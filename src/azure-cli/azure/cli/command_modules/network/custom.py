@@ -143,50 +143,6 @@ def _get_default_value(balancer, property_name, option_name, return_name):
 # endregion
 
 
-# region Generic list commands
-def _generic_list(cli_ctx, operation_name, resource_group_name):
-    ncf = network_client_factory(cli_ctx)
-    operation_group = getattr(ncf, operation_name)
-    if resource_group_name:
-        return operation_group.list(resource_group_name)
-
-    return operation_group.list_all()
-
-
-def list_vnet(cmd, resource_group_name=None):
-    return _generic_list(cmd.cli_ctx, 'virtual_networks', resource_group_name)
-
-
-def list_lbs(cmd, resource_group_name=None):
-    return _generic_list(cmd.cli_ctx, 'load_balancers', resource_group_name)
-
-
-def list_nics(cmd, resource_group_name=None):
-    return _generic_list(cmd.cli_ctx, 'network_interfaces', resource_group_name)
-
-
-def list_custom_ip_prefixes(cmd, resource_group_name=None):
-    return _generic_list(cmd.cli_ctx, 'custom_ip_prefixes', resource_group_name)
-
-
-def list_public_ips(cmd, resource_group_name=None):
-    return _generic_list(cmd.cli_ctx, 'public_ip_addresses', resource_group_name)
-
-
-def list_route_tables(cmd, resource_group_name=None):
-    return _generic_list(cmd.cli_ctx, 'route_tables', resource_group_name)
-
-
-def list_application_gateways(cmd, resource_group_name=None):
-    return _generic_list(cmd.cli_ctx, 'application_gateways', resource_group_name)
-
-
-def list_network_watchers(cmd, resource_group_name=None):
-    return _generic_list(cmd.cli_ctx, 'network_watchers', resource_group_name)
-
-# endregion
-
-
 # region ApplicationGateways
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
@@ -223,7 +179,6 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         build_application_gateway_resource, build_public_ip_resource, build_vnet_resource)
 
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-    IPAllocationMethod = cmd.get_models('IPAllocationMethod')
 
     tags = tags or {}
     sku_tier = sku.split('_', 1)[0] if not _is_v2_sku(sku) else sku
@@ -237,8 +192,6 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 
     public_ip_id = public_ip_address if is_valid_resource_id(public_ip_address) else None
     subnet_id = subnet if is_valid_resource_id(subnet) else None
-    private_ip_allocation = IPAllocationMethod.static.value if private_ip_address \
-        else IPAllocationMethod.dynamic.value
 
     network_id_template = resource_id(
         subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
@@ -936,6 +889,27 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
     on_demand_arguments = {protocol, host, path, timeout, host_name_from_http_settings, match_body, match_status_codes,
                            address_pool, http_settings}
     if on_demand_arguments.difference({None}):
+        if address_pool is not None and not is_valid_resource_id(address_pool):
+            address_pool = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=resource_group_name,
+                namespace="Microsoft.Network",
+                type="applicationGateways",
+                name=application_gateway_name,
+                child_type_1="backendAddressPools",
+                child_name_1=address_pool
+            )
+        if http_settings is not None and not is_valid_resource_id(http_settings):
+            http_settings = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=resource_group_name,
+                namespace="Microsoft.Network",
+                type="applicationGateways",
+                name=application_gateway_name,
+                child_type_1="backendHttpSettingsCollection",
+                child_name_1=http_settings
+            )
+
         from .aaz.latest.network.application_gateway._health_on_demand import HealthOnDemand
         return LongRunningOperation(cmd.cli_ctx)(
             HealthOnDemand(cli_ctx=cmd.cli_ctx)(command_args={
@@ -949,8 +923,8 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
                 "host_name_from_http_settings": host_name_from_http_settings,
                 "match_body": match_body,
                 "match_status_codes": match_status_codes,
-                "address_pool": address_pool,
-                "http_settings": http_settings,
+                "backend_address_pool": {"id": address_pool},
+                "backend_http_settings": {"id": http_settings}
             })
         )
 
@@ -959,7 +933,7 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
         Health(cli_ctx=cmd.cli_ctx)(command_args={
             "name": application_gateway_name,
             "resource_group": resource_group_name,
-            "expand": expand,
+            "expand": expand
         })
     )
 # endregion
@@ -2366,14 +2340,16 @@ def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, ta
     # if VNETs specified, have to create the protection plan and then add the VNETs
     plan_id = LongRunningOperation(cmd.cli_ctx)(Create_Ddos_Protection(args))['id']
 
-    SubResource = cmd.get_models('SubResource')
     logger.info('Attempting to attach VNets to newly created DDoS protection plan.')
+    from azure.cli.core.commands import LongRunningOperation
     for vnet_subresource in vnets:
-        vnet_client = network_client_factory(cmd.cli_ctx).virtual_networks
         id_parts = parse_resource_id(vnet_subresource.id)
-        vnet = vnet_client.get(id_parts['resource_group'], id_parts['name'])
-        vnet.ddos_protection_plan = SubResource(id=plan_id)
-        vnet_client.begin_create_or_update(id_parts['resource_group'], id_parts['name'], vnet)
+        poller = VNetUpdate(cli_ctx=cmd.cli_ctx)(command_args={
+            'name': id_parts['name'],
+            'resource_group': id_parts['resource_group'],
+            'ddos_protection_plan': plan_id
+        })
+        LongRunningOperation(cmd.cli_ctx)(poller)
 
     show_args = {
         "name": ddos_plan_name,
@@ -2385,7 +2361,6 @@ def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, ta
 
 
 def update_ddos_plan(cmd, resource_group_name, ddos_plan_name, tags=None, vnets=None):
-    SubResource = cmd.get_models('SubResource')
     from azure.cli.command_modules.network.aaz.latest.network.ddos_protection import Update
     Update_Ddos_Protection = Update(cli_ctx=cmd.cli_ctx)
     args = {
@@ -2412,27 +2387,26 @@ def update_ddos_plan(cmd, resource_group_name, ddos_plan_name, tags=None, vnets=
             existing_vnet_ids = {x['id'] for x in show_args['virtualNetworks']}
         else:
             existing_vnet_ids = set([])
-        client = network_client_factory(cmd.cli_ctx).virtual_networks
+        from azure.cli.core.commands import LongRunningOperation
         for vnet_id in vnet_ids.difference(existing_vnet_ids):
             logger.info("Adding VNet '%s' to plan.", vnet_id)
             id_parts = parse_resource_id(vnet_id)
-            vnet = client.get(id_parts['resource_group'], id_parts['name'])
-            vnet.ddos_protection_plan = SubResource(id=show_args['id'])
-            client.begin_create_or_update(id_parts['resource_group'], id_parts['name'], vnet)
+            poller = VNetUpdate(cli_ctx=cmd.cli_ctx)(command_args={
+                'name': id_parts['name'],
+                'resource_group': id_parts['resource_group'],
+                'ddos_protection_plan': show_args['id']
+            })
+            LongRunningOperation(cmd.cli_ctx)(poller)
         for vnet_id in existing_vnet_ids.difference(vnet_ids):
             logger.info("Removing VNet '%s' from plan.", vnet_id)
             id_parts = parse_resource_id(vnet_id)
-            vnet = client.get(id_parts['resource_group'], id_parts['name'])
-            vnet.ddos_protection_plan = None
-            client.begin_create_or_update(id_parts['resource_group'], id_parts['name'], vnet)
+            poller = VNetUpdate(cli_ctx=cmd.cli_ctx)(command_args={
+                'name': id_parts['name'],
+                'resource_group': id_parts['resource_group'],
+                'ddos_protection_plan': None
+            })
+            LongRunningOperation(cmd.cli_ctx)(poller)
     return Update_Ddos_Protection(args)
-
-
-def list_ddos_plans(cmd, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).ddos_protection_plans
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list()
 # endregion
 
 
@@ -2519,7 +2493,7 @@ def create_dns_record_set(cmd, resource_group_name, zone_name, record_set_name, 
                           metadata=None, if_match=None, if_none_match=None, ttl=3600, target_resource=None):
 
     RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_NETWORK)
+    SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_NETWORK_DNS)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS).record_sets
     record_set = RecordSet(
         ttl=ttl,
@@ -2544,7 +2518,7 @@ def update_dns_record_set(instance, cmd, metadata=None, target_resource=None):
     if target_resource == '':
         instance.target_resource = None
     elif target_resource is not None:
-        SubResource = cmd.get_models('SubResource')
+        SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_NETWORK_DNS)
         instance.target_resource = SubResource(id=target_resource)
     return instance
 
@@ -3850,54 +3824,7 @@ class PrivateEndpointConnectionUpdate(_PrivateEndpointConnectionUpdate):
         args_schema.connection_status._required = True
         args_schema.connection_status.enum = AAZArgEnum({"Approved": "Approved", "Rejected": "Rejected", "Removed": "Removed"})
         return args_schema
-
-
-def add_private_link_services_ipconfig(cmd, resource_group_name, service_name,
-                                       private_ip_address=None, private_ip_allocation_method=None,
-                                       private_ip_address_version=None,
-                                       subnet=None, virtual_network_name=None, public_ip_address=None):
-    client = network_client_factory(cmd.cli_ctx).private_link_services
-    PrivateLinkServiceIpConfiguration, PublicIPAddress, Subnet = cmd.get_models('PrivateLinkServiceIpConfiguration',
-                                                                                'PublicIPAddress',
-                                                                                'Subnet')
-    link_service = client.get(resource_group_name, service_name)
-    if link_service is None:
-        raise CLIError("Private link service should be existed. Please create it first.")
-    ip_name_index = len(link_service.ip_configurations)
-    ip_config = PrivateLinkServiceIpConfiguration(
-        name='{0}_ipconfig_{1}'.format(service_name, ip_name_index),
-        private_ip_address=private_ip_address,
-        private_ip_allocation_method=private_ip_allocation_method,
-        private_ip_address_version=private_ip_address_version,
-        subnet=subnet and Subnet(id=subnet),
-        public_ip_address=public_ip_address and PublicIPAddress(id=public_ip_address)
-    )
-    link_service.ip_configurations.append(ip_config)
-    return client.begin_create_or_update(resource_group_name, service_name, link_service)
-
-
-def remove_private_link_services_ipconfig(cmd, resource_group_name, service_name, ip_config_name):
-    client = network_client_factory(cmd.cli_ctx).private_link_services
-    link_service = client.get(resource_group_name, service_name)
-    if link_service is None:
-        raise CLIError("Private link service should be existed. Please create it first.")
-    ip_config = None
-    for item in link_service.ip_configurations:
-        if item.name == ip_config_name:
-            ip_config = item
-            break
-    if ip_config is None:  # pylint: disable=no-else-return
-        logger.warning("%s ip configuration doesn't exist", ip_config_name)
-        return link_service
-    else:
-        link_service.ip_configurations.remove(ip_config)
-        return client.begin_create_or_update(resource_group_name, service_name, link_service)
 # endregion
-
-
-def _edge_zone_model(cmd, edge_zone):
-    ExtendedLocation, ExtendedLocationTypes = cmd.get_models('ExtendedLocation', 'ExtendedLocationTypes')
-    return ExtendedLocation(name=edge_zone, type=ExtendedLocationTypes.EDGE_ZONE)
 
 
 # region LoadBalancers
@@ -4023,32 +3950,6 @@ def lb_get_operation(lb):
     return lb
 
 
-def create_lb_inbound_nat_pool(
-        cmd, resource_group_name, load_balancer_name, item_name, protocol, frontend_port_range_start,
-        frontend_port_range_end, backend_port, frontend_ip_name=None, enable_tcp_reset=None,
-        floating_ip=None, idle_timeout=None):
-    InboundNatPool = cmd.get_models('InboundNatPool')
-    ncf = network_client_factory(cmd.cli_ctx)
-    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
-    if not frontend_ip_name:
-        frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
-    frontend_ip = get_property(lb.frontend_ip_configurations, frontend_ip_name) \
-        if frontend_ip_name else None
-    new_pool = InboundNatPool(
-        name=item_name,
-        protocol=protocol,
-        frontend_ip_configuration=frontend_ip,
-        frontend_port_range_start=frontend_port_range_start,
-        frontend_port_range_end=frontend_port_range_end,
-        backend_port=backend_port,
-        enable_tcp_reset=enable_tcp_reset,
-        enable_floating_ip=floating_ip,
-        idle_timeout_in_minutes=idle_timeout)
-    upsert_to_collection(lb, 'inbound_nat_pools', new_pool, 'name')
-    poller = ncf.load_balancers.begin_create_or_update(resource_group_name, load_balancer_name, lb)
-    return get_property(poller.result().inbound_nat_pools, item_name)
-
-
 def set_lb_inbound_nat_pool(
         cmd, instance, parent, item_name, protocol=None,
         frontend_port_range_start=None, frontend_port_range_end=None, backend_port=None,
@@ -4092,29 +3993,6 @@ def _process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name):
 
         subnet = vnet + f'/subnets/{subnet}'
     return subnet
-
-
-def delete_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name):
-    from azure.cli.core.commands import LongRunningOperation
-    ncf = network_client_factory(cmd.cli_ctx)
-    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
-
-    def delete_basic_lb_backend_address_pool():
-        new_be_pools = [pool for pool in lb.backend_address_pools
-                        if pool.name.lower() != backend_address_pool_name.lower()]
-        lb.backend_address_pools = new_be_pools
-        poller = ncf.load_balancers.begin_create_or_update(resource_group_name, load_balancer_name, lb)
-        result = LongRunningOperation(cmd.cli_ctx)(poller).backend_address_pools
-        if next((x for x in result if x.name.lower() == backend_address_pool_name.lower()), None):
-            raise CLIError("Failed to delete '{}' on '{}'".format(backend_address_pool_name, load_balancer_name))
-
-    if lb.sku.name.lower() == 'basic':
-        delete_basic_lb_backend_address_pool()
-        return None
-
-    return ncf.load_balancer_backend_address_pools.begin_delete(resource_group_name,
-                                                                load_balancer_name,
-                                                                backend_address_pool_name)
 
 
 # region cross-region lb
@@ -6735,26 +6613,6 @@ class VnetGatewayRevokedCertCreate(_VnetGatewayRevokedCertCreate):
         return args_schema
 
 
-def _prep_cert_create(cmd, gateway_name, resource_group_name):
-    VpnClientConfiguration = cmd.get_models('VpnClientConfiguration')
-    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateways
-    gateway = ncf.get(resource_group_name, gateway_name)
-    if not gateway.vpn_client_configuration:
-        gateway.vpn_client_configuration = VpnClientConfiguration()
-    config = gateway.vpn_client_configuration
-
-    if not config.vpn_client_address_pool or not config.vpn_client_address_pool.address_prefixes:
-        raise CLIError('Address prefixes must be set on VPN gateways before adding'
-                       ' certificates.  Please use "update" with --address-prefixes first.')
-
-    if config.vpn_client_revoked_certificates is None:
-        config.vpn_client_revoked_certificates = []
-    if config.vpn_client_root_certificates is None:
-        config.vpn_client_root_certificates = []
-
-    return config, gateway, ncf
-
-
 class VnetGatewayCreate(_VnetGatewayCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -7366,314 +7224,6 @@ def delete_virtual_hub(cmd, resource_group_name, virtual_hub_name):
         LongRunningOperation(cmd.cli_ctx)(poller)
     from .aaz.latest.network.routeserver import Delete
     return Delete(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': virtual_hub_name})
-# endregion
-
-
-# region VirtualRouter
-def create_virtual_router(cmd,
-                          resource_group_name,
-                          virtual_router_name,
-                          hosted_gateway=None,
-                          hosted_subnet=None,
-                          location=None,
-                          tags=None):
-    vrouter_client = network_client_factory(cmd.cli_ctx).virtual_routers
-    vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
-
-    from azure.core.exceptions import HttpResponseError
-    try:
-        vrouter_client.get(resource_group_name, virtual_router_name)
-    except HttpResponseError:
-        pass
-
-    virtual_hub_name = virtual_router_name
-    try:
-        vhub_client.get(resource_group_name, virtual_hub_name)
-        raise CLIError('The VirtualRouter "{}" under resource group "{}" exists'.format(virtual_hub_name,
-                                                                                        resource_group_name))
-    except HttpResponseError:
-        pass
-
-    SubResource = cmd.get_models('SubResource')
-
-    # for old VirtualRouter
-    if hosted_gateway is not None:
-        VirtualRouter = cmd.get_models('VirtualRouter')
-        virtual_router = VirtualRouter(virtual_router_asn=None,
-                                       virtual_router_ips=[],
-                                       hosted_subnet=None,
-                                       hosted_gateway=SubResource(id=hosted_gateway),
-                                       location=location,
-                                       tags=tags)
-        return vrouter_client.begin_create_or_update(resource_group_name, virtual_router_name, virtual_router)
-
-    # for VirtualHub
-    VirtualHub, HubIpConfiguration = cmd.get_models('VirtualHub', 'HubIpConfiguration')
-
-    hub = VirtualHub(tags=tags, location=location, virtual_wan=None, sku='Standard')
-    ip_config = HubIpConfiguration(subnet=SubResource(id=hosted_subnet))
-
-    from azure.cli.core.commands import LongRunningOperation
-
-    vhub_poller = vhub_client.begin_create_or_update(resource_group_name, virtual_hub_name, hub)
-    LongRunningOperation(cmd.cli_ctx)(vhub_poller)
-
-    vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
-    try:
-        vhub_ip_poller = vhub_ip_config_client.begin_create_or_update(resource_group_name,
-                                                                      virtual_hub_name,
-                                                                      'Default',
-                                                                      ip_config)
-        LongRunningOperation(cmd.cli_ctx)(vhub_ip_poller)
-    except Exception as ex:
-        logger.error(ex)
-        vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, 'Default')
-        vhub_client.begin_delete(resource_group_name, virtual_hub_name)
-        raise ex
-
-    return vhub_client.get(resource_group_name, virtual_hub_name)
-
-
-def virtual_router_update_getter(cmd, resource_group_name, virtual_router_name):
-    from azure.core.exceptions import HttpResponseError
-    try:
-        vrouter_client = network_client_factory(cmd.cli_ctx).virtual_routers
-        return vrouter_client.get(resource_group_name, virtual_router_name)
-    except HttpResponseError:  # 404
-        pass
-
-    virtual_hub_name = virtual_router_name
-    vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
-    return vhub_client.get(resource_group_name, virtual_hub_name)
-
-
-def virtual_router_update_setter(cmd, resource_group_name, virtual_router_name, parameters):
-    if parameters.type == 'Microsoft.Network/virtualHubs':
-        client = network_client_factory(cmd.cli_ctx).virtual_hubs
-    else:
-        client = network_client_factory(cmd.cli_ctx).virtual_routers
-
-    # If the client is virtual_hubs,
-    # the virtual_router_name represents virtual_hub_name and
-    # the parameters represents VirtualHub
-    return client.begin_create_or_update(resource_group_name, virtual_router_name, parameters)
-
-
-def update_virtual_router(cmd, instance, tags=None):
-    # both VirtualHub and VirtualRouter own those properties
-    with cmd.update_context(instance) as c:
-        c.set_param('tags', tags)
-    return instance
-
-
-def list_virtual_router(cmd, resource_group_name=None):
-    vrouter_client = network_client_factory(cmd.cli_ctx).virtual_routers
-    vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
-
-    if resource_group_name is not None:
-        vrouters = vrouter_client.list_by_resource_group(resource_group_name)
-        vhubs = vhub_client.list_by_resource_group(resource_group_name)
-    else:
-        vrouters = vrouter_client.list()
-        vhubs = vhub_client.list()
-
-    return list(vrouters) + list(vhubs)
-
-
-def show_virtual_router(cmd, resource_group_name, virtual_router_name):
-    vrouter_client = network_client_factory(cmd.cli_ctx).virtual_routers
-    vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
-
-    from azure.core.exceptions import HttpResponseError
-    try:
-        item = vrouter_client.get(resource_group_name, virtual_router_name)
-    except HttpResponseError:
-        virtual_hub_name = virtual_router_name
-        item = vhub_client.get(resource_group_name, virtual_hub_name)
-
-    return item
-
-
-def delete_virtual_router(cmd, resource_group_name, virtual_router_name):
-    vrouter_client = network_client_factory(cmd.cli_ctx).virtual_routers
-    vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
-    vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
-
-    from azure.core.exceptions import HttpResponseError
-    try:
-        vrouter_client.get(resource_group_name, virtual_router_name)
-        item = vrouter_client.begin_delete(resource_group_name, virtual_router_name)
-    except HttpResponseError:
-        from azure.cli.core.commands import LongRunningOperation
-
-        virtual_hub_name = virtual_router_name
-        poller = vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, 'Default')
-        LongRunningOperation(cmd.cli_ctx)(poller)
-
-        item = vhub_client.begin_delete(resource_group_name, virtual_hub_name)
-
-    return item
-
-
-def create_virtual_router_peering(cmd, resource_group_name, virtual_router_name, peering_name, peer_asn, peer_ip):
-
-    # try VirtualRouter first
-    from azure.core.exceptions import HttpResponseError
-    try:
-        vrouter_client = network_client_factory(cmd.cli_ctx).virtual_routers
-        vrouter_client.get(resource_group_name, virtual_router_name)
-    except HttpResponseError:
-        pass
-    else:
-        vrouter_peering_client = network_client_factory(cmd.cli_ctx).virtual_router_peerings
-        VirtualRouterPeering = cmd.get_models('VirtualRouterPeering')
-        virtual_router_peering = VirtualRouterPeering(peer_asn=peer_asn, peer_ip=peer_ip)
-        return vrouter_peering_client.begin_create_or_update(resource_group_name,
-                                                             virtual_router_name,
-                                                             peering_name,
-                                                             virtual_router_peering)
-
-    virtual_hub_name = virtual_router_name
-    bgp_conn_name = peering_name
-
-    # try VirtualHub then if the virtual router doesn't exist
-    try:
-        vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
-        vhub_client.get(resource_group_name, virtual_hub_name)
-    except HttpResponseError:
-        msg = 'The VirtualRouter "{}" under resource group "{}" was not found'.format(virtual_hub_name,
-                                                                                      resource_group_name)
-        raise CLIError(msg)
-
-    BgpConnection = cmd.get_models('BgpConnection')
-    vhub_bgp_conn = BgpConnection(name=peering_name, peer_asn=peer_asn, peer_ip=peer_ip)
-
-    vhub_bgp_conn_client = network_client_factory(cmd.cli_ctx).virtual_hub_bgp_connection
-    return vhub_bgp_conn_client.begin_create_or_update(resource_group_name, virtual_hub_name,
-                                                       bgp_conn_name, vhub_bgp_conn)
-
-
-def virtual_router_peering_update_getter(cmd, resource_group_name, virtual_router_name, peering_name):
-    vrouter_peering_client = network_client_factory(cmd.cli_ctx).virtual_router_peerings
-
-    from azure.core.exceptions import HttpResponseError
-    try:
-        return vrouter_peering_client.get(resource_group_name, virtual_router_name, peering_name)
-    except HttpResponseError:  # 404
-        pass
-
-    virtual_hub_name = virtual_router_name
-    bgp_conn_name = peering_name
-
-    vhub_bgp_conn_client = network_client_factory(cmd.cli_ctx).virtual_hub_bgp_connection
-    return vhub_bgp_conn_client.get(resource_group_name, virtual_hub_name, bgp_conn_name)
-
-
-def virtual_router_peering_update_setter(cmd, resource_group_name, virtual_router_name, peering_name, parameters):
-    if parameters.type == 'Microsoft.Network/virtualHubs/bgpConnections':
-        client = network_client_factory(cmd.cli_ctx).virtual_hub_bgp_connection
-    else:
-        client = network_client_factory(cmd.cli_ctx).virtual_router_peerings
-
-    # if the client is virtual_hub_bgp_connection,
-    # the virtual_router_name represents virtual_hub_name and
-    # the peering_name represents bgp_connection_name and
-    # the parameters represents BgpConnection
-    return client.begin_create_or_update(resource_group_name, virtual_router_name, peering_name, parameters)
-
-
-def update_virtual_router_peering(cmd, instance, peer_asn=None, peer_ip=None):
-    # both VirtualHub and VirtualRouter own those properties
-    with cmd.update_context(instance) as c:
-        c.set_param('peer_asn', peer_asn)
-        c.set_param('peer_ip', peer_ip)
-    return instance
-
-
-def list_virtual_router_peering(cmd, resource_group_name, virtual_router_name):
-    virtual_hub_name = virtual_router_name
-
-    from azure.core.exceptions import HttpResponseError
-    try:
-        vrouter_client = network_client_factory(cmd.cli_ctx).virtual_routers
-        vrouter_client.get(resource_group_name, virtual_router_name)
-    except HttpResponseError:
-        try:
-            vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
-            vhub_client.get(resource_group_name, virtual_hub_name)
-        except HttpResponseError:
-            msg = 'The VirtualRouter "{}" under resource group "{}" was not found'.format(virtual_hub_name,
-                                                                                          resource_group_name)
-            raise CLIError(msg)
-
-    try:
-        vrouter_peering_client = network_client_factory(cmd.cli_ctx).virtual_router_peerings
-        vrouter_peerings = list(vrouter_peering_client.list(resource_group_name, virtual_router_name))
-    except HttpResponseError:
-        vrouter_peerings = []
-
-    virtual_hub_name = virtual_router_name
-    try:
-        vhub_bgp_conn_client = network_client_factory(cmd.cli_ctx).virtual_hub_bgp_connections
-        vhub_bgp_connections = list(vhub_bgp_conn_client.list(resource_group_name, virtual_hub_name))
-    except HttpResponseError:
-        vhub_bgp_connections = []
-
-    return list(vrouter_peerings) + list(vhub_bgp_connections)
-
-
-def show_virtual_router_peering(cmd, resource_group_name, virtual_router_name, peering_name):
-    from azure.core.exceptions import HttpResponseError
-    try:
-        vrouter_client = network_client_factory(cmd.cli_ctx).virtual_routers
-        vrouter_client.get(resource_group_name, virtual_router_name)
-    except HttpResponseError:
-        pass
-    else:
-        vrouter_peering_client = network_client_factory(cmd.cli_ctx).virtual_router_peerings
-        return vrouter_peering_client.get(resource_group_name, virtual_router_name, peering_name)
-
-    virtual_hub_name = virtual_router_name
-    bgp_conn_name = peering_name
-
-    # try VirtualHub then if the virtual router doesn't exist
-    try:
-        vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
-        vhub_client.get(resource_group_name, virtual_hub_name)
-    except HttpResponseError:
-        msg = 'The VirtualRouter "{}" under resource group "{}" was not found'.format(virtual_hub_name,
-                                                                                      resource_group_name)
-        raise CLIError(msg)
-
-    vhub_bgp_conn_client = network_client_factory(cmd.cli_ctx).virtual_hub_bgp_connection
-    return vhub_bgp_conn_client.get(resource_group_name, virtual_hub_name, bgp_conn_name)
-
-
-def delete_virtual_router_peering(cmd, resource_group_name, virtual_router_name, peering_name):
-    from azure.core.exceptions import HttpResponseError
-    try:
-        vrouter_client = network_client_factory(cmd.cli_ctx).virtual_routers
-        vrouter_client.get(resource_group_name, virtual_router_name)
-    except:  # pylint: disable=bare-except
-        pass
-    else:
-        vrouter_peering_client = network_client_factory(cmd.cli_ctx).virtual_router_peerings
-        return vrouter_peering_client.begin_delete(resource_group_name, virtual_router_name, peering_name)
-
-    virtual_hub_name = virtual_router_name
-    bgp_conn_name = peering_name
-
-    # try VirtualHub then if the virtual router doesn't exist
-    try:
-        vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
-        vhub_client.get(resource_group_name, virtual_hub_name)
-    except HttpResponseError:
-        msg = 'The VirtualRouter "{}" under resource group "{}" was not found'.format(virtual_hub_name,
-                                                                                      resource_group_name)
-        raise CLIError(msg)
-
-    vhub_bgp_conn_client = network_client_factory(cmd.cli_ctx).virtual_hub_bgp_connection
-    return vhub_bgp_conn_client.begin_delete(resource_group_name, virtual_hub_name, bgp_conn_name)
 # endregion
 
 

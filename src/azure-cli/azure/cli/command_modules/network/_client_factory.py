@@ -74,13 +74,5 @@ def cf_dns_mgmt_record_sets(cli_ctx, _):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK_DNS).record_sets
 
 
-def cf_virtual_router(cli_ctx, _):
-    return network_client_factory(cli_ctx).virtual_routers
-
-
 def cf_virtual_hub(cli_ctx, _):
     return network_client_factory(cli_ctx).virtual_hubs
-
-
-def cf_virtual_router_peering(cli_ctx, _):
-    return network_client_factory(cli_ctx).virtual_router_peerings
