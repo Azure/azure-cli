@@ -672,7 +672,7 @@ def __print_preview(diff_output):
 
         elif action in (JsonDiff.DELETE, JsonDiff.ADD):
             subtitle = 'Deleting' if action == JsonDiff.DELETE else 'Adding'
-            logger.warning(f'\n{subtitle}:')
+            logger.warning('\n %s:', subtitle)
 
             for record in changes:
                 logger.warning(json.dumps(record, ensure_ascii=False))
@@ -1267,7 +1267,8 @@ def __get_json_diff(old_obj=None, new_obj=None):
     diff = list(differ.compare(old_json, new_json))
 
     return diff
-    
+
+
 def __print_kvset_json_diff(old_obj=None, new_obj=None, yes=False):
     if not yes:
         logger.warning('\n---------------- KVSet Preview ----------------')
