@@ -207,7 +207,7 @@ def validate_azure_ad_authentication(cmd, namespace):
         skip_client_validation = getattr(namespace, "skip_client_validation")
 
     if skip_client_validation is True:
-        print('Skipping client-side validation ...')
+        logger.warning('Skipping client-side validation ...')
         return
 
     logger.debug("Validate Azure AD authentication from client-side:")
