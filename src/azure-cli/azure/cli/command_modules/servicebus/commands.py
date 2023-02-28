@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long
 # pylint: disable=too-many-statements
+# pylint: disable=too-many-locals
 
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import ResourceType
@@ -25,6 +26,10 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.servicebus.operations#NamespacesOperations.{}',
         client_factory=namespaces_mgmt_client_factory,
         resource_type=ResourceType.MGMT_SERVICEBUS)
+
+    sb_namespace_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.servicebus.Operation.NamespaceCustomFile#{}',
+    )
 
     sb_queue_util = CliCommandType(
         operations_tmpl='azure.mgmt.servicebus.operations#QueuesOperations.{}',
@@ -69,15 +74,14 @@ def load_command_table(self, _):
     from ._validators import validate_subnet
 
 # Namespace Region
+    with self.command_group('servicebus namespace', custom_command_type=sb_namespace_custom,
+                            is_preview=True) as g:
+        g.custom_command('create', 'create_servicebus_namespace', supports_no_wait=True)
+
     custom_tmpl = 'azure.cli.command_modules.servicebus.custom#{}'
     servicebus_custom = CliCommandType(operations_tmpl=custom_tmpl)
     with self.command_group('servicebus namespace', sb_namespace_util, client_factory=namespaces_mgmt_client_factory, min_api='2021-06-01-preview') as g:
-        g.custom_command('create', 'cli_namespace_create')
-        g.show_command('show', 'get')
-        g.custom_command('list', 'cli_namespace_list')
-        g.command('delete', 'begin_delete')
         g.custom_command('exists', 'cli_namespace_exists')
-        g.generic_update_command('update', custom_func_name='cli_namespace_update', custom_func_type=servicebus_custom, setter_name='begin_create_or_update')
 
     with self.command_group('servicebus namespace authorization-rule', sb_namespace_util, client_factory=namespaces_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
         g.custom_command('create', 'cli_namespaceautho_create')
@@ -187,11 +191,11 @@ def load_command_table(self, _):
         g.custom_command('update', 'cli_networkrule_update')
 
 # Identity Region
-    with self.command_group('servicebus namespace identity', sb_namespace_util, min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_SERVICEBUS, client_factory=namespaces_mgmt_client_factory) as g:
+    with self.command_group('servicebus namespace identity', custom_command_type=sb_namespace_custom, is_preview=True) as g:
         g.custom_command('assign', 'cli_add_identity')
         g.custom_command('remove', 'cli_remove_identity')
 
 # Encryption Region
-    with self.command_group('servicebus namespace encryption', sb_namespace_util, min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_SERVICEBUS, client_factory=namespaces_mgmt_client_factory) as g:
+    with self.command_group('servicebus namespace encryption', custom_command_type=sb_namespace_custom, is_preview=True) as g:
         g.custom_command('add', 'cli_add_encryption')
         g.custom_command('remove', 'cli_remove_encryption')
