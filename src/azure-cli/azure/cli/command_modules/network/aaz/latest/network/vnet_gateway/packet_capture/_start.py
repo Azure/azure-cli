@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network vnet-gateway packet-capture start",
+    is_preview=True,
 )
 class Start(AAZCommand):
     """Start packet capture on a virtual network gateway.
@@ -74,7 +75,7 @@ class Start(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = None
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
         return result
 
     class VirtualNetworkGatewaysStartPacketCapture(AAZHttpOperation):
