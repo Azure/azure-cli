@@ -411,7 +411,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
                                                             permission,
                                                             use_acr_audience=use_acr_audience)
         except CLIError as e:
-            raise_tomanyrequests_error(str(e))
+            raise_toomanyrequests_error(str(e))
             logger.warning("%s: %s", AAD_TOKEN_BASE_ERROR_MESSAGE, str(e))
 
     # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
@@ -444,8 +444,8 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
     return login_server, None, None
 
 
-def raise_tomanyrequests_error(error):
-    if '429' in error:
+def raise_toomanyrequests_error(error):
+    if 'Too many requests' in error:
         raise CLIError("{}: {}".format(AAD_TOKEN_BASE_ERROR_MESSAGE, error))
 
 
