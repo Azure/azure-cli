@@ -26,7 +26,7 @@ from azure.cli.command_modules.network._validators import (
     WafConfigExclusionAction,
     validate_nat_gateway,
     validate_waf_policy,
-    validate_user_assigned_identity, validate_virtul_network_gateway,
+    validate_user_assigned_identity,
     NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction,
     process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument)
 from azure.cli.command_modules.network._completers import (
@@ -254,14 +254,12 @@ def load_arguments(self, _):
     # endregion
 
     # region WebApplicationFirewallPolicy
-    (WebApplicationFirewallAction, WebApplicationFirewallMatchVariable,
+    (WebApplicationFirewallAction,
      WebApplicationFirewallOperator, WebApplicationFirewallRuleType,
-     WebApplicationFirewallTransform,
      OwaspCrsExclusionEntryMatchVariable, OwaspCrsExclusionEntrySelectorMatchOperator,
      WebApplicationFirewallEnabledState, WebApplicationFirewallMode) = self.get_models(
-         'WebApplicationFirewallAction', 'WebApplicationFirewallMatchVariable',
+         'WebApplicationFirewallAction',
          'WebApplicationFirewallOperator', 'WebApplicationFirewallRuleType',
-         'WebApplicationFirewallTransform',
          'OwaspCrsExclusionEntryMatchVariable', 'OwaspCrsExclusionEntrySelectorMatchOperator',
          'WebApplicationFirewallEnabledState', 'WebApplicationFirewallMode')
     with self.argument_context('network application-gateway waf-policy', min_api='2018-12-01') as c:
@@ -1096,6 +1094,19 @@ def load_arguments(self, _):
         c.argument('allow_gateway_transit', action='store_true', help='Allows gateway link to be used in the remote VNet.')
         c.argument('allow_forwarded_traffic', action='store_true', help='Allows forwarded traffic from the local VNet to the remote VNet.')
         c.argument('use_remote_gateways', action='store_true', help='Allows VNet to use the remote VNet\'s gateway. Remote VNet gateway must have --allow-gateway-transit enabled for remote peering. Only 1 peering can have this flag enabled. Cannot be set if the VNet already has a gateway.')
+
+    with self.argument_context('network vnet subnet') as c:
+        c.argument('subnet_name', arg_type=subnet_name_type, options_list=['--name', '-n'], id_part='child_name_1')
+        c.argument('nat_gateway', min_api='2019-02-01', validator=validate_nat_gateway, help='Name or ID of a NAT gateway to attach.')
+        c.argument('address_prefix', metavar='PREFIX', help='Address prefix in CIDR format.', max_api='2018-07-01')
+        c.argument('address_prefix', metavar='PREFIXES', options_list='--address-prefixes', nargs='+', help='Space-separated list of address prefixes in CIDR format.', min_api='2018-08-01')
+        c.argument('virtual_network_name', virtual_network_name_type)
+        c.argument('network_security_group', options_list=['--network-security-group', '--nsg'], validator=get_nsg_validator(), help='Name or ID of a network security group (NSG).')
+        c.argument('route_table', help='Name or ID of a route table to associate with the subnet.')
+        c.argument('service_endpoints', nargs='+', min_api='2017-06-01')
+        c.argument('service_endpoint_policy', nargs='+', min_api='2018-07-01', help='Space-separated list of names or IDs of service endpoint policies to apply.', validator=validate_service_endpoint_policy)
+        c.argument('disable_private_endpoint_network_policies', arg_type=get_three_state_flag(), min_api='2019-04-01', help='Disable private endpoint network policies on the subnet, the policy is disabled by default.')
+        c.argument('disable_private_link_service_network_policies', arg_type=get_three_state_flag(), min_api='2019-04-01', help='Disable private link service network policies on the subnet.')
 
     with self.argument_context('network vnet subnet create') as c:
         c.argument('subnet_name', arg_type=subnet_name_type, options_list=['--name', '-n'], id_part='child_name_1',

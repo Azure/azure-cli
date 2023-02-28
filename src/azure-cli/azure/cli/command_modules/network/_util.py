@@ -3,10 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import sys
-from knack.util import CLIError
-from azure.cli.core.util import sdk_no_wait
-
 from azure.cli.core.azclierror import UnrecognizedArgumentError
 
 

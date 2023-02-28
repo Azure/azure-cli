@@ -14,7 +14,6 @@ from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_
 
 from azure.cli.core.aaz import has_value
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
-from azure.cli.core.commands import upsert_to_collection, get_property
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
 from azure.cli.core.util import CLIError, sdk_no_wait
@@ -225,8 +224,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         private_link_subnet_id = '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template,
                                                                            virtual_network_name,
                                                                            private_link_subnet)
-        private_link_ip_allocation_method = IPAllocationMethod.static.value if private_link_ip_address \
-            else IPAllocationMethod.dynamic.value
+        private_link_ip_allocation_method = 'Static' if private_link_ip_address else 'Dynamic'
 
     app_gateway_resource = build_application_gateway_resource(
         cmd, application_gateway_name, location, tags, sku, sku_tier, capacity, servers, frontend_port,
@@ -2337,7 +2335,6 @@ def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, ta
     plan_id = LongRunningOperation(cmd.cli_ctx)(Create_Ddos_Protection(args))['id']
 
     logger.info('Attempting to attach VNets to newly created DDoS protection plan.')
-    from azure.cli.core.commands import LongRunningOperation
     for vnet_subresource in vnets:
         id_parts = parse_resource_id(vnet_subresource.id)
         poller = VNetUpdate(cli_ctx=cmd.cli_ctx)(command_args={
@@ -3946,30 +3943,6 @@ def lb_get_operation(lb):
     return lb
 
 
-def set_lb_inbound_nat_pool(
-        cmd, instance, parent, item_name, protocol=None,
-        frontend_port_range_start=None, frontend_port_range_end=None, backend_port=None,
-        frontend_ip_name=None, enable_tcp_reset=None, floating_ip=None, idle_timeout=None):
-    with cmd.update_context(instance) as c:
-        c.set_param('protocol', protocol)
-        c.set_param('frontend_port_range_start', frontend_port_range_start)
-        c.set_param('frontend_port_range_end', frontend_port_range_end)
-        c.set_param('backend_port', backend_port)
-        c.set_param('enable_floating_ip', floating_ip)
-        c.set_param('idle_timeout_in_minutes', idle_timeout)
-
-    if enable_tcp_reset is not None:
-        instance.enable_tcp_reset = enable_tcp_reset
-
-    if frontend_ip_name == '':
-        instance.frontend_ip_configuration = None
-    elif frontend_ip_name is not None:
-        instance.frontend_ip_configuration = \
-            get_property(parent.frontend_ip_configurations, frontend_ip_name)
-
-    return parent
-
-
 def _process_vnet_name_and_id(vnet, cmd, resource_group_name):
     if vnet and not is_valid_resource_id(vnet):
         vnet = resource_id(
@@ -4003,7 +3976,6 @@ def create_cross_region_load_balancer(cmd, load_balancer_name, resource_group_na
         build_load_balancer_resource, build_public_ip_resource)
 
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-    IPAllocationMethod = cmd.get_models('IPAllocationMethod')
 
     sku = 'standard'
     tier = 'Global'
@@ -4012,8 +3984,7 @@ def create_cross_region_load_balancer(cmd, load_balancer_name, resource_group_na
     public_ip_address = public_ip_address or 'PublicIP{}'.format(load_balancer_name)
     backend_pool_name = backend_pool_name or '{}bepool'.format(load_balancer_name)
     if not public_ip_address_allocation:
-        public_ip_address_allocation = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
-            else IPAllocationMethod.dynamic.value
+        public_ip_address_allocation = 'Static' if (sku and sku.lower() == 'standard') else 'Dynamic'
 
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
