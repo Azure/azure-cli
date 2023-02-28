@@ -19,7 +19,6 @@ from azure.cli.command_modules.network._validators import (
     validate_address_pool_name_or_id, validate_metadata,
     validate_dns_record_type, validate_private_ip_address,
     get_servers_validator, get_public_ip_validator, get_nsg_validator,
-    get_network_watcher_for_pcap_creation, get_network_watcher_from_location, validate_capture_size_and_limit,
     get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
     validate_service_endpoint_policy, validate_subresource_list,
     validate_custom_error_pages,
@@ -36,7 +35,6 @@ from azure.cli.command_modules.network._completers import (
 from azure.cli.command_modules.network._actions import (
     TrustedClientCertificateCreate,
     SslProfilesCreate, AddMappingRequest, WAFRulesCreate)
-from azure.cli.core.util import get_json_object
 from azure.cli.core.profiles import ResourceType
 
 
@@ -48,15 +46,13 @@ def load_arguments(self, _):
      FlowLogFormatType, IPAllocationMethod, IPVersion, PublicIPAddressSkuName, PublicIPAddressSkuTier,
      SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
      ConnectionMonitorEndpointFilterType, ConnectionMonitorTestConfigurationProtocol,
-     PreferredIPVersion, HTTPConfigurationMethod, OutputType, DestinationPortBehavior, CoverageLevel, EndpointType,
-     PacketCaptureTargetType) = self.get_models(
+     PreferredIPVersion, HTTPConfigurationMethod, OutputType, DestinationPortBehavior, CoverageLevel, EndpointType) = self.get_models(
          'ApplicationGatewayProtocol',
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslProtocol',
          'FlowLogFormatType', 'IPAllocationMethod', 'IPVersion', 'PublicIPAddressSkuName', 'PublicIPAddressSkuTier',
          'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
          'ConnectionMonitorEndpointFilterType', 'ConnectionMonitorTestConfigurationProtocol',
-         'PreferredIPVersion', 'HTTPConfigurationMethod', 'OutputType', 'DestinationPortBehavior', 'CoverageLevel', 'EndpointType',
-         'PacketCaptureTargetType')
+         'PreferredIPVersion', 'HTTPConfigurationMethod', 'OutputType', 'DestinationPortBehavior', 'CoverageLevel', 'EndpointType')
 
     ZoneType = self.get_models('ZoneType', resource_type=ResourceType.MGMT_NETWORK_DNS)
 
@@ -945,28 +941,6 @@ def load_arguments(self, _):
     with self.argument_context('network watcher create') as c:
         c.argument('location', validator=get_default_location_from_resource_group)
 
-    with self.argument_context('network watcher packet-capture create') as c:
-        c.argument('watcher_name', ignore_type, validator=get_network_watcher_for_pcap_creation)
-        c.ignore('location')
-        c.ignore('watcher_rg')
-        c.argument('capture_limit', type=int, validator=validate_capture_size_and_limit, help='The maximum size in bytes of the capture output.')
-        c.argument('capture_size', type=int, validator=validate_capture_size_and_limit, help='Number of bytes captured per packet. Excess bytes are truncated.')
-        c.argument('time_limit', type=int, validator=validate_capture_size_and_limit, help='Maximum duration of the capture session in seconds.')
-        c.argument('vm', help='Name or ID of the VM to target. If the name of the VM is provided, the --resource-group is required.')
-        c.argument('resource_group_name', help='Name of the resource group the target VM is in.')
-        c.argument('nic', help='Name or ID of the NIC resource to test. If the VM has multiple NICs and IP forwarding is enabled on any of them, this parameter is required.')
-        c.argument('target_type', help='Target Resource Type, only \'AzureVM\' and \'AzureVMSS\' are supported now', arg_type=get_enum_type(PacketCaptureTargetType))
-        c.argument('target', help='Name or ID of the target, it could be virtual machine or virtual machine scale sets')
-        c.argument('include', nargs='+', help='Space-separated list of VMSS Instances to include in Packet capture like 0 1 2')
-        c.argument('exclude', nargs='+', help='Space-separated list of VMSS Instances to exclude in Packet capture')
-
-    with self.argument_context('network watcher packet-capture') as c:
-        c.argument('capture_name', name_arg_type, help='Name of the packet capture session.')
-        c.argument('storage_account', arg_group='Storage')
-        c.argument('storage_path', arg_group='Storage')
-        c.argument('file_path', arg_group='Storage')
-        c.argument('filters', type=get_json_object)
-
     with self.argument_context('network watcher flow-log') as c:
         c.argument('location', get_location_type(self.cli_ctx),
                    help='Location to identify the exclusive Network Watcher under a region. '
@@ -999,14 +973,6 @@ def load_arguments(self, _):
                    options_list='--workspace',
                    help='Name or ID of a Log Analytics workspace. Must be in the same region of flow log')
         c.argument('traffic_analytics_enabled', options_list='--traffic-analytics', arg_type=get_three_state_flag(), help='Enable traffic analytics. Defaults to true if `--workspace` is provided.')
-
-    for item in ['list', 'stop', 'delete', 'show', 'show-status']:
-        with self.argument_context('network watcher packet-capture {}'.format(item)) as c:
-            c.extra('location')
-            c.argument('location', get_location_type(self.cli_ctx), required=True)
-            c.argument('packet_capture_name', name_arg_type)
-            c.argument('network_watcher_name', ignore_type, options_list=['--network-watcher-name'], validator=get_network_watcher_from_location(remove=True, rg_name='resource_group_name', watcher_name='network_watcher_name'))
-            c.ignore('resource_group_name')
 
     with self.argument_context('network watcher troubleshooting') as c:
         c.argument('resource', help='Name or ID of the resource to troubleshoot.')

@@ -28,10 +28,6 @@ def cf_network_watcher(cli_ctx, _):
     return network_client_factory(cli_ctx).network_watchers
 
 
-def cf_packet_capture(cli_ctx, _):
-    return network_client_factory(cli_ctx).packet_captures
-
-
 def cf_dns_references(cli_ctx, _):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
