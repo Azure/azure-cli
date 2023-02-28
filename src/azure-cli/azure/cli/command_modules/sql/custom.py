@@ -1822,7 +1822,7 @@ def db_update(  # pylint: disable=too-many-locals
     #####
     if assign_identity:
         if user_assigned_identity_id is not None:
-            _get_database_identity_for_update(instance.identity, user_assigned_identity_id)
+            _get_database_identity(user_assigned_identity_id)
 
     if keys is not None or keys_to_remove is not None:
         instance.keys = _get_database_keys_for_update(keys, keys_to_remove)
@@ -1836,21 +1836,6 @@ def db_update(  # pylint: disable=too-many-locals
     instance.availability_zone = None
 
     return instance
-
-
-def _get_database_identity_for_update(existingIdentity, userAssignedIdentities):
-
-    databaseIdentity = None
-
-    if existingIdentity is not None and existingIdentity.user_assigned_identities is not None:
-        for umi in userAssignedIdentities:
-            existingIdentity.user_assigned_identities.update({umi: DatabaseUserIdentity()})
-
-        databaseIdentity = existingIdentity
-    else:
-        databaseIdentity = _get_database_identity(userAssignedIdentities)
-
-    return databaseIdentity
 
 
 def _get_database_keys(akvKeys):
