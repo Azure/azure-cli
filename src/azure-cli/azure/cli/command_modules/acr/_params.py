@@ -227,6 +227,21 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('force', options_list=['--force', '-f'], help='Overwrite the existing tag.', action='store_true')
         c.argument('manifest_spec', options_list=['--name', '-n'], help="The name of the artifact. May include a tag in the format 'name:tag'.")
 
+    with self.argument_context('acr cache') as c:
+        c.argument('registry_name', options_list=['--registry', '-r'])
+        c.argument('name', options_list=['--name', '-n'], help='The name of the cache rule.')
+        c.argument('cred_set', options_list=['--cred-set', '-c'], help='The name of the credential set.')
+        c.argument('source_repo', options_list=['--source-repo', '-s'], help="The full source repository path such as 'docker.io/library/ubuntu'.")
+        c.argument('target_repo', options_list=['--target-repo', '-t'], help="The target repository namespace such as 'ubuntu'.")
+        c.argument('remove_cred_set', action="store_true", help='Optional boolean indicating whether to remove the credential set from the cache rule. False by default.')
+
+    with self.argument_context('acr credential-set') as c:
+        c.argument('registry_name', options_list=['--registry', '-r'])
+        c.argument('name', options_list=['--name', '-n'], help='The name of the credential set.')
+        c.argument('login_server', options_list=['--login-server', '-l'], help="The login server address of the upstream registry such as 'docker.io'")
+        c.argument('username_id', options_list=['--username-id', '-u'], help='The Azure Key Vault secret ID of the secret containing the username to the upstream registry.')
+        c.argument('password_id', options_list=['--password-id', '-p'], help='The Azure Key Vault secret ID of the secret containing the password to the upstream registry.')
+
     with self.argument_context('acr repository untag') as c:
         c.argument('image', options_list=['--image', '-t'], help="The name of the image. May include a tag in the format 'name:tag'.")
 

@@ -97,18 +97,14 @@ from .aaz.latest.network.vnet_gateway.aad import Assign as _VnetGatewayAadAssign
 from .aaz.latest.network.vnet_gateway.ipsec_policy import Add as _VnetGatewayIpsecPolicyAdd
 from .aaz.latest.network.vnet_gateway.nat_rule import Add as _VnetGatewayNatRuleAdd, List as _VnetGatewayNatRuleShow, \
     Remove as _VnetGatewayNatRuleRemove
-from .aaz.latest.network.vnet_gateway.packet_capture import Start as _VnetGatewayPackageCaptureStart, \
-    Stop as _VnetGatewayPackageCaptureStop
 from .aaz.latest.network.vnet_gateway.revoked_cert import Create as _VnetGatewayRevokedCertCreate
 from .aaz.latest.network.vnet_gateway.root_cert import Create as _VnetGatewayRootCertCreate
 from .aaz.latest.network.vnet_gateway.vpn_client import GenerateVpnProfile as _VpnProfileGenerate, \
-    Generate as _VpnClientPackageGenerate, ShowUrl as _VpnProfilePackageUrlShow, \
-    ShowHealth as _VpnClientConnectionHealthShow
+    Generate as _VpnClientPackageGenerate
 from .aaz.latest.network.vpn_connection import Update as _VpnConnectionUpdate, \
     ShowDeviceConfigScript as _VpnConnectionDeviceConfigScriptShow
 from .aaz.latest.network.vpn_connection.ipsec_policy import Add as _VpnConnIpsecPolicyAdd
-from .aaz.latest.network.vpn_connection.packet_capture import Start as _VpnConnPackageCaptureStart, \
-    Stop as _VpnConnPackageCaptureStop
+from .aaz.latest.network.vpn_connection.packet_capture import Stop as _VpnConnPackageCaptureStop
 from .aaz.latest.network.vpn_connection.shared_key import Update as _VpnConnSharedKeyUpdate
 
 logger = get_logger(__name__)
@@ -1436,12 +1432,19 @@ class RuleCreate(_RuleCreate):
     def pre_instance_create(self):
         args = self.ctx.args
         instance = self.ctx.vars.instance
-        if not has_value(args.address_pool):
+        if not has_value(args.address_pool) and not has_value(args.redirect_config):
             address_pools = instance.properties.backend_address_pools
             if len(address_pools) == 1:
                 args.address_pool = instance.properties.backend_address_pools[0].id
             elif len(address_pools) > 1:
                 err_msg = "Multiple backend address pools found. Specify --address-pool explicitly."
+                raise ArgumentUsageError(err_msg)
+        if not has_value(args.http_settings) and not has_value(args.redirect_config):
+            settings = instance.properties.backend_http_settings_collection
+            if len(settings) == 1:
+                args.http_settings = instance.properties.backend_http_settings_collection[0].id
+            elif len(settings) > 1:
+                err_msg = "Multiple backend settings found. Specify --http-settings explicitly."
                 raise ArgumentUsageError(err_msg)
         if not has_value(args.http_listener):
             listeners = instance.properties.http_listeners
@@ -1449,13 +1452,6 @@ class RuleCreate(_RuleCreate):
                 args.http_listener = instance.properties.http_listeners[0].id
             elif len(listeners) > 1:
                 err_msg = "Multiple HTTP listeners found. Specify --http-listener explicitly."
-                raise ArgumentUsageError(err_msg)
-        if not has_value(args.http_settings):
-            settings = instance.properties.backend_http_settings_collection
-            if len(settings) == 1:
-                args.http_settings = instance.properties.backend_http_settings_collection[0].id
-            elif len(settings) > 1:
-                err_msg = "Multiple backend settings found. Specify --http-settings explicitly."
                 raise ArgumentUsageError(err_msg)
 
     def _output(self, *args, **kwargs):
@@ -5722,29 +5718,6 @@ def list_nw_connection_monitor_v2_output(client,
     return connection_monitor.outputs
 
 
-def create_nw_packet_capture(cmd, client, resource_group_name, capture_name,
-                             watcher_rg, watcher_name, vm=None, location=None,
-                             storage_account=None, storage_path=None, file_path=None,
-                             capture_size=None, capture_limit=None, time_limit=None, filters=None,
-                             target_type=None, target=None, include=None, exclude=None):
-    PacketCapture, PacketCaptureStorageLocation = cmd.get_models('PacketCapture', 'PacketCaptureStorageLocation')
-    PacketCaptureMachineScope = cmd.get_models('PacketCaptureMachineScope')
-    # Set the appropriate fields if target is VM
-    pcap_scope = None
-    if not target_type or target_type.lower() != "azurevmss":
-        target = vm
-    else:
-        pcap_scope = PacketCaptureMachineScope(include=include, exclude=exclude)
-
-    storage_settings = PacketCaptureStorageLocation(storage_id=storage_account,
-                                                    storage_path=storage_path, file_path=file_path)
-    capture_params = PacketCapture(target=target, storage_location=storage_settings,
-                                   bytes_to_capture_per_packet=capture_size,
-                                   total_bytes_per_session=capture_limit, time_limit_in_seconds=time_limit,
-                                   filters=filters, target_type=target_type, scope=pcap_scope)
-    return client.begin_create(watcher_rg, watcher_name, capture_name, capture_params)
-
-
 def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_account=None,
                          resource_group_name=None, enabled=None, retention=0, log_format=None, log_version=None,
                          traffic_analytics_workspace=None, traffic_analytics_interval=None,
@@ -6771,6 +6744,7 @@ class VnetGatewayCreate(_VnetGatewayCreate):
         args_schema.vnet = AAZResourceIdArg(
             options=['--vnet'],
             help="Name or ID of an existing virtual network which has a subnet named 'GatewaySubnet'.",
+            required=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}"
             )
@@ -6865,6 +6839,7 @@ class VnetGatewayCreate(_VnetGatewayCreate):
             nat_rules = self.ctx.vars.instance.properties.natRules.to_serialized_data()
             for nat_rule in nat_rules:
                 if 'type' in nat_rule['properties']:
+                    # `properties.type` conflict with the `type` property when flatten `properties`
                     nat_rule['properties']['type'] = AAZUndefined
             self.ctx.vars.instance.properties.nat_rules = nat_rules
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -6892,7 +6867,6 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}"
             ),
-            nullable=True
         )
         args_schema.root_cert_data = AAZFileArg(options=['--root-cert-data'], arg_group="Root Cert Authentication",
                                                 help="Base64 contents of the root certificate file or file path.",
@@ -6959,46 +6933,9 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
             args.active = active
 
 
-class VnetGatewayPackageCaptureStart(_VnetGatewayPackageCaptureStart):
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class VnetGatewayPackageCaptureStop(_VnetGatewayPackageCaptureStop):
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class VpnProfilePackageUrlShow(_VpnProfilePackageUrlShow):
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class VpnClientConnectionHealthShow(_VpnClientConnectionHealthShow):
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
 def generate_vpn_client(cmd, resource_group_name, virtual_network_gateway_name, processor_architecture=None,
                         authentication_method=None, radius_server_auth_certificate=None, client_root_certificates=None,
                         use_legacy=False):
-    class VpnClientPackageGenerate(_VpnClientPackageGenerate):
-        def _output(self, *args, **kwargs):
-            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-            return result
-
-    class VpnProfileGenerate(_VpnProfileGenerate):
-        def _output(self, *args, **kwargs):
-            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-            return result
-
     generate_args = {"name": virtual_network_gateway_name,
                      "resource_group": resource_group_name,
                      "processor_architecture": processor_architecture}
@@ -7006,9 +6943,9 @@ def generate_vpn_client(cmd, resource_group_name, virtual_network_gateway_name, 
         generate_args['authentication_method'] = authentication_method
         generate_args['radius_server_auth_certificate'] = radius_server_auth_certificate
         generate_args['client_root_certificates'] = client_root_certificates
-        return VpnProfileGenerate(cli_ctx=cmd.cli_ctx)(command_args=generate_args)
+        return _VpnProfileGenerate(cli_ctx=cmd.cli_ctx)(command_args=generate_args)
     # legacy implementation
-    return VpnClientPackageGenerate(cli_ctx=cmd.cli_ctx)(command_args=generate_args)
+    return _VpnClientPackageGenerate(cli_ctx=cmd.cli_ctx)(command_args=generate_args)
 
 
 class VnetGatewayVpnConnectionsDisconnect(_VnetGatewayVpnConnectionsDisconnect):
@@ -7093,13 +7030,6 @@ def list_vpn_connections(cmd, resource_group_name, virtual_network_gateway_name=
     return List(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": resource_group_name})
 
 
-class VpnConnPackageCaptureStart(_VpnConnPackageCaptureStart):
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
 class VpnConnPackageCaptureStop(_VpnConnPackageCaptureStop):
 
     @classmethod
@@ -7107,10 +7037,6 @@ class VpnConnPackageCaptureStop(_VpnConnPackageCaptureStop):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.sas_url._required = True
         return args_schema
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
 
 
 class VpnConnectionDeviceConfigScriptShow(_VpnConnectionDeviceConfigScriptShow):
@@ -7123,10 +7049,6 @@ class VpnConnectionDeviceConfigScriptShow(_VpnConnectionDeviceConfigScriptShow):
         args_schema.vendor._required = True
 
         return args_schema
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
 # endregion
 
 
@@ -7142,21 +7064,26 @@ class VnetGatewayIpsecPolicyAdd(_VnetGatewayIpsecPolicyAdd):
 
 
 def clear_vnet_gateway_ipsec_policies(cmd, resource_group_name, gateway_name, no_wait=False):
+
     class VnetGatewayIpsecPoliciesClear(_VnetGatewayUpdate):
-        def pre_operations(self):
-            args = self.ctx.args
-            args.no_wait = no_wait
+
+        def _output(self, *args, **kwargs):
+            result = self.deserialize_output(
+                self.ctx.vars.instance.properties.vpn_client_configuration.vpn_client_ipsec_policies,
+                client_flatten=True
+            )
+            return result
 
         def pre_instance_update(self, instance):
             instance.properties.vpn_client_configuration.vpn_client_ipsec_policies = None
 
-    ipsec_policies_args = {"resource_group": resource_group_name,
-                           "name": gateway_name}
-    from azure.cli.core.commands import LongRunningOperation
-    if no_wait:
-        return VnetGatewayIpsecPoliciesClear(cli_ctx=cmd.cli_ctx)(command_args=ipsec_policies_args)
-    poller = VnetGatewayIpsecPoliciesClear(cli_ctx=cmd.cli_ctx)(command_args=ipsec_policies_args)
-    return LongRunningOperation(cmd.cli_ctx)(poller)['vpnClientConfiguration']['vpnClientIpsecPolicies']
+    ipsec_policies_args = {
+        "resource_group": resource_group_name,
+        "name": gateway_name,
+        "no_wait": no_wait
+    }
+
+    return VnetGatewayIpsecPoliciesClear(cli_ctx=cmd.cli_ctx)(command_args=ipsec_policies_args)
 
 
 class VpnConnIpsecPolicyAdd(_VpnConnIpsecPolicyAdd):

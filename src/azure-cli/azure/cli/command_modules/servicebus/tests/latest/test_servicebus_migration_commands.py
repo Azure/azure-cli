@@ -156,7 +156,7 @@ class SBNSMigrationCRUDScenarioTest(ScenarioTest):
                 'servicebus namespace show  --resource-group {rg} --name {namespacenamestandard}').get_output_in_json()
 
         # Delete Namespace - Standard
-        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacenamestandard}')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacenamestandard} ')
 
         # get namespace
         getnamespace = self.cmd(
