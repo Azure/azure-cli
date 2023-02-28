@@ -40,10 +40,6 @@ def cf_network_watcher(cli_ctx, _):
     return network_client_factory(cli_ctx).network_watchers
 
 
-def cf_packet_capture(cli_ctx, _):
-    return network_client_factory(cli_ctx).packet_captures
-
-
 def cf_private_access(cli_ctx, _):
     return network_client_factory(cli_ctx).available_private_access_services
 

@@ -4539,6 +4539,7 @@ def managed_instance_create(
         external_admin_sid=None,
         external_admin_name=None,
         service_principal_type=None,
+        zone_redundant=None,
         **kwargs):
     '''
     Creates a managed instance.
@@ -4575,6 +4576,8 @@ def managed_instance_create(
     kwargs['key_id'] = key_id
 
     kwargs['primary_user_assigned_identity_id'] = primary_user_assigned_identity_id
+
+    kwargs['zone_redundant'] = zone_redundant
 
     ad_only = None
     if enable_ad_only_auth:
@@ -4657,7 +4660,8 @@ def managed_instance_update(
         user_assigned_identity_id=None,
         virtual_network_subnet_id=None,
         yes=None,
-        service_principal_type=None):
+        service_principal_type=None,
+        zone_redundant=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -4723,6 +4727,9 @@ def managed_instance_update(
 
     if virtual_network_subnet_id is not None:
         instance.subnet_id = virtual_network_subnet_id
+
+    if zone_redundant is not None:
+        instance.zone_redundant = zone_redundant
 
     return instance
 
@@ -5845,7 +5852,8 @@ def instance_failover_group_create(
         partner_managed_instance,
         partner_resource_group,
         failover_policy=FailoverPolicyType.automatic.value,
-        grace_period=1):
+        grace_period=1,
+        secondary_type="Geo"):
     '''
     Creates a failover group.
     '''
@@ -5883,13 +5891,15 @@ def instance_failover_group_create(
                 failover_policy=failover_policy,
                 failover_with_data_loss_grace_period_minutes=grace_period),
             read_only_endpoint=InstanceFailoverGroupReadOnlyEndpoint(
-                failover_policy="Disabled")))
+                failover_policy="Disabled"),
+            secondary_type=secondary_type))
 
 
 def instance_failover_group_update(
         instance,
         failover_policy=None,
-        grace_period=None,):
+        grace_period=None,
+        secondary_type=None):
     '''
     Updates the failover group.
     '''
@@ -5899,23 +5909,26 @@ def instance_failover_group_update(
         failover_policy,
         grace_period)
 
+    if secondary_type is not None:
+        instance.secondary_type = secondary_type
+
     return instance
 
 
 def instance_failover_group_failover(
         client,
-        resource_group_name,
+        resource_group_name_failover,
         failover_group_name,
-        location_name,
+        location_name_failover,
         allow_data_loss=False):
     '''
     Failover an instance failover group.
     '''
 
     failover_group = client.get(
-        resource_group_name=resource_group_name,
+        resource_group_name=resource_group_name_failover,
         failover_group_name=failover_group_name,
-        location_name=location_name)
+        location_name=location_name_failover)
 
     if failover_group.replication_role == "Primary":
         return
@@ -5927,9 +5940,9 @@ def instance_failover_group_failover(
         failover_func = client.begin_failover
 
     return failover_func(
-        resource_group_name=resource_group_name,
+        resource_group_name=resource_group_name_failover,
         failover_group_name=failover_group_name,
-        location_name=location_name)
+        location_name=location_name_failover)
 
 ###############################################
 #              sql server conn-policy         #

@@ -18,8 +18,8 @@ from azure.cli.core.commands import upsert_to_collection, get_property
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
 from azure.cli.core.util import CLIError, sdk_no_wait
-from azure.cli.core.azclierror import InvalidArgumentValueError, ValidationError, \
-    UnrecognizedArgumentError, ResourceNotFoundError, ArgumentUsageError
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, ValidationError, \
+    UnrecognizedArgumentError, ResourceNotFoundError, ArgumentUsageError, MutuallyExclusiveArgumentError
 from azure.cli.core.profiles import ResourceType, supported_api_version
 
 from azure.cli.command_modules.network._client_factory import network_client_factory
@@ -97,18 +97,14 @@ from .aaz.latest.network.vnet_gateway.aad import Assign as _VnetGatewayAadAssign
 from .aaz.latest.network.vnet_gateway.ipsec_policy import Add as _VnetGatewayIpsecPolicyAdd
 from .aaz.latest.network.vnet_gateway.nat_rule import Add as _VnetGatewayNatRuleAdd, List as _VnetGatewayNatRuleShow, \
     Remove as _VnetGatewayNatRuleRemove
-from .aaz.latest.network.vnet_gateway.packet_capture import Start as _VnetGatewayPackageCaptureStart, \
-    Stop as _VnetGatewayPackageCaptureStop
 from .aaz.latest.network.vnet_gateway.revoked_cert import Create as _VnetGatewayRevokedCertCreate
 from .aaz.latest.network.vnet_gateway.root_cert import Create as _VnetGatewayRootCertCreate
 from .aaz.latest.network.vnet_gateway.vpn_client import GenerateVpnProfile as _VpnProfileGenerate, \
-    Generate as _VpnClientPackageGenerate, ShowUrl as _VpnProfilePackageUrlShow, \
-    ShowHealth as _VpnClientConnectionHealthShow
+    Generate as _VpnClientPackageGenerate
 from .aaz.latest.network.vpn_connection import Update as _VpnConnectionUpdate, \
     ShowDeviceConfigScript as _VpnConnectionDeviceConfigScriptShow
 from .aaz.latest.network.vpn_connection.ipsec_policy import Add as _VpnConnIpsecPolicyAdd
-from .aaz.latest.network.vpn_connection.packet_capture import Start as _VpnConnPackageCaptureStart, \
-    Stop as _VpnConnPackageCaptureStop
+from .aaz.latest.network.vpn_connection.packet_capture import Stop as _VpnConnPackageCaptureStop
 from .aaz.latest.network.vpn_connection.shared_key import Update as _VpnConnSharedKeyUpdate
 
 logger = get_logger(__name__)
@@ -1436,12 +1432,19 @@ class RuleCreate(_RuleCreate):
     def pre_instance_create(self):
         args = self.ctx.args
         instance = self.ctx.vars.instance
-        if not has_value(args.address_pool):
+        if not has_value(args.address_pool) and not has_value(args.redirect_config):
             address_pools = instance.properties.backend_address_pools
             if len(address_pools) == 1:
                 args.address_pool = instance.properties.backend_address_pools[0].id
             elif len(address_pools) > 1:
                 err_msg = "Multiple backend address pools found. Specify --address-pool explicitly."
+                raise ArgumentUsageError(err_msg)
+        if not has_value(args.http_settings) and not has_value(args.redirect_config):
+            settings = instance.properties.backend_http_settings_collection
+            if len(settings) == 1:
+                args.http_settings = instance.properties.backend_http_settings_collection[0].id
+            elif len(settings) > 1:
+                err_msg = "Multiple backend settings found. Specify --http-settings explicitly."
                 raise ArgumentUsageError(err_msg)
         if not has_value(args.http_listener):
             listeners = instance.properties.http_listeners
@@ -1449,13 +1452,6 @@ class RuleCreate(_RuleCreate):
                 args.http_listener = instance.properties.http_listeners[0].id
             elif len(listeners) > 1:
                 err_msg = "Multiple HTTP listeners found. Specify --http-listener explicitly."
-                raise ArgumentUsageError(err_msg)
-        if not has_value(args.http_settings):
-            settings = instance.properties.backend_http_settings_collection
-            if len(settings) == 1:
-                args.http_settings = instance.properties.backend_http_settings_collection[0].id
-            elif len(settings) > 1:
-                err_msg = "Multiple backend settings found. Specify --http-settings explicitly."
                 raise ArgumentUsageError(err_msg)
 
     def _output(self, *args, **kwargs):
@@ -4639,9 +4635,6 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
     def pre_instance_update(self, instance):
         args = self.ctx.args
         instance = self.ctx.vars.instance
-        if args.make_primary.to_serialized_data():
-            for config in instance.properties.ip_configurations:
-                config.properties.primary = False
         args.asgs_obj = assign_aaz_list_arg(
             args.asgs_obj,
             args.application_security_groups,
@@ -4662,6 +4655,12 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             args.lb_inbound_nat_rules,
             element_transformer=lambda _, rule_id: {"id": rule_id}
         )
+        # all ip configurations must belong to the same asgs
+        is_primary = args.make_primary.to_serialized_data()
+        for config in instance.properties.ip_configurations:
+            if is_primary:
+                config.properties.primary = False
+            config.properties.application_security_groups = args.asgs_obj
 
     def post_instance_update(self, instance):
         if not has_value(instance.properties.subnet.id):
@@ -5722,45 +5721,158 @@ def list_nw_connection_monitor_v2_output(client,
     return connection_monitor.outputs
 
 
-def create_nw_packet_capture(cmd, client, resource_group_name, capture_name,
-                             watcher_rg, watcher_name, vm=None, location=None,
-                             storage_account=None, storage_path=None, file_path=None,
-                             capture_size=None, capture_limit=None, time_limit=None, filters=None,
-                             target_type=None, target=None, include=None, exclude=None):
-    PacketCapture, PacketCaptureStorageLocation = cmd.get_models('PacketCapture', 'PacketCaptureStorageLocation')
-    PacketCaptureMachineScope = cmd.get_models('PacketCaptureMachineScope')
-    # Set the appropriate fields if target is VM
-    pcap_scope = None
-    if not target_type or target_type.lower() != "azurevmss":
-        target = vm
-    else:
-        pcap_scope = PacketCaptureMachineScope(include=include, exclude=exclude)
+def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_account=None,
+                         resource_group_name=None, enabled=None, retention=0, log_format=None, log_version=None,
+                         traffic_analytics_workspace=None, traffic_analytics_interval=None,
+                         traffic_analytics_enabled=None):
+    from azure.cli.core.commands import LongRunningOperation
+    flowlog_status_parameters = cmd.get_models('FlowLogStatusParameters')(target_resource_id=nsg)
+    config = LongRunningOperation(cmd.cli_ctx)(client.begin_get_flow_log_status(watcher_rg,
+                                                                                watcher_name,
+                                                                                flowlog_status_parameters))
+    try:
+        if not config.flow_analytics_configuration.network_watcher_flow_analytics_configuration.workspace_id:
+            config.flow_analytics_configuration = None
+    except AttributeError:
+        config.flow_analytics_configuration = None
 
-    storage_settings = PacketCaptureStorageLocation(storage_id=storage_account,
-                                                    storage_path=storage_path, file_path=file_path)
-    capture_params = PacketCapture(target=target, storage_location=storage_settings,
-                                   bytes_to_capture_per_packet=capture_size,
-                                   total_bytes_per_session=capture_limit, time_limit_in_seconds=time_limit,
-                                   filters=filters, target_type=target_type, scope=pcap_scope)
-    return client.begin_create(watcher_rg, watcher_name, capture_name, capture_params)
+    with cmd.update_context(config) as c:
+        c.set_param('enabled', enabled if enabled is not None else config.enabled)
+        c.set_param('storage_id', storage_account or config.storage_id)
+    if retention is not None:
+        config.retention_policy = {
+            'days': retention,
+            'enabled': int(retention) > 0
+        }
+    if cmd.supported_api_version(min_api='2018-10-01') and (log_format or log_version):
+        config.format = {
+            'type': log_format,
+            'version': log_version
+        }
+
+    if cmd.supported_api_version(min_api='2018-10-01') and \
+            any([traffic_analytics_workspace is not None, traffic_analytics_enabled is not None]):
+        workspace = None
+
+        if traffic_analytics_workspace:
+            from azure.cli.core.commands.arm import get_arm_resource_by_id
+            workspace = get_arm_resource_by_id(cmd.cli_ctx, traffic_analytics_workspace)
+
+        if not config.flow_analytics_configuration:
+            # must create whole object
+            if not workspace:
+                raise CLIError('usage error (analytics not already configured): --workspace NAME_OR_ID '
+                               '[--enabled {true|false}]')
+            if traffic_analytics_enabled is None:
+                traffic_analytics_enabled = True
+            config.flow_analytics_configuration = {
+                'network_watcher_flow_analytics_configuration': {
+                    'enabled': traffic_analytics_enabled,
+                    'workspace_id': workspace.properties['customerId'],
+                    'workspace_region': workspace.location,
+                    'workspace_resource_id': traffic_analytics_workspace,
+                    'traffic_analytics_interval': traffic_analytics_interval
+                }
+            }
+        else:
+            with cmd.update_context(config.flow_analytics_configuration.network_watcher_flow_analytics_configuration) as c:
+                # update object
+                c.set_param('enabled', traffic_analytics_enabled)
+                if traffic_analytics_workspace == "":
+                    config.flow_analytics_configuration = None
+                elif workspace:
+                    c.set_param('workspace_id', workspace.properties['customerId'])
+                    c.set_param('workspace_region', workspace.location)
+                    c.set_param('workspace_resource_id', traffic_analytics_workspace)
+                    c.set_param('traffic_analytics_interval', traffic_analytics_interval)
+
+    return client.begin_set_flow_log_configuration(watcher_rg, watcher_name, config)
 
 
 # combination of resource_group_name and nsg is for old output
 # combination of location and flow_log_name is for new output
-def show_nw_flow_logging(cmd, watcher_rg, watcher_name, location=None, resource_group_name=None, nsg=None,
+def show_nw_flow_logging(cmd, client, watcher_rg, watcher_name, location=None, resource_group_name=None, nsg=None,
                          flow_log_name=None):
     # deprecated approach to show flow log
     if nsg is not None:
-        from .aaz.latest.network.watcher.flow_log import ConfigureFlowLog
-        return ConfigureFlowLog(cli_ctx=cmd.cli_ctx)(command_args={"network_watcher_name": watcher_name,
-                                                                   "resource_group": watcher_rg,
-                                                                   "target_resource_id": nsg})
+        flowlog_status_parameters = cmd.get_models('FlowLogStatusParameters')(target_resource_id=nsg)
+        return client.begin_get_flow_log_status(watcher_rg, watcher_name, flowlog_status_parameters)
 
     # new approach to show flow log
-    from .aaz.latest.network.watcher.flow_log import Show
-    return Show(cli_ctx=cmd.cli_ctx)(command_args={"network_watcher_name": watcher_name,
-                                                   "resource_group": watcher_rg,
-                                                   "name": flow_log_name})
+    from ._client_factory import cf_flow_logs
+    client = cf_flow_logs(cmd.cli_ctx, None)
+    return client.get(watcher_rg, watcher_name, flow_log_name)
+
+
+def create_nw_flow_log(cmd,
+                       client,
+                       location,
+                       watcher_rg,
+                       watcher_name,
+                       flow_log_name,
+                       nsg=None,
+                       vnet=None,
+                       subnet=None,
+                       nic=None,
+                       storage_account=None,
+                       resource_group_name=None,
+                       enabled=None,
+                       retention=0,
+                       log_format=None,
+                       log_version=None,
+                       traffic_analytics_workspace=None,
+                       traffic_analytics_interval=60,
+                       traffic_analytics_enabled=None,
+                       tags=None):
+    FlowLog = cmd.get_models('FlowLog')
+
+    if sum(map(bool, [vnet, subnet, nic, nsg])) == 0:
+        raise RequiredArgumentMissingError("Please enter atleast one target resource ID.")
+    if sum(map(bool, [vnet, nic, nsg])) > 1:
+        raise MutuallyExclusiveArgumentError("Please enter only one target resource ID.")
+
+    if subnet is not None:
+        flow_log = FlowLog(location=location, target_resource_id=subnet, storage_id=storage_account, enabled=enabled, tags=tags)
+    elif vnet is not None and subnet is None:
+        flow_log = FlowLog(location=location, target_resource_id=vnet, storage_id=storage_account, enabled=enabled, tags=tags)
+    elif nic is not None:
+        flow_log = FlowLog(location=location, target_resource_id=nic, storage_id=storage_account, enabled=enabled, tags=tags)
+    elif nsg is not None:
+        flow_log = FlowLog(location=location, target_resource_id=nsg, storage_id=storage_account, enabled=enabled, tags=tags)
+
+    if retention > 0:
+        RetentionPolicyParameters = cmd.get_models('RetentionPolicyParameters')
+        retention_policy = RetentionPolicyParameters(days=retention, enabled=(retention > 0))
+        flow_log.retention_policy = retention_policy
+
+    if log_format is not None or log_version is not None:
+        FlowLogFormatParameters = cmd.get_models('FlowLogFormatParameters')
+        format_config = FlowLogFormatParameters(type=log_format, version=log_version)
+        flow_log.format = format_config
+
+    if traffic_analytics_workspace is not None:
+        TrafficAnalyticsProperties, TrafficAnalyticsConfigurationProperties = \
+            cmd.get_models('TrafficAnalyticsProperties', 'TrafficAnalyticsConfigurationProperties')
+
+        from azure.cli.core.commands.arm import get_arm_resource_by_id
+        workspace = get_arm_resource_by_id(cmd.cli_ctx, traffic_analytics_workspace)
+        if not workspace:
+            raise CLIError('Name or ID of workspace is invalid')
+
+        traffic_analytics_config = TrafficAnalyticsConfigurationProperties(
+            enabled=traffic_analytics_enabled,
+            workspace_id=workspace.properties['customerId'],
+            workspace_region=workspace.location,
+            workspace_resource_id=workspace.id,
+            traffic_analytics_interval=traffic_analytics_interval
+        )
+        traffic_analytics = TrafficAnalyticsProperties(
+            network_watcher_flow_analytics_configuration=traffic_analytics_config
+        )
+
+        flow_log.flow_analytics_configuration = traffic_analytics
+
+    return client.begin_create_or_update(watcher_rg, watcher_name, flow_log_name, flow_log)
 
 
 def update_nw_flow_log_getter(client, watcher_rg, watcher_name, flow_log_name):
@@ -5769,6 +5881,92 @@ def update_nw_flow_log_getter(client, watcher_rg, watcher_name, flow_log_name):
 
 def update_nw_flow_log_setter(client, watcher_rg, watcher_name, flow_log_name, parameters):
     return client.begin_create_or_update(watcher_rg, watcher_name, flow_log_name, parameters)
+
+
+def update_nw_flow_log(cmd,
+                       instance,
+                       location,
+                       resource_group_name=None,    # dummy parameter to let it appear in command
+                       enabled=None,
+                       nsg=None,
+                       vnet=None,
+                       subnet=None,
+                       nic=None,
+                       storage_account=None,
+                       retention=0,
+                       log_format=None,
+                       log_version=None,
+                       traffic_analytics_workspace=None,
+                       traffic_analytics_interval=60,
+                       traffic_analytics_enabled=None,
+                       tags=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('enabled', enabled)
+        c.set_param('tags', tags)
+        c.set_param('storage_id', storage_account)
+
+    if sum(map(bool, [vnet, nic, nsg])) > 1:
+        raise MutuallyExclusiveArgumentError("Please enter only one target resource ID.")
+
+    if subnet is not None:
+        c.set_param('target_resource_id', subnet)
+    elif vnet is not None and subnet is None:
+        c.set_param('target_resource_id', vnet)
+    elif nic is not None:
+        c.set_param('target_resource_id', nic)
+    else:
+        c.set_param('target_resource_id', nsg)
+
+    with cmd.update_context(instance.retention_policy) as c:
+        c.set_param('days', retention)
+        c.set_param('enabled', retention > 0)
+
+    with cmd.update_context(instance.format) as c:
+        c.set_param('type', log_format)
+        c.set_param('version', log_version)
+
+    if traffic_analytics_workspace is not None:
+        from azure.cli.core.commands.arm import get_arm_resource_by_id
+        workspace = get_arm_resource_by_id(cmd.cli_ctx, traffic_analytics_workspace)
+        if not workspace:
+            raise CLIError('Name or ID of workspace is invalid')
+
+        if instance.flow_analytics_configuration.network_watcher_flow_analytics_configuration is None:
+            analytics_conf = cmd.get_models('TrafficAnalyticsConfigurationProperties')
+            instance.flow_analytics_configuration.network_watcher_flow_analytics_configuration = analytics_conf()
+
+        with cmd.update_context(
+                instance.flow_analytics_configuration.network_watcher_flow_analytics_configuration) as c:
+            c.set_param('enabled', traffic_analytics_enabled)
+            c.set_param('workspace_id', workspace.properties['customerId'])
+            c.set_param('workspace_region', workspace.location)
+            c.set_param('workspace_resource_id', workspace.id)
+            c.set_param('traffic_analytics_interval', traffic_analytics_interval)
+
+    return instance
+
+
+def list_nw_flow_log(client, watcher_rg, watcher_name, location):
+    return client.list(watcher_rg, watcher_name)
+
+
+def delete_nw_flow_log(client, watcher_rg, watcher_name, location, flow_log_name):
+    return client.begin_delete(watcher_rg, watcher_name, flow_log_name)
+
+
+def start_nw_troubleshooting(cmd, client, watcher_name, watcher_rg, resource, storage_account,
+                             storage_path, resource_type=None, resource_group_name=None,
+                             no_wait=False):
+    TroubleshootingParameters = cmd.get_models('TroubleshootingParameters')
+    params = TroubleshootingParameters(target_resource_id=resource, storage_id=storage_account,
+                                       storage_path=storage_path)
+    return sdk_no_wait(no_wait, client.begin_get_troubleshooting, watcher_rg, watcher_name, params)
+
+
+def show_nw_troubleshooting_result(cmd, client, watcher_name, watcher_rg, resource, resource_type=None,
+                                   resource_group_name=None):
+    query_troubleshooting_parameters = cmd.get_models('QueryTroubleshootingParameters')(target_resource_id=resource)
+    return client.begin_get_troubleshooting_result(watcher_rg, watcher_name, query_troubleshooting_parameters)
 # endregion
 
 
@@ -6549,6 +6747,7 @@ class VnetGatewayCreate(_VnetGatewayCreate):
         args_schema.vnet = AAZResourceIdArg(
             options=['--vnet'],
             help="Name or ID of an existing virtual network which has a subnet named 'GatewaySubnet'.",
+            required=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}"
             )
@@ -6643,6 +6842,7 @@ class VnetGatewayCreate(_VnetGatewayCreate):
             nat_rules = self.ctx.vars.instance.properties.natRules.to_serialized_data()
             for nat_rule in nat_rules:
                 if 'type' in nat_rule['properties']:
+                    # `properties.type` conflict with the `type` property when flatten `properties`
                     nat_rule['properties']['type'] = AAZUndefined
             self.ctx.vars.instance.properties.nat_rules = nat_rules
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -6670,7 +6870,6 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}"
             ),
-            nullable=True
         )
         args_schema.root_cert_data = AAZFileArg(options=['--root-cert-data'], arg_group="Root Cert Authentication",
                                                 help="Base64 contents of the root certificate file or file path.",
@@ -6737,46 +6936,9 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
             args.active = active
 
 
-class VnetGatewayPackageCaptureStart(_VnetGatewayPackageCaptureStart):
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class VnetGatewayPackageCaptureStop(_VnetGatewayPackageCaptureStop):
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class VpnProfilePackageUrlShow(_VpnProfilePackageUrlShow):
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class VpnClientConnectionHealthShow(_VpnClientConnectionHealthShow):
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
 def generate_vpn_client(cmd, resource_group_name, virtual_network_gateway_name, processor_architecture=None,
                         authentication_method=None, radius_server_auth_certificate=None, client_root_certificates=None,
                         use_legacy=False):
-    class VpnClientPackageGenerate(_VpnClientPackageGenerate):
-        def _output(self, *args, **kwargs):
-            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-            return result
-
-    class VpnProfileGenerate(_VpnProfileGenerate):
-        def _output(self, *args, **kwargs):
-            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-            return result
-
     generate_args = {"name": virtual_network_gateway_name,
                      "resource_group": resource_group_name,
                      "processor_architecture": processor_architecture}
@@ -6784,9 +6946,9 @@ def generate_vpn_client(cmd, resource_group_name, virtual_network_gateway_name, 
         generate_args['authentication_method'] = authentication_method
         generate_args['radius_server_auth_certificate'] = radius_server_auth_certificate
         generate_args['client_root_certificates'] = client_root_certificates
-        return VpnProfileGenerate(cli_ctx=cmd.cli_ctx)(command_args=generate_args)
+        return _VpnProfileGenerate(cli_ctx=cmd.cli_ctx)(command_args=generate_args)
     # legacy implementation
-    return VpnClientPackageGenerate(cli_ctx=cmd.cli_ctx)(command_args=generate_args)
+    return _VpnClientPackageGenerate(cli_ctx=cmd.cli_ctx)(command_args=generate_args)
 
 
 class VnetGatewayVpnConnectionsDisconnect(_VnetGatewayVpnConnectionsDisconnect):
@@ -6871,13 +7033,6 @@ def list_vpn_connections(cmd, resource_group_name, virtual_network_gateway_name=
     return List(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": resource_group_name})
 
 
-class VpnConnPackageCaptureStart(_VpnConnPackageCaptureStart):
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
 class VpnConnPackageCaptureStop(_VpnConnPackageCaptureStop):
 
     @classmethod
@@ -6885,10 +7040,6 @@ class VpnConnPackageCaptureStop(_VpnConnPackageCaptureStop):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.sas_url._required = True
         return args_schema
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
 
 
 class VpnConnectionDeviceConfigScriptShow(_VpnConnectionDeviceConfigScriptShow):
@@ -6901,10 +7052,6 @@ class VpnConnectionDeviceConfigScriptShow(_VpnConnectionDeviceConfigScriptShow):
         args_schema.vendor._required = True
 
         return args_schema
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
 # endregion
 
 
@@ -6920,21 +7067,26 @@ class VnetGatewayIpsecPolicyAdd(_VnetGatewayIpsecPolicyAdd):
 
 
 def clear_vnet_gateway_ipsec_policies(cmd, resource_group_name, gateway_name, no_wait=False):
+
     class VnetGatewayIpsecPoliciesClear(_VnetGatewayUpdate):
-        def pre_operations(self):
-            args = self.ctx.args
-            args.no_wait = no_wait
+
+        def _output(self, *args, **kwargs):
+            result = self.deserialize_output(
+                self.ctx.vars.instance.properties.vpn_client_configuration.vpn_client_ipsec_policies,
+                client_flatten=True
+            )
+            return result
 
         def pre_instance_update(self, instance):
             instance.properties.vpn_client_configuration.vpn_client_ipsec_policies = None
 
-    ipsec_policies_args = {"resource_group": resource_group_name,
-                           "name": gateway_name}
-    from azure.cli.core.commands import LongRunningOperation
-    if no_wait:
-        return VnetGatewayIpsecPoliciesClear(cli_ctx=cmd.cli_ctx)(command_args=ipsec_policies_args)
-    poller = VnetGatewayIpsecPoliciesClear(cli_ctx=cmd.cli_ctx)(command_args=ipsec_policies_args)
-    return LongRunningOperation(cmd.cli_ctx)(poller)['vpnClientConfiguration']['vpnClientIpsecPolicies']
+    ipsec_policies_args = {
+        "resource_group": resource_group_name,
+        "name": gateway_name,
+        "no_wait": no_wait
+    }
+
+    return VnetGatewayIpsecPoliciesClear(cli_ctx=cmd.cli_ctx)(command_args=ipsec_policies_args)
 
 
 class VpnConnIpsecPolicyAdd(_VpnConnIpsecPolicyAdd):
