@@ -3933,3 +3933,66 @@ class NetworkPrivateLinkMLRegistryScenarioTest(ScenarioTest):
 
 if __name__ == '__main__':
     unittest.main()
+
+class NetworkPrivateLinkMysqlFlexibleServerScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='westus2')
+    def test_private_link_resource_mysql_flexible_server(self, resource_group):
+        #At very first, we define some params
+        self.kwargs.update({
+            'server_name': self.create_random_name(prefix='cli', length=40),
+            'rg': resource_group
+        })
+
+        #First of all, we need to create a flexible server
+        result = self.cmd('mysql flexible-server create -g {rg} --name {server_name}  --public-access none').get_output_in_json()
+        self.kwargs['flexible_sever_id'] = result['id']
+
+        #Secondly, we should check private-link-resource list
+        self.cmd('network private-link-resource list --id {flexible_sever_id}', checks=[
+            self.check('length(@)', 1),
+        ])
+
+    @ResourceGroupPreparer(location='centraluseuap')
+    def test_private_endpoint_connection_mysql_flexible_server(self, resource_group):
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'server_name': self.create_random_name('mysql-privatelink-server', 40),
+            'plan_name': self.create_random_name('mysql-privatelink-asp', 40),
+            'vnet_name': self.create_random_name('mysql-privatelink-vnet', 40),
+            'subnet_name': self.create_random_name('mysql-privatelink-subnet', 40),
+            'endpoint_name': self.create_random_name('mysql-privatelink-endpoint', 40),
+            'endpoint_conn_name': self.create_random_name('mysql-privatelink-endpointconn', 40),
+            'second_endpoint_name': self.create_random_name('mysql-privatelink-endpoint2', 40),
+            'second_endpoint_conn_name': self.create_random_name('mysql-privatelink-endpointconn2', 40),
+            'description_msg': 'somedescription'
+        })
+
+        #Prepare Network
+        self.cmd('network vnet create -n {vnet_name} -g {resource_group} --subnet-name {subnet_name}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {subnet_name} --vnet-name {vnet_name} -g {resource_group} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+        
+        #Create MySQL Server
+        result = self.cmd('mysql flexible-server create -g {rg} --name {server_name}  --public-access none').get_output_in_json()
+        self.kwargs['flexible_sever_id'] = result['id'] 
+
+        #Create Endpoint
+        result = self.cmd('network private-endpoint create -g {resource_group} -n {endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} '
+                          '--connection-name {endpoint_conn_name} --private-connection-resource-id {flexible_sever_id} '
+                          '--group-id mysqlServer --manual-request').get_output_in_json()
+        self.assertTrue(self.kwargs['endpoint_name'].lower() in result['name'].lower())
+        
+        result = self.cmd('network private-endpoint-connection list -g {resource_group} -n {server_name} --type Microsoft.DBforMySQL/flexibleServers', checks=[
+            self.check('length(@)', 1),
+        ]).get_output_in_json()
+        self.kwargs['private_endpoint_connection_id'] = result[0]['id']
+        
+        self.cmd('network private-endpoint-connection approve --id {private_endpoint_connection_id} --description Approved',
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
+
+        #Remove Endpoint
+        self.cmd('network private-endpoint-connection delete --id {private_endpoint_connection_id} -y')
+        
+        
