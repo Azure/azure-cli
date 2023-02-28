@@ -6706,7 +6706,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
                         JMESPathCheck('type', 'Microsoft.Sql/managedInstances/distributedAvailabilityGroups'),
                         JMESPathCheck('targetDatabase', target_database),
                         JMESPathCheck('sourceEndpoint', source_endpoint),
-                        JMESPathCheck('linkState', 'Copying'),
+                        JMESPathCheck('linkState', 'WaitForHybridConnectionToEstablish'),
                         ]).get_output_in_json()
 
         link_id = link['id']
@@ -6722,7 +6722,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
                         JMESPathCheck('type', 'Microsoft.Sql/managedInstances/distributedAvailabilityGroups'),
                         JMESPathCheck('targetDatabase', target_database),
                         JMESPathCheck('sourceEndpoint', source_endpoint),
-                        JMESPathCheck('linkState', 'Copying'),
+                        JMESPathCheck('linkState', 'WaitForHybridConnectionToEstablish'),
                         ]).get_output_in_json()
 
         # delete instance link

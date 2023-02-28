@@ -3590,6 +3590,8 @@ def dw_update(
 
     if service_objective:
         instance.sku = Sku(name=service_objective)
+    
+    instance.availability_zone = None
 
     return instance
 
