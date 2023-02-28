@@ -51,6 +51,7 @@ class CheckIpAddress(AAZCommand):
             options=["-n", "--name"],
             help="The virtual network (VNet) name.",
             required=True,
+            id_part="name",
         )
         _args_schema.ip_address = AAZStrArg(
             options=["--ip-address"],
@@ -63,11 +64,11 @@ class CheckIpAddress(AAZCommand):
         self.VirtualNetworksCheckIPAddressAvailability(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -99,7 +100,7 @@ class CheckIpAddress(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -168,6 +169,10 @@ class CheckIpAddress(AAZCommand):
             available_ip_addresses.Element = AAZStrType()
 
             return cls._schema_on_200
+
+
+class _CheckIpAddressHelper:
+    """Helper class for CheckIpAddress"""
 
 
 __all__ = ["CheckIpAddress"]

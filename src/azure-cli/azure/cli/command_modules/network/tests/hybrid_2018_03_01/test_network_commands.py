@@ -1560,9 +1560,9 @@ class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
         self.cmd('network vpn-connection create -g {rg} -n {conn1} --vnet-gateway1 {gw1} --local-gateway2 {lgw1} --shared-key AzureA1b2C3')
 
         self.cmd('network vpn-connection ipsec-policy add -g {rg} --connection-name {conn1} --ike-encryption AES256 --ike-integrity SHA384 --dh-group DHGroup24 --ipsec-encryption GCMAES256 --ipsec-integrity GCMAES256 --pfs-group PFS24 --sa-lifetime 7200 --sa-max-size 2048')
-        self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}')
+        self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}', checks=self.check('length(@)', 1))
         self.cmd('network vpn-connection ipsec-policy clear -g {rg} --connection-name {conn1}')
-        self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}')
+        self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}', checks=self.check('length(@)', 0))
 
 
 class NetworkSubnetSetScenarioTest(ScenarioTest):
@@ -1896,6 +1896,151 @@ class NetworkWatcherScenarioTest(LiveScenarioTest):
         self._network_watcher_flow_log()
         self._network_watcher_packet_capture()
         self._network_watcher_troubleshooting()
+
+
+class NetworkVNetScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_vnet_test')
+    def test_network_vnet(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'rt': 'Microsoft.Network/virtualNetworks'
+        })
+
+        self.cmd('network vnet create --resource-group {rg} --name {vnet} --subnet-name default', checks=[
+            self.check('newVNet.provisioningState', 'Succeeded'),
+            self.check('newVNet.addressSpace.addressPrefixes[0]', '10.0.0.0/16')
+        ])
+        self.cmd('network vnet check-ip-address -g {rg} -n {vnet} --ip-address 10.0.0.50',
+                 checks=self.check('available', True))
+
+        self.cmd('network vnet check-ip-address -g {rg} -n {vnet} --ip-address 10.0.0.0',
+                 checks=self.check('available', False))
+
+        self.cmd('network vnet list', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?type == '{rt}']) == length(@)", True)
+        ])
+        self.cmd('network vnet list --resource-group {rg}', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?type == '{rt}']) == length(@)", True),
+        ])
+        self.cmd('network vnet show --resource-group {rg} --name {vnet}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{vnet}'),
+            self.check('type', '{rt}')
+        ])
+        self.kwargs['prefixes'] = '20.0.0.0/16 10.0.0.0/16'
+        self.cmd('network vnet update --resource-group {rg} --name {vnet} --address-prefixes {prefixes} --dns-servers 1.2.3.4', checks=[
+            self.check('length(addressSpace.addressPrefixes)', 2),
+            self.check('dhcpOptions.dnsServers[0]', '1.2.3.4')
+        ])
+        self.cmd('network vnet update -g {rg} -n {vnet} --dns-servers ""', checks=[
+            self.check('length(addressSpace.addressPrefixes)', 2),
+            self.check('dhcpOptions.dnsServers', [])
+        ])
+
+        # test generic update
+        self.cmd('network vnet update --resource-group {rg} --name {vnet} --set addressSpace.addressPrefixes[0]="20.0.0.0/24"',
+                 checks=self.check('addressSpace.addressPrefixes[0]', '20.0.0.0/24'))
+
+        self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix 20.0.0.0/24')
+        self.cmd('network vnet subnet list --resource-group {rg} --vnet-name {vnet}',
+                 checks=self.check('type(@)', 'array'))
+        self.cmd('network vnet subnet show --resource-group {rg} --vnet-name {vnet} --name {subnet}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{subnet}'),
+        ])
+
+        self.cmd('network vnet subnet delete --resource-group {rg} --vnet-name {vnet} --name {subnet}')
+        self.cmd('network vnet subnet list --resource-group {rg} --vnet-name {vnet}',
+                 checks=self.check("length([?name == '{subnet}'])", 0))
+
+        self.cmd('network vnet list --resource-group {rg}',
+                 checks=self.check("length([?name == '{vnet}'])", 1))
+        self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
+        self.cmd('network vnet list --resource-group {rg}', checks=self.is_empty())
+
+
+class NetworkVNetPeeringScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vnet_peering')
+    def test_network_vnet_peering(self, resource_group):
+
+        # create two vnets with non-overlapping prefixes
+        self.cmd('network vnet create -g {rg} -n vnet1')
+        self.cmd('network vnet create -g {rg} -n vnet2 --subnet-name GatewaySubnet --address-prefix 11.0.0.0/16 --subnet-prefix 11.0.0.0/24')
+        # create supporting resources for gateway
+        self.cmd('network public-ip create -g {rg} -n ip1')
+        ip_id = self.cmd('network public-ip show -g {rg} -n ip1 --query id').get_output_in_json()
+        vnet_id = self.cmd('network vnet show -g {rg} -n vnet2 --query id').get_output_in_json()
+
+        self.kwargs.update({
+            'ip_id': ip_id,
+            'vnet_id': vnet_id
+        })
+        # create the gateway on vnet2
+        self.cmd('network vnet-gateway create -g {rg} -n gateway1 --public-ip-address {ip_id} --vnet {vnet_id} --tags foo=doo')
+
+        vnet1_id = self.cmd('network vnet show -g {rg} -n vnet1 --query id').get_output_in_json()
+        vnet2_id = self.cmd('network vnet show -g {rg} -n vnet2 --query id').get_output_in_json()
+
+        self.kwargs.update({
+            'vnet1_id': vnet1_id,
+            'vnet2_id': vnet2_id
+        })
+        # set up gateway sharing from vnet1 to vnet2
+        self.cmd('network vnet peering create -g {rg} -n peering2 --vnet-name vnet2 --remote-vnet {vnet1_id} --allow-gateway-transit', checks=[
+            self.check('allowGatewayTransit', True),
+            self.check('remoteVirtualNetwork.id', '{vnet1_id}'),
+            self.check('peeringState', 'Initiated')
+        ])
+        self.cmd('network vnet peering create -g {rg} -n peering1 --vnet-name vnet1 --remote-vnet {vnet2_id} --use-remote-gateways --allow-forwarded-traffic', checks=[
+            self.check('useRemoteGateways', True),
+            self.check('remoteVirtualNetwork.id', '{vnet2_id}'),
+            self.check('peeringState', 'Connected'),
+            self.check('allowVirtualNetworkAccess', False)
+        ])
+        self.cmd('network vnet peering show -g {rg} -n peering1 --vnet-name vnet1',
+                 checks=self.check('name', 'peering1'))
+        self.cmd('network vnet peering list -g {rg} --vnet-name vnet2', checks=[
+            self.check('[0].name', 'peering2'),
+            self.check('length(@)', 1)
+        ])
+        self.cmd('network vnet peering update -g {rg} -n peering1 --vnet-name vnet1 --set useRemoteGateways=false', checks=[
+            self.check('useRemoteGateways', False),
+            self.check('allowForwardedTraffic', True)
+        ])
+        self.cmd('network vnet peering delete -g {rg} -n peering1 --vnet-name vnet1')
+        self.cmd('network vnet peering list -g {rg} --vnet-name vnet1',
+                 checks=self.is_empty())
+        # must delete the second peering and the gateway or the resource group delete will fail
+        self.cmd('network vnet peering delete -g {rg} -n peering2 --vnet-name vnet2')
+        self.cmd('network vnet-gateway delete -g {rg} -n gateway1')
+
+
+class NetworkSubnetEndpointServiceScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_subnet_endpoint_service_test')
+    def test_network_subnet_endpoint_service(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet': 'subnet1'
+        })
+        self.cmd('network vnet list-endpoint-services -l westus', checks=[
+            self.check('length(@)', 12),
+            self.check('@[0].name', 'Microsoft.Storage')
+        ])
+
+        result = self.cmd('network vnet list-endpoint-services -l westus').get_output_in_json()
+        self.assertGreaterEqual(len(result), 2)
+        self.cmd('network vnet create -g {rg} -n {vnet}')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.1.0/24 --service-endpoints Microsoft.Storage',
+                 checks=self.check('serviceEndpoints[0].service', 'Microsoft.Storage'))
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints ""',
+                 checks=self.check('serviceEndpoints', None))
 
 
 if __name__ == '__main__':

@@ -6034,16 +6034,22 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
         primary_location = ManagedInstancePreparer.location
         secondary_location = ManagedInstancePreparer.sec_location
 
+        secondary_type = "Standby"
+        self.kwargs.update({
+            'secondary_type': secondary_type
+        })
+
         # Create Failover Group
         self.cmd(
-            'sql instance-failover-group create -n {} -g {} --mi {} --partner-resource-group {} --partner-mi {} --failover-policy Automatic --grace-period 2'
+            'sql instance-failover-group create -n {} -g {} --mi {} --partner-resource-group {} --partner-mi {} --failover-policy Automatic --grace-period 2 --secondary-type {}'
                 .format(failover_group_name, resource_group_name, primary_name, secondary_group,
-                        secondary_name),
+                        secondary_name, secondary_type),
             checks=[
                 JMESPathCheck('name', failover_group_name),
                 JMESPathCheck('resourceGroup', resource_group_name),
                 JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
-                JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120)
+                JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120),
+                JMESPathCheck('secondaryType', secondary_type)
             ])
 
         # Get Instance Failover Group on a partner managed instance and check if role is secondary
@@ -6054,16 +6060,23 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
                      JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120),
                      JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
-                     JMESPathCheck('replicationRole', 'Secondary')
+                     JMESPathCheck('replicationRole', 'Secondary'),
+                     JMESPathCheck('secondaryType', secondary_type)
                  ])
 
+        secondary_type = "Geo"
+        self.kwargs.update({
+            'secondary_type': secondary_type
+        })
+
         # Update Failover Group
-        self.cmd('sql instance-failover-group update -g {} -n {} -l {} --grace-period 3 '
-                 .format(resource_group_name, failover_group_name, primary_location),
+        self.cmd('sql instance-failover-group update -g {} -n {} -l {} --grace-period 3 --secondary-type {}'
+                 .format(resource_group_name, failover_group_name, primary_location, secondary_type),
                  checks=[
                      JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
                      JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
-                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled')
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('secondaryType', secondary_type)
                  ])
 
         # Check if properties got propagated to secondary server
@@ -6074,7 +6087,8 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
                      JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
                      JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
-                     JMESPathCheck('replicationRole', 'Secondary')
+                     JMESPathCheck('replicationRole', 'Secondary'),
+                     JMESPathCheck('secondaryType', secondary_type)
                  ])
 
         # Update Failover Group failover policy to Manual
@@ -6760,3 +6774,72 @@ class SqlManagedInstanceDatabaseRecoverTest(ScenarioTest):
         self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db -r {recoverable_db}',
                 checks=[
                     JMESPathCheck('name', "recovered_db")])
+
+class SqlManagedInstanceZoneRedundancyScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    def test_sql_mi_zone_redundancy(self):
+
+        subscription_id = ManagedInstancePreparer.subscription_id
+        group = ManagedInstancePreparer.group
+        vnet_name = 'vnet-skrivokapic-multiaz-paasv2'
+        subnet_name = ManagedInstancePreparer.subnet_name
+        subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
+
+        self.kwargs.update({
+            'rg': group,
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix,
+                                                             managed_instance_name_max_length),
+            'loc': 'southafricanorth',
+            'username': 'admin123',
+            'admin_password': 'SecretPassword123SecretPassword',
+            'subnet': subnet,
+            'license_type': 'BasePrice',
+            'v_cores': 4,
+            'storage_size_in_gb': '128',
+            'edition': 'BusinessCritical',
+            'family': 'Gen5',
+            'collation': ManagedInstancePreparer.collation,
+            'proxy_override': "Proxy",
+            'zone_redundant': 'True'
+        })
+
+        # Create a zone - redundant managed instance
+        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                                    '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
+                                    '--storage {storage_size_in_gb} --edition {edition} --family {family} --collation {collation} '
+                                    '--proxy-override {proxy_override} --zone-redundant {zone_redundant}',
+                                    checks=[
+                                        self.check('name', '{managed_instance_name}'),
+                                        self.check('resourceGroup', '{rg}'),
+                                        self.check('administratorLogin', '{username}'),
+                                        self.check('vCores', '{v_cores}'),
+                                        self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                                        self.check('licenseType', '{license_type}'),
+                                        self.check('sku.tier', '{edition}'),
+                                        self.check('sku.family', '{family}'),
+                                        self.check('sku.capacity', '{v_cores}'),
+                                        self.check('identity', None),
+                                        self.check('collation', '{collation}'),
+                                        self.check('proxyOverride', '{proxy_override}'),
+                                        self.check('zoneRedundant', '{zone_redundant}')])
+
+        # Get the managed instance and check zone redundancy
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+        self.assertEqual(managed_instance['zoneRedundant'], True)
+
+        # Disable zone redundancy
+        self.kwargs.update({
+            'zone_redundant': 'False'
+        })
+
+        self.cmd('sql mi update -g {rg} -n {managed_instance_name} --zone-redundant {zone_redundant}',
+                 checks= [self.check('zoneRedundant', '{zone_redundant}')])
+
+        # Get the managed instance and check zone redundancy
+
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+        self.assertEqual(managed_instance['zoneRedundant'], False)
+
+        # Delete the managed instance
+        self.cmd('sql mi delete --ids {} --yes'
+                 .format(managed_instance['id']), checks=NoneCheck())

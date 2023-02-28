@@ -269,7 +269,7 @@ class SBSubscriptionCRUDScenarioTest(ScenarioTest):
                     self.check('deadLetteringOnFilterEvaluationExceptions', 'False')])
 
         # Delete Namespace
-        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename}')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename} ')
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_sb_subscription')
@@ -297,7 +297,7 @@ class SBSubscriptionCRUDScenarioTest(ScenarioTest):
         self.assertEqual(True, sub['clientAffineProperties']['isDurable'])
         self.assertEqual(True, sub['clientAffineProperties']['isShared'])
 
-        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename}')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename} ')
 
 
     def assertOnUpdate(self, actual, expected):

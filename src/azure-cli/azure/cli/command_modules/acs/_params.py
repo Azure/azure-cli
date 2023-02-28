@@ -455,6 +455,7 @@ def load_arguments(self, _):
         c.argument('scale_down_mode', arg_type=get_enum_type(scale_down_modes))
 
     with self.argument_context('aks nodepool upgrade') as c:
+        c.argument('max_surge', validator=validate_max_surge)
         c.argument('snapshot_id', validator=validate_snapshot_id)
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
