@@ -1432,12 +1432,19 @@ class RuleCreate(_RuleCreate):
     def pre_instance_create(self):
         args = self.ctx.args
         instance = self.ctx.vars.instance
-        if not has_value(args.address_pool):
+        if not has_value(args.address_pool) and not has_value(args.redirect_config):
             address_pools = instance.properties.backend_address_pools
             if len(address_pools) == 1:
                 args.address_pool = instance.properties.backend_address_pools[0].id
             elif len(address_pools) > 1:
                 err_msg = "Multiple backend address pools found. Specify --address-pool explicitly."
+                raise ArgumentUsageError(err_msg)
+        if not has_value(args.http_settings) and not has_value(args.redirect_config):
+            settings = instance.properties.backend_http_settings_collection
+            if len(settings) == 1:
+                args.http_settings = instance.properties.backend_http_settings_collection[0].id
+            elif len(settings) > 1:
+                err_msg = "Multiple backend settings found. Specify --http-settings explicitly."
                 raise ArgumentUsageError(err_msg)
         if not has_value(args.http_listener):
             listeners = instance.properties.http_listeners
@@ -1445,13 +1452,6 @@ class RuleCreate(_RuleCreate):
                 args.http_listener = instance.properties.http_listeners[0].id
             elif len(listeners) > 1:
                 err_msg = "Multiple HTTP listeners found. Specify --http-listener explicitly."
-                raise ArgumentUsageError(err_msg)
-        if not has_value(args.http_settings):
-            settings = instance.properties.backend_http_settings_collection
-            if len(settings) == 1:
-                args.http_settings = instance.properties.backend_http_settings_collection[0].id
-            elif len(settings) > 1:
-                err_msg = "Multiple backend settings found. Specify --http-settings explicitly."
                 raise ArgumentUsageError(err_msg)
 
     def _output(self, *args, **kwargs):
