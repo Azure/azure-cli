@@ -927,7 +927,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                        'Learn more at https://go.microsoft.com/fwlink/?linkid=222571 ',
                        identified_region)
         from azure.cli.core import telemetry
-        telemetry.set_region_identified(identified_region)
+        telemetry.set_region_identified(location, identified_region)
 
     # # In the latest profile, the default public IP will be expected to be changed from Basic to Standard.
     # # In order to avoid breaking change which has a big impact to users,
