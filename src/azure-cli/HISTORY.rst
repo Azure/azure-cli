@@ -208,11 +208,11 @@ Release History
 
 **NetAppFiles**
 
-* `az volumes qouta-rule create`: Add volume quota rule create command (#24956)
-* `az volumes qouta-rule show`: Add volume quota rule show command (#24956)
-* `az volumes qouta-rule list`: Add volume quota rule list command (#24956)
-* `az volumes qouta-rule update`: Add volume quota rule update command (#24956)
-* `az volumes qouta-rule delete`: Add volume quota rule delete command (#24956)
+* `az volumes quota-rule create`: Add volume quota rule create command (#24956)
+* `az volumes quota-rule show`: Add volume quota rule show command (#24956)
+* `az volumes quota-rule list`: Add volume quota rule list command (#24956)
+* `az volumes quota-rule update`: Add volume quota rule update command (#24956)
+* `az volumes quota-rule delete`: Add volume quota rule delete command (#24956)
 
 **Network**
 
