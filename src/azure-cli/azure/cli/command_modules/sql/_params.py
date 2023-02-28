@@ -2006,6 +2006,9 @@ def load_arguments(self, _):
         c.argument('requested_backup_storage_redundancy',
                    arg_type=backup_storage_redundancy_param_type_mi)
 
+        c.argument('zone_redundant',
+                   arg_type=zone_redundant_param_type)
+
     with self.argument_context('sql mi create') as c:
         c.argument('location',
                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
@@ -2029,7 +2032,8 @@ def load_arguments(self, _):
                 'yes',
                 'maintenance_configuration_id',
                 'primary_user_assigned_identity_id',
-                'key_id'
+                'key_id',
+                'zone_redundant'
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
@@ -2131,6 +2135,9 @@ def load_arguments(self, _):
         c.argument('maintenance_configuration_id',
                    options_list=['--maint-config-id', '-m'],
                    help='Change maintenance configuration for this managed instance.')
+
+        c.argument('zone_redundant',
+                   arg_type=zone_redundant_param_type)
 
         # Create args that will be used to build up the Managed Instance's Sku object
         create_args_for_complex_type(
