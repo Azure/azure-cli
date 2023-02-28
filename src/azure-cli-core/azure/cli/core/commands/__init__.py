@@ -673,7 +673,9 @@ class AzCliCommandInvoker(CommandInvoker):
 
         event_data = {'result': results}
         self.cli_ctx.raise_event(EVENT_INVOKER_FILTER_RESULT, event_data=event_data)
-
+        if results and len(results) > 0 and 'nextMarker' in results[-1] and \
+                'nextMarker' not in event_data['result'][-1]:
+            event_data['result'].append(results[-1])
         # save to local context if it is turned on after command executed successfully
         if self.cli_ctx.local_context.is_on and command and command in self.commands_loader.command_table and \
                 command in self.parser.subparser_map and self.parser.subparser_map[command].specified_arguments:
