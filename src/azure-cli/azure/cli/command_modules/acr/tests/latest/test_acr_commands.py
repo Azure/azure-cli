@@ -190,6 +190,73 @@ class AcrCommandsTests(ScenarioTest):
         # test acr delete
         self.cmd('acr delete -n {registry_name} -g {rg} -y')
 
+    @ResourceGroupPreparer()
+    def test_acr_cache(self, resource_group, resource_group_location):
+        registry_name = self.create_random_name('clireg', 20)
+
+        self.kwargs.update({
+            'registry_name': registry_name,
+            'rg_loc': resource_group_location,
+            'sku': 'Standard',
+            'cr_name': 'test1',
+            'cs_name': 'test1',
+            'source_repo': 'docker.io/library/ubuntu',
+            'target_repo': 'ubuntu',
+            'user_id': 'https://cliimportkv73021.vault.azure.net/secrets/SPusername',
+            'pass_id': 'https://cliimportkv73021.vault.azure.net/secrets/SPpassword',
+            'new_pass_id': 'https://cliimportkv73021.vault.azure.net/secrets/SPusername',
+            'upstream': 'docker.io'
+
+        })
+
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('adminUserEnabled', False),
+                         self.check('sku.name', 'Standard'),
+                         self.check('sku.tier', 'Standard'),
+                         self.check('provisioningState', 'Succeeded')])
+
+
+        self.cmd('acr credential-set create -n {cs_name} -r {registry_name} -l {upstream} -u {user_id} -p {pass_id}',
+                 checks=[self.check('name', '{cs_name}'),
+                         self.check('provisioningState', 'Succeeded')])
+
+        self.cmd('acr credential-set list -r {registry_name}',
+                 checks=[self.check('[0].name', '{cs_name}'),
+                         self.check('[0].provisioningState', 'Succeeded')])
+
+        self.cmd('acr credential-set show -n {cs_name} -r {registry_name}',
+                 checks=[self.check('name', '{cs_name}'),
+                         self.check('provisioningState', 'Succeeded')])
+
+        self.cmd('acr credential-set update -n {cs_name} -r {registry_name} -p {new_pass_id}',
+                 checks=[self.check('name', '{cs_name}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('authCredentials[0].passwordSecretIdentifier', '{new_pass_id}')])
+
+        self.cmd('acr cache create -n {cr_name} -r {registry_name} -s {source_repo} -t {target_repo} -c {cs_name}',
+                 checks=[self.check('name', '{cr_name}'),
+                         self.check('provisioningState', 'Succeeded')])
+
+        self.cmd('acr cache list -r {registry_name}',
+                 checks=[self.check('[0].name', '{cr_name}'),
+                         self.check('[0].provisioningState', 'Succeeded')])
+
+        self.cmd('acr cache show -n {cr_name} -r {registry_name}',
+                 checks=[self.check('name', '{cr_name}'),
+                         self.check('provisioningState', 'Succeeded')])
+
+        self.cmd('acr cache update -n {cr_name} -r {registry_name} --remove-cred-set',
+                 checks=[self.check('name', '{cr_name}'),
+                         self.check('provisioningState', 'Succeeded')])
+
+        self.cmd('acr cache delete -n {cr_name} -r {registry_name} -y')
+
+        self.cmd('acr credential-set delete -n {cs_name} -r {registry_name} -y')
+
+        self.cmd('acr delete -n {registry_name} -g {rg} -y')
+
     @AllowLargeResponse()
     @ResourceGroupPreparer()
     def test_acr_create_replication(self, resource_group, resource_group_location):
@@ -607,8 +674,8 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr create --name {registry_2_name} --resource-group {rg} --sku premium --public-network-enabled false --allow-trusted-services false',
                  checks=[self.check('publicNetworkAccess', 'Disabled'),
                          self.check('networkRuleBypassOptions', 'None')])
-        
-        
+
+
     @ResourceGroupPreparer()
     def test_acr_with_public_network_access_disabled(self, resource_group, resource_group_location):
         self.kwargs.update({
