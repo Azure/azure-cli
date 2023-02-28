@@ -724,7 +724,7 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
             self.check('type(@)', 'object'),
             self.check('name', '{route}'),
         ])
-        self.cmd('network route-table route delete --resource-group {rg} --route-table-name {table} --name {route}')
+        self.cmd('network route-table route delete --resource-group {rg} --route-table-name {table} --name {route} -y')
         self.cmd('network route-table route list --resource-group {rg} --route-table-name {table}', checks=self.is_empty())
-        self.cmd('network route-table delete --resource-group {rg} --name {table}')
+        self.cmd('network route-table delete --resource-group {rg} --name {table} -y')
         self.cmd('network route-table list --resource-group {rg}', checks=self.is_empty())
