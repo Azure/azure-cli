@@ -15,7 +15,7 @@ from azure.cli.core.profiles import ResourceType
 
 # Namespace Region
 def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
-                         capacity=None, zone_redundant=None, mi_system_assigned=None, disable_local_auth=None,
+                         capacity=None, zone_redundant=None, mi_system_assigned=None,
                          mi_user_assigned=None, encryption_config=None, minimum_tls_version=None):
 
     SBSku = cmd.get_models('SBSku', resource_type=ResourceType.MGMT_SERVICEBUS)
@@ -30,9 +30,6 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
     parameter.tags = tags
     parameter.sku = SBSku(name=sku, tier=sku, capacity=capacity)
 
-    if disable_local_auth is not None:
-        parameter.disable_local_auth = disable_local_auth
-        
     if zone_redundant is not None:
         parameter.zone_redundant = zone_redundant
 
