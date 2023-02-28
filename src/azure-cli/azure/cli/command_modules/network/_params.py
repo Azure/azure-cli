@@ -255,11 +255,11 @@ def load_arguments(self, _):
 
     # region WebApplicationFirewallPolicy
     (WebApplicationFirewallAction,
-     WebApplicationFirewallOperator, WebApplicationFirewallRuleType,
+     WebApplicationFirewallRuleType,
      OwaspCrsExclusionEntryMatchVariable, OwaspCrsExclusionEntrySelectorMatchOperator,
      WebApplicationFirewallEnabledState, WebApplicationFirewallMode) = self.get_models(
          'WebApplicationFirewallAction',
-         'WebApplicationFirewallOperator', 'WebApplicationFirewallRuleType',
+         'WebApplicationFirewallRuleType',
          'OwaspCrsExclusionEntryMatchVariable', 'OwaspCrsExclusionEntrySelectorMatchOperator',
          'WebApplicationFirewallEnabledState', 'WebApplicationFirewallMode')
     with self.argument_context('network application-gateway waf-policy', min_api='2018-12-01') as c:
