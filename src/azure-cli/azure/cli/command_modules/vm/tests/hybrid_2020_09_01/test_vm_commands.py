@@ -1489,7 +1489,7 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
         self.cmd('network lb list -g {rg}', checks=self.check('[0].sku.name', 'Basic'))
         self.cmd('network public-ip list -g {rg}', checks=[
             self.check('[0].sku.name', 'Basic'),
-            self.check('[0].publicIpAllocationMethod', 'Dynamic')
+            self.check('[0].publicIPAllocationMethod', 'Dynamic')
         ])
 
         # but you can overrides the defaults
