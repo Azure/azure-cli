@@ -17,7 +17,7 @@ from azure.cli.command_modules.network.azure_stack._client_factory import (
     cf_express_route_service_providers,
     cf_network_interfaces, cf_network_security_groups, cf_network_watcher, cf_packet_capture,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
-    cf_security_rules, cf_usages,
+    cf_security_rules,
     cf_public_ip_addresses, cf_connection_monitor,
     cf_public_ip_prefixes, cf_dns_references, cf_private_endpoints,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
@@ -36,7 +36,7 @@ from azure.cli.command_modules.network.azure_stack._format import (
     transform_nsg_create_output,
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
-    transform_network_usage_list, transform_network_usage_table, transform_nsg_rule_table_output,
+    transform_nsg_rule_table_output,
     transform_effective_route_table, transform_effective_nsg)
 from azure.cli.command_modules.network.azure_stack._validators import (
     get_network_watcher_from_location,
@@ -280,12 +280,6 @@ def load_command_table(self, _):
         client_factory=cf_network_interfaces
     )
 
-    # endregion
-
-    # region NetworkRoot
-    usage_path = 'azure.mgmt.network.operations#UsagesOperations.{}'
-    with self.command_group('network') as g:
-        g.command('list-usages', 'list', operations_tmpl=usage_path, client_factory=cf_usages, transform=transform_network_usage_list, table_transformer=transform_network_usage_table)
     # endregion
 
     # region ApplicationGateways

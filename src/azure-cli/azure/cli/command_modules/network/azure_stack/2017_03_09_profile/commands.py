@@ -68,3 +68,11 @@ def load_command_table(self, _):
     self.command_table['network vnet subnet update'] = VNetSubnetUpdate(loader=self)
 
     # endregion
+
+    # region NetworkRoot
+    with self.command_group('network'):
+        from .operations.locations import UsagesList
+        from .._format import transform_network_usage_table
+        self.command_table['network list-usages'] = UsagesList(loader=self,
+                                                               table_transformer=transform_network_usage_table)
+    # endregion
