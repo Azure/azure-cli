@@ -16,16 +16,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.ignore('search_management_request_options')
         c.argument('sku', help='Search Service SKU', arg_type=get_enum_type(["Free", "Basic", "Standard", "Standard2", "Standard3"]))
         c.argument('public_network_access', options_list=['--public-network-access', '--public-access'])
-        c.argument('disable_local_auth', min_api='2021-04-30-Preview', arg_type=get_three_state_flag())
-        c.argument('auth_options', min_api='2021-04-30-Preview')
-        c.argument('aad_auth_failure_mode', min_api='2021-04-30-Preview')
+        c.argument('disable_local_auth', arg_type=get_three_state_flag())
+        c.argument('auth_options')
+        c.argument('aad_auth_failure_mode')
 
     with self.argument_context('search service update') as c:
         c.ignore('search_management_request_options')
         c.argument('public_network_access', options_list=['--public-network-access', '--public-access'])
-        c.argument('disable_local_auth', min_api='2021-04-30-Preview', arg_type=get_three_state_flag())
-        c.argument('auth_options', min_api='2021-04-30-Preview')
-        c.argument('aad_auth_failure_mode', min_api='2021-04-30-Preview')
+        c.argument('disable_local_auth', arg_type=get_three_state_flag())
+        c.argument('auth_options')
+        c.argument('aad_auth_failure_mode')
 
     with self.argument_context('search private-endpoint-connection') as c:
         c.ignore('search_management_request_options')

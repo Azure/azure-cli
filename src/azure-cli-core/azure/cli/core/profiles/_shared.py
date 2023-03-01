@@ -78,8 +78,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_CUSTOMLOCATION = ('azure.mgmt.extendedlocation', 'CustomLocations')
     MGMT_CONTAINERSERVICE = ('azure.mgmt.containerservice', 'ContainerServiceClient')
     MGMT_APPCONFIGURATION = ('azure.mgmt.appconfiguration', 'AppConfigurationManagementClient')
-    MGMT_SEARCH = ('azure.mgmt.search', 'SearchManagementClient')
-
 
     # the "None" below will stay till a command module fills in the type so "get_mgmt_service_client"
     # can be provided with "ResourceType.XXX" to initialize the client object. This usually happens
@@ -256,7 +254,6 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_APPCONFIGURATION: SDKProfile('2022-05-01', {
             'replicas': '2022-03-01-preview'
         }),
-        ResourceType.MGMT_SEARCH: '2022-09-01'
     },
     '2020-09-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2019-06-01',

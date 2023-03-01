@@ -44,9 +44,7 @@ def create_search_service(cmd, resource_group_name, search_service_name, sku, lo
     :param aad_auth_failure_mode: Describes response code from calls to the search service that failed authentication; possible values include "http401WithBearerChallenge", "http403";
                      This cannot be combined with disable_local_auth.
     """
-    SearchService, Sku, NetworkRuleSet, IpRule, Identity = cmd.get_models('SearchService', 'Sku', 'NetworkRuleSet', 'IpRule', 'Identity')
-    if SearchService is None:
-        raise UnrecognizedArgumentError("null search service model!")
+    from azure.mgmt.search.models import SearchService, Sku, NetworkRuleSet, IpRule, Identity
     from azure.cli.command_modules.search._client_factory import cf_search_services
     import re
 
@@ -112,7 +110,7 @@ def update_search_service(cmd, instance, partition_count=0, replica_count=0, pub
     :param aad_auth_failure_mode: Describes response code from calls to the search service that failed authentication; possible values include "http401WithBearerChallenge", "http403";
                      This cannot be combined with disable_local_auth.
     """
-    NetworkRuleSet, IpRule, Identity = cmd.get_models('NetworkRuleSet', 'IpRule', 'Identity')
+    from azure.mgmt.search.models import NetworkRuleSet, IpRule, Identity
     import re
 
     replica_count = int(replica_count)
@@ -160,8 +158,7 @@ def update_private_endpoint_connection(cmd, resource_group_name, search_service_
         the private endpoint connection resource.
     """
 
-    PrivateEndpointConnection, PrivateEndpointConnectionProperties, PrivateEndpointConnectionPropertiesPrivateLinkServiceConnectionState = cmd.get_models(
-        'PrivateEndpointConnection', 'PrivateEndpointConnectionProperties', 'PrivateEndpointConnectionPropertiesPrivateLinkServiceConnectionState')
+    from azure.mgmt.search.models import PrivateEndpointConnection, PrivateEndpointConnectionProperties, PrivateEndpointConnectionPropertiesPrivateLinkServiceConnectionState
     from azure.cli.command_modules.search._client_factory import cf_search_private_endpoint_connections
 
     _client = cf_search_private_endpoint_connections(cmd.cli_ctx, None)
@@ -198,7 +195,7 @@ def create_shared_private_link_resource(cmd, resource_group_name, search_service
     :param shared_private_link_resource_request_message: Custom request message when creating or updating the shared
         privatelink resources.
     """
-    SharedPrivateLinkResource, SharedPrivateLinkResourceProperties = cmd.get_models('SharedPrivateLinkResource', 'SharedPrivateLinkResourceProperties')
+    from azure.mgmt.search.models import SharedPrivateLinkResource, SharedPrivateLinkResourceProperties
     from azure.cli.command_modules.search._client_factory import cf_search_shared_private_link_resources
 
     _client = cf_search_shared_private_link_resources(cmd.cli_ctx, None)
@@ -232,8 +229,7 @@ def update_shared_private_link_resource(cmd, resource_group_name, search_service
     :param shared_private_link_resource_request_message: Custom request message when creating or updating the shared
         privatelink resources.
     """
-    SharedPrivateLinkResource, SharedPrivateLinkResourceProperties = cmd.get_models(
-        'SharedPrivateLinkResource', 'SharedPrivateLinkResourceProperties')
+    from azure.mgmt.search.models import SharedPrivateLinkResource, SharedPrivateLinkResourceProperties
     from azure.cli.command_modules.search._client_factory import cf_search_shared_private_link_resources
 
     _client = cf_search_shared_private_link_resources(cmd.cli_ctx, None)
