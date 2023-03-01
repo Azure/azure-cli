@@ -861,3 +861,178 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
         self.cmd('network route-table route list --resource-group {rg} --route-table-name {table}', checks=self.is_empty())
         self.cmd('network route-table delete --resource-group {rg} --name {table} -y')
         self.cmd('network route-table list --resource-group {rg}', checks=self.is_empty())
+
+
+class NetworkPublicIpWithSku(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_lb_sku')
+    def test_network_public_ip_sku(self, resource_group):
+
+        self.kwargs.update({
+            'standard_sku': 'Standard',
+            'basic_sku': 'Basic',
+            'location': 'eastus2',
+            'ip1': 'pubip1',
+            'ip2': 'pubip2',
+            'ip3': 'pubip3',
+            'ip4': 'pubip4'
+        })
+
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip1}')
+        self.cmd('network public-ip show -g {rg} -n {ip1}', checks=[
+            self.check('sku.name', self.kwargs.get('basic_sku')),
+            self.check('publicIPAllocationMethod', 'Dynamic')
+        ])
+
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip2} --sku {standard_sku} --tags foo=doo')
+        self.cmd('network public-ip show -g {rg} -n {ip2}', checks=[
+            self.check('sku.name', self.kwargs.get('standard_sku')),
+            self.check('publicIPAllocationMethod', 'Static'),
+            self.check('tags.foo', 'doo')
+        ])
+
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip3} --sku {standard_sku} --tier {global_tier}')
+        self.cmd('network public-ip show -g {rg} -n {ip3}', checks=[
+            self.check('sku.name', self.kwargs.get('standard_sku')),
+            self.check('publicIPAllocationMethod', 'Static')
+        ])
+
+        from azure.core.exceptions import HttpResponseError
+        with self.assertRaisesRegex(HttpResponseError, 'Global publicIP addresses are only supported for standard SKU public IP addresses'):
+            self.cmd('network public-ip create -g {rg} -l {location} -n {ip4} --tier {global_tier}')
+
+
+class NetworkZonedPublicIpScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_zoned_public_ip')
+    def test_network_zoned_public_ip(self, resource_group):
+        self.kwargs['ip'] = 'pubip'
+        self.cmd('network public-ip create -g {rg} -n {ip} -l centralus -z 2 --sku standard',
+                 checks=self.check('publicIp.zones[0]', '2'))
+
+        self.cmd(
+            'network public-ip show -g {rg} -n {ip}',
+            checks=[
+                self.check('name', '{ip}'),
+                self.check('publicIPAddressVersion', 'IPv4')
+            ]
+        )
+
+
+class NetworkPublicIpScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_public_ip')
+    def test_network_public_ip(self, resource_group):
+        self.kwargs.update({
+            'ip1': 'pubipdns',
+            'ip2': 'pubipnodns',
+            'ip3': 'pubip3',
+            'dns': 'woot1',
+            'zone': '1',
+            'location': 'eastus2',
+            'ip_tags': 'RoutingPreference=Internet',
+            'version': 'ipv4',
+            'sku': 'standard'
+        })
+        self.cmd('network public-ip create -g {rg} -n {ip1} --dns-name {dns} --allocation-method static', checks=[
+            self.check('publicIp.provisioningState', 'Succeeded'),
+            self.check('publicIp.publicIPAllocationMethod', 'Static'),
+            self.check('publicIp.dnsSettings.domainNameLabel', '{dns}')
+        ])
+        self.cmd('network public-ip create -g {rg} -n {ip2}', checks=[
+            self.check('publicIp.provisioningState', 'Succeeded'),
+            self.check('publicIp.publicIPAllocationMethod', 'Dynamic'),
+            self.check('publicIp.dnsSettings', None)
+        ])
+
+        self.cmd(
+            'network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza2 --idle-timeout 10 --tags foo=doo',
+            checks=[
+                self.check('publicIPAllocationMethod', 'Static'),
+                self.check('dnsSettings.domainNameLabel', 'wowza2'),
+                self.check('idleTimeoutInMinutes', 10),
+                self.check('tags.foo', 'doo')
+            ])
+
+        self.cmd('network public-ip list -g {rg}', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
+        ])
+
+        self.cmd('network public-ip show -g {rg} -n {ip1}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{ip1}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        self.cmd('network public-ip delete -g {rg} -n {ip1}')
+        self.cmd('network public-ip list -g {rg}',
+                 checks=self.check("length[?name == '{ip1}']", None))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_public_ip_zone', location='eastus2')
+    def test_network_public_ip_zone(self, resource_group):
+        self.cmd('network public-ip create -g {rg} -n ip --sku Standard -z 1', checks=[
+            self.check('length(publicIp.zones)', 1)
+        ])
+
+
+class NetworkPublicIpPrefix(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix', location='eastus2')
+    def test_network_public_ip_prefix(self, resource_group):
+
+        self.kwargs.update({
+            'prefix': 'prefix1',
+            'pip': 'pip1',
+            'prefix_v6': self.create_random_name('public-ip-prefix-', 24),
+            'pip_v6': self.create_random_name('public-ip-', 16)
+        })
+
+        # Test prefix CRUD
+        self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30',
+                 checks=self.check('prefixLength', 30))
+        self.cmd('network public-ip prefix update -g {rg} -n {prefix} --tags foo=doo')
+
+        # test prefix show command
+        self.cmd('network public-ip prefix show -g {rg} -n {prefix}',
+                 checks=self.check('tags.foo', 'doo'))
+
+        self.cmd('network public-ip prefix list -g {rg}',
+                 checks=self.check('length(@)', 1))
+        self.cmd('network public-ip prefix delete -g {rg} -n {prefix}')
+        self.cmd('network public-ip prefix list -g {rg}',
+                 checks=self.is_empty())
+
+        # Test public IP create with prefix
+        self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30')
+        self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix} --sku Standard',
+                 checks=self.check("publicIp.publicIPPrefix.id.contains(@, '{prefix}')", True))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix_zone', location='eastus2')
+    def test_network_public_ip_prefix_zone(self, resource_group):
+        self.kwargs.update({
+            'prefix': 'prefix1',
+        })
+
+        # Test prefix with multi zones
+        self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30 --zone 1', checks=[
+            self.check('prefixLength', 30),
+            self.check('length(zones)', 1)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix_with_ip_address', location='eastus2')
+    def test_network_public_ip_prefix_with_ip_address(self, resource_group):
+        self.kwargs.update({
+            'prefix_name_ipv4': 'public_ip_prefix_0',
+            'pip': 'pip1'
+        })
+
+        ip_prefix = self.cmd('network public-ip prefix create -g {rg} -n {prefix_name_ipv4} --length 28', checks=[
+            self.check('publicIPAddressVersion', 'IPv4')
+        ]).get_output_in_json()
+
+        ip_address = ip_prefix['ipPrefix'][:-3]
+
+        # Create public ip with ip address
+        self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix_name_ipv4} --sku Standard --ip-address ' + ip_address,
+                 checks=self.check("publicIp.publicIPPrefix.id.contains(@, '{prefix_name_ipv4}')", True))
