@@ -76,3 +76,25 @@ def load_command_table(self, _):
         self.command_table['network list-usages'] = UsagesList(loader=self,
                                                                table_transformer=transform_network_usage_table)
     # endregion
+
+    # region PublicIPAddresses
+    public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$Address:ipAddress, AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
+    public_ip_show_table_transform = public_ip_show_table_transform.replace('$zone$',
+                                                                            'Zones: (!zones && \' \') || join(` `, zones), ' if self.supported_api_version(
+                                                                                min_api='2017-06-01') else ' ')
+
+    public_ip = import_aaz_by_profile("network.public_ip")
+    operations_tmpl = self.get_module_name_by_profile("operations.public_ip#{}")
+    from .._format import transform_public_ip_create_output
+    from .._validators import get_default_location_from_resource_group
+
+    with self.command_group('network public-ip', operations_tmpl=operations_tmpl) as g:
+        g.custom_command("create", "create_public_ip", transform=transform_public_ip_create_output,
+                         validator=get_default_location_from_resource_group)
+
+    self.command_table['network public-ip list'] = public_ip.List(loader=self,
+                                                                  table_transformer='[].' + public_ip_show_table_transform)
+    self.command_table['network public-ip show'] = public_ip.Show(loader=self,
+                                                                  table_transformer=public_ip_show_table_transform)
+
+    # endregion
