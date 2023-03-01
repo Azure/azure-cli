@@ -78,7 +78,6 @@ class Update(AAZCommand):
             options=["--make-primary"],
             arg_group="IP Configuration",
             help="Set to make this configuration the primary one for the NIC.",
-            default=False,
             nullable=True,
         )
         _args_schema.private_ip_address = AAZStrArg(
