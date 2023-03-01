@@ -16,6 +16,10 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a connection monitor.
+
+    :example: Create a connection monitor
+        az network watcher connection-monitor create --name MyV2ConnectionMonitor --endpoint-source- name "vm01" --endpoint-source-resource-id MyVM01ResourceID --endpoint-dest-name bing --endpoint-dest-address bing.com --test-config-name TCPTestConfig --protocol Tcp --tcp-port 2048
+        az network watcher connection-monitor create --endpoint-dest-address bing.com --endpoint- dest-name bing --endpoint-source-name "vm01" --endpoint-source-resource-id MyVM01ResourceID --location westus2 --name MyConnectionMonitorName --protocol Tcp --tcp-port 2048 --test- config-name TCPTestConfig
     """
 
     _aaz_info = {
@@ -54,10 +58,6 @@ class Create(AAZCommand):
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
-        )
-        _args_schema.migrate = AAZStrArg(
-            options=["--migrate"],
-            help="Value indicating whether connection monitor V1 should be migrated to V2 format.",
         )
         _args_schema.location = AAZStrArg(
             options=["-l", "--location"],
@@ -536,9 +536,6 @@ class Create(AAZCommand):
         @property
         def query_parameters(self):
             parameters = {
-                **self.serialize_query_param(
-                    "migrate", self.ctx.args.migrate,
-                ),
                 **self.serialize_query_param(
                     "api-version", "2022-01-01",
                     required=True,

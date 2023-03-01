@@ -12,7 +12,6 @@ import os
 
 from knack.util import CLIError
 from knack.log import get_logger
-from azure.cli.core.azclierror import ValidationError
 
 from azure.cli.core.commands.validators import \
     (validate_tags, get_default_location_from_resource_group)
