@@ -15,6 +15,8 @@ from azure.cli.core.aaz import has_value, AAZResourceLocationArg, AAZResourceLoc
     AAZArgEnum, AAZBoolArg, AAZFloatArg, AAZIntArg
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.commands.validators import validate_tags
+from .._validators import _resolve_api_version
 
 from ..aaz.latest.network.watcher import RunConfigurationDiagnostic as _RunConfigurationDiagnostic
 from ..aaz.latest.network.watcher import ShowNextHop as _ShowNextHop, ShowSecurityGroupView as _ShowSecurityGroupView, \
@@ -29,6 +31,7 @@ from ..aaz.latest.network.watcher.packet_capture import Create as _PacketCapture
 from ..aaz.latest.network.watcher.packet_capture import Delete as _PacketCaptureDelete, List as _PacketCaptureList, \
     Show as _PacketCaptureShow, ShowStatus as _PacketCaptureShowStatus, Stop as _PacketCaptureStop
 
+from ..aaz.latest.network.watcher.connection_monitor import Create as _WatcherConnectionMonitorCreate
 from ..aaz.latest.network.watcher.connection_monitor import Start as _WatcherConnectionMonitorStart
 from ..aaz.latest.network.watcher.connection_monitor import Stop as _WatcherConnectionMonitorStop
 from ..aaz.latest.network.watcher.connection_monitor import Show as _WatcherConnectionMonitorShow
@@ -568,6 +571,337 @@ class PacketCaptureStop(_PacketCaptureStop):
         get_network_watcher_from_location(self)
 
 
+def process_nw_cm_v2_create_namespace(cmd):
+    args = cmd.ctx.args
+    validate_tags(args)
+    if not has_value(args.location):  # location is None only occurs in creating a V2 connection monitor
+        endpoint_source_resource_id = args.endpoint_source_resource_id
+        from msrestazure.tools import is_valid_resource_id, parse_resource_id
+        from azure.mgmt.resource import ResourceManagementClient
+        # parse and verify endpoint_source_resource_id
+        if not has_value(endpoint_source_resource_id):
+            raise ValidationError('usage error: --location/--endpoint-source-resource-id '
+                                  'is required to create a V2 connection monitor')
+        if is_valid_resource_id(endpoint_source_resource_id) is False:
+            raise ValidationError('usage error: "{}" is not a valid resource id'.format(endpoint_source_resource_id))
+
+        resource = parse_resource_id(args.endpoint_source_resource_id)
+        resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceManagementClient)
+        resource_api_version = _resolve_api_version(resource_client,
+                                                    resource['namespace'],
+                                                    resource['resource_parent'],
+                                                    resource['resource_type'])
+        resource = resource_client.resources.get_by_id(args.endpoint_source_resource_id, resource_api_version)
+
+        args.location = resource.location
+        if not has_value(args.location):
+            raise ValidationError("Can not get location from --endpoint-source-resource-id")
+
+    v2_required_parameter_set = [
+        'endpoint_source_resource_id', 'endpoint_source_name', 'endpoint_dest_name', 'test_config_name'
+    ]
+    for p in v2_required_parameter_set:
+        if not hasattr(args, p) or getattr(args, p) is None:
+            raise ValidationError(
+                'usage error: --{} is required to create a V2 connection monitor'.format(p.replace('_', '-')))
+    if not has_value(args.test_config_protocol):
+        raise ValidationError('usage error: --protocol is required to create a test '
+                              'configuration for V2 connection monitor')
+
+    if has_value(args.output_type) and not has_value(args.workspace_ids):
+        raise ValidationError('usage error: --output-type is specified but no other resource id provided')
+
+
+class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.network_watcher_name._registered = False
+        args_schema.network_watcher_name._required = False
+        args_schema.resource_group._registered = False
+        args_schema.resource_group._required = False
+
+        args_schema.auto_start._registered = False
+        args_schema.monitoring_interval_in_seconds._registered = False
+        args_schema.sources._registered = False
+        args_schema.destination._registered = False
+        args_schema.endpoints._registered = False
+        args_schema.test_configuration._registered = False
+        args_schema.test_groups._registered = False
+        args_schema.outputs._registered = False
+
+        # V2 Endpoint
+        args_schema.endpoint_dest_address = AAZStrArg(
+            options=["--endpoint-dest-address"],
+            help="Address of the destination of connection monitor endpoint (IP or domain name)",
+            arg_group="V2 Endpoint",
+        )
+        args_schema.endpoint_dest_coverage_level = AAZStrArg(
+            options=["--endpoint-dest-coverage-level"],
+            help="Test coverage for the endpoint. Allowed values: AboveAverage, Average, "
+                 "BelowAverage, Default, Full, Low",
+            enum={"AboveAverage": "AboveAverage", "Average": "Average", "BelowAverage": "BelowAverage",
+                  "Default": "Default", "Full": "Full", "Low": "Low"},
+        )
+        args_schema.endpoint_dest_name = AAZStrArg(
+            options=["--endpoint-dest-name"],
+            help="The name of the destination of connection monitor endpoint. "
+                 "If you are creating a V2 Connection Monitor, it's required.",
+            arg_group="V2 Endpoint"
+        )
+        args_schema.endpoint_dest_resource_id = AAZStrArg(
+            options=["--endpoint-dest-resource-id"],
+            help="Resource ID of the destination of connection monitor endpoint.",
+            arg_group="V2 Endpoint",
+        )
+        args_schema.endpoint_dest_type = AAZStrArg(
+            options=["--endpoint-dest-type"],
+            help="The endpoint type.  Allowed values: AzureArcVM, AzureSubnet, AzureVM, AzureVMSS, AzureVNet, "
+                 "ExternalAddress, MMAWorkspaceMachine, MMAWorkspaceNetwork.",
+            enum={"AzureArcVM": "AzureArcVM", "AzureSubnet": "AzureSubnet", "AzureVM": "AzureVM",
+                  "AzureVMSS": "AzureVMSS", "AzureVNet": "AzureVNet", "ExternalAddress": "ExternalAddress",
+                  "MMAWorkspaceMachine": "MMAWorkspaceMachine", "MMAWorkspaceNetwork": "MMAWorkspaceNetwork"},
+        )
+        args_schema.endpoint_source_address = AAZStrArg(
+            options=["--endpoint-source-address"],
+            help="Address of the source of connection monitor endpoint (IP or domain name).",
+            arg_group="V2 Endpoint",
+        )
+        args_schema.endpoint_source_coverage_level = AAZStrArg(
+            options=["--endpoint-source-coverage-level"],
+            help="Test coverage for the endpoint. Allowed values: AboveAverage, Average, "
+                 "BelowAverage, Default, Full, Low",
+            enum={"AboveAverage": "AboveAverage", "Average": "Average", "BelowAverage": "BelowAverage",
+                  "Default": "Default", "Full": "Full", "Low": "Low"},
+        )
+        args_schema.endpoint_source_name = AAZStrArg(
+            options=["--endpoint-source-name"],
+            help="The name of the source of connection monitor endpoint. "
+                 "If you are creating a V2 Connection Monitor, it's required.",
+            arg_group="V2 Endpoint",
+        )
+        args_schema.endpoint_source_resource_id = AAZStrArg(
+            options=["--endpoint-source-resource-id"],
+            help="Resource ID of the source of connection monitor endpoint. "
+                 "If endpoint is intended to used as source, this option is required.",
+            arg_group="V2 Endpoint",
+        )
+        args_schema.endpoint_source_type = AAZStrArg(
+            options=["--endpoint-source-type"],
+            help="The endpoint type.  Allowed values: AzureArcVM, AzureSubnet, AzureVM, AzureVMSS, AzureVNet, "
+                 "ExternalAddress, MMAWorkspaceMachine, MMAWorkspaceNetwork.",
+            enum={"AzureArcVM": "AzureArcVM", "AzureSubnet": "AzureSubnet", "AzureVM": "AzureVM",
+                  "AzureVMSS": "AzureVMSS", "AzureVNet": "AzureVNet", "ExternalAddress": "ExternalAddress",
+                  "MMAWorkspaceMachine": "MMAWorkspaceMachine", "MMAWorkspaceNetwork": "MMAWorkspaceNetwork"},
+        )
+
+        # V2 Output
+        args_schema.output_type = AAZStrArg(
+            options=["--type", "--output-type"],
+            help="Connection monitor output destination type. Currently, only \"Workspace\" is supported.",
+            enum={"Workspace": "Workspace"},
+            arg_group="V2 Output"
+        )
+        args_schema.workspace_ids = AAZListArg(
+            options=["--workspace_ids"],
+            help="Space-separated list of ids of log analytics workspace.",
+            arg_group="V2 Output"
+        )
+        args_schema.workspace_ids.Element = AAZStrArg()
+
+        # V2 Test Configuration
+        args_schema.test_config_name = AAZStrArg(
+            options=["--test-config-name"],
+            help="The name of the connection monitor test configuration. "
+                 "If you are creating a V2 Connection Monitor, it's required.",
+            arg_group="V2 Test Configuration",
+        )
+        args_schema.test_config_frequency = AAZStrArg(
+            options=["--frequency"],
+            help="The frequency of test evaluation, in seconds.  Default: 60.",
+            arg_group="V2 Test Configuration",
+        )
+        args_schema.test_config_http_method = AAZStrArg(
+            options=["--http-method"],
+            help="The HTTP method to use.  Allowed values: Get, Post.",
+            arg_group="V2 Test Configuration",
+            enum={"Get": "Get", "Post": "Post"},
+        )
+        args_schema.test_config_http_path = AAZStrArg(
+            options=["--http-path"],
+            help='The path component of the URI. For instance, "/dir1/dir2".',
+            arg_group="V2 Test Configuration",
+        )
+        args_schema.test_config_http_port = AAZStrArg(
+            options=["--http-port"],
+            help='The port to connect to.',
+            arg_group="V2 Test Configuration",
+        )
+        args_schema.test_config_http_valid_status_codes = AAZListArg(
+            options=["--http-valid-status-codes"],
+            help="Space-separated list of HTTP status codes to consider successful. For instance, '2xx 301-304 418'",
+            arg_group="V2 Test Configuration"
+        )
+        args_schema.test_config_http_valid_status_codes.Element = AAZStrArg()
+
+        args_schema.test_config_http_prefer_https = AAZBoolArg(
+            options=["--http-prefer"],
+            help='Value indicating whether HTTPS is preferred over HTTP in cases where the choice is not explicit. '
+                 ' Allowed values: false, true.',
+            arg_group="V2 Test Configuration",
+        )
+        args_schema.test_config_icmp_disable_trace_route = AAZBoolArg(
+            options=["--icmp-disable-trace-route"],
+            help='Value indicating whether path evaluation with trace route should be disabled. false is default. '
+                 ' Allowed values: false, true.',
+            arg_group="V2 Test Configuration",
+        )
+
+        args_schema.test_config_preferred_ip_version = AAZStrArg(
+            options=["--preferred-ip-version"],
+            help='The preferred IP version to use in test evaluation. '
+                 'The connection monitor may choose to use a different version depending on other parameters. '
+                 'Allowed values: IPv4, IPv6.',
+            arg_group="V2 Test Configuration",
+            enum={"IPv4": "IPv4", "IPv6": "IPv6"},
+        )
+        args_schema.test_config_protocol = AAZStrArg(
+            options=["--protocol"],
+            help='The protocol to use in test evaluation.  Allowed values: Http, Icmp, Tcp.',
+            arg_group="V2 Test Configuration",
+            enum={"Http": "Http", "Icmp": "Icmp", "Tcp": "Tcp"},
+        )
+
+        args_schema.test_config_tcp_disable_trace_route = AAZBoolArg(
+            options=["--tcp-disable-trace-route"],
+            help='Value indicating whether path evaluation with trace route should be disabled. false is default. '
+                 'Allowed values: false, true.',
+            arg_group="V2 Test Configuration",
+        )
+        args_schema.test_config_tcp_port = AAZStrArg(
+            options=["--tcp-port"],
+            help='The port to connect to.',
+            arg_group="V2 Test Configuration",
+        )
+        args_schema.test_config_tcp_port_behavior = AAZStrArg(
+            options=["--tcp-port-behavior"],
+            help='Destination port behavior.  Allowed values: ListenIfAvailable, None.',
+            arg_group="V2 Test Configuration",
+            enum={"ListenIfAvailable": "ListenIfAvailable", "None": "None"},
+        )
+        args_schema.test_config_threshold_failed_percent = AAZIntArg(
+            options=["--threshold-failed-percent"],
+            help='The maximum percentage of failed checks permitted for a test to evaluate as successful.',
+            arg_group="V2 Test Configuration",
+        )
+        args_schema.test_config_threshold_round_trip_time = AAZFloatArg(
+            options=["--threshold-round-trip-time"],
+            help='The maximum round-trip time in milliseconds permitted for a test to evaluate as successful.',
+            arg_group="V2 Test Configuration",
+        )
+
+        # V2 Test Group
+        args_schema.test_group_disable = AAZBoolArg(
+            options=["--test-group-disable"],
+            help='Value indicating whether test group is disabled. false is default.  Allowed values: false, true.',
+            arg_group="V2 Test Group",
+        )
+        args_schema.test_group_name = AAZStrArg(
+            options=["--test-group-name"],
+            help='The name of the connection monitor test group.  Default: DefaultTestGroup.',
+            arg_group="V2 Test Group",
+        )
+
+    def pre_operations(self):
+        process_nw_cm_v2_create_namespace(self)
+        get_network_watcher_from_location(self, watcher_name='network_watcher_name', rg_name='resource_group')
+        args = self.ctx.args
+
+        # deal with endpoint
+        src_endpoint = {
+            "name": args.endpoint_source_name,
+            "resource_id": args.endpoint_source_resource_id,
+            "address": args.endpoint_source_address,
+            "type": args.endpoint_source_type,
+            "coverage_level": args.endpoint_source_coverage_level
+        }
+
+        dst_endpoint = {
+            "name": args.endpoint_dest_name,
+            "resource_id": args.endpoint_dest_resource_id,
+            "address": args.endpoint_dest_address,
+            "type": args.endpoint_dest_type,
+            "coverage_level": args.endpoint_dest_coverage_level
+        }
+
+        # deal with test configuration
+        test_config = {
+            "name": args.test_config_name,
+            "test_frequency_sec": args.test_config_frequency,
+            "protocol": args.test_config_protocol,
+            "preferred_ip_version": args.test_config_preferred_ip_version,
+        }
+        if has_value(args.test_config_threshold_failed_percent) or \
+                has_value(args.test_config_threshold_round_trip_time):
+            test_config['success_threshold'] = {
+                "checks_failed_percent": args.test_config_threshold_failed_percent,
+                "round_trip_time_ms": args.test_config_threshold_round_trip_time
+            }
+        if args.test_config_protocol == "Tcp":
+            tcp_config = {
+                "port": args.test_config_tcp_port,
+                "destination_port_behavior": args.test_config_tcp_port_behavior,
+                "disable_trace_route": args.test_config_tcp_disable_trace_route,
+            }
+            test_config['tcp_configuration'] = tcp_config
+        elif args.test_config_protocol == "Icmp":
+            icmp_config = {"disable_trace_route": args.test_config_icmp_disable_trace_route}
+            test_config['icmp_configuration'] = icmp_config
+        elif args.test_config_protocol == "Http":
+            http_config = {
+                "port": args.test_config_http_port,
+                "method": args.test_config_http_method,
+                "path": args.test_config_http_path,
+                "valid_status_code_ranges": args.test_config_http_valid_status_codes,
+                "prefer_https": args.test_config_http_prefer_https,
+            }
+            test_config['http_configuration'] = http_config
+        else:
+            raise ValidationError('Unsupported protocol: "{}" for test configuration'.format(args.test_config_protocol))
+
+        # deal with test group
+        test_group = {
+            "name": args.test_group_name,
+            "disable": args.test_group_disable,
+            "test-configurations": [tc.name for tc in [test_config]],
+            "sources": [e.name for e in [src_endpoint]],
+            "destinations": [e.name for e in [dst_endpoint]]
+        }
+
+        # If 'workspace_ids' option is specified but 'output_type' is not
+        # then still it should be implicit that 'output-type' is 'Workspace'
+        # since only supported value for output_type is 'Workspace' currently.
+        if has_value(args.workspace_ids) and not has_value(args.output_type):
+            args.output_type = 'Workspace'
+        if args.output_type != "Workspace":
+            raise ValidationError('Unsupported output type: "{}"'.format(args.output_type))
+
+        if has_value(args.output_type) and has_value(args.workspace_ids):
+            args.outputs = []
+            for workspace_id in args.workspace_ids:
+                output = {
+                    "type": args.output_type,
+                    "workspace_id": workspace_id,
+                }
+                args.outputs.append(output)
+        else:
+            args.outputs = []
+        args.endpoints = [src_endpoint, dst_endpoint]
+        args.test_configurations = [test_config]
+        args.test_groups = [test_group]
+
+
 class WatcherConnectionMonitorStart(_WatcherConnectionMonitorStart):
 
     @classmethod
@@ -583,9 +917,6 @@ class WatcherConnectionMonitorStart(_WatcherConnectionMonitorStart):
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
             required=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group_name",
-            ),
         )
         return args_schema
 
@@ -611,9 +942,6 @@ class WatcherConnectionMonitorStop(_WatcherConnectionMonitorStop):
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
             required=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group_name",
-            ),
         )
         return args_schema
 
@@ -639,9 +967,6 @@ class WatcherConnectionMonitorList(_WatcherConnectionMonitorList):
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
             required=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group_name",
-            ),
         )
         return args_schema
 
@@ -667,9 +992,6 @@ class WatcherConnectionMonitorShow(_WatcherConnectionMonitorShow):
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
             required=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group_name",
-            ),
         )
         return args_schema
 
@@ -695,9 +1017,6 @@ class WatcherConnectionMonitorQuery(_WatcherConnectionMonitorQuery):
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
             required=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group_name",
-            ),
         )
         return args_schema
 
@@ -723,9 +1042,6 @@ class WatcherConnectionMonitorDelete(_WatcherConnectionMonitorDelete):
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
             required=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group_name",
-            ),
         )
         return args_schema
 
@@ -1127,6 +1443,7 @@ class WatcherConnectionMonitorOutputAdd(_WatcherConnectionMonitorOutputAdd):
             help="Location. Values from: `az account list-locations`. "
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
+            required=True,
         )
         return args_schema
 

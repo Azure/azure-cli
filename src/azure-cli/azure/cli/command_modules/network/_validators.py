@@ -816,53 +816,6 @@ def process_nw_cm_v2_create_namespace(cmd, namespace):
     return get_network_watcher_from_location()(cmd, namespace)
 
 
-def process_nw_cm_create_namespace(cmd, namespace):
-    validate_tags(namespace)
-    if namespace.location is None:  # location is None only occurs in creating a V2 connection monitor
-        endpoint_source_resource_id = namespace.endpoint_source_resource_id
-
-        from msrestazure.tools import is_valid_resource_id, parse_resource_id
-        from azure.mgmt.resource import ResourceManagementClient
-
-        # parse and verify endpoint_source_resource_id
-        if endpoint_source_resource_id is None:
-            raise ValidationError('usage error: '
-                                  '--location/--endpoint-source-resource-id '
-                                  'is required to create a V2 connection monitor')
-
-        if is_valid_resource_id(endpoint_source_resource_id) is False:
-            raise ValidationError('usage error: "{}" is not a valid resource id'.format(endpoint_source_resource_id))
-
-        resource = parse_resource_id(namespace.endpoint_source_resource_id)
-        resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceManagementClient)
-        resource_api_version = _resolve_api_version(resource_client,
-                                                    resource['namespace'],
-                                                    resource['resource_parent'],
-                                                    resource['resource_type'])
-        resource = resource_client.resources.get_by_id(namespace.endpoint_source_resource_id, resource_api_version)
-
-        namespace.location = resource.location
-        if namespace.location is None:
-            raise ValidationError("Can not get location from --endpoint-source-resource-id")
-
-    v2_required_parameter_set = [
-        'endpoint_source_resource_id', 'endpoint_source_name', 'endpoint_dest_name', 'test_config_name'
-    ]
-    for p in v2_required_parameter_set:
-        if not hasattr(namespace, p) or getattr(namespace, p) is None:
-            raise ValidationError(
-                'usage error: --{} is required to create a V2 connection monitor'.format(p.replace('_', '-')))
-    if namespace.test_config_protocol is None:
-        raise ValidationError('usage error: --protocol is required to create a test configuration for V2 connection monitor')
-
-    v2_optional_parameter_set = ['workspace_ids']
-    if namespace.output_type is not None:
-        tmp = [p for p in v2_optional_parameter_set if getattr(namespace, p) is None]
-        if v2_optional_parameter_set == tmp:
-            raise ValidationError('usage error: --output-type is specified but no other resource id provided')
-    from .operations.watcher import get_network_watcher_from_location
-    return get_network_watcher_from_location(cmd)
-
 def process_nw_cm_v2_endpoint_namespace(cmd, namespace):
     if hasattr(namespace, 'filter_type') or hasattr(namespace, 'filter_items'):
         filter_type, filter_items = namespace.filter_type, namespace.filter_items
