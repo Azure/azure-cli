@@ -485,3 +485,50 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
         self.cmd('network route-table route list --resource-group {rg} --route-table-name {table}', checks=self.is_empty())
         self.cmd('network route-table delete --resource-group {rg} --name {table} -y')
         self.cmd('network route-table list --resource-group {rg}', checks=self.is_empty())
+
+
+class NetworkPublicIpScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_public_ip')
+    def test_network_public_ip(self, resource_group):
+        self.kwargs.update({
+            'ip1': 'pubipdns',
+            'ip2': 'pubipnodns',
+            'ip3': 'pubip3',
+            'dns': 'woot1',
+            'location': 'eastus2',
+        })
+        self.cmd('network public-ip create -g {rg} -n {ip1} --dns-name {dns} --allocation-method static', checks=[
+            self.check('publicIp.provisioningState', 'Succeeded'),
+            self.check('publicIp.publicIPAllocationMethod', 'Static'),
+            self.check('publicIp.dnsSettings.domainNameLabel', '{dns}')
+        ])
+        self.cmd('network public-ip create -g {rg} -n {ip2}', checks=[
+            self.check('publicIp.provisioningState', 'Succeeded'),
+            self.check('publicIp.publicIPAllocationMethod', 'Dynamic'),
+            self.check('publicIp.dnsSettings', None)
+        ])
+
+        self.cmd(
+            'network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza2 --idle-timeout 10 --tags foo=doo',
+            checks=[
+                self.check('publicIPAllocationMethod', 'Static'),
+                self.check('dnsSettings.domainNameLabel', 'wowza2'),
+                self.check('idleTimeoutInMinutes', 10),
+                self.check('tags.foo', 'doo')
+            ])
+
+        self.cmd('network public-ip list -g {rg}', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
+        ])
+
+        self.cmd('network public-ip show -g {rg} -n {ip1}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{ip1}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        self.cmd('network public-ip delete -g {rg} -n {ip1}')
+        self.cmd('network public-ip list -g {rg}',
+                 checks=self.check("length[?name == '{ip1}']", None))

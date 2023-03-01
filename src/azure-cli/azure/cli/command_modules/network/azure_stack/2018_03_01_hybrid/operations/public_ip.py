@@ -71,28 +71,5 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         public_ip_args['edge_zone'] = edge_zone
         public_ip_args['type'] = 'EdgeZone'
 
-    return PublicIPCreate(cli_ctx=cmd.cli_ctx)(command_args=public_ip_args)
-
-
-class PublicIPCreate(_PublicIP.Create):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.public_ip_prefix._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/publicIPPrefixes/{}",
-        )
-        return args_schema
-
-
-class PublicIPUpdate(_PublicIP.Update):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.public_ip_prefix._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/publicIPPrefixes/{}",
-        )
-        return args_schema
+    PublicIpCreate = import_aaz_by_profile("network.public_ip").Create
+    return PublicIpCreate(cli_ctx=cmd.cli_ctx)(command_args=public_ip_args)

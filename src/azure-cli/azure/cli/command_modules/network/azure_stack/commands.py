@@ -877,25 +877,25 @@ def load_command_table(self, _):
     public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$Address:ipAddress, AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
     public_ip_show_table_transform = public_ip_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ' if self.supported_api_version(min_api='2017-06-01') else ' ')
 
-    with self.command_group('network public-ip', network_public_ip_sdk) as g:
-        if self.cli_ctx.cloud.profile == 'latest':
-            from azure.cli.command_modules.network.aaz.latest.network.public_ip import List, Show
-            self.command_table['network public-ip list'] = List(loader=self, table_transformer='[].' + public_ip_show_table_transform)
-            self.command_table['network public-ip show'] = Show(loader=self, table_transformer=public_ip_show_table_transform)
-            g.custom_command('create', 'create_public_ip_latest', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
-        else:
-            g.command('delete', 'begin_delete')
-            g.show_command('show', 'get', table_transformer=public_ip_show_table_transform)
-            g.custom_command('list', 'list_public_ips', table_transformer='[].' + public_ip_show_table_transform)
-            g.custom_command('create', 'create_public_ip', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
-            g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_public_ip')
+    # with self.command_group('network public-ip', network_public_ip_sdk) as g:
+    #     if self.cli_ctx.cloud.profile == 'latest':
+    #         from azure.cli.command_modules.network.aaz.latest.network.public_ip import List, Show
+    #         self.command_table['network public-ip list'] = List(loader=self, table_transformer='[].' + public_ip_show_table_transform)
+    #         self.command_table['network public-ip show'] = Show(loader=self, table_transformer=public_ip_show_table_transform)
+    #         g.custom_command('create', 'create_public_ip_latest', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
+    #     else:
+    #         g.command('delete', 'begin_delete')
+    #         g.show_command('show', 'get', table_transformer=public_ip_show_table_transform)
+    #         g.custom_command('list', 'list_public_ips', table_transformer='[].' + public_ip_show_table_transform)
+    #         g.custom_command('create', 'create_public_ip', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
+    #         g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_public_ip')
 
-    with self.command_group('network public-ip prefix', network_public_ip_prefix_sdk, client_factory=cf_public_ip_prefixes) as g:
-        g.custom_command('create', 'create_public_ip_prefix')
-        g.command('delete', 'begin_delete')
-        g.custom_command('list', 'list_public_ip_prefixes')
-        g.show_command('show')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_public_ip_prefix')
+    # with self.command_group('network public-ip prefix', network_public_ip_prefix_sdk, client_factory=cf_public_ip_prefixes) as g:
+    #     g.custom_command('create', 'create_public_ip_prefix')
+    #     g.command('delete', 'begin_delete')
+    #     g.custom_command('list', 'list_public_ip_prefixes')
+    #     g.show_command('show')
+    #     g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_public_ip_prefix')
 
     # endregion
 

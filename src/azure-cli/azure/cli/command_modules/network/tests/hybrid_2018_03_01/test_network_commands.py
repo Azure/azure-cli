@@ -97,7 +97,7 @@ class NetworkPublicIpWithSku(ScenarioTest):
         self.cmd('network public-ip create -g {rg} -l {location} -n {ip} --sku {sku} --tags foo=doo')
         self.cmd('network public-ip show -g {rg} -n {ip}', checks=[
             self.check('sku.name', 'Standard'),
-            self.check('publicIpAllocationMethod', 'Static'),
+            self.check('publicIPAllocationMethod', 'Static'),
             self.check('tags.foo', 'doo')
         ])
 
@@ -610,16 +610,16 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
         })
         self.cmd('network public-ip create -g {rg} -n {ip1} --dns-name {dns} --allocation-method static', checks=[
             self.check('publicIp.provisioningState', 'Succeeded'),
-            self.check('publicIp.publicIpAllocationMethod', 'Static'),
+            self.check('publicIp.publicIPAllocationMethod', 'Static'),
             self.check('publicIp.dnsSettings.domainNameLabel', '{dns}')
         ])
         self.cmd('network public-ip create -g {rg} -n {ip2}', checks=[
             self.check('publicIp.provisioningState', 'Succeeded'),
-            self.check('publicIp.publicIpAllocationMethod', 'Dynamic'),
+            self.check('publicIp.publicIPAllocationMethod', 'Dynamic'),
             self.check('publicIp.dnsSettings', None)
         ])
         self.cmd('network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza --idle-timeout 10 --tags foo=doo', checks=[
-            self.check('publicIpAllocationMethod', 'Static'),
+            self.check('publicIPAllocationMethod', 'Static'),
             self.check('dnsSettings.domainNameLabel', 'wowza'),
             self.check('idleTimeoutInMinutes', 10),
             self.check('tags.foo', 'doo')
@@ -646,11 +646,16 @@ class NetworkZonedPublicIpScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_zoned_public_ip')
     def test_network_zoned_public_ip(self, resource_group):
         self.kwargs['ip'] = 'pubip'
-        self.cmd('network public-ip create -g {rg} -n {ip} -l centralus -z 2',
+        self.cmd('network public-ip create -g {rg} -n {ip} -l centralus -z 2 --sku Standard',
                  checks=self.check('publicIp.zones[0]', '2'))
 
-        table_output = self.cmd('network public-ip show -g {rg} -n {ip} -otable').output
-        self.assertEqual(table_output.splitlines()[2].split(), ['pubip', resource_group, 'centralus', '2', 'IPv4', 'Dynamic', '4', 'Succeeded'])
+        self.cmd(
+            'network public-ip show -g {rg} -n {ip}',
+            checks=[
+                self.check('name', '{ip}'),
+                self.check('publicIPAddressVersion', 'IPv4')
+            ]
+        )
 
 
 class NetworkExpressRouteScenarioTest(ScenarioTest):
