@@ -11,7 +11,8 @@ from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingEr
 from azure.cli.core.commands.arm import get_arm_resource_by_id
 
 from azure.cli.core.aaz import has_value, AAZResourceLocationArg, AAZResourceLocationArgFormat, AAZListArg, AAZStrArg, \
-    AAZBoolArg, AAZFloatArg, AAZIntArg, AAZDictArg
+    AAZBoolArg, AAZFloatArg, AAZIntArg, AAZIntArgFormat, AAZDictArg, AAZResourceIdArg, AAZResourceIdArgFormat
+
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import validate_tags
@@ -97,7 +98,6 @@ def get_network_watcher_from_vmss(cmd):
 class TestIPFlow(_TestIPFlow):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location = AAZResourceLocationArg(
             registered=False,
@@ -154,7 +154,6 @@ class TestIPFlow(_TestIPFlow):
 class ShowNextHop(_ShowNextHop):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location = AAZResourceLocationArg(
             registered=False,
@@ -184,7 +183,6 @@ class ShowNextHop(_ShowNextHop):
 class ShowSecurityGroupView(_ShowSecurityGroupView):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location = AAZResourceLocationArg(
             registered=False,
@@ -210,7 +208,6 @@ class ShowSecurityGroupView(_ShowSecurityGroupView):
 class RunConfigurationDiagnostic(_RunConfigurationDiagnostic):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location = AAZResourceLocationArg(
             registered=False,
@@ -322,7 +319,6 @@ class RunConfigurationDiagnostic(_RunConfigurationDiagnostic):
 class ShowTopology(_ShowTopology):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location = AAZResourceLocationArg(
             help="Location. Defaults to the location of the target resource group. "
@@ -368,7 +364,6 @@ class ShowTopology(_ShowTopology):
 class TestConnectivity(_TestConnectivity):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZDictArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location = AAZResourceLocationArg(
             registered=False,
@@ -428,7 +423,6 @@ class TestConnectivity(_TestConnectivity):
 class PacketCaptureCreate(_PacketCaptureCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.location = AAZResourceLocationArg(
             registered=False,
@@ -1054,7 +1048,6 @@ class NwFlowLogCreate(_NwFlowLogCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat, AAZIntArg, AAZIntArgFormat, AAZBoolArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
         args_schema.network_watcher_name._required = False
@@ -1167,8 +1160,6 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat, AAZIntArg, AAZIntArgFormat, AAZBoolArg
-
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
         args_schema.network_watcher_name._required = False
@@ -1333,7 +1324,6 @@ class NwTroubleshootingStart(_NwTroubleshootingStart):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.watcher_name._registered = False
         args_schema.watcher_name._required = False
@@ -1379,7 +1369,6 @@ class NwTroubleshootingStart(_NwTroubleshootingStart):
 class NwTroubleshootingShow(_NwTroubleshootingShow):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.watcher_name._registered = False
         args_schema.watcher_name._required = False
@@ -1655,7 +1644,8 @@ class WatcherConnectionMonitorEndpointRemove(_WatcherConnectionMonitorEndpointRe
 
         temp_test_groups = instance.properties.test_groups
         if has_value(args.test_groups):
-            temp_test_groups = [t for t in instance.properties.test_groups if t.name in args.test_groups]
+            temp_test_groups = [t for t in instance.properties.test_groups
+                                if t.name.to_serialized_data() in args.test_groups]
 
         for test_group in temp_test_groups:
             test_group.sources = [tc for tc in test_group.sources if tc != name]
@@ -1703,14 +1693,16 @@ class WatcherConnectionMonitorTestConfigurationAdd(_MonitorTestConfigurationAdd)
         name = args.test_configuration_name.to_serialized_data()
 
         if has_value(args.http_request_header):
-            request_header = {}
-            for name, val in args.http_request_header.items():
-                args.http_request_headers.append(request_header)
+            for tmp_name, val in args.http_request_header.items():
+                args.http_request_headers.append({
+                    "name": tmp_name,
+                    "value": val,
+                })
 
         instance = self.ctx.vars.instance
         if has_value(args.test_groups):
             for test_group in instance.properties.test_groups:
-                if test_group.name in args.test_groups:
+                if test_group.name.to_serialized_data() in args.test_groups:
                     test_group.test_configurations.append(name)
 
 
@@ -1764,7 +1756,6 @@ class WatcherConnectionMonitorTestConfigurationRemove(_MonitorTestConfigurationR
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.watcher_name._registered = False
         args_schema.watcher_name._required = False
@@ -1797,7 +1788,8 @@ class WatcherConnectionMonitorTestConfigurationRemove(_MonitorTestConfigurationR
         # refresh test groups
         temp_test_groups = instance.properties.test_groups
         if has_value(args.test_groups):
-            temp_test_groups = [t for t in instance.properties.test_groups if t.name in args.test_groups]
+            temp_test_groups = [t for t in instance.properties.test_groups
+                                if t.name.to_serialized_data() in args.test_groups]
 
         for test_group in temp_test_groups:
             test_group.test_configurations = [tc for tc in test_group.test_configurations if tc != name]
@@ -2087,7 +2079,7 @@ class WatcherConnectionMonitorTestGroupRemove(_WatcherConnectionMonitorUpdate):
 
         new_test_groups, removed_test_group = [], None
         for t in instance.properties.test_groups:
-            if t.name == name:
+            if t.name.to_serialized_data() == name:
                 removed_test_group = t
             else:
                 new_test_groups.append(t)
@@ -2102,7 +2094,8 @@ class WatcherConnectionMonitorTestGroupRemove(_WatcherConnectionMonitorUpdate):
             tmp = [t for t in instance.properties.test_groups if (e in t.sources or e in t.destinations)]
             if not tmp:
                 removed_endpoints.append(e)
-        instance.properties.endpoints = [e for e in instance.properties.endpoints if e.name not in removed_endpoints]
+        instance.properties.endpoints = [e for e in instance.properties.endpoints
+                                         if e.name.to_serialized_data() not in removed_endpoints]
 
         # deal with test configurations which are only referenced by this remove test group
         removed_test_configurations = []
@@ -2111,5 +2104,4 @@ class WatcherConnectionMonitorTestGroupRemove(_WatcherConnectionMonitorUpdate):
             if not tmp:
                 removed_test_configurations.append(c)
         instance.properties.test_configurations = [c for c in instance.properties.test_configurations
-                                                   if c.name not in removed_test_configurations]
-
+                                                   if c.name.to_serialized_data() not in removed_test_configurations]
