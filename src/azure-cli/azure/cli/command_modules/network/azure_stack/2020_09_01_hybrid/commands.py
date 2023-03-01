@@ -116,4 +116,10 @@ def load_command_table(self, _):
     with self.command_group('network vnet subnet', operations_tmpl=operations_tmpl) as g:
         g.custom_command("list-available-ips", "subnet_list_available_ips", is_preview=True)
 
+    # region NetworkRoot
+    with self.command_group('network'):
+        from .operations.locations import UsagesList
+        from .._format import transform_network_usage_table
+        self.command_table['network list-usages'] = UsagesList(loader=self,
+                                                               table_transformer=transform_network_usage_table)
     # endregion

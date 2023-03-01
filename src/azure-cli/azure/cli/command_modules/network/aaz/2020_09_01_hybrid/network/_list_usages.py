@@ -12,21 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network vnet list-endpoint-services",
+    "network list-usages",
 )
-class ListEndpointServices(AAZCommand):
-    """List which services support VNet service tunneling in a given region.
+class ListUsages(AAZCommand):
+    """List the number of network resources in a region that are used against a subscription quota.
 
-    To learn more about service endpoints visit https://docs.microsoft.com/azure/virtual-network/virtual-network-service-endpoints-configure#azure-cli.
-
-    :example: List the endpoint services available for use in the West US region.
-        az network vnet list-endpoint-services -l westus -o table
+    :example: List the provisioned network resources in East US region within a subscription.
+        az network list-usages --location eastus -o table
     """
 
     _aaz_info = {
         "version": "2018-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/locations/{}/virtualnetworkavailableendpointservices", "2018-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/locations/{}/usages", "2018-11-01"],
         ]
     }
 
@@ -52,7 +50,7 @@ class ListEndpointServices(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.AvailableEndpointServicesList(ctx=self.ctx)()
+        self.UsagesList(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -68,7 +66,7 @@ class ListEndpointServices(AAZCommand):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class AvailableEndpointServicesList(AAZHttpOperation):
+    class UsagesList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -82,7 +80,7 @@ class ListEndpointServices(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/locations/{location}/virtualNetworkAvailableEndpointServices",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/locations/{location}/usages",
                 **self.url_parameters
             )
 
@@ -154,19 +152,34 @@ class ListEndpointServices(AAZCommand):
             value.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element
-            _element.id = AAZStrType()
-            _element.name = AAZStrType(
+            _element.current_value = AAZIntType(
+                serialized_name="currentValue",
+                flags={"required": True},
+            )
+            _element.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
+            _element.limit = AAZIntType(
+                flags={"required": True},
             )
+            _element.name = AAZObjectType(
+                flags={"required": True},
+            )
+            _element.unit = AAZStrType(
+                flags={"required": True},
+            )
+
+            name = cls._schema_on_200.value.Element.name
+            name.localized_value = AAZStrType(
+                serialized_name="localizedValue",
+            )
+            name.value = AAZStrType()
 
             return cls._schema_on_200
 
 
-class _ListEndpointServicesHelper:
-    """Helper class for ListEndpointServices"""
+class _ListUsagesHelper:
+    """Helper class for ListUsages"""
 
 
-__all__ = ["ListEndpointServices"]
+__all__ = ["ListUsages"]
