@@ -5868,25 +5868,6 @@ long-summary: >
     For more information about configuring flow logs visit https://docs.microsoft.com/azure/network-watcher/network-watcher-nsg-flow-logging-cli
 """
 
-helps['network watcher flow-log configure'] = """
-type: command
-short-summary: Configure flow logging on a network security group.
-parameters:
-  - name: --nsg
-    short-summary: Name or ID of the Network Security Group to target.
-  - name: --enabled
-    short-summary: Enable logging.
-  - name: --retention
-    short-summary: Number of days to retain logs.
-  - name: --storage-account
-    short-summary: Name or ID of the storage account in which to save the flow logs.
-examples:
-  - name: Enable NSG flow logs.
-    text: az network watcher flow-log configure -g MyResourceGroup --enabled true --nsg MyNsg --storage-account MyStorageAccount
-  - name: Disable NSG flow logs.
-    text: az network watcher flow-log configure -g MyResourceGroup --enabled false --nsg MyNsg
-"""
-
 helps['network watcher flow-log create'] = """
 type: command
 short-summary: Create a flow log on a network security group.
