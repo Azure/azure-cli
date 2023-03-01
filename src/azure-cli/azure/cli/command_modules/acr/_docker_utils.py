@@ -169,7 +169,7 @@ def _get_aad_token_after_challenge(cli_ctx,
         if is_diagnostics_context:
             return CONNECTIVITY_TOOMANYREQUESTS_ERROR.format_error_message(login_server)
         raise AzureResponseError(CONNECTIVITY_TOOMANYREQUESTS_ERROR.format_error_message(login_server)
-                       .get_error_message())
+                                 .get_error_message())
     if response.status_code not in [200]:
         from ._errors import CONNECTIVITY_REFRESH_TOKEN_ERROR
         if is_diagnostics_context:
