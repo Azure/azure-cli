@@ -245,8 +245,6 @@ short-summary: List the Service Bus Namespaces
 examples:
   - name: Get the Service Bus Namespaces by resource group
     text: az servicebus namespace list --resource-group myresourcegroup
-  - name: Get the Service Bus Namespaces by Subscription.
-    text: az servicebus namespace list
 """
 
 helps['servicebus namespace network-rule'] = """
@@ -534,7 +532,6 @@ short-summary: Create the ServiceBus Subscription
 examples:
   - name: Create a new Subscription.
     text: az servicebus topic subscription create --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name mysubscription
-
 """
 
 helps['servicebus topic subscription delete'] = """

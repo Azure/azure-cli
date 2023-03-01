@@ -2762,6 +2762,8 @@ short-summary: Publish a bicep file to a remote module registry.
 examples:
   - name: Publish a bicep file.
     text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}"
+  - name: Publish a bicep file with documentation uri.
+    text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}" --documentationUri {documentationUri}
 """
 
 helps['bicep restore'] = """

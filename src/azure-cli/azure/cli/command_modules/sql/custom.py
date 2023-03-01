@@ -71,7 +71,9 @@ from azure.mgmt.sql.models import (
     StorageKeyType,
     TransparentDataEncryptionName,
     UserIdentity,
-    VirtualNetworkRule
+    VirtualNetworkRule,
+    DatabaseUserIdentity,
+    DatabaseKey
 )
 
 from azure.cli.core.profiles import ResourceType
@@ -538,6 +540,31 @@ def _get__user_assigned_identity(
     return identityResult
 
 
+def _get_database_identity(
+        userAssignedIdentities):
+    '''
+    Gets the resource identity type for the database.
+    '''
+    databaseIdentity = None
+
+    if userAssignedIdentities is None:
+        raise CLIError('The list of user assigned identity ids needs to be passed for database CMK')
+
+    umiDict = None
+
+    for umi in userAssignedIdentities:
+        if umiDict is None:
+            umiDict = {umi: DatabaseUserIdentity()}
+        else:
+            umiDict[umi] = DatabaseUserIdentity()  # pylint: disable=unsupported-assignment-operation
+
+    from azure.mgmt.sql.models import DatabaseIdentity  # pylint: disable=redefined-outer-name
+
+    databaseIdentity = DatabaseIdentity(type=ResourceIdType.user_assigned.value, user_assigned_identities=umiDict)
+
+    return databaseIdentity
+
+
 _DEFAULT_SERVER_VERSION = "12.0"
 
 
@@ -979,6 +1006,70 @@ def _validate_elastic_pool_id(
     return elastic_pool_id
 
 
+def restorable_databases_get(
+    client,
+    server_name,
+    resource_group_name,
+    restorable_dropped_database_id,
+    expand_keys=False,
+    keys_filter=None
+):
+    '''
+    Gets a restorable dropped database
+    '''
+
+    expand = None
+    if expand_keys and keys_filter is not None:
+        expand = "keys($filter=pointInTime('%s'))" % keys_filter
+    elif expand_keys:
+        expand = 'keys'
+
+    return client.get(resource_group_name, server_name, restorable_dropped_database_id, expand)
+
+
+def recoverable_databases_get(
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        expand_keys=False,
+        keys_filter=None):
+    '''
+    Gets a recoverable database
+    '''
+
+    expand = None
+    if expand_keys and keys_filter is not None:
+        expand = "keys($filter=pointInTime('%s'))" % keys_filter
+    elif expand_keys:
+        expand = 'keys'
+
+    return client.get(resource_group_name=resource_group_name,
+                      server_name=server_name,
+                      database_name=database_name,
+                      expand=expand)
+
+
+def db_get(
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        expand_keys=False,
+        keys_filter=None):
+    '''
+    Gets a database
+    '''
+
+    expand = None
+    if expand_keys and keys_filter is not None:
+        expand = "keys($filter=pointInTime('%s'))" % keys_filter
+    elif expand_keys:
+        expand = 'keys'
+
+    return client.get(resource_group_name, server_name, database_name, expand)
+
+
 def _db_dw_create(
         cli_ctx,
         client,
@@ -987,6 +1078,10 @@ def _db_dw_create(
         no_wait,
         sku=None,
         secondary_type=None,
+        assign_identity=False,
+        user_assigned_identity_id=None,
+        keys=None,
+        encryption_protector=None,
         **kwargs):
     '''
     Creates a DB (with any create mode) or DW.
@@ -1033,6 +1128,13 @@ def _db_dw_create(
         cli_ctx,
         kwargs['maintenance_configuration_id'])
 
+    # Per DB CMK params
+    if assign_identity:
+        kwargs['identity'] = _get_database_identity(user_assigned_identity_id)
+
+    kwargs['keys'] = _get_database_keys(keys)
+    kwargs['encryption_protector'] = encryption_protector
+
     # Create
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        server_name=dest_db.server_name,
@@ -1078,6 +1180,10 @@ def db_create(
         resource_group_name,
         no_wait=False,
         yes=None,
+        assign_identity=False,
+        user_assigned_identity_id=None,
+        keys=None,
+        encryption_protector=None,
         **kwargs):
     '''
     Creates a DB (with 'Default' create mode.)
@@ -1102,6 +1208,10 @@ def db_create(
         None,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         no_wait,
+        assign_identity=assign_identity,
+        user_assigned_identity_id=user_assigned_identity_id,
+        keys=keys,
+        encryption_protector=encryption_protector,
         **kwargs)
 
 
@@ -1130,6 +1240,10 @@ def db_copy(
         dest_server_name=None,
         dest_resource_group_name=None,
         no_wait=False,
+        assign_identity=False,
+        user_assigned_identity_id=None,
+        keys=None,
+        encryption_protector=None,
         **kwargs):
     '''
     Copies a DB (i.e. create with 'Copy' create mode.)
@@ -1168,6 +1282,10 @@ def db_copy(
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         DatabaseIdentity(cmd.cli_ctx, dest_name, dest_server_name, dest_resource_group_name),
         no_wait,
+        assign_identity=assign_identity,
+        user_assigned_identity_id=user_assigned_identity_id,
+        keys=keys,
+        encryption_protector=encryption_protector,
         **kwargs)
 
 
@@ -1182,6 +1300,10 @@ def db_create_replica(
         partner_resource_group_name=None,
         secondary_type=None,
         no_wait=False,
+        assign_identity=False,
+        user_assigned_identity_id=None,
+        keys=None,
+        encryption_protector=None,
         **kwargs):
     '''
     Creates a secondary replica DB (i.e. create with 'Secondary' create mode.)
@@ -1223,6 +1345,10 @@ def db_create_replica(
         DatabaseIdentity(cmd.cli_ctx, partner_database_name, partner_server_name, partner_resource_group_name),
         no_wait,
         secondary_type=secondary_type,
+        assign_identity=assign_identity,
+        user_assigned_identity_id=user_assigned_identity_id,
+        keys=keys,
+        encryption_protector=encryption_protector,
         **kwargs)
 
 
@@ -1267,6 +1393,10 @@ def db_restore(
         restore_point_in_time=None,
         source_database_deletion_date=None,
         no_wait=False,
+        assign_identity=False,
+        user_assigned_identity_id=None,
+        keys=None,
+        encryption_protector=None,
         **kwargs):
     '''
     Restores an existing or deleted DB (i.e. create with 'Restore'
@@ -1300,6 +1430,10 @@ def db_restore(
         # Cross-server restore is not supported. So dest server/group must be the same as source.
         DatabaseIdentity(cmd.cli_ctx, dest_name, server_name, resource_group_name),
         no_wait,
+        assign_identity=assign_identity,
+        user_assigned_identity_id=user_assigned_identity_id,
+        keys=keys,
+        encryption_protector=encryption_protector,
         **kwargs)
 
 
@@ -1556,7 +1690,7 @@ def db_list(
     return client.list_by_server(resource_group_name=resource_group_name, server_name=server_name)
 
 
-def db_update(
+def db_update(  # pylint: disable=too-many-locals
         cmd,
         instance,
         server_name,
@@ -1575,7 +1709,13 @@ def db_update(
         compute_model=None,
         requested_backup_storage_redundancy=None,
         maintenance_configuration_id=None,
-        preferred_enclave_type=None):
+        preferred_enclave_type=None,
+        assign_identity=False,
+        user_assigned_identity_id=None,
+        keys=None,
+        encryption_protector=None,
+        federated_client_id=None,
+        keys_to_remove=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
@@ -1677,7 +1817,56 @@ def db_update(
     if auto_pause_delay:
         instance.auto_pause_delay = auto_pause_delay
 
+    #####
+    # Per DB CMK properties
+    #####
+    if assign_identity:
+        if user_assigned_identity_id is not None:
+            instance.identity = _get_database_identity(user_assigned_identity_id)
+
+    if keys is not None or keys_to_remove is not None:
+        instance.keys = _get_database_keys_for_update(keys, keys_to_remove)
+
+    if encryption_protector is not None:
+        instance.encryption_protector = encryption_protector
+
+    if federated_client_id is not None:
+        instance.federated_client_id = federated_client_id
+
+    instance.availability_zone = None
+
     return instance
+
+
+def _get_database_keys(akvKeys):
+
+    databaseKeys = None
+
+    if akvKeys is not None:
+        for akvKey in akvKeys:
+            if databaseKeys is None:
+                databaseKeys = {akvKey: DatabaseKey()}
+            else:
+                databaseKeys[akvKey] = DatabaseKey()  # pylint: disable=unsupported-assignment-operation
+
+    return databaseKeys
+
+
+def _get_database_keys_for_update(akvKeys, akvKeysToRemove):
+
+    databaseKeys = {}
+
+    if akvKeys is not None:
+        for akvKey in akvKeys:
+            if akvKey not in databaseKeys:
+                databaseKeys[akvKey] = DatabaseKey()  # pylint: disable=unsupported-assignment-operation
+
+    if akvKeysToRemove is not None:
+        for akvKey in akvKeysToRemove:
+            if akvKey not in databaseKeys:
+                databaseKeys[akvKey] = None
+
+    return databaseKeys
 
 
 #####
@@ -2983,6 +3172,11 @@ def restore_long_term_retention_backup(
         high_availability_replica_count,
         zone_redundant,
         service_objective,
+        assign_identity=False,
+        user_assigned_identity_id=None,
+        keys=None,
+        encryption_protector=None,
+        federated_client_id=None,
         **kwargs):
     '''
     Restores an existing database (i.e. create with 'RestoreLongTermRetentionBackup' create mode.)
@@ -3015,6 +3209,14 @@ def restore_long_term_retention_backup(
         if kwargs['requested_backup_storage_redundancy'] == 'Geo':
             _backup_storage_redundancy_specify_geo_warning()
 
+    # Per DB CMK params
+    if assign_identity:
+        kwargs['identity'] = _get_database_identity(user_assigned_identity_id)
+
+    kwargs['keys'] = _get_database_keys(keys)
+    kwargs['encryption_protector'] = encryption_protector
+    kwargs['federated_client_id'] = federated_client_id
+
     return client.begin_create_or_update(
         database_name=target_database_name,
         server_name=target_server_name,
@@ -3045,6 +3247,11 @@ def restore_geo_backup(
         high_availability_replica_count,
         zone_redundant,
         service_objective,
+        assign_identity=False,
+        user_assigned_identity_id=None,
+        keys=None,
+        encryption_protector=None,
+        federated_client_id=None,
         **kwargs):
     '''
     Restores an existing database (i.e. create with 'RestoreGeoBackup' create mode.)
@@ -3076,6 +3283,14 @@ def restore_geo_backup(
             _backup_storage_redundancy_take_source_warning()
         if kwargs['requested_backup_storage_redundancy'] == 'Geo':
             _backup_storage_redundancy_specify_geo_warning()
+
+    # Per DB CMK params
+    if assign_identity:
+        kwargs['identity'] = _get_database_identity(user_assigned_identity_id)
+
+    kwargs['keys'] = _get_database_keys(keys)
+    kwargs['encryption_protector'] = encryption_protector
+    kwargs['federated_client_id'] = federated_client_id
 
     return client.begin_create_or_update(
         database_name=target_database_name,
@@ -3360,6 +3575,8 @@ def dw_update(
 
     if service_objective:
         instance.sku = Sku(name=service_objective)
+
+    instance.availability_zone = None
 
     return instance
 
@@ -4261,6 +4478,79 @@ def encryption_protector_update(
                                        server_key_name=key_name,
                                        auto_rotation_enabled=auto_rotation_enabled))
 
+
+def encryption_protector_revalidate(
+        client,
+        resource_group_name,
+        server_name):
+    '''
+    Revalidate a server encryption protector.
+    '''
+
+    if server_name is None:
+        raise CLIError('Server name cannot be null')
+
+    try:
+        return client.begin_revalidate(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            encryption_protector_name=EncryptionProtectorName.CURRENT)
+
+    except Exception as ex:
+        raise ex
+
+
+def database_encryption_protector_revalidate(
+        client,
+        resource_group_name,
+        server_name,
+        database_name):
+    '''
+    Revalidate a database encryption protector.
+    '''
+
+    if server_name is None:
+        raise CLIError('Server name cannot be null')
+
+    if database_name is None:
+        raise CLIError('Database name cannot be null')
+
+    try:
+        return client.begin_revalidate(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            database_name=database_name,
+            encryption_protector_name=EncryptionProtectorName.CURRENT)
+
+    except Exception as ex:
+        raise ex
+
+
+def database_encryption_protector_revert(
+        client,
+        resource_group_name,
+        server_name,
+        database_name):
+    '''
+    Reverts a database encryption protector.
+    '''
+
+    if server_name is None:
+        raise CLIError('Server name cannot be null')
+
+    if database_name is None:
+        raise CLIError('Database name cannot be null')
+
+    try:
+        return client.begin_revert(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            database_name=database_name,
+            encryption_protector_name=EncryptionProtectorName.CURRENT)
+
+    except Exception as ex:
+        raise ex
+
 #####
 #           sql server aad-only
 #####
@@ -4539,6 +4829,7 @@ def managed_instance_create(
         external_admin_sid=None,
         external_admin_name=None,
         service_principal_type=None,
+        zone_redundant=None,
         **kwargs):
     '''
     Creates a managed instance.
@@ -4575,6 +4866,8 @@ def managed_instance_create(
     kwargs['key_id'] = key_id
 
     kwargs['primary_user_assigned_identity_id'] = primary_user_assigned_identity_id
+
+    kwargs['zone_redundant'] = zone_redundant
 
     ad_only = None
     if enable_ad_only_auth:
@@ -4657,7 +4950,8 @@ def managed_instance_update(
         user_assigned_identity_id=None,
         virtual_network_subnet_id=None,
         yes=None,
-        service_principal_type=None):
+        service_principal_type=None,
+        zone_redundant=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -4723,6 +5017,9 @@ def managed_instance_update(
 
     if virtual_network_subnet_id is not None:
         instance.subnet_id = virtual_network_subnet_id
+
+    if zone_redundant is not None:
+        instance.zone_redundant = zone_redundant
 
     return instance
 
@@ -5845,7 +6142,8 @@ def instance_failover_group_create(
         partner_managed_instance,
         partner_resource_group,
         failover_policy=FailoverPolicyType.automatic.value,
-        grace_period=1):
+        grace_period=1,
+        secondary_type="Geo"):
     '''
     Creates a failover group.
     '''
@@ -5883,13 +6181,15 @@ def instance_failover_group_create(
                 failover_policy=failover_policy,
                 failover_with_data_loss_grace_period_minutes=grace_period),
             read_only_endpoint=InstanceFailoverGroupReadOnlyEndpoint(
-                failover_policy="Disabled")))
+                failover_policy="Disabled"),
+            secondary_type=secondary_type))
 
 
 def instance_failover_group_update(
         instance,
         failover_policy=None,
-        grace_period=None,):
+        grace_period=None,
+        secondary_type=None):
     '''
     Updates the failover group.
     '''
@@ -5899,23 +6199,26 @@ def instance_failover_group_update(
         failover_policy,
         grace_period)
 
+    if secondary_type is not None:
+        instance.secondary_type = secondary_type
+
     return instance
 
 
 def instance_failover_group_failover(
         client,
-        resource_group_name,
+        resource_group_name_failover,
         failover_group_name,
-        location_name,
+        location_name_failover,
         allow_data_loss=False):
     '''
     Failover an instance failover group.
     '''
 
     failover_group = client.get(
-        resource_group_name=resource_group_name,
+        resource_group_name=resource_group_name_failover,
         failover_group_name=failover_group_name,
-        location_name=location_name)
+        location_name=location_name_failover)
 
     if failover_group.replication_role == "Primary":
         return
@@ -5927,9 +6230,9 @@ def instance_failover_group_failover(
         failover_func = client.begin_failover
 
     return failover_func(
-        resource_group_name=resource_group_name,
+        resource_group_name=resource_group_name_failover,
         failover_group_name=failover_group_name,
-        location_name=location_name)
+        location_name=location_name_failover)
 
 ###############################################
 #              sql server conn-policy         #
@@ -5982,7 +6285,7 @@ def transparent_data_encryptions_set(
     '''
     kwargs['state'] = status
 
-    return client.create_or_update(
+    return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         database_name=database_name,

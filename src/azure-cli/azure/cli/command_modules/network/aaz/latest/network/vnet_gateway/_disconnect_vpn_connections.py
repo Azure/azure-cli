@@ -55,13 +55,8 @@ class DisconnectVpnConnections(AAZCommand):
             required=True,
             id_part="name",
         )
-
-        # define Arg Group "Request"
-
-        _args_schema = cls._args_schema
         _args_schema.vpn_connections = AAZListArg(
             options=["--vpn-connections"],
-            arg_group="Request",
             help="List of Name or ID of VPN connections.",
         )
 

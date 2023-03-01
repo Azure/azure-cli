@@ -97,34 +97,6 @@ def cli_namespace_exists(cmd, client, name):
         return client.check_name_availability(parameters={'name': name})
 
 
-# Namespace Authorization rule:
-def cli_namespaceautho_create(cmd, client, resource_group_name, namespace_name, name, rights=None):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        from azure.cli.command_modules.servicebus._utils import accessrights_converter
-        return client.create_or_update_authorization_rule(
-            resource_group_name=resource_group_name,
-            namespace_name=namespace_name,
-            authorization_rule_name=name,
-            parameters={'rights': accessrights_converter(rights)})
-
-
-# Namespace Authorization rule:
-def cli_namespaceautho_update(cmd, instance, rights):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        from azure.cli.command_modules.servicebus._utils import accessrights_converter
-        instance.rights = accessrights_converter(rights)
-        return instance
-
-
-def cli_keys_renew(client, resource_group_name, namespace_name, name, key_type, key=None):
-    return client.regenerate_keys(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        authorization_rule_name=name,
-        parameters={'key_type': key_type, 'key': key}
-    )
-
-
 # Queue Region
 def cli_sbqueue_create(cmd, client, resource_group_name, namespace_name, queue_name, lock_duration=None,
                        max_size_in_megabytes=None, requires_duplicate_detection=None, requires_session=None,
@@ -243,28 +215,6 @@ def cli_sbqueue_update(instance, lock_duration=None,
     return instance
 
 
-# Queue Authorization rule:
-def cli_queueautho_create(cmd, client, resource_group_name, namespace_name, queue_name, name, rights=None):
-    from azure.cli.command_modules.servicebus._utils import accessrights_converter
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        return client.create_or_update_authorization_rule(
-            resource_group_name=resource_group_name,
-            namespace_name=namespace_name,
-            queue_name=queue_name,
-            authorization_rule_name=name,
-            parameters={'rights': accessrights_converter(rights)})
-
-
-def cli_queueauthokey_renew(cmd, client, resource_group_name, namespace_name, queue_name, name, key_type=None, key=None):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        return client.regenerate_keys(
-            resource_group_name=resource_group_name,
-            namespace_name=namespace_name,
-            queue_name=queue_name,
-            authorization_rule_name=name,
-            parameters={'key_type': key_type, 'key': key})
-
-
 # Topic Region
 def cli_sbtopic_create(cmd, client, resource_group_name, namespace_name, topic_name, default_message_time_to_live=None,
                        max_size_in_megabytes=None, requires_duplicate_detection=None,
@@ -352,28 +302,6 @@ def cli_sbtopic_update(instance, default_message_time_to_live=None,
         instance.max_message_size_in_kilobytes = max_message_size_in_kilobytes
 
     return instance
-
-
-# Topic Authorization rule
-def cli_topicautho_create(cmd, client, resource_group_name, namespace_name, topic_name, name, rights=None):
-    from azure.cli.command_modules.servicebus._utils import accessrights_converter
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        return client.create_or_update_authorization_rule(
-            resource_group_name=resource_group_name,
-            namespace_name=namespace_name,
-            topic_name=topic_name,
-            authorization_rule_name=name,
-            parameters={'rights': accessrights_converter(rights)})
-
-
-def cli_topicauthokey_renew(cmd, client, resource_group_name, namespace_name, topic_name, name, key_type=None, key=None):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        return client.regenerate_keys(
-            resource_group_name=resource_group_name,
-            namespace_name=namespace_name,
-            topic_name=topic_name,
-            authorization_rule_name=name,
-            parameters={'key_type': key_type, 'key': key})
 
 
 # Subscription Region
@@ -924,7 +852,6 @@ def cli_remove_identity(cmd, client, resource_group_name, namespace_name, system
 def cli_add_encryption(cmd, client, resource_group_name, namespace_name, encryption_config):
     namespace = client.get(resource_group_name, namespace_name)
     Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_SERVICEBUS)
-
     if namespace.encryption:
         if namespace.encryption.key_vault_properties:
             namespace.encryption.key_vault_properties.extend(encryption_config)
