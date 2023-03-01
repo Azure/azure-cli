@@ -12,7 +12,7 @@ from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingEr
 from azure.cli.core.commands.arm import get_arm_resource_by_id
 
 from azure.cli.core.aaz import has_value, AAZResourceLocationArg, AAZResourceLocationArgFormat, AAZListArg, AAZStrArg, \
-    AAZArgEnum, AAZBoolArg, AAZFloatArg, AAZIntArg
+    AAZArgEnum, AAZBoolArg, AAZFloatArg, AAZIntArg, AAZDictArg
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import validate_tags
@@ -826,7 +826,6 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
             "type": args.endpoint_source_type,
             "coverage_level": args.endpoint_source_coverage_level
         }
-
         dst_endpoint = {
             "name": args.endpoint_dest_name,
             "resource_id": args.endpoint_dest_resource_id,
@@ -1515,7 +1514,7 @@ class WatcherConnectionMonitorEndpointAdd(_WatcherConnectionMonitorEndpointAdd):
         )
         args_schema.address_include.Element = AAZStrArg()
 
-        args_schema.filter_item = AAZListArg(
+        args_schema.filter_item = AAZDictArg(
             options=["--filter-item"],
             help="List of property=value pairs to define filter items. "
                  "Property currently include: type, address. Property value of "
@@ -1541,8 +1540,8 @@ class WatcherConnectionMonitorEndpointAdd(_WatcherConnectionMonitorEndpointAdd):
     def pre_operations(self):
         args = self.ctx.args
         if has_value(args.filter_type) or has_value(args.filter_item):
-            filter_type, filter_items = args.filter_type, args.filter_item
-            if (filter_type and not filter_items) or (not filter_type and filter_items):
+            filter_type, filter_item = args.filter_type, args.filter_item
+            if (filter_type and not filter_item) or (not filter_type and filter_item):
                 raise ValidationError('usage error: --filter-type and --filter-item must be present at the same time.')
         if has_value(args.dest_test_groups) or has_value(args.source_test_groups):
             dest_test_groups, source_test_groups = args.dest_test_groups, args.source_test_groups
@@ -1563,19 +1562,13 @@ class WatcherConnectionMonitorEndpointAdd(_WatcherConnectionMonitorEndpointAdd):
             for ip in args.address_exclude:
                 args.scope_exclude.append({"address": ip})
 
-        if has_value(args.filter_type) and has_value(args.filter_items):
-            filter_item = {}
-            for item in args.filter_items:
-                try:
-                    key, val = item.split('=', 1)
-                    if hasattr(filter_item, key):
-                        setattr(filter_item, key, val)
-                    else:
-                        raise ValidationError("usage error: '{}' is not a valid property of "
-                                              "connection monitor endpoint filter-item".format(key))
-                except ValueError:
-                    raise ValidationError('usage error:  PropertyName=PropertyValue [PropertyName=PropertyValue ...]')
-            args.filter_items.append(filter_item)
+        if has_value(args.filter_type) and has_value(args.filter_item):
+            for address, val in args.filter_item.items():
+                args.filter_items.append({
+                    "address": address,
+                    "type": val,
+                })
+
         instance = self.ctx.vars.instance
 
         src_test_groups = set()
@@ -1607,9 +1600,6 @@ class WatcherConnectionMonitorEndpointShow(_WatcherConnectionMonitorEndpointShow
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
             required=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="watcher_rg",
-            ),
         )
         return args_schema
 
@@ -1633,9 +1623,6 @@ class WatcherConnectionMonitorEndpointList(_WatcherConnectionMonitorEndpointList
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
             required=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="watcher_rg",
-            ),
         )
         return args_schema
 
@@ -1659,9 +1646,6 @@ class WatcherConnectionMonitorEndpointRemove(_WatcherConnectionMonitorEndpointRe
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
             required=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="watcher_rg",
-            ),
         )
         args_schema.test_groups = AAZListArg(
             options=["--test-groups"],
@@ -1701,10 +1685,11 @@ class WatcherConnectionMonitorTestConfigurationAdd(_MonitorTestConfigurationAdd)
         args_schema.watcher_name._required = False
         args_schema.watcher_rg._registered = False
         args_schema.watcher_rg._required = False
+        args_schema.http_request_headers._registered = False
 
-        args_schema.http_request_header = AAZListArg(
-            options=["--address-exclude"],
-            help="List of address of the endpoint item which needs to be included to the endpoint scope.", # ? include
+        args_schema.http_request_header = AAZDictArg(
+            options=["--http-request-header"],
+            help="The HTTP headers to transmit with the request. List of property=value pairs to define HTTP headers.",
         )
         args_schema.http_request_header.Element = AAZStrArg()
 
@@ -1723,16 +1708,8 @@ class WatcherConnectionMonitorTestConfigurationAdd(_MonitorTestConfigurationAdd)
 
         if has_value(args.http_request_header):
             request_header = {}
-            for item in args.http_request_header:
-                try:
-                    key, val = item.split('=', 1)
-                    if hasattr(request_header, key):
-                        setattr(request_header, key, val)
-                    else:
-                        raise ValidationError("usage error: '{}' is not a value property of HTTPHeader".format(key))
-                except ValueError:
-                    raise ValidationError('usage error: name=HTTPHeader value=HTTPHeaderValue')
-        args.http_request_headers.append(request_header)
+            for name, val in args.http_request_header.items():
+                args.http_request_headers.append(request_header)
 
         instance = self.ctx.vars.instance
         if has_value(args.test_groups):
@@ -1757,9 +1734,6 @@ class WatcherConnectionMonitorTestConfigurationShow(_MonitorTestConfigurationSho
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
             required=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="watcher_rg",
-            ),
         )
         return args_schema
 
@@ -1783,9 +1757,6 @@ class WatcherConnectionMonitorTestConfigurationList(_MonitorTestConfigurationLis
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
             required=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="watcher_rg",
-            ),
         )
         return args_schema
 
@@ -1810,9 +1781,6 @@ class WatcherConnectionMonitorTestConfigurationRemove(_MonitorTestConfigurationR
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
             required=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="watcher_rg",
-            ),
         )
         args_schema.test_groups = AAZListArg(
             options=["--test-groups"],
@@ -1981,7 +1949,6 @@ class WatcherConnectionMonitorTestGroupAdd(_WatcherConnectionMonitorTestGroupAdd
 
     def pre_instance_create(self):
         args = self.ctx.args
-        name = args.test_group_name.to_serialized_data()
         instance = self.ctx.vars.instance
 
         endpoint_source_name = args.endpoint_source_name
@@ -2074,9 +2041,6 @@ class WatcherConnectionMonitorTestGroupShow(_WatcherConnectionMonitorTestGroupSh
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
             required=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="watcher_rg",
-            ),
         )
         return args_schema
 
@@ -2100,9 +2064,6 @@ class WatcherConnectionMonitorTestGroupList(_WatcherConnectionMonitorTestGroupLi
                  "You can configure the default location "
                  "using `az configure --defaults location=<location>`.",
             required=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="watcher_rg",
-            ),
         )
         return args_schema
 
