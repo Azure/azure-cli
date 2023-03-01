@@ -1822,7 +1822,7 @@ def db_update(  # pylint: disable=too-many-locals
     #####
     if assign_identity:
         if user_assigned_identity_id is not None:
-            _get_database_identity(user_assigned_identity_id)
+            instance.identity = _get_database_identity(user_assigned_identity_id)
 
     if keys is not None or keys_to_remove is not None:
         instance.keys = _get_database_keys_for_update(keys, keys_to_remove)
