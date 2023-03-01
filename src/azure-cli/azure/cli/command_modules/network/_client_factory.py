@@ -20,10 +20,6 @@ def cf_connection_monitor(cli_ctx, _):
     return network_client_factory(cli_ctx).connection_monitors
 
 
-def cf_flow_logs(cli_ctx, _):
-    return network_client_factory(cli_ctx).flow_logs
-
-
 def cf_network_watcher(cli_ctx, _):
     return network_client_factory(cli_ctx).network_watchers
 
