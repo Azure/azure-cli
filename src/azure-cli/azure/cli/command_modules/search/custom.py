@@ -244,6 +244,7 @@ def update_shared_private_link_resource(cmd, resource_group_name, search_service
     return sdk_no_wait(no_wait, _client.begin_create_or_update, resource_group_name,
                        search_service_name, shared_private_link_resource_name, _shared_private_link_resource)
 
+
 def setup_search_auth(cmd, instance, disable_local_auth, auth_options, aad_auth_failure_mode):
     """
     Add auth options to a search service
@@ -281,4 +282,4 @@ def setup_search_auth(cmd, instance, disable_local_auth, auth_options, aad_auth_
         instance.auth_options = {}
         instance.auth_options[auth_options] = {}
         if aad_auth_failure_mode:
-            instance.auth_options[auth_options]["aadAuthFailureMode"] = aad_auth_failure_mode  
+            instance.auth_options[auth_options]["aadAuthFailureMode"] = aad_auth_failure_mode
