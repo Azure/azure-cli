@@ -214,7 +214,7 @@ def cf_synapse_library(cli_ctx, workspace_name):
 
 
 def cf_synapse_client_managedprivateendpoints_factory(cli_ctx, workspace_name):
-    from azure.synapse.managedprivateendpoints import ManagedPrivateEndpointsClient
+    from azure.synapse.managedprivateendpoints import VnetClient
     from azure.cli.core._profile import Profile
     from azure.cli.core.commands.client_factory import get_subscription_id
     subscription_id = get_subscription_id(cli_ctx)
@@ -223,7 +223,7 @@ def cf_synapse_client_managedprivateendpoints_factory(cli_ctx, workspace_name):
         resource=cli_ctx.cloud.endpoints.synapse_analytics_resource_id,
         subscription_id=subscription_id
     )
-    return ManagedPrivateEndpointsClient(
+    return VnetClient(
         credential=cred,
         endpoint='{}{}{}'.format("https://", workspace_name, cli_ctx.cloud.suffixes.synapse_analytics_endpoint)
     )

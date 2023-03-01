@@ -25,9 +25,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-01-01",
+        "version": "2022-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutegateways/{}/expressrouteconnections/{}", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutegateways/{}/expressrouteconnections/{}", "2022-07-01"],
         ]
     }
 
@@ -52,13 +52,11 @@ class Create(AAZCommand):
             options=["-n", "--name"],
             help="ExpressRoute connection name.",
             required=True,
-            id_part="child_name_1",
         )
         _args_schema.gateway_name = AAZStrArg(
             options=["--gateway-name"],
             help="ExpressRoute gateway name.",
             required=True,
-            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -79,10 +77,10 @@ class Create(AAZCommand):
         # define Arg Group "Peering"
 
         _args_schema = cls._args_schema
-        _args_schema.peering = AAZResourceIdArg(
+        _args_schema.peering = AAZStrArg(
             options=["--peering"],
             arg_group="Peering",
-            help="Name or ID of an ExpressRoute peering."
+            help="Name or ID of an ExpressRoute peering.",
         )
 
         # define Arg Group "Properties"
@@ -120,6 +118,20 @@ class Create(AAZCommand):
         labels.Element = AAZStrArg()
 
         # define Arg Group "RoutingConfiguration"
+
+        _args_schema = cls._args_schema
+        _args_schema.inbound_route_map = AAZObjectArg(
+            options=["--inbound-route-map"],
+            arg_group="RoutingConfiguration",
+            help="The resource id of the RouteMap associated with this RoutingConfiguration for inbound learned routes.",
+        )
+        cls._build_args_sub_resource_create(_args_schema.inbound_route_map)
+        _args_schema.outbound_route_map = AAZObjectArg(
+            options=["--outbound-route-map"],
+            arg_group="RoutingConfiguration",
+            help="The resource id of theRouteMap associated with this RoutingConfiguration for outbound advertised routes.",
+        )
+        cls._build_args_sub_resource_create(_args_schema.outbound_route_map)
         return cls._args_schema
 
     _args_sub_resource_create = None
@@ -225,7 +237,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2022-07-01",
                     required=True,
                 ),
             }
@@ -267,7 +279,9 @@ class Create(AAZCommand):
 
             routing_configuration = _builder.get(".properties.routingConfiguration")
             if routing_configuration is not None:
-                _build_schema_sub_resource_create(routing_configuration.set_prop("associatedRouteTable", AAZObjectType, ".associated_id"))
+                _CreateHelper._build_schema_sub_resource_create(routing_configuration.set_prop("associatedRouteTable", AAZObjectType, ".associated_id"))
+                _CreateHelper._build_schema_sub_resource_create(routing_configuration.set_prop("inboundRouteMap", AAZObjectType, ".inbound_route_map"))
+                _CreateHelper._build_schema_sub_resource_create(routing_configuration.set_prop("outboundRouteMap", AAZObjectType, ".outbound_route_map"))
                 routing_configuration.set_prop("propagatedRouteTables", AAZObjectType)
 
             propagated_route_tables = _builder.get(".properties.routingConfiguration.propagatedRouteTables")
@@ -277,7 +291,7 @@ class Create(AAZCommand):
 
             ids = _builder.get(".properties.routingConfiguration.propagatedRouteTables.ids")
             if ids is not None:
-                _build_schema_sub_resource_create(ids.set_elements(AAZObjectType, "."))
+                _CreateHelper._build_schema_sub_resource_create(ids.set_elements(AAZObjectType, "."))
 
             labels = _builder.get(".properties.routingConfiguration.propagatedRouteTables.labels")
             if labels is not None:
@@ -318,6 +332,9 @@ class Create(AAZCommand):
             properties.enable_internet_security = AAZBoolType(
                 serialized_name="enableInternetSecurity",
             )
+            properties.enable_private_link_fast_path = AAZBoolType(
+                serialized_name="enablePrivateLinkFastPath",
+            )
             properties.express_route_circuit_peering = AAZObjectType(
                 serialized_name="expressRouteCircuitPeering",
                 flags={"required": True},
@@ -343,7 +360,15 @@ class Create(AAZCommand):
             routing_configuration.associated_route_table = AAZObjectType(
                 serialized_name="associatedRouteTable",
             )
-            _build_schema_sub_resource_read(routing_configuration.associated_route_table)
+            _CreateHelper._build_schema_sub_resource_read(routing_configuration.associated_route_table)
+            routing_configuration.inbound_route_map = AAZObjectType(
+                serialized_name="inboundRouteMap",
+            )
+            _CreateHelper._build_schema_sub_resource_read(routing_configuration.inbound_route_map)
+            routing_configuration.outbound_route_map = AAZObjectType(
+                serialized_name="outboundRouteMap",
+            )
+            _CreateHelper._build_schema_sub_resource_read(routing_configuration.outbound_route_map)
             routing_configuration.propagated_route_tables = AAZObjectType(
                 serialized_name="propagatedRouteTables",
             )
@@ -357,7 +382,7 @@ class Create(AAZCommand):
 
             ids = cls._schema_on_200_201.properties.routing_configuration.propagated_route_tables.ids
             ids.Element = AAZObjectType()
-            _build_schema_sub_resource_read(ids.Element)
+            _CreateHelper._build_schema_sub_resource_read(ids.Element)
 
             labels = cls._schema_on_200_201.properties.routing_configuration.propagated_route_tables.labels
             labels.Element = AAZStrType()
@@ -370,10 +395,13 @@ class Create(AAZCommand):
             vnet_routes.static_routes = AAZListType(
                 serialized_name="staticRoutes",
             )
+            vnet_routes.static_routes_config = AAZObjectType(
+                serialized_name="staticRoutesConfig",
+            )
 
             bgp_connections = cls._schema_on_200_201.properties.routing_configuration.vnet_routes.bgp_connections
             bgp_connections.Element = AAZObjectType()
-            _build_schema_sub_resource_read(bgp_connections.Element)
+            _CreateHelper._build_schema_sub_resource_read(bgp_connections.Element)
 
             static_routes = cls._schema_on_200_201.properties.routing_configuration.vnet_routes.static_routes
             static_routes.Element = AAZObjectType()
@@ -390,30 +418,41 @@ class Create(AAZCommand):
             address_prefixes = cls._schema_on_200_201.properties.routing_configuration.vnet_routes.static_routes.Element.address_prefixes
             address_prefixes.Element = AAZStrType()
 
+            static_routes_config = cls._schema_on_200_201.properties.routing_configuration.vnet_routes.static_routes_config
+            static_routes_config.propagate_static_routes = AAZBoolType(
+                serialized_name="propagateStaticRoutes",
+                flags={"read_only": True},
+            )
+            static_routes_config.vnet_local_route_override_criteria = AAZStrType(
+                serialized_name="vnetLocalRouteOverrideCriteria",
+            )
+
             return cls._schema_on_200_201
 
 
-def _build_schema_sub_resource_create(_builder):
-    if _builder is None:
-        return
-    _builder.set_prop("id", AAZStrType, ".id")
+class _CreateHelper:
+    """Helper class for Create"""
 
+    @classmethod
+    def _build_schema_sub_resource_create(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("id", AAZStrType, ".id")
 
-_schema_sub_resource_read = None
+    _schema_sub_resource_read = None
 
+    @classmethod
+    def _build_schema_sub_resource_read(cls, _schema):
+        if cls._schema_sub_resource_read is not None:
+            _schema.id = cls._schema_sub_resource_read.id
+            return
 
-def _build_schema_sub_resource_read(_schema):
-    global _schema_sub_resource_read
-    if _schema_sub_resource_read is not None:
-        _schema.id = _schema_sub_resource_read.id
-        return
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
 
-    _schema_sub_resource_read = AAZObjectType()
+        sub_resource_read = _schema_sub_resource_read
+        sub_resource_read.id = AAZStrType()
 
-    sub_resource_read = _schema_sub_resource_read
-    sub_resource_read.id = AAZStrType()
-
-    _schema.id = _schema_sub_resource_read.id
+        _schema.id = cls._schema_sub_resource_read.id
 
 
 __all__ = ["Create"]

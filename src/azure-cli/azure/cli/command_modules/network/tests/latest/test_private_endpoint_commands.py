@@ -2462,7 +2462,7 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
         _test_private_endpoint(self, group_id=False)
 
-    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_sql_server")
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_sql_server", location="eastus")
     def test_private_endpoint_connection_sql_server(self, resource_group):
         self.kwargs.update({
             'rg': resource_group,
@@ -3930,6 +3930,91 @@ class NetworkPrivateLinkMLRegistryScenarioTest(ScenarioTest):
         time.sleep(90)
         self.cmd('network private-endpoint-connection show --id {private-endpoint-connection-id}',
                  expect_failure=True)
+        
+class NetworkPrivateLinkMicrosoftMonitorAccountsRegistryScenarioTest(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='test_monitor_accounts_registries_pe_', random_name_length=40, location="eastus2euap")
+    def test_private_link_endpoint_monitor_accounts_registry(self, resource_group):
+        self.kwargs.update({
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'account_name': self.create_random_name('test-amw-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'private_endpoint': self.create_random_name('cli-pe-', 24),
+            'private_endpoint2': self.create_random_name('cli-pe-', 24),
+            'private_endpoint_connection': self.create_random_name('cli-pec-', 24),
+            'private_endpoint_connection2': self.create_random_name('cli-pec-', 24),
+            'location': 'eastus2euap',
+            'approve_desc': 'ApprovedByTest',
+            'reject_desc': 'RejectedByTest',
+            'rg': resource_group,
+            'sub': self.get_subscription_id(),
+            'body': '{\\"location\\":\\"eastus2euap\\"}'
+        })
+
+        # Test create Azure monitor workspace create
+        macAccount = self.cmd('az rest --method "PUT" \
+                        --url "https://management.azure.com/subscriptions/{sub}/resourcegroups/{rg}/providers/Microsoft.Monitor/accounts/{account_name}?api-version=2021-06-03-preview" \
+                        --body "{body}"').get_output_in_json()
+        self.kwargs['account_id'] = macAccount['id']
+        print(macAccount['id'])
+
+        # Prepare network
+        self.cmd('network vnet create -n {vnet} -g {rg} -l {location} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Test private link resource list
+        pr = self.cmd('network private-link-resource list --name {account_name} -g {rg} --type microsoft.monitor/accounts', checks=[
+            self.check('length(@)', 1)
+        ]).get_output_in_json()
+        self.kwargs['group_id'] = pr[0]['properties']['groupId']
+
+        # Create private endpoint with manual request approval
+        private_endpoint = self.cmd(
+            'network private-endpoint create -g {rg} -n {private_endpoint2} --vnet-name {vnet} --subnet {subnet} '
+            '--private-connection-resource-id {account_id} --connection-name {private_endpoint_connection2} '
+            '--group-id {group_id} --location {location} --manual-request').get_output_in_json()
+        self.assertTrue(self.kwargs['private_endpoint2'].lower() in private_endpoint['name'].lower())
+        print("PrivateEndpt created for manual approval", private_endpoint)
+
+        # Test get private endpoint connection
+        private_endpoint_connections = self.cmd('network private-endpoint-connection list --id {account_id}',
+                                                checks=[
+                                                    self.check(
+                                                        '@[0].properties.privateLinkServiceConnectionState.status',
+                                                        'Pending'),
+                                                ]).get_output_in_json()
+        self.kwargs['private_endpoint_connection2_id'] = private_endpoint_connections[0]['id']
+
+        # Test approve private endpoint connection
+        self.cmd(
+            'network private-endpoint-connection approve --id {private_endpoint_connection2_id} '
+            '--description {approve_desc}', checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
+            ])
+
+        # Test reject previous approved private endpoint connnection
+        self.cmd('network private-endpoint-connection reject --id {private_endpoint_connection2_id}'
+                 ' --description {reject_desc}', checks=[
+                  self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
+        ])
+
+        # Test delete private endpoint connection
+        self.cmd('network private-endpoint-connection delete --id {private_endpoint_connection2_id} --yes')
+        import time
+        time.sleep(90)
+        self.cmd('network private-endpoint-connection show --id {private_endpoint_connection2_id}',
+                 expect_failure=True)
+
+        # Add an endpoint that gets auto approved
+        result = self.cmd('network private-endpoint create -g {rg} -n {private_endpoint} --vnet-name {vnet} --subnet {subnet} --private-connection-resource-id {account_id} '
+        '--connection-name {private_endpoint_connection} --group-id {group_id}').get_output_in_json()
+        print("AutoApprove Private endpoint", result)
+        print("----break-----")
+        self.assertTrue(self.kwargs['private_endpoint'].lower() in result['name'].lower())
+        self.assertTrue("Approved" in result['privateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'])
 
 if __name__ == '__main__':
     unittest.main()

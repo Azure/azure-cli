@@ -215,7 +215,6 @@ def load_arguments(self, _):
         c.argument('sql_management_mode',
                    help='SQL Server management type. Updates from LightWeight to Full.',
                    options_list=['--sql-mgmt-type'],
-                   arg_type=get_enum_type(['Full']),
                    deprecate_info=c.deprecate())
         c.argument('prompt',
                    options_list=['--yes', '-y'],
