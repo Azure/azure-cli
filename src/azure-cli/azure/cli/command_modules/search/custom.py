@@ -257,9 +257,6 @@ def setup_search_auth(cmd, instance, disable_local_auth, auth_options, aad_auth_
     """
     from azure.cli.core.azclierror import MutuallyExclusiveArgumentError, RequiredArgumentMissingError
 
-    if not cmd.supported_api_version(min_api='2021-04-30-Preview'):
-        return
-
     if (disable_local_auth is not None and disable_local_auth not in [True, False]):
         raise UnrecognizedArgumentError(
             "SearchService.DisableLocalAuth: only [True, False] are allowed")

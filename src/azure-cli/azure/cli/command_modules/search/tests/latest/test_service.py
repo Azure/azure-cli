@@ -380,7 +380,7 @@ class AzureSearchServicesTests(ScenarioTest):
             ' --auth-options {auth_options}',
             checks=[self.check('name', '{name}'),
                     self.check('disableLocalAuth', '{disable_local_auth}'),
-                    self.check('authOptions', {'{auth_options}': {}})])
+                    self.check('authOptions', {'apiKeyOnly': {}, 'aadOrApiKey': None })])
 
         self.kwargs.update({
             'disable_local_auth': False,
@@ -395,7 +395,7 @@ class AzureSearchServicesTests(ScenarioTest):
             ' --aad-auth-failure-mode {aad_auth_failure_mode}',
             checks=[self.check('name', '{name}'),
                     self.check('disableLocalAuth', '{disable_local_auth}'),
-                    self.check('authOptions', { '{auth_options}': { 'aadAuthFailureMode': '{aad_auth_failure_mode}' } } )])
+                    self.check('authOptions', { 'aadOrApiKey': { 'aadAuthFailureMode': 'http401WithBearerChallenge' }, 'apiKeyOnly': None } )])
 
         self.kwargs.update({
             'disable_local_auth': False,
@@ -410,7 +410,7 @@ class AzureSearchServicesTests(ScenarioTest):
             ' --aad-auth-failure-mode {aad_auth_failure_mode}',
             checks=[self.check('name', '{name}'),
                     self.check('disableLocalAuth', '{disable_local_auth}'),
-                    self.check('authOptions', { '{auth_options}': { 'aadAuthFailureMode': '{aad_auth_failure_mode}' } } )])
+                    self.check('authOptions', { 'aadOrApiKey': { 'aadAuthFailureMode': 'http403' }, 'apiKeyOnly': None } )])
 
 if __name__ == '__main__':
     unittest.main()
