@@ -282,12 +282,6 @@ def load_command_table(self, _):
 
     # endregion
 
-    # region NetworkRoot
-    # usage_path = 'azure.mgmt.network.operations#UsagesOperations.{}'
-    # with self.command_group('network') as g:
-    #     g.command('list-usages', 'list', operations_tmpl=usage_path, client_factory=cf_usages, transform=transform_network_usage_list, table_transformer=transform_network_usage_table)
-    # endregion
-
     # region ApplicationGateways
     with self.command_group('network application-gateway', network_ag_sdk) as g:
         g.custom_command('create', 'create_application_gateway',

@@ -115,6 +115,7 @@ def load_command_table(self, _):
     self.command_table['network vnet subnet update'] = VNetSubnetUpdate(loader=self)
     with self.command_group('network vnet subnet', operations_tmpl=operations_tmpl) as g:
         g.custom_command("list-available-ips", "subnet_list_available_ips", is_preview=True)
+    # endregion
 
     # region NetworkRoot
     with self.command_group('network'):

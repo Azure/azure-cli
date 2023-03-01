@@ -819,6 +819,26 @@ class NetworkSubnetEndpointServiceScenarioTest(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints ""',
                  checks=self.check('serviceEndpoints', None))
 
+    @ResourceGroupPreparer(name_prefix='cli_subnet_delegation')
+    def test_network_subnet_delegation(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+        })
+        result = self.cmd('network vnet subnet list-available-delegations -l westcentralus').get_output_in_json()
+        self.assertTrue(len(result) > 1, True)
+        result = self.cmd('network vnet subnet list-available-delegations -g {rg}').get_output_in_json()
+        self.assertTrue(len(result) > 1, True)
+
+        self.cmd('network vnet create -g {rg} -n {vnet} -l westcentralus')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.0.0/24 --delegations Microsoft.Web.serverFarms', checks=[
+            self.check('delegations[0].serviceName', 'Microsoft.Web/serverFarms')
+        ])
+        # verify the update command, and that CLI validation will accept either serviceName or Name
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --delegations Microsoft.Sql/managedInstances',
+                 checks=self.check('delegations[0].serviceName', 'Microsoft.Sql/managedInstances'))
+
+
 
 class NetworkRouteTableOperationScenarioTest(ScenarioTest):
 
@@ -867,45 +887,3 @@ class NetworkUsageListScenarioTest(ScenarioTest):
 
     def test_network_usage_list(self):
         self.cmd('network list-usages --location westus', checks=self.check('type(@)', 'array'))
-
-
-class NetworkSubnetEndpointServiceScenarioTest(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_subnet_endpoint_service_test')
-    def test_network_subnet_endpoint_service(self, resource_group):
-        self.kwargs.update({
-            'vnet': 'vnet1',
-            'subnet': 'subnet1'
-        })
-        self.cmd('network vnet list-endpoint-services -l westus', checks=[
-            self.check('length(@)', 12),
-            self.check('@[0].name', 'Microsoft.Storage')
-        ])
-
-        result = self.cmd('network vnet list-endpoint-services -l westus').get_output_in_json()
-        self.assertGreaterEqual(len(result), 2)
-        self.cmd('network vnet create -g {rg} -n {vnet}')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.1.0/24 --service-endpoints Microsoft.Storage',
-                 checks=self.check('serviceEndpoints[0].service', 'Microsoft.Storage'))
-        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints ""',
-                 checks=self.check('serviceEndpoints', None))
-
-
-    @ResourceGroupPreparer(name_prefix='cli_subnet_delegation')
-    def test_network_subnet_delegation(self, resource_group):
-        self.kwargs.update({
-            'vnet': 'vnet1',
-            'subnet': 'subnet1',
-        })
-        result = self.cmd('network vnet subnet list-available-delegations -l westcentralus').get_output_in_json()
-        self.assertTrue(len(result) > 1, True)
-        result = self.cmd('network vnet subnet list-available-delegations -g {rg}').get_output_in_json()
-        self.assertTrue(len(result) > 1, True)
-
-        self.cmd('network vnet create -g {rg} -n {vnet} -l westcentralus')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.0.0/24 --delegations Microsoft.Web.serverFarms', checks=[
-            self.check('delegations[0].serviceName', 'Microsoft.Web/serverFarms')
-        ])
-        # verify the update command, and that CLI validation will accept either serviceName or Name
-        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --delegations Microsoft.Sql/managedInstances',
-                 checks=self.check('delegations[0].serviceName', 'Microsoft.Sql/managedInstances'))

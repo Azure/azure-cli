@@ -781,3 +781,9 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
         self.cmd('network route-table route list --resource-group {rg} --route-table-name {table}', checks=self.is_empty())
         self.cmd('network route-table delete --resource-group {rg} --name {table} -y')
         self.cmd('network route-table list --resource-group {rg}', checks=self.is_empty())
+
+
+class NetworkUsageListScenarioTest(ScenarioTest):
+
+    def test_network_usage_list(self):
+        self.cmd('network list-usages --location westus', checks=self.check('type(@)', 'array'))
