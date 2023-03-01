@@ -798,15 +798,17 @@ def db_show_conn_str(
     formats = {
         ClientType.ado_net.value: {
             ClientAuthenticationType.sql_password.value:
-                'Server=tcp:{server_fqdn},1433;Database={db};User ID=<username>;'
-                'Password=<password>;Encrypt=true;Connection Timeout=30;',
+                'Server=tcp:{server_fqdn},1433;Initial Catalog={db};Persist Security Info=False;'
+                'User ID=<username>;Password=<password>;MultipleActiveResultSets=False;Encrypt=true;'
+                'TrustServerCertificate=False;Connection Timeout=30;',
             ClientAuthenticationType.active_directory_password.value:
-                'Server=tcp:{server_fqdn},1433;Database={db};User ID=<username>;'
-                'Password=<password>;Encrypt=true;Connection Timeout=30;'
-                'Authentication="Active Directory Password"',
+                'Server=tcp:{server_fqdn},1433;Initial Catalog={db};Persist Security Info=False;'
+                'User ID=<username>;Password=<password>;MultipleActiveResultSets=False;Encrypt=true;'
+                'TrustServerCertificate=False;Authentication="Active Directory Password"',
             ClientAuthenticationType.active_directory_integrated.value:
-                'Server=tcp:{server_fqdn},1433;Database={db};Encrypt=true;'
-                'Connection Timeout=30;Authentication="Active Directory Integrated"'
+                'Server=tcp:{server_fqdn},1433;Initial Catalog={db};Persist Security Info=False;'
+                'User ID=<username>;MultipleActiveResultSets=False;Encrypt=true;'
+                'TrustServerCertificate=False;Authentication="Active Directory Integrated"'
         },
         ClientType.sqlcmd.value: {
             ClientAuthenticationType.sql_password.value:

@@ -3780,19 +3780,19 @@ class SqlServerConnectionStringScenarioTest(ScenarioTest):
         # ADO.NET, username/password
         conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c ado.net').get_output_in_json()
         self.assertEqual(conn_str,
-                         'Server=tcp:myserver.database.windows.net,1433;Database=mydb;User ID=<username>;Password=<password>;Encrypt=true;Connection Timeout=30;')
+                         'Server=tcp:myserver.database.windows.net,1433;Initial Catalog=mydb;Persist Security Info=False;User ID=<username>;Password=<password>;MultipleActiveResultSets=False;Encrypt=true;TrustServerCertificate=False;Connection Timeout=30;')
 
         # ADO.NET, ADPassword
         conn_str = self.cmd(
             'sql db show-connection-string -s myserver -n mydb -c ado.net -a ADPassword').get_output_in_json()
         self.assertEqual(conn_str,
-                         'Server=tcp:myserver.database.windows.net,1433;Database=mydb;User ID=<username>;Password=<password>;Encrypt=true;Connection Timeout=30;Authentication="Active Directory Password"')
+                         'Server=tcp:myserver.database.windows.net,1433;Initial Catalog=mydb;Persist Security Info=False;User ID=<username>;Password=<password>;MultipleActiveResultSets=False;Encrypt=true;TrustServerCertificate=False;Authentication="Active Directory Password"')
 
         # ADO.NET, ADIntegrated
         conn_str = self.cmd(
             'sql db show-connection-string -s myserver -n mydb -c ado.net -a ADIntegrated').get_output_in_json()
         self.assertEqual(conn_str,
-                         'Server=tcp:myserver.database.windows.net,1433;Database=mydb;Encrypt=true;Connection Timeout=30;Authentication="Active Directory Integrated"')
+                         'Server=tcp:myserver.database.windows.net,1433;Initial Catalog=mydb;Persist Security Info=False;User ID=<username>;MultipleActiveResultSets=False;Encrypt=true;TrustServerCertificate=False;Authentication="Active Directory Integrated"')
 
         # SqlCmd, username/password
         conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c sqlcmd').get_output_in_json()
