@@ -83,3 +83,23 @@ def load_command_table(self, _):
     with self.command_group('network vnet subnet', operations_tmpl=operations_tmpl) as g:
         g.custom_command("list-available-ips", "subnet_list_available_ips", is_preview=True)
     # endregion
+
+    # region PublicIPAddresses
+    public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$Address:ipAddress, AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
+    public_ip_show_table_transform = public_ip_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ' if self.supported_api_version(min_api='2017-06-01') else ' ')
+
+    public_ip = import_aaz_by_profile("network.public_ip")
+    operations_tmpl = self.get_module_name_by_profile("operations.public_ip#{}")
+    from .operations.public_ip import PublicIPUpdate, PublicIpPrefixCreate
+    from .._format import transform_public_ip_create_output
+    from .._validators import process_public_ip_create_namespace
+
+    with self.command_group('network public-ip', operations_tmpl=operations_tmpl) as g:
+        g.custom_command("create", "create_public_ip", transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
+
+    self.command_table['network public-ip update'] = PublicIPUpdate(loader=self)
+    self.command_table['network public-ip list'] = public_ip.List(loader=self, table_transformer='[].' + public_ip_show_table_transform)
+    self.command_table['network public-ip show'] = public_ip.Show(loader=self, table_transformer=public_ip_show_table_transform)
+
+    self.command_table['network public-ip prefix create'] = PublicIpPrefixCreate(loader=self)
+    # endregion
