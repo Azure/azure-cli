@@ -7,7 +7,6 @@
 import os
 import unittest
 
-from azure.cli.testsdk.constants import AUX_SUBSCRIPTION
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
@@ -543,6 +542,139 @@ class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-
         self.cmd('network vpn-connection create -g {rg} -n {conn21} --vnet-gateway1 {gw2} --vnet-gateway2 {gw1} --shared-key {key} --enable-bgp')
 
 
+class NetworkVpnGatewayScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway')
+    def test_network_vpn_gateway(self, resource_group):
+
+        self.kwargs.update({
+            'vnet1': 'myvnet1',
+            'vnet2': 'myvnet2',
+            'vnet3': 'myvnet3',
+            'gw1': 'gateway1',
+            'gw2': 'gateway2',
+            'gw3': 'gateway3',
+            'ip1': 'pubip1',
+            'ip2': 'pubip2',
+            'ip3': 'pubip3'
+        })
+
+        self.cmd('network public-ip create -n {ip1} -g {rg}')
+        self.cmd('network public-ip create -n {ip2} -g {rg}')
+        self.cmd('network public-ip create -n {ip3} -g {rg}')
+        self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name GatewaySubnet --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.0.0/24')
+        self.cmd('network vnet create -g {rg} -n {vnet2} --subnet-name GatewaySubnet --address-prefix 10.1.0.0/16')
+        self.cmd('network vnet create -g {rg} -n {vnet3} --subnet-name GatewaySubnet --address-prefix 10.2.0.0/16')
+
+        self.kwargs.update({'sub': self.get_subscription_id()})
+        self.kwargs.update({
+            'vnet1_id': '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet1}'.format(**self.kwargs),
+            'vnet2_id': '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet2}'.format(**self.kwargs)
+        })
+
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw2} --vnet {vnet2_id} --public-ip-address {ip2} --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw3} --vnet {vnet3} --public-ip-address {ip3} --no-wait --sku standard --asn 12345 --bgp-peering-address 10.2.250.250 --peer-weight 50')
+
+        self.cmd('network vnet-gateway wait -g {rg} -n {gw1} --created')
+        self.cmd('network vnet-gateway wait -g {rg} -n {gw2} --created')
+        self.cmd('network vnet-gateway wait -g {rg} -n {gw3} --created')
+
+        self.cmd('network vnet-gateway show -g {rg} -n {gw1}', checks=[
+            self.check('gatewayType', 'Vpn'),
+            self.check('sku.capacity', 2),
+            self.check('sku.name', 'Basic'),
+            self.check('vpnType', 'RouteBased'),
+            self.check('enableBgp', False)
+        ])
+        self.cmd('network vnet-gateway show -g {rg} -n {gw2}', checks=[
+            self.check('gatewayType', 'Vpn'),
+            self.check('sku.capacity', 2),
+            self.check('sku.name', 'Basic'),
+            self.check('vpnType', 'RouteBased'),
+            self.check('enableBgp', False)
+        ])
+        self.cmd('network vnet-gateway show -g {rg} -n {gw3}', checks=[
+            self.check('sku.name', 'Standard'),
+            self.check('enableBgp', True),
+            self.check('bgpSettings.asn', 12345),
+            self.check('bgpSettings.bgpPeeringAddress', '10.2.250.250'),
+            self.check('bgpSettings.peerWeight', 50)
+        ])
+
+        self.kwargs.update({
+            'conn12': 'conn1to2',
+            'conn21': 'conn2to1',
+            'gw1_id': '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworkGateways/{gw1}'.format(**self.kwargs)
+        })
+
+        self.cmd('network vpn-connection create -n {conn12} -g {rg} --shared-key 123 --vnet-gateway1 {gw1_id} --vnet-gateway2 {gw2} --tags foo=doo')
+        self.cmd('network vpn-connection update -n {conn12} -g {rg} --routing-weight 25 --tags foo=boo',
+                 checks=self.check('routingWeight', 25))
+        self.cmd('network vpn-connection create -n {conn21} -g {rg} --shared-key 123 --vnet-gateway2 {gw1_id} --vnet-gateway1 {gw2}')
+
+        self.cmd('network vnet-gateway list-learned-routes -g {rg} -n {gw1}')
+        self.cmd('network vnet-gateway list-advertised-routes -g {rg} -n {gw1} --peer 10.1.1.1')
+        self.cmd('network vnet-gateway list-bgp-peer-status -g {rg} -n {gw1} --peer 10.1.1.1')
+
+
+class NetworkVpnClientPackageScenarioTest(LiveScenarioTest):
+
+    @ResourceGroupPreparer('cli_test_vpn_client_package')
+    def test_vpn_client_package(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'public_ip': 'pip1',
+            'gateway_prefix': '100.1.1.0/24',
+            'gateway': 'vgw1',
+            'cert': 'cert1',
+            'cert_path': os.path.join(TEST_DIR, 'test-root-cert.cer')
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
+        self.cmd('network public-ip create -g {rg} -n {public_ip}')
+        self.cmd('network vnet-gateway create -g {rg} -n {gateway} --address-prefix {gateway_prefix} --vnet {vnet} --public-ip-address {public_ip}')
+        self.cmd('network vnet-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert} --public-cert-data "{cert_path}"')
+        output = self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway}').get_output_in_json()
+        self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
+        output = self.cmd('network vnet-gateway vpn-client show-url -g {rg} -n {gateway}').get_output_in_json()
+        self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
+
+
+class NetworkVnetGatewayIpSecPolicy(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vnet_gateway_ipsec')
+    def test_network_vnet_gateway_ipsec(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'ip': 'pip1',
+            'gw': 'gw1',
+            'gw_sku': 'VpnGw2',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
+        self.cmd('network public-ip create -g {rg} -n {ip}')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw} --public-ip-address {ip} --vnet {vnet} --sku {gw_sku} --gateway-type Vpn --vpn-type RouteBased --address-prefix 40.1.0.0/24 --client-protocol IkeV2 SSTP --radius-secret 111_aaa --radius-server 30.1.1.15')
+        self.cmd('network vnet-gateway ipsec-policy add -g {rg} --gateway-name {gw} --ike-encryption AES256 --ike-integrity SHA384 --dh-group DHGroup24 --ipsec-encryption GCMAES256 --ipsec-integrity GCMAES256 --pfs-group PFS24 --sa-lifetime 7200 --sa-max-size 2048',
+                 checks=[self.check('dhGroup', 'DHGroup24'),
+                         self.check('ikeEncryption', 'AES256'),
+                         self.check('ikeIntegrity', 'SHA384'),
+                         self.check('ipsecEncryption', 'GCMAES256'),
+                         self.check('ipsecIntegrity', 'GCMAES256'),
+                         self.check('pfsGroup', 'PFS24'),
+                         self.check('saDataSizeKilobytes', 2048),
+                         self.check('saLifeTimeSeconds', 7200)])
+
+        self.cmd('network vnet-gateway ipsec-policy list -g {rg} --gateway-name {gw}',
+                 checks=[self.check('length(@)', 1)])
+        self.cmd('network vnet-gateway ipsec-policy clear -g {rg} --gateway-name {gw}')
+        self.cmd('network vnet-gateway ipsec-policy list -g {rg} --gateway-name {gw}',
+                 checks=[self.check('length(@)', 0)])
+        self.cmd('network vnet-gateway show-supported-devices -g {rg} -n {gw} -o tsv')
+
+
 class NetworkVNetScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_vnet_test')
@@ -688,176 +820,44 @@ class NetworkSubnetEndpointServiceScenarioTest(ScenarioTest):
                  checks=self.check('serviceEndpoints', None))
 
 
-class NetworkPublicIpWithSku(ScenarioTest):
+class NetworkRouteTableOperationScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_network_lb_sku')
-    def test_network_public_ip_sku(self, resource_group):
-
-        self.kwargs.update({
-            'standard_sku': 'Standard',
-            'basic_sku': 'Basic',
-            'location': 'eastus2',
-            'ip1': 'pubip1',
-            'ip2': 'pubip2',
-            'ip3': 'pubip3',
-            'ip4': 'pubip4'
-        })
-
-        self.cmd('network public-ip create -g {rg} -l {location} -n {ip1}')
-        self.cmd('network public-ip show -g {rg} -n {ip1}', checks=[
-            self.check('sku.name', self.kwargs.get('basic_sku')),
-            self.check('publicIPAllocationMethod', 'Dynamic')
-        ])
-
-        self.cmd('network public-ip create -g {rg} -l {location} -n {ip2} --sku {standard_sku} --tags foo=doo')
-        self.cmd('network public-ip show -g {rg} -n {ip2}', checks=[
-            self.check('sku.name', self.kwargs.get('standard_sku')),
-            self.check('publicIPAllocationMethod', 'Static'),
-            self.check('tags.foo', 'doo')
-        ])
-
-        self.cmd('network public-ip create -g {rg} -l {location} -n {ip3} --sku {standard_sku} --tier {global_tier}')
-        self.cmd('network public-ip show -g {rg} -n {ip3}', checks=[
-            self.check('sku.name', self.kwargs.get('standard_sku')),
-            self.check('publicIPAllocationMethod', 'Static')
-        ])
-
-        from azure.core.exceptions import HttpResponseError
-        with self.assertRaisesRegex(HttpResponseError, 'Global publicIP addresses are only supported for standard SKU public IP addresses'):
-            self.cmd('network public-ip create -g {rg} -l {location} -n {ip4} --tier {global_tier}')
-
-
-class NetworkZonedPublicIpScenarioTest(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_zoned_public_ip')
-    def test_network_zoned_public_ip(self, resource_group):
-        self.kwargs['ip'] = 'pubip'
-        self.cmd('network public-ip create -g {rg} -n {ip} -l centralus -z 2 --sku standard',
-                 checks=self.check('publicIp.zones[0]', '2'))
-
-        self.cmd(
-            'network public-ip show -g {rg} -n {ip}',
-            checks=[
-                self.check('name', '{ip}'),
-                self.check('publicIPAddressVersion', 'IPv4')
-            ]
-        )
-
-
-class NetworkPublicIpScenarioTest(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_public_ip')
-    def test_network_public_ip(self, resource_group):
-        self.kwargs.update({
-            'ip1': 'pubipdns',
-            'ip2': 'pubipnodns',
-            'ip3': 'pubip3',
-            'dns': 'woot1',
-            'zone': '1',
-            'location': 'eastus2',
-            'ip_tags': 'RoutingPreference=Internet',
-            'version': 'ipv4',
-            'sku': 'standard'
-        })
-        self.cmd('network public-ip create -g {rg} -n {ip1} --dns-name {dns} --allocation-method static', checks=[
-            self.check('publicIp.provisioningState', 'Succeeded'),
-            self.check('publicIp.publicIPAllocationMethod', 'Static'),
-            self.check('publicIp.dnsSettings.domainNameLabel', '{dns}')
-        ])
-        self.cmd('network public-ip create -g {rg} -n {ip2}', checks=[
-            self.check('publicIp.provisioningState', 'Succeeded'),
-            self.check('publicIp.publicIPAllocationMethod', 'Dynamic'),
-            self.check('publicIp.dnsSettings', None)
-        ])
-
-        self.cmd(
-            'network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza2 --idle-timeout 10 --tags foo=doo',
-            checks=[
-                self.check('publicIPAllocationMethod', 'Static'),
-                self.check('dnsSettings.domainNameLabel', 'wowza2'),
-                self.check('idleTimeoutInMinutes', 10),
-                self.check('tags.foo', 'doo')
-            ])
-
-        self.cmd('network public-ip list -g {rg}', checks=[
-            self.check('type(@)', 'array'),
-            self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
-        ])
-
-        self.cmd('network public-ip show -g {rg} -n {ip1}', checks=[
-            self.check('type(@)', 'object'),
-            self.check('name', '{ip1}'),
-            self.check('resourceGroup', '{rg}')
-        ])
-
-        self.cmd('network public-ip delete -g {rg} -n {ip1}')
-        self.cmd('network public-ip list -g {rg}',
-                 checks=self.check("length[?name == '{ip1}']", None))
-
-    @ResourceGroupPreparer(name_prefix='cli_test_public_ip_zone', location='eastus2')
-    def test_network_public_ip_zone(self, resource_group):
-        self.cmd('network public-ip create -g {rg} -n ip --sku Standard -z 1', checks=[
-            self.check('length(publicIp.zones)', 1)
-        ])
-
-
-class NetworkPublicIpPrefix(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix', location='eastus2')
-    def test_network_public_ip_prefix(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_route_table')
+    def test_network_route_table_operation(self, resource_group):
 
         self.kwargs.update({
-            'prefix': 'prefix1',
-            'pip': 'pip1',
-            'prefix_v6': self.create_random_name('public-ip-prefix-', 24),
-            'pip_v6': self.create_random_name('public-ip-', 16)
+            'table': 'cli-test-route-table',
+            'route': 'my-route',
+            'rt': 'Microsoft.Network/routeTables'
         })
 
-        # Test prefix CRUD
-        self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30',
-                 checks=self.check('prefixLength', 30))
-        self.cmd('network public-ip prefix update -g {rg} -n {prefix} --tags foo=doo')
-
-        # test prefix show command
-        self.cmd('network public-ip prefix show -g {rg} -n {prefix}',
+        self.cmd('network route-table create -n {table} -g {rg} --tags foo=doo',
                  checks=self.check('tags.foo', 'doo'))
-
-        self.cmd('network public-ip prefix list -g {rg}',
-                 checks=self.check('length(@)', 1))
-        self.cmd('network public-ip prefix delete -g {rg} -n {prefix}')
-        self.cmd('network public-ip prefix list -g {rg}',
-                 checks=self.is_empty())
-
-        # Test public IP create with prefix
-        self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30')
-        self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix} --sku Standard',
-                 checks=self.check("publicIp.publicIPPrefix.id.contains(@, '{prefix}')", True))
-
-    @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix_zone', location='eastus2')
-    def test_network_public_ip_prefix_zone(self, resource_group):
-        self.kwargs.update({
-            'prefix': 'prefix1',
-        })
-
-        # Test prefix with multi zones
-        self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30 --zone 1', checks=[
-            self.check('prefixLength', 30),
-            self.check('length(zones)', 1)
+        self.cmd('network route-table update -n {table} -g {rg} --tags foo=boo --disable-bgp-route-propagation', checks=[
+            self.check('tags.foo', 'boo')
         ])
+        self.cmd('network route-table route create --address-prefix 10.0.5.0/24 -n {route} -g {rg} --next-hop-type None --route-table-name {table}')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix_with_ip_address', location='eastus2')
-    def test_network_public_ip_prefix_with_ip_address(self, resource_group):
-        self.kwargs.update({
-            'prefix_name_ipv4': 'public_ip_prefix_0',
-            'pip': 'pip1'
-        })
-
-        ip_prefix = self.cmd('network public-ip prefix create -g {rg} -n {prefix_name_ipv4} --length 28', checks=[
-            self.check('publicIPAddressVersion', 'IPv4')
-        ]).get_output_in_json()
-
-        ip_address = ip_prefix['ipPrefix'][:-3]
-
-        # Create public ip with ip address
-        self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix_name_ipv4} --sku Standard --ip-address ' + ip_address,
-                 checks=self.check("publicIp.publicIPPrefix.id.contains(@, '{prefix_name_ipv4}')", True))
+        self.cmd('network route-table list',
+                 checks=self.check('type(@)', 'array'))
+        self.cmd('network route-table list --resource-group {rg}', checks=[
+            self.check('type(@)', 'array'),
+            self.check('length(@)', 1),
+            self.check('[0].name', '{table}'),
+            self.check('[0].type', '{rt}')
+        ])
+        self.cmd('network route-table show --resource-group {rg} --name {table}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{table}'),
+            self.check('type', '{rt}')
+        ])
+        self.cmd('network route-table route list --resource-group {rg} --route-table-name {table}',
+                 checks=self.check('type(@)', 'array'))
+        self.cmd('network route-table route show --resource-group {rg} --route-table-name {table} --name {route}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{route}'),
+        ])
+        self.cmd('network route-table route delete --resource-group {rg} --route-table-name {table} --name {route} -y')
+        self.cmd('network route-table route list --resource-group {rg} --route-table-name {table}', checks=self.is_empty())
+        self.cmd('network route-table delete --resource-group {rg} --name {table} -y')
+        self.cmd('network route-table list --resource-group {rg}', checks=self.is_empty())

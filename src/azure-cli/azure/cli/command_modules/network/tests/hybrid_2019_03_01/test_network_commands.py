@@ -495,6 +495,106 @@ class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-
         self.cmd('network vpn-connection create -g {rg} -n {conn21} --vnet-gateway1 {gw2} --vnet-gateway2 {gw1} --shared-key {key} --enable-bgp')
 
 
+class NetworkVpnGatewayScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vpn_gateway')
+    def test_network_vpn_gateway(self, resource_group):
+
+        self.kwargs.update({
+            'vnet1': 'myvnet1',
+            'vnet2': 'myvnet2',
+            'vnet3': 'myvnet3',
+            'gw1': 'gateway1',
+            'gw2': 'gateway2',
+            'gw3': 'gateway3',
+            'ip1': 'pubip1',
+            'ip2': 'pubip2',
+            'ip3': 'pubip3'
+        })
+
+        self.cmd('network public-ip create -n {ip1} -g {rg}')
+        self.cmd('network public-ip create -n {ip2} -g {rg}')
+        self.cmd('network public-ip create -n {ip3} -g {rg}')
+        self.cmd('network vnet create -g {rg} -n {vnet1} --subnet-name GatewaySubnet --address-prefix 10.0.0.0/16 --subnet-prefix 10.0.0.0/24')
+        self.cmd('network vnet create -g {rg} -n {vnet2} --subnet-name GatewaySubnet --address-prefix 10.1.0.0/16')
+        self.cmd('network vnet create -g {rg} -n {vnet3} --subnet-name GatewaySubnet --address-prefix 10.2.0.0/16')
+
+        self.kwargs.update({'sub': self.get_subscription_id()})
+        self.kwargs.update({
+            'vnet1_id': '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet1}'.format(**self.kwargs),
+            'vnet2_id': '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet2}'.format(**self.kwargs)
+        })
+
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw2} --vnet {vnet2_id} --public-ip-address {ip2} --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n {gw3} --vnet {vnet3} --public-ip-address {ip3} --no-wait --sku standard --asn 12345 --bgp-peering-address 10.2.250.250 --peer-weight 50')
+
+        self.cmd('network vnet-gateway wait -g {rg} -n {gw1} --created')
+        self.cmd('network vnet-gateway wait -g {rg} -n {gw2} --created')
+        self.cmd('network vnet-gateway wait -g {rg} -n {gw3} --created')
+
+        self.cmd('network vnet-gateway show -g {rg} -n {gw1}', checks=[
+            self.check('gatewayType', 'Vpn'),
+            self.check('sku.capacity', 2),
+            self.check('sku.name', 'Basic'),
+            self.check('vpnType', 'RouteBased'),
+            self.check('enableBgp', False)
+        ])
+        self.cmd('network vnet-gateway show -g {rg} -n {gw2}', checks=[
+            self.check('gatewayType', 'Vpn'),
+            self.check('sku.capacity', 2),
+            self.check('sku.name', 'Basic'),
+            self.check('vpnType', 'RouteBased'),
+            self.check('enableBgp', False)
+        ])
+        self.cmd('network vnet-gateway show -g {rg} -n {gw3}', checks=[
+            self.check('sku.name', 'Standard'),
+            self.check('enableBgp', True),
+            self.check('bgpSettings.asn', 12345),
+            self.check('bgpSettings.bgpPeeringAddress', '10.2.250.250'),
+            self.check('bgpSettings.peerWeight', 50)
+        ])
+
+        self.kwargs.update({
+            'conn12': 'conn1to2',
+            'conn21': 'conn2to1',
+            'gw1_id': '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworkGateways/{gw1}'.format(**self.kwargs)
+        })
+
+        self.cmd('network vpn-connection create -n {conn12} -g {rg} --shared-key 123 --vnet-gateway1 {gw1_id} --vnet-gateway2 {gw2} --tags foo=doo')
+        self.cmd('network vpn-connection update -n {conn12} -g {rg} --routing-weight 25 --tags foo=boo',
+                 checks=self.check('routingWeight', 25))
+        self.cmd('network vpn-connection create -n {conn21} -g {rg} --shared-key 123 --vnet-gateway2 {gw1_id} --vnet-gateway1 {gw2}')
+
+        self.cmd('network vnet-gateway list-learned-routes -g {rg} -n {gw1}')
+        self.cmd('network vnet-gateway list-advertised-routes -g {rg} -n {gw1} --peer 10.1.1.1')
+        self.cmd('network vnet-gateway list-bgp-peer-status -g {rg} -n {gw1} --peer 10.1.1.1')
+
+
+class NetworkVpnClientPackageScenarioTest(LiveScenarioTest):
+
+    @ResourceGroupPreparer('cli_test_vpn_client_package')
+    def test_vpn_client_package(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'public_ip': 'pip1',
+            'gateway_prefix': '100.1.1.0/24',
+            'gateway': 'vgw1',
+            'cert': 'cert1',
+            'cert_path': os.path.join(TEST_DIR, 'test-root-cert.cer')
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
+        self.cmd('network public-ip create -g {rg} -n {public_ip}')
+        self.cmd('network vnet-gateway create -g {rg} -n {gateway} --address-prefix {gateway_prefix} --vnet {vnet} --public-ip-address {public_ip}')
+        self.cmd('network vnet-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert} --public-cert-data "{cert_path}"')
+        output = self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway}').get_output_in_json()
+        self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
+        output = self.cmd('network vnet-gateway vpn-client show-url -g {rg} -n {gateway}').get_output_in_json()
+        self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
+
+
 class NetworkVNetScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_vnet_test')
@@ -638,3 +738,46 @@ class NetworkSubnetEndpointServiceScenarioTest(ScenarioTest):
                  checks=self.check('serviceEndpoints[0].service', 'Microsoft.Storage'))
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints ""',
                  checks=self.check('serviceEndpoints', None))
+
+
+class NetworkRouteTableOperationScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_route_table')
+    def test_network_route_table_operation(self, resource_group):
+
+        self.kwargs.update({
+            'table': 'cli-test-route-table',
+            'route': 'my-route',
+            'rt': 'Microsoft.Network/routeTables'
+        })
+
+        self.cmd('network route-table create -n {table} -g {rg} --tags foo=doo',
+                 checks=self.check('tags.foo', 'doo'))
+        self.cmd('network route-table update -n {table} -g {rg} --tags foo=boo --disable-bgp-route-propagation', checks=[
+            self.check('tags.foo', 'boo')
+        ])
+        self.cmd('network route-table route create --address-prefix 10.0.5.0/24 -n {route} -g {rg} --next-hop-type None --route-table-name {table}')
+
+        self.cmd('network route-table list',
+                 checks=self.check('type(@)', 'array'))
+        self.cmd('network route-table list --resource-group {rg}', checks=[
+            self.check('type(@)', 'array'),
+            self.check('length(@)', 1),
+            self.check('[0].name', '{table}'),
+            self.check('[0].type', '{rt}')
+        ])
+        self.cmd('network route-table show --resource-group {rg} --name {table}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{table}'),
+            self.check('type', '{rt}')
+        ])
+        self.cmd('network route-table route list --resource-group {rg} --route-table-name {table}',
+                 checks=self.check('type(@)', 'array'))
+        self.cmd('network route-table route show --resource-group {rg} --route-table-name {table} --name {route}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{route}'),
+        ])
+        self.cmd('network route-table route delete --resource-group {rg} --route-table-name {table} --name {route} -y')
+        self.cmd('network route-table route list --resource-group {rg} --route-table-name {table}', checks=self.is_empty())
+        self.cmd('network route-table delete --resource-group {rg} --name {table} -y')
+        self.cmd('network route-table list --resource-group {rg}', checks=self.is_empty())

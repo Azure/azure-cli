@@ -13,12 +13,12 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags --sku
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_queue000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001","name":"cli_test_sb_queue000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-10-04T11:45:07Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001","name":"cli_test_sb_queue000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-20T10:56:45Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:45:08 GMT
+      - Mon, 20 Feb 2023 10:56:48 GMT
       expires:
       - '-1'
       pragma:
@@ -42,9 +42,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "tags": {"{tag1": "value1,", "tag2": "value2}"},
-      "sku": {"name": "Standard", "tier": "Standard"}, "properties": {"publicNetworkAccess":
-      "Enabled"}}'
+    body: '{"identity": {"type": "None"}, "location": "westus", "sku": {"name": "Standard",
+      "tier": "Standard"}, "tags": {"{tag1": "value1,", "tag2": "value2}"}}'
     headers:
       Accept:
       - application/json
@@ -55,37 +54,37 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '170'
+      - '150'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --tags --sku
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 (AAZ) azsdk-python-core/1.24.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-10-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1,","tag2":"value2}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:sb-nscli000002","createdAt":"2022-10-04T11:45:14.95Z","updatedAt":"2022-10-04T11:45:14.95Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{"{tag1":"value1,","tag2":"value2}"},"properties":{"premiumMessagingPartitions":0,"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:sb-nscli000002","createdAt":"2023-02-20T10:56:50.05Z","updatedAt":"2023-02-20T10:56:50.05Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '717'
+      - '748'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:45:17 GMT
+      - Mon, 20 Feb 2023 10:56:50 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -95,7 +94,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -113,31 +112,31 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags --sku
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 (AAZ) azsdk-python-core/1.24.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-10-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1,","tag2":"value2}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:sb-nscli000002","createdAt":"2022-10-04T11:45:14.95Z","updatedAt":"2022-10-04T11:45:14.95Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{"{tag1":"value1,","tag2":"value2}"},"properties":{"premiumMessagingPartitions":0,"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:sb-nscli000002","createdAt":"2023-02-20T10:56:50.05Z","updatedAt":"2023-02-20T10:56:50.05Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '717'
+      - '748'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:45:47 GMT
+      - Mon, 20 Feb 2023 10:57:20 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -163,81 +162,31 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags --sku
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 (AAZ) azsdk-python-core/1.24.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-10-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1,","tag2":"value2}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:sb-nscli000002","createdAt":"2022-10-04T11:45:14.95Z","updatedAt":"2022-10-04T11:45:59.307Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"{tag1":"value1,","tag2":"value2}"},"properties":{"premiumMessagingPartitions":0,"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:sb-nscli000002","createdAt":"2023-02-20T10:56:50.05Z","updatedAt":"2023-02-20T10:57:34.133Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '716'
+      - '747'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:46:18 GMT
+      - Mon, 20 Feb 2023 10:57:50 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus namespace create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name --tags --sku
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1,","tag2":"value2}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:sb-nscli000002","createdAt":"2022-10-04T11:45:14.95Z","updatedAt":"2022-10-04T11:45:59.307Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '716'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 04 Oct 2022 11:46:19 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -263,31 +212,31 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 (AAZ) azsdk-python-core/1.24.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-10-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1,","tag2":"value2}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:sb-nscli000002","createdAt":"2022-10-04T11:45:14.95Z","updatedAt":"2022-10-04T11:45:59.307Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"{tag1":"value1,","tag2":"value2}"},"properties":{"premiumMessagingPartitions":0,"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:sb-nscli000002","createdAt":"2023-02-20T10:56:50.05Z","updatedAt":"2023-02-20T10:57:34.133Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '716'
+      - '747'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:46:20 GMT
+      - Mon, 20 Feb 2023 10:57:52 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -317,21 +266,21 @@ interactions:
       ParameterSetName:
       - --name --namespace-name --resource-group
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli3000008?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli3000008?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli3000008","name":"sb-queuecli3000008","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:46:23.937Z","updatedAt":"2022-10-04T11:46:24Z","accessedAt":"0001-01-01T00:00:00"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli3000008","name":"sb-queuecli3000008","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:57:54.24Z","updatedAt":"2023-02-20T10:57:54.27Z","accessedAt":"0001-01-01T00:00:00"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1038'
+      - '1040'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:46:24 GMT
+      - Mon, 20 Feb 2023 10:57:54 GMT
       expires:
       - '-1'
       pragma:
@@ -347,7 +296,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -369,21 +318,21 @@ interactions:
       ParameterSetName:
       - --name --namespace-name --resource-group
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli4000009?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli4000009?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli4000009","name":"sb-queuecli4000009","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:46:27.897Z","updatedAt":"2022-10-04T11:46:28.013Z","accessedAt":"0001-01-01T00:00:00"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli4000009","name":"sb-queuecli4000009","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:57:56.73Z","updatedAt":"2023-02-20T10:57:56.767Z","accessedAt":"0001-01-01T00:00:00"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1042'
+      - '1041'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:46:28 GMT
+      - Mon, 20 Feb 2023 10:57:57 GMT
       expires:
       - '-1'
       pragma:
@@ -399,7 +348,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -420,31 +369,31 @@ interactions:
         --max-delivery-count --status --default-message-time-to-live --enable-batched-operations
         --forward-to --forward-dead-lettered-messages-to
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-10-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1,","tag2":"value2}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:sb-nscli000002","createdAt":"2022-10-04T11:45:14.95Z","updatedAt":"2022-10-04T11:45:59.307Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"{tag1":"value1,","tag2":"value2}"},"properties":{"premiumMessagingPartitions":0,"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:sb-nscli000002","createdAt":"2023-02-20T10:56:50.05Z","updatedAt":"2023-02-20T10:57:34.133Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '716'
+      - '747'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:46:29 GMT
+      - Mon, 20 Feb 2023 10:57:57 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -481,12 +430,12 @@ interactions:
         --max-delivery-count --status --default-message-time-to-live --enable-batched-operations
         --forward-to --forward-dead-lettered-messages-to
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT3M","maxSizeInMegabytes":4096,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:46:33.617Z","updatedAt":"2022-10-04T11:46:33.717Z","accessedAt":"0001-01-01T00:00:00","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT3M","maxSizeInMegabytes":4096,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:57:59.553Z","updatedAt":"2023-02-20T10:57:59.607Z","accessedAt":"0001-01-01T00:00:00","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
     headers:
       cache-control:
       - no-cache
@@ -495,7 +444,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:46:33 GMT
+      - Mon, 20 Feb 2023 10:57:59 GMT
       expires:
       - '-1'
       pragma:
@@ -511,7 +460,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -529,21 +478,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --lock-duration
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT3M","maxSizeInMegabytes":4096,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:46:33.6228182Z","updatedAt":"2022-10-04T11:46:33.6228182Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT3M","maxSizeInMegabytes":4096,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:57:59.553Z","updatedAt":"2023-02-20T10:57:59.607Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1122'
+      - '1114'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:46:35 GMT
+      - Mon, 20 Feb 2023 10:58:00 GMT
       expires:
       - '-1'
       pragma:
@@ -584,9 +533,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --lock-duration
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":4096,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"0001-01-01T00:00:00","updatedAt":"0001-01-01T00:00:00","accessedAt":"0001-01-01T00:00:00","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
@@ -598,7 +547,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:46:38 GMT
+      - Mon, 20 Feb 2023 10:58:00 GMT
       expires:
       - '-1'
       pragma:
@@ -614,7 +563,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -632,21 +581,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --default-message-time-to-live
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":4096,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:46:33.6228182Z","updatedAt":"2022-10-04T11:46:38.8259853Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":4096,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:57:59.553Z","updatedAt":"2023-02-20T10:58:01.237Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1122'
+      - '1114'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:46:40 GMT
+      - Mon, 20 Feb 2023 10:58:01 GMT
       expires:
       - '-1'
       pragma:
@@ -687,9 +636,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --default-message-time-to-live
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":4096,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"0001-01-01T00:00:00","updatedAt":"0001-01-01T00:00:00","accessedAt":"0001-01-01T00:00:00","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
@@ -701,7 +650,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:46:42 GMT
+      - Mon, 20 Feb 2023 10:58:02 GMT
       expires:
       - '-1'
       pragma:
@@ -717,7 +666,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1197'
     status:
       code: 200
       message: OK
@@ -735,21 +684,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --max-size
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":4096,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:46:33.6228182Z","updatedAt":"2022-10-04T11:46:43.1072681Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":4096,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:57:59.553Z","updatedAt":"2023-02-20T10:58:02.327Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1117'
+      - '1109'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:46:45 GMT
+      - Mon, 20 Feb 2023 10:58:02 GMT
       expires:
       - '-1'
       pragma:
@@ -790,9 +739,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --max-size
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"0001-01-01T00:00:00","updatedAt":"0001-01-01T00:00:00","accessedAt":"0001-01-01T00:00:00","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
@@ -804,7 +753,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:46:47 GMT
+      - Mon, 20 Feb 2023 10:58:03 GMT
       expires:
       - '-1'
       pragma:
@@ -820,7 +769,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -838,21 +787,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --enable-batched-operations
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:46:33.6228182Z","updatedAt":"2022-10-04T11:46:47.3416805Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:57:59.553Z","updatedAt":"2023-02-20T10:58:03.68Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1117'
+      - '1108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:46:48 GMT
+      - Mon, 20 Feb 2023 10:58:03 GMT
       expires:
       - '-1'
       pragma:
@@ -893,9 +842,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --enable-batched-operations
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"0001-01-01T00:00:00","updatedAt":"0001-01-01T00:00:00","accessedAt":"0001-01-01T00:00:00","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
@@ -907,7 +856,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:46:50 GMT
+      - Mon, 20 Feb 2023 10:58:05 GMT
       expires:
       - '-1'
       pragma:
@@ -923,7 +872,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
+      - '1197'
     status:
       code: 200
       message: OK
@@ -941,21 +890,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --enable-batched-operations
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:46:33.6228182Z","updatedAt":"2022-10-04T11:46:50.4667026Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:57:59.553Z","updatedAt":"2023-02-20T10:58:05.003Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1116'
+      - '1108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:46:51 GMT
+      - Mon, 20 Feb 2023 10:58:05 GMT
       expires:
       - '-1'
       pragma:
@@ -996,9 +945,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --enable-batched-operations
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"0001-01-01T00:00:00","updatedAt":"0001-01-01T00:00:00","accessedAt":"0001-01-01T00:00:00","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
@@ -1010,7 +959,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:46:53 GMT
+      - Mon, 20 Feb 2023 10:58:06 GMT
       expires:
       - '-1'
       pragma:
@@ -1044,21 +993,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --duplicate-detection-history-time-window
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:46:33.6228182Z","updatedAt":"2022-10-04T11:46:53.9045668Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:57:59.553Z","updatedAt":"2023-02-20T10:58:06.433Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1117'
+      - '1109'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:46:54 GMT
+      - Mon, 20 Feb 2023 10:58:06 GMT
       expires:
       - '-1'
       pragma:
@@ -1099,9 +1048,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --duplicate-detection-history-time-window
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"0001-01-01T00:00:00","updatedAt":"0001-01-01T00:00:00","accessedAt":"0001-01-01T00:00:00","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
@@ -1113,7 +1062,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:46:55 GMT
+      - Mon, 20 Feb 2023 10:58:07 GMT
       expires:
       - '-1'
       pragma:
@@ -1129,7 +1078,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -1147,21 +1096,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --enable-dead-lettering-on-message-expiration
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:46:33.6228182Z","updatedAt":"2022-10-04T11:46:55.7795841Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:57:59.553Z","updatedAt":"2023-02-20T10:58:07.823Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1116'
+      - '1108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:46:56 GMT
+      - Mon, 20 Feb 2023 10:58:07 GMT
       expires:
       - '-1'
       pragma:
@@ -1202,9 +1151,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --enable-dead-lettering-on-message-expiration
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"0001-01-01T00:00:00","updatedAt":"0001-01-01T00:00:00","accessedAt":"0001-01-01T00:00:00","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
@@ -1216,7 +1165,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:02 GMT
+      - Mon, 20 Feb 2023 10:58:08 GMT
       expires:
       - '-1'
       pragma:
@@ -1250,21 +1199,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --enable-dead-lettering-on-message-expiration
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:46:33.6228182Z","updatedAt":"2022-10-04T11:47:03.0608816Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:57:59.553Z","updatedAt":"2023-02-20T10:58:09.383Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1117'
+      - '1109'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:04 GMT
+      - Mon, 20 Feb 2023 10:58:09 GMT
       expires:
       - '-1'
       pragma:
@@ -1305,9 +1254,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --enable-dead-lettering-on-message-expiration
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"0001-01-01T00:00:00","updatedAt":"0001-01-01T00:00:00","accessedAt":"0001-01-01T00:00:00","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
@@ -1319,7 +1268,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:08 GMT
+      - Mon, 20 Feb 2023 10:58:10 GMT
       expires:
       - '-1'
       pragma:
@@ -1353,21 +1302,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --max-delivery-count
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:46:33.6228182Z","updatedAt":"2022-10-04T11:47:08.9829193Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":8,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:57:59.553Z","updatedAt":"2023-02-20T10:58:10.71Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1116'
+      - '1107'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:10 GMT
+      - Mon, 20 Feb 2023 10:58:11 GMT
       expires:
       - '-1'
       pragma:
@@ -1408,9 +1357,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --max-delivery-count
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":15,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"0001-01-01T00:00:00","updatedAt":"0001-01-01T00:00:00","accessedAt":"0001-01-01T00:00:00","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
@@ -1422,7 +1371,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:15 GMT
+      - Mon, 20 Feb 2023 10:58:12 GMT
       expires:
       - '-1'
       pragma:
@@ -1438,7 +1387,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -1456,21 +1405,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --forward-to
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":15,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:46:33.6228182Z","updatedAt":"2022-10-04T11:47:15.8422415Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":15,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:57:59.553Z","updatedAt":"2023-02-20T10:58:12.323Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli3000008","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1117'
+      - '1109'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:18 GMT
+      - Mon, 20 Feb 2023 10:58:13 GMT
       expires:
       - '-1'
       pragma:
@@ -1511,9 +1460,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --forward-to
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":15,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"0001-01-01T00:00:00","updatedAt":"0001-01-01T00:00:00","accessedAt":"0001-01-01T00:00:00","forwardTo":"sb-queuecli4000009","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
@@ -1525,7 +1474,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:20 GMT
+      - Mon, 20 Feb 2023 10:58:13 GMT
       expires:
       - '-1'
       pragma:
@@ -1541,7 +1490,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -1559,21 +1508,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --forward-dead-lettered-messages-to
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":15,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:46:33.6228182Z","updatedAt":"2022-10-04T11:47:20.811023Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli4000009","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":15,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:57:59.5655299Z","updatedAt":"2023-02-20T10:58:13.7268729Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli4000009","forwardDeadLetteredMessagesTo":"sb-queuecli3000008"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1116'
+      - '1117'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:21 GMT
+      - Mon, 20 Feb 2023 10:58:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1614,9 +1563,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --forward-dead-lettered-messages-to
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":15,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"0001-01-01T00:00:00","updatedAt":"0001-01-01T00:00:00","accessedAt":"0001-01-01T00:00:00","forwardTo":"sb-queuecli4000009","forwardDeadLetteredMessagesTo":"sb-queuecli4000009"}}'
@@ -1628,7 +1577,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:24 GMT
+      - Mon, 20 Feb 2023 10:58:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1644,7 +1593,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -1662,12 +1611,12 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --status
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":15,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:46:33.6228182Z","updatedAt":"2022-10-04T11:47:24.4830939Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli4000009","forwardDeadLetteredMessagesTo":"sb-queuecli4000009"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":15,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:57:59.5655299Z","updatedAt":"2023-02-20T10:58:15.1330907Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli4000009","forwardDeadLetteredMessagesTo":"sb-queuecli4000009"}}'
     headers:
       cache-control:
       - no-cache
@@ -1676,7 +1625,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:26 GMT
+      - Mon, 20 Feb 2023 10:58:15 GMT
       expires:
       - '-1'
       pragma:
@@ -1717,9 +1666,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --status
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":15,"sizeInBytes":0,"messageCount":0,"status":"SendDisabled","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"0001-01-01T00:00:00","updatedAt":"0001-01-01T00:00:00","accessedAt":"0001-01-01T00:00:00","forwardTo":"sb-queuecli4000009","forwardDeadLetteredMessagesTo":"sb-queuecli4000009"}}'
@@ -1731,7 +1680,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:28 GMT
+      - Mon, 20 Feb 2023 10:58:15 GMT
       expires:
       - '-1'
       pragma:
@@ -1747,7 +1696,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -1765,12 +1714,12 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --max-size
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":15,"sizeInBytes":0,"messageCount":0,"status":"SendDisabled","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:46:33.6228182Z","updatedAt":"2022-10-04T11:47:28.2485803Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli4000009","forwardDeadLetteredMessagesTo":"sb-queuecli4000009"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":15,"sizeInBytes":0,"messageCount":0,"status":"SendDisabled","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:57:59.5655299Z","updatedAt":"2023-02-20T10:58:16.6018731Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli4000009","forwardDeadLetteredMessagesTo":"sb-queuecli4000009"}}'
     headers:
       cache-control:
       - no-cache
@@ -1779,7 +1728,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:29 GMT
+      - Mon, 20 Feb 2023 10:58:17 GMT
       expires:
       - '-1'
       pragma:
@@ -1820,9 +1769,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --max-size
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005?api-version=2022-10-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":15,"sizeInBytes":0,"messageCount":0,"status":"SendDisabled","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"0001-01-01T00:00:00","updatedAt":"0001-01-01T00:00:00","accessedAt":"0001-01-01T00:00:00","forwardTo":"sb-queuecli4000009","forwardDeadLetteredMessagesTo":"sb-queuecli4000009"}}'
@@ -1834,7 +1783,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:32 GMT
+      - Mon, 20 Feb 2023 10:58:17 GMT
       expires:
       - '-1'
       pragma:
@@ -1850,7 +1799,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -1874,21 +1823,21 @@ interactions:
       - --resource-group --name --namespace-name --auto-delete-on-idle --enable-session
         --enable-express --enable-partitioning
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006","name":"sb-queuecli2000006","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":16384,"requiresDuplicateDetection":false,"requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P7D","enablePartitioning":true,"enableExpress":true,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:47:35.567Z","updatedAt":"2022-10-04T11:47:36.807Z","accessedAt":"0001-01-01T00:00:00"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006","name":"sb-queuecli2000006","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":16384,"requiresDuplicateDetection":false,"requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P7D","enablePartitioning":true,"enableExpress":true,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:58:20.3Z","updatedAt":"2023-02-20T10:58:20.367Z","accessedAt":"0001-01-01T00:00:00"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1017'
+      - '1015'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:36 GMT
+      - Mon, 20 Feb 2023 10:58:20 GMT
       expires:
       - '-1'
       pragma:
@@ -1904,7 +1853,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -1922,21 +1871,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --auto-delete-on-idle
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006","name":"sb-queuecli2000006","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":16384,"requiresDuplicateDetection":false,"requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P7D","enablePartitioning":true,"enableExpress":true,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:47:35.567Z","updatedAt":"2022-10-04T11:47:36.807Z","accessedAt":"0001-01-01T00:00:00Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006","name":"sb-queuecli2000006","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":16384,"requiresDuplicateDetection":false,"requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P7D","enablePartitioning":true,"enableExpress":true,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:58:20.3Z","updatedAt":"2023-02-20T10:58:20.367Z","accessedAt":"0001-01-01T00:00:00Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1018'
+      - '1016'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:38 GMT
+      - Mon, 20 Feb 2023 10:58:21 GMT
       expires:
       - '-1'
       pragma:
@@ -1976,9 +1925,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --auto-delete-on-idle
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006?api-version=2022-10-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006","name":"sb-queuecli2000006","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":16384,"requiresDuplicateDetection":false,"requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P1DT3M4S","enablePartitioning":true,"enableExpress":true,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"0001-01-01T00:00:00","updatedAt":"0001-01-01T00:00:00","accessedAt":"0001-01-01T00:00:00"}}'
@@ -1990,7 +1939,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:39 GMT
+      - Mon, 20 Feb 2023 10:58:21 GMT
       expires:
       - '-1'
       pragma:
@@ -2006,7 +1955,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1192'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -2024,21 +1973,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --enable-express
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006","name":"sb-queuecli2000006","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":16384,"requiresDuplicateDetection":false,"requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P1DT3M4S","enablePartitioning":true,"enableExpress":true,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:47:35.567Z","updatedAt":"2022-10-04T11:47:40.5644512Z","accessedAt":"0001-01-01T00:00:00Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006","name":"sb-queuecli2000006","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":16384,"requiresDuplicateDetection":false,"requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P1DT3M4S","enablePartitioning":true,"enableExpress":true,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:58:20.3Z","updatedAt":"2023-02-20T10:58:22.454077Z","accessedAt":"0001-01-01T00:00:00Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1027'
+      - '1024'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:41 GMT
+      - Mon, 20 Feb 2023 10:58:22 GMT
       expires:
       - '-1'
       pragma:
@@ -2078,9 +2027,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --enable-express
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006?api-version=2022-10-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006","name":"sb-queuecli2000006","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":16384,"requiresDuplicateDetection":false,"requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P1DT3M4S","enablePartitioning":true,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"0001-01-01T00:00:00","updatedAt":"0001-01-01T00:00:00","accessedAt":"0001-01-01T00:00:00"}}'
@@ -2092,7 +2041,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:44 GMT
+      - Mon, 20 Feb 2023 10:58:24 GMT
       expires:
       - '-1'
       pragma:
@@ -2108,7 +2057,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -2126,21 +2075,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --enable-express
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006","name":"sb-queuecli2000006","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":16384,"requiresDuplicateDetection":false,"requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P1DT3M4S","enablePartitioning":true,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:47:35.567Z","updatedAt":"2022-10-04T11:47:44.7903811Z","accessedAt":"0001-01-01T00:00:00Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006","name":"sb-queuecli2000006","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":16384,"requiresDuplicateDetection":false,"requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P1DT3M4S","enablePartitioning":true,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:58:20.3Z","updatedAt":"2023-02-20T10:58:24.3155242Z","accessedAt":"0001-01-01T00:00:00Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1028'
+      - '1026'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:46 GMT
+      - Mon, 20 Feb 2023 10:58:24 GMT
       expires:
       - '-1'
       pragma:
@@ -2180,9 +2129,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --enable-express
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006?api-version=2022-10-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006","name":"sb-queuecli2000006","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":16384,"requiresDuplicateDetection":false,"requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P1DT3M4S","enablePartitioning":true,"enableExpress":true,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"0001-01-01T00:00:00","updatedAt":"0001-01-01T00:00:00","accessedAt":"0001-01-01T00:00:00"}}'
@@ -2194,7 +2143,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:49 GMT
+      - Mon, 20 Feb 2023 10:58:25 GMT
       expires:
       - '-1'
       pragma:
@@ -2210,7 +2159,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -2228,21 +2177,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --status
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006","name":"sb-queuecli2000006","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":16384,"requiresDuplicateDetection":false,"requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P1DT3M4S","enablePartitioning":true,"enableExpress":true,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:47:35.567Z","updatedAt":"2022-10-04T11:47:49.7436586Z","accessedAt":"0001-01-01T00:00:00Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006","name":"sb-queuecli2000006","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":16384,"requiresDuplicateDetection":false,"requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P1DT3M4S","enablePartitioning":true,"enableExpress":true,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:58:20.3Z","updatedAt":"2023-02-20T10:58:25.7352952Z","accessedAt":"0001-01-01T00:00:00Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1027'
+      - '1025'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:51 GMT
+      - Mon, 20 Feb 2023 10:58:26 GMT
       expires:
       - '-1'
       pragma:
@@ -2282,9 +2231,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --namespace-name --status
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006?api-version=2022-10-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006","name":"sb-queuecli2000006","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":16384,"requiresDuplicateDetection":false,"requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"ReceiveDisabled","autoDeleteOnIdle":"P1DT3M4S","enablePartitioning":true,"enableExpress":true,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"0001-01-01T00:00:00","updatedAt":"0001-01-01T00:00:00","accessedAt":"0001-01-01T00:00:00"}}'
@@ -2296,7 +2245,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:53 GMT
+      - Mon, 20 Feb 2023 10:58:26 GMT
       expires:
       - '-1'
       pragma:
@@ -2312,7 +2261,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -2330,22 +2279,22 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --auto-delete-on-idle --max-size
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-10-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1,","tag2":"value2}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:sb-nscli000002","createdAt":"2022-10-04T11:45:14.95Z","updatedAt":"2022-10-04T11:45:59.307Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"{tag1":"value1,","tag2":"value2}"},"properties":{"premiumMessagingPartitions":0,"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:sb-nscli000002","createdAt":"2023-02-20T10:56:50.05Z","updatedAt":"2023-02-20T10:57:34.133Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '716'
+      - '747'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:53 GMT
+      - Mon, 20 Feb 2023 10:58:26 GMT
       expires:
       - '-1'
       pragma:
@@ -2384,21 +2333,21 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --auto-delete-on-idle --max-size
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004","name":"sb-queuecli000004","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"PT10M","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:47:56.24Z","updatedAt":"2022-10-04T11:47:56.41Z","accessedAt":"0001-01-01T00:00:00"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004","name":"sb-queuecli000004","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"PT10M","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:58:29.427Z","updatedAt":"2023-02-20T10:58:29.453Z","accessedAt":"0001-01-01T00:00:00"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1017'
+      - '1019'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:56 GMT
+      - Mon, 20 Feb 2023 10:58:29 GMT
       expires:
       - '-1'
       pragma:
@@ -2414,7 +2363,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -2432,21 +2381,21 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004","name":"sb-queuecli000004","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"PT10M","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:47:56.24Z","updatedAt":"2022-10-04T11:47:56.41Z","accessedAt":"0001-01-01T00:00:00Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004","name":"sb-queuecli000004","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"PT10M","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:58:29.427Z","updatedAt":"2023-02-20T10:58:29.453Z","accessedAt":"0001-01-01T00:00:00Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1018'
+      - '1020'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:47:58 GMT
+      - Mon, 20 Feb 2023 10:58:29 GMT
       expires:
       - '-1'
       pragma:
@@ -2478,21 +2427,21 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --auto-delete-on-idle
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004","name":"sb-queuecli000004","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"PT10M","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:47:56.24Z","updatedAt":"2022-10-04T11:47:56.41Z","accessedAt":"0001-01-01T00:00:00Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004","name":"sb-queuecli000004","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"PT10M","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:58:29.427Z","updatedAt":"2023-02-20T10:58:29.453Z","accessedAt":"0001-01-01T00:00:00Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1018'
+      - '1020'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:48:00 GMT
+      - Mon, 20 Feb 2023 10:58:31 GMT
       expires:
       - '-1'
       pragma:
@@ -2532,9 +2481,9 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --auto-delete-on-idle
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004?api-version=2022-10-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004","name":"sb-queuecli000004","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"PT11M","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"0001-01-01T00:00:00","updatedAt":"0001-01-01T00:00:00","accessedAt":"0001-01-01T00:00:00"}}'
@@ -2546,7 +2495,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:48:03 GMT
+      - Mon, 20 Feb 2023 10:58:31 GMT
       expires:
       - '-1'
       pragma:
@@ -2562,7 +2511,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -2580,21 +2529,21 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":15,"sizeInBytes":0,"messageCount":0,"status":"SendDisabled","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:46:33.6228182Z","updatedAt":"2022-10-04T11:47:32.2798579Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli4000009","forwardDeadLetteredMessagesTo":"sb-queuecli4000009"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006","name":"sb-queuecli2000006","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":16384,"requiresDuplicateDetection":false,"requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"ReceiveDisabled","autoDeleteOnIdle":"P1DT3M4S","enablePartitioning":true,"enableExpress":true,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:47:35.567Z","updatedAt":"2022-10-04T11:47:53.0019893Z","accessedAt":"0001-01-01T00:00:00Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli3000008","name":"sb-queuecli3000008","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:46:23.9508631Z","updatedAt":"2022-10-04T11:46:23.9508631Z","accessedAt":"0001-01-01T00:00:00Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli4000009","name":"sb-queuecli4000009","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:46:27.953808Z","updatedAt":"2022-10-04T11:46:27.953808Z","accessedAt":"0001-01-01T00:00:00Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004","name":"sb-queuecli000004","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"PT11M","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2022-10-04T11:47:56.24Z","updatedAt":"2022-10-04T11:48:03.423Z","accessedAt":"0001-01-01T00:00:00Z"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000005","name":"sb-queuecli2000005","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT2M","maxSizeInMegabytes":2048,"requiresDuplicateDetection":true,"requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"enableBatchedOperations":false,"duplicateDetectionHistoryTimeWindow":"PT8M","maxDeliveryCount":15,"sizeInBytes":0,"messageCount":0,"status":"SendDisabled","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:57:59.5655299Z","updatedAt":"2023-02-20T10:58:18.0237264Z","accessedAt":"0001-01-01T00:00:00Z","forwardTo":"sb-queuecli4000009","forwardDeadLetteredMessagesTo":"sb-queuecli4000009"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli2000006","name":"sb-queuecli2000006","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":16384,"requiresDuplicateDetection":false,"requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"ReceiveDisabled","autoDeleteOnIdle":"P1DT3M4S","enablePartitioning":true,"enableExpress":true,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:58:20.3Z","updatedAt":"2023-02-20T10:58:27.0790222Z","accessedAt":"0001-01-01T00:00:00Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli3000008","name":"sb-queuecli3000008","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:57:54.24Z","updatedAt":"2023-02-20T10:57:54.27Z","accessedAt":"0001-01-01T00:00:00Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli4000009","name":"sb-queuecli4000009","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:57:56.749469Z","updatedAt":"2023-02-20T10:57:56.749469Z","accessedAt":"0001-01-01T00:00:00Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004","name":"sb-queuecli000004","type":"Microsoft.ServiceBus/namespaces/queues","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"lockDuration":"PT1M","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"enableBatchedOperations":true,"duplicateDetectionHistoryTimeWindow":"PT10M","maxDeliveryCount":10,"sizeInBytes":0,"messageCount":0,"status":"Active","autoDeleteOnIdle":"PT11M","enablePartitioning":false,"enableExpress":false,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"createdAt":"2023-02-20T10:58:29.427Z","updatedAt":"2023-02-20T10:58:31.867Z","accessedAt":"0001-01-01T00:00:00Z"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '5294'
+      - '5283'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:48:05 GMT
+      - Mon, 20 Feb 2023 10:58:32 GMT
       expires:
       - '-1'
       pragma:
@@ -2632,9 +2581,9 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --queue-name --name --rights
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004/authorizationRules/cliAutho000003?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004/authorizationRules/cliAutho000003?api-version=2022-10-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004/authorizationRules/cliAutho000003","name":"cliAutho000003","type":"Microsoft.ServiceBus/namespaces/queues/authorizationrules","properties":{"rights":["Listen"]}}'
@@ -2646,7 +2595,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:48:10 GMT
+      - Mon, 20 Feb 2023 10:58:33 GMT
       expires:
       - '-1'
       pragma:
@@ -2662,7 +2611,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -2680,9 +2629,9 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --queue-name --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004/authorizationRules/cliAutho000003?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004/authorizationRules/cliAutho000003?api-version=2022-10-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004/authorizationrules/cliAutho000003","name":"cliAutho000003","type":"Microsoft.ServiceBus/namespaces/queues/authorizationrules","location":"westus","properties":{"rights":["Listen"]}}'
@@ -2694,7 +2643,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:48:13 GMT
+      - Mon, 20 Feb 2023 10:58:34 GMT
       expires:
       - '-1'
       pragma:
@@ -2726,9 +2675,9 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --queue-name --name --rights
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004/authorizationRules/cliAutho000003?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004/authorizationRules/cliAutho000003?api-version=2022-10-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004/authorizationrules/cliAutho000003","name":"cliAutho000003","type":"Microsoft.ServiceBus/namespaces/queues/authorizationrules","location":"westus","properties":{"rights":["Listen"]}}'
@@ -2740,7 +2689,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:48:14 GMT
+      - Mon, 20 Feb 2023 10:58:35 GMT
       expires:
       - '-1'
       pragma:
@@ -2776,9 +2725,9 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --queue-name --name --rights
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004/authorizationRules/cliAutho000003?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004/authorizationRules/cliAutho000003?api-version=2022-10-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004/authorizationRules/cliAutho000003","name":"cliAutho000003","type":"Microsoft.ServiceBus/namespaces/queues/authorizationrules","properties":{"rights":["Send"]}}'
@@ -2790,7 +2739,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:48:18 GMT
+      - Mon, 20 Feb 2023 10:58:35 GMT
       expires:
       - '-1'
       pragma:
@@ -2806,7 +2755,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -2826,12 +2775,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --queue-name --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004/authorizationRules/cliAutho000003/ListKeys?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004/authorizationRules/cliAutho000003/ListKeys?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"primaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=F09EfboLJ0zAA6WFbBE0BFRLbcn0fIvngwQhVJDNdZo=;EntityPath=sb-queuecli000004","secondaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=/xgISmMh3IJlzYXGzPAuG3EKUw/z5eEMv6WdXNbFmmk=;EntityPath=sb-queuecli000004","primaryKey":"F09EfboLJ0zAA6WFbBE0BFRLbcn0fIvngwQhVJDNdZo=","secondaryKey":"/xgISmMh3IJlzYXGzPAuG3EKUw/z5eEMv6WdXNbFmmk=","keyName":"cliAutho000003"}'
+      string: '{"primaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=u1Sk61Qct6JqmzStxxcLjT+j8G7HRSJY8+ASbB1iQ8o=;EntityPath=sb-queuecli000004","secondaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=mSqI3nLzGXx/ytVFXB/zswINsCPjGZ7IW+ASbCPgwtk=;EntityPath=sb-queuecli000004","primaryKey":"u1Sk61Qct6JqmzStxxcLjT+j8G7HRSJY8+ASbB1iQ8o=","secondaryKey":"mSqI3nLzGXx/ytVFXB/zswINsCPjGZ7IW+ASbCPgwtk=","keyName":"cliAutho000003"}'
     headers:
       cache-control:
       - no-cache
@@ -2840,7 +2789,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:48:21 GMT
+      - Mon, 20 Feb 2023 10:58:37 GMT
       expires:
       - '-1'
       pragma:
@@ -2878,12 +2827,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --queue-name --name --key
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004/authorizationRules/cliAutho000003/regenerateKeys?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004/authorizationRules/cliAutho000003/regenerateKeys?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"primaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=HwaH1MqHGz2Gy2MBgJC2s9qsNS40/IYOannOqXfgBz0=;EntityPath=sb-queuecli000004","secondaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=/xgISmMh3IJlzYXGzPAuG3EKUw/z5eEMv6WdXNbFmmk=;EntityPath=sb-queuecli000004","primaryKey":"HwaH1MqHGz2Gy2MBgJC2s9qsNS40/IYOannOqXfgBz0=","secondaryKey":"/xgISmMh3IJlzYXGzPAuG3EKUw/z5eEMv6WdXNbFmmk=","keyName":"cliAutho000003"}'
+      string: '{"primaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=fqSGevUX+qLEnaWFSWKlS/kTTESW7gWLe+ASbHCn8Wo=;EntityPath=sb-queuecli000004","secondaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=mSqI3nLzGXx/ytVFXB/zswINsCPjGZ7IW+ASbCPgwtk=;EntityPath=sb-queuecli000004","primaryKey":"fqSGevUX+qLEnaWFSWKlS/kTTESW7gWLe+ASbHCn8Wo=","secondaryKey":"mSqI3nLzGXx/ytVFXB/zswINsCPjGZ7IW+ASbCPgwtk=","keyName":"cliAutho000003"}'
     headers:
       cache-control:
       - no-cache
@@ -2892,7 +2841,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:48:21 GMT
+      - Mon, 20 Feb 2023 10:58:37 GMT
       expires:
       - '-1'
       pragma:
@@ -2908,7 +2857,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -2930,12 +2879,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --queue-name --name --key
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004/authorizationRules/cliAutho000003/regenerateKeys?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004/authorizationRules/cliAutho000003/regenerateKeys?api-version=2022-10-01-preview
   response:
     body:
-      string: '{"primaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=HwaH1MqHGz2Gy2MBgJC2s9qsNS40/IYOannOqXfgBz0=;EntityPath=sb-queuecli000004","secondaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=PfVPBhPdDeXZ2HJKbD4Hrg+109WuKK5eavFAFh9tyPc=;EntityPath=sb-queuecli000004","primaryKey":"HwaH1MqHGz2Gy2MBgJC2s9qsNS40/IYOannOqXfgBz0=","secondaryKey":"PfVPBhPdDeXZ2HJKbD4Hrg+109WuKK5eavFAFh9tyPc=","keyName":"cliAutho000003"}'
+      string: '{"primaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=fqSGevUX+qLEnaWFSWKlS/kTTESW7gWLe+ASbHCn8Wo=;EntityPath=sb-queuecli000004","secondaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=4Vq42Oq0QcsboPF66l5xbTKuTN21PPFyt+ASbIu2JxQ=;EntityPath=sb-queuecli000004","primaryKey":"fqSGevUX+qLEnaWFSWKlS/kTTESW7gWLe+ASbHCn8Wo=","secondaryKey":"4Vq42Oq0QcsboPF66l5xbTKuTN21PPFyt+ASbIu2JxQ=","keyName":"cliAutho000003"}'
     headers:
       cache-control:
       - no-cache
@@ -2944,7 +2893,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 04 Oct 2022 11:48:22 GMT
+      - Mon, 20 Feb 2023 10:58:39 GMT
       expires:
       - '-1'
       pragma:
@@ -2980,9 +2929,9 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --queue-name --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004/authorizationRules/cliAutho000003?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004/authorizationRules/cliAutho000003?api-version=2022-10-01-preview
   response:
     body:
       string: ''
@@ -2992,7 +2941,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 04 Oct 2022 11:48:24 GMT
+      - Mon, 20 Feb 2023 10:58:40 GMT
       expires:
       - '-1'
       pragma:
@@ -3024,9 +2973,9 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-servicebus/8.2.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/queues/sb-queuecli000004?api-version=2022-10-01-preview
   response:
     body:
       string: ''
@@ -3036,7 +2985,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 04 Oct 2022 11:48:25 GMT
+      - Mon, 20 Feb 2023 10:58:41 GMT
       expires:
       - '-1'
       pragma:
@@ -3048,7 +2997,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14998'
+      - '14999'
     status:
       code: 200
       message: OK
@@ -3056,7 +3005,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -3068,9 +3017,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 (AAZ) azsdk-python-core/1.24.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-10-01-preview
   response:
     body:
       string: ''
@@ -3080,24 +3029,24 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 04 Oct 2022 11:48:27 GMT
+      - Mon, 20 Feb 2023 10:58:43 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/locations/westus/operationStatus/sb-nscli000002?api-version=2022-01-01-preview&resourceType=Namespace
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/locations/westus/operationStatus/sb-nscli000002?api-version=2022-10-01-preview&resourceType=Namespace
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14998'
+      - '14999'
     status:
       code: 202
       message: Accepted
@@ -3115,9 +3064,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.8.0 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.44.1 (AAZ) azsdk-python-core/1.24.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/locations/westus/operationStatus/sb-nscli000002?api-version=2022-01-01-preview&resourceType=Namespace
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_queue000001/providers/Microsoft.ServiceBus/locations/westus/operationStatus/sb-nscli000002?api-version=2022-10-01-preview&resourceType=Namespace
   response:
     body:
       string: ''
@@ -3125,16 +3074,16 @@ interactions:
       cache-control:
       - no-cache
       date:
-      - Tue, 04 Oct 2022 11:48:57 GMT
+      - Mon, 20 Feb 2023 10:59:14 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:

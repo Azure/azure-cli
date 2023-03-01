@@ -52,35 +52,48 @@ class Create(AAZCommand):
             options=["-n", "--name"],
             help="Route name.",
             required=True,
-            id_part="child_name_1",
         )
         _args_schema.route_table_name = AAZStrArg(
             options=["--route-table-name"],
             help="Route table name.",
             required=True,
-            id_part="name",
         )
+
+        # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
         _args_schema.address_prefix = AAZStrArg(
             options=["--address-prefix"],
+            arg_group="Properties",
             help="The destination CIDR to which the route applies.",
         )
         _args_schema.next_hop_ip_address = AAZStrArg(
             options=["--next-hop-ip-address"],
+            arg_group="Properties",
             help="The IP address packets should be forwarded to when using the VirtualAppliance hop type.",
         )
         _args_schema.next_hop_type = AAZStrArg(
             options=["--next-hop-type"],
+            arg_group="Properties",
             help="The type of Azure hop the packet should be sent to.",
             enum={"Internet": "Internet", "None": "None", "VirtualAppliance": "VirtualAppliance", "VirtualNetworkGateway": "VirtualNetworkGateway", "VnetLocal": "VnetLocal"},
         )
-
-        # define Arg Group "Properties"
 
         # define Arg Group "RouteParameters"
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         yield self.RoutesCreateOrUpdate(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -126,7 +139,7 @@ class Create(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -231,6 +244,10 @@ class Create(AAZCommand):
             )
 
             return cls._schema_on_200_201
+
+
+class _CreateHelper:
+    """Helper class for Create"""
 
 
 __all__ = ["Create"]

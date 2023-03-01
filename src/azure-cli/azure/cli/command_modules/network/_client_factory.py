@@ -20,10 +20,6 @@ def cf_connection_monitor(cli_ctx, _):
     return network_client_factory(cli_ctx).connection_monitors
 
 
-def cf_flow_logs(cli_ctx, _):
-    return network_client_factory(cli_ctx).flow_logs
-
-
 def cf_private_link_services(cli_ctx, _):
     return network_client_factory(cli_ctx).private_link_services
 
@@ -42,10 +38,6 @@ def cf_local_network_gateways(cli_ctx, _):
 
 def cf_network_watcher(cli_ctx, _):
     return network_client_factory(cli_ctx).network_watchers
-
-
-def cf_packet_capture(cli_ctx, _):
-    return network_client_factory(cli_ctx).packet_captures
 
 
 def cf_private_access(cli_ctx, _):
