@@ -2630,8 +2630,7 @@ class CosmosDBTests(ScenarioTest):
 
         restorable_resources = self.cmd('az cosmosdb table restorable-resource list --restore-location {loc} -l {loc} --instance-id {ins_id} --restore-timestamp {rts}').get_output_in_json()
         assert len(restorable_resources) == 1
-        assert len(restorable_resources) == 1
-        assert restorable_resources[0] == table
+        assert restorable_resources[0]['name'] == table
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_gremlin_graph_backupinfo', location='eastus2')
     def test_cosmosdb_gremlin_graph_backupinfo(self, resource_group):
