@@ -26,6 +26,7 @@ from azure.cli.core.util import should_disable_connection_verify
 from azure.cli.core.cloud import CloudSuffixNotSetException
 from azure.cli.core._profile import _AZ_LOGIN_MESSAGE
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.azclierror import AzureResponseError
 
 from ._client_factory import cf_acr_registries
 from ._constants import get_managed_sku
@@ -167,7 +168,7 @@ def _get_aad_token_after_challenge(cli_ctx,
     if response.status_code == 429:
         if is_diagnostics_context:
             return CONNECTIVITY_TOOMANYREQUESTS_ERROR.format_error_message(login_server)
-        raise CLIError(CONNECTIVITY_TOOMANYREQUESTS_ERROR.format_error_message(login_server)
+        raise AzureResponseError(CONNECTIVITY_TOOMANYREQUESTS_ERROR.format_error_message(login_server)
                        .get_error_message())
     if response.status_code not in [200]:
         from ._errors import CONNECTIVITY_REFRESH_TOKEN_ERROR
@@ -446,7 +447,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
 
 def raise_toomanyrequests_error(error):
     if CONNECTIVITY_TOOMANYREQUESTS_ERROR.error_title in error:
-        raise CLIError("{}: {}".format(AAD_TOKEN_BASE_ERROR_MESSAGE, error))
+        raise AzureResponseError("{}: {}".format(AAD_TOKEN_BASE_ERROR_MESSAGE, error))
 
 
 def get_login_credentials(cmd,
