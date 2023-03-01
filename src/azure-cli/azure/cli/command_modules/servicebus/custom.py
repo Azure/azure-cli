@@ -10,7 +10,10 @@
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-return-statements
 import re
+from knack.log import get_logger
 from azure.cli.core.profiles import ResourceType
+
+logger = get_logger(__name__)
 
 
 # Namespace Region
@@ -92,34 +95,6 @@ def cli_namespace_list(cmd, client, resource_group_name=None):
 def cli_namespace_exists(cmd, client, name):
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
         return client.check_name_availability(parameters={'name': name})
-
-
-# Namespace Authorization rule:
-def cli_namespaceautho_create(cmd, client, resource_group_name, namespace_name, name, rights=None):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        from azure.cli.command_modules.servicebus._utils import accessrights_converter
-        return client.create_or_update_authorization_rule(
-            resource_group_name=resource_group_name,
-            namespace_name=namespace_name,
-            authorization_rule_name=name,
-            parameters={'rights': accessrights_converter(rights)})
-
-
-# Namespace Authorization rule:
-def cli_namespaceautho_update(cmd, instance, rights):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        from azure.cli.command_modules.servicebus._utils import accessrights_converter
-        instance.rights = accessrights_converter(rights)
-        return instance
-
-
-def cli_keys_renew(client, resource_group_name, namespace_name, name, key_type, key=None):
-    return client.regenerate_keys(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        authorization_rule_name=name,
-        parameters={'key_type': key_type, 'key': key}
-    )
 
 
 # Rule Region
@@ -280,6 +255,10 @@ def cli_migration_complete(client, resource_group_name, namespace_name, config_n
     return client.complete_migration(resource_group_name, namespace_name, config_name)
 
 
+def revert(client, resource_group_name, namespace_name, config_name="$default"):
+    return client.revert(resource_group_name, namespace_name, config_name)
+
+
 iso8601pattern = re.compile("^P(?!$)(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(?=\\d)(\\d+H)?(\\d+M)?(\\d+.)?(\\d+S)?)?$")
 timedeltapattern = re.compile("^\\d+:\\d+:\\d+$")
 
@@ -313,6 +292,7 @@ def return_valid_duration(update_value, current_value=None):
         return value_toreturn
 
     if timedeltapattern.match(value_toreturn):
+        logger.warning('Please use ISO8601 duration for timespan inputs. Timespan inputs of format (days:min:seconds) would be deprecated from version 2.49.0.')
         day, minute, seconds = value_toreturn.split(":")
         if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) <= timedelta(days=DURATION_DAYS,
                                                                                             minutes=DURATION_MIN,
@@ -336,6 +316,7 @@ def return_valid_duration_create(update_value):
                     'duration value should be less than (days:min:secs) 10675199:10085:477581')
 
         if timedeltapattern.match(update_value):
+            logger.warning('Please use ISO8601 duration for timespan inputs. Timespan inputs of format (days:min:seconds) would be deprecated from version 2.49.0.')
             day, minute, seconds = update_value.split(":")
             if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) <= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
                 update_value = timedelta(days=int(day), minutes=int(minute), seconds=int(seconds))
@@ -585,10 +566,6 @@ def cli_add_encryption(cmd, client, resource_group_name, namespace_name, encrypt
     get_namespace = client.get(resource_group_name, namespace_name)
 
     return get_namespace
-
-
-def revert(client, resource_group_name, namespace_name, config_name="$default"):
-    return client.revert(resource_group_name, namespace_name, config_name)
 
 
 def cli_remove_encryption(client, resource_group_name, namespace_name, encryption_config):
