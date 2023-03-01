@@ -12,9 +12,7 @@ from azure.cli.core.profiles import get_api_version, ResourceType
 
 from azure.cli.command_modules.network._client_factory import (
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
-    cf_connection_monitor,
     cf_dns_references)
-
 from azure.cli.command_modules.network._format import (
     transform_local_gateway_table_output, transform_dns_record_set_output,
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
@@ -27,9 +25,7 @@ from azure.cli.command_modules.network._format import (
     transform_vnet_gateway_routes_table, transform_vnet_gateway_bgp_peer_table)
 from azure.cli.command_modules.network._validators import (
     process_ag_create_namespace,
-    process_lb_create_namespace, process_nw_cm_v2_create_namespace,
-    process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
-    process_nw_cm_v2_test_group,
+    process_lb_create_namespace,
     process_nw_flow_log_show_namespace,
     process_public_ip_create_namespace,
     process_vpn_connection_create_namespace,
@@ -60,11 +56,6 @@ def load_command_table(self, _):
         client_factory=cf_dns_references,
         resource_type=ResourceType.MGMT_NETWORK_DNS,
         min_api='2018-05-01'
-    )
-
-    network_watcher_cm_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ConnectionMonitorsOperations.{}',
-        client_factory=cf_connection_monitor
     )
     # endregion
 
@@ -489,16 +480,6 @@ def load_command_table(self, _):
         self.command_table["network watcher test-connectivity"] = TestConnectivity(loader=self)
         g.custom_command("configure", "configure_network_watcher")
 
-    # with self.command_group('network watcher connection-monitor', network_watcher_cm_sdk, client_factory=cf_connection_monitor, min_api='2018-01-01') as g:
-    #     g.custom_command('create', 'create_nw_connection_monitor', validator=process_nw_cm_v2_create_namespace)
-    #     g.command('delete', 'begin_delete')
-    #     g.show_command('show', 'get')
-    #     g.command('stop', 'begin_stop')
-    #     g.command('start', 'begin_start')
-    #     g.command('query', 'begin_query')
-    #     g.command('list', 'list')
-
-
     from .operations.watcher import WatcherConnectionMonitorStart, WatcherConnectionMonitorStop, \
         WatcherConnectionMonitorList, WatcherConnectionMonitorQuery, WatcherConnectionMonitorShow, \
         WatcherConnectionMonitorDelete, WatcherConnectionMonitorCreate
@@ -510,16 +491,6 @@ def load_command_table(self, _):
     self.command_table["network watcher connection-monitor delete"] = WatcherConnectionMonitorDelete(loader=self)
     self.command_table["network watcher connection-monitor show"] = WatcherConnectionMonitorShow(loader=self)
 
-    # with self.command_group('network watcher connection-monitor endpoint',
-    #                         network_watcher_cm_sdk,
-    #                         min_api='2019-11-01',
-    #                         client_factory=cf_connection_monitor,
-    #                         is_preview=True,
-    #                         validator=process_nw_cm_v2_endpoint_namespace) as g:
-    #     g.custom_command('add', 'add_nw_connection_monitor_v2_endpoint')
-    #     g.custom_command('remove', 'remove_nw_connection_monitor_v2_endpoint')
-    #     g.custom_show_command('show', 'show_nw_connection_monitor_v2_endpoint')
-    #     g.custom_command('list', 'list_nw_connection_monitor_v2_endpoint')
     from .operations.watcher import WatcherConnectionMonitorEndpointAdd, WatcherConnectionMonitorEndpointShow, \
         WatcherConnectionMonitorEndpointList, WatcherConnectionMonitorEndpointRemove
     self.command_table["network watcher connection-monitor endpoint add"] = WatcherConnectionMonitorEndpointAdd(
@@ -531,16 +502,6 @@ def load_command_table(self, _):
     self.command_table["network watcher connection-monitor endpoint list"] = WatcherConnectionMonitorEndpointList(
         loader=self)
 
-    # with self.command_group('network watcher connection-monitor test-configuration',
-    #                         network_watcher_cm_sdk,
-    #                         min_api='2019-11-01',
-    #                         client_factory=cf_connection_monitor,
-    #                         is_preview=True,
-    #                         validator=process_nw_cm_v2_test_configuration_namespace) as c:
-    #     c.custom_command('add', 'add_nw_connection_monitor_v2_test_configuration')
-    #     c.custom_command('remove', 'remove_nw_connection_monitor_v2_test_configuration')
-    #     c.custom_show_command('show', 'show_nw_connection_monitor_v2_test_configuration')
-    #     c.custom_command('list', 'list_nw_connection_monitor_v2_test_configuration')
     from .operations.watcher import WatcherConnectionMonitorTestConfigurationAdd as WCMTAdd, \
         WatcherConnectionMonitorTestConfigurationShow as WCMTCShow, \
         WatcherConnectionMonitorTestConfigurationList as WCMTCList, \
@@ -550,17 +511,6 @@ def load_command_table(self, _):
     self.command_table["network watcher connection-monitor test-configuration show"] = WCMTCShow(loader=self)
     self.command_table["network watcher connection-monitor test-configuration list"] = WCMTCList(loader=self)
 
-    # with self.command_group('network watcher connection-monitor test-group',
-    #                         network_watcher_cm_sdk,
-    #                         min_api='2019-11-01',
-    #                         client_factory=cf_connection_monitor,
-    #                         is_preview=True,
-    #                         validator=process_nw_cm_v2_test_group) as c:
-    #     c.custom_command('add', 'add_nw_connection_monitor_v2_test_group')
-    #     c.custom_command('remove', 'remove_nw_connection_monitor_v2_test_group')
-    #     c.custom_show_command('show', 'show_nw_connection_monitor_v2_test_group')
-    #     c.custom_command('list', 'list_nw_connection_monitor_v2_test_group')
-
     with self.command_group('network watcher connection-monitor test-group', is_preview=True) as c:
         from .operations.watcher import WatcherConnectionMonitorTestGroupAdd as WCMTGAdd, \
             WatcherConnectionMonitorTestGroupShow as WCMTGShow, \
@@ -569,16 +519,6 @@ def load_command_table(self, _):
         self.command_table["network watcher connection-monitor test-group show"] = WCMTGShow(loader=self)
         self.command_table["network watcher connection-monitor test-group list"] = WCMTGList(loader=self)
         c.custom_command('remove', 'remove_nw_connection_monitor_test_group')
-
-    # with self.command_group('network watcher connection-monitor output',
-    #                         network_watcher_cm_sdk,
-    #                         min_api='2019-11-01',
-    #                         client_factory=cf_connection_monitor,
-    #                         is_preview=True,
-    #                         validator=process_nw_cm_v2_output_namespace) as c:
-    #     c.custom_command('add', 'add_nw_connection_monitor_v2_output')
-    #     c.custom_command('remove', 'remove_nw_connection_monitor_v2_output')
-    #     c.custom_command('list', 'list_nw_connection_monitor_v2_output')
 
     with self.command_group('network watcher connection-monitor output', is_preview=True) as c:
         from .operations.watcher import WatcherConnectionMonitorOutputAdd, WatcherConnectionMonitorOutputList
