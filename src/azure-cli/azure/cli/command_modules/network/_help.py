@@ -5692,6 +5692,19 @@ examples:
     text: az network watcher list
 """
 
+helps['network watcher connection-monitor output remove'] = """
+type: command
+short-summary: Remove all outputs from a connection monitor.
+"""
+
+helps['network watcher connection-monitor test-group remove'] = """
+type: command
+short-summary: Remove test group from a connection monitor.
+examples:
+  - name: Remove test group from a connection monitor.
+    text: az network watcher connection-monitor test-group remove --connection-monitor MyConnectionMonitor --location westus2 --name MyConnectionMonitorTestGroup
+"""
+
 helps['network watcher packet-capture'] = """
 type: group
 short-summary: Manage packet capture sessions on VMs.

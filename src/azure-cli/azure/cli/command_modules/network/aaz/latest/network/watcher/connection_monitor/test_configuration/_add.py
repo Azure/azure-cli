@@ -60,7 +60,9 @@ class Add(AAZCommand):
             help="The name of the Network Watcher resource.",
             required=True,
         )
-        _args_schema.resource_group = AAZResourceGroupNameArg(
+        _args_schema.watcher_rg = AAZResourceGroupNameArg(
+            options=["-g", "--watcher-rg"],
+            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
         _args_schema.test_configuration_name = AAZStrArg(
@@ -273,7 +275,7 @@ class Add(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
+                    "resourceGroupName", self.ctx.args.watcher_rg,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -376,7 +378,7 @@ class Add(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
+                    "resourceGroupName", self.ctx.args.watcher_rg,
                     required=True,
                 ),
                 **self.serialize_url_param(

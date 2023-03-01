@@ -619,15 +619,14 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_watcher_name._registered = False
         args_schema.network_watcher_name._required = False
-        args_schema.resource_group._registered = False
         args_schema.resource_group._required = False
 
         args_schema.auto_start._registered = False
         args_schema.monitoring_interval_in_seconds._registered = False
-        args_schema.sources._registered = False
+        args_schema.source._registered = False
         args_schema.destination._registered = False
         args_schema.endpoints._registered = False
-        args_schema.test_configuration._registered = False
+        args_schema.test_configurations._registered = False
         args_schema.test_groups._registered = False
         args_schema.outputs._registered = False
 
@@ -643,6 +642,7 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
                  "BelowAverage, Default, Full, Low",
             enum={"AboveAverage": "AboveAverage", "Average": "Average", "BelowAverage": "BelowAverage",
                   "Default": "Default", "Full": "Full", "Low": "Low"},
+            arg_group="V2 Endpoint"
         )
         args_schema.endpoint_dest_name = AAZStrArg(
             options=["--endpoint-dest-name"],
@@ -662,6 +662,7 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
             enum={"AzureArcVM": "AzureArcVM", "AzureSubnet": "AzureSubnet", "AzureVM": "AzureVM",
                   "AzureVMSS": "AzureVMSS", "AzureVNet": "AzureVNet", "ExternalAddress": "ExternalAddress",
                   "MMAWorkspaceMachine": "MMAWorkspaceMachine", "MMAWorkspaceNetwork": "MMAWorkspaceNetwork"},
+            arg_group="V2 Endpoint"
         )
         args_schema.endpoint_source_address = AAZStrArg(
             options=["--endpoint-source-address"],
@@ -674,6 +675,7 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
                  "BelowAverage, Default, Full, Low",
             enum={"AboveAverage": "AboveAverage", "Average": "Average", "BelowAverage": "BelowAverage",
                   "Default": "Default", "Full": "Full", "Low": "Low"},
+            arg_group="V2 Endpoint"
         )
         args_schema.endpoint_source_name = AAZStrArg(
             options=["--endpoint-source-name"],
@@ -694,6 +696,7 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
             enum={"AzureArcVM": "AzureArcVM", "AzureSubnet": "AzureSubnet", "AzureVM": "AzureVM",
                   "AzureVMSS": "AzureVMSS", "AzureVNet": "AzureVNet", "ExternalAddress": "ExternalAddress",
                   "MMAWorkspaceMachine": "MMAWorkspaceMachine", "MMAWorkspaceNetwork": "MMAWorkspaceNetwork"},
+            arg_group="V2 Endpoint"
         )
 
         # V2 Output
@@ -746,7 +749,7 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
         args_schema.test_config_http_valid_status_codes.Element = AAZStrArg()
 
         args_schema.test_config_http_prefer_https = AAZBoolArg(
-            options=["--http-prefer"],
+            options=["--https-prefer"],
             help='Value indicating whether HTTPS is preferred over HTTP in cases where the choice is not explicit. '
                  ' Allowed values: false, true.',
             arg_group="V2 Test Configuration",
@@ -812,6 +815,7 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
             help='The name of the connection monitor test group.  Default: DefaultTestGroup.',
             arg_group="V2 Test Group",
         )
+        return args_schema
 
     def pre_operations(self):
         process_nw_cm_v2_create_namespace(self)
@@ -1498,18 +1502,26 @@ class WatcherConnectionMonitorEndpointAdd(_WatcherConnectionMonitorEndpointAdd):
         args_schema.watcher_name._required = False
         args_schema.watcher_rg._registered = False
         args_schema.watcher_rg._required = False
+
         args_schema.filter_items._registered = False
         args_schema.scope_exclude._registered = False
         args_schema.scope_include._registered = False
 
+        args_schema.location = AAZResourceLocationArg(
+            options=["-l", "--location"],
+            help="Location. Values from: `az account list-locations`. "
+                 "You can configure the default location "
+                 "using `az configure --defaults location=<location>`.",
+            required=True
+        )
         args_schema.address_exclude = AAZListArg(
             options=["--address-exclude"],
-            help="List of address of the endpoint item which needs to be included to the endpoint scope.", # ? include
+            help="List of address of the endpoint item which needs to be excluded to the endpoint scope.",
         )
         args_schema.address_exclude.Element = AAZStrArg()
 
         args_schema.address_include = AAZListArg(
-            options=["--address-exclude"],
+            options=["--address-include"],
             help="List of address of the endpoint item which needs to be included to the endpoint scope.",
         )
         args_schema.address_include.Element = AAZStrArg()
@@ -1687,17 +1699,27 @@ class WatcherConnectionMonitorTestConfigurationAdd(_MonitorTestConfigurationAdd)
         args_schema.watcher_rg._required = False
         args_schema.http_request_headers._registered = False
 
+        args_schema.location = AAZResourceLocationArg(
+            options=["-l", "--location"],
+            help="Location. Values from: `az account list-locations`. "
+                 "You can configure the default location "
+                 "using `az configure --defaults location=<location>`.",
+            required=True,
+        )
         args_schema.http_request_header = AAZDictArg(
             options=["--http-request-header"],
             help="The HTTP headers to transmit with the request. List of property=value pairs to define HTTP headers.",
+            arg_group="HTTP Protocol",
         )
         args_schema.http_request_header.Element = AAZStrArg()
 
         args_schema.test_groups = AAZListArg(
             options=["--test-groups"],
             help="Space-separated list of names of test group which only need to be affected if specified.",
+            required=True,
         )
         args_schema.test_groups.Element = AAZStrArg()
+        return args_schema
 
     def pre_operations(self):
         get_network_watcher_from_location(self)
@@ -1819,8 +1841,15 @@ class WatcherConnectionMonitorTestGroupAdd(_WatcherConnectionMonitorTestGroupAdd
 
         args_schema.destinations._registered = False
         args_schema.sources._registered = False
-        args_schema.test_configuration._registered = False
+        args_schema.test_configurations._registered = False
 
+        args_schema.location = AAZResourceLocationArg(
+            options=["-l", "--location"],
+            help="Location. Values from: `az account list-locations`. "
+                 "You can configure the default location "
+                 "using `az configure --defaults location=<location>`.",
+            required=True,
+        )
         # V2 Endpoint
         args_schema.endpoint_dest_name = AAZStrArg(
             options=["--endpoint-dest-name"],
@@ -1895,7 +1924,7 @@ class WatcherConnectionMonitorTestGroupAdd(_WatcherConnectionMonitorTestGroupAdd
         args_schema.test_config_http_valid_status_codes.Element = AAZStrArg()
 
         args_schema.test_config_http_prefer_https = AAZBoolArg(
-            options=["--http-prefer"],
+            options=["--https-prefer"],
             help='Value indicating whether HTTPS is preferred over HTTP in cases where the choice is not explicit. '
                  ' Allowed values: false, true.',
             arg_group="V2 Test Configuration",
@@ -1943,6 +1972,7 @@ class WatcherConnectionMonitorTestGroupAdd(_WatcherConnectionMonitorTestGroupAdd
             help='The maximum round-trip time in milliseconds permitted for a test to evaluate as successful.',
             arg_group="V2 Test Configuration",
         )
+        return args_schema
 
     def pre_operations(self):
         get_network_watcher_from_location(self)
