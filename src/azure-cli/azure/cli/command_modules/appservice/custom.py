@@ -2704,7 +2704,11 @@ def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certif
     hosting_environment_profile_param = (webapp.hosting_environment_profile.name
                                          if webapp.hosting_environment_profile else '')
 
-    thumb_print = _get_cert(certificate_password, certificate_file)
+    try:
+        thumb_print = _get_cert(certificate_password, certificate_file)
+    except OpenSSL.crypto.Error as e:
+        raise UnclassifiedUserFault(f"Failed to get the certificate's thrumbprint with error: '{e}'. "
+                                    "Please double check the certificate password.") from e
     cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
                                     webapp.location, resource_group_name)
     cert = Certificate(password=certificate_password, pfx_blob=cert_contents,
