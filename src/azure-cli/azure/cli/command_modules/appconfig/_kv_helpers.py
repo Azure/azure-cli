@@ -692,6 +692,8 @@ def __find_ff_diff(old_json, new_json, strict=False):
     differ = JsonDiffer(syntax='explicit')
     res = differ.diff(old_json, new_json)
     keys = str(res.keys())
+
+    # return the empty diff if there are no additions, deletions or updates
     if res == {} or (('update' not in keys) and ('insert' not in keys) and (not strict or ('delete' not in keys))):
         return ff_diff
 
@@ -738,6 +740,8 @@ def __find_kv_diff(old_json, new_json, strict=False):
     differ = JsonDiffer(syntax='explicit')
     res = differ.diff(old_json, new_json)
     keys = str(res.keys())
+
+    # return the empty diff if there are no additions, deletions or updates
     if res == {} or (('update' not in keys) and ('insert' not in keys) and (not strict or ('delete' not in keys))):
         return kv_diff
 
