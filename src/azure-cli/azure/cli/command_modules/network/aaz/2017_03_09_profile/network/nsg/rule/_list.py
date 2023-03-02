@@ -43,9 +43,9 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
-            help="The name of the network security group.",
+        _args_schema.nsg_name = AAZStrArg(
+            options=["--nsg-name"],
+            help="Name of the network security group.",
             required=True,
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -101,7 +101,7 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "networkSecurityGroupName", self.ctx.args.name,
+                    "networkSecurityGroupName", self.ctx.args.nsg_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -189,7 +189,6 @@ class List(AAZCommand):
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
-                flags={"read_only": True},
             )
             properties.source_address_prefix = AAZStrType(
                 serialized_name="sourceAddressPrefix",

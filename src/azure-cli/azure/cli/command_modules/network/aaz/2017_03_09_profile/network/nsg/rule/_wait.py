@@ -187,7 +187,6 @@ class Wait(AAZWaitCommand):
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
-                flags={"read_only": True},
             )
             properties.source_address_prefix = AAZStrType(
                 serialized_name="sourceAddressPrefix",

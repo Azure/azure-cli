@@ -23,10 +23,10 @@ class Create(AAZCommand):
     :example: Create a "Deny" rule over TCP for a specific IP address range with the lowest priority.
         az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRule --priority 4096 --source-address-prefixes 208.130.28.0/24 --source-port-ranges 80 --destination-address-prefixes '*' --destination-port-ranges 80 8080 --access Deny --protocol Tcp --description "Deny from specific IP address ranges on 80 and 8080."
 
-    :example: Create a security rule using service tags. For more details visit https://aka.ms/servicetags
+    :example: Create a security rule using service tags (https://aka.ms/servicetags).
         az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRuleWithTags --priority 400 --source-address-prefixes VirtualNetwork --destination-address-prefixes Storage --destination-port-ranges '*' --direction Outbound --access Allow --protocol Tcp --description "Allow VirtualNetwork to Storage."
 
-    :example: Create a security rule using application security groups. https://aka.ms/applicationsecuritygroups
+    :example: Create a security rule using application security groups (https://aka.ms/applicationsecuritygroups).
         az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRuleWithAsg --priority 500 --source-address-prefixes Internet --destination-port-ranges 80 8080 --destination-asgs Web --access Allow --protocol Tcp --description "Allow Internet to Web ASG on ports 80,8080."
     """
 
@@ -69,27 +69,27 @@ class Create(AAZCommand):
         )
         _args_schema.access = AAZStrArg(
             options=["--access"],
-            help="Allowed values: Allow, Deny.",
+            help="Network traffic is allowed or denied.",
             default="Allow",
             enum={"Allow": "Allow", "Deny": "Deny"},
         )
         _args_schema.description = AAZStrArg(
             options=["--description"],
-            help="Rule description.",
+            help="Description for this rule. Restricted to 140 chars.",
         )
         _args_schema.direction = AAZStrArg(
             options=["--direction"],
-            help="Allowed values: Inbound, Outbound.",
+            help="Direction of the rule. The direction specifies if rule will be evaluated on incoming or outgoing traffic.",
             default="Inbound",
             enum={"Inbound": "Inbound", "Outbound": "Outbound"},
         )
         _args_schema.priority = AAZIntArg(
             options=["--priority"],
-            help="Rule priority, between 100 (highest priority) and 4096 (lowest priority). Must be unique for each rule in the collection.",
+            help="Priority of the rule. The value can be between 100 and 4096. The priority number must be unique for each rule in the collection. The lower the priority number, the higher the priority of the rule.",
         )
         _args_schema.protocol = AAZStrArg(
             options=["--protocol"],
-            help="etwork protocol this rule applies to.  Allowed values: *, Ah, Esp, Icmp, Tcp, Udp.",
+            help="Network protocol this rule applies to.",
             default="*",
             enum={"*": "*", "Tcp": "Tcp", "Udp": "Udp"},
         )
@@ -100,15 +100,17 @@ class Create(AAZCommand):
         _args_schema.destination_address_prefix = AAZStrArg(
             options=["--destination-address-prefix"],
             arg_group="Destination",
-            help="Space-separated list of CIDR prefixes or IP ranges.  Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' to match all IPs. Besides, it also supports all available Service Tags like 'ApiManagement', 'SqlManagement', 'AzureMonitor', etc.",
+            help="The destination address prefix. CIDR or destination IP range. Asterisk '*' can also be used to match all source IPs. Default tags such as 'VirtualNetwork', 'AzureLoadBalancer' and 'Internet' can also be used.",
             default="*",
         )
         _args_schema.destination_port_range = AAZStrArg(
             options=["--destination-port-range"],
             arg_group="Destination",
-            help="Port or port range between 0-65535. Use '*' to match all ports.",
+            help="The destination port or range. Integer or range between 0 and 65535. Asterisk '*' can also be used to match all ports.",
             default="80",
         )
+
+        # define Arg Group "Properties"
 
         # define Arg Group "SecurityRuleParameters"
 
@@ -118,14 +120,14 @@ class Create(AAZCommand):
         _args_schema.source_address_prefix = AAZStrArg(
             options=["--source-address-prefix"],
             arg_group="Source",
-            help="Space-separated list of CIDR prefixes or IP ranges. Alternatively, specify ONE of 'VirtualNetwork',                                      'AzureLoadBalancer', 'Internet' or '*' to match all IPs. Besides, it also supports all available Service Tags like 'ApiManagement', 'SqlManagement', 'AzureMonitor', etc.",
+            help="The CIDR or source IP range. Asterisk '*' can also be used to match all source IPs. Default tags such as 'VirtualNetwork', 'AzureLoadBalancer' and 'Internet' can also be used. If this is an ingress rule, specifies where network traffic originates from.",
             default="*",
         )
         _args_schema.source_port_range = AAZStrArg(
             options=["--source-port-range"],
             arg_group="Source",
-            help="Port or port range between 0-65535. Use '*' to match all ports.",
-            default="*",
+            help="The source port or range. Integer or range between 0 and 65535. Asterisk '*' can also be used to match all ports.",
+            default="80",
         )
         return cls._args_schema
 
@@ -302,7 +304,6 @@ class Create(AAZCommand):
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
-                flags={"read_only": True},
             )
             properties.source_address_prefix = AAZStrType(
                 serialized_name="sourceAddressPrefix",

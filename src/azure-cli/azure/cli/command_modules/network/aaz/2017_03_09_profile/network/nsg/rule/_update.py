@@ -67,30 +67,27 @@ class Update(AAZCommand):
         )
         _args_schema.access = AAZStrArg(
             options=["--access"],
-            help="Allowed values: Allow, Deny.",
-            default="Allow",
+            help="Network traffic is allowed or denied.",
             enum={"Allow": "Allow", "Deny": "Deny"},
         )
         _args_schema.description = AAZStrArg(
             options=["--description"],
-            help="Rule description.",
+            help="Description for this rule. Restricted to 140 chars.",
             nullable=True,
         )
         _args_schema.direction = AAZStrArg(
             options=["--direction"],
-            help="Allowed values: Inbound, Outbound.",
-            default="Inbound",
+            help="Direction of the rule. The direction specifies if rule will be evaluated on incoming or outgoing traffic.",
             enum={"Inbound": "Inbound", "Outbound": "Outbound"},
         )
         _args_schema.priority = AAZIntArg(
             options=["--priority"],
-            help="Rule priority, between 100 (highest priority) and 4096 (lowest priority). Must be unique for each rule in the collection.",
+            help="Priority of the rule. The value can be between 100 and 4096. The priority number must be unique for each rule in the collection. The lower the priority number, the higher the priority of the rule.",
             nullable=True,
         )
         _args_schema.protocol = AAZStrArg(
             options=["--protocol"],
-            help="etwork protocol this rule applies to.  Allowed values: *, Ah, Esp, Icmp, Tcp, Udp.",
-            default="*",
+            help="Network protocol this rule applies to.",
             enum={"*": "*", "Tcp": "Tcp", "Udp": "Udp"},
         )
 
@@ -100,16 +97,16 @@ class Update(AAZCommand):
         _args_schema.destination_address_prefix = AAZStrArg(
             options=["--destination-address-prefix"],
             arg_group="Destination",
-            help="Space-separated list of CIDR prefixes or IP ranges.  Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' to match all IPs. Besides, it also supports all available Service Tags like 'ApiManagement', 'SqlManagement', 'AzureMonitor', etc.",
-            default="*",
+            help="The destination address prefix. CIDR or destination IP range. Asterisk '*' can also be used to match all source IPs. Default tags such as 'VirtualNetwork', 'AzureLoadBalancer' and 'Internet' can also be used.",
         )
         _args_schema.destination_port_range = AAZStrArg(
             options=["--destination-port-range"],
             arg_group="Destination",
-            help="Port or port range between 0-65535. Use '*' to match all ports.",
-            default="80",
+            help="The destination port or range. Integer or range between 0 and 65535. Asterisk '*' can also be used to match all ports.",
             nullable=True,
         )
+
+        # define Arg Group "Properties"
 
         # define Arg Group "SecurityRuleParameters"
 
@@ -119,14 +116,12 @@ class Update(AAZCommand):
         _args_schema.source_address_prefix = AAZStrArg(
             options=["--source-address-prefix"],
             arg_group="Source",
-            help="Space-separated list of CIDR prefixes or IP ranges. Alternatively, specify ONE of 'VirtualNetwork',                                      'AzureLoadBalancer', 'Internet' or '*' to match all IPs. Besides, it also supports all available Service Tags like 'ApiManagement', 'SqlManagement', 'AzureMonitor', etc.",
-            default="*",
+            help="The CIDR or source IP range. Asterisk '*' can also be used to match all source IPs. Default tags such as 'VirtualNetwork', 'AzureLoadBalancer' and 'Internet' can also be used. If this is an ingress rule, specifies where network traffic originates from.",
         )
         _args_schema.source_port_range = AAZStrArg(
             options=["--source-port-range"],
             arg_group="Source",
-            help="Port or port range between 0-65535. Use '*' to match all ports.",
-            default="*",
+            help="The source port or range. Integer or range between 0 and 65535. Asterisk '*' can also be used to match all ports.",
             nullable=True,
         )
         return cls._args_schema
@@ -445,7 +440,6 @@ class _UpdateHelper:
         )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
-            flags={"read_only": True},
         )
         properties.source_address_prefix = AAZStrType(
             serialized_name="sourceAddressPrefix",

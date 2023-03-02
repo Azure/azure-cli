@@ -145,16 +145,22 @@ def transform_nsg_rule_table_output(result):
     item['Name'] = result['name']
     item['ResourceGroup'] = result['resourceGroup']
     item['Priority'] = result['priority']
-    item['SourcePortRanges'] = result.get('sourcePortRange', ' '.join(result['sourcePortRanges']))
-    item['SourceAddressPrefixes'] = result.get('sourceAddressPrefix', ' '.join(result['sourceAddressPrefixes']))
-    item['SourceASG'] = result.get('sourceApplicationSecurityGroups', 'None')
     item['Access'] = result['access']
     item['Protocol'] = result['protocol']
     item['Direction'] = result['direction']
-    item['DestinationPortRanges'] = result.get('destinationPortRange', ' '.join(result['destinationPortRanges']))
-    item['DestinationAddressPrefixes'] = result.get('destinationAddressPrefix',
-                                                    ' '.join(result['destinationAddressPrefixes']))
-    item['DestinationASG'] = result.get('destinationApplicationSecurityGroups', 'None')
+    if 'SourcePortRanges' in item:
+        item['SourcePortRanges'] = result.get('sourcePortRange', ' '.join(result['sourcePortRanges']))
+    if 'SourceAddressPrefixes' in item:
+        item['SourceAddressPrefixes'] = result.get('sourceAddressPrefix', ' '.join(result['sourceAddressPrefixes']))
+    if 'SourceASG' in item:
+        item['SourceASG'] = result.get('sourceApplicationSecurityGroups', 'None')
+    if 'DestinationPortRanges' in item:
+        item['DestinationPortRanges'] = result.get('destinationPortRange', ' '.join(result['destinationPortRanges']))
+    if 'DestinationAddressPrefixes' in item:
+        item['DestinationAddressPrefixes'] = result.get('destinationAddressPrefix',
+                                                        ' '.join(result['destinationAddressPrefixes']))
+    if 'DestinationASG' in item:
+        item['DestinationASG'] = result.get('destinationApplicationSecurityGroups', 'None')
     return item
 
 
