@@ -748,3 +748,4 @@ def _get_policy_assignment_id(cmd, policy_assignment):
             raise ArgumentUsageError("Multiple policy assignment with the name '{}' found. "
                                      "Specify the policy assignment ID.".format(policy_assignment))
         return policy_assignment_ids[0]
+    return policy_assignment
