@@ -1206,6 +1206,33 @@ helps['aks nodepool start'] = """
           text: az aks nodepool start --nodepool-name nodepool1 -g MyResourceGroup --cluster-name MyManagedCluster
 """
 
+helps['aks nodepool operation-abort'] = """
+    type: command
+    short-summary: Abort last running operation on nodepool.
+    parameters:
+        - name: --nodepool-name
+          type: string
+          short-summary: Agent pool name
+        - name: --aks-custom-headers
+          type: string
+          short-summary: Send custom headers. When specified, format should be Key1=Value1,Key2=Value2
+    examples:
+        - name: Abort operation on agent pool
+          text: az aks nodepool operation-abort -g myResourceGroup --nodepool-name nodepool1 --cluster-name myAKSCluster
+"""
+
+helps['aks operation-abort'] = """
+    type: command
+    short-summary: Abort last running operation on managed cluster.
+    parameters:
+        - name: --aks-custom-headers
+          type: string
+          short-summary: Send custom headers. When specified, format should be Key1=Value1,Key2=Value2
+    examples:
+        - name: Abort operation on managed cluster
+          text: az aks operation-abort -g myResourceGroup -n myAKSCluster
+"""
+
 helps['aks remove-dev-spaces'] = """
 type: command
 short-summary: Remove Azure Dev Spaces from a managed Kubernetes cluster.

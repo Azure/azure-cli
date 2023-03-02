@@ -7,6 +7,7 @@ import json
 import os
 import subprocess
 import tempfile
+import time 
 import unittest
 
 from azure.cli.command_modules.acs._consts import CONST_KUBE_DASHBOARD_ADDON_NAME
@@ -4883,6 +4884,68 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         start_cmd = 'aks start --resource-group={resource_group} --name={name}'
         self.cmd(start_cmd)
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap')
+    def test_aks_abort(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --ssh-key-value={ssh_key_value} --no-wait'
+        self.cmd(create_cmd)
+
+        abort_cmd = 'aks operation-abort --resource-group={resource_group} --name={name}'
+        self.cmd(abort_cmd, checks=[self.is_empty()])
+
+        time.sleep(10)
+        show_cmd = 'aks show --resource-group={resource_group} --name={name}'
+        self.cmd(show_cmd, checks=[self.check('provisioningState', 'Canceled')])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_nodepool_abort(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        node_pool_name = self.create_random_name('c', 6)
+        node_vm_size = 'standard_d4darm_v3'
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'node_pool_name': node_pool_name,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'node_vm_size': node_vm_size,
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--vm-set-type VirtualMachineScaleSets --node-count=1 ' \
+                     '--ssh-key-value={ssh_key_value} ' \
+                     '--node-vm-size={node_vm_size} -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        # add nodepool
+        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={node_pool_name} --node-vm-size={node_vm_size} --node-count=2', checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+        # stop nodepool
+        self.cmd('aks nodepool stop --no-wait --resource-group={resource_group} --cluster-name={name} --nodepool-name={node_pool_name} --aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/PreviewStartStopAgentPool')
+
+        abort_cmd = 'aks nodepool operation-abort --resource-group={resource_group} --cluster-name={name} --nodepool-name={node_pool_name}'
+        self.cmd(abort_cmd, checks=[self.is_empty()])
+
+        time.sleep(10)
+        get_nodepool_cmd = 'aks nodepool show ' \
+                           '--resource-group={resource_group} ' \
+                           '--cluster-name={name} ' \
+                           '-n {node_pool_name} '
+        self.cmd(get_nodepool_cmd, checks=[
+            self.check('provisioningState', 'Canceled'),
+            self.check('powerState.code', 'Running')
+        ])
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')

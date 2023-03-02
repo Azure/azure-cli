@@ -2248,6 +2248,56 @@ def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
     return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, cluster_name, nodepool_name)
 
 
+def aks_agentpool_operation_abort(cmd,   # pylint: disable=unused-argument
+                                  client,
+                                  resource_group_name,
+                                  cluster_name,
+                                  nodepool_name,
+                                  aks_custom_headers=None,
+                                  no_wait=False):
+    PowerState = cmd.get_models(
+        "PowerState",
+        resource_type=CUSTOM_MGMT_AKS_PREVIEW,
+        operation_group="agent_pools",
+    )
+
+    agentpool_exists = False
+    instances = client.list(resource_group_name, cluster_name)
+    for agentpool_profile in instances:
+        if agentpool_profile.name.lower() == nodepool_name.lower():
+            agentpool_exists = True
+            break
+    if not agentpool_exists:
+        raise InvalidArgumentValueError(
+            "Node pool {} doesnt exist, use 'aks nodepool list' to get current node pool list".format(nodepool_name))
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    power_state = PowerState(code="Running")
+    instance.power_state = power_state
+    headers = get_aks_custom_headers(aks_custom_headers)
+    return sdk_no_wait(no_wait, client.abort_latest_operation, resource_group_name, cluster_name, nodepool_name, headers=headers)
+
+
+def aks_operation_abort(cmd,   # pylint: disable=unused-argument
+                        client,
+                        resource_group_name,
+                        name,
+                        aks_custom_headers=None,
+                        no_wait=False):
+    PowerState = cmd.get_models(
+        "PowerState",
+        resource_type=CUSTOM_MGMT_AKS_PREVIEW,
+        operation_group="managed_clusters",
+    )
+
+    instance = client.get(resource_group_name, name)
+    power_state = PowerState(code="Running")
+    if instance is None:
+        raise InvalidArgumentValueError("Cluster {} doesnt exist, use 'aks list' to get current cluster list".format(name))
+    instance.power_state = power_state
+    headers = get_aks_custom_headers(aks_custom_headers)
+    return sdk_no_wait(no_wait, client.abort_latest_operation, resource_group_name, name, headers=headers)
+
+
 def aks_agentpool_show(cmd, client, resource_group_name, cluster_name, nodepool_name):
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
     return instance
