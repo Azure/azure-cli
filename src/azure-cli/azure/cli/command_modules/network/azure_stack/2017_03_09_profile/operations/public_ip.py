@@ -15,7 +15,7 @@ _PublicIP = import_aaz_by_profile("network.public_ip")
 
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=None, dns_name=None,
-                     idle_timeout=4, reverse_fqdn=None, edge_zone=None, ip_address=None):
+                     idle_timeout=4, reverse_fqdn=None, ip_address=None):
     public_ip_args = {
         'name': public_ip_address_name,
         "resource_group": resource_group_name,
@@ -32,10 +32,6 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
     if dns_name or reverse_fqdn:
         public_ip_args['dns_name'] = dns_name
         public_ip_args['reverse_fqdn'] = reverse_fqdn
-
-    if edge_zone:
-        public_ip_args['edge_zone'] = edge_zone
-        public_ip_args['type'] = 'EdgeZone'
 
     PublicIpCreate = import_aaz_by_profile("network.public_ip").Create
     return PublicIpCreate(cli_ctx=cmd.cli_ctx)(command_args=public_ip_args)

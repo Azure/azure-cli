@@ -56,13 +56,6 @@ class Update(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.location = AAZResourceLocationArg(
-            help="Location. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`.",
-            nullable=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
-        )
         _args_schema.dns_name = AAZStrArg(
             options=["--dns-name"],
             help="Globally unique DNS entry.",
@@ -76,11 +69,6 @@ class Update(AAZCommand):
         _args_schema.idle_timeout = AAZIntArg(
             options=["--idle-timeout"],
             help="Idle timeout in minutes.",
-            nullable=True,
-        )
-        _args_schema.ip_address = AAZStrArg(
-            options=["--ip-address"],
-            help="The IP address associated with the public IP address resource.",
             nullable=True,
         )
         _args_schema.allocation_method = AAZStrArg(
@@ -340,7 +328,6 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
-            _builder.set_prop("location", AAZStrType, ".location")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
 
@@ -348,7 +335,6 @@ class Update(AAZCommand):
             if properties is not None:
                 properties.set_prop("dnsSettings", AAZObjectType)
                 properties.set_prop("idleTimeoutInMinutes", AAZIntType, ".idle_timeout")
-                properties.set_prop("ipAddress", AAZStrType, ".ip_address")
                 properties.set_prop("publicIPAllocationMethod", AAZStrType, ".allocation_method")
 
             dns_settings = _builder.get(".properties.dnsSettings")

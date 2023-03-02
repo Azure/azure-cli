@@ -1053,10 +1053,13 @@ def process_nic_create_namespace(cmd, namespace):
 
 def process_public_ip_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
-    validate_public_ip_prefix(cmd, namespace)
-    validate_ip_tags(namespace)
+    if 'public_ip_prefix' in namespace:
+        validate_public_ip_prefix(cmd, namespace)
+    if 'ip_tags' in namespace:
+        validate_ip_tags(namespace)
     validate_tags(namespace)
-    _inform_coming_breaking_change_for_public_ip(namespace)
+    if 'sku' in namespace or 'zone' in namespace:
+        _inform_coming_breaking_change_for_public_ip(namespace)
 
 
 def _inform_coming_breaking_change_for_public_ip(namespace):

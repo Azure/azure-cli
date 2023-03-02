@@ -17,7 +17,7 @@ _PublicIPPrefix = import_aaz_by_profile("network.public_ip.prefix")
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=None, dns_name=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, zone=None, ip_tags=None,
-                     public_ip_prefix=None, edge_zone=None, ip_address=None):
+                     public_ip_prefix=None, ip_address=None):
     public_ip_args = {
         'name': public_ip_address_name,
         "resource_group": resource_group_name,
@@ -60,16 +60,12 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
 
     if sku:
         public_ip_args['sku'] = sku
-        if not sku:
-            public_ip_args['sku'] = 'Basic'
+    if not sku:
+        public_ip_args['sku'] = 'Basic'
 
     if dns_name or reverse_fqdn:
         public_ip_args['dns_name'] = dns_name
         public_ip_args['reverse_fqdn'] = reverse_fqdn
-
-    if edge_zone:
-        public_ip_args['edge_zone'] = edge_zone
-        public_ip_args['type'] = 'EdgeZone'
 
     return PublicIPCreate(cli_ctx=cmd.cli_ctx)(command_args=public_ip_args)
 
@@ -104,6 +100,7 @@ class PublicIpPrefixCreate(_PublicIPPrefix.Create):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.sku._registered = False
+        args_schema.length._required = True
 
         return args_schema
 

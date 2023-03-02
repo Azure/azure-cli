@@ -83,11 +83,11 @@ def load_command_table(self, _):
     public_ip = import_aaz_by_profile("network.public_ip")
     operations_tmpl = self.get_module_name_by_profile("operations.public_ip#{}")
     from .._format import transform_public_ip_create_output
-    from .._validators import get_default_location_from_resource_group
+    from .._validators import process_public_ip_create_namespace
 
     with self.command_group('network public-ip', operations_tmpl=operations_tmpl) as g:
         g.custom_command("create", "create_public_ip", transform=transform_public_ip_create_output,
-                         validator=get_default_location_from_resource_group)
+                         validator=process_public_ip_create_namespace)
 
     self.command_table['network public-ip list'] = public_ip.List(loader=self,
                                                                   table_transformer='[].' + public_ip_show_table_transform)
