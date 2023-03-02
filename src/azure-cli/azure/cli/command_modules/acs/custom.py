@@ -1109,7 +1109,7 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
     # in which case we ignore the KUBECONFIG variable
     # KUBECONFIG can be colon separated. If we find that condition, use the first entry
     if "KUBECONFIG" in os.environ and path == os.path.join(os.path.expanduser('~'), '.kube', 'config'):
-        kubeconfig_path = os.environ["KUBECONFIG"].split(":")[0]
+        kubeconfig_path = os.environ["KUBECONFIG"].split(os.pathsep)[0]
         if kubeconfig_path:
             logger.info("The default path '%s' is replaced by '%s' defined in KUBECONFIG.", path, kubeconfig_path)
             path = kubeconfig_path
