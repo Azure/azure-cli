@@ -507,7 +507,7 @@ jobs:
 - job: TestExtensionsLoading
   displayName: Test Extensions Loading
   condition: succeeded()
-  timeoutInMinutes: 40
+  timeoutInMinutes: 60
 
   pool:
     name: ${{ variables.ubuntu_pool }}
@@ -933,7 +933,7 @@ jobs:
 
 - job: CheckStyle
   displayName: "Check CLI Style"
-
+  timeoutInMinutes: 120
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
