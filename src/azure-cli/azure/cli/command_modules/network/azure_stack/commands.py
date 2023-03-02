@@ -853,7 +853,6 @@ def load_command_table(self, _):
         g.wait_command('wait')
     # endRegion
 
-
     # region RouteFilters
     from azure.cli.command_modules.network.aaz.latest.network.route_filter.rule import ListServiceCommunities
     self.command_table['network route-filter rule list-service-communities'] = ListServiceCommunities(loader=self, table_transformer=transform_service_community_table_output)
