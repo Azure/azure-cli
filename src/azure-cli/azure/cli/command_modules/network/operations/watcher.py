@@ -1937,6 +1937,7 @@ class WatcherConnectionMonitorTestGroupAdd(_WatcherConnectionMonitorTestGroupAdd
     def pre_operations(self):
         get_network_watcher_from_location(self)
 
+    # pylint: disable=too-many-boolean-expressions
     def pre_instance_create(self):
         args = self.ctx.args
         instance = self.ctx.vars.instance
