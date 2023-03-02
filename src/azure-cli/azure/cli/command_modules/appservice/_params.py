@@ -251,6 +251,9 @@ subscription than the app service environment, please use the resource ID for --
 
         with self.argument_context(scope + ' config ssl bind') as c:
             c.argument('ssl_type', help='The ssl cert type', arg_type=get_enum_type(['SNI', 'IP']))
+            c.argument('hostname', help='The custom domain name. If empty, hostnames will be selected automatically')
+        with self.argument_context(scope + ' config ssl unbind') as c:
+            c.argument('hostname', help='The custom domain name. If empty, hostnames will be selected automatically')
         with self.argument_context(scope + ' config ssl upload') as c:
             c.argument('certificate_password', help='The ssl cert password')
             c.argument('certificate_file', type=file_type, help='The filepath for the .pfx file')
