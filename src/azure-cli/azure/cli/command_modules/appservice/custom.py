@@ -2722,8 +2722,11 @@ def upload_ssl_cert(cmd, resource_group_name,
     except OpenSSL.crypto.Error as e:
         raise UnclassifiedUserFault(f"Failed to get the certificate's thrumbprint with error: '{e}'. "
                                     "Please double check the certificate password.") from e
-    cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
-                                    webapp.location, resource_group_name)
+	if certificate_name:
+        cert_name = certificate_name
+    else:
+        cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
+                                        webapp.location, resource_group_name)
     cert = Certificate(password=certificate_password, pfx_blob=cert_contents,
                        location=webapp.location, server_farm_id=webapp.server_farm_id)
     return client.certificates.create_or_update(resource_group_name, cert_name, cert)
