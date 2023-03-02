@@ -76,7 +76,7 @@ def get_vnet_validator(dest):
     from msrestazure.tools import is_valid_resource_id, resource_id
 
     def _validate_vnet_name_or_id(cmd, namespace):
-        SubResource = cmd.get_models('SubResource')
+        SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_NETWORK_DNS)
         subscription_id = get_subscription_id(cmd.cli_ctx)
 
         resource_group = namespace.resource_group_name
@@ -246,19 +246,6 @@ def validate_ssl_cert(namespace):
             pass
 
 
-def validate_delegations(cmd, namespace):
-    if namespace.delegations:
-        Delegation = cmd.get_models('Delegation')
-        delegations = []
-        for i, item in enumerate(namespace.delegations):
-            if '/' not in item and len(item.split('.')) == 3:
-                # convert names to serviceNames
-                _, service, resource_type = item.split('.')
-                item = 'Microsoft.{}/{}'.format(service, resource_type)
-            delegations.append(Delegation(name=str(i), service_name=item))
-        namespace.delegations = delegations
-
-
 def validate_dns_record_type(namespace):
     tokens = namespace.command.split(' ')
     types = ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'soa', 'srv', 'txt']
@@ -281,18 +268,6 @@ def validate_user_assigned_identity(cmd, namespace):
             namespace='Microsoft.ManagedIdentity',
             type='userAssignedIdentities',
             name=namespace.user_assigned_identity
-        )
-
-
-def validate_virtul_network_gateway(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    if namespace.hosted_gateway and not is_valid_resource_id(namespace.hosted_gateway):
-        namespace.hosted_gateway = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type='virtualNetworkGateways',
-            name=namespace.hosted_gateway
         )
 
 
@@ -360,22 +335,6 @@ def validate_local_gateway(cmd, namespace):
             name=namespace.gateway_default_site,
             namespace='Microsoft.Network',
             type='localNetworkGateways')
-
-
-def validate_match_variables(cmd, namespace):
-    if not namespace.match_variables:
-        return
-
-    MatchVariable = cmd.get_models('MatchVariable')
-    variables = []
-    for match in namespace.match_variables:
-        try:
-            name, selector = match.split('.', 1)
-        except ValueError:
-            name = match
-            selector = None
-        variables.append(MatchVariable(variable_name=name, selector=selector))
-    namespace.match_variables = variables
 
 
 def validate_metadata(namespace):
@@ -550,7 +509,7 @@ def get_servers_validator(camel_case=False):
 
 def validate_subresource_list(cmd, namespace):
     if namespace.target_resources:
-        SubResource = cmd.get_models('SubResource')
+        SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_NETWORK_DNS)
         subresources = []
         for item in namespace.target_resources:
             subresources.append(SubResource(id=item))

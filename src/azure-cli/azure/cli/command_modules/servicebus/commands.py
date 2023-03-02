@@ -13,9 +13,6 @@ from azure.cli.core.profiles import ResourceType
 
 def load_command_table(self, _):
     from azure.cli.command_modules.servicebus._client_factory import (namespaces_mgmt_client_factory,
-                                                                      queues_mgmt_client_factory,
-                                                                      topics_mgmt_client_factory,
-                                                                      subscriptions_mgmt_client_factory,
                                                                       rules_mgmt_client_factory,
                                                                       disaster_recovery_mgmt_client_factory,
                                                                       migration_mgmt_client_factory,
@@ -30,21 +27,6 @@ def load_command_table(self, _):
     sb_namespace_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.servicebus.Operation.NamespaceCustomFile#{}',
     )
-
-    sb_queue_util = CliCommandType(
-        operations_tmpl='azure.mgmt.servicebus.operations#QueuesOperations.{}',
-        client_factory=queues_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_SERVICEBUS)
-
-    sb_topic_util = CliCommandType(
-        operations_tmpl='azure.mgmt.servicebus.operations#TopicsOperations.{}',
-        client_factory=topics_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_SERVICEBUS)
-
-    sb_subscriptions_util = CliCommandType(
-        operations_tmpl='azure.mgmt.servicebus.operations#SubscriptionsOperations.{}',
-        client_factory=subscriptions_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_SERVICEBUS)
 
     sb_rule_util = CliCommandType(
         operations_tmpl='azure.mgmt.servicebus.operations#RulesOperations.{}',
@@ -83,15 +65,6 @@ def load_command_table(self, _):
     with self.command_group('servicebus namespace', sb_namespace_util, client_factory=namespaces_mgmt_client_factory, min_api='2021-06-01-preview') as g:
         g.custom_command('exists', 'cli_namespace_exists')
 
-    with self.command_group('servicebus namespace authorization-rule', sb_namespace_util, client_factory=namespaces_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
-        g.custom_command('create', 'cli_namespaceautho_create')
-        g.show_command('show', 'get_authorization_rule')
-        g.command('list', 'list_authorization_rules')
-        g.command('keys list', 'list_keys')
-        g.custom_command('keys renew', 'cli_keys_renew')
-        g.command('delete', 'delete_authorization_rule')
-        g.generic_update_command('update', getter_name='get_authorization_rule', setter_name='create_or_update_authorization_rule', custom_func_name='cli_namespaceautho_update')
-
     with self.command_group('servicebus namespace private-endpoint-connection', sb_private_endpoints_util, resource_type=ResourceType.MGMT_SERVICEBUS,
                             custom_command_type=servicebus_custom, is_preview=True,
                             client_factory=private_endpoint_connections_mgmt_client_factory) as g:
@@ -109,48 +82,6 @@ def load_command_table(self, _):
         from azure.cli.core.commands.transform import gen_dict_to_list_transform
         g.show_command('show', 'get', is_preview=True, min_api='2021-06-01-preview',
                        transform=gen_dict_to_list_transform(key="value"))
-
-# Queue Region
-    with self.command_group('servicebus queue', sb_queue_util, client_factory=queues_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
-        g.custom_command('create', 'cli_sbqueue_create')
-        g.show_command('show', 'get')
-        g.command('list', 'list_by_namespace')
-        g.command('delete', 'delete')
-        g.generic_update_command('update', custom_func_name='cli_sbqueue_update')
-
-    with self.command_group('servicebus queue authorization-rule', sb_queue_util, client_factory=queues_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
-        g.custom_command('create', 'cli_queueautho_create')
-        g.show_command('show', 'get_authorization_rule')
-        g.command('list', 'list_authorization_rules')
-        g.command('keys list', 'list_keys')
-        g.custom_command('keys renew', 'cli_queueauthokey_renew')
-        g.command('delete', 'delete_authorization_rule')
-        g.generic_update_command('update', getter_name='get_authorization_rule', setter_name='create_or_update_authorization_rule', custom_func_name='cli_namespaceautho_update')
-
-# Topic Region
-    with self.command_group('servicebus topic', sb_topic_util, client_factory=topics_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
-        g.custom_command('create', 'cli_sbtopic_create')
-        g.show_command('show', 'get')
-        g.command('list', 'list_by_namespace')
-        g.command('delete', 'delete')
-        g.generic_update_command('update', custom_func_name='cli_sbtopic_update')
-
-    with self.command_group('servicebus topic authorization-rule', sb_topic_util, client_factory=topics_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
-        g.custom_command('create', 'cli_topicautho_create')
-        g.show_command('show', 'get_authorization_rule')
-        g.command('list', 'list_authorization_rules')
-        g.command('keys list', 'list_keys')
-        g.custom_command('keys renew', 'cli_topicauthokey_renew')
-        g.command('delete', 'delete_authorization_rule')
-        g.generic_update_command('update', getter_name='get_authorization_rule', setter_name='create_or_update_authorization_rule', custom_func_name='cli_namespaceautho_update')
-
-# Subscription Region
-    with self.command_group('servicebus topic subscription', sb_subscriptions_util, client_factory=subscriptions_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
-        g.custom_command('create', 'cli_sbsubscription_create')
-        g.show_command('show', 'get')
-        g.command('list', 'list_by_topic')
-        g.command('delete', 'delete')
-        g.generic_update_command('update', custom_func_name='cli_sbsubscription_update')
 
 # Rules Region
     with self.command_group('servicebus topic subscription rule', sb_rule_util, client_factory=rules_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:

@@ -13,8 +13,8 @@ from azure.cli.core.profiles import get_api_version, ResourceType
 from azure.cli.command_modules.network._client_factory import (
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_connection_monitor,
-    cf_dns_references,
-    cf_virtual_router, cf_virtual_router_peering)
+    cf_dns_references)
+
 from azure.cli.command_modules.network._format import (
     transform_local_gateway_table_output, transform_dns_record_set_output,
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
@@ -65,30 +65,6 @@ def load_command_table(self, _):
     network_watcher_cm_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#ConnectionMonitorsOperations.{}',
         client_factory=cf_connection_monitor
-    )
-
-    network_vrouter_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualRoutersOperations.{}',
-        client_factory=cf_virtual_router,
-        min_api='2019-08-01'
-    )
-
-    network_vrouter_update_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.custom#{}',
-        client_factory=cf_virtual_router,
-        min_api='2019-08-01'
-    )
-
-    network_vrouter_peering_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualRouterPeeringsOperations.{}',
-        client_factory=cf_virtual_router_peering,
-        min_api='2019-08-01'
-    )
-
-    network_vrouter_peering_update_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.custom#{}',
-        client_factory=cf_virtual_router_peering,
-        min_api='2019-08-01'
     )
     # endregion
 
@@ -246,7 +222,7 @@ def load_command_table(self, _):
     # endregion
 
     # region DdosProtectionPlans
-    with self.command_group('network ddos-protection', min_api='2018-02-01') as g:
+    with self.command_group('network ddos-protection') as g:
         g.custom_command('create', 'create_ddos_plan')
         g.custom_command('update', 'update_ddos_plan')
     # endregion
@@ -363,11 +339,6 @@ def load_command_table(self, _):
     with self.command_group('network private-link-service connection'):
         from azure.cli.command_modules.network.custom import PrivateEndpointConnectionUpdate
         self.command_table['network private-link-service connection update'] = PrivateEndpointConnectionUpdate(loader=self)
-
-    # TODO: Due to service limitation.
-    # with self.command_group('network private-link-service ip-configs', network_private_link_service_sdk) as g:
-    #     g.custom_command('add', 'add_private_link_services_ipconfig')
-    #     g.custom_command('remove', 'remove_private_link_services_ipconfig')
     # endregion
 
     # region LoadBalancers
@@ -729,35 +700,6 @@ def load_command_table(self, _):
         from .aaz.latest.network.vpn_connection import Wait
         self.command_table['network vpn-connection packet-capture stop'] = VpnConnPackageCaptureStop(loader=self)
         self.command_table['network vpn-connection packet-capture wait'] = Wait(loader=self)
-    # endregion
-
-    # region VirtualRouter
-    with self.command_group('network vrouter', network_vrouter_sdk,
-                            deprecate_info=self.deprecate(redirect=NETWORK_VROUTER_DEPRECATION_INFO, hide=True)) as g:
-        g.custom_command('create', 'create_virtual_router')
-        g.generic_update_command('update',
-                                 getter_name='virtual_router_update_getter',
-                                 getter_type=network_vrouter_update_sdk,
-                                 setter_name='virtual_router_update_setter',
-                                 setter_type=network_vrouter_update_sdk,
-                                 custom_func_name='update_virtual_router')
-        g.custom_command('delete', 'delete_virtual_router')
-        g.custom_show_command('show', 'show_virtual_router')
-        g.custom_command('list', 'list_virtual_router')
-
-    with self.command_group(
-            'network vrouter peering', network_vrouter_peering_sdk,
-            deprecate_info=self.deprecate(redirect=NETWORK_VROUTER_PEERING_DEPRECATION_INFO, hide=True)) as g:
-        g.custom_command('create', 'create_virtual_router_peering')
-        g.generic_update_command('update',
-                                 getter_name='virtual_router_peering_update_getter',
-                                 getter_type=network_vrouter_peering_update_sdk,
-                                 setter_name='virtual_router_peering_update_setter',
-                                 setter_type=network_vrouter_peering_update_sdk,
-                                 custom_func_name='update_virtual_router_peering')
-        g.custom_command('delete', 'delete_virtual_router_peering')
-        g.custom_show_command('show', 'show_virtual_router_peering')
-        g.custom_command('list', 'list_virtual_router_peering')
     # endregion
 
     # region VirtualHub

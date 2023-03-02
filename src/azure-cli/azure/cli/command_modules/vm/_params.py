@@ -1444,9 +1444,6 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('intent_vm_sizes', nargs='*', min_api='2021-11-01', help="Specify possible sizes of virtual machines that can be created in the proximity placement group.")
 
-    with self.argument_context('ppg show', min_api='2019-07-01') as c:
-        c.argument('include_colocation_status', action='store_true', help='Enable fetching the colocation status of all the resources in the proximity placement group.')
-
     for scope, item in [('vm create', 'VM'), ('vmss create', 'VMSS'),
                         ('vm availability-set create', 'availability set'),
                         ('vm update', 'VM'), ('vmss update', 'VMSS'),

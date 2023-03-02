@@ -20,13 +20,13 @@ from azure.cli.command_modules.network._validators import (
     validate_dns_record_type, validate_private_ip_address,
     get_servers_validator, get_public_ip_validator, get_nsg_validator,
     get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
-    validate_service_endpoint_policy, validate_delegations, validate_subresource_list,
+    validate_service_endpoint_policy, validate_subresource_list,
     validate_custom_error_pages,
     validate_custom_headers, validate_status_code_ranges, validate_subnet_ranges,
     WafConfigExclusionAction,
-    validate_nat_gateway, validate_match_variables,
+    validate_nat_gateway,
     validate_waf_policy,
-    validate_user_assigned_identity, validate_virtul_network_gateway,
+    validate_user_assigned_identity,
     NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction,
     process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument)
 from azure.cli.command_modules.network._completers import (
@@ -254,14 +254,12 @@ def load_arguments(self, _):
     # endregion
 
     # region WebApplicationFirewallPolicy
-    (WebApplicationFirewallAction, WebApplicationFirewallMatchVariable,
-     WebApplicationFirewallOperator, WebApplicationFirewallRuleType,
-     WebApplicationFirewallTransform,
+    (WebApplicationFirewallAction,
+     WebApplicationFirewallRuleType,
      OwaspCrsExclusionEntryMatchVariable, OwaspCrsExclusionEntrySelectorMatchOperator,
      WebApplicationFirewallEnabledState, WebApplicationFirewallMode) = self.get_models(
-         'WebApplicationFirewallAction', 'WebApplicationFirewallMatchVariable',
-         'WebApplicationFirewallOperator', 'WebApplicationFirewallRuleType',
-         'WebApplicationFirewallTransform',
+         'WebApplicationFirewallAction',
+         'WebApplicationFirewallRuleType',
          'OwaspCrsExclusionEntryMatchVariable', 'OwaspCrsExclusionEntrySelectorMatchOperator',
          'WebApplicationFirewallEnabledState', 'WebApplicationFirewallMode')
     with self.argument_context('network application-gateway waf-policy', min_api='2018-12-01') as c:
@@ -303,28 +301,6 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway waf-policy custom-rule list', min_api='2018-12-01') as c:
         c.argument('policy_name', options_list='--policy-name', id_part=None)
-
-    with self.argument_context('network application-gateway waf-policy custom-rule match-condition',
-                               min_api='2018-12-01') as c:
-        c.argument('operator', arg_type=get_enum_type(WebApplicationFirewallOperator), help='Operator for matching.')
-        c.argument('negation_condition',
-                   options_list='--negate',
-                   arg_type=get_three_state_flag(),
-                   help='Match the negative of the condition.')
-        c.argument('match_values',
-                   options_list='--values',
-                   nargs='+',
-                   help='Space-separated list of values to match.')
-        c.argument('transforms',
-                   arg_type=get_enum_type(WebApplicationFirewallTransform),
-                   nargs='+',
-                   help='Space-separated list of transforms to apply when matching.')
-        if WebApplicationFirewallMatchVariable:
-            waf_custom_rule_match_variables = list(WebApplicationFirewallMatchVariable)
-            help_string = 'Space-separated list of variables to use when matching. ' \
-                          'Variable values: {}'.format(', '.join(waf_custom_rule_match_variables))
-            c.argument('match_variables', nargs='+', help=help_string, validator=validate_match_variables)
-        c.argument('index', type=int, help='Index of the match condition to remove.')
 
     with self.argument_context('network application-gateway waf-policy custom-rule match-condition list', min_api='2018-12-01') as c:
         c.argument('policy_name', options_list='--policy-name', id_part=None)
@@ -1126,7 +1102,6 @@ def load_arguments(self, _):
         c.argument('route_table', help='Name or ID of a route table to associate with the subnet.')
         c.argument('service_endpoints', nargs='+', min_api='2017-06-01')
         c.argument('service_endpoint_policy', nargs='+', min_api='2018-07-01', help='Space-separated list of names or IDs of service endpoint policies to apply.', validator=validate_service_endpoint_policy)
-        c.argument('delegations', nargs='+', min_api='2017-08-01', help='Space-separated list of services to whom the subnet should be delegated. (e.g. Microsoft.Sql/servers)', validator=validate_delegations)
         c.argument('disable_private_endpoint_network_policies', arg_type=get_three_state_flag(), min_api='2019-04-01', help='Disable private endpoint network policies on the subnet, the policy is disabled by default.')
         c.argument('disable_private_link_service_network_policies', arg_type=get_three_state_flag(), min_api='2019-04-01', help='Disable private link service network policies on the subnet.')
 
@@ -1179,20 +1154,6 @@ def load_arguments(self, _):
         c.ignore('connection_type')
         for item in ['vnet_gateway2', 'local_gateway2', 'express_route_circuit2']:
             c.argument(item, arg_group='Destination')
-
-    with self.argument_context('network vrouter') as c:
-        c.argument('virtual_router_name', options_list=['--name', '-n'], help='The name of the Virtual Router.')
-        c.argument('hosted_gateway',
-                   deprecate_info=c.deprecate(redirect='--hosted-subnet', hide=False),
-                   help='Name or ID of the virtual network gateway with ExpressRouter on which VirtualRouter is hosted.',
-                   validator=validate_virtul_network_gateway)
-        c.argument('hosted_subnet', help='The ID of a subnet where VirtualRouter would be deployed')
-
-    with self.argument_context('network vrouter peering') as c:
-        c.argument('virtual_router_name', options_list=['--vrouter-name'], help='The name of the Virtual Router.')
-        c.argument('peering_name', options_list=['--name', '-n'], help='The name of the Virtual Router Peering')
-        c.argument('peer_asn', type=int, help='Peer ASN. Its range is from 1 to 4294967295.')
-        c.argument('peer_ip', help='Peer IP address.')
 
     with self.argument_context('network routeserver') as c:
         c.argument('virtual_hub_name', options_list=['--name', '-n'], id_part='name',

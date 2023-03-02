@@ -56,6 +56,10 @@ def load_arguments_eh(self, _):
         c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'], is_preview=True,
                    arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether Infrastructure Encryption (Double Encryption) is enabled/disabled')
+        c.argument('public_network_access', options_list=['--public-network-access', '--public-network'],
+                   arg_type=get_enum_type(['Enabled', 'Disabled']),
+                   help='This determines if traffic is allowed over public network. By default it is enabled. If value is SecuredByPerimeter then Inbound and Outbound communication is controlled by the network security perimeter and profile\' access rules.')
+        c.argument('alternate_name', help='Alternate name specified when alias and namespace names are same.')
 
     with self.argument_context('eventhubs namespace create', min_api='2021-06-01-preview') as c:
         c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], is_preview=True, help='Cluster ARM ID of the Namespace')
