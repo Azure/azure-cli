@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods
 from knack.log import get_logger
-from azure.cli.core.aaz import has_value
 from ._util import import_aaz_by_profile
 
 

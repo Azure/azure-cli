@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
-# pylint: disable=too-many-locals, too-many-statements
+# pylint: disable=too-many-locals, too-many-statements, disable=line-too-long
 def load_command_table(self, _):
     from .operations import import_aaz_by_profile
 

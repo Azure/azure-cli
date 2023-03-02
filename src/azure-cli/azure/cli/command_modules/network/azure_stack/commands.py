@@ -30,7 +30,6 @@ from azure.cli.command_modules.network.azure_stack._util import (
 from azure.cli.command_modules.network.azure_stack._format import (
     transform_dns_record_set_output,
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
-    transform_public_ip_create_output,
     transform_traffic_manager_create_output, transform_nic_create_output,
     transform_nsg_create_output,
     transform_geographic_hierachy_table_output,
@@ -48,7 +47,6 @@ from azure.cli.command_modules.network.azure_stack._validators import (
     process_nw_flow_log_set_namespace, process_nw_flow_log_create_namespace, process_nw_flow_log_show_namespace,
     process_nw_packet_capture_create_namespace, process_nw_test_connectivity_namespace, process_nw_topology_namespace,
     process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
-    process_public_ip_create_namespace,
     process_vpn_connection_create_namespace,
     process_nw_config_diagnostic_namespace,
     process_appgw_waf_policy_update)
