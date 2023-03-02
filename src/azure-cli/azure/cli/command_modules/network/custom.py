@@ -21,7 +21,6 @@ from azure.cli.core.azclierror import InvalidArgumentValueError, ValidationError
     UnrecognizedArgumentError, ResourceNotFoundError, ArgumentUsageError
 from azure.cli.core.profiles import ResourceType, supported_api_version
 
-from azure.cli.command_modules.network._client_factory import network_client_factory
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 
@@ -6867,23 +6866,29 @@ def create_virtual_hub(cmd,
         'tags': tags,
         'sku': 'Standard',
     }
-    from azure.cli.command_modules.network.aaz.latest.network.routeserver import Create
+    from .aaz.latest.network.routeserver import Create
     vhub_poller = Create(cli_ctx=cmd.cli_ctx)(command_args=args)
     LongRunningOperation(cmd.cli_ctx)(vhub_poller)
 
-    ip_config = HubIpConfiguration(
-        subnet=SubResource(id=hosted_subnet),
-        public_ip_address=PublicIPAddress(id=public_ip_address)
-    )
-    vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
+    from .aaz.latest.network.routeserver.ip_config import Create as IPConfigCreate, Delete as IPConfigDelete
     try:
-        vhub_ip_poller = vhub_ip_config_client.begin_create_or_update(
-            resource_group_name, virtual_hub_name, 'Default', ip_config)
-        LongRunningOperation(cmd.cli_ctx)(vhub_ip_poller)
+        create_poller = IPConfigCreate(cli_ctx=cmd.cli_ctx)(command_args={
+            'name': 'Default',
+            'vhub_name': virtual_hub_name,
+            'resource_group': resource_group_name,
+            'subnet': hosted_subnet,
+            'public_ip_address': public_ip_address
+        })
+        LongRunningOperation(cmd.cli_ctx)(create_poller)
     except Exception as ex:
         logger.error(ex)
         try:
-            vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, 'Default')
+            delete_poller = IPConfigDelete(cli_ctx=cmd.cli_ctx)(command_args={
+                'name': 'Default',
+                'vhub_name': virtual_hub_name,
+                'resource_group': resource_group_name
+            })
+            LongRunningOperation(cmd.cli_ctx)(delete_poller)
         except HttpResponseError:
             pass
         from .aaz.latest.network.routeserver import Delete
@@ -6895,12 +6900,21 @@ def create_virtual_hub(cmd,
 
 def delete_virtual_hub(cmd, resource_group_name, virtual_hub_name):
     from azure.cli.core.commands import LongRunningOperation
-    vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
-    ip_configs = list(vhub_ip_config_client.list(resource_group_name, virtual_hub_name))
-    if ip_configs:
-        ip_config = ip_configs[0]   # There will always be only 1
-        poller = vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, ip_config.name)
+    from .aaz.latest.network.routeserver.ip_config import List as IPConfigList, Delete as IPConfigDelete
+    ip_configs = IPConfigList(cli_ctx=cmd.cli_ctx)(command_args={
+        'vhub_name': virtual_hub_name,
+        'resource_group': resource_group_name
+    })
+    try:
+        ip_config = next(ip_configs)  # there will always be only 1
+        poller = IPConfigDelete(cli_ctx=cmd.cli_ctx)(command_args={
+            'name': ip_config['name'],
+            'vhub_name': virtual_hub_name,
+            'resource_group': resource_group_name
+        })
         LongRunningOperation(cmd.cli_ctx)(poller)
+    except StopIteration:
+        pass
     from .aaz.latest.network.routeserver import Delete
     return Delete(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': virtual_hub_name})
 # endregion
