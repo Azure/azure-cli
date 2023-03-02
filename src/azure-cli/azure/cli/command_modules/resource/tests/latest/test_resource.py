@@ -3981,18 +3981,18 @@ class BicepScenarioTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_with_bicepparam')
-    def test_bicepparam_deployment_with_json_template(self):
+    def test_resource_deployment_with_bicepparam_and_json_template(self):
         self.kwargs.update({
             'tf': "./main.json",
             'params' : "./param.bicepparam"
         })
 
-        with self.assertRaisesRegex(CLIError, "Only .bicep template are allowed with .bicepparam parameters"):
+        with self.assertRaisesRegex(CLIError, "Only a .bicep template is allowed with a .bicepparam parameter file"):
             self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params}')
             
 
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_with_bicepparam')
-    def test_bicepparam_deployment_with_multiple_parameter_sources(self):
+    def test_resource_deployment_with_bicepparam_and_other_parameter_sources(self):
         self.kwargs.update({
             'tf': "./main.bicepparam",
             'params1' : "./param1.bicepparam",

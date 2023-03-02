@@ -940,8 +940,6 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
     on_error_deployment = None
     template_content = None
 
-    
-
     if query_string and not template_uri:
         raise IncorrectUsageError('please provide --template-uri if --query-string is specified')
 
@@ -960,17 +958,14 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS)
         template_obj = show_resource(cmd=cmd, resource_ids=[template_spec], api_version=api_version).properties['mainTemplate']
     else:
-
         if is_bicepparam_file_provided(parameters):
-            if len(parameters) > 1: 
+            if len(parameters) > 1:
                 raise IncorrectUsageError("Can not use --parameters more than once when using a .bicepparam file")
             bicepparam_file = parameters[0][0]
-            
             if not is_bicep_file(template_file):
-                raise IncorrectUsageError("Only .bicep template are allowed with .bicepparam parameters")
+                raise IncorrectUsageError("Only a .bicep template is allowed with a .bicepparam parameter file")
 
             build_bicepparam_output = run_bicep_command(cmd.cli_ctx, ["build-params", bicepparam_file, "--bicep-file", template_file, "--stdout"])
-            
             build_bicepparam_output_json = json.loads(build_bicepparam_output)
             template_content = build_bicepparam_output_json["templateJson"]
 

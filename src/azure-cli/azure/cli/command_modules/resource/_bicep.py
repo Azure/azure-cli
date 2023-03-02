@@ -167,8 +167,10 @@ def remove_bicep_installation():
 def is_bicep_file(file_path):
     return file_path.lower().endswith(".bicep")
 
+
 def is_bicepparam_file(file_path):
     return file_path.lower().endswith(".bicepparam")
+
 
 def is_bicepparam_file_provided(parameters):
     if not parameters or len(parameters) < 1:
@@ -178,6 +180,7 @@ def is_bicepparam_file_provided(parameters):
         if is_bicepparam_file(parameter[0]):
             return True
     return False
+
 
 def get_bicep_available_release_tags():
     try:
