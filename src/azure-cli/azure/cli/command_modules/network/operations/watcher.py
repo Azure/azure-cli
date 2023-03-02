@@ -12,7 +12,7 @@ from azure.cli.core.commands.arm import get_arm_resource_by_id
 
 from azure.cli.core.aaz import has_value, AAZResourceLocationArg, AAZResourceLocationArgFormat, AAZListArg, AAZStrArg, \
     AAZBoolArg, AAZFloatArg, AAZIntArg, AAZIntArgFormat, AAZDictArg, AAZResourceIdArg, AAZResourceIdArgFormat
-
+from azure.cli.core.aaz.utils import assign_aaz_list_arg
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import validate_tags
@@ -589,13 +589,6 @@ def process_nw_cm_v2_create_namespace(cmd):
         if not has_value(args.location):
             raise ValidationError("Can not get location from --endpoint-source-resource-id")
 
-    v2_required_parameter_set = [
-        'endpoint_source_resource_id', 'endpoint_source_name', 'endpoint_dest_name', 'test_config_name'
-    ]
-    for p in v2_required_parameter_set:
-        if not hasattr(args, p) or getattr(args, p) is None:
-            raise ValidationError(
-                'usage error: --{} is required to create a V2 connection monitor'.format(p.replace('_', '-')))
     if not has_value(args.test_config_protocol):
         raise ValidationError('usage error: --protocol is required to create a test '
                               'configuration for V2 connection monitor')
@@ -639,6 +632,7 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
             options=["--endpoint-dest-name"],
             help="The name of the destination of connection monitor endpoint. "
                  "If you are creating a V2 Connection Monitor, it's required.",
+            required=True,
             arg_group="V2 Endpoint"
         )
         args_schema.endpoint_dest_resource_id = AAZStrArg(
@@ -670,12 +664,14 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
             options=["--endpoint-source-name"],
             help="The name of the source of connection monitor endpoint. "
                  "If you are creating a V2 Connection Monitor, it's required.",
+            required=True,
             arg_group="V2 Endpoint",
         )
         args_schema.endpoint_source_resource_id = AAZStrArg(
             options=["--endpoint-source-resource-id"],
             help="Resource ID of the source of connection monitor endpoint. "
                  "If endpoint is intended to used as source, this option is required.",
+            required=True,
             arg_group="V2 Endpoint",
         )
         args_schema.endpoint_source_type = AAZStrArg(
@@ -706,6 +702,7 @@ class WatcherConnectionMonitorCreate(_WatcherConnectionMonitorCreate):
             options=["--test-config-name"],
             help="The name of the connection monitor test configuration. "
                  "If you are creating a V2 Connection Monitor, it's required.",
+            required=True,
             arg_group="V2 Test Configuration",
         )
         args_schema.test_config_frequency = AAZIntArg(
@@ -1404,16 +1401,6 @@ class NwTroubleshootingShow(_NwTroubleshootingShow):
             args.target_resource_id = args.resource
 
 
-def process_nw_cm_v2_output_namespace(cmd):
-    args = cmd.ctx.args
-    v2_output_optional_parameter_set = ['workspace_id']
-    if hasattr(args, 'out_type') and args.out_type.to_serialized_data() is not None:
-        tmp = [p for p in v2_output_optional_parameter_set if getattr(args, p) is None]
-        if v2_output_optional_parameter_set == tmp:
-            raise ValidationError('usage error: --type is specified but no other resource id provided')
-    get_network_watcher_from_location(cmd)
-
-
 class WatcherConnectionMonitorOutputAdd(_WatcherConnectionMonitorOutputAdd):
 
     @classmethod
@@ -1436,7 +1423,7 @@ class WatcherConnectionMonitorOutputAdd(_WatcherConnectionMonitorOutputAdd):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.out_type) and not has_value(args.workspace_id):
+        if has_value(args.output_type) and not has_value(args.workspace_id):
             raise ValidationError('usage error: --type is specified but no other resource id provided')
         get_network_watcher_from_location(self)
 
@@ -1469,6 +1456,8 @@ class WatcherConnectionMonitorOutputRemove(_WatcherConnectionMonitorUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.watcher_name._required = False
+        args_schema.watcher_rg._required = False
         return args_schema
 
     def pre_operations(self):
@@ -1535,14 +1524,17 @@ class WatcherConnectionMonitorEndpointAdd(_WatcherConnectionMonitorEndpointAdd):
                                       'test group via --dest-test-groups/--source-test-groups')
         get_network_watcher_from_location(self)
 
-        args.scope_exclude = []
-        args.scope_include = []
-        if has_value(args.address_include):
-            for ip in args.address_include:
-                args.scope_include.append({"address": ip})
-        if has_value(args.address_exclude):
-            for ip in args.address_exclude:
-                args.scope_exclude.append({"address": ip})
+        args.scope_include = assign_aaz_list_arg(
+            args.scope_include,
+            args.address_include,
+            element_transformer=lambda _, tmp_ip: {"address": tmp_ip}
+        )
+
+        args.scope_exclude = assign_aaz_list_arg(
+            args.scope_exclude,
+            args.address_exclude,
+            element_transformer=lambda _, tmp_ip: {"address": tmp_ip}
+        )
 
     def pre_instance_create(self):
         args = self.ctx.args
@@ -1806,8 +1798,11 @@ class WatcherConnectionMonitorTestGroupAdd(_WatcherConnectionMonitorTestGroupAdd
         args_schema.watcher_rg._required = False
 
         args_schema.destinations._registered = False
+        args_schema.destinations._required = False
         args_schema.sources._registered = False
+        args_schema.sources._required = False
         args_schema.test_configurations._registered = False
+        args_schema.test_configurations._required = False
 
         args_schema.location = AAZResourceLocationArg(
             options=["-l", "--location"],
@@ -1946,43 +1941,34 @@ class WatcherConnectionMonitorTestGroupAdd(_WatcherConnectionMonitorTestGroupAdd
         args = self.ctx.args
         instance = self.ctx.vars.instance
 
-        endpoint_source_name = args.endpoint_source_name
-        endpoint_dest_name = args.endpoint_dest_name
-
-        endpoint_source_address = args.endpoint_source_address
-        endpoint_source_resource_id = args.endpoint_source_resource_id
-        endpoint_dest_address = args.endpoint_dest_address
-        endpoint_dest_resource_id = args.endpoint_dest_resource_id
-
         # deal with endpoint
-        if any([endpoint_source_address, endpoint_source_resource_id]):
+        if has_value(args.endpoint_source_address) or has_value(args.endpoint_source_resource_id):
             src_endpoint = {
-                "name": endpoint_source_name,
-                "resource_id": endpoint_source_resource_id,
-                "address": endpoint_source_address
+                "name": args.endpoint_source_name,
+                "resource_id": args.endpoint_source_resource_id,
+                "address": args.endpoint_source_address
             }
             instance.properties.endpoints.append(src_endpoint)
-        if any([endpoint_dest_address, endpoint_dest_resource_id]):
+        if has_value(args.endpoint_dest_address) or has_value(args.endpoint_dest_resource_id):
             dst_endpoint = {
-                "name": endpoint_dest_name,
-                "resource_id": endpoint_dest_resource_id,
-                "address": endpoint_dest_address
+                "name": args.endpoint_dest_name,
+                "resource_id": args.endpoint_dest_resource_id,
+                "address": args.endpoint_dest_address
             }
             instance.properties.endpoints.append(dst_endpoint)
 
-        args.sources.append(endpoint_source_name)
-        args.destinations.append(endpoint_dest_name)
+        args.sources.append(args.endpoint_source_name)
+        args.destinations.append(args.endpoint_dest_name)
 
         # deal with test configuration
-        new_test_configuration_creation_requirements = [
-            args.test_config_protocol, args.test_config_preferred_ip_version,
-            args.test_config_threshold_failed_percent, args.test_config_threshold_round_trip_time,
-            args.test_config_tcp_disable_trace_route, args.test_config_tcp_port,
-            args.test_config_icmp_disable_trace_route,
-            args.test_config_http_port, args.test_config_http_method,
-            args.test_config_http_path, args.test_config_http_valid_status_codes, args.test_config_http_prefer_https
-        ]
-        if any(new_test_configuration_creation_requirements):
+        if has_value(args.test_config_protocol) or has_value(args.test_config_preferred_ip_version) or \
+                has_value(args.test_config_threshold_failed_percent) or \
+                has_value(args.test_config_threshold_round_trip_time) or \
+                has_value(args.test_config_tcp_disable_trace_route) or has_value(args.test_config_tcp_port) or \
+                has_value(args.test_config_icmp_disable_trace_route) or \
+                has_value(args.test_config_http_port) or has_value(args.test_config_http_method) or \
+                has_value(args.test_config_http_path) or has_value(args.test_config_http_valid_status_codes) or \
+                has_value(args.test_config_http_prefer_https):
             test_config = {
                 "name": args.test_config_name,
                 "test_frequency_sec": args.test_config_frequency,
@@ -2068,6 +2054,19 @@ class WatcherConnectionMonitorTestGroupList(_WatcherConnectionMonitorTestGroupLi
 
 class WatcherConnectionMonitorTestGroupRemove(_WatcherConnectionMonitorUpdate):
 
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.watcher_name._required = False
+        args_schema.watcher_rg._required = False
+        args_schema.test_group_name = AAZStrArg(
+            options=["--test-group-name"],
+            help='The name of the connection monitor test group.',
+            required=True,
+            registered=False,
+        )
+        return args_schema
+
     def pre_operations(self):
         get_network_watcher_from_location(self)
 
@@ -2090,8 +2089,10 @@ class WatcherConnectionMonitorTestGroupRemove(_WatcherConnectionMonitorUpdate):
 
         # deal with endpoints which are only referenced by this removed test group
         removed_endpoints = []
-        for e in removed_test_group.sources + removed_test_group.destinations:
-            tmp = [t for t in instance.properties.test_groups if (e in t.sources or e in t.destinations)]
+        for e in (removed_test_group.sources.to_serialized_data() +
+                  removed_test_group.destinations.to_serialized_data()):
+            tmp = [t for t in instance.properties.test_groups
+                   if (e in t.sources.to_serialized_data() or e in t.destinations.to_serialized_data())]
             if not tmp:
                 removed_endpoints.append(e)
         instance.properties.endpoints = [e for e in instance.properties.endpoints
@@ -2099,8 +2100,8 @@ class WatcherConnectionMonitorTestGroupRemove(_WatcherConnectionMonitorUpdate):
 
         # deal with test configurations which are only referenced by this remove test group
         removed_test_configurations = []
-        for c in removed_test_group.test_configurations:
-            tmp = [t for t in instance.properties.test_groups if c in t.test_configurations]
+        for c in removed_test_group.test_configurations.to_serialized_data():
+            tmp = [t for t in instance.properties.test_groups if c in t.test_configurations.to_serialized_data()]
             if not tmp:
                 removed_test_configurations.append(c)
         instance.properties.test_configurations = [c for c in instance.properties.test_configurations

@@ -6905,7 +6905,7 @@ def remove_nw_connection_monitor_test_group(cmd, connection_monitor_name, locati
     update_args = {
         'connection_monitor_name': connection_monitor_name,
         'location': location,
-        'name': name
+        'test_group_name': name
     }
     from .operations.watcher import WatcherConnectionMonitorTestGroupRemove
     return WatcherConnectionMonitorTestGroupRemove(cli_ctx=cmd.cli_ctx)(command_args=update_args)
