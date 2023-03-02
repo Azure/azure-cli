@@ -61,6 +61,7 @@ cli_jobs = {
             'container': 19,
             'cosmosdb': 45,
             'databoxedge': 25,
+            'deploymentmanager': 18,
             'dla': 19,
             'dls': 22,
             'dms': 22,
