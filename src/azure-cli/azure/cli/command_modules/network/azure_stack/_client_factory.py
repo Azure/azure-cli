@@ -120,14 +120,6 @@ def cf_private_access(cli_ctx, _):
     return network_client_factory(cli_ctx).available_private_access_services
 
 
-def cf_public_ip_addresses(cli_ctx, _):
-    return network_client_factory(cli_ctx).public_ip_addresses
-
-
-def cf_public_ip_prefixes(cli_ctx, _):
-    return network_client_factory(cli_ctx).public_ip_prefixes
-
-
 def cf_security_rules(cli_ctx, _):
     return network_client_factory(cli_ctx).security_rules
 
