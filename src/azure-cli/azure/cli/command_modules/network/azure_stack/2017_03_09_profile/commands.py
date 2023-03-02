@@ -78,10 +78,7 @@ def load_command_table(self, _):
     # endregion
 
     # region PublicIPAddresses
-    public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$Address:ipAddress, AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
-    public_ip_show_table_transform = public_ip_show_table_transform.replace('$zone$',
-                                                                            'Zones: (!zones && \' \') || join(` `, zones), ' if self.supported_api_version(
-                                                                                min_api='2017-06-01') else ' ')
+    public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
 
     public_ip = import_aaz_by_profile("network.public_ip")
     operations_tmpl = self.get_module_name_by_profile("operations.public_ip#{}")
