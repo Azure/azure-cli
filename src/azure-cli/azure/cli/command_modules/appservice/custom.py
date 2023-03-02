@@ -62,6 +62,7 @@ from .utils import (_normalize_sku,
                     raise_missing_token_suggestion,
                     _get_location_from_resource_group,
                     _list_app,
+                    is_functionapp,
                     _rename_server_farm_props,
                     _get_location_from_webapp,
                     _normalize_location,
@@ -910,8 +911,8 @@ def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None
 
 
 def list_function_app(cmd, resource_group_name=None):
-    return list(filter(lambda x: x.kind is not None and "function" in x.kind.lower(),
-                       _list_app(cmd.cli_ctx, resource_group_name)))
+    return list(filter(lambda x: x.kind is not None and is_functionapp(x),
+                _list_app(cmd.cli_ctx, resource_group_name)))
 
 
 def show_app(cmd, resource_group_name, name, slot=None):
@@ -2703,7 +2704,11 @@ def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certif
     hosting_environment_profile_param = (webapp.hosting_environment_profile.name
                                          if webapp.hosting_environment_profile else '')
 
-    thumb_print = _get_cert(certificate_password, certificate_file)
+    try:
+        thumb_print = _get_cert(certificate_password, certificate_file)
+    except OpenSSL.crypto.Error as e:
+        raise UnclassifiedUserFault(f"Failed to get the certificate's thrumbprint with error: '{e}'. "
+                                    "Please double check the certificate password.") from e
     cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
                                     webapp.location, resource_group_name)
     cert = Certificate(password=certificate_password, pfx_blob=cert_contents,

@@ -50,10 +50,6 @@ class SBNetworkrulesetCRUDScenarioTest(ScenarioTest):
         created_subnet2 = self.cmd(
             'network vnet subnet create --resource-group {rg} --name {namesubnet2} --vnet-name {namevnet1} --address-prefixes 10.0.0.0/24').get_output_in_json()
 
-        # Check for the NameSpace name Availability
-        self.cmd('servicebus namespace exists --name {namespacename}',
-                 checks=[self.check('nameAvailable', True)])
-
         # Create Namespace
         self.cmd(
             'servicebus namespace create --resource-group {rg} --name {namespacename} --tags {tags} --sku {sku}',

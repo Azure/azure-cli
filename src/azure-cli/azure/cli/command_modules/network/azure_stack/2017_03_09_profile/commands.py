@@ -45,3 +45,34 @@ def load_command_table(self, _):
     self.command_table['network vpn-connection shared-key update'] = VpnConnSharedKeyUpdate(loader=self)
 
     # endregion
+
+    # region VirtualNetworkGateways
+    from .operations.vnet_gateway import VnetGatewayCreate, VnetGatewayUpdate
+    self.command_table['network vnet-gateway create'] = VnetGatewayCreate(loader=self)
+    self.command_table['network vnet-gateway update'] = VnetGatewayUpdate(loader=self)
+
+    from .operations.vnet_gateway import VnetGatewayRevokedCertCreate
+    self.command_table['network vnet-gateway revoked-cert create'] = VnetGatewayRevokedCertCreate(loader=self)
+
+    from .operations.vnet_gateway import VnetGatewayRootCertCreate
+    self.command_table['network vnet-gateway root-cert create'] = VnetGatewayRootCertCreate(loader=self)
+
+    # region VirtualNetwork
+    from .operations.vnet import VNetCreate, VNetUpdate, VNetSubnetUpdate
+    from .._format import transform_vnet_table_output
+    vnet = import_aaz_by_profile("network.vnet")
+    self.command_table['network vnet create'] = VNetCreate(loader=self)
+    self.command_table['network vnet update'] = VNetUpdate(loader=self)
+    self.command_table['network vnet list'] = vnet.List(loader=self, table_transformer=transform_vnet_table_output)
+
+    self.command_table['network vnet subnet update'] = VNetSubnetUpdate(loader=self)
+
+    # endregion
+
+    # region NetworkRoot
+    with self.command_group('network'):
+        from .operations.locations import UsagesList
+        from .._format import transform_network_usage_table
+        self.command_table['network list-usages'] = UsagesList(loader=self,
+                                                               table_transformer=transform_network_usage_table)
+    # endregion

@@ -230,11 +230,6 @@ class Update(AAZCommand):
         )
 
         _element = cls._args_schema.vpn_client_root_certificates.Element
-        _element.id = AAZStrArg(
-            options=["id"],
-            help="Resource ID.",
-            nullable=True,
-        )
         _element.name = AAZStrArg(
             options=["name"],
             help="The name of the resource that is unique within a resource group. This name can be used to access the resource.",
@@ -738,7 +733,6 @@ class Update(AAZCommand):
 
             _elements = _builder.get(".properties.vpnClientConfiguration.vpnClientRootCertificates[]")
             if _elements is not None:
-                _elements.set_prop("id", AAZStrType, ".id")
                 _elements.set_prop("name", AAZStrType, ".name")
                 _elements.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
 

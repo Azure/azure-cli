@@ -33,10 +33,6 @@ class VpnConnectionDeviceConfigScriptShow(_VpnConnection.ShowDeviceConfigScript)
 
         return args_schema
 
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
 
 _VpnConnIpsecPolicy = import_aaz_by_profile("network.vpn_connection.ipsec_policy")
 

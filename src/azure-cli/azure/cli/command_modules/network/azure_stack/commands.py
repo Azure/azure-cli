@@ -16,10 +16,8 @@ from azure.cli.command_modules.network.azure_stack._client_factory import (
     cf_express_route_circuit_peerings, cf_express_route_circuits,
     cf_express_route_service_providers,
     cf_network_interfaces, cf_network_security_groups, cf_network_watcher, cf_packet_capture,
-    cf_virtual_networks, cf_virtual_network_peerings,
-    cf_virtual_network_gateways,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
-    cf_security_rules, cf_subnets, cf_usages,
+    cf_security_rules,
     cf_public_ip_addresses, cf_connection_monitor,
     cf_public_ip_prefixes, cf_dns_references, cf_private_endpoints,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
@@ -33,14 +31,13 @@ from azure.cli.command_modules.network.azure_stack._util import (
 from azure.cli.command_modules.network.azure_stack._format import (
     transform_dns_record_set_output,
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
-    transform_vnet_create_output, transform_public_ip_create_output,
+    transform_public_ip_create_output,
     transform_traffic_manager_create_output, transform_nic_create_output,
-    transform_nsg_create_output, transform_vnet_gateway_create_output,
+    transform_nsg_create_output,
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
-    transform_network_usage_list, transform_network_usage_table, transform_nsg_rule_table_output,
-    transform_vnet_table_output, transform_effective_route_table, transform_effective_nsg,
-    transform_vnet_gateway_routes_table, transform_vnet_gateway_bgp_peer_table)
+    transform_nsg_rule_table_output,
+    transform_effective_route_table, transform_effective_nsg)
 from azure.cli.command_modules.network.azure_stack._validators import (
     get_network_watcher_from_location,
     process_ag_create_namespace, process_ag_http_listener_create_namespace, process_ag_listener_create_namespace, process_ag_settings_create_namespace, process_ag_http_settings_create_namespace,
@@ -53,7 +50,6 @@ from azure.cli.command_modules.network.azure_stack._validators import (
     process_nw_packet_capture_create_namespace, process_nw_test_connectivity_namespace, process_nw_topology_namespace,
     process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
     process_public_ip_create_namespace,
-    process_vnet_create_namespace, process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
     process_vpn_connection_create_namespace,
     process_nw_config_diagnostic_namespace,
     process_appgw_waf_policy_update)
@@ -212,26 +208,6 @@ def load_command_table(self, _):
         min_api='2018-07-01'
     )
 
-    network_subnet_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#SubnetsOperations.{}',
-        client_factory=cf_subnets
-    )
-
-    network_vgw_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualNetworkGatewaysOperations.{}',
-        client_factory=cf_virtual_network_gateways
-    )
-
-    network_vnet_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualNetworksOperations.{}',
-        client_factory=cf_virtual_networks
-    )
-
-    network_vnet_peering_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualNetworkPeeringsOperations.{}',
-        client_factory=cf_virtual_network_peerings
-    )
-
     network_watcher_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#NetworkWatchersOperations.{}',
         client_factory=cf_network_watcher
@@ -299,19 +275,11 @@ def load_command_table(self, _):
         min_api='2020-06-01'
     )
 
-    network_custom = CliCommandType(operations_tmpl=custom_operations_tmpl)
-
     network_nic_custom = CliCommandType(
         operations_tmpl=custom_operations_tmpl,
         client_factory=cf_network_interfaces
     )
 
-    # endregion
-
-    # region NetworkRoot
-    usage_path = 'azure.mgmt.network.operations#UsagesOperations.{}'
-    with self.command_group('network') as g:
-        g.command('list-usages', 'list', operations_tmpl=usage_path, client_factory=cf_usages, transform=transform_network_usage_list, table_transformer=transform_network_usage_table)
     # endregion
 
     # region ApplicationGateways
@@ -942,80 +910,6 @@ def load_command_table(self, _):
 
     from azure.cli.command_modules.network.aaz.latest.network.traffic_manager.endpoint import ShowGeographicHierarchy
     self.command_table['network traffic-manager endpoint show-geographic-hierarchy'] = ShowGeographicHierarchy(loader=self, table_transformer=transform_geographic_hierachy_table_output)
-    # endregion
-
-    # region VirtualNetworks
-    with self.command_group('network vnet', network_vnet_sdk) as g:
-        from azure.cli.command_modules.network.aaz.latest.network.vnet import List
-        self.command_table['network vnet list'] = List(loader=self, table_transformer=transform_vnet_table_output)
-        g.custom_command('create', 'create_vnet', transform=transform_vnet_create_output, validator=process_vnet_create_namespace)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_vnet')
-        g.custom_command('list-available-ips', 'list_available_ips', min_api='2016-09-01', is_preview=True)
-
-    with self.command_group('network vnet peering', network_vnet_peering_sdk, min_api='2016-09-01') as g:
-        g.custom_command('create', 'create_vnet_peering')
-        g.custom_command('sync', 'sync_vnet_peering')
-        g.generic_update_command('update', setter_name='update_vnet_peering', setter_type=network_custom)
-
-    with self.command_group('network vnet subnet', network_subnet_sdk) as g:
-        g.custom_command('create', 'create_subnet')
-        g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='subnet_parameters', custom_func_name='update_subnet')
-        g.custom_command('list-available-ips', 'subnet_list_available_ips', min_api='2016-09-01', is_preview=True)
-    # endregion
-
-    # region VirtualNetworkGateways
-    with self.command_group('network vnet-gateway', network_vgw_sdk, min_api='2016-09-01') as g:
-        g.custom_command('create', 'create_vnet_gateway', supports_no_wait=True, transform=transform_vnet_gateway_create_output, validator=process_vnet_gateway_create_namespace)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_vnet_gateway', supports_no_wait=True, validator=process_vnet_gateway_update_namespace)
-        g.wait_command('wait')
-        g.command('delete', 'begin_delete', supports_no_wait=True)
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.command('reset', 'begin_reset')
-        g.command('list-bgp-peer-status', 'begin_get_bgp_peer_status', table_transformer=transform_vnet_gateway_bgp_peer_table)
-        g.command('list-advertised-routes', 'begin_get_advertised_routes', table_transformer=transform_vnet_gateway_routes_table)
-        g.command('list-learned-routes', 'begin_get_learned_routes', table_transformer=transform_vnet_gateway_routes_table)
-        g.command('show-supported-devices', 'supported_vpn_devices', is_preview=True, min_api='2017-09-01')
-        g.custom_command('disconnect-vpn-connections', 'disconnect_vnet_gateway_vpn_connections', client_factory=cf_virtual_network_gateways, supports_no_wait=True, is_preview=True, min_api='2019-11-01')
-
-    with self.command_group('network vnet-gateway packet-capture', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2019-07-01') as g:
-        g.custom_command('start', 'start_vnet_gateway_package_capture', supports_no_wait=True)
-        g.custom_command('stop', 'stop_vnet_gateway_package_capture', supports_no_wait=True)
-        g.wait_command('wait')
-
-    with self.command_group('network vnet-gateway vpn-client', network_vgw_sdk, client_factory=cf_virtual_network_gateways) as g:
-        g.custom_command('generate', 'generate_vpn_client')
-        g.command('show-url', 'begin_get_vpn_profile_package_url', min_api='2017-08-01')
-        g.command('show-health', 'begin_get_vpnclient_connection_health', is_preview=True, min_api='2019-04-01')
-
-    with self.command_group('network vnet-gateway vpn-client ipsec-policy', network_vgw_sdk, client_factory=cf_virtual_network_gateways, is_preview=True, min_api='2018-02-01') as g:
-        g.custom_command('set', 'set_vpn_client_ipsec_policy', supports_no_wait=True)
-        g.show_command('show', 'begin_get_vpnclient_ipsec_parameters')
-        g.wait_command('wait')
-
-    with self.command_group('network vnet-gateway revoked-cert', network_vgw_sdk) as g:
-        g.custom_command('create', 'create_vnet_gateway_revoked_cert')
-        g.custom_command('delete', 'delete_vnet_gateway_revoked_cert')
-
-    with self.command_group('network vnet-gateway root-cert', network_vgw_sdk) as g:
-        g.custom_command('create', 'create_vnet_gateway_root_cert')
-        g.custom_command('delete', 'delete_vnet_gateway_root_cert')
-
-    with self.command_group('network vnet-gateway ipsec-policy', network_vgw_sdk, min_api='2018-02-01') as g:
-        g.custom_command('add', 'add_vnet_gateway_ipsec_policy', supports_no_wait=True, doc_string_source='IpsecPolicy')
-        g.custom_command('list', 'list_vnet_gateway_ipsec_policies')
-        g.custom_command('clear', 'clear_vnet_gateway_ipsec_policies', supports_no_wait=True)
-
-    with self.command_group('network vnet-gateway aad', network_vgw_sdk, min_api='2019-04-01') as g:
-        g.custom_command('assign', 'assign_vnet_gateway_aad', supports_no_wait=True)
-        g.custom_show_command('show', 'show_vnet_gateway_aad')
-        g.custom_command('remove', 'remove_vnet_gateway_aad', supports_no_wait=True)
-
-    with self.command_group('network vnet-gateway nat-rule', network_vgw_sdk, min_api='2021-02-01', is_preview=True) as g:
-        g.custom_command('add', 'add_vnet_gateway_nat_rule', supports_no_wait=True)
-        g.custom_show_command('list', 'show_vnet_gateway_nat_rule')
-        g.custom_command('remove', 'remove_vnet_gateway_nat_rule', supports_no_wait=True)
-        g.wait_command('wait')
     # endregion
 
     # region VirtualNetworkGatewayConnections
