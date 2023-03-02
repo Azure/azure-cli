@@ -861,3 +861,103 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
         self.cmd('network route-table route list --resource-group {rg} --route-table-name {table}', checks=self.is_empty())
         self.cmd('network route-table delete --resource-group {rg} --name {table} -y')
         self.cmd('network route-table list --resource-group {rg}', checks=self.is_empty())
+
+
+class NetworkExtendedNSGScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_extended_nsg')
+    def test_network_extended_nsg(self, resource_group):
+
+        self.kwargs.update({
+            'nsg': 'nsg1',
+            'rule': 'rule1'
+        })
+        self.cmd('network nsg create --name {nsg} -g {rg}')
+        self.cmd('network nsg rule create --access allow --destination-address-prefixes 10.0.0.0/24 11.0.0.0/24 --direction inbound --nsg-name {nsg} -g {rg} --source-address-prefixes * -n {rule} --source-port-ranges 700-900 1000-1100 --priority 1000', checks=[
+            self.check('length(destinationAddressPrefixes)', 2),
+            self.check('destinationAddressPrefix', None),
+            self.check('length(sourceAddressPrefixes)', 0),
+            self.check('sourceAddressPrefix', '*'),
+            self.check('length(sourcePortRanges)', 2),
+            self.check('sourcePortRange', None),
+            self.check('length(destinationPortRanges)', 0),
+            self.check('destinationPortRange', '80')
+        ])
+        self.cmd('network nsg rule update --destination-address-prefixes Internet --nsg-name {nsg} -g {rg} --source-address-prefixes 10.0.0.0/24 11.0.0.0/24 -n {rule} --source-port-ranges * --destination-port-ranges 500-1000 2000 3000', checks=[
+            self.check('length(destinationAddressPrefixes)', 0),
+            self.check('destinationAddressPrefix', 'Internet'),
+            self.check('length(sourceAddressPrefixes)', 2),
+            self.check('sourceAddressPrefix', None),
+            self.check('length(sourcePortRanges)', 0),
+            self.check('sourcePortRange', '*'),
+            self.check('length(destinationPortRanges)', 3),
+            self.check('destinationPortRange', None)
+        ])
+
+
+class NetworkSecurityGroupScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_nsg')
+    def test_network_nsg(self, resource_group):
+
+        self.kwargs.update({
+            'nsg': 'test-nsg1',
+            'rule': 'web',
+            'rt': 'Microsoft.Network/networkSecurityGroups'
+        })
+
+        self.cmd('network nsg create --name {nsg} -g {rg} --tags foo=doo')
+        self.cmd('network nsg rule create --access allow --destination-address-prefixes 1234 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefixes 789 -n {rule} --source-port-ranges * --destination-port-ranges 4444 --priority 1000')
+
+        self.cmd('network nsg list', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?type == '{rt}']) == length(@)", True)
+        ])
+        self.cmd('network nsg list --resource-group {rg}', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?type == '{rt}']) == length(@)", True),
+            self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
+        ])
+        self.cmd('network nsg show --resource-group {rg} --name {nsg}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('type', '{rt}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('name', '{nsg}')
+        ])
+        # Test for the manually added nsg rule
+        self.cmd('network nsg rule list --resource-group {rg} --nsg-name {nsg}', checks=[
+            self.check('type(@)', 'array'),
+            self.check('length(@)', 1),
+            self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
+        ])
+        self.cmd('network nsg rule list --resource-group {rg} --nsg-name {nsg} -o table')
+        self.cmd('network nsg rule show --resource-group {rg} --nsg-name {nsg} --name {rule}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('name', '{rule}')
+        ])
+
+        self.kwargs.update({
+            'access': 'DENY',
+            'prefix': '111',
+            'dir': 'Outbound',
+            'protocol': 'Tcp',
+            'ports': '1234-1235',
+            'desc': 'greatrule',
+            'priority': 888
+        })
+        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg} -n {rule} --direction {dir} --access {access} --destination-address-prefixes {prefix} --protocol {protocol} --source-address-prefixes {prefix} --source-port-ranges {ports} --destination-port-ranges {ports} --priority {priority} --description {desc}', checks=[
+            self.check('access', 'Deny'),
+            self.check('direction', '{dir}'),
+            self.check('destinationAddressPrefix', '{prefix}'),
+            self.check('protocol', '{protocol}'),
+            self.check('sourceAddressPrefix', '{prefix}'),
+            self.check('sourcePortRange', '{ports}'),
+            self.check('priority', '{priority}'),
+            self.check('description', '{desc}')
+        ])
+
+        # test generic update
+        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg} -n {rule} --set description="cool"',
+                 checks=self.check('description', 'cool'))

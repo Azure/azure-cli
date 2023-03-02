@@ -67,52 +67,61 @@ class Update(AAZCommand):
         )
         _args_schema.access = AAZStrArg(
             options=["--access"],
-            help="Allowed values: Allow, Deny.",
-            default="Allow",
+            help="Network traffic is allowed or denied.",
             enum={"Allow": "Allow", "Deny": "Deny"},
         )
         _args_schema.description = AAZStrArg(
             options=["--description"],
-            help="Rule description.",
+            help="Description for this rule. Restricted to 140 chars.",
             nullable=True,
         )
         _args_schema.direction = AAZStrArg(
             options=["--direction"],
-            help="Allowed values: Inbound, Outbound.",
-            default="Inbound",
+            help="Direction of the rule. The direction specifies if rule will be evaluated on incoming or outgoing traffic.",
             enum={"Inbound": "Inbound", "Outbound": "Outbound"},
         )
         _args_schema.priority = AAZIntArg(
             options=["--priority"],
-            help="Rule priority, between 100 (highest priority) and 4096 (lowest priority). Must be unique for each rule in the collection.",
+            help="Priority of the rule. The value can be between 100 and 4096. The priority number must be unique for each rule in the collection. The lower the priority number, the higher the priority of the rule.",
             nullable=True,
         )
         _args_schema.protocol = AAZStrArg(
             options=["--protocol"],
-            help="etwork protocol this rule applies to.  Allowed values: *, Ah, Esp, Icmp, Tcp, Udp.",
-            default="*",
+            help="Network protocol this rule applies to.",
             enum={"*": "*", "Tcp": "Tcp", "Udp": "Udp"},
         )
 
         # define Arg Group "Destination"
 
         _args_schema = cls._args_schema
+        _args_schema.destination_address_prefix = AAZStrArg(
+            options=["--destination-address-prefix"],
+            arg_group="Destination",
+            help="The destination address prefix. CIDR or destination IP range. Asterisk '*' can also be used to match all source IPs. Default tags such as 'VirtualNetwork', 'AzureLoadBalancer' and 'Internet' can also be used.",
+            nullable=True,
+        )
         _args_schema.destination_address_prefixes = AAZListArg(
             options=["--destination-address-prefixes"],
             arg_group="Destination",
-            help="Space-separated list of CIDR prefixes or IP ranges. Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' to match all IPs. Besides, it also supports all available Service Tags like 'ApiManagement', 'SqlManagement', 'AzureMonitor', etc. Default: *.",
+            help="Space-separated list of CIDR prefixes or IP ranges. Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' to match all IPs. Besides, it also supports all available Service Tags like 'ApiManagement', 'SqlManagement', 'AzureMonitor', etc.",
             nullable=True,
         )
-        _args_schema.destination_asgs = AAZListArg(
-            options=["--destination-asgs"],
+        _args_schema.destination_application_security_groups = AAZListArg(
+            options=["--destination-application-security-groups"],
             arg_group="Destination",
-            help="Space-separated list of application security group names or supports one application security group name or ID.",
+            help="Application security group specified as destination.",
+            nullable=True,
+        )
+        _args_schema.destination_port_range = AAZStrArg(
+            options=["--destination-port-range"],
+            arg_group="Destination",
+            help="The destination port or range. Integer or range between 0 and 65535. Asterisk '*' can also be used to match all ports.",
             nullable=True,
         )
         _args_schema.destination_port_ranges = AAZListArg(
             options=["--destination-port-ranges"],
             arg_group="Destination",
-            help="Space-separated list of ports or port ranges between 0-65535. Use '*' to match all ports.  Default: 80.",
+            help="Space-separated list of ports or port ranges between 0-65535. Use '*' to match all ports.",
             nullable=True,
         )
 
@@ -121,11 +130,11 @@ class Update(AAZCommand):
             nullable=True,
         )
 
-        destination_asgs = cls._args_schema.destination_asgs
-        destination_asgs.Element = AAZObjectArg(
+        destination_application_security_groups = cls._args_schema.destination_application_security_groups
+        destination_application_security_groups.Element = AAZObjectArg(
             nullable=True,
         )
-        cls._build_args_application_security_group_update(destination_asgs.Element)
+        cls._build_args_application_security_group_update(destination_application_security_groups.Element)
 
         destination_port_ranges = cls._args_schema.destination_port_ranges
         destination_port_ranges.Element = AAZStrArg(
@@ -139,22 +148,34 @@ class Update(AAZCommand):
         # define Arg Group "Source"
 
         _args_schema = cls._args_schema
+        _args_schema.source_address_prefix = AAZStrArg(
+            options=["--source-address-prefix"],
+            arg_group="Source",
+            help="The CIDR or source IP range. Asterisk '*' can also be used to match all source IPs. Default tags such as 'VirtualNetwork', 'AzureLoadBalancer' and 'Internet' can also be used. If this is an ingress rule, specifies where network traffic originates from.",
+            nullable=True,
+        )
         _args_schema.source_address_prefixes = AAZListArg(
             options=["--source-address-prefixes"],
             arg_group="Source",
-            help="Space-separated list of CIDR prefixes or IP ranges. Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' to match all IPs. Besides, it also supports all available Service Tags like 'ApiManagement', 'SqlManagement', 'AzureMonitor', etc. Default: *.",
+            help="Space-separated list of CIDR prefixes or IP ranges. Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' to match all IPs. Besides, it also supports all available Service Tags like 'ApiManagement', 'SqlManagement', 'AzureMonitor', etc.",
             nullable=True,
         )
-        _args_schema.source_asgs = AAZListArg(
-            options=["--source-asgs"],
+        _args_schema.source_application_security_groups = AAZListArg(
+            options=["--source-application-security-groups"],
             arg_group="Source",
-            help="Space-separated list of application security group names or IDs. Limited by backend server, temporarily this argument only supports one application security group name or ID.",
+            help="Application security group specified as source.",
+            nullable=True,
+        )
+        _args_schema.source_port_range = AAZStrArg(
+            options=["--source-port-range"],
+            arg_group="Source",
+            help="The source port or range. Integer or range between 0 and 65535. Asterisk '*' can also be used to match all ports.",
             nullable=True,
         )
         _args_schema.source_port_ranges = AAZListArg(
             options=["--source-port-ranges"],
             arg_group="Source",
-            help="Space-separated list of ports or port ranges between 0-65535. Use '*' to match all ports.  Default: *.",
+            help="Space-separated list of ports or port ranges between 0-65535. Use '*' to match all ports.",
             nullable=True,
         )
 
@@ -163,11 +184,11 @@ class Update(AAZCommand):
             nullable=True,
         )
 
-        source_asgs = cls._args_schema.source_asgs
-        source_asgs.Element = AAZObjectArg(
+        source_application_security_groups = cls._args_schema.source_application_security_groups
+        source_application_security_groups.Element = AAZObjectArg(
             nullable=True,
         )
-        cls._build_args_application_security_group_update(source_asgs.Element)
+        cls._build_args_application_security_group_update(source_application_security_groups.Element)
 
         source_port_ranges = cls._args_schema.source_port_ranges
         source_port_ranges.Element = AAZStrArg(
@@ -180,6 +201,7 @@ class Update(AAZCommand):
     @classmethod
     def _build_args_application_security_group_update(cls, _schema):
         if cls._args_application_security_group_update is not None:
+            _schema.id = cls._args_application_security_group_update.id
             _schema.location = cls._args_application_security_group_update.location
             _schema.tags = cls._args_application_security_group_update.tags
             return
@@ -189,6 +211,14 @@ class Update(AAZCommand):
         )
 
         application_security_group_update = cls._args_application_security_group_update
+        application_security_group_update.id = AAZResourceIdArg(
+            options=["id"],
+            help="Resource ID.",
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/applicationSecurityGroups/{}",
+            ),
+        )
         application_security_group_update.location = AAZResourceLocationArg(
             options=["l", "location"],
             help="Resource location.",
@@ -208,6 +238,7 @@ class Update(AAZCommand):
             nullable=True,
         )
 
+        _schema.id = cls._args_application_security_group_update.id
         _schema.location = cls._args_application_security_group_update.location
         _schema.tags = cls._args_application_security_group_update.tags
 
@@ -461,14 +492,18 @@ class Update(AAZCommand):
             if properties is not None:
                 properties.set_prop("access", AAZStrType, ".access", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("description", AAZStrType, ".description")
+                properties.set_prop("destinationAddressPrefix", AAZStrType, ".destination_address_prefix")
                 properties.set_prop("destinationAddressPrefixes", AAZListType, ".destination_address_prefixes")
-                properties.set_prop("destinationApplicationSecurityGroups", AAZListType, ".destination_asgs")
+                properties.set_prop("destinationApplicationSecurityGroups", AAZListType, ".destination_application_security_groups")
+                properties.set_prop("destinationPortRange", AAZStrType, ".destination_port_range")
                 properties.set_prop("destinationPortRanges", AAZListType, ".destination_port_ranges")
                 properties.set_prop("direction", AAZStrType, ".direction", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("priority", AAZIntType, ".priority")
                 properties.set_prop("protocol", AAZStrType, ".protocol", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("sourceAddressPrefix", AAZStrType, ".source_address_prefix")
                 properties.set_prop("sourceAddressPrefixes", AAZListType, ".source_address_prefixes")
-                properties.set_prop("sourceApplicationSecurityGroups", AAZListType, ".source_asgs")
+                properties.set_prop("sourceApplicationSecurityGroups", AAZListType, ".source_application_security_groups")
+                properties.set_prop("sourcePortRange", AAZStrType, ".source_port_range")
                 properties.set_prop("sourcePortRanges", AAZListType, ".source_port_ranges")
 
             destination_address_prefixes = _builder.get(".properties.destinationAddressPrefixes")
@@ -513,6 +548,7 @@ class _UpdateHelper:
     def _build_schema_application_security_group_update(cls, _builder):
         if _builder is None:
             return
+        _builder.set_prop("id", AAZStrType, ".id")
         _builder.set_prop("location", AAZStrType, ".location")
         _builder.set_prop("tags", AAZDictType, ".tags")
 

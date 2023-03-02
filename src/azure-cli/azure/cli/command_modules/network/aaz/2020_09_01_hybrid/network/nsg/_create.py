@@ -18,7 +18,7 @@ class Create(AAZCommand):
     """Create a network security group.
 
     :example: Create an NSG in a resource group within a region with tags.
-        az network nsg create -g MyResourceGroup -n MyNsg --tags super_secure no_80 no_22
+        az network nsg create -g MyResourceGroup -n MyNsg --tags foo=bar
     """
 
     _aaz_info = {
@@ -77,6 +77,7 @@ class Create(AAZCommand):
     @classmethod
     def _build_args_application_security_group_create(cls, _schema):
         if cls._args_application_security_group_create is not None:
+            _schema.id = cls._args_application_security_group_create.id
             _schema.location = cls._args_application_security_group_create.location
             _schema.tags = cls._args_application_security_group_create.tags
             return
@@ -84,6 +85,13 @@ class Create(AAZCommand):
         cls._args_application_security_group_create = AAZObjectArg()
 
         application_security_group_create = cls._args_application_security_group_create
+        application_security_group_create.id = AAZResourceIdArg(
+            options=["id"],
+            help="Resource ID.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/applicationSecurityGroups/{}",
+            ),
+        )
         application_security_group_create.location = AAZResourceLocationArg(
             options=["l", "location"],
             help="Resource location.",
@@ -99,6 +107,7 @@ class Create(AAZCommand):
         tags = cls._args_application_security_group_create.tags
         tags.Element = AAZStrArg()
 
+        _schema.id = cls._args_application_security_group_create.id
         _schema.location = cls._args_application_security_group_create.location
         _schema.tags = cls._args_application_security_group_create.tags
 
@@ -389,6 +398,7 @@ class _CreateHelper:
     def _build_schema_application_security_group_create(cls, _builder):
         if _builder is None:
             return
+        _builder.set_prop("id", AAZStrType, ".id")
         _builder.set_prop("location", AAZStrType, ".location")
         _builder.set_prop("tags", AAZDictType, ".tags")
 

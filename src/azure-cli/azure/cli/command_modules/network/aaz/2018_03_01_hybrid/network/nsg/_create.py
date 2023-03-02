@@ -18,7 +18,7 @@ class Create(AAZCommand):
     """Create a network security group.
 
     :example: Create an NSG in a resource group within a region with tags.
-        az network nsg create -g MyResourceGroup -n MyNsg --tags super_secure no_80 no_22
+        az network nsg create -g MyResourceGroup -n MyNsg --tags foo=bar
     """
 
     _aaz_info = {
@@ -77,6 +77,7 @@ class Create(AAZCommand):
     @classmethod
     def _build_args_application_security_group_create(cls, _schema):
         if cls._args_application_security_group_create is not None:
+            _schema.id = cls._args_application_security_group_create.id
             _schema.location = cls._args_application_security_group_create.location
             _schema.tags = cls._args_application_security_group_create.tags
             return
@@ -84,6 +85,13 @@ class Create(AAZCommand):
         cls._args_application_security_group_create = AAZObjectArg()
 
         application_security_group_create = cls._args_application_security_group_create
+        application_security_group_create.id = AAZResourceIdArg(
+            options=["id"],
+            help="Resource ID.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/applicationSecurityGroups/{}",
+            ),
+        )
         application_security_group_create.location = AAZResourceLocationArg(
             options=["l", "location"],
             help="Resource location.",
@@ -99,6 +107,7 @@ class Create(AAZCommand):
         tags = cls._args_application_security_group_create.tags
         tags.Element = AAZStrArg()
 
+        _schema.id = cls._args_application_security_group_create.id
         _schema.location = cls._args_application_security_group_create.location
         _schema.tags = cls._args_application_security_group_create.tags
 
@@ -149,7 +158,7 @@ class Create(AAZCommand):
         )
         security_rule_create.destination_address_prefix = AAZStrArg(
             options=["destination-address-prefix"],
-            help="The destination address prefix. CIDR or destination IP range. Asterisk '*' can also be used to match all source IPs. Default tags such as 'VirtualNetwork', 'AzureLoadBalancer' and 'Internet' can also be used.",
+            help="The destination address prefix. CIDR or destination IP range. Asterisks '*' can also be used to match all source IPs. Default tags such as 'VirtualNetwork', 'AzureLoadBalancer' and 'Internet' can also be used.",
         )
         security_rule_create.destination_address_prefixes = AAZListArg(
             options=["destination-address-prefixes"],
@@ -161,7 +170,7 @@ class Create(AAZCommand):
         )
         security_rule_create.destination_port_range = AAZStrArg(
             options=["destination-port-range"],
-            help="The destination port or range. Integer or range between 0 and 65535. Asterisk '*' can also be used to match all ports.",
+            help="The destination port or range. Integer or range between 0 and 65535. Asterisks '*' can also be used to match all ports.",
         )
         security_rule_create.destination_port_ranges = AAZListArg(
             options=["destination-port-ranges"],
@@ -187,7 +196,7 @@ class Create(AAZCommand):
         )
         security_rule_create.source_address_prefix = AAZStrArg(
             options=["source-address-prefix"],
-            help="The CIDR or source IP range. Asterisk '*' can also be used to match all source IPs. Default tags such as 'VirtualNetwork', 'AzureLoadBalancer' and 'Internet' can also be used. If this is an ingress rule, specifies where network traffic originates from. ",
+            help="The CIDR or source IP range. Asterisks '*' can also be used to match all source IPs. Default tags such as 'VirtualNetwork', 'AzureLoadBalancer' and 'Internet' can also be used. If this is an ingress rule, specifies where network traffic originates from. ",
         )
         security_rule_create.source_address_prefixes = AAZListArg(
             options=["source-address-prefixes"],
@@ -199,7 +208,7 @@ class Create(AAZCommand):
         )
         security_rule_create.source_port_range = AAZStrArg(
             options=["source-port-range"],
-            help="The source port or range. Integer or range between 0 and 65535. Asterisk '*' can also be used to match all ports.",
+            help="The source port or range. Integer or range between 0 and 65535. Asterisks '*' can also be used to match all ports.",
         )
         security_rule_create.source_port_ranges = AAZListArg(
             options=["source-port-ranges"],
@@ -389,6 +398,7 @@ class _CreateHelper:
     def _build_schema_application_security_group_create(cls, _builder):
         if _builder is None:
             return
+        _builder.set_prop("id", AAZStrType, ".id")
         _builder.set_prop("location", AAZStrType, ".location")
         _builder.set_prop("tags", AAZDictType, ".tags")
 
