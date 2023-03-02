@@ -462,7 +462,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                             sku_name=instance.sku.name)
 
     if auto_grow:
-        instance.storage.storage_autogrow = auto_grow
+        instance.storage.auto_grow = auto_grow
 
     params = ServerForUpdate(sku=instance.sku,
                              storage=instance.storage,
