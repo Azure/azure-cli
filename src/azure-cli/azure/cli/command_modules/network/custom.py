@@ -6856,9 +6856,6 @@ def create_virtual_hub(cmd,
             raise CLIError('The VirtualHub "{}" under resource group "{}" exists'.format(
                 virtual_hub_name, resource_group_name))
 
-    SubResource, HubIpConfiguration, PublicIPAddress = cmd.get_models('SubResource',
-                                                                      'HubIpConfiguration', 'PublicIPAddress')
-
     args = {
         'resource_group': resource_group_name,
         'name': virtual_hub_name,

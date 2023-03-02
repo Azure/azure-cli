@@ -31,7 +31,7 @@ from azure.cli.command_modules.network._validators import (
     process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument)
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
-    ag_url_map_rule_completion_list, tm_endpoint_completion_list)
+    tm_endpoint_completion_list)
 from azure.cli.command_modules.network._actions import (
     TrustedClientCertificateCreate,
     SslProfilesCreate, AddMappingRequest, WAFRulesCreate)
@@ -166,32 +166,6 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway ssl-policy') as c:
         c.argument('clear', action='store_true', help='Clear SSL policy.')
         c.argument('disabled_ssl_protocols', nargs='+', help='Space-separated list of protocols to disable.', arg_type=get_enum_type(ApplicationGatewaySslProtocol))
-
-    with self.argument_context('network application-gateway url-path-map') as c:
-        c.argument('rule_name', help='The name of the url-path-map rule.', arg_group='First Rule')
-        c.argument('paths', nargs='+', help='Space-separated list of paths to associate with the rule. Valid paths start and end with "/" (ex: "/bar/")', arg_group='First Rule')
-        c.argument('address_pool', help='The name or ID of the backend address pool to use with the created rule.', completer=get_ag_subresource_completion_list('backend_address_pools'), arg_group='First Rule')
-        c.argument('http_settings', help='The name or ID of the HTTP settings to use with the created rule.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'), arg_group='First Rule')
-        c.argument('firewall_policy', min_api='2019-09-01', help='Name or ID of a Firewall Policy resource.', arg_group='First Rule')
-        c.argument('rewrite_rule_set', min_api='2019-04-01', help='The name or ID of the rewrite rule set. If not specified, the default for the map will be used.', arg_group='First Rule')
-
-    with self.argument_context('network application-gateway url-path-map create') as c:
-        c.argument('default_address_pool', help='The name or ID of the default backend address pool, if different from --address-pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
-        c.argument('default_http_settings', help='The name or ID of the default HTTP settings, if different from --http-settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
-        c.argument('default_rewrite_rule_set', min_api='2019-04-01', help='The name or ID of the default rewrite rule set, if different from --rewrite-rule-set.')
-
-    with self.argument_context('network application-gateway url-path-map update') as c:
-        c.argument('default_address_pool', help='The name or ID of the default backend address pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
-        c.argument('default_http_settings', help='The name or ID of the default HTTP settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
-        c.argument('default_rewrite_rule_set', min_api='2019-04-01', help='The name or ID of the default rewrite rule set.')
-
-    with self.argument_context('network application-gateway url-path-map rule') as c:
-        c.argument('item_name', options_list=['--name', '-n'], help='The name of the url-path-map rule.', completer=ag_url_map_rule_completion_list, id_part='child_name_2')
-        c.argument('url_path_map_name', options_list='--path-map-name', help='The name of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'), id_part='child_name_1')
-        c.argument('address_pool', help='The name or ID of the backend address pool. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list('backend_address_pools'))
-        c.argument('http_settings', help='The name or ID of the HTTP settings. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
-        for item in ['address_pool', 'http_settings', 'redirect_config', 'paths', 'rewrite_rule_set', 'firewall_policy']:
-            c.argument(item, arg_group=None)
 
     with self.argument_context('network application-gateway url-path-map rule create') as c:
         c.argument('item_name', options_list=['--name', '-n'], help='The name of the url-path-map rule.', completer=None)
