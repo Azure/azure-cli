@@ -2722,7 +2722,7 @@ def upload_ssl_cert(cmd, resource_group_name,
     except OpenSSL.crypto.Error as e:
         raise UnclassifiedUserFault(f"Failed to get the certificate's thrumbprint with error: '{e}'. "
                                     "Please double check the certificate password.") from e
-	if certificate_name:
+    if certificate_name:
         cert_name = certificate_name
     else:
         cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
