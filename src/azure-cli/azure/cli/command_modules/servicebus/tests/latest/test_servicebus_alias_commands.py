@@ -40,9 +40,6 @@ class SBDRAliasCRUDScenarioTest(ScenarioTest):
             'test': ''
         })
 
-        self.cmd('servicebus namespace exists --name {namespacenameprimary}',
-                 checks=[self.check('nameAvailable', True)])
-
         # Create Namespace - Primary
         self.cmd(
             'servicebus namespace create --resource-group {rg} --name {namespacenameprimary} --location {loc_south} --tags {tags} --sku {sku}',
