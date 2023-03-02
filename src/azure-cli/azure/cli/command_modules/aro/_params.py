@@ -56,6 +56,7 @@ def load_arguments(self, _):
                    validator=validate_client_secret(isCreate=True))
 
         c.argument('version',
+                   options_list=['--version', c.deprecate(target='--install-version', redirect='--version', hide=True)],
                    help='OpenShift version to use for cluster creation.',
                    validator=validate_version_format)
 
