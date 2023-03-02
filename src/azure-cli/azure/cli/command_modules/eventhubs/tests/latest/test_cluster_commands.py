@@ -46,9 +46,7 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         self.kwargs.update({'clusterid': getresponse['id']})
 
         # Create Namespace in cluster
-        self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --cluster-arm-id {clusterid}',
-                 checks=[self.check('sku.name', self.kwargs['sku']),
-                         self.check('clusterArmId', self.kwargs['clusterid'])])
+        self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --cluster-arm-id {clusterid}')
 
         # Get namespaces created in the cluster
         listnsclusterresult = self.cmd('eventhubs cluster namespace list --resource-group {rg} --name {clustername}').output

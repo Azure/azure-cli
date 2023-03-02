@@ -4,10 +4,11 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
 from knack.log import get_logger
+from knack.util import CLIError
 from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id
 
 from azure.cli.core.aaz import has_value, AAZResourceLocationArg, AAZResourceLocationArgFormat
-from azure.cli.core.azclierror import ValidationError
+from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
 from azure.cli.core.commands.arm import get_arm_resource_by_id
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
@@ -22,6 +23,13 @@ from ..aaz.latest.network.watcher.connection_monitor import Show as _WatcherConn
 from ..aaz.latest.network.watcher.connection_monitor import List as _WatcherConnectionMonitorList
 from ..aaz.latest.network.watcher.connection_monitor import Delete as _WatcherConnectionMonitorDelete
 from ..aaz.latest.network.watcher.connection_monitor import Query as _WatcherConnectionMonitorQuery
+from ..aaz.latest.network.watcher.flow_log import Create as _NwFlowLogCreate, Update as _NwFlowLogUpdate, \
+    List as _NwFlowLogList, Delete as _NwFlowLogDelete
+from ..aaz.latest.network.watcher.troubleshooting import Start as _NwTroubleshootingStart, \
+    Show as _NwTroubleshootingShow
+from ..aaz.latest.network.watcher.packet_capture import Create as _PacketCaptureCreate
+from ..aaz.latest.network.watcher.packet_capture import Delete as _PacketCaptureDelete, List as _PacketCaptureList, \
+    Show as _PacketCaptureShow, ShowStatus as _PacketCaptureShowStatus, Stop as _PacketCaptureStop
 
 logger = get_logger(__name__)
 
@@ -54,6 +62,15 @@ def get_network_watcher_from_resource(cmd):
     args = cmd.ctx.args
     resource = get_arm_resource_by_id(cmd.cli_ctx, args.resource.to_serialized_data())
     args.location = resource.location
+    get_network_watcher_from_location(cmd)
+
+
+def get_network_watcher_from_vmss(cmd):
+    args = cmd.ctx.args
+    compute_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machine_scale_sets
+    vmss_name = parse_resource_id(args.target.to_serialized_data())["name"]
+    vmss = compute_client.get(args.resource_group_name, vmss_name)
+    args.location = vmss.location
     get_network_watcher_from_location(cmd)
 
 
@@ -388,6 +405,151 @@ class TestConnectivity(_TestConnectivity):
             args.headers_obj = [{"name": k, "value": v} for k, v in args.headers.items()]
 
 
+class PacketCaptureCreate(_PacketCaptureCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.location = AAZResourceLocationArg(
+            registered=False,
+        )
+        args_schema.resource_group_name = AAZStrArg(
+            options=["-g", "--resource-group"],
+            help="Name of the resource group the target resource is in.",
+            required=True,
+        )
+        args_schema.vm = AAZResourceIdArg(
+            options=["--vm"],
+            help="Name or ID of the VM to target",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute"
+                         "/virtualMachines/{}",
+            ),
+        )
+        args_schema.target._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute"
+                     "/virtualMachineScaleSets/{}",
+        )
+        args_schema.storage_account._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Storage"
+                     "/storageAccounts/{}",
+        )
+        args_schema.target._required = False
+        args_schema.watcher_rg._required = False
+        args_schema.watcher_rg._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_name._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.target_type) and args.target_type.to_serialized_data().lower() == "azurevmss":
+            get_network_watcher_from_vmss(self)
+        else:
+            # set the appropriate fields if target is vm
+            get_network_watcher_from_vm(self)
+            args.target = args.vm
+            args.include, args.exclude = None, None
+
+        storage_usage = ValidationError("usage error: --storage-account NAME_OR_ID [--storage-path PATH] [--file-path PATH] | --file-path PATH")
+        if not has_value(args.storage_account) and (has_value(args.storage_path) or not has_value(args.file_path)):
+            raise storage_usage
+
+        if has_value(args.file_path):
+            path = args.file_path.to_serialized_data()
+            if not path.endswith(".cap"):
+                raise ValidationError("usage error: --file-path PATH must end with the '*.cap' extension")
+
+            if not path.startswith("/"):
+                path = path.replace("/", "\\")
+            args.file_path = path
+
+
+class PacketCaptureDelete(_PacketCaptureDelete):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.location = AAZResourceLocationArg(
+            required=True,
+        )
+        args_schema.watcher_rg._required = False
+        args_schema.watcher_rg._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_name._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        get_network_watcher_from_location(self)
+
+
+class PacketCaptureList(_PacketCaptureList):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.location = AAZResourceLocationArg(
+            required=True,
+        )
+        args_schema.watcher_rg._required = False
+        args_schema.watcher_rg._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_name._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        get_network_watcher_from_location(self)
+
+
+class PacketCaptureShow(_PacketCaptureShow):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.location = AAZResourceLocationArg(
+            required=True,
+        )
+        args_schema.watcher_rg._required = False
+        args_schema.watcher_rg._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_name._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        get_network_watcher_from_location(self)
+
+
+class PacketCaptureShowStatus(_PacketCaptureShowStatus):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.location = AAZResourceLocationArg(
+            required=True,
+        )
+        args_schema.watcher_rg._required = False
+        args_schema.watcher_rg._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_name._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        get_network_watcher_from_location(self)
+
+
+class PacketCaptureStop(_PacketCaptureStop):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.location = AAZResourceLocationArg(
+            required=True,
+        )
+        args_schema.watcher_rg._required = False
+        args_schema.watcher_rg._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_name._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        get_network_watcher_from_location(self)
+
+
 def update_network_watcher_from_location(ctx, cli_ctx, watcher_name='watcher_name',
                                          rg_name='watcher_rg'):
 
@@ -569,3 +731,368 @@ class WatcherConnectionMonitorDelete(_WatcherConnectionMonitorDelete):
                                              self.cli_ctx,
                                              watcher_name='network_watcher_name',
                                              rg_name='resource_group_name')
+
+
+class NwFlowLogCreate(_NwFlowLogCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat, AAZIntArg, AAZIntArgFormat, AAZBoolArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.network_watcher_name._registered = False
+        args_schema.network_watcher_name._required = False
+        args_schema.resource_group._required = False
+        args_schema.location._required = True
+        args_schema.flow_analytics_configuration._registered = False
+        args_schema.retention_policy._registered = False
+        args_schema.target_resource_id._registered = False
+        args_schema.traffic_analytics_interval = AAZIntArg(
+            options=['--interval'], arg_group="Traffic Analytics",
+            help="Interval in minutes at which to conduct flow analytics. Temporarily allowed values are 10 and 60.",
+            default=60,
+            fmt=AAZIntArgFormat(
+                maximum=60,
+                minimum=10,
+            )
+        )
+        args_schema.retention = AAZIntArg(
+            options=['--retention'],
+            help="Number of days to retain logs.",
+        )
+        args_schema.traffic_analytics_enabled = AAZBoolArg(
+            options=['--traffic-analytics'], arg_group="Traffic Analytics",
+            help="Enable traffic analytics. Defaults to true if `--workspace` is provided."
+        )
+        args_schema.traffic_analytics_workspace = AAZResourceIdArg(
+            options=['--workspace'], arg_group="Traffic Analytics",
+            help="Name or ID of a Log Analytics workspace. Must be in the same region of flow log",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.OperationalInsights/workspaces/{}"
+            )
+        )
+        args_schema.vnet = AAZResourceIdArg(
+            options=['--vnet'],
+            help="Name or ID of the Virtual Network Resource.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}"
+            )
+        )
+        args_schema.subnet = AAZResourceIdArg(
+            options=['--subnet'],
+            help="Name or ID of Subnet.",
+        )
+        args_schema.nic = AAZResourceIdArg(
+            options=['--nic'],
+            help="Name or ID of the Network Interface (NIC) Resource.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/networkInterfaces/{}"
+            )
+        )
+        args_schema.nsg = AAZResourceIdArg(
+            options=['--nsg'],
+            help="Name or ID of the network security group.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/networkSecurityGroups/{}"
+            )
+        )
+        args_schema.storage_account._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Storage/storageAccounts/{}"
+        )
+
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        get_network_watcher_from_location(self,
+                                          watcher_name='network_watcher_name',
+                                          rg_name='resource_group')
+        if has_value(args.subnet):
+            subnet = args.subnet.to_serialized_data()
+            if not is_valid_resource_id(subnet) and has_value(args.vnet):
+                args.subnet = args.vnet.to_serialized_data() + "/subnets/" + subnet
+
+        if not has_value(args.enabled):
+            args.enabled = True
+        if sum(map(bool, [args.vnet, args.subnet, args.nic, args.nsg])) == 0:
+            raise RequiredArgumentMissingError("Please enter atleast one target resource ID.")
+        if sum(map(bool, [args.vnet, args.nic, args.nsg])) > 1:
+            raise MutuallyExclusiveArgumentError("Please enter only one target resource ID.")
+
+        if has_value(args.subnet):
+            args.target_resource_id = args.subnet
+        elif has_value(args.vnet) and not has_value(args.subnet):
+            args.target_resource_id = args.vnet
+        elif has_value(args.nic):
+            args.target_resource_id = args.nic
+        elif has_value(args.nsg):
+            args.target_resource_id = args.nsg
+
+        if has_value(args.retention):
+            if args.retention > 0:
+                args.retention_policy = {"days": args.retention, "enabled": True}
+
+        if has_value(args.traffic_analytics_workspace):
+
+            workspace = get_arm_resource_by_id(self.cli_ctx, args.traffic_analytics_workspace.to_serialized_data())
+            if not workspace:
+                raise CLIError('Name or ID of workspace is invalid')
+
+            args.flow_analytics_configuration = {"workspace_id": workspace.properties['customerId'],
+                                                 "workspace_region": workspace.location,
+                                                 "workspace_resource_id": workspace.id}
+            if has_value(args.traffic_analytics_enabled):
+                args.flow_analytics_configuration['enabled'] = args.traffic_analytics_enabled
+            if has_value(args.traffic_analytics_interval):
+                args.flow_analytics_configuration['traffic_analytics_interval'] = args.traffic_analytics_interval
+
+
+class NwFlowLogUpdate(_NwFlowLogUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat, AAZIntArg, AAZIntArgFormat, AAZBoolArg
+
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.network_watcher_name._registered = False
+        args_schema.network_watcher_name._required = False
+        args_schema.resource_group._required = False
+        args_schema.location._required = True
+        args_schema.flow_analytics_configuration._registered = False
+        args_schema.retention_policy._registered = False
+        args_schema.target_resource_id._registered = False
+        args_schema.retention = AAZIntArg(
+            options=['--retention'],
+            help="Number of days to retain logs.",
+            nullable=True,
+        )
+        args_schema.traffic_analytics_interval = AAZIntArg(
+            options=['--interval'], arg_group="Traffic Analytics",
+            help="Interval in minutes at which to conduct flow analytics. Temporarily allowed values are 10 and 60.",
+            nullable=True,
+            fmt=AAZIntArgFormat(
+                maximum=60,
+                minimum=10,
+            )
+        )
+        args_schema.traffic_analytics_enabled = AAZBoolArg(
+            options=['--traffic-analytics'], arg_group="Traffic Analytics", nullable=True,
+            help="Enable traffic analytics. Defaults to true if `--workspace` is provided."
+        )
+        args_schema.traffic_analytics_workspace = AAZResourceIdArg(
+            options=['--workspace'], arg_group="Traffic Analytics", nullable=True,
+            help="Name or ID of a Log Analytics workspace. Must be in the same region of flow log",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.OperationalInsights/workspaces/{}"
+            )
+        )
+        args_schema.vnet = AAZResourceIdArg(
+            options=['--vnet'],
+            help="Name or ID of the Virtual Network Resource.",
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}"
+            )
+        )
+        args_schema.subnet = AAZResourceIdArg(
+            options=['--subnet'],
+            help="Name or ID of Subnet.",
+            nullable=True,
+        )
+        args_schema.nic = AAZResourceIdArg(
+            options=['--nic'],
+            help="Name or ID of the Network Interface (NIC) Resource.",
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/networkInterfaces/{}"
+            )
+        )
+        args_schema.nsg = AAZResourceIdArg(
+            options=['--nsg'],
+            help="Name or ID of the network security group.",
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/networkSecurityGroups/{}"
+            )
+        )
+        args_schema.storage_account._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Storage/storageAccounts/{}"
+        )
+
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        get_network_watcher_from_location(self,
+                                          watcher_name='network_watcher_name',
+                                          rg_name='resource_group')
+        if has_value(args.subnet):
+            subnet = args.subnet.to_serialized_data()
+            if not is_valid_resource_id(subnet) and has_value(args.vnet):
+                args.subnet = args.vnet.to_serialized_data() + "/subnets/" + subnet
+
+        if sum(map(bool, [args.vnet, args.nic, args.nsg])) > 1:
+            raise MutuallyExclusiveArgumentError("Please enter only one target resource ID.")
+        if has_value(args.subnet):
+            args.target_resource_id = args.subnet
+        elif has_value(args.vnet) and not has_value(args.subnet):
+            args.target_resource_id = args.vnet
+        elif has_value(args.nic):
+            args.target_resource_id = args.nic
+        elif has_value(args.nsg):
+            args.target_resource_id = args.nsg
+
+        if args.retention > 0:
+            args.retention_policy = {"days": args.retention, "enabled": True}
+
+        if has_value(args.traffic_analytics_workspace):
+            workspace = get_arm_resource_by_id(self.cli_ctx, args.traffic_analytics_workspace.to_serialized_data())
+            if not workspace:
+                raise CLIError('Name or ID of workspace is invalid')
+
+            args.flow_analytics_configuration = {
+                "workspace_id": workspace.properties['customerId'],
+                "workspace_region": workspace.location,
+                "workspace_resource_id": workspace.id
+            }
+            if has_value(args.traffic_analytics_enabled):
+                args.flow_analytics_configuration['enabled'] = args.traffic_analytics_enabled
+            if has_value(args.traffic_analytics_interval):
+                args.flow_analytics_configuration['traffic_analytics_interval'] = args.traffic_analytics_interval
+
+
+class NwFlowLogList(_NwFlowLogList):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.network_watcher_name._registered = False
+        args_schema.network_watcher_name._required = False
+        args_schema.resource_group._registered = False
+        args_schema.resource_group._required = False
+        args_schema.location = AAZResourceLocationArg(
+            options=["-l", "--location"],
+            help="Location to identify the exclusive Network Watcher under a region. "
+                 "Only one Network Watcher can be existed per subscription and region.",
+            required=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        return args_schema
+
+    def pre_operations(self):
+        get_network_watcher_from_location(self,
+                                          watcher_name='network_watcher_name',
+                                          rg_name='resource_group')
+
+
+class NwFlowLogDelete(_NwFlowLogDelete):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.network_watcher_name._registered = False
+        args_schema.network_watcher_name._required = False
+        args_schema.resource_group._registered = False
+        args_schema.resource_group._required = False
+        args_schema.location = AAZResourceLocationArg(
+            options=["-l", "--location"],
+            help="Location to identify the exclusive Network Watcher under a region. "
+                 "Only one Network Watcher can be existed per subscription and region.",
+            required=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        return args_schema
+
+    def pre_operations(self):
+        get_network_watcher_from_location(self,
+                                          watcher_name='network_watcher_name',
+                                          rg_name='resource_group')
+
+
+class NwTroubleshootingStart(_NwTroubleshootingStart):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.watcher_name._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_rg._required = False
+        args_schema.target_resource_id._registered = False
+        args_schema.target_resource_id._required = False
+        args_schema.resource_group_name = AAZStrArg(
+            options=["-g", "--resource-group"],
+            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
+        )
+        args_schema.resource_type = AAZStrArg(
+            options=["-t", "--resource-type"],
+            help="The type of target resource to troubleshoot, if resource ID is not specified.",
+            enum={"vnetGateway": "virtualNetworkGateways", "vpnConnection": "connections"},
+        )
+        args_schema.resource = AAZResourceIdArg(
+            options=["--resource"],
+            help="Name or ID of the resource to troubleshoot.",
+            required=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Network/{resource_type}/{}"
+            )
+        )
+        args_schema.storage_account._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Storage/storageAccounts/{}"
+        )
+        args_schema.location = AAZResourceLocationArg(
+            registered=False,
+        )
+
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        storage_usage = CLIError('usage error: --storage-account NAME_OR_ID [--storage-path PATH]')
+        if has_value(args.storage_path) and not has_value(args.storage_account):
+            raise storage_usage
+        if has_value(args.resource):
+            args.target_resource_id = args.resource
+        get_network_watcher_from_resource(self)
+
+
+class NwTroubleshootingShow(_NwTroubleshootingShow):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.watcher_name._registered = False
+        args_schema.watcher_name._required = False
+        args_schema.watcher_rg._required = False
+        args_schema.target_resource_id._registered = False
+        args_schema.target_resource_id._required = False
+        args_schema.resource_group_name = AAZStrArg(
+            options=["-g", "--resource-group"],
+            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
+        )
+        args_schema.resource_type = AAZStrArg(
+            options=["-t", "--resource-type"],
+            help="The resource type.",
+            enum={"vnetGateway": "virtualNetworkGateways", "vpnConnection": "connections"},
+        )
+        args_schema.resource = AAZResourceIdArg(
+            options=["--resource"],
+            help="Name or ID of the resource to troubleshoot.",
+            required=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Network/{resource_type}/{}"
+            )
+        )
+        args_schema.location = AAZResourceLocationArg(
+            registered=False,
+        )
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        get_network_watcher_from_resource(self)
+        if has_value(args.resource):
+            args.target_resource_id = args.resource

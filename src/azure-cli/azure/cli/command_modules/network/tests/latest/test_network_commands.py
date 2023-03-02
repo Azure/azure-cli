@@ -762,7 +762,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
     def test_network_app_gateway_with_waf_v2_sku(self, resource_group):
         self.cmd('network public-ip create -g {rg} -n pubip1 --sku Standard')
         self.cmd('network application-gateway waf-policy create -n waf1 -g {rg}')
-        self.cmd('network application-gateway create -g {rg} -n ag1 --sku WAF_v2 --public-ip-address pubip1 --priority 1001 --waf-policy waf1')
+        self.cmd('network application-gateway create -g {rg} -n ag1 --sku WAF_v2 --public-ip-address pubip1 --waf-policy waf1 --priority 1001')
 
         self.cmd('network application-gateway list --resource-group {rg}', checks=[
             self.check('type(@)', 'array'),
@@ -1778,6 +1778,8 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             "settings": self.create_random_name("settings-", 16),
             "http_listener": self.create_random_name("http-listener-", 20),
             "routing_rule": self.create_random_name("routing-rule-", 20),
+            "pool": self.create_random_name("pool-", 12),
+            "redirect_config": self.create_random_name("redirect-config-", 20),
             "rule": self.create_random_name("rule-", 12),
         })
         self.cmd("network public-ip create -n {pip} -g {rg} --sku Standard")
@@ -1798,12 +1800,18 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             ]
         )
         self.cmd("network application-gateway routing-rule delete -n {routing_rule} -g {rg} --gateway-name {ag}")
-        # default http listener has been occupied by default rule
+        # default http listener has been associated with default rule
         self.cmd("network application-gateway frontend-port create -n {port2} -g {rg} --gateway-name {ag} --port 8082")
         self.cmd("network application-gateway http-listener create -n {http_listener} -g {rg} --gateway-name {ag} --frontend-port {port2} --frontend-ip appGatewayFrontendIP")
+        # multiple pools are valid when redirection exsits
+        self.cmd("network application-gateway address-pool create -n {pool} -g {rg} --gateway-name {ag}")
+        self.cmd("network application-gateway frontend-port create -n rd-port -g {rg} --gateway-name {ag} --port 8084")
+        self.cmd("network application-gateway http-listener create -n rd-listener -g {rg} --gateway-name {ag} --frontend-port rd-port --frontend-ip appGatewayFrontendIP")
+        self.cmd("network application-gateway redirect-config create -n {redirect_config} -g {rg} --gateway-name {ag} --target-listener rd-listener --type permanent")
         self.cmd(
-            "network application-gateway rule create -n {rule} -g {rg} --gateway-name {ag} --http-listener {http_listener} --priority 1004",
+            "network application-gateway rule create -n {rule} -g {rg} --gateway-name {ag} --http-listener {http_listener} --redirect-config {redirect_config} --priority 1004",
             checks=[
+                self.check("length(backendAddressPools)", 2),
                 self.check("requestRoutingRules[0].backendAddressPool.id", "{pool_id}"),
                 self.check("requestRoutingRules[0].backendHttpSettings.id", "{http_settings_id}"),
             ]
@@ -2175,9 +2183,10 @@ class NetworkAppGatewayWafV2ConfigScenarioTest(ScenarioTest):
             'ag': 'ag1'
         })
         self.cmd('network public-ip create -g {rg} -n {ip} --sku standard')
-        self.cmd('network application-gateway create -g {rg} -n {ag} --subnet subnet1 --vnet-name vnet1 --public-ip-address {ip} --sku WAF_v2 --priority 1001 --no-wait')
+        self.cmd('network application-gateway waf-policy create -n waf1 -g {rg}')
+        self.cmd('network application-gateway create -g {rg} -n {ag} --subnet subnet1 --vnet-name vnet1 --public-ip-address {ip} --sku WAF_v2 --priority 1001 --waf-policy waf1 --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
-        self.cmd('network application-gateway waf-config set -g {rg} --gateway-name ag1 --enabled true --firewall-mode prevention --rule-set-version 3.0 --exclusion RequestHeaderNames StartsWith abc --exclusion RequestArgNames Equals def --no-wait')
+        self.cmd('network application-gateway waf-config set -g {rg} --gateway-name ag1 --enabled true --firewall-mode prevention --rule-set-version 3.0 --exclusion RequestHeaderNames StartsWith abc --exclusion RequestArgNames Equals def')
         self.cmd('network application-gateway waf-config show -g {rg} --gateway-name ag1', checks=[
             self.check('enabled', True),
             self.check('length(exclusions)', 2)
@@ -5879,72 +5888,6 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         self.cmd('network watcher test-ip-flow -g {rg} --vm {vm} --direction outbound --local {private-ip}:* --protocol tcp --remote 100.1.2.3:80')
         self.cmd('network watcher show-security-group-view -g {rg} --vm {vm}')
         self.cmd('network watcher show-next-hop -g {rg} --vm {vm} --source-ip 10.0.0.9 --dest-ip 10.0.0.6')
-
-    @live_only()
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log', location='westus')
-    @StorageAccountPreparer(name_prefix='clitestnw', location='westus', kind='StorageV2')
-    def test_network_watcher_flow_log(self, resource_group, resource_group_location, storage_account):
-
-        self.kwargs.update({
-            'loc': resource_group_location,
-            'nsg': 'nsg1',
-            'sa': storage_account,
-            'ws': self.create_random_name('testws', 20),
-            'la_prop_path': os.path.join(TEST_DIR, 'loganalytics.json')
-        })
-
-        self.cmd('network nsg create -g {rg} -n {nsg}')
-        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --enabled --retention 5 --storage-account {sa}')
-        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --retention 0')
-        self.cmd('network watcher flow-log show -g {rg} --nsg {nsg}')
-
-        # test traffic-analytics features
-        self.cmd('resource create -g {rg} -n {ws} --resource-type Microsoft.OperationalInsights/workspaces -p @"{la_prop_path}"')
-        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --workspace {ws} --interval 10', checks=[
-            # self.check("contains(flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.workspaceResourceId, '{ws}')", True),
-            # self.check("flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.trafficAnalyticsInterval", 10),
-            # self.check("flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled", True)
-        ])
-
-        self.cmd('network watcher flow-log show -g {rg} --nsg {nsg}', checks=[
-            # self.check("contains(flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.workspaceResourceId, '{ws}')", True),
-            # self.check("flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.trafficAnalyticsInterval", 10),
-            # self.check("flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled", True)
-        ])
-        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --workspace {ws} --interval 60', checks=[
-            # self.check("flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.trafficAnalyticsInterval", 60)
-        ])
-        self.cmd('network watcher flow-log show -g {rg} --nsg {nsg}', checks=[
-            # self.check("flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.trafficAnalyticsInterval", 60)
-        ])
-        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --traffic-analytics false', checks=[
-            # self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled', False)
-        ])
-        self.cmd('network watcher flow-log show -g {rg} --nsg {nsg}', checks=[
-            # self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled', False)
-        ])
-        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --workspace ""', checks=[
-            # self.check('flowAnalyticsConfiguration', None)
-        ])
-        self.cmd('network watcher flow-log show -g {rg} --nsg {nsg}', checks=[
-            # self.check('flowAnalyticsConfiguration', None)
-        ])
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log2', location='canadaeast')
-    @StorageAccountPreparer(name_prefix='clitestnw', location='canadaeast', kind='StorageV2')
-    def test_network_watcher_flow_log2(self, resource_group, resource_group_location, storage_account):
-
-        self.kwargs.update({
-            'loc': resource_group_location,
-            'nsg': 'nsg1',
-            'sa': storage_account
-        })
-
-        self.cmd('network watcher configure -g {rg} --locations westus westus2 westcentralus eastus canadaeast --enabled')
-        self.cmd('network nsg create -g {rg} -n {nsg}')
-        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --enabled --retention 5 --storage-account {sa}')
 
     @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
     @ResourceGroupPreparer(name_prefix='cli_test_nw_packet_capture', location='eastus')

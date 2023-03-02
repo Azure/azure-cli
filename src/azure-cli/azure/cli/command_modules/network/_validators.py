@@ -76,7 +76,7 @@ def get_vnet_validator(dest):
     from msrestazure.tools import is_valid_resource_id, resource_id
 
     def _validate_vnet_name_or_id(cmd, namespace):
-        SubResource = cmd.get_models('SubResource')
+        SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_NETWORK_DNS)
         subscription_id = get_subscription_id(cmd.cli_ctx)
 
         resource_group = namespace.resource_group_name
@@ -246,19 +246,6 @@ def validate_ssl_cert(namespace):
             pass
 
 
-def validate_delegations(cmd, namespace):
-    if namespace.delegations:
-        Delegation = cmd.get_models('Delegation')
-        delegations = []
-        for i, item in enumerate(namespace.delegations):
-            if '/' not in item and len(item.split('.')) == 3:
-                # convert names to serviceNames
-                _, service, resource_type = item.split('.')
-                item = 'Microsoft.{}/{}'.format(service, resource_type)
-            delegations.append(Delegation(name=str(i), service_name=item))
-        namespace.delegations = delegations
-
-
 def validate_dns_record_type(namespace):
     tokens = namespace.command.split(' ')
     types = ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'soa', 'srv', 'txt']
@@ -281,18 +268,6 @@ def validate_user_assigned_identity(cmd, namespace):
             namespace='Microsoft.ManagedIdentity',
             type='userAssignedIdentities',
             name=namespace.user_assigned_identity
-        )
-
-
-def validate_virtul_network_gateway(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    if namespace.hosted_gateway and not is_valid_resource_id(namespace.hosted_gateway):
-        namespace.hosted_gateway = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type='virtualNetworkGateways',
-            name=namespace.hosted_gateway
         )
 
 
@@ -360,22 +335,6 @@ def validate_local_gateway(cmd, namespace):
             name=namespace.gateway_default_site,
             namespace='Microsoft.Network',
             type='localNetworkGateways')
-
-
-def validate_match_variables(cmd, namespace):
-    if not namespace.match_variables:
-        return
-
-    MatchVariable = cmd.get_models('MatchVariable')
-    variables = []
-    for match in namespace.match_variables:
-        try:
-            name, selector = match.split('.', 1)
-        except ValueError:
-            name = match
-            selector = None
-        variables.append(MatchVariable(variable_name=name, selector=selector))
-    namespace.match_variables = variables
 
 
 def validate_metadata(namespace):
@@ -550,7 +509,7 @@ def get_servers_validator(camel_case=False):
 
 def validate_subresource_list(cmd, namespace):
     if namespace.target_resources:
-        SubResource = cmd.get_models('SubResource')
+        SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_NETWORK_DNS)
         subresources = []
         for item in namespace.target_resources:
             subresources.append(SubResource(id=item))
@@ -730,13 +689,6 @@ def load_cert_file(param_name):
             setattr(namespace, param_name, read_base_64_file(attr))
 
     return load_cert_validator
-
-
-def get_network_watcher_for_pcap_creation(cmd, namespace):
-    if namespace.target_type and namespace.target_type.lower() == "azurevmss":
-        get_network_watcher_from_vmss(cmd, namespace)
-    else:
-        get_network_watcher_from_vm(cmd, namespace)
 
 
 def get_network_watcher_from_vm(cmd, namespace):
@@ -970,117 +922,6 @@ def _process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name):
     return subnet
 
 
-def process_nw_flow_log_create_namespace(cmd, namespace):
-    """
-    Flow Log is the sub-resource of Network Watcher, they must be in the same region and subscription.
-    """
-    from msrestazure.tools import is_valid_resource_id, resource_id
-
-    # for both create and update
-    if namespace.resource_group_name is None:
-        err_tpl, err_body = 'usage error: use {} instead.', None
-
-        if namespace.nsg and not is_valid_resource_id(namespace.nsg):
-            err_body = '--nsg ID / --nsg NSD_NAME --resource-group NSD_RESOURCE_GROUP'
-
-        if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
-            err_body = '--storage-account ID / --storage-account NAME --resource_group STORAGE_ACCOUNT_RESOURCE_GROUP'
-
-        if namespace.traffic_analytics_workspace and not is_valid_resource_id(namespace.traffic_analytics_workspace):
-            err_body = '--workspace ID / --workspace NAME --resource-group WORKSPACE_RESOURCE_GROUP'
-
-        if namespace.vnet and not is_valid_resource_id(namespace.vnet):
-            err_body = '--vnet ID / --vnet NAME --resource-group VNET_RESOURCE_GROUP'
-
-        if namespace.subnet and not is_valid_resource_id(namespace.subnet):
-            err_body = '--subnet ID / --subnet NAME --resource-group SUBNET_RESOURCE_GROUP'
-
-        if namespace.nic and not is_valid_resource_id(namespace.nic):
-            err_body = '--nic ID / --nic NAME --resource-group NIC_RESOURCE_GROUP'
-
-        if err_body is not None:
-            raise CLIError(err_tpl.format(err_body))
-
-    # for both create and update
-    if namespace.vnet and not is_valid_resource_id(namespace.vnet):
-        kwargs = {
-            'subscription': get_subscription_id(cmd.cli_ctx),
-            'resource_group': namespace.resource_group_name,
-            'namespace': 'Microsoft.Network',
-            'type': 'virtualNetworks',
-            'name': namespace.vnet
-        }
-        namespace.vnet = resource_id(**kwargs)
-    if namespace.subnet and not is_valid_resource_id(namespace.subnet):
-        namespace.subnet = _process_subnet_name_and_id(
-            namespace.subnet, namespace.vnet,
-            cmd, namespace.resource_group_name)
-    if namespace.nic and not is_valid_resource_id(namespace.nic):
-        kwargs = {
-            'subscription': get_subscription_id(cmd.cli_ctx),
-            'resource_group': namespace.resource_group_name,
-            'namespace': 'Microsoft.Network',
-            'type': 'networkInterfaces',
-            'name': namespace.nic
-        }
-        namespace.nic = resource_id(**kwargs)
-    if namespace.nsg and not is_valid_resource_id(namespace.nsg):
-        kwargs = {
-            'subscription': get_subscription_id(cmd.cli_ctx),
-            'resource_group': namespace.resource_group_name,
-            'namespace': 'Microsoft.Network',
-            'type': 'networkSecurityGroups',
-            'name': namespace.nsg
-        }
-        namespace.nsg = resource_id(**kwargs)
-
-    # for both create and update
-    if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
-        kwargs = {
-            'subscription': get_subscription_id(cmd.cli_ctx),
-            'resource_group': namespace.resource_group_name,
-            'namespace': 'Microsoft.Storage',
-            'type': 'storageAccounts',
-            'name': namespace.storage_account
-        }
-        namespace.storage_account = resource_id(**kwargs)
-
-    # for both create and update
-    if namespace.traffic_analytics_workspace and not is_valid_resource_id(namespace.traffic_analytics_workspace):
-        kwargs = {
-            'subscription': get_subscription_id(cmd.cli_ctx),
-            'resource_group': namespace.resource_group_name,
-            'namespace': 'Microsoft.OperationalInsights',
-            'type': 'workspaces',
-            'name': namespace.traffic_analytics_workspace
-        }
-        namespace.traffic_analytics_workspace = resource_id(**kwargs)
-
-    get_network_watcher_from_location(remove=False)(cmd, namespace)
-
-    validate_tags(namespace)
-
-
-def process_nw_flow_log_set_namespace(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
-        namespace.storage_account = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Storage',
-            type='storageAccounts',
-            name=namespace.storage_account)
-    if namespace.traffic_analytics_workspace and not is_valid_resource_id(namespace.traffic_analytics_workspace):
-        namespace.traffic_analytics_workspace = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.OperationalInsights',
-            type='workspaces',
-            name=namespace.traffic_analytics_workspace)
-
-    process_nw_flow_log_show_namespace(cmd, namespace)
-
-
 def process_nw_flow_log_show_namespace(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     from azure.cli.core.commands.arm import get_arm_resource_by_id
@@ -1101,95 +942,6 @@ def process_nw_flow_log_show_namespace(cmd, namespace):
         get_network_watcher_from_location(remove=False)(cmd, namespace)
     else:
         raise CLIError('usage error: --nsg NSG | --location NETWORK_WATCHER_LOCATION --name FLOW_LOW_NAME')
-
-
-def process_nw_packet_capture_create_namespace(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-
-    storage_usage = CLIError('usage error: --storage-account NAME_OR_ID [--storage-path '
-                             'PATH] [--file-path PATH] | --file-path PATH')
-    if not namespace.storage_account and not namespace.file_path:
-        raise storage_usage
-
-    if namespace.storage_path and not namespace.storage_account:
-        raise storage_usage
-
-    if namespace.target_type and namespace.target_type.lower() == "azurevmss":
-        get_network_watcher_from_vmss(cmd, namespace)
-        if not is_valid_resource_id(namespace.target):
-            namespace.target = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=namespace.resource_group_name,
-                namespace='Microsoft.Compute',
-                type='virtualMachineScaleSets',
-                name=namespace.target)
-    else:
-        get_network_watcher_from_vm(cmd, namespace)
-        if not is_valid_resource_id(namespace.vm):
-            namespace.vm = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=namespace.resource_group_name,
-                namespace='Microsoft.Compute',
-                type='virtualMachines',
-                name=namespace.vm)
-
-    if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
-        namespace.storage_account = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Storage',
-            type='storageAccounts',
-            name=namespace.storage_account)
-
-    if namespace.file_path:
-        file_path = namespace.file_path
-        if not file_path.endswith('.cap'):
-            raise CLIError("usage error: --file-path PATH must end with the '*.cap' extension")
-        if not file_path.startswith('/'):
-            file_path = file_path.replace('/', '\\')
-        namespace.file_path = file_path
-
-
-def process_nw_troubleshooting_start_namespace(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    storage_usage = CLIError('usage error: --storage-account NAME_OR_ID [--storage-path PATH]')
-    if namespace.storage_path and not namespace.storage_account:
-        raise storage_usage
-
-    if not is_valid_resource_id(namespace.storage_account):
-        namespace.storage_account = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Storage',
-            type='storageAccounts',
-            name=namespace.storage_account)
-
-    process_nw_troubleshooting_show_namespace(cmd, namespace)
-
-
-def process_nw_troubleshooting_show_namespace(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    resource_usage = CLIError('usage error: --resource ID | --resource NAME --resource-type TYPE '
-                              '--resource-group NAME')
-    id_params = [namespace.resource_type, namespace.resource_group_name]
-    if not is_valid_resource_id(namespace.resource):
-        if not all(id_params):
-            raise resource_usage
-        type_map = {
-            'vnetGateway': 'virtualNetworkGateways',
-            'vpnConnection': 'connections'
-        }
-        namespace.resource = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type=type_map[namespace.resource_type],
-            name=namespace.resource)
-    else:
-        if any(id_params):
-            raise resource_usage
-
-    get_network_watcher_from_resource(cmd, namespace)
 
 
 def process_lb_outbound_rule_namespace(cmd, namespace):
@@ -1276,20 +1028,6 @@ def validate_status_code_ranges(namespace):
             raise usage_error
 
     namespace.status_code_ranges = values
-
-
-def validate_capture_size_and_limit(namespace):
-    if namespace.capture_limit:
-        if namespace.capture_limit < 0:
-            raise CLIError('usage error: --capture-limit cannot be a negative value.')
-
-    if namespace.capture_size:
-        if namespace.capture_size < 0:
-            raise CLIError('usage error: --capture-size cannot be a negative value.')
-
-    if namespace.time_limit:
-        if namespace.time_limit < 0:
-            raise CLIError('usage error: --time-limit cannot be a negative value.')
 
 
 def validate_subnet_ranges(namespace):

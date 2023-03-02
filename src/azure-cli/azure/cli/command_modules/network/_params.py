@@ -19,15 +19,14 @@ from azure.cli.command_modules.network._validators import (
     validate_address_pool_name_or_id, validate_metadata,
     validate_dns_record_type, validate_private_ip_address,
     get_servers_validator, get_public_ip_validator, get_nsg_validator,
-    get_network_watcher_for_pcap_creation, get_network_watcher_from_location, validate_capture_size_and_limit,
     get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
-    validate_service_endpoint_policy, validate_delegations, validate_subresource_list,
+    validate_service_endpoint_policy, validate_subresource_list,
     validate_custom_error_pages,
     validate_custom_headers, validate_status_code_ranges, validate_subnet_ranges,
     WafConfigExclusionAction,
-    validate_nat_gateway, validate_match_variables,
+    validate_nat_gateway,
     validate_waf_policy,
-    validate_user_assigned_identity, validate_virtul_network_gateway,
+    validate_user_assigned_identity,
     NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction,
     process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument)
 from azure.cli.command_modules.network._completers import (
@@ -36,7 +35,6 @@ from azure.cli.command_modules.network._completers import (
 from azure.cli.command_modules.network._actions import (
     TrustedClientCertificateCreate,
     SslProfilesCreate, AddMappingRequest, WAFRulesCreate)
-from azure.cli.core.util import get_json_object
 from azure.cli.core.profiles import ResourceType
 
 
@@ -48,15 +46,13 @@ def load_arguments(self, _):
      FlowLogFormatType, IPAllocationMethod, IPVersion, PublicIPAddressSkuName, PublicIPAddressSkuTier,
      SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
      ConnectionMonitorEndpointFilterType, ConnectionMonitorTestConfigurationProtocol,
-     PreferredIPVersion, HTTPConfigurationMethod, OutputType, DestinationPortBehavior, CoverageLevel, EndpointType,
-     PacketCaptureTargetType) = self.get_models(
+     PreferredIPVersion, HTTPConfigurationMethod, OutputType, DestinationPortBehavior, CoverageLevel, EndpointType) = self.get_models(
          'ApplicationGatewayProtocol',
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslProtocol',
          'FlowLogFormatType', 'IPAllocationMethod', 'IPVersion', 'PublicIPAddressSkuName', 'PublicIPAddressSkuTier',
          'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
          'ConnectionMonitorEndpointFilterType', 'ConnectionMonitorTestConfigurationProtocol',
-         'PreferredIPVersion', 'HTTPConfigurationMethod', 'OutputType', 'DestinationPortBehavior', 'CoverageLevel', 'EndpointType',
-         'PacketCaptureTargetType')
+         'PreferredIPVersion', 'HTTPConfigurationMethod', 'OutputType', 'DestinationPortBehavior', 'CoverageLevel', 'EndpointType')
 
     ZoneType = self.get_models('ZoneType', resource_type=ResourceType.MGMT_NETWORK_DNS)
 
@@ -258,14 +254,12 @@ def load_arguments(self, _):
     # endregion
 
     # region WebApplicationFirewallPolicy
-    (WebApplicationFirewallAction, WebApplicationFirewallMatchVariable,
-     WebApplicationFirewallOperator, WebApplicationFirewallRuleType,
-     WebApplicationFirewallTransform,
+    (WebApplicationFirewallAction,
+     WebApplicationFirewallRuleType,
      OwaspCrsExclusionEntryMatchVariable, OwaspCrsExclusionEntrySelectorMatchOperator,
      WebApplicationFirewallEnabledState, WebApplicationFirewallMode) = self.get_models(
-         'WebApplicationFirewallAction', 'WebApplicationFirewallMatchVariable',
-         'WebApplicationFirewallOperator', 'WebApplicationFirewallRuleType',
-         'WebApplicationFirewallTransform',
+         'WebApplicationFirewallAction',
+         'WebApplicationFirewallRuleType',
          'OwaspCrsExclusionEntryMatchVariable', 'OwaspCrsExclusionEntrySelectorMatchOperator',
          'WebApplicationFirewallEnabledState', 'WebApplicationFirewallMode')
     with self.argument_context('network application-gateway waf-policy', min_api='2018-12-01') as c:
@@ -307,28 +301,6 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway waf-policy custom-rule list', min_api='2018-12-01') as c:
         c.argument('policy_name', options_list='--policy-name', id_part=None)
-
-    with self.argument_context('network application-gateway waf-policy custom-rule match-condition',
-                               min_api='2018-12-01') as c:
-        c.argument('operator', arg_type=get_enum_type(WebApplicationFirewallOperator), help='Operator for matching.')
-        c.argument('negation_condition',
-                   options_list='--negate',
-                   arg_type=get_three_state_flag(),
-                   help='Match the negative of the condition.')
-        c.argument('match_values',
-                   options_list='--values',
-                   nargs='+',
-                   help='Space-separated list of values to match.')
-        c.argument('transforms',
-                   arg_type=get_enum_type(WebApplicationFirewallTransform),
-                   nargs='+',
-                   help='Space-separated list of transforms to apply when matching.')
-        if WebApplicationFirewallMatchVariable:
-            waf_custom_rule_match_variables = list(WebApplicationFirewallMatchVariable)
-            help_string = 'Space-separated list of variables to use when matching. ' \
-                          'Variable values: {}'.format(', '.join(waf_custom_rule_match_variables))
-            c.argument('match_variables', nargs='+', help=help_string, validator=validate_match_variables)
-        c.argument('index', type=int, help='Index of the match condition to remove.')
 
     with self.argument_context('network application-gateway waf-policy custom-rule match-condition list', min_api='2018-12-01') as c:
         c.argument('policy_name', options_list='--policy-name', id_part=None)
@@ -967,28 +939,6 @@ def load_arguments(self, _):
     with self.argument_context('network watcher create') as c:
         c.argument('location', validator=get_default_location_from_resource_group)
 
-    with self.argument_context('network watcher packet-capture create') as c:
-        c.argument('watcher_name', ignore_type, validator=get_network_watcher_for_pcap_creation)
-        c.ignore('location')
-        c.ignore('watcher_rg')
-        c.argument('capture_limit', type=int, validator=validate_capture_size_and_limit, help='The maximum size in bytes of the capture output.')
-        c.argument('capture_size', type=int, validator=validate_capture_size_and_limit, help='Number of bytes captured per packet. Excess bytes are truncated.')
-        c.argument('time_limit', type=int, validator=validate_capture_size_and_limit, help='Maximum duration of the capture session in seconds.')
-        c.argument('vm', help='Name or ID of the VM to target. If the name of the VM is provided, the --resource-group is required.')
-        c.argument('resource_group_name', help='Name of the resource group the target VM is in.')
-        c.argument('nic', help='Name or ID of the NIC resource to test. If the VM has multiple NICs and IP forwarding is enabled on any of them, this parameter is required.')
-        c.argument('target_type', help='Target Resource Type, only \'AzureVM\' and \'AzureVMSS\' are supported now', arg_type=get_enum_type(PacketCaptureTargetType))
-        c.argument('target', help='Name or ID of the target, it could be virtual machine or virtual machine scale sets')
-        c.argument('include', nargs='+', help='Space-separated list of VMSS Instances to include in Packet capture like 0 1 2')
-        c.argument('exclude', nargs='+', help='Space-separated list of VMSS Instances to exclude in Packet capture')
-
-    with self.argument_context('network watcher packet-capture') as c:
-        c.argument('capture_name', name_arg_type, help='Name of the packet capture session.')
-        c.argument('storage_account', arg_group='Storage')
-        c.argument('storage_path', arg_group='Storage')
-        c.argument('file_path', arg_group='Storage')
-        c.argument('filters', type=get_json_object)
-
     with self.argument_context('network watcher flow-log') as c:
         c.argument('location', get_location_type(self.cli_ctx),
                    help='Location to identify the exclusive Network Watcher under a region. '
@@ -999,9 +949,6 @@ def load_arguments(self, _):
         c.argument('retention', type=int, help='Number of days to retain logs')
         c.argument('storage_account', help='Name or ID of the storage account in which to save the flow logs. '
                                            'Must be in the same region of flow log.')
-        c.argument('vnet', options_list=['--vnet'], help='Name or ID of the Virtual Network Resource.')
-        c.argument('subnet', options_list=['--subnet'], help='Name or ID of Subnet')
-        c.argument('nic', options_list=['--nic'], help='Name or ID of the Network Interface (NIC) Resource.')
 
     # temporary solution for compatible with old show command's parameter
     # after old show command's parameter is deprecated and removed,
@@ -1021,14 +968,6 @@ def load_arguments(self, _):
                    options_list='--workspace',
                    help='Name or ID of a Log Analytics workspace. Must be in the same region of flow log')
         c.argument('traffic_analytics_enabled', options_list='--traffic-analytics', arg_type=get_three_state_flag(), help='Enable traffic analytics. Defaults to true if `--workspace` is provided.')
-
-    for item in ['list', 'stop', 'delete', 'show', 'show-status']:
-        with self.argument_context('network watcher packet-capture {}'.format(item)) as c:
-            c.extra('location')
-            c.argument('location', get_location_type(self.cli_ctx), required=True)
-            c.argument('packet_capture_name', name_arg_type)
-            c.argument('network_watcher_name', ignore_type, options_list=['--network-watcher-name'], validator=get_network_watcher_from_location(remove=True, rg_name='resource_group_name', watcher_name='network_watcher_name'))
-            c.ignore('resource_group_name')
 
     with self.argument_context('network watcher troubleshooting') as c:
         c.argument('resource', help='Name or ID of the resource to troubleshoot.')
@@ -1163,7 +1102,6 @@ def load_arguments(self, _):
         c.argument('route_table', help='Name or ID of a route table to associate with the subnet.')
         c.argument('service_endpoints', nargs='+', min_api='2017-06-01')
         c.argument('service_endpoint_policy', nargs='+', min_api='2018-07-01', help='Space-separated list of names or IDs of service endpoint policies to apply.', validator=validate_service_endpoint_policy)
-        c.argument('delegations', nargs='+', min_api='2017-08-01', help='Space-separated list of services to whom the subnet should be delegated. (e.g. Microsoft.Sql/servers)', validator=validate_delegations)
         c.argument('disable_private_endpoint_network_policies', arg_type=get_three_state_flag(), min_api='2019-04-01', help='Disable private endpoint network policies on the subnet, the policy is disabled by default.')
         c.argument('disable_private_link_service_network_policies', arg_type=get_three_state_flag(), min_api='2019-04-01', help='Disable private link service network policies on the subnet.')
 
@@ -1216,20 +1154,6 @@ def load_arguments(self, _):
         c.ignore('connection_type')
         for item in ['vnet_gateway2', 'local_gateway2', 'express_route_circuit2']:
             c.argument(item, arg_group='Destination')
-
-    with self.argument_context('network vrouter') as c:
-        c.argument('virtual_router_name', options_list=['--name', '-n'], help='The name of the Virtual Router.')
-        c.argument('hosted_gateway',
-                   deprecate_info=c.deprecate(redirect='--hosted-subnet', hide=False),
-                   help='Name or ID of the virtual network gateway with ExpressRouter on which VirtualRouter is hosted.',
-                   validator=validate_virtul_network_gateway)
-        c.argument('hosted_subnet', help='The ID of a subnet where VirtualRouter would be deployed')
-
-    with self.argument_context('network vrouter peering') as c:
-        c.argument('virtual_router_name', options_list=['--vrouter-name'], help='The name of the Virtual Router.')
-        c.argument('peering_name', options_list=['--name', '-n'], help='The name of the Virtual Router Peering')
-        c.argument('peer_asn', type=int, help='Peer ASN. Its range is from 1 to 4294967295.')
-        c.argument('peer_ip', help='Peer IP address.')
 
     with self.argument_context('network routeserver') as c:
         c.argument('virtual_hub_name', options_list=['--name', '-n'], id_part='name',
