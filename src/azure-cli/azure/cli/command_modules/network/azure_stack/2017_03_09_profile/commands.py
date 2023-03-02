@@ -40,6 +40,26 @@ def load_command_table(self, _):
 
     # endregion
 
+    # region NetworkInterfaces
+    from .._format import transform_effective_nsg, transform_effective_route_table
+    operations_tmpl = self.get_module_name_by_profile("operations.nic#{}")
+
+    from .operations.nic import NICCreate, NICUpdate
+    self.command_table["network nic create"] = NICCreate(loader=self)
+    self.command_table["network nic update"] = NICUpdate(loader=self)
+
+    from .operations.nic import NICIPConfigCreate, NICIPConfigUpdate, NICIPConfigNATAdd, NICIPConfigNATRemove
+    self.command_table["network nic ip-config create"] = NICIPConfigCreate(loader=self)
+    self.command_table["network nic ip-config update"] = NICIPConfigUpdate(loader=self)
+    self.command_table["network nic ip-config inbound-nat-rule add"] = NICIPConfigNATAdd(loader=self)
+    self.command_table["network nic ip-config inbound-nat-rule remove"] = NICIPConfigNATRemove(loader=self)
+
+    with self.command_group("network nic ip-config address-pool", operations_tmpl=operations_tmpl) as g:
+        g.custom_command("add", "add_nic_ip_config_address_pool")
+        g.custom_command("remove", "remove_nic_ip_config_address_pool")
+
+    # endregion
+
     # region VirtualNetworkGatewayConnections
     from .operations.vpn_connection import VpnConnSharedKeyUpdate
     self.command_table['network vpn-connection shared-key update'] = VpnConnSharedKeyUpdate(loader=self)

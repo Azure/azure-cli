@@ -689,40 +689,6 @@ def load_command_table(self, _):
                          exception_handler=handle_template_based_exception)
     # endregion
 
-    # region NetworkInterfaces: (NIC)
-    with self.command_group('network nic', network_nic_sdk) as g:
-        g.custom_command('create', 'create_nic', transform=transform_nic_create_output, validator=process_nic_create_namespace, supports_no_wait=True)
-        g.command('delete', 'begin_delete', supports_no_wait=True)
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_nics')
-        g.command('show-effective-route-table', 'begin_get_effective_route_table', min_api='2016-09-01', table_transformer=transform_effective_route_table)
-        g.command('list-effective-nsg', 'begin_list_effective_network_security_groups', min_api='2016-09-01', table_transformer=transform_effective_nsg)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_nic', supports_no_wait=True)
-        g.wait_command('wait')
-
-    resource = 'network_interfaces'
-    subresource = 'ip_configurations'
-    with self.command_group('network nic ip-config', network_nic_sdk) as g:
-        g.custom_command('create', 'create_nic_ip_config')
-        g.generic_update_command('update',
-                                 child_collection_prop_name='ip_configurations', child_arg_name='ip_config_name',
-                                 setter_name='update_nic_ip_config_setter',
-                                 setter_type=network_nic_custom,
-                                 custom_func_name='set_nic_ip_config')
-        g.command('list', list_network_resource_property(resource, subresource), command_type=network_util)
-        g.show_command('show', get_network_resource_property_entry(resource, subresource), command_type=network_util)
-        g.command('delete', delete_network_resource_property_entry(resource, subresource), command_type=network_util)
-
-    with self.command_group('network nic ip-config address-pool') as g:
-        g.custom_command('add', 'add_nic_ip_config_address_pool')
-        g.custom_command('remove', 'remove_nic_ip_config_address_pool')
-
-    with self.command_group('network nic ip-config inbound-nat-rule') as g:
-        g.custom_command('add', 'add_nic_ip_config_inbound_nat_rule')
-        g.custom_command('remove', 'remove_nic_ip_config_inbound_nat_rule')
-
-    # endregion
-
     # region NetworkSecurityGroups
     with self.command_group('network nsg', network_nsg_sdk) as g:
         g.custom_command('create', 'create_nsg', transform=transform_nsg_create_output)
