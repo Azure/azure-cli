@@ -553,13 +553,34 @@ def trusted_launch_warning_log(namespace, generation_version, features):
     if not generation_version:
         return
 
-    # log_message = 'Starting Build 2023 event, "az vm/vmss create" command will deploy Trusted Launch VM by default.' \
-    #               ' To know more about Trusted Launch, please visit' \
-    #               ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch'
-    #
-    # if generation_version == 'V1':
-    #     logger.warning(log_message)
-    #
-    # if generation_version == 'V2':
-    #     if is_trusted_launch_supported(features) and not namespace.security_type:
-    #         logger.warning(log_message)
+    log_message = 'Starting Build 2023 event, "az vm/vmss create" command will deploy Trusted Launch VM by default.' \
+                  ' To know more about Trusted Launch, please visit' \
+                  ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch'
+
+    if generation_version == 'V1':
+        logger.warning(log_message)
+
+    if generation_version == 'V2':
+        if is_trusted_launch_supported(features) and not namespace.security_type:
+            logger.warning(log_message)
+
+
+def display_region_recommendation(cmd, namespace):
+
+    identified_region_maps = {
+        'westeurope': 'uksouth',
+        'francecentral': 'northeurope',
+        'germanywestcentral': 'northeurope'
+    }
+
+    identified_region = identified_region_maps.get(namespace.location)
+
+    if identified_region and cmd.cli_ctx.config.getboolean('core', 'display_region_identified', True):
+        logger.warning('Selecting "%s" may reduce your costs. '
+                       'The region you\'ve selected may cost more for the same services. '
+                       'You can disable this message in the future with the command'
+                       ' "az config set core.display_region_identified=false". '
+                       'Learn more at https://go.microsoft.com/fwlink/?linkid=222571 ',
+                       identified_region)
+        from azure.cli.core import telemetry
+        telemetry.set_region_identified(namespace.location, identified_region)
