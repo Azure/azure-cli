@@ -5661,53 +5661,6 @@ def sig_community_image_version_list(client, location, public_gallery_name, gall
 # endRegion
 
 
-# Region VMSS
-class VMSSNICList(_VMSSNICList):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.virtual_machine_scale_set_name._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/"
-                     "Microsoft.Compute/virtualMachineScaleSets/{}"
-        )
-
-        return args_schema
-
-
-class VMSSNICListVMNICs(_VMSSNICListVMNICs):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.virtual_machine_scale_set_name._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/"
-                     "Microsoft.Compute/virtualMachineScaleSets/{}"
-        )
-
-        return args_schema
-
-
-class VMSSNICShow(_VMSSNICShow):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.virtual_machine_scale_set_name._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/"
-                     "Microsoft.Compute/virtualMachineScaleSets/{}"
-        )
-        args_schema.network_interface_name._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/"
-                     "Microsoft.Network/networkInterfaces/{}"
-        )
-
-        return args_schema
-
-
 class PPGShow(_PPGShow):
 
     @classmethod

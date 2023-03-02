@@ -249,12 +249,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.compute.operations#CommunityGalleryImageVersionsOperations.{}',
         client_factory=cf_community_gallery_image_version)
 
-    with self.command_group("vmss nic"):
-        from .custom import VMSSNICList, VMSSNICListVMNICs, VMSSNICShow
-        self.command_table["vmss nic list"] = VMSSNICList(loader=self)
-        self.command_table["vmss nic list-vm-nics"] = VMSSNICListVMNICs(loader=self)
-        self.command_table["vmss nic show"] = VMSSNICShow(loader=self)
-
     with self.command_group("ppg"):
         from .custom import PPGShow
         self.command_table["ppg show"] = PPGShow(loader=self)
