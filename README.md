@@ -158,6 +158,8 @@ You can download the latest builds by following the links below:
 | Ubuntu Jammy Deb  | https://aka.ms/InstallAzureCliJammyEdge    |
 |      RPM el8      | https://aka.ms/InstallAzureCliRpmEl8Edge   |
 
+On Windows, you need to uninstall the official version before installing the edge build. (see: https://github.com/Azure/azure-cli/issues/25607#issuecomment-1452855212)
+
 You can easily install the latest Homebrew edge build with the following command:
 
 ```bash
@@ -167,13 +169,13 @@ brew install $(curl -Ls -o /dev/null -w %{url_effective} https://aka.ms/InstallA
 You can install the edge build on Ubuntu Xenial with the following command:
 
 ```bash
-curl -Ls -o azure-cli_xenial_all.deb https://aka.ms/InstallAzureCliXenialEdge && dpkg -i azure-cli_xenial_all.deb
+curl --location --silent --output azure-cli_jammy.deb https://aka.ms/InstallAzureCliJammyEdge && dpkg -i azure-cli_jammy.deb
 ```
 
-And install the edge build with rpm package on CentOS/RHEL/Fedora:
+And install the edge build with rpm package on RHEL 8 or CentOS Stream 8:
 
 ```bash
-rpm -ivh --nodeps $(curl -Ls -o /dev/null -w %{url_effective} https://aka.ms/InstallAzureCliRpmEdge)
+dnf install -y $(curl --location --silent --output /dev/null --write-out %{url_effective} https://aka.ms/InstallAzureCliRpmEl8Edge)
 ```
 
 Here's an example of installing edge builds with pip3 in a virtual environment. The `--upgrade-strategy=eager` option will install the edge builds of dependencies as well. 
