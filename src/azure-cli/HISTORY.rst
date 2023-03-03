@@ -8,7 +8,7 @@ Release History
 
 **ACR**
 
-* `az acr token`, `az acr scope-map`: Tokens and Scope-Maps are Generally Available (#25294)
+* `az acr token\scope-map`: Tokens and Scope-Maps are Generally Available (#25294)
 * `az acr manifest`: Support oci image index (#25353)
 * `az acr cache`: Add new command group to manage cache rules (#25096)
 * `az acr credential-set`: Add new command group to manage credential sets (#25096)
@@ -17,7 +17,7 @@ Release History
 **AKS**
 
 * `az aks check-acr`: Fix mariner node missing cert (#25453)
-* Fix #25521: `az aks nodepool upgrade` crashes when the version passed in through the parameter `--kubernetes-version` is the same as the cluster version (#25526)
+* Fix #25521: `az aks nodepool upgrade`: Fix the crashes when the version passed in through the parameter `--kubernetes-version` is the same as the cluster version (#25526)
 * Fix #25530: `az aks nodepool upgrade`: Fix agent pool property name used for fetching current k8s version (#25539)
 * `az aks create`: Add new parameter `--pod-cidrs` for setting the IP ranges used to allocate IPs to pods (#25256)
 * `az aks create`: Add new parameter `--service-cidrs` for setting the K8s service IPs (#25256)
@@ -53,7 +53,7 @@ Release History
 
 * `az vmss reimage`: Fix the bug that all instances will be reimaged after using `--instance-id` and add new parameter `--instance-ids` to replace `--instance-id` (#25477)
 * `az vm create`: Support recommending more suitable regions through warning log when creating VM (#25529)
-* `az vm/vmss identity assign`: Add warning log and modify help to inform that the default value Contributor of `--role` will be removed (#25283)
+* `az vm/vmss identity assign`: Add warning and modify help message for `--role`: Please note that the default value of `--role` will be removed in the breaking change release of the fall of 2023, so please specify `--role` and `--scope` at the same time when assigning a role to the managed identity. (#25283)
 
 **Container**
 
@@ -92,10 +92,10 @@ Release History
 * [BREAKING CHANGE] `az network cross-region-lb`: Remove in `2017-03-09-profile`, `2018-03-01-hybrid`, `2019-03-01-hybrid` and `2019-03-01-hybrid` profiles. (#25494)
 * [BREAKING CHANGE] `az network nic ip-config`: Rename output property `privateIpAddress` to `privateIPAddress` to keep consistent with the name in API (#25498)
 * [BREAKING CHANGE] `az network nic ip-config`: Rename output property `privateIpAllocationMethod` to `privateIPAllocationMethod` to keep consistent with the name in API (#25498)
-* [BREAKING CHANGE] `az network local-gateway`: Updated output property names in `2017-03-09-profile`, `2018-03-01-hybrid`, `2019-03-01-hybrid` and `2019-03-01-hybrid` profiles to keep consist with the `latest` profile. (#25513)
-* [BREAKING CHANGE] `az network vpn-connection`: Updated output property names in `2017-03-09-profile`, `2018-03-01-hybrid`, `2019-03-01-hybrid` and `2019-03-01-hybrid` profiles to keep consist with the `latest` profile. (#25536)
-* [BREAKING CHANGE] `az network vnet-gateway`: Updated output property names in `2017-03-09-profile`, `2018-03-01-hybrid`, `2019-03-01-hybrid` and `2019-03-01-hybrid` profiles to keep consist with the `latest` profile. (#25588)
-* [BREAKING CHANGE] `az network watcher flow-log`: Removed the deprecated command `configure` (#25559)
+* [BREAKING CHANGE] `az network local-gateway`: Update output property names in `2017-03-09-profile`, `2018-03-01-hybrid`, `2019-03-01-hybrid` and `2019-03-01-hybrid` profiles to keep consist with the `latest` profile. (#25513)
+* [BREAKING CHANGE] `az network vpn-connection`: Update output property names in `2017-03-09-profile`, `2018-03-01-hybrid`, `2019-03-01-hybrid` and `2019-03-01-hybrid` profiles to keep consist with the `latest` profile. (#25536)
+* [BREAKING CHANGE] `az network vnet-gateway`: Update output property names in `2017-03-09-profile`, `2018-03-01-hybrid`, `2019-03-01-hybrid` and `2019-03-01-hybrid` profiles to keep consist with the `latest` profile. (#25588)
+* [BREAKING CHANGE] `az network watcher flow-log`: Remove the deprecated command `configure` (#25559)
 * [BREAKING CHANGE] `az network vrouter`: Deprecate `vrouter` and use `routeserver` instead (#25603)
 * [BREAKING CHANGE] `az network watcher connection-monitor endpoint add`: Remove deprecated parameters `filter-item` and `filter-type` (#25518)
 * `az network nsg rule list`: Fix `-o table` cannot be used (#25387)
