@@ -2448,7 +2448,7 @@ def create_dns_zone(cmd, client, resource_group_name, zone_name, parent_zone_nam
     created_zone = client.create_or_update(resource_group_name, zone_name, zone,
                                            if_none_match='*' if if_none_match else None)
 
-    if cmd.supported_api_version(min_api='2016-04-01') and parent_zone_name is not None:
+    if cmd.supported_api_version(min_api='2016-04-01', resource_type=ResourceType.MGMT_NETWORK_DNS) and parent_zone_name is not None:
         logger.info('Attempting to add delegation in the parent zone')
         add_dns_delegation(cmd, created_zone, parent_zone_name, resource_group_name, zone_name)
     return created_zone
@@ -3866,7 +3866,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
         subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
         namespace='Microsoft.Network')
 
-    if edge_zone and cmd.supported_api_version(min_api='2020-08-01'):
+    if edge_zone:
         edge_zone_type = 'EdgeZone'
     else:
         edge_zone_type = None
