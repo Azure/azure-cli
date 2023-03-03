@@ -2253,7 +2253,6 @@ def aks_agentpool_operation_abort(cmd,   # pylint: disable=unused-argument
                                   resource_group_name,
                                   cluster_name,
                                   nodepool_name,
-                                  aks_custom_headers=None,
                                   no_wait=False):
     PowerState = cmd.get_models(
         "PowerState",
@@ -2272,15 +2271,13 @@ def aks_agentpool_operation_abort(cmd,   # pylint: disable=unused-argument
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
     power_state = PowerState(code="Running")
     instance.power_state = power_state
-    headers = get_aks_custom_headers(aks_custom_headers)
-    return sdk_no_wait(no_wait, client.abort_latest_operation, resource_group_name, cluster_name, nodepool_name, headers=headers)
+    return sdk_no_wait(no_wait, client.begin_abort_latest_operation, resource_group_name, cluster_name, nodepool_name)
 
 
 def aks_operation_abort(cmd,   # pylint: disable=unused-argument
                         client,
                         resource_group_name,
                         name,
-                        aks_custom_headers=None,
                         no_wait=False):
     PowerState = cmd.get_models(
         "PowerState",
@@ -2293,8 +2290,7 @@ def aks_operation_abort(cmd,   # pylint: disable=unused-argument
     if instance is None:
         raise InvalidArgumentValueError("Cluster {} doesnt exist, use 'aks list' to get current cluster list".format(name))
     instance.power_state = power_state
-    headers = get_aks_custom_headers(aks_custom_headers)
-    return sdk_no_wait(no_wait, client.abort_latest_operation, resource_group_name, name, headers=headers)
+    return sdk_no_wait(no_wait, client.begin_abort_latest_operation, resource_group_name, name)
 
 
 def aks_agentpool_show(cmd, client, resource_group_name, cluster_name, nodepool_name):
