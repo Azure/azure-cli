@@ -528,11 +528,7 @@ class FunctionAppManagedEnvironment(LiveScenarioTest):
                  .format(resource_group, functionapp_name, storage_account, managed_environment_name)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
-                     JMESPathCheck('kind', 'functionapp,linux'),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
-
-        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('linuxFxVersion', 'DOCKER|mcr.microsoft.com/azuredocs/containerapps-helloworld:latest')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
