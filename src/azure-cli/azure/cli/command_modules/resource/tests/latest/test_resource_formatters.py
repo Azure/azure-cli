@@ -357,17 +357,11 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
                     WhatIfPropertyChange(
                         path="path.a.to.change2",
                         property_change_type=PropertyChangeType.modify,
-                        before={
-                            "tag1": "value"
-                        },
-                        after={
-                            "tag2": "value"
-                        },
+                        before={"tag1": "value"},
+                        after={"tag2": "value"},
                     ),
                     WhatIfPropertyChange(
-                        path="path.a.to.change3",
-                        property_change_type=PropertyChangeType.no_effect,
-                        after=12345,
+                        path="path.a.to.change3", property_change_type=PropertyChangeType.no_effect, after=12345,
                     ),
                     WhatIfPropertyChange(
                         path="path.b.to.nested.change",
@@ -497,6 +491,81 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
     + long.path: []
     ~ long.nested.path: [
       - 5: 12345
+      ]
+"""
+
+        result = format_what_if_operation_result(WhatIfOperationResult(changes=changes), False)
+
+        self.assertIn(expected, result)
+
+    def test_nested_array_changes(self):
+        changes = [
+            WhatIfChange(
+                resource_id="/subscriptions/00000000-0000-0000-0000-000000000004/resourceGroups/rg4/providers/Microsoft.DocumentDB/databaseAccounts/myaccount/sqlDatabases/accesscontrol/containers/workflows",
+                change_type=ChangeType.modify,
+                delta=[
+                    WhatIfPropertyChange(
+                        path="properties.resource.indexingPolicy.compositeIndexes",
+                        property_change_type=PropertyChangeType.array,
+                        children=[
+                            WhatIfPropertyChange(
+                                path="0",
+                                property_change_type=PropertyChangeType.modify,
+                                children=[
+                                    WhatIfPropertyChange(
+                                        path=None,
+                                        property_change_type=PropertyChangeType.array,
+                                        children=[
+                                            WhatIfPropertyChange(
+                                                path="0",
+                                                property_change_type=PropertyChangeType.modify,
+                                                children=[
+                                                    WhatIfPropertyChange(
+                                                        path="order",
+                                                        property_change_type=PropertyChangeType.delete,
+                                                        before="ascending"
+                                                    )
+                                                ]
+                                            ),
+                                            WhatIfPropertyChange(
+                                                path="1",
+                                                property_change_type=PropertyChangeType.modify,
+                                                children=[
+                                                    WhatIfPropertyChange(
+                                                        path="order",
+                                                        property_change_type=PropertyChangeType.delete,
+                                                        before="ascending"
+                                                    )
+                                                ]
+                                            )
+                                        ]
+                                    )
+                                ]
+                            ),
+                        ],
+                    ),
+                ],
+            ),
+        ]
+
+        expected = """
+Scope: /subscriptions/00000000-0000-0000-0000-000000000004/resourceGroups/rg4
+
+  ~ Microsoft.DocumentDB/databaseAccounts/myaccount/sqlDatabases/accesscontrol/containers/workflows
+    ~ properties.resource.indexingPolicy.compositeIndexes: [
+      ~ 0:
+
+        [
+        ~ 0:
+
+          - order: "ascending"
+
+        ~ 1:
+
+          - order: "ascending"
+
+        ]
+
       ]
 """
 

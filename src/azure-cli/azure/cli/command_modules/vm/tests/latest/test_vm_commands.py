@@ -2663,7 +2663,7 @@ class VMCreateExistingOptions(ScenarioTest):
         self.cmd('network nsg show -n {nsg} -g {rg}',
                  checks=self.check('networkInterfaces[0].id.ends_with(@, \'{vm}VMNic\')', True))
         self.cmd('network nic show -n {vm}VMNic -g {rg}',
-                 checks=self.check('ipConfigurations[0].publicIpAddress.id.ends_with(@, \'{pubip}\')', True))
+                 checks=self.check('ipConfigurations[0].publicIPAddress.id.ends_with(@, \'{pubip}\')', True))
         self.cmd('vm show -n {vm} -g {rg}',
                  checks=[self.check('storageProfile.osDisk.vhd.uri', 'https://{sa}.blob.core.windows.net/{container}/{disk}.vhd'),
                          self.check('storageProfile.osDisk.deleteOption', 'Delete')])
@@ -2767,7 +2767,7 @@ class VMCreateExistingIdsOptions(ScenarioTest):
         self.cmd('network nsg show -n {nsg} -g {rg}',
                  checks=self.check('networkInterfaces[0].id.ends_with(@, \'{vm}VMNic\')', True))
         self.cmd('network nic show -n {vm}VMNic -g {rg}',
-                 checks=self.check('ipConfigurations[0].publicIpAddress.id.ends_with(@, \'{pubip}\')', True))
+                 checks=self.check('ipConfigurations[0].publicIPAddress.id.ends_with(@, \'{pubip}\')', True))
         self.cmd('vm show -n {vm} -g {rg}',
                  checks=self.check('storageProfile.osDisk.vhd.uri', 'https://{sa}.blob.core.windows.net/{container}/{disk}.vhd'))
 
@@ -2792,7 +2792,7 @@ class VMCreateCustomIP(ScenarioTest):
             self.check('sku.name', '{public_ip_sku}')
         ])
         self.cmd('network nic show -n {vm}VMNic -g {rg}',
-                 checks=self.check('ipConfigurations[0].privateIpAllocationMethod', 'Static'))
+                 checks=self.check('ipConfigurations[0].privateIPAllocationMethod', 'Static'))
 
         # verify the default should be "Basic" sku with "Dynamic" allocation method
         self.cmd('vm create -n {vm2} -g {rg} --image UbuntuLTS --admin-username user11 --generate-ssh-keys --nsg-rule NONE')
@@ -3475,6 +3475,17 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('upgradePolicy.rollingUpgradePolicy.pauseTimeBetweenBatches', PTB),
             self.check('upgradePolicy.rollingUpgradePolicy.prioritizeUnhealthyInstances', True)
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_with_max_surge')
+    def test_vmss_with_max_surge(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10)
+        })
+        self.cmd(
+            'vmss create -n {vmss} -g {rg} --image ubuntults --upgrade-policy-mode Manual --max-surge true --disable-overprovision',
+            checks=[
+                self.check('vmss.upgradePolicy.rollingUpgradePolicy.maxSurge', True)
+            ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_ephemeral_os_disk')
     def test_vmss_create_ephemeral_os_disk(self, resource_group):
@@ -4542,7 +4553,7 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
         self.cmd('network lb list -g {rg}', checks=self.check('[0].sku.name', 'Basic'))
         self.cmd('network public-ip list -g {rg}', checks=[
             self.check('[0].sku.name', 'Basic'),
-            self.check('[0].publicIpAllocationMethod', 'Dynamic')
+            self.check('[0].publicIPAllocationMethod', 'Dynamic')
         ])
 
         # but you can overrides the defaults
@@ -4551,7 +4562,7 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
                  checks=self.check('sku.name', 'Standard'))
         self.cmd('network public-ip show -g {rg} -n {ip}', checks=[
             self.check('sku.name', 'Standard'),
-            self.check('publicIpAllocationMethod', 'Static')
+            self.check('publicIPAllocationMethod', 'Static')
         ])
 
 
@@ -6448,13 +6459,13 @@ class VMGalleryApplication(ScenarioTest):
         ])
         self.cmd('sig gallery-application list -r {gallery} -g {rg}', checks=[
             self.check('[0].name', '{app_name}'),
-            self.check('[0].supportedOsType', 'Windows'),
+            self.check('[0].supportedOSType', 'Windows'),
             self.check('[0].description', 'test'),
             self.check('[0].tags', {'tag': 'test'})
             ])
         self.cmd('sig gallery-application show -n {app_name} -r {gallery} -g {rg}', checks=[
             self.check('name', '{app_name}'),
-            self.check('supportedOsType', 'Windows'),
+            self.check('supportedOSType', 'Windows'),
             self.check('description', 'test'),
             self.check('tags', {'tag': 'test'})
         ])
@@ -6544,10 +6555,10 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             self.exists('colocationStatus')
         ])
 
-        self.cmd('ppg create -n {ppg2} -t ultra -g {rg}', checks=[
+        self.cmd('ppg create -n {ppg2} -t Standard -g {rg}', checks=[
             self.check('name', '{ppg2}'),
             self.check('location', '{loc}'),
-            self.check('proximityPlacementGroupType', 'Ultra')
+            self.check('proximityPlacementGroupType', 'Standard')
         ])
 
         self.cmd('ppg create -n {ppg3} -g {rg}', checks=[
@@ -6739,7 +6750,7 @@ class DedicatedHostScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host_', location='westeurope')
-    @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host2_', location='centraluseuap', key='rg2')
+    @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host2_', location='eastus', key='rg2')
     def test_dedicated_host_e2e(self, resource_group, resource_group_location):
         self.kwargs.update({
             'host-group': 'my-host-group',
@@ -7103,6 +7114,19 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
                      self.check(update_enable_key, True),
                      self.check(update_not_before_timeout_key, 'PT5M')
                  ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_os_iamge_notification_')
+    def test_vmss_os_image_notification(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --enable-osimage-notification true', checks=[
+             self.check('vmss.virtualMachineProfile.scheduledEventsProfile.osImageNotificationProfile.enable', True)
+        ])
+
+        self.cmd('vmss update -g {rg} -n {vmss} --enable-osimage-notification false', checks=[
+            self.check('virtualMachineProfile.scheduledEventsProfile.osImageNotificationProfile', None)
+        ])
 
 
 class VMPriorityEvictionBillingTest(ScenarioTest):
@@ -8697,9 +8721,17 @@ class VMSSReimageScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_reimage_')
     def test_vmss_reimage(self, resource_group):
-        self.cmd('vmss create -g {rg} -n vmss1 --image centos --admin-username vmtest')
-        self.cmd('vmss reimage -g {rg} -n vmss1 --instance-id 1')
-        self.cmd('vmss reimage -g {rg} -n vmss1')
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10)
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image CentOS --admin-username vmtest --instance-count 2')
+        instances = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()
+        self.kwargs['instance_id1'] = instances[0]['instanceId']
+        self.kwargs['instance_id2'] = instances[1]['instanceId']
+        self.cmd('vmss reimage -g {rg} -n {vmss} --instance-ids {instance_id1}')
+        self.cmd('vmss reimage -g {rg} -n {vmss} --instance-ids {instance_id1} {instance_id2}')
+        self.cmd('vmss reimage -g {rg} -n {vmss}')
 
 
 class VMSSHKeyScenarioTest(ScenarioTest):
@@ -8866,6 +8898,10 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         message = "Please specify --hyper-v-generation as 'V2'  the value of --upload-type is 'UploadWithSecurityData'"
         with self.assertRaisesRegex(ArgumentUsageError, message):
             self.cmd('disk create -n {disk2} -g {rg} --os-type Windows --hyper-v-generation v1 --security-type TrustedLaunch --upload-type UploadWithSecurityData --upload-size-bytes 34359738880 --sku standard_lrs')
+
+        message = "usage error: --upload-size-bytes is required to create a disk for upload"
+        with self.assertRaisesRegex(RequiredArgumentMissingError, message):
+            self.cmd('disk create -n {disk2} -g {rg} --upload-type Upload --size-gb 10')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_trusted_launch_', location='southcentralus')
     def test_vmss_trusted(self, resource_group):

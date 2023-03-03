@@ -32,6 +32,7 @@ GITHUB_OAUTH_SCOPES = [
 ]
 LOGICAPP_KIND = "workflowapp"
 FUNCTIONAPP_KIND = "functionapp"
+DOTNET_REFERENCES_DIR_IN_ZIP = ".az-references"
 
 
 class FUNCTIONS_STACKS_API_KEYS():

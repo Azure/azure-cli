@@ -132,12 +132,15 @@ parameters:
   - name: --aad-client-app-id
     type: string
     short-summary: The ID of an Azure Active Directory client application of type "Native". This application is for user login via kubectl.
+    long-summary: --aad-client-app-id is deprecated. See https://aka.ms/aks/aad-legacy for details.
   - name: --aad-server-app-id
     type: string
     short-summary: The ID of an Azure Active Directory server application of type "Web app/API". This application represents the managed cluster's apiserver (Server application).
+    long-summary: --aad-server-app-id is deprecated. See https://aka.ms/aks/aad-legacy for details.
   - name: --aad-server-app-secret
     type: string
     short-summary: The secret of an Azure Active Directory server application.
+    long-summary: --aad-server-app-secret is deprecated. See https://aka.ms/aks/aad-legacy for details.
   - name: --aad-tenant-id
     type: string
     short-summary: The ID of an Azure Active Directory tenant.
@@ -157,6 +160,10 @@ parameters:
     type: int
     short-summary: Load balancer managed outbound IP count.
     long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+  - name: --load-balancer-managed-outbound-ipv6-count
+    type: int
+    short-summary: Load balancer managed outbound IPv6 IP count.
+    long-summary: Desired number of managed outbound IPv6 IPs for load balancer outbound connection. Valid for dual-stack (--ip-families IPv4,IPv6) only. If updated, it will wipe off the existing setting on Load balancer managed outbound IPv6 count; Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs.
   - name: --load-balancer-outbound-ips
     type: string
     short-summary: Load balancer outbound IP resource IDs.
@@ -251,6 +258,18 @@ parameters:
     type: string
     short-summary: A CIDR notation IP range from which to assign service cluster IPs.
     long-summary: This range must not overlap with any Subnet IP ranges. For example, 10.0.0.0/16.
+  - name: --service-cidrs
+    type: string
+    short-summary: A comma separated list of CIDR notation IP ranges from which to assign service cluster IPs.
+    long-summary: Each range must not overlap with any Subnet IP ranges. For example, "10.0.0.0/16,2001:abcd::/108".
+  - name: --pod-cidrs
+    type: string
+    short-summary: A comma separated list of CIDR notation IP ranges from which to assign pod IPs when kubenet is used.
+    long-summary: Each range must not overlap with any Subnet IP ranges. For example, "172.244.0.0/16,fd0:abcd::/64".
+  - name: --ip-families
+    type: string
+    short-summary: A comma separated list of IP versions to use for cluster networking.
+    long-summary: Each IP version should be in the format IPvN. For example, IPv4.
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
@@ -537,6 +556,10 @@ parameters:
     type: int
     short-summary: Load balancer managed outbound IP count.
     long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. --load-balancer-managed-outbound-ip-count, --load-balancer-outbound-ips and --load-balancer-outbound-ip-prefixes are mutually exclusive. If updated, it will wipe off the existing setting on Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs. If the new value is greater than the original value, new additional outbound IPs will be created. If the value is less than the original value, existing outbound IPs will be deleted and outbound connections may fail due to configuration update.
+  - name: --load-balancer-managed-outbound-ipv6-count
+    type: int
+    short-summary: Load balancer managed outbound IPv6 IP count.
+    long-summary: Desired number of managed outbound IPv6 IPs for load balancer outbound connection. Valid for dual-stack (--ip-families IPv4,IPv6) only. If updated, it will wipe off the existing setting on Load balancer managed outbound IPv6 count; Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs.
   - name: --load-balancer-outbound-ips
     type: string
     short-summary: Load balancer outbound IP resource IDs.
@@ -1120,7 +1143,7 @@ parameters:
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
   - name: --node-taints
     type: string
-    short-summary: The node taints for the node pool. You can update the existing node taint of a nodepool or create a new node taint for a nodepool.
+    short-summary: The node taints for the node pool. You can update the existing node taint of a nodepool or create a new node taint for a nodepool. Pass the empty string `""` to remove all taints.
   - name: --labels
     type: string
     short-summary: The node labels for the node pool. See https://aka.ms/node-labels for syntax of labels.
@@ -1233,15 +1256,19 @@ parameters:
   - name: --reset-aad
     type: string
     short-summary: Reset Azure Active Directory configuration for a managed cluster.
+    long-summary: --reset-aad is deprecated. See https://aka.ms/aks/aad-legacy for details.
   - name: --aad-server-app-id
     type: string
     short-summary: The ID of an Azure Active Directory server application. This argument is required if `--reset-aad` is specified.
+    long-summary: --aad-server-app-id is deprecated. See https://aka.ms/aks/aad-legacy for details.
   - name: --aad-server-app-secret
     type: string
     short-summary: The secret of an Azure Active Directory server application. This argument is required if `--reset-aad` is specified.
+    long-summary: --aad-server-app-secret is deprecated. See https://aka.ms/aks/aad-legacy for details.
   - name: --aad-client-app-id
     type: string
     short-summary: The ID of an Azure Active Directory client application. This argument is required if `--reset-aad` is specified.
+    long-summary: --aad-client-app-id is deprecated. See https://aka.ms/aks/aad-legacy for details.
   - name: --aad-tenant-id
     type: string
     short-summary: Tenant ID associated with Azure Active Directory.
@@ -1249,8 +1276,6 @@ parameters:
 examples:
   - name: Update an existing Kubernetes cluster with new service principal.
     text: az aks update-credentials -g MyResourceGroup -n MyManagedCluster --reset-service-principal --service-principal MyNewServicePrincipalID --client-secret MyNewServicePrincipalSecret
-  - name: Update an existing Azure Active Directory Kubernetes cluster with new server app secret key.
-    text: az aks update-credentials -g MyResourceGroup -n MyManagedCluster --reset-aad --aad-server-app-id MyExistingAADServerAppID --aad-server-app-secret MyNewAADServerAppSecret --aad-client-app-id MyExistingAADClientAppID --aad-tenant-id MyAADTenantID
 """
 
 helps['aks upgrade'] = """

@@ -102,14 +102,6 @@ def list_custom_ip_prefixes(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'custom_ip_prefixes', resource_group_name)
 
 
-def list_public_ips(cmd, resource_group_name=None):
-    return _generic_list(cmd.cli_ctx, 'public_ip_addresses', resource_group_name)
-
-
-def list_public_ip_prefixes(cmd, resource_group_name=None):
-    return _generic_list(cmd.cli_ctx, 'public_ip_prefixes', resource_group_name)
-
-
 def list_route_tables(cmd, resource_group_name=None):
     return _generic_list(cmd.cli_ctx, 'route_tables', resource_group_name)
 
@@ -2534,7 +2526,8 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
                 target_resource_id = record_set.target_resource.id
                 record_obj.update({'target-resource-id': record_type.upper() + " " + target_resource_id})
                 record_type = 'alias'
-                zone_obj[record_set_name][record_type] = []
+                if record_type not in zone_obj[record_set_name]:
+                    zone_obj[record_set_name][record_type] = []
             elif record_type == 'aaaa' or record_type == 'a':
                 record_obj.update({'ip': ''})
             elif record_type == 'cname':
@@ -3904,7 +3897,6 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
         build_load_balancer_resource, build_public_ip_resource, build_vnet_resource)
 
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-    IPAllocationMethod = cmd.get_models('IPAllocationMethod')
 
     if public_ip_address is None:
         logger.warning(
@@ -3916,8 +3908,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
     public_ip_address = public_ip_address or 'PublicIP{}'.format(load_balancer_name)
     backend_pool_name = backend_pool_name or '{}bepool'.format(load_balancer_name)
     if not public_ip_address_allocation:
-        public_ip_address_allocation = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
-            else IPAllocationMethod.dynamic.value
+        public_ip_address_allocation = 'Static' if (sku and sku.lower() == 'standard') else 'Dynamic'
 
     # Build up the ARM template
     master_template = ArmTemplateBuilder()
@@ -3925,8 +3916,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
 
     public_ip_id = public_ip_address if is_valid_resource_id(public_ip_address) else None
     subnet_id = subnet if is_valid_resource_id(subnet) else None
-    private_ip_allocation = IPAllocationMethod.static.value if private_ip_address \
-        else IPAllocationMethod.dynamic.value
+    private_ip_allocation = 'Static' if private_ip_address else 'Dynamic'
 
     network_id_template = resource_id(
         subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
@@ -6554,232 +6544,6 @@ def update_custom_ip_prefix(instance,
 # endregion
 
 
-# region PublicIPAddresses
-def create_public_ip_latest(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
-                            allocation_method=None, dns_name=None,
-                            idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
-                            public_ip_prefix=None, edge_zone=None, ip_address=None, protection_mode=None):
-    IPAllocationMethod = cmd.get_models('IPAllocationMethod')
-
-    public_ip_args = {
-        'name': public_ip_address_name,
-        "resource_group": resource_group_name,
-        'location': location,
-        'tags': tags,
-        'allocation_method': allocation_method,
-        'idle_timeout': idle_timeout,
-        'ip_address': ip_address,
-        'ip_tags': ip_tags
-    }
-
-    if cmd.supported_api_version(min_api='2018-07-01') and public_ip_prefix:
-        if is_valid_resource_id(public_ip_prefix):
-            public_ip_prefix_id = public_ip_prefix
-            public_ip_prefix_name = parse_resource_id(public_ip_prefix)['resource_name']
-        else:
-            public_ip_prefix_id = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=resource_group_name,
-                namespace='Microsoft.Network',
-                type='publicIPPrefixes',
-                name=public_ip_prefix
-            )
-            public_ip_prefix_name = public_ip_prefix
-        public_ip_args['public_ip_prefix'] = public_ip_prefix_id
-
-        # reuse prefix information
-        pip_client = network_client_factory(cmd.cli_ctx).public_ip_prefixes
-        pip_obj = pip_client.get(resource_group_name, public_ip_prefix_name)
-        version = pip_obj.public_ip_address_version
-        sku, tier = pip_obj.sku.name, pip_obj.sku.tier
-        zone = pip_obj.zones
-
-    if sku is None:
-        logger.warning(
-            "Please note that the default public IP used for creation will be changed from Basic to Standard "
-            "in the future."
-        )
-
-    if not allocation_method:
-        if sku and sku.lower() == 'standard':
-            public_ip_args['allocation_method'] = IPAllocationMethod.static.value
-        else:
-            public_ip_args['allocation_method'] = IPAllocationMethod.dynamic.value
-
-    public_ip_args['version'] = version
-    public_ip_args['zone'] = zone
-
-    if sku:
-        public_ip_args['sku'] = sku
-    if tier:
-        if not sku:
-            public_ip_args['sku'] = 'Basic'
-        public_ip_args['tier'] = tier
-
-    if dns_name or reverse_fqdn:
-        public_ip_args['dns_name'] = dns_name
-        public_ip_args['reverse_fqdn'] = reverse_fqdn
-
-    if edge_zone:
-        public_ip_args['edge_zone'] = edge_zone
-        public_ip_args['type'] = 'EdgeZone'
-    if protection_mode:
-        public_ip_args['protection_mode'] = protection_mode
-
-    from azure.cli.command_modules.network.aaz.latest.network.public_ip import Create
-
-    return Create(cli_ctx=cmd.cli_ctx)(command_args=public_ip_args)
-
-
-def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
-                     allocation_method=None, dns_name=None,
-                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
-                     public_ip_prefix=None, edge_zone=None, ip_address=None):
-    IPAllocationMethod, PublicIPAddress, PublicIPAddressDnsSettings, SubResource = cmd.get_models(
-        'IPAllocationMethod', 'PublicIPAddress', 'PublicIPAddressDnsSettings', 'SubResource')
-
-    public_ip_args = {
-        'location': location,
-        'tags': tags,
-        'public_ip_allocation_method': allocation_method,
-        'idle_timeout_in_minutes': idle_timeout,
-        'ip_address': ip_address,
-        'dns_settings': None
-    }
-
-    if cmd.supported_api_version(min_api='2018-07-01') and public_ip_prefix:
-        if is_valid_resource_id(public_ip_prefix):
-            public_ip_prefix_id = public_ip_prefix
-            public_ip_prefix_name = parse_resource_id(public_ip_prefix)['resource_name']
-        else:
-            public_ip_prefix_id = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=resource_group_name,
-                namespace='Microsoft.Network',
-                type='publicIPPrefixes',
-                name=public_ip_prefix
-            )
-            public_ip_prefix_name = public_ip_prefix
-        public_ip_args['public_ip_prefix'] = SubResource(id=public_ip_prefix_id)
-
-        # reuse prefix information
-        pip_client = network_client_factory(cmd.cli_ctx).public_ip_prefixes
-        pip_obj = pip_client.get(resource_group_name, public_ip_prefix_name)
-        version = pip_obj.public_ip_address_version
-        sku, tier = pip_obj.sku.name, pip_obj.sku.tier
-        zone = pip_obj.zones
-
-    if sku is None:
-        logger.warning(
-            "Please note that the default public IP used for creation will be changed from Basic to Standard "
-            "in the future."
-        )
-
-    client = network_client_factory(cmd.cli_ctx).public_ip_addresses
-    if not allocation_method:
-        if sku and sku.lower() == 'standard':
-            public_ip_args['public_ip_allocation_method'] = IPAllocationMethod.static.value
-        else:
-            public_ip_args['public_ip_allocation_method'] = IPAllocationMethod.dynamic.value
-
-    if cmd.supported_api_version(min_api='2016-09-01'):
-        public_ip_args['public_ip_address_version'] = version
-    if cmd.supported_api_version(min_api='2017-06-01'):
-        public_ip_args['zones'] = zone
-    if cmd.supported_api_version(min_api='2017-11-01'):
-        public_ip_args['ip_tags'] = ip_tags
-
-    if sku:
-        public_ip_args['sku'] = {'name': sku}
-    if tier:
-        if not sku:
-            public_ip_args['sku'] = {'name': 'Basic'}
-        public_ip_args['sku'].update({'tier': tier})
-
-    public_ip = PublicIPAddress(**public_ip_args)
-
-    if dns_name or reverse_fqdn:
-        public_ip.dns_settings = PublicIPAddressDnsSettings(
-            domain_name_label=dns_name,
-            reverse_fqdn=reverse_fqdn)
-
-    if edge_zone:
-        public_ip.extended_location = _edge_zone_model(cmd, edge_zone)
-    return client.begin_create_or_update(resource_group_name, public_ip_address_name, public_ip)
-
-
-def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, version=None,
-                     idle_timeout=None, reverse_fqdn=None, tags=None, sku=None, ip_tags=None,
-                     public_ip_prefix=None):
-    if dns_name is not None or reverse_fqdn is not None:
-        if instance.dns_settings:
-            if dns_name is not None:
-                instance.dns_settings.domain_name_label = dns_name
-            if reverse_fqdn is not None:
-                instance.dns_settings.reverse_fqdn = reverse_fqdn
-        else:
-            PublicIPAddressDnsSettings = cmd.get_models('PublicIPAddressDnsSettings')
-            instance.dns_settings = PublicIPAddressDnsSettings(domain_name_label=dns_name, fqdn=None,
-                                                               reverse_fqdn=reverse_fqdn)
-    if allocation_method is not None:
-        instance.public_ip_allocation_method = allocation_method
-    if version is not None:
-        instance.public_ip_address_version = version
-    if idle_timeout is not None:
-        instance.idle_timeout_in_minutes = idle_timeout
-    if tags is not None:
-        instance.tags = tags
-    if sku is not None:
-        instance.sku.name = sku
-    if ip_tags:
-        instance.ip_tags = ip_tags
-    if public_ip_prefix:
-        SubResource = cmd.get_models('SubResource')
-        instance.public_ip_prefix = SubResource(id=public_ip_prefix)
-    return instance
-
-
-def create_public_ip_prefix(cmd, client, resource_group_name, public_ip_prefix_name, prefix_length,
-                            version=None, location=None, tags=None, zone=None, edge_zone=None,
-                            custom_ip_prefix_name=None):
-    PublicIPPrefix, PublicIPPrefixSku, SubResource = cmd.get_models('PublicIPPrefix', 'PublicIPPrefixSku', 'SubResource')
-    prefix = PublicIPPrefix(
-        location=location,
-        prefix_length=prefix_length,
-        sku=PublicIPPrefixSku(name='Standard'),
-        tags=tags,
-        zones=zone
-    )
-
-    if cmd.supported_api_version(min_api='2019-08-01'):
-        prefix.public_ip_address_version = version if version is not None else 'ipv4'
-
-    if cmd.supported_api_version(min_api='2020-06-01') and custom_ip_prefix_name:
-        # support cross-subscription
-        if is_valid_resource_id(custom_ip_prefix_name):
-            custom_ip_prefix_id = custom_ip_prefix_name
-        else:
-            custom_ip_prefix_id = resource_id(
-                subscription=get_subscription_id(cmd.cli_ctx),
-                resource_group=resource_group_name,
-                namespace='Microsoft.Network',
-                type='customIPPrefixes',
-                name=custom_ip_prefix_name
-            )
-        prefix.custom_ip_prefix = SubResource(id=custom_ip_prefix_id)
-
-    if edge_zone:
-        prefix.extended_location = _edge_zone_model(cmd, edge_zone)
-    return client.begin_create_or_update(resource_group_name, public_ip_prefix_name, prefix)
-
-
-def update_public_ip_prefix(instance, tags=None):
-    if tags is not None:
-        instance.tags = tags
-    return instance
-# endregion
-
-
 # region TrafficManagers
 def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_group_name,
                                    routing_method, unique_dns_name, monitor_path=None,
@@ -7551,7 +7315,6 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network.azure_stack._template_builder import build_vpn_connection_resource
 
-    client = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     tags = tags or {}
 
@@ -7589,39 +7352,6 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
         return client.validate(resource_group_name, deployment_name, deployment)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
-
-
-def update_vpn_connection(cmd, instance, routing_weight=None, shared_key=None, tags=None,
-                          enable_bgp=None, use_policy_based_traffic_selectors=None,
-                          express_route_gateway_bypass=None):
-
-    with cmd.update_context(instance) as c:
-        c.set_param('routing_weight', routing_weight)
-        c.set_param('shared_key', shared_key)
-        c.set_param('tags', tags)
-        c.set_param('enable_bgp', enable_bgp)
-        c.set_param('express_route_gateway_bypass', express_route_gateway_bypass)
-        c.set_param('use_policy_based_traffic_selectors', use_policy_based_traffic_selectors)
-
-    # TODO: Remove these when issue #1615 is fixed
-    gateway1_id = parse_resource_id(instance.virtual_network_gateway1.id)
-    ncf = network_client_factory(cmd.cli_ctx, subscription_id=gateway1_id['subscription'])
-    instance.virtual_network_gateway1 = ncf.virtual_network_gateways.get(
-        gateway1_id['resource_group'], gateway1_id['name'])
-
-    if instance.virtual_network_gateway2:
-        gateway2_id = parse_resource_id(instance.virtual_network_gateway2.id)
-        ncf = network_client_factory(cmd.cli_ctx, subscription_id=gateway2_id['subscription'])
-        instance.virtual_network_gateway2 = ncf.virtual_network_gateways.get(
-            gateway2_id['resource_group'], gateway2_id['name'])
-
-    if instance.local_network_gateway2:
-        gateway2_id = parse_resource_id(instance.local_network_gateway2.id)
-        ncf = network_client_factory(cmd.cli_ctx, subscription_id=gateway2_id['subscription'])
-        instance.local_network_gateway2 = ncf.local_network_gateways.get(
-            gateway2_id['resource_group'], gateway2_id['name'])
-
-    return instance
 
 
 def list_vpn_connections(cmd, resource_group_name, virtual_network_gateway_name=None):
@@ -7731,22 +7461,6 @@ def add_vpn_conn_ipsec_policy(cmd, client, resource_group_name, connection_name,
     else:
         conn.ipsec_policies = [new_policy]
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, connection_name, conn)
-
-
-def clear_vpn_conn_ipsec_policies(cmd, client, resource_group_name, connection_name, no_wait=False):
-    conn = client.get(resource_group_name, connection_name)
-    conn.ipsec_policies = None
-    conn.use_policy_based_traffic_selectors = False
-    if no_wait:
-        return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, connection_name, conn)
-
-    from azure.cli.core.commands import LongRunningOperation
-    poller = sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, connection_name, conn)
-    return LongRunningOperation(cmd.cli_ctx)(poller).ipsec_policies
-
-
-def list_vpn_conn_ipsec_policies(cmd, client, resource_group_name, connection_name):
-    return client.get(resource_group_name, connection_name).ipsec_policies
 
 
 def assign_vnet_gateway_aad(cmd, resource_group_name, gateway_name,

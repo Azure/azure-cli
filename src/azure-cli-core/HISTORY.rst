@@ -3,6 +3,19 @@
 Release History
 ===============
 
+2.46.0
+++++++
+* Add announcement for WAM-based login (#25416)
+
+2.45.0
+++++++
+* `aaz`: Support AAZFileArg (#25075)
+* `aaz`: Support singular options of `AAZListArg` in shorthand syntax partial value expression (#25302)
+
+2.44.1
+++++++
+* No changes
+
 2.44.0
 ++++++
 * `aaz`: Support subresource selector (#24827)

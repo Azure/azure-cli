@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command_group(
     "network security-partner-provider",
+    is_preview=True,
 )
 class __CMDGroup(AAZCommandGroup):
     """Manage Azure security partner provider.

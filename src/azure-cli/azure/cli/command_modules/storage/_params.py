@@ -12,7 +12,7 @@ from azure.cli.core.local_context import LocalContextAttribute, LocalContextActi
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
                           validate_entity, validate_select, validate_blob_type,
                           validate_included_datasets_validator, validate_custom_domain, validate_hns_migration_type,
-                          validate_container_public_access,
+                          validate_container_public_access, validate_allow_blob_public_access,
                           add_progress_callback, process_resource_group,
                           storage_account_key_options, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
@@ -308,6 +308,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account failover') as c:
         c.argument('failover_type', options_list=['--failover-type', '--type'], is_preview=True, default=None,
                    help="The parameter is set to 'Planned' to indicate whether a Planned failover is requested")
+        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('storage account delete') as c:
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], local_context_attribute=None)
@@ -374,10 +375,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'platform managed keys for data at rest.')
         c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01',
                    help='Allow or disallow public access to all blobs or containers in the storage account. '
-                   'The default value for this property is null, which is equivalent to true. When true, containers '
-                   'in the account may be configured for public access. Note that setting this property to true does '
+                   'The default value for this property is null. When true, containers in the account may '
+                   'be configured for public access. Note that setting this property to true does '
                    'not enable anonymous access to any data in the account. The additional step of configuring the '
-                   'public access setting for a container is required to enable anonymous access.')
+                   'public access setting for a container is required to enable anonymous access.',
+                   validator=validate_allow_blob_public_access)
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
                         'The default interpretation is TLS 1.0 for this property')
@@ -620,8 +622,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, id_part=None)
 
     with self.argument_context('storage account network-rule', resource_type=ResourceType.MGMT_STORAGE) as c:
+        from ._validators import validate_ip_address
         c.argument('account_name', acct_name_type, id_part=None)
-        c.argument('ip_address', help='IPv4 address or CIDR range.')
+        c.argument('ip_address', nargs='*', help='IPv4 address or CIDR range. Can supply a list: --ip-address ip1 '
+                                                 '[ip2]...', validator=validate_ip_address)
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
         c.argument('action', action_type)
@@ -1316,19 +1320,23 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('tags', tags_type)
         c.extra('destination_blob_type', arg_type=get_enum_type(['Detect', 'BlockBlob', 'PageBlob', 'AppendBlob']),
                 help='Defines the type of blob at the destination. '
-                     'Value of "Detect" determines the type basd on source blob type.')
+                     'Value of "Detect" determines the type based on source blob type.')
 
-    with self.argument_context('storage blob copy start-batch', arg_group='Copy Source') as c:
+    with self.argument_context('storage blob copy start-batch', arg_group='Copy Source',
+                               resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         from azure.cli.command_modules.storage._validators import get_source_file_or_blob_service_client_track2
-
         c.argument('source_client', ignore_type, validator=get_source_file_or_blob_service_client_track2)
-
         c.extra('source_account_name')
         c.extra('source_account_key')
         c.extra('source_uri')
         c.argument('source_sas')
         c.argument('source_container')
         c.argument('source_share')
+
+        c.extra('tier', tier_type)
+        c.extra('destination_blob_type', arg_type=get_enum_type(['Detect', 'BlockBlob', 'PageBlob', 'AppendBlob']),
+                help='Defines the type of blob at the destination. '
+                     'Value of "Detect" determines the type based on source blob type.')
 
     with self.argument_context('storage blob incremental-copy start') as c:
         from azure.cli.command_modules.storage._validators import process_blob_source_uri
@@ -1471,6 +1479,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     for item in ['create', 'extend']:
         with self.argument_context('storage container immutability-policy {}'.format(item)) as c:
+            from ._validators import validate_allow_protected_append_writes_all
             c.argument('account_name',
                        help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT.')
             c.argument('if_match', help="An ETag value, or the wildcard character (*). Specify this header to perform "
@@ -1494,7 +1503,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                                           " ExtendImmutabilityPolicy API. The "
                                                           "'allowProtectedAppendWrites' and "
                                                           "'allowProtectedAppendWritesAll' properties are mutually "
-                                                          "exclusive.")
+                                                          "exclusive.",
+                    validator=validate_allow_protected_append_writes_all)
             c.extra('period', type=int, help='The immutability period for the blobs in the container since the policy '
                                              'creation, in days.')
             c.ignore('parameters')

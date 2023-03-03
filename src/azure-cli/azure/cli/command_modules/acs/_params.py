@@ -164,8 +164,12 @@ def load_arguments(self, _):
         c.argument('docker_bridge_address')
         c.argument('pod_cidr')
         c.argument('service_cidr')
+        c.argument('ip_families')
+        c.argument('pod_cidrs')
+        c.argument('service_cidrs')
         c.argument('load_balancer_sku', arg_type=get_enum_type(load_balancer_skus), validator=validate_load_balancer_sku)
         c.argument('load_balancer_managed_outbound_ip_count', type=int)
+        c.argument('load_balancer_managed_outbound_ipv6_count', type=int)
         c.argument('load_balancer_outbound_ips', validator=validate_load_balancer_outbound_ips)
         c.argument('load_balancer_outbound_ip_prefixes', validator=validate_load_balancer_outbound_ip_prefixes)
         c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
@@ -191,9 +195,9 @@ def load_arguments(self, _):
         c.argument('assign_kubelet_identity', validator=validate_assign_kubelet_identity)
         c.argument('enable_aad', action='store_true')
         c.argument('enable_azure_rbac', action='store_true')
-        c.argument('aad_client_app_id')
-        c.argument('aad_server_app_id')
-        c.argument('aad_server_app_secret')
+        c.argument('aad_client_app_id', deprecate_info=c.deprecate(target='--aad-client-app-id', hide=True))
+        c.argument('aad_server_app_id', deprecate_info=c.deprecate(target='--aad-server-app-id', hide=True))
+        c.argument('aad_server_app_secret', deprecate_info=c.deprecate(target='--aad-server-app-secret', hide=True))
         c.argument('aad_tenant_id')
         c.argument('aad_admin_group_object_ids')
         c.argument('enable_oidc_issuer', action='store_true')
@@ -271,6 +275,7 @@ def load_arguments(self, _):
         c.argument('disable_local_accounts', action='store_true')
         c.argument('enable_local_accounts', action='store_true')
         c.argument('load_balancer_managed_outbound_ip_count', type=int)
+        c.argument('load_balancer_managed_outbound_ipv6_count', type=int)
         c.argument('load_balancer_outbound_ips', validator=validate_load_balancer_outbound_ips)
         c.argument('load_balancer_outbound_ip_prefixes', validator=validate_load_balancer_outbound_ip_prefixes)
         c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
@@ -378,11 +383,11 @@ def load_arguments(self, _):
         c.argument('client_secret')
 
     with self.argument_context('aks update-credentials', arg_group='AAD') as c:
-        c.argument('reset_aad', action='store_true')
-        c.argument('aad_client_app_id')
-        c.argument('aad_server_app_id')
-        c.argument('aad_server_app_secret')
-        c.argument('aad_tenant_id')
+        c.argument('reset_aad', action='store_true', deprecate_info=c.deprecate(target='--reset-aad', hide=True))
+        c.argument('aad_client_app_id', deprecate_info=c.deprecate(target='--aad-client-app-id', hide=True))
+        c.argument('aad_server_app_id', deprecate_info=c.deprecate(target='--aad-server-app-id', hide=True))
+        c.argument('aad_server_app_secret', deprecate_info=c.deprecate(target='--aad-server-app-secret', hide=True))
+        c.argument('aad_tenant_id', deprecate_info=c.deprecate(target='--aad-tenant-id', hide=True))
 
     with self.argument_context('aks upgrade', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('kubernetes_version', completer=get_k8s_upgrades_completion_list)
@@ -455,7 +460,9 @@ def load_arguments(self, _):
         c.argument('scale_down_mode', arg_type=get_enum_type(scale_down_modes))
 
     with self.argument_context('aks nodepool upgrade') as c:
+        c.argument('max_surge', validator=validate_max_surge)
         c.argument('snapshot_id', validator=validate_snapshot_id)
+        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('aks command invoke') as c:
         c.argument('command_string', options_list=[
