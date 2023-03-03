@@ -17,8 +17,7 @@ from azure.cli.core.commands.template_create import get_folded_parameter_help_st
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 from azure.cli.command_modules.network.azure_stack._validators import (
     dns_zone_name_type,
-    validate_ssl_cert, validate_cert, validate_inbound_nat_rule_id_list,
-    validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
+    validate_ssl_cert, validate_cert,
     validate_address_pool_name_or_id, load_cert_file, validate_metadata,
     validate_peering_type, validate_dns_record_type, validate_route_filter, validate_target_listener,
     validate_private_ip_address,
@@ -26,7 +25,7 @@ from azure.cli.command_modules.network.azure_stack._validators import (
     get_network_watcher_from_vm, get_network_watcher_for_pcap_creation, get_network_watcher_from_location, validate_capture_size_and_limit,
     get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
     validate_service_endpoint_policy, validate_delegations, validate_subresource_list,
-    validate_er_peer_circuit, validate_ag_address_pools, validate_custom_error_pages,
+    validate_er_peer_circuit, validate_custom_error_pages,
     validate_custom_headers, validate_status_code_ranges, validate_subnet_ranges,
     WafConfigExclusionAction, validate_express_route_peering, validate_virtual_hub,
     validate_express_route_port, bandwidth_validator_factory,

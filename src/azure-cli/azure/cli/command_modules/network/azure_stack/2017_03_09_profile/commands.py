@@ -41,7 +41,6 @@ def load_command_table(self, _):
     # endregion
 
     # region NetworkInterfaces
-    from .._format import transform_effective_nsg, transform_effective_route_table
     operations_tmpl = self.get_module_name_by_profile("operations.nic#{}")
 
     from .operations.nic import NICCreate, NICUpdate

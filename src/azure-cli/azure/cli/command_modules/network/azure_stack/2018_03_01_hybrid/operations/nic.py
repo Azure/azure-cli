@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods
+# pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument
 from knack.log import get_logger
 from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.aaz import AAZResourceIdArgFormat, has_value, AAZListArg, AAZResourceIdArg, \
@@ -197,17 +197,6 @@ class NICUpdate(_NIC.Update):
 
 
 _NICIPConfig = import_aaz_by_profile("network.nic.ip_config")
-
-
-def _get_nic_ip_config(nic, name):
-    if nic.ip_configurations:
-        ip_config = next(
-            (x for x in nic.ip_configurations if x.name.lower() == name.lower()), None)
-    else:
-        ip_config = None
-    if not ip_config:
-        raise CLIError('IP configuration {} not found.'.format(name))
-    return ip_config
 
 
 class NICIPConfigCreate(_NICIPConfig.Create):

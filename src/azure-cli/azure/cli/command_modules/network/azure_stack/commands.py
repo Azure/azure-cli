@@ -15,7 +15,7 @@ from azure.cli.command_modules.network.azure_stack._client_factory import (
     cf_application_gateways, cf_express_route_circuit_authorizations,
     cf_express_route_circuit_peerings, cf_express_route_circuits,
     cf_express_route_service_providers,
-    cf_network_interfaces, cf_network_security_groups, cf_network_watcher, cf_packet_capture,
+    cf_network_security_groups, cf_network_watcher, cf_packet_capture,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_security_rules,
     cf_connection_monitor, cf_dns_references, cf_private_endpoints,
@@ -179,11 +179,6 @@ def load_command_table(self, _):
         min_api='2019-04-01'
     )
 
-    network_nic_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#NetworkInterfacesOperations.{}',
-        client_factory=cf_network_interfaces
-    )
-
     network_nsg_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#NetworkSecurityGroupsOperations.{}',
         client_factory=cf_network_security_groups
@@ -259,11 +254,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations#CustomIPPrefixesOperations.{}',
         client_factory=cf_custom_ip_prefixes,
         min_api='2020-06-01'
-    )
-
-    network_nic_custom = CliCommandType(
-        operations_tmpl=custom_operations_tmpl,
-        client_factory=cf_network_interfaces
     )
 
     # endregion
