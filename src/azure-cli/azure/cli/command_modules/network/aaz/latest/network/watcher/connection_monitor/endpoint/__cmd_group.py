@@ -12,10 +12,11 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "network watcher",
+    "network watcher connection-monitor endpoint",
+    is_preview=True,
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage the Azure Network Watcher. Network Watcher assists with monitoring and diagnosing conditions at a network scenario level. To learn more visit https://docs.microsoft.com/azure/network-watcher/.
+    """Manage endpoint of a connection monitor.
     """
     pass
 
