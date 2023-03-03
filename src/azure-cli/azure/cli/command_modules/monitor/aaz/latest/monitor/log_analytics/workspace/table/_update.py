@@ -101,7 +101,7 @@ class Update(AAZCommand):
             arg_group="Properties",
             help="The table total retention in days, between 4 and 2555.",
             fmt=AAZIntArgFormat(
-                maximum=2555,
+                maximum=2556,
                 minimum=4,
             ),
         )
