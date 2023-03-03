@@ -1294,6 +1294,13 @@ def load_arguments(self, _):
                    arg_group=sku_arg_group,
                    help='The name of the new service objective.')
 
+        c.argument('edition',
+                   required=False,
+                   arg_type=tier_param_type)
+
+        c.argument('elastic_pool_id',
+                   arg_type=elastic_pool_id_param_type)
+
         c.argument('assign_identity',
                    arg_type=database_assign_identity_param_type)
 
@@ -1386,6 +1393,13 @@ def load_arguments(self, _):
                    required=False,
                    arg_group=sku_arg_group,
                    help='The name of the new service objective.')
+
+        c.argument('edition',
+                   required=False,
+                   arg_type=tier_param_type)
+
+        c.argument('elastic_pool_id',
+                   arg_type=elastic_pool_id_param_type)
 
         c.argument('assign_identity',
                    arg_type=database_assign_identity_param_type)
