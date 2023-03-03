@@ -9,4 +9,13 @@
 # flake8: noqa
 
 from .__cmd_group import *
+from ._create import *
+from ._delete import *
 from ._list import *
+from ._run_configuration_diagnostic import *
+from ._show_next_hop import *
+from ._show_security_group_view import *
+from ._show_topology import *
+from ._test_connectivity import *
+from ._test_ip_flow import *
+from ._update import *

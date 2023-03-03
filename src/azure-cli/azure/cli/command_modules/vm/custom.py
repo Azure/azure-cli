@@ -46,7 +46,7 @@ from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_
                        load_images_thru_services, _get_latest_image_version)
 from ._client_factory import (_compute_client_factory, cf_public_ip_addresses, cf_vm_image_term,
                               _dev_test_labs_client_factory)
-from .aaz.latest.vmss.nic import List as _VMSSNICList, ListVmNics as _VMSSNICListVMNICs, Show as _VMSSNICShow
+from .aaz.latest.ppg import Show as _PPGShow
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 try:
@@ -3703,12 +3703,14 @@ def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
     return [r for r in result if r.ip_address]
 
 
-def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_id=None, no_wait=False):
+def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
-    if instance_id:
-        for instance in instance_id:
-            sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_reimage,
-                        resource_group_name, vm_scale_set_name, instance)
+    if instance_ids:
+        VirtualMachineScaleSetVMInstanceIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceIDs')
+        instance_ids = VirtualMachineScaleSetVMInstanceIDs(instance_ids=instance_ids)
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_reimage_all, resource_group_name,
+                           vm_scale_set_name, instance_ids)
+
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_reimage, resource_group_name, vm_scale_set_name)
 
 
@@ -5658,48 +5660,14 @@ def sig_community_image_version_list(client, location, public_gallery_name, gall
 # endRegion
 
 
-# Region VMSS
-class VMSSNICList(_VMSSNICList):
+class PPGShow(_PPGShow):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.virtual_machine_scale_set_name._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/"
-                     "Microsoft.Compute/virtualMachineScaleSets/{}"
-        )
 
-        return args_schema
-
-
-class VMSSNICListVMNICs(_VMSSNICListVMNICs):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.virtual_machine_scale_set_name._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/"
-                     "Microsoft.Compute/virtualMachineScaleSets/{}"
-        )
-
-        return args_schema
-
-
-class VMSSNICShow(_VMSSNICShow):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.virtual_machine_scale_set_name._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/"
-                     "Microsoft.Compute/virtualMachineScaleSets/{}"
-        )
-        args_schema.network_interface_name._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/"
-                     "Microsoft.Network/networkInterfaces/{}"
-        )
+        from azure.cli.core.aaz import AAZArgEnum
+        args_schema.include_colocation_status._blank = "True"
+        args_schema.include_colocation_status.enum = AAZArgEnum({"True": "True", "False": "False"})
 
         return args_schema

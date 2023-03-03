@@ -1269,6 +1269,12 @@ def _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=False):
         if not namespace.identity_scope and role_is_explicitly_specified:
             raise ArgumentUsageError(
                 "usage error: please specify --scope when assigning a role to the managed identity")
+        if not role_is_explicitly_specified and namespace.identity_scope:
+            logger.warning(
+                "Please note that the default value of '--role' will be removed in the breaking change release of the "
+                "fall. So specify '--role' and '--scope' at the same time when assigning a role to the managed "
+                "identity to avoid breaking your automation script when the default value of '--role' is removed."
+            )
 
     # Assign managed identity
     if is_identity_assign or namespace.assign_identity is not None:
@@ -1449,6 +1455,11 @@ def _resolve_role_id(cli_ctx, role, scope):
 def process_vm_create_namespace(cmd, namespace):
     validate_tags(namespace)
     _validate_location(cmd, namespace, namespace.zone, namespace.size)
+
+    # Currently, only `az vm create` supports this feature, so it is temporarily placed in process_vm_create_namespace()
+    from ._vm_utils import display_region_recommendation
+    display_region_recommendation(cmd, namespace)
+
     validate_edge_zone(cmd, namespace)
     if namespace.count is not None:
         _validate_count(namespace)

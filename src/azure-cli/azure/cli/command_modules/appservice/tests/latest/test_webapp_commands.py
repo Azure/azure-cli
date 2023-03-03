@@ -389,7 +389,7 @@ class BackupRestoreTest(ScenarioTest):
         backup_name = self.create_random_name(prefix='backup-name', length=24)
         slot_backup_name = self.create_random_name(prefix='sbn-', length=24)
 
-        # Create a webapp backup 
+        # Create a webapp backup
         self.cmd('webapp config backup create -g {} --webapp-name {} --backup-name {} --container-url {}'.format(resource_group, webapp, backup_name, sasurl), checks=[
             JMESPathCheck('blobName', backup_name)
         ])
@@ -406,8 +406,8 @@ class BackupRestoreTest(ScenarioTest):
                 # Backup operation is still in progress, Sleep 30 seconds
                 time.sleep(30)
             return list_backups_respone[0]['backupId']
-        
-        # Verify webapp backups count 
+
+        # Verify webapp backups count
         webapp_backup_id = get_backup_id(f'webapp config backup list -g {resource_group} --webapp-name {webapp}', backup_name)
 
         # Delete webapp backup
@@ -1549,8 +1549,9 @@ class WebappSSLCertTest(ScenarioTest):
                                                            plan), self.check('tags.plan', 'plan1'))
         self.cmd('webapp create -g {} -n {} --plan {} --tags web=web1'.format(
             resource_group, webapp_name, plan))
-        self.cmd('webapp config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {}'.format(resource_group, webapp_name, pfx_file, cert_password), checks=[
-            JMESPathCheck('thumbprint', cert_thumbprint)
+        self.cmd('webapp config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {} --certificate-name {}'.format(resource_group, webapp_name, pfx_file, cert_password, "test123"), checks=[
+            JMESPathCheck('thumbprint', cert_thumbprint),
+            JMESPathCheck('name', 'test123')
         ])
         self.cmd('webapp show -g {} -n {}'.format(resource_group,
                                                   webapp_name), self.check('tags.web', 'web1'))
@@ -1600,6 +1601,32 @@ class WebappSSLCertTest(ScenarioTest):
             'webapp show -g {} -n {} -s {}'.format(resource_group, webapp_name, slot_name))
         self.cmd('webapp delete -g {} -n {}'.format(resource_group, webapp_name))
 
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_ssl_specify_hostname(self, resource_group, resource_group_location):
+        plan = self.create_random_name(prefix='ssl-test-plan', length=24)
+        webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
+        # Cert Generated using
+        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        pfx_file = os.path.join(TEST_DIR, 'server.pfx')
+        cert_password = 'test'
+        cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
+        hostname = f"{webapp_name}.azurewebsites.net"
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan} --sku S1 --tags plan=plan1')
+        self.cmd(f'webapp create -g {resource_group} -n {webapp_name} --plan {plan} --tags web=web1')
+        self.cmd(f'webapp config ssl upload -g {resource_group} -n {webapp_name} --certificate-file "{pfx_file}" --certificate-password {cert_password}', checks=[
+            JMESPathCheck('thumbprint', cert_thumbprint)
+        ])
+        self.cmd(f'webapp config ssl bind -g {resource_group} -n {webapp_name} --certificate-thumbprint {cert_thumbprint} --hostname {hostname} --ssl-type SNI', checks=[
+            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(
+                webapp_name), 'SniEnabled'),
+            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].thumbprint".format(
+                webapp_name), cert_thumbprint)
+        ])
+        self.cmd(f'webapp config ssl unbind -g {resource_group} -n {webapp_name} --certificate-thumbprint {cert_thumbprint} --hostname {hostname}', checks=[
+            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(
+                webapp_name), 'Disabled'),
+        ])
+
 
 class WebappSSLImportCertTest(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -1623,8 +1650,9 @@ class WebappSSLImportCertTest(ScenarioTest):
         self.cmd('keyvault certificate import --name {} --vault-name {} --file "{}" --password {}'.format(
             cert_name, key_vault, pfx_file, cert_password))
 
-        self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, key_vault, cert_name), checks=[
-            JMESPathCheck('thumbprint', cert_thumbprint)
+        self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {} --certificate-name {}'.format(resource_group, webapp_name, key_vault, cert_name, "test123"), checks=[
+            JMESPathCheck('thumbprint', cert_thumbprint),
+			JMESPathCheck('name', 'test123')
         ])
 
         self.cmd('webapp config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {}'.format(resource_group, webapp_name, cert_thumbprint, 'SNI'), checks=[

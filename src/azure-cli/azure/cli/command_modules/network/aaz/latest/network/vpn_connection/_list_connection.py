@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "network vpn-connection list-connection",
-)
 class ListConnection(AAZCommand):
     """List all the connections in a virtual network gateway.
     """
