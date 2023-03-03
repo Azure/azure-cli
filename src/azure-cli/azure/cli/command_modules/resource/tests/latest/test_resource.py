@@ -3980,9 +3980,9 @@ class BicepScenarioTest(ScenarioTest):
             self.greater_than('length(@)', 0)
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_deployment_with_bicepparam')
     def test_resource_deployment_with_bicepparam_and_json_template(self):
         self.kwargs.update({
+            'rg' : "exampleGroup",
             'tf': "./main.json",
             'params' : "./param.bicepparam"
         })
@@ -3991,9 +3991,9 @@ class BicepScenarioTest(ScenarioTest):
             self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params}')
             
 
-    @ResourceGroupPreparer(name_prefix='cli_test_deployment_with_bicepparam')
     def test_resource_deployment_with_bicepparam_and_other_parameter_sources(self):
         self.kwargs.update({
+            'rg' : "exampleGroup",
             'tf': "./main.bicepparam",
             'params1' : "./param1.bicepparam",
             'params2' : "./param2.json",
@@ -4136,7 +4136,7 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
 
         self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params}', checks=[
             self.check('properties.provisioningState', 'Succeeded')
-        ])
+        ])    
         
     def test_subscription_level_deployment_with_bicep(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
