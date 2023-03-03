@@ -51,6 +51,8 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.extension_management_detail = None
         self.raw_command = None
         self.show_survey_message = False
+        self.region_input = None
+        self.region_identified = None
         self.mode = 'default'
         # The AzCLIError sub-class name
         self.error_type = 'None'
@@ -211,6 +213,8 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'PollEndTime', str(self.poll_end_time))
         set_custom_properties(result, 'CloudName', _get_cloud_name())
         set_custom_properties(result, 'ShowSurveyMessage', str(self.show_survey_message))
+        set_custom_properties(result, 'RegionInput', self.region_input)
+        set_custom_properties(result, 'RegionIdentified', self.region_identified)
         set_custom_properties(result, 'AllowBroker', str(self.allow_broker))
 
         return result
@@ -429,6 +433,14 @@ def set_raw_command_name(command):
 def set_survey_info(show_survey_message):
     # whether showed the intercept survey message or not
     _session.show_survey_message = show_survey_message
+
+
+@decorators.suppress_all_exceptions()
+def set_region_identified(region_input, region_identified):
+    # Record the region input by customers
+    _session.region_input = region_input
+    # Record the region we have recommended to customers
+    _session.region_identified = region_identified
 
 
 @decorators.suppress_all_exceptions()
