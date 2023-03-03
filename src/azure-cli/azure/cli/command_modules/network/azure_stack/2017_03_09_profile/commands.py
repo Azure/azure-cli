@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
-# pylint: disable=too-many-locals, too-many-statements
+# pylint: disable=too-many-locals, too-many-statements, disable=line-too-long
 def load_command_table(self, _):
     from .operations import import_aaz_by_profile
 
@@ -75,4 +75,23 @@ def load_command_table(self, _):
         from .._format import transform_network_usage_table
         self.command_table['network list-usages'] = UsagesList(loader=self,
                                                                table_transformer=transform_network_usage_table)
+    # endregion
+
+    # region PublicIPAddresses
+    public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
+
+    public_ip = import_aaz_by_profile("network.public_ip")
+    operations_tmpl = self.get_module_name_by_profile("operations.public_ip#{}")
+    from .._format import transform_public_ip_create_output
+    from .._validators import process_public_ip_create_namespace
+
+    with self.command_group('network public-ip', operations_tmpl=operations_tmpl) as g:
+        g.custom_command("create", "create_public_ip", transform=transform_public_ip_create_output,
+                         validator=process_public_ip_create_namespace)
+
+    self.command_table['network public-ip list'] = public_ip.List(loader=self,
+                                                                  table_transformer='[].' + public_ip_show_table_transform)
+    self.command_table['network public-ip show'] = public_ip.Show(loader=self,
+                                                                  table_transformer=public_ip_show_table_transform)
+
     # endregion

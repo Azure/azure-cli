@@ -39,7 +39,7 @@ class NetworkLoadBalancerWithSku(ScenarioTest):
         ])
         self.cmd('network public-ip show -g {rg} -n {ip}', checks=[
             self.check('sku.name', 'Standard'),
-            self.check('publicIpAllocationMethod', 'Static')
+            self.check('publicIPAllocationMethod', 'Static')
         ])
 
 
@@ -104,7 +104,7 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
         # test internet facing load balancer with new static public IP
         self.cmd('network lb create -n {lb}2 -g {rg} --public-ip-address-allocation static --tags foo=doo')
         self.cmd('network public-ip show -g {rg} -n PublicIP{lb}2', checks=[
-            self.check('publicIpAllocationMethod', 'Static'),
+            self.check('publicIPAllocationMethod', 'Static'),
         ])
 
         # test internal load balancer create (existing subnet ID)
@@ -787,3 +787,112 @@ class NetworkUsageListScenarioTest(ScenarioTest):
 
     def test_network_usage_list(self):
         self.cmd('network list-usages --location westus', checks=self.check('type(@)', 'array'))
+
+
+class NetworkPublicIpWithSku(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_lb_sku')
+    def test_network_public_ip_sku(self, resource_group):
+
+        self.kwargs.update({
+            'standard_sku': 'Standard',
+            'basic_sku': 'Basic',
+            'location': 'eastus2',
+            'ip1': 'pubip1',
+            'ip2': 'pubip2',
+            'ip3': 'pubip3',
+            'ip4': 'pubip4'
+        })
+
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip1}')
+        self.cmd('network public-ip show -g {rg} -n {ip1}', checks=[
+            self.check('sku.name', self.kwargs.get('basic_sku')),
+            self.check('publicIPAllocationMethod', 'Dynamic')
+        ])
+
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip2} --sku {standard_sku} --tags foo=doo')
+        self.cmd('network public-ip show -g {rg} -n {ip2}', checks=[
+            self.check('sku.name', self.kwargs.get('standard_sku')),
+            self.check('publicIPAllocationMethod', 'Static'),
+            self.check('tags.foo', 'doo')
+        ])
+
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip3} --sku {standard_sku}')
+        self.cmd('network public-ip show -g {rg} -n {ip3}', checks=[
+            self.check('sku.name', self.kwargs.get('standard_sku')),
+            self.check('publicIPAllocationMethod', 'Static')
+        ])
+
+
+class NetworkZonedPublicIpScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_zoned_public_ip')
+    def test_network_zoned_public_ip(self, resource_group):
+        self.kwargs['ip'] = 'pubip'
+        self.cmd('network public-ip create -g {rg} -n {ip} -l centralus -z 2 --sku standard',
+                 checks=self.check('publicIp.zones[0]', '2'))
+
+        self.cmd(
+            'network public-ip show -g {rg} -n {ip}',
+            checks=[
+                self.check('name', '{ip}'),
+                self.check('publicIPAddressVersion', 'IPv4')
+            ]
+        )
+
+
+class NetworkPublicIpScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_public_ip')
+    def test_network_public_ip(self, resource_group):
+        self.kwargs.update({
+            'ip1': 'pubipdns',
+            'ip2': 'pubipnodns',
+            'ip3': 'pubip3',
+            'dns': 'woot1',
+            'zone': '1',
+            'location': 'eastus2',
+            'ip_tags': 'RoutingPreference=Internet',
+            'version': 'ipv4',
+            'sku': 'standard'
+        })
+        self.cmd('network public-ip create -g {rg} -n {ip1} --dns-name {dns} --allocation-method static', checks=[
+            self.check('publicIp.provisioningState', 'Succeeded'),
+            self.check('publicIp.publicIPAllocationMethod', 'Static'),
+            self.check('publicIp.dnsSettings.domainNameLabel', '{dns}')
+        ])
+        self.cmd('network public-ip create -g {rg} -n {ip2}', checks=[
+            self.check('publicIp.provisioningState', 'Succeeded'),
+            self.check('publicIp.publicIPAllocationMethod', 'Dynamic'),
+            self.check('publicIp.dnsSettings', None)
+        ])
+
+        self.cmd(
+            'network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza2 --idle-timeout 10 --tags foo=doo',
+            checks=[
+                self.check('publicIPAllocationMethod', 'Static'),
+                self.check('dnsSettings.domainNameLabel', 'wowza2'),
+                self.check('idleTimeoutInMinutes', 10),
+                self.check('tags.foo', 'doo')
+            ])
+
+        self.cmd('network public-ip list -g {rg}', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
+        ])
+
+        self.cmd('network public-ip show -g {rg} -n {ip1}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{ip1}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        self.cmd('network public-ip delete -g {rg} -n {ip1}')
+        self.cmd('network public-ip list -g {rg}',
+                 checks=self.check("length[?name == '{ip1}']", None))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_public_ip_zone', location='eastus2')
+    def test_network_public_ip_zone(self, resource_group):
+        self.cmd('network public-ip create -g {rg} -n ip --sku Standard -z 1', checks=[
+            self.check('length(publicIp.zones)', 1)
+        ])
