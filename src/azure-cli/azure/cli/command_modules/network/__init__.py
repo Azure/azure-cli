@@ -56,6 +56,7 @@ class AzureStackNetworkCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.azure_stack.custom#{}')
         super().__init__(cli_ctx=cli_ctx,
+                         resource_type=ResourceType.MGMT_NETWORK,
                          custom_command_type=network_custom,
                          suppress_extension=[
                              ModExtensionSuppress(__name__, 'dns', '0.0.2',
