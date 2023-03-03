@@ -68,6 +68,9 @@ Release History
 * `az cosmosdb gremlin restorable-database list`: New command that list restorable gremlin databases (#24530)
 * `az cosmosdb gremlin restorable-graph list`: New command that list restorable graphs under a gremlin database (#24530)
 * `az cosmosdb gremlin retrieve-latest-backup-time`: New command that retrieve latest backup time for a graph under a database (#24530)
+* `az cosmosdb table restorable-resource list`: New command that list restorable table resources (#24530)
+* `az cosmosdb table restorable-table list`: New command that list restorable tables (#24530)
+* `az cosmosdb table retrieve-latest-backup-time`: New command that retrieve latest backup time for a table (#24530)
 
 **Deployment Manager**
 
@@ -147,12 +150,6 @@ Release History
 
 * `az storage blob copy start-batch`: Add `--destination-blob-type` and `--tier` (#25561)
 * Fix #25402: `az storage account network-rule`: Support adding and removing multiple IPs (#25514)
-
-**Table**
-
-* `az cosmosdb table restorable-resource list`: New command that list restorable table resources (#24530)
-* `az cosmosdb table restorable-table list`: New command that list restorable tables (#24530)
-* `az cosmosdb table retrieve-latest-backup-time`: New command that retrieve latest backup time for a table (#24530)
 
 2.45.0
 ++++++
