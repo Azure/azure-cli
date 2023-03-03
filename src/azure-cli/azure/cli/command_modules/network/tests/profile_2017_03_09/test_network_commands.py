@@ -43,7 +43,7 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
         # test internet facing load balancer with new static public IP
         self.cmd('network lb create -n {lb}2 -g {rg} --public-ip-address-allocation static --tags foo=doo')
         self.cmd('network public-ip show -g {rg} -n PublicIP{lb}2', checks=[
-            self.check('publicIpAllocationMethod', 'Static'),
+            self.check('publicIPAllocationMethod', 'Static'),
         ])
 
         # test internal load balancer create (existing subnet ID)
@@ -486,93 +486,55 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
         self.cmd('network route-table delete --resource-group {rg} --name {table} -y')
         self.cmd('network route-table list --resource-group {rg}', checks=self.is_empty())
 
-class NetworkExtendedNSGScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_extended_nsg')
-    def test_network_extended_nsg(self, resource_group):
+class NetworkUsageListScenarioTest(ScenarioTest):
 
+    def test_network_usage_list(self):
+        self.cmd('network list-usages --location westus', checks=self.check('type(@)', 'array'))
+
+
+class NetworkPublicIpScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_public_ip')
+    def test_network_public_ip(self, resource_group):
         self.kwargs.update({
-            'nsg': 'nsg1',
-            'rule': 'rule1'
+            'ip1': 'pubipdns',
+            'ip2': 'pubipnodns',
+            'ip3': 'pubip3',
+            'dns': 'woot1',
+            'location': 'eastus2',
         })
-        self.cmd('network nsg create --name {nsg} -g {rg}')
-        self.cmd('network nsg rule create --access allow --destination-address-prefix 11.0.0.0/24 --direction inbound --nsg-name {nsg} -g {rg} --source-address-prefix * -n {rule} --source-port-range 700-900 --priority 1000', checks=[
-            self.check('destinationAddressPrefix', '11.0.0.0/24'),
-            self.check('sourceAddressPrefix', '*'),
-            self.check('sourcePortRange', '700-900'),
-            self.check('destinationPortRange', '80')
+        self.cmd('network public-ip create -g {rg} -n {ip1} --dns-name {dns} --allocation-method static', checks=[
+            self.check('publicIp.provisioningState', 'Succeeded'),
+            self.check('publicIp.publicIPAllocationMethod', 'Static'),
+            self.check('publicIp.dnsSettings.domainNameLabel', '{dns}')
         ])
-        self.cmd('network nsg rule update --destination-address-prefix Internet --nsg-name {nsg} -g {rg} --source-address-prefix 10.0.0.0/24 -n {rule} --source-port-range * --destination-port-range 500-1000', checks=[
-            self.check('destinationAddressPrefix', 'Internet'),
-            self.check('sourceAddressPrefix', '10.0.0.0/24'),
-            self.check('sourcePortRange', '*'),
-            self.check('destinationPortRange', '500-1000')
+        self.cmd('network public-ip create -g {rg} -n {ip2}', checks=[
+            self.check('publicIp.provisioningState', 'Succeeded'),
+            self.check('publicIp.publicIPAllocationMethod', 'Dynamic'),
+            self.check('publicIp.dnsSettings', None)
         ])
 
+        self.cmd(
+            'network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza2 --idle-timeout 10 --tags foo=doo',
+            checks=[
+                self.check('publicIPAllocationMethod', 'Static'),
+                self.check('dnsSettings.domainNameLabel', 'wowza2'),
+                self.check('idleTimeoutInMinutes', 10),
+                self.check('tags.foo', 'doo')
+            ])
 
-class NetworkSecurityGroupScenarioTest(ScenarioTest):
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_nsg')
-    def test_network_nsg(self, resource_group):
-
-        self.kwargs.update({
-            'nsg': 'test-nsg1',
-            'rule': 'web',
-            'rt': 'Microsoft.Network/networkSecurityGroups'
-        })
-
-        self.cmd('network nsg create --name {nsg} -g {rg} --tags foo=doo')
-        self.cmd('network nsg rule create --access allow --destination-address-prefix 1234 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefix 789 -n {rule} --source-port-range * --destination-port-range 4444 --priority 1000')
-
-        self.cmd('network nsg list', checks=[
+        self.cmd('network public-ip list -g {rg}', checks=[
             self.check('type(@)', 'array'),
-            self.check("length([?type == '{rt}']) == length(@)", True)
-        ])
-        self.cmd('network nsg list --resource-group {rg}', checks=[
-            self.check('type(@)', 'array'),
-            self.check("length([?type == '{rt}']) == length(@)", True),
             self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
         ])
-        self.cmd('network nsg show --resource-group {rg} --name {nsg}', checks=[
+
+        self.cmd('network public-ip show -g {rg} -n {ip1}', checks=[
             self.check('type(@)', 'object'),
-            self.check('type', '{rt}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('name', '{nsg}')
-        ])
-        # Test for the manually added nsg rule
-        self.cmd('network nsg rule list --resource-group {rg} --nsg-name {nsg}', checks=[
-            self.check('type(@)', 'array'),
-            self.check('length(@)', 1),
-            self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
-        ])
-        self.cmd('network nsg rule list --resource-group {rg} --nsg-name {nsg} -o table')
-        self.cmd('network nsg rule show --resource-group {rg} --nsg-name {nsg} --name {rule}', checks=[
-            self.check('type(@)', 'object'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('name', '{rule}')
+            self.check('name', '{ip1}'),
+            self.check('resourceGroup', '{rg}')
         ])
 
-        self.kwargs.update({
-            'access': 'DENY',
-            'prefix': '111',
-            'dir': 'Outbound',
-            'protocol': 'Tcp',
-            'ports': '1234-1235',
-            'desc': 'greatrule',
-            'priority': 888
-        })
-        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg} -n {rule} --direction {dir} --access {access} --destination-address-prefix {prefix} --protocol {protocol} --source-address-prefix {prefix} --source-port-range {ports} --destination-port-range {ports} --priority {priority} --description {desc}', checks=[
-            self.check('access', 'Deny'),
-            self.check('direction', '{dir}'),
-            self.check('destinationAddressPrefix', '{prefix}'),
-            self.check('protocol', '{protocol}'),
-            self.check('sourceAddressPrefix', '{prefix}'),
-            self.check('sourcePortRange', '{ports}'),
-            self.check('priority', '{priority}'),
-            self.check('description', '{desc}')
-        ])
-
-        # test generic update
-        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg} -n {rule} --set description="cool"',
-                 checks=self.check('description', 'cool'))
+        self.cmd('network public-ip delete -g {rg} -n {ip1}')
+        self.cmd('network public-ip list -g {rg}',
+                 checks=self.check("length[?name == '{ip1}']", None))

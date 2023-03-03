@@ -1449,6 +1449,11 @@ def _resolve_role_id(cli_ctx, role, scope):
 def process_vm_create_namespace(cmd, namespace):
     validate_tags(namespace)
     _validate_location(cmd, namespace, namespace.zone, namespace.size)
+
+    # Currently, only `az vm create` supports this feature, so it is temporarily placed in process_vm_create_namespace()
+    from ._vm_utils import display_region_recommendation
+    display_region_recommendation(cmd, namespace)
+
     validate_edge_zone(cmd, namespace)
     if namespace.count is not None:
         _validate_count(namespace)

@@ -39,7 +39,7 @@ class NetworkLoadBalancerWithSku(ScenarioTest):
         ])
         self.cmd('network public-ip show -g {rg} -n {ip}', checks=[
             self.check('sku.name', 'Standard'),
-            self.check('publicIpAllocationMethod', 'Static')
+            self.check('publicIPAllocationMethod', 'Static')
         ])
 
 
@@ -104,7 +104,7 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
         # test internet facing load balancer with new static public IP
         self.cmd('network lb create -n {lb}2 -g {rg} --public-ip-address-allocation static --tags foo=doo')
         self.cmd('network public-ip show -g {rg} -n PublicIP{lb}2', checks=[
-            self.check('publicIpAllocationMethod', 'Static'),
+            self.check('publicIPAllocationMethod', 'Static'),
         ])
 
         # test internal load balancer create (existing subnet ID)
@@ -819,6 +819,26 @@ class NetworkSubnetEndpointServiceScenarioTest(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints ""',
                  checks=self.check('serviceEndpoints', None))
 
+    @ResourceGroupPreparer(name_prefix='cli_subnet_delegation')
+    def test_network_subnet_delegation(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+        })
+        result = self.cmd('network vnet subnet list-available-delegations -l westcentralus').get_output_in_json()
+        self.assertTrue(len(result) > 1, True)
+        result = self.cmd('network vnet subnet list-available-delegations -g {rg}').get_output_in_json()
+        self.assertTrue(len(result) > 1, True)
+
+        self.cmd('network vnet create -g {rg} -n {vnet} -l westcentralus')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.0.0/24 --delegations Microsoft.Web.serverFarms', checks=[
+            self.check('delegations[0].serviceName', 'Microsoft.Web/serverFarms')
+        ])
+        # verify the update command, and that CLI validation will accept either serviceName or Name
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --delegations Microsoft.Sql/managedInstances',
+                 checks=self.check('delegations[0].serviceName', 'Microsoft.Sql/managedInstances'))
+
+
 
 class NetworkRouteTableOperationScenarioTest(ScenarioTest):
 
@@ -863,101 +883,178 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
         self.cmd('network route-table list --resource-group {rg}', checks=self.is_empty())
 
 
-class NetworkExtendedNSGScenarioTest(ScenarioTest):
+class NetworkUsageListScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_extended_nsg')
-    def test_network_extended_nsg(self, resource_group):
-
-        self.kwargs.update({
-            'nsg': 'nsg1',
-            'rule': 'rule1'
-        })
-        self.cmd('network nsg create --name {nsg} -g {rg}')
-        self.cmd('network nsg rule create --access allow --destination-address-prefixes 10.0.0.0/24 11.0.0.0/24 --direction inbound --nsg-name {nsg} -g {rg} --source-address-prefixes * -n {rule} --source-port-ranges 700-900 1000-1100 --priority 1000', checks=[
-            self.check('length(destinationAddressPrefixes)', 2),
-            self.check('destinationAddressPrefix', None),
-            self.check('length(sourceAddressPrefixes)', 0),
-            self.check('sourceAddressPrefix', '*'),
-            self.check('length(sourcePortRanges)', 2),
-            self.check('sourcePortRange', None),
-            self.check('length(destinationPortRanges)', 0),
-            self.check('destinationPortRange', '80')
-        ])
-        self.cmd('network nsg rule update --destination-address-prefixes Internet --nsg-name {nsg} -g {rg} --source-address-prefixes 10.0.0.0/24 11.0.0.0/24 -n {rule} --source-port-ranges * --destination-port-ranges 500-1000 2000 3000', checks=[
-            self.check('length(destinationAddressPrefixes)', 0),
-            self.check('destinationAddressPrefix', 'Internet'),
-            self.check('length(sourceAddressPrefixes)', 2),
-            self.check('sourceAddressPrefix', None),
-            self.check('length(sourcePortRanges)', 0),
-            self.check('sourcePortRange', '*'),
-            self.check('length(destinationPortRanges)', 3),
-            self.check('destinationPortRange', None)
-        ])
+    def test_network_usage_list(self):
+        self.cmd('network list-usages --location westus', checks=self.check('type(@)', 'array'))
 
 
-class NetworkSecurityGroupScenarioTest(ScenarioTest):
+class NetworkPublicIpWithSku(ScenarioTest):
 
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_nsg')
-    def test_network_nsg(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_network_lb_sku')
+    def test_network_public_ip_sku(self, resource_group):
 
         self.kwargs.update({
-            'nsg': 'test-nsg1',
-            'rule': 'web',
-            'rt': 'Microsoft.Network/networkSecurityGroups'
+            'standard_sku': 'Standard',
+            'basic_sku': 'Basic',
+            'location': 'eastus2',
+            'ip1': 'pubip1',
+            'ip2': 'pubip2',
+            'ip3': 'pubip3',
+            'ip4': 'pubip4'
         })
 
-        self.cmd('network nsg create --name {nsg} -g {rg} --tags foo=doo')
-        self.cmd('network nsg rule create --access allow --destination-address-prefixes 1234 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefixes 789 -n {rule} --source-port-ranges * --destination-port-ranges 4444 --priority 1000')
-
-        self.cmd('network nsg list', checks=[
-            self.check('type(@)', 'array'),
-            self.check("length([?type == '{rt}']) == length(@)", True)
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip1}')
+        self.cmd('network public-ip show -g {rg} -n {ip1}', checks=[
+            self.check('sku.name', self.kwargs.get('basic_sku')),
+            self.check('publicIPAllocationMethod', 'Dynamic')
         ])
-        self.cmd('network nsg list --resource-group {rg}', checks=[
+
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip2} --sku {standard_sku} --tags foo=doo')
+        self.cmd('network public-ip show -g {rg} -n {ip2}', checks=[
+            self.check('sku.name', self.kwargs.get('standard_sku')),
+            self.check('publicIPAllocationMethod', 'Static'),
+            self.check('tags.foo', 'doo')
+        ])
+
+        self.cmd('network public-ip create -g {rg} -l {location} -n {ip3} --sku {standard_sku}')
+        self.cmd('network public-ip show -g {rg} -n {ip3}', checks=[
+            self.check('sku.name', self.kwargs.get('standard_sku')),
+            self.check('publicIPAllocationMethod', 'Static')
+        ])
+
+
+class NetworkZonedPublicIpScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_zoned_public_ip')
+    def test_network_zoned_public_ip(self, resource_group):
+        self.kwargs['ip'] = 'pubip'
+        self.cmd('network public-ip create -g {rg} -n {ip} -l centralus -z 2 --sku standard',
+                 checks=self.check('publicIp.zones[0]', '2'))
+
+        self.cmd(
+            'network public-ip show -g {rg} -n {ip}',
+            checks=[
+                self.check('name', '{ip}'),
+                self.check('publicIPAddressVersion', 'IPv4')
+            ]
+        )
+
+
+class NetworkPublicIpScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_public_ip')
+    def test_network_public_ip(self, resource_group):
+        self.kwargs.update({
+            'ip1': 'pubipdns',
+            'ip2': 'pubipnodns',
+            'ip3': 'pubip3',
+            'dns': 'woot1',
+            'zone': '1',
+            'location': 'eastus2',
+            'ip_tags': 'RoutingPreference=Internet',
+            'version': 'ipv4',
+            'sku': 'standard'
+        })
+        self.cmd('network public-ip create -g {rg} -n {ip1} --dns-name {dns} --allocation-method static', checks=[
+            self.check('publicIp.provisioningState', 'Succeeded'),
+            self.check('publicIp.publicIPAllocationMethod', 'Static'),
+            self.check('publicIp.dnsSettings.domainNameLabel', '{dns}')
+        ])
+        self.cmd('network public-ip create -g {rg} -n {ip2}', checks=[
+            self.check('publicIp.provisioningState', 'Succeeded'),
+            self.check('publicIp.publicIPAllocationMethod', 'Dynamic'),
+            self.check('publicIp.dnsSettings', None)
+        ])
+
+        self.cmd(
+            'network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza2 --idle-timeout 10 --tags foo=doo',
+            checks=[
+                self.check('publicIPAllocationMethod', 'Static'),
+                self.check('dnsSettings.domainNameLabel', 'wowza2'),
+                self.check('idleTimeoutInMinutes', 10),
+                self.check('tags.foo', 'doo')
+            ])
+
+        self.cmd('network public-ip list -g {rg}', checks=[
             self.check('type(@)', 'array'),
-            self.check("length([?type == '{rt}']) == length(@)", True),
             self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
         ])
-        self.cmd('network nsg show --resource-group {rg} --name {nsg}', checks=[
+
+        self.cmd('network public-ip show -g {rg} -n {ip1}', checks=[
             self.check('type(@)', 'object'),
-            self.check('type', '{rt}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('name', '{nsg}')
+            self.check('name', '{ip1}'),
+            self.check('resourceGroup', '{rg}')
         ])
-        # Test for the manually added nsg rule
-        self.cmd('network nsg rule list --resource-group {rg} --nsg-name {nsg}', checks=[
-            self.check('type(@)', 'array'),
-            self.check('length(@)', 1),
-            self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
+
+        self.cmd('network public-ip delete -g {rg} -n {ip1}')
+        self.cmd('network public-ip list -g {rg}',
+                 checks=self.check("length[?name == '{ip1}']", None))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_public_ip_zone', location='eastus2')
+    def test_network_public_ip_zone(self, resource_group):
+        self.cmd('network public-ip create -g {rg} -n ip --sku Standard -z 1', checks=[
+            self.check('length(publicIp.zones)', 1)
         ])
-        self.cmd('network nsg rule list --resource-group {rg} --nsg-name {nsg} -o table')
-        self.cmd('network nsg rule show --resource-group {rg} --nsg-name {nsg} --name {rule}', checks=[
-            self.check('type(@)', 'object'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('name', '{rule}')
-        ])
+
+
+class NetworkPublicIpPrefix(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix', location='eastus2')
+    def test_network_public_ip_prefix(self, resource_group):
 
         self.kwargs.update({
-            'access': 'DENY',
-            'prefix': '111',
-            'dir': 'Outbound',
-            'protocol': 'Tcp',
-            'ports': '1234-1235',
-            'desc': 'greatrule',
-            'priority': 888
+            'prefix': 'prefix1',
+            'pip': 'pip1',
+            'prefix_v6': self.create_random_name('public-ip-prefix-', 24),
+            'pip_v6': self.create_random_name('public-ip-', 16)
         })
-        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg} -n {rule} --direction {dir} --access {access} --destination-address-prefixes {prefix} --protocol {protocol} --source-address-prefixes {prefix} --source-port-ranges {ports} --destination-port-ranges {ports} --priority {priority} --description {desc}', checks=[
-            self.check('access', 'Deny'),
-            self.check('direction', '{dir}'),
-            self.check('destinationAddressPrefix', '{prefix}'),
-            self.check('protocol', '{protocol}'),
-            self.check('sourceAddressPrefix', '{prefix}'),
-            self.check('sourcePortRange', '{ports}'),
-            self.check('priority', '{priority}'),
-            self.check('description', '{desc}')
+
+        # Test prefix CRUD
+        self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30',
+                 checks=self.check('prefixLength', 30))
+        self.cmd('network public-ip prefix update -g {rg} -n {prefix} --tags foo=doo')
+
+        # test prefix show command
+        self.cmd('network public-ip prefix show -g {rg} -n {prefix}',
+                 checks=self.check('tags.foo', 'doo'))
+
+        self.cmd('network public-ip prefix list -g {rg}',
+                 checks=self.check('length(@)', 1))
+        self.cmd('network public-ip prefix delete -g {rg} -n {prefix}')
+        self.cmd('network public-ip prefix list -g {rg}',
+                 checks=self.is_empty())
+
+        # Test public IP create with prefix
+        self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30')
+        self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix} --sku Standard',
+                 checks=self.check("publicIp.publicIPPrefix.id.contains(@, '{prefix}')", True))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix_zone', location='eastus2')
+    def test_network_public_ip_prefix_zone(self, resource_group):
+        self.kwargs.update({
+            'prefix': 'prefix1',
+        })
+
+        # Test prefix with multi zones
+        self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30 --zone 1', checks=[
+            self.check('prefixLength', 30),
+            self.check('length(zones)', 1)
         ])
 
-        # test generic update
-        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg} -n {rule} --set description="cool"',
-                 checks=self.check('description', 'cool'))
+    @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix_with_ip_address', location='eastus2')
+    def test_network_public_ip_prefix_with_ip_address(self, resource_group):
+        self.kwargs.update({
+            'prefix_name_ipv4': 'public_ip_prefix_0',
+            'pip': 'pip1'
+        })
+
+        ip_prefix = self.cmd('network public-ip prefix create -g {rg} -n {prefix_name_ipv4} --length 28', checks=[
+            self.check('publicIPAddressVersion', 'IPv4')
+        ]).get_output_in_json()
+
+        ip_address = ip_prefix['ipPrefix'][:-3]
+
+        # Create public ip with ip address
+        self.cmd('network public-ip create -g {rg} -n {pip} --public-ip-prefix {prefix_name_ipv4} --sku Standard --ip-address ' + ip_address,
+                 checks=self.check("publicIp.publicIPPrefix.id.contains(@, '{prefix_name_ipv4}')", True))

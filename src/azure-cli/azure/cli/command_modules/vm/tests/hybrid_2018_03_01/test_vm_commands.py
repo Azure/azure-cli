@@ -1153,7 +1153,7 @@ class VMCreateCustomIP(ScenarioTest):
         self.cmd('vm create -n {vm} -g {rg} --image openSUSE-Leap --admin-username user11 --private-ip-address 10.0.0.5 --public-ip-sku {public_ip_sku} --public-ip-address-dns-name {dns} --generate-ssh-keys')
 
         self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', checks=[
-            self.check('publicIpAllocationMethod', 'Static'),
+            self.check('publicIPAllocationMethod', 'Static'),
             self.check('dnsSettings.domainNameLabel', '{dns}'),
             self.check('sku.name', '{public_ip_sku}')
         ])
@@ -1163,7 +1163,7 @@ class VMCreateCustomIP(ScenarioTest):
         # verify the default should be "Basic" sku with "Dynamic" allocation method
         self.cmd('vm create -n {vm2} -g {rg} --image openSUSE-Leap --admin-username user11 --generate-ssh-keys')
         self.cmd('network public-ip show -n {vm2}PublicIP -g {rg}', checks=[
-            self.check('publicIpAllocationMethod', 'Dynamic'),
+            self.check('publicIPAllocationMethod', 'Dynamic'),
             self.check('sku.name', 'Basic')
         ])
 
@@ -1837,7 +1837,7 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
         self.cmd('network lb list -g {rg}', checks=self.check('[0].sku.name', 'Basic'))
         self.cmd('network public-ip list -g {rg}', checks=[
             self.check('[0].sku.name', 'Basic'),
-            self.check('[0].publicIpAllocationMethod', 'Dynamic')
+            self.check('[0].publicIPAllocationMethod', 'Dynamic')
         ])
 
         # but you can overrides the defaults
@@ -1846,7 +1846,7 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
                  checks=self.check('sku.name', 'Standard'))
         self.cmd('network public-ip show -g {rg} -n {ip}', checks=[
             self.check('sku.name', 'Standard'),
-            self.check('publicIpAllocationMethod', 'Static')
+            self.check('publicIPAllocationMethod', 'Static')
         ])
 
 

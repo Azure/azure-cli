@@ -54,7 +54,8 @@ from azure.cli.core.azclierror import (InvalidArgumentValueError, MutuallyExclus
 from .tunnel import TunnelServer
 
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
-from ._client_factory import web_client_factory, ex_handler_factory, providers_client_factory
+from ._client_factory import (web_client_factory, ex_handler_factory, providers_client_factory,
+                              appcontainers_client_factory)
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
 from .utils import (_normalize_sku,
                     get_sku_tier,
@@ -62,6 +63,7 @@ from .utils import (_normalize_sku,
                     raise_missing_token_suggestion,
                     _get_location_from_resource_group,
                     _list_app,
+                    is_functionapp,
                     _rename_server_farm_props,
                     _get_location_from_webapp,
                     _normalize_location,
@@ -77,9 +79,9 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
                          WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
-                         WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH)
+                         WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, HELLO_WORLD_IMAGE)
 from ._github_oauth import (get_github_access_token, cache_github_token)
-from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
+from ._validators import validate_and_convert_to_int, validate_range_of_int_flag, validate_same_location
 
 logger = get_logger(__name__)
 
@@ -353,6 +355,16 @@ def _get_subnet_info(cmd, resource_group_name, vnet, subnet):
     subnet_info["subnet_resource_id"] = subnet_rid
     subnet_info["subnet_subscription_id"] = subscription_id
     return subnet_info
+
+
+def get_managed_environment(cmd, resource_group_name, environment_name):
+    try:
+        appcontainers_client = appcontainers_client_factory(cmd.cli_ctx)
+        return appcontainers_client.managed_environments.get(resource_group_name, environment_name)
+    except Exception as ex:  # pylint: disable=broad-except
+        error_message = "Retrieving managed environment failed with an exception: {}".format(ex)
+        recommendation_message = "Please verify the managed environment is valid"
+        raise ResourceNotFoundError(error_message, recommendation_message)
 
 
 def validate_container_app_create_options(runtime=None, deployment_container_image_name=None,
@@ -910,8 +922,8 @@ def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None
 
 
 def list_function_app(cmd, resource_group_name=None):
-    return list(filter(lambda x: x.kind is not None and "function" in x.kind.lower(),
-                       _list_app(cmd.cli_ctx, resource_group_name)))
+    return list(filter(lambda x: x.kind is not None and is_functionapp(x),
+                _list_app(cmd.cli_ctx, resource_group_name)))
 
 
 def show_app(cmd, resource_group_name, name, slot=None):
@@ -1598,12 +1610,12 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
                                                                           slot=slot))
 
 
-def update_container_settings_functionapp(cmd, resource_group_name, name, docker_registry_server_url=None,
-                                          docker_custom_image_name=None, docker_registry_server_user=None,
-                                          docker_registry_server_password=None, slot=None):
-    return update_container_settings(cmd, resource_group_name, name, docker_registry_server_url,
-                                     docker_custom_image_name, docker_registry_server_user, None,
-                                     docker_registry_server_password, multicontainer_config_type=None,
+def update_container_settings_functionapp(cmd, resource_group_name, name, registry_server=None,
+                                          image=None, registry_username=None,
+                                          registry_password=None, slot=None):
+    return update_container_settings(cmd, resource_group_name, name, registry_server,
+                                     image, registry_username, None,
+                                     registry_password, multicontainer_config_type=None,
                                      multicontainer_config_file=None, slot=slot)
 
 
@@ -1777,15 +1789,14 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
 
 
 def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_source=None,
-                            deployment_container_image_name=None, docker_registry_server_password=None,
-                            docker_registry_server_user=None):
-    container_args = deployment_container_image_name or docker_registry_server_password or docker_registry_server_user
+                            image=None, registry_password=None,
+                            registry_username=None):
+    container_args = image or registry_password or registry_username
     if container_args and not configuration_source:
-        raise ArgumentUsageError("Cannot use arguments --deployment-container-image_name, "
-                                 "--docker-registry-server_password, or --docker-registry-server-user without argument "
-                                 "--configuration-source")
+        raise ArgumentUsageError("Cannot use image, password and username arguments without "
+                                 "--configuration-source argument")
 
-    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
+    docker_registry_server_url = parse_docker_image_name(image)
 
     Site = cmd.get_models('Site')
     client = web_client_factory(cmd.cli_ctx)
@@ -1800,8 +1811,8 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
 
     if configuration_source:
         update_slot_configuration_from_source(cmd, client, resource_group_name, name, slot, configuration_source,
-                                              deployment_container_image_name, docker_registry_server_password,
-                                              docker_registry_server_user,
+                                              image, registry_password,
+                                              registry_username,
                                               docker_registry_server_url=docker_registry_server_url)
 
     result.name = result.name.split('/')[-1]
@@ -2694,7 +2705,10 @@ def _get_log(url, user_name, password, log_file=None):
     r.release_conn()
 
 
-def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certificate_file, slot=None):
+def upload_ssl_cert(cmd, resource_group_name,
+                    name, certificate_password,
+                    certificate_file, slot=None,
+                    certificate_name=None):
     Certificate = cmd.get_models('Certificate')
     client = web_client_factory(cmd.cli_ctx)
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
@@ -2703,9 +2717,16 @@ def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certif
     hosting_environment_profile_param = (webapp.hosting_environment_profile.name
                                          if webapp.hosting_environment_profile else '')
 
-    thumb_print = _get_cert(certificate_password, certificate_file)
-    cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
-                                    webapp.location, resource_group_name)
+    try:
+        thumb_print = _get_cert(certificate_password, certificate_file)
+    except OpenSSL.crypto.Error as e:
+        raise UnclassifiedUserFault(f"Failed to get the certificate's thrumbprint with error: '{e}'. "
+                                    "Please double check the certificate password.") from e
+    if certificate_name:
+        cert_name = certificate_name
+    else:
+        cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
+                                        webapp.location, resource_group_name)
     cert = Certificate(password=certificate_password, pfx_blob=cert_contents,
                        location=webapp.location, server_farm_id=webapp.server_farm_id)
     return client.certificates.create_or_update(resource_group_name, cert_name, cert)
@@ -2743,7 +2764,7 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
     raise ResourceNotFoundError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
 
 
-def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certificate_name):
+def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certificate_name, certificate_name=None):
     Certificate = cmd.get_models('Certificate')
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, name)
@@ -2799,7 +2820,11 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     if not kv_secret_name:
         kv_secret_name = key_vault_certificate_name
 
-    cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
+        if certificate_name:
+            cert_name = certificate_name
+        else:
+            cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
+
     lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
     lnk_msg = 'Find more details here: {}'.format(lnk)
     if not _check_service_principal_permissions(cmd, kv_resource_group_name, kv_name, kv_subscription):
@@ -2814,7 +2839,7 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
                                                 certificate_envelope=kv_cert_def)
 
 
-def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None):
+def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None, certificate_name=None):
     Certificate = cmd.get_models('Certificate')
     hostname = hostname.lower()
     client = web_client_factory(cmd.cli_ctx)
@@ -2844,7 +2869,8 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
 
     # TODO: Update manual polling to use LongRunningOperation once backend API & new SDK supports polling
     try:
-        return client.certificates.create_or_update(name=hostname, resource_group_name=resource_group_name,
+        certificate_name = hostname if not certificate_name else certificate_name
+        return client.certificates.create_or_update(name=certificate_name, resource_group_name=resource_group_name,
                                                     certificate_envelope=easy_cert_def)
     except Exception as ex:
         poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
@@ -2863,7 +2889,7 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
                     return r.text
             logger.warning("Managed Certificate creation in progress. Please use the command "
                            "'az webapp config ssl show -g %s --certificate-name %s' "
-                           " to view your certificate once it is created", resource_group_name, hostname)
+                           " to view your certificate once it is created", resource_group_name, certificate_name)
             return
         raise CLIError(ex)
 
@@ -2905,7 +2931,7 @@ def _update_host_name_ssl_state(cmd, resource_group_name, webapp_name, webapp,
                                    slot, updated_webapp)
 
 
-def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
+def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, ssl_type, hostname, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, name)
     if not webapp:
@@ -2924,14 +2950,16 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
             if webapp_cert.thumbprint == certificate_thumbprint:
                 found_cert = webapp_cert
     if found_cert:
-        if len(found_cert.host_names) == 1 and not found_cert.host_names[0].startswith('*'):
-            return _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
-                                               found_cert.host_names[0], ssl_type,
-                                               certificate_thumbprint, slot)
-
-        query_result = list_hostnames(cmd, resource_group_name, name, slot)
-        hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
-        to_update = _match_host_names_from_cert(found_cert.host_names, hostnames_in_webapp)
+        if not hostname:
+            if len(found_cert.host_names) == 1 and not found_cert.host_names[0].startswith('*'):
+                return _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
+                                                   found_cert.host_names[0], ssl_type,
+                                                   certificate_thumbprint, slot)
+            query_result = list_hostnames(cmd, resource_group_name, name, slot)
+            hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
+            to_update = _match_host_names_from_cert(found_cert.host_names, hostnames_in_webapp)
+        else:
+            to_update = [hostname]
         for h in to_update:
             _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
                                         h, ssl_type, certificate_thumbprint, slot)
@@ -2941,16 +2969,16 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
     raise ResourceNotFoundError("Certificate for thumbprint '{}' not found.".format(certificate_thumbprint))
 
 
-def bind_ssl_cert(cmd, resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
+def bind_ssl_cert(cmd, resource_group_name, name, certificate_thumbprint, ssl_type, hostname=None, slot=None):
     SslState = cmd.get_models('SslState')
     return _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint,
-                               SslState.sni_enabled if ssl_type == 'SNI' else SslState.ip_based_enabled, slot)
+                               SslState.sni_enabled if ssl_type == 'SNI' else SslState.ip_based_enabled, hostname, slot)
 
 
-def unbind_ssl_cert(cmd, resource_group_name, name, certificate_thumbprint, slot=None):
+def unbind_ssl_cert(cmd, resource_group_name, name, certificate_thumbprint, hostname=None, slot=None):
     SslState = cmd.get_models('SslState')
     return _update_ssl_binding(cmd, resource_group_name, name,
-                               certificate_thumbprint, SslState.disabled, slot)
+                               certificate_thumbprint, SslState.disabled, hostname, slot)
 
 
 def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
@@ -3499,9 +3527,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        consumption_plan_location=None, app_insights=None, app_insights_key=None,
                        disable_app_insights=None, deployment_source_url=None,
                        deployment_source_branch='master', deployment_local_git=None,
-                       docker_registry_server_password=None, docker_registry_server_user=None,
-                       deployment_container_image_name=None, tags=None, assign_identities=None,
-                       role='Contributor', scope=None, vnet=None, subnet=None, https_only=False):
+                       registry_password=None, registry_username=None,
+                       image=None, tags=None, assign_identities=None,
+                       role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, environment=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
@@ -3514,7 +3542,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                              "--plan NAME_OR_ID | --consumption-plan-location LOCATION")
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair = cmd.get_models('SiteConfig', 'NameValuePair')
-    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
+    docker_registry_server_url = parse_docker_image_name(image)
     disable_app_insights = (disable_app_insights == "true")
 
     site_config = SiteConfig(app_settings=[])
@@ -3584,12 +3612,33 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         raise ValidationError("2.x functions are not supported in this region. To create a 3.x function, "
                               "pass in the flag '--functions-version 3'")
 
-    if is_linux and not runtime and (consumption_plan_location or not deployment_container_image_name):
+    if is_linux and not runtime and (consumption_plan_location or not image):
         raise ArgumentUsageError(
             "usage error: --runtime RUNTIME required for linux functions apps without custom image.")
 
     if runtime is None and runtime_version is not None:
         raise ArgumentUsageError('Must specify --runtime to use --runtime-version')
+
+    # TODO use managed-environment field on ASP model when we the latest SDK is avaliable.
+    if environment is not None:
+        if consumption_plan_location is not None:
+            raise ArgumentUsageError(
+                'The --consumption-plan-location argument is not relevant for managed environment deployments')
+
+        managed_environment = get_managed_environment(cmd, resource_group_name, environment)
+
+        validate_same_location(cmd,
+                               managed_environment.location,
+                               functionapp_def.location,
+                               'The plan location must match the managed environment location')
+
+        functionapp_def.enable_additional_properties_sending()
+        existing_properties = functionapp_def.serialize()["properties"]
+        functionapp_def.additional_properties["properties"] = existing_properties
+        functionapp_def.additional_properties["properties"]["managedEnvironment"] = managed_environment.id
+
+        if image is None:
+            image = HELLO_WORLD_IMAGE
 
     runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=(not is_linux))
     matched_runtime = runtime_helper.resolve("dotnet" if not runtime else runtime,
@@ -3607,14 +3656,14 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         if not is_consumption:
             site_config.app_settings.append(NameValuePair(name='MACHINEKEY_DecryptionKey',
                                                           value=str(hexlify(urandom(32)).decode()).upper()))
-            if deployment_container_image_name:
+            if image:
                 functionapp_def.kind = 'functionapp,linux,container'
                 site_config.app_settings.append(NameValuePair(name='DOCKER_CUSTOM_IMAGE_NAME',
-                                                              value=deployment_container_image_name))
+                                                              value=image))
                 site_config.app_settings.append(NameValuePair(name='FUNCTION_APP_EDIT_MODE', value='readOnly'))
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='false'))
-                site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
+                site_config.linux_fx_version = _format_fx_version(image)
 
                 # clear all runtime specific configs and settings
                 site_config_dict.use32_bit_worker_process = False
@@ -3690,10 +3739,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             update_app_settings(cmd, functionapp.resource_group, functionapp.name,
                                 ['AzureWebJobsDashboard={}'.format(con_string)])
 
-    if deployment_container_image_name:
+    if image:
         update_container_settings_functionapp(cmd, resource_group_name, name, docker_registry_server_url,
-                                              deployment_container_image_name, docker_registry_server_user,
-                                              docker_registry_server_password)
+                                              image, registry_username,
+                                              registry_password)
 
     if assign_identities is not None:
         identity = assign_identity(cmd, resource_group_name, name, assign_identities,

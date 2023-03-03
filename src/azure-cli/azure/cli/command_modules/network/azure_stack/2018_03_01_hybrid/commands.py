@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
-# pylint: disable=too-many-locals, too-many-statements
+# pylint: disable=too-many-locals, too-many-statements, disable=line-too-long
 def load_command_table(self, _):
     from .operations import import_aaz_by_profile
 
@@ -106,17 +106,27 @@ def load_command_table(self, _):
 
     # endregion
 
-    # region NetworkSecurityGroups
-    from .operations.nsg import NSGCreate, NSGRuleCreate, NSGRuleUpdate
-    from .._format import transform_nsg_rule_table_output
-    operations_tmpl = self.get_module_name_by_profile("operations.nsg#{}")
-    nsgRule = import_aaz_by_profile("network.nsg.rule")
-    self.command_table["network nsg create"] = NSGCreate(loader=self)
+    # region NetworkRoot
+    with self.command_group('network'):
+        from .operations.locations import UsagesList
+        from .._format import transform_network_usage_table
+        self.command_table['network list-usages'] = UsagesList(loader=self,
+                                                               table_transformer=transform_network_usage_table)
+    # endregion
 
-    self.command_table["network nsg rule create"] = NSGRuleCreate(loader=self)
-    self.command_table["network nsg rule update"] = NSGRuleUpdate(loader=self)
+    # region PublicIPAddresses
+    public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$Address:ipAddress, AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
+    public_ip_show_table_transform = public_ip_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ')
 
-    self.command_table["network nsg rule show"] = nsgRule.Show(loader=self, table_transformer=transform_nsg_rule_table_output)
-    with self.command_group("network nsg rule", operations_tmpl=operations_tmpl) as g:
-        g.custom_command("list", "list_nsg_rules", table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
+    public_ip = import_aaz_by_profile("network.public_ip")
+    operations_tmpl = self.get_module_name_by_profile("operations.public_ip#{}")
+    from .._format import transform_public_ip_create_output
+    from .._validators import process_public_ip_create_namespace
+
+    with self.command_group('network public-ip', operations_tmpl=operations_tmpl) as g:
+        g.custom_command("create", "create_public_ip", transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
+
+    self.command_table['network public-ip list'] = public_ip.List(loader=self, table_transformer='[].' + public_ip_show_table_transform)
+    self.command_table['network public-ip show'] = public_ip.Show(loader=self, table_transformer=public_ip_show_table_transform)
+
     # endregion

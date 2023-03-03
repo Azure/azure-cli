@@ -76,7 +76,7 @@ def get_vnet_validator(dest):
     from msrestazure.tools import is_valid_resource_id, resource_id
 
     def _validate_vnet_name_or_id(cmd, namespace):
-        SubResource = cmd.get_models('SubResource')
+        SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_NETWORK_DNS)
         subscription_id = get_subscription_id(cmd.cli_ctx)
 
         resource_group = namespace.resource_group_name
@@ -246,19 +246,6 @@ def validate_ssl_cert(namespace):
             pass
 
 
-def validate_delegations(cmd, namespace):
-    if namespace.delegations:
-        Delegation = cmd.get_models('Delegation')
-        delegations = []
-        for i, item in enumerate(namespace.delegations):
-            if '/' not in item and len(item.split('.')) == 3:
-                # convert names to serviceNames
-                _, service, resource_type = item.split('.')
-                item = 'Microsoft.{}/{}'.format(service, resource_type)
-            delegations.append(Delegation(name=str(i), service_name=item))
-        namespace.delegations = delegations
-
-
 def validate_dns_record_type(namespace):
     tokens = namespace.command.split(' ')
     types = ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'soa', 'srv', 'txt']
@@ -281,18 +268,6 @@ def validate_user_assigned_identity(cmd, namespace):
             namespace='Microsoft.ManagedIdentity',
             type='userAssignedIdentities',
             name=namespace.user_assigned_identity
-        )
-
-
-def validate_virtul_network_gateway(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    if namespace.hosted_gateway and not is_valid_resource_id(namespace.hosted_gateway):
-        namespace.hosted_gateway = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type='virtualNetworkGateways',
-            name=namespace.hosted_gateway
         )
 
 
@@ -360,22 +335,6 @@ def validate_local_gateway(cmd, namespace):
             name=namespace.gateway_default_site,
             namespace='Microsoft.Network',
             type='localNetworkGateways')
-
-
-def validate_match_variables(cmd, namespace):
-    if not namespace.match_variables:
-        return
-
-    MatchVariable = cmd.get_models('MatchVariable')
-    variables = []
-    for match in namespace.match_variables:
-        try:
-            name, selector = match.split('.', 1)
-        except ValueError:
-            name = match
-            selector = None
-        variables.append(MatchVariable(variable_name=name, selector=selector))
-    namespace.match_variables = variables
 
 
 def validate_metadata(namespace):
@@ -550,7 +509,7 @@ def get_servers_validator(camel_case=False):
 
 def validate_subresource_list(cmd, namespace):
     if namespace.target_resources:
-        SubResource = cmd.get_models('SubResource')
+        SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_NETWORK_DNS)
         subresources = []
         for item in namespace.target_resources:
             subresources.append(SubResource(id=item))
@@ -808,135 +767,6 @@ def process_nw_cm_v1_create_namespace(cmd, namespace):
             namespace='Microsoft.Compute',
             type='virtualMachines',
             name=namespace.dest_resource)
-
-
-def process_nw_cm_v2_create_namespace(cmd, namespace):
-    validate_tags(namespace)
-    if namespace.location is None:  # location is None only occurs in creating a V2 connection monitor
-        endpoint_source_resource_id = namespace.endpoint_source_resource_id
-
-        from msrestazure.tools import is_valid_resource_id, parse_resource_id
-        from azure.mgmt.resource import ResourceManagementClient
-
-        # parse and verify endpoint_source_resource_id
-        if endpoint_source_resource_id is None:
-            raise CLIError('usage error: '
-                           '--location/--endpoint-source-resource-id is required to create a V2 connection monitor')
-        if is_valid_resource_id(endpoint_source_resource_id) is False:
-            raise CLIError('usage error: "{}" is not a valid resource id'.format(endpoint_source_resource_id))
-
-        resource = parse_resource_id(namespace.endpoint_source_resource_id)
-        resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceManagementClient)
-        resource_api_version = _resolve_api_version(resource_client,
-                                                    resource['namespace'],
-                                                    resource['resource_parent'],
-                                                    resource['resource_type'])
-        resource = resource_client.resources.get_by_id(namespace.endpoint_source_resource_id, resource_api_version)
-
-        namespace.location = resource.location
-        if namespace.location is None:
-            raise CLIError("Can not get location from --endpoint-source-resource-id")
-
-    v2_required_parameter_set = [
-        'endpoint_source_resource_id', 'endpoint_source_name', 'endpoint_dest_name', 'test_config_name'
-    ]
-    for p in v2_required_parameter_set:
-        if not hasattr(namespace, p) or getattr(namespace, p) is None:
-            raise CLIError(
-                'usage error: --{} is required to create a V2 connection monitor'.format(p.replace('_', '-')))
-    if namespace.test_config_protocol is None:
-        raise CLIError('usage error: --protocol is required to create a test configuration for V2 connection monitor')
-
-    v2_optional_parameter_set = ['workspace_ids']
-    if namespace.output_type is not None:
-        tmp = [p for p in v2_optional_parameter_set if getattr(namespace, p) is None]
-        if v2_optional_parameter_set == tmp:
-            raise CLIError('usage error: --output-type is specified but no other resource id provided')
-
-    return get_network_watcher_from_location()(cmd, namespace)
-
-
-def process_nw_cm_v2_endpoint_namespace(cmd, namespace):
-    if hasattr(namespace, 'filter_type') or hasattr(namespace, 'filter_items'):
-        filter_type, filter_items = namespace.filter_type, namespace.filter_items
-        if (filter_type and not filter_items) or (not filter_type and filter_items):
-            raise CLIError('usage error: --filter-type and --filter-item must be present at the same time.')
-
-    if hasattr(namespace, 'dest_test_groups') or hasattr(namespace, 'source_test_groups'):
-        dest_test_groups, source_test_groups = namespace.dest_test_groups, namespace.source_test_groups
-        if dest_test_groups is None and source_test_groups is None:
-            raise CLIError('usage error: endpoint has to be referenced from at least one existing test group '
-                           'via --dest-test-groups/--source-test-groups')
-
-    return get_network_watcher_from_location()(cmd, namespace)
-
-
-def process_nw_cm_v2_test_configuration_namespace(cmd, namespace):
-    return get_network_watcher_from_location()(cmd, namespace)
-
-
-def process_nw_cm_v2_test_group(cmd, namespace):
-    return get_network_watcher_from_location()(cmd, namespace)
-
-
-def process_nw_cm_v2_output_namespace(cmd, namespace):
-    v2_output_optional_parameter_set = ['workspace_id']
-    if hasattr(namespace, 'out_type') and namespace.out_type is not None:
-        tmp = [p for p in v2_output_optional_parameter_set if getattr(namespace, p) is None]
-        if v2_output_optional_parameter_set == tmp:
-            raise CLIError('usage error: --type is specified but no other resource id provided')
-
-    return get_network_watcher_from_location()(cmd, namespace)
-
-
-# pylint: disable=protected-access,too-few-public-methods
-class NWConnectionMonitorEndpointFilterItemAction(argparse._AppendAction):
-    def __call__(self, parser, namespace, values, option_string=None):
-        ConnectionMonitorEndpointFilterItem = namespace._cmd.get_models('ConnectionMonitorEndpointFilterItem')
-
-        if not namespace.filter_items:
-            namespace.filter_items = []
-
-        filter_item = ConnectionMonitorEndpointFilterItem()
-
-        for item in values:
-            try:
-                key, val = item.split('=', 1)
-
-                if hasattr(filter_item, key):
-                    setattr(filter_item, key, val)
-                else:
-                    raise CLIError(
-                        "usage error: '{}' is not a valid property of ConnectionMonitorEndpointFilterItem".format(key))
-            except ValueError:
-                raise CLIError(
-                    'usage error: {} PropertyName=PropertyValue [PropertyName=PropertyValue ...]'.format(option_string))
-
-        namespace.filter_items.append(filter_item)
-
-
-# pylint: disable=protected-access,too-few-public-methods
-class NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction(argparse._AppendAction):
-    def __call__(self, parser, namespace, values, option_string=None):
-        HTTPHeader = namespace._cmd.get_models('HTTPHeader')
-
-        if not namespace.http_request_headers:
-            namespace.http_request_headers = []
-
-        request_header = HTTPHeader()
-
-        for item in values:
-            try:
-                key, val = item.split('=', 1)
-                if hasattr(request_header, key):
-                    setattr(request_header, key, val)
-                else:
-                    raise CLIError("usage error: '{}' is not a value property of HTTPHeader".format(key))
-            except ValueError:
-                raise CLIError(
-                    'usage error: {} name=HTTPHeader value=HTTPHeaderValue'.format(option_string))
-
-        namespace.http_request_headers.append(request_header)
 
 
 def _process_vnet_name_and_id(vnet, cmd, resource_group_name):
