@@ -74,6 +74,7 @@ def register_providers():
     _register_one_provider("Microsoft.KubernetesConfiguration/privateLinkScopes", '2022-04-02-preview', True)
     _register_one_provider("Microsoft.OpenEnergyPlatform/energyServices", '2022-04-04-preview', True)
     _register_one_provider("Microsoft.MachineLearningServices/registries", '2022-10-01-preview', True)
+    _register_one_provider('Microsoft.DBforMySQL/flexibleServers', '2022-09-30-privatepreview', False)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None, support_connection_operation=True):  # pylint: disable=line-too-long
