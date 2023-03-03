@@ -2705,7 +2705,10 @@ def _get_log(url, user_name, password, log_file=None):
     r.release_conn()
 
 
-def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certificate_file, slot=None):
+def upload_ssl_cert(cmd, resource_group_name,
+                    name, certificate_password,
+                    certificate_file, slot=None,
+                    certificate_name=None):
     Certificate = cmd.get_models('Certificate')
     client = web_client_factory(cmd.cli_ctx)
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
@@ -2719,8 +2722,11 @@ def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certif
     except OpenSSL.crypto.Error as e:
         raise UnclassifiedUserFault(f"Failed to get the certificate's thrumbprint with error: '{e}'. "
                                     "Please double check the certificate password.") from e
-    cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
-                                    webapp.location, resource_group_name)
+    if certificate_name:
+        cert_name = certificate_name
+    else:
+        cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
+                                        webapp.location, resource_group_name)
     cert = Certificate(password=certificate_password, pfx_blob=cert_contents,
                        location=webapp.location, server_farm_id=webapp.server_farm_id)
     return client.certificates.create_or_update(resource_group_name, cert_name, cert)
@@ -2758,7 +2764,7 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
     raise ResourceNotFoundError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
 
 
-def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certificate_name):
+def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certificate_name, certificate_name=None):
     Certificate = cmd.get_models('Certificate')
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, name)
@@ -2814,7 +2820,11 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     if not kv_secret_name:
         kv_secret_name = key_vault_certificate_name
 
-    cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
+        if certificate_name:
+            cert_name = certificate_name
+        else:
+            cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
+
     lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
     lnk_msg = 'Find more details here: {}'.format(lnk)
     if not _check_service_principal_permissions(cmd, kv_resource_group_name, kv_name, kv_subscription):
@@ -2829,7 +2839,7 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
                                                 certificate_envelope=kv_cert_def)
 
 
-def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None):
+def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None, certificate_name=None):
     Certificate = cmd.get_models('Certificate')
     hostname = hostname.lower()
     client = web_client_factory(cmd.cli_ctx)
@@ -2859,7 +2869,8 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
 
     # TODO: Update manual polling to use LongRunningOperation once backend API & new SDK supports polling
     try:
-        return client.certificates.create_or_update(name=hostname, resource_group_name=resource_group_name,
+        certificate_name = hostname if not certificate_name else certificate_name
+        return client.certificates.create_or_update(name=certificate_name, resource_group_name=resource_group_name,
                                                     certificate_envelope=easy_cert_def)
     except Exception as ex:
         poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
@@ -2878,7 +2889,7 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
                     return r.text
             logger.warning("Managed Certificate creation in progress. Please use the command "
                            "'az webapp config ssl show -g %s --certificate-name %s' "
-                           " to view your certificate once it is created", resource_group_name, hostname)
+                           " to view your certificate once it is created", resource_group_name, certificate_name)
             return
         raise CLIError(ex)
 
