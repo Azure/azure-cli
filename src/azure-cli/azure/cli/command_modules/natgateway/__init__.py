@@ -6,7 +6,6 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core import AzCommandsLoader
-from azure.cli.core.profiles import ResourceType
 
 from ._help import helps  # pylint: disable=unused-import
 
@@ -18,13 +17,22 @@ class NatGatewayCommandsLoader(AzCommandsLoader):
         natgateway_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.natgateway.custom#{}')
         super(NatGatewayCommandsLoader, self).__init__(
             cli_ctx=cli_ctx,
-            min_api='2019-02-01',
-            resource_type=ResourceType.MGMT_NETWORK,
             custom_command_type=natgateway_custom
         )
 
     def load_command_table(self, args):
         from .commands import load_command_table
+        from azure.cli.core.aaz import load_aaz_command_table
+        try:
+            from . import aaz
+        except ImportError:
+            aaz = None
+        if aaz:
+            load_aaz_command_table(
+                loader=self,
+                aaz_pkg_name=aaz.__name__,
+                args=args
+            )
         load_command_table(self, args)
         return self.command_table
 

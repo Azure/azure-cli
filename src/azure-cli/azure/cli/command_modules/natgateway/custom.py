@@ -3,51 +3,98 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.aaz.utils import assign_aaz_list_arg
 
-from knack.log import get_logger
-
-logger = get_logger(__name__)
+from .aaz.latest.network.nat.gateway import Create as _NATGatewayCreate, Update as _NATGatewayUpdate
 
 
-def network_client_factory(cli_ctx, **kwargs):
-    from azure.cli.core.profiles import ResourceType
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK, **kwargs)
+class NATGatewayCreate(_NATGatewayCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.public_ip_addresses = AAZListArg(
+            options=["--public-ip-addresses"],
+            help="Space-separated list of public IP addresses (Names or IDs).",
+        )
+        args_schema.public_ip_addresses.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/publicIPAddresses/{}",
+            ),
+        )
+        args_schema.public_ip_prefixes = AAZListArg(
+            options=["--public-ip-prefixes"],
+            help="Space-separated list of public IP prefixes (Names or IDs).",
+        )
+        args_schema.public_ip_prefixes.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/publicIPPrefixes/{}",
+            ),
+        )
+        args_schema.pip_addresses._registered = False
+        args_schema.pip_prefixes._registered = False
+        args_schema.sku._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.pip_addresses = assign_aaz_list_arg(
+            args.pip_addresses,
+            args.public_ip_addresses,
+            element_transformer=lambda _, address_id: {"id": address_id}
+        )
+        args.pip_prefixes = assign_aaz_list_arg(
+            args.pip_prefixes,
+            args.public_ip_prefixes,
+            element_transformer=lambda _, prefix_id: {"id": prefix_id}
+        )
+        args.sku.name = "Standard"
 
 
-def create_nat_gateway(cmd, nat_gateway_name, resource_group_name,
-                       location=None, public_ip_addresses=None,
-                       public_ip_prefixes=None, idle_timeout=None, zone=None, no_wait=False):
+class NATGatewayUpdate(_NATGatewayUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.public_ip_addresses = AAZListArg(
+            options=["--public-ip-addresses"],
+            help="Space-separated list of public IP addresses (Names or IDs).",
+            nullable=True,
+        )
+        args_schema.public_ip_addresses.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/publicIPAddresses/{}",
+            ),
+            nullable=True,
+        )
+        args_schema.public_ip_prefixes = AAZListArg(
+            options=["--public-ip-prefixes"],
+            help="Space-separated list of public IP prefixes (Names or IDs).",
+            nullable=True,
+        )
+        args_schema.public_ip_prefixes.Element = AAZResourceIdArg(
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                         "/publicIPPrefixes/{}",
+            ),
+            nullable=True,
+        )
+        args_schema.pip_addresses._registered = False
+        args_schema.pip_prefixes._registered = False
+        return args_schema
 
-    client = network_client_factory(cmd.cli_ctx).nat_gateways
-    NatGateway, NatGatewaySku = cmd.get_models('NatGateway', 'NatGatewaySku')
-
-    nat_gateway = NatGateway(name=nat_gateway_name,
-                             location=location,
-                             sku=NatGatewaySku(name='Standard'),
-                             idle_timeout_in_minutes=idle_timeout,
-                             zones=zone,
-                             public_ip_addresses=public_ip_addresses,
-                             public_ip_prefixes=public_ip_prefixes)
-
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, nat_gateway_name, nat_gateway)
-
-
-def update_nat_gateway(instance, cmd, public_ip_addresses=None,
-                       public_ip_prefixes=None, idle_timeout=None):
-
-    with cmd.update_context(instance) as c:
-        c.set_param('idle_timeout_in_minutes', idle_timeout)
-        if public_ip_addresses is not None:
-            c.set_param('public_ip_addresses', public_ip_addresses)
-        if public_ip_prefixes is not None:
-            c.set_param('public_ip_prefixes', public_ip_prefixes)
-    return instance
-
-
-def list_nat_gateway(cmd, resource_group_name=None):
-    client = network_client_factory(cmd.cli_ctx).nat_gateways
-    if resource_group_name:
-        return client.list(resource_group_name)
-    return client.list_all()
+    def pre_operations(self):
+        args = self.ctx.args
+        args.pip_addresses = assign_aaz_list_arg(
+            args.pip_addresses,
+            args.public_ip_addresses,
+            element_transformer=lambda _, address_id: {"id": address_id}
+        )
+        args.pip_prefixes = assign_aaz_list_arg(
+            args.pip_prefixes,
+            args.public_ip_prefixes,
+            element_transformer=lambda _, prefix_id: {"id": prefix_id}
+        )
