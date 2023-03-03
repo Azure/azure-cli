@@ -88,7 +88,8 @@ def load_arguments(self, _):
     # region ApplicationGateways
     with self.argument_context('network application-gateway') as c:
         c.argument('application_gateway_name', app_gateway_name_type, options_list=['--name', '-n'])
-        c.argument('sku', arg_group='Gateway', help='The name of the SKU.', arg_type=get_enum_type(ApplicationGatewaySkuName), default=ApplicationGatewaySkuName.standard_medium.value)
+        skus = ["Standard_Small", "Standard_Medium", "WAF_Medium", "WAF_Large", "Standard_v2", "WAF_v2"]
+        c.argument('sku', arg_group='Gateway', help='The name of the SKU.', arg_type=get_enum_type(skus), default="Standard_Medium")
         c.argument('min_capacity', min_api='2018-07-01', help='Lower bound on the number of application gateway instances.', type=int)
         c.argument('max_capacity', min_api='2018-12-01', help='Upper bound on the number of application gateway instances.', type=int)
         c.ignore('virtual_network_type', 'private_ip_address_allocation')
