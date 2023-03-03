@@ -3,13 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument
-from knack.log import get_logger
-from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.aaz import AAZResourceIdArgFormat, has_value, AAZListArg, AAZResourceIdArg, \
-    AAZStrArg, AAZArgEnum, AAZListArgFormat
+    AAZStrArg, AAZListArgFormat
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
-from ._util import import_aaz_by_profile
+from knack.log import get_logger
 
+from ._util import import_aaz_by_profile
 
 logger = get_logger(__name__)
 

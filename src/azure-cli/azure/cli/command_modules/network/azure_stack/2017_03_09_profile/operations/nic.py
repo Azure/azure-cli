@@ -3,13 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument
-from knack.log import get_logger
-from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.aaz import AAZResourceIdArgFormat, has_value, AAZListArg, AAZResourceIdArg, \
-    AAZStrArg, AAZArgEnum, AAZListArgFormat
+    AAZStrArg, AAZListArgFormat
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
-from ._util import import_aaz_by_profile
+from knack.log import get_logger
 
+from ._util import import_aaz_by_profile
 
 logger = get_logger(__name__)
 
@@ -386,7 +385,6 @@ def add_nic_ip_config_address_pool(cmd, resource_group_name, network_interface_n
         "pool_id": backend_address_pool
     }
     return LBPoolAdd(cli_ctx=cmd.cli_ctx)(command_args=arguments)
-
 
 
 def remove_nic_ip_config_address_pool(cmd, resource_group_name, network_interface_name, ip_config_name,
