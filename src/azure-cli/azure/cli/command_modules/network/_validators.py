@@ -44,34 +44,6 @@ def _resolve_api_version(rcf, resource_provider_namespace, parent_resource_path,
         'API version is required and could not be resolved for resource {}'.format(resource_type))
 
 
-def get_asg_validator(loader, dest):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-
-    ApplicationSecurityGroup = loader.get_models('ApplicationSecurityGroup')
-
-    def _validate_asg_name_or_id(cmd, namespace):
-        subscription_id = get_subscription_id(cmd.cli_ctx)
-        resource_group = namespace.resource_group_name
-        names_or_ids = getattr(namespace, dest)
-        ids = []
-
-        if names_or_ids == [""] or not names_or_ids:
-            return
-
-        for val in names_or_ids:
-            if not is_valid_resource_id(val):
-                val = resource_id(
-                    subscription=subscription_id,
-                    resource_group=resource_group,
-                    namespace='Microsoft.Network', type='applicationSecurityGroups',
-                    name=val
-                )
-            ids.append(ApplicationSecurityGroup(id=val))
-        setattr(namespace, dest, ids)
-
-    return _validate_asg_name_or_id
-
-
 def get_vnet_validator(dest):
     from msrestazure.tools import is_valid_resource_id, resource_id
 
