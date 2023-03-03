@@ -85,7 +85,7 @@ Release History
 * [BREAKING CHANGE] `az network nic create/update`: Rename output property `enableIpForwarding` to `enableIPForwarding` to keep consistent with the name in API (#25454)
 * [BREAKING CHANGE] `az network nic create/update`: Rename output property `privateIpAllocationMethod` to `privateIPAllocationMethod` to keep consistent with the name in API (#25454)
 * [BREAKING CHANGE] `az network nic create/update`: Rename output property `publicIpAddress` to `publicIPAddress` to keep consistent with the name in API (#25454)
-* [BREAKING CHANGE] `az network lb`: Updated output property names in `2017-03-09-profile`, `2018-03-01-hybrid`, `2019-03-01-hybrid` and `2019-03-01-hybrid` profiles to keep consist with the `latest` profile. (#25494)
+* [BREAKING CHANGE] `az network lb`: Update output property names in `2017-03-09-profile`, `2018-03-01-hybrid`, `2019-03-01-hybrid` and `2019-03-01-hybrid` profiles to keep consist with the `latest` profile. (#25494)
 * [BREAKING CHANGE] `az network cross-region-lb`: Remove in `2017-03-09-profile`, `2018-03-01-hybrid`, `2019-03-01-hybrid` and `2019-03-01-hybrid` profiles. (#25494)
 * [BREAKING CHANGE] `az network nic ip-config`: Rename output property `privateIpAddress` to `privateIPAddress` to keep consistent with the name in API (#25498)
 * [BREAKING CHANGE] `az network nic ip-config`: Rename output property `privateIpAllocationMethod` to `privateIPAllocationMethod` to keep consistent with the name in API (#25498)
