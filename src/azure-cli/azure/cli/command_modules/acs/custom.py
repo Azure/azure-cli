@@ -2257,7 +2257,6 @@ def aks_agentpool_operation_abort(cmd,   # pylint: disable=unused-argument
                                   no_wait=False):
     PowerState = cmd.get_models(
         "PowerState",
-        resource_type=CUSTOM_MGMT_AKS_PREVIEW,
         operation_group="agent_pools",
     )
 
@@ -2285,7 +2284,7 @@ def aks_operation_abort(cmd,   # pylint: disable=unused-argument
                         no_wait=False):
     PowerState = cmd.get_models(
         "PowerState",
-        resource_type=CUSTOM_MGMT_AKS_PREVIEW,
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         operation_group="managed_clusters",
     )
 
