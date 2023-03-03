@@ -150,7 +150,7 @@ def load_command_table(self, _):
     from .._format import transform_nsg_rule_table_output
     operations_tmpl = self.get_module_name_by_profile("operations.nsg#{}")
     nsgRule = import_aaz_by_profile("network.nsg.rule")
-    # self.command_table["network nsg create"] = NSGCreate(loader=self)
+    self.command_table["network nsg create"] = NSGCreate(loader=self)
 
     self.command_table["network nsg rule create"] = NSGRuleCreate(loader=self)
     self.command_table["network nsg rule update"] = NSGRuleUpdate(loader=self)
