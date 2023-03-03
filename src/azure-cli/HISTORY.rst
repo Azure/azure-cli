@@ -95,6 +95,7 @@ Release History
 * [BREAKING CHANGE] `az network local-gateway`: Update output property names in `2017-03-09-profile`, `2018-03-01-hybrid`, `2019-03-01-hybrid` and `2019-03-01-hybrid` profiles to keep consist with the `latest` profile. (#25513)
 * [BREAKING CHANGE] `az network vpn-connection`: Update output property names in `2017-03-09-profile`, `2018-03-01-hybrid`, `2019-03-01-hybrid` and `2019-03-01-hybrid` profiles to keep consist with the `latest` profile. (#25536)
 * [BREAKING CHANGE] `az network vnet-gateway`: Update output property names in `2017-03-09-profile`, `2018-03-01-hybrid`, `2019-03-01-hybrid` and `2019-03-01-hybrid` profiles to keep consist with the `latest` profile. (#25588)
+* [BREAKING CHANGE] `az network nic`: Update output property names in `2017-03-09-profile`, `2018-03-01-hybrid`, `2019-03-01-hybrid` and `2019-03-01-hybrid` profiles to keep consist with the `latest` profile (#25645)
 * [BREAKING CHANGE] `az network watcher flow-log`: Remove the deprecated command `configure` (#25559)
 * [BREAKING CHANGE] `az network vrouter`: Deprecate `vrouter` and use `routeserver` instead (#25603)
 * [BREAKING CHANGE] `az network watcher connection-monitor endpoint add`: Remove deprecated parameters `filter-item` and `filter-type` (#25518)
