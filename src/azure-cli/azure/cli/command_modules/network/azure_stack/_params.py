@@ -1274,66 +1274,10 @@ def load_arguments(self, _):
     # endregion
 
     # region NetworkSecurityGroups
-    with self.argument_context('network nsg') as c:
-        c.argument('network_security_group_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'), id_part='name')
-
-    with self.argument_context('network nsg create') as c:
-        c.argument('name', name_arg_type)
-
     with self.argument_context('network nsg rule') as c:
         c.argument('security_rule_name', name_arg_type, id_part='child_name_1', help='Name of the network security group rule')
         c.argument('network_security_group_name', options_list='--nsg-name', metavar='NSGNAME', help='Name of the network security group', id_part='name')
         c.argument('include_default', help='Include default security rules in the output.')
-
-    with self.argument_context('network nsg rule create') as c:
-        c.argument('network_security_group_name', options_list='--nsg-name', metavar='NSGNAME', help='Name of the network security group', id_part=None)
-
-    for item in ['create', 'update']:
-        with self.argument_context('network nsg rule {}'.format(item)) as c:
-            c.argument('priority', help='Rule priority, between 100 (highest priority) and 4096 (lowest priority). Must be unique for each rule in the collection.', type=int)
-            c.argument('description', help='Rule description')
-            c.argument('access', help=None, arg_type=get_enum_type(SecurityRuleAccess), default=SecurityRuleAccess.allow.value if item == 'create' else None)
-            c.argument('protocol', help='Network protocol this rule applies to.', arg_type=get_enum_type(SecurityRuleProtocol), default=SecurityRuleProtocol.asterisk.value if item == 'create' else None)
-            c.argument('direction', help=None, arg_type=get_enum_type(SecurityRuleDirection), default=SecurityRuleDirection.inbound.value if item == 'create' else None)
-
-        with self.argument_context('network nsg rule {}'.format(item), min_api='2017-06-01') as c:
-            c.argument('source_port_ranges', nargs='+', help="Space-separated list of ports or port ranges between 0-65535. Use '*' to match all ports.", arg_group='Source')
-            c.argument('source_address_prefixes',
-                       nargs='+',
-                       help="Space-separated list of CIDR prefixes or IP ranges. "
-                            "Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' "
-                            "to match all IPs. Besides, it also supports all available Service Tags like "
-                            "'ApiManagement', 'SqlManagement', 'AzureMonitor', etc.",
-                       arg_group='Source')
-            c.argument('destination_port_ranges', nargs='+', help="Space-separated list of ports or port ranges between 0-65535. Use '*' to match all ports.", arg_group='Destination')
-            c.argument('destination_address_prefixes',
-                       nargs='+',
-                       help="Space-separated list of CIDR prefixes or IP ranges. "
-                            "Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' "
-                            "to match all IPs. Besides, it also supports all available Service Tags like "
-                            "'ApiManagement', 'SqlManagement', 'AzureMonitor', etc.",
-                       arg_group='Destination')
-
-        with self.argument_context('network nsg rule {}'.format(item), max_api='2017-03-01') as c:
-            c.argument('source_port_range', help="Port or port range between 0-65535. Use '*' to match all ports.", arg_group='Source')
-            c.argument('source_address_prefix',
-                       help="Space-separated list of CIDR prefixes or IP ranges. "
-                            "Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' "
-                            "to match all IPs. Besides, it also supports all available Service Tags like "
-                            "'ApiManagement', 'SqlManagement', 'AzureMonitor', etc.",
-                       arg_group='Source')
-            c.argument('destination_port_range', help="Port or port range between 0-65535. Use '*' to match all ports.", arg_group='Destination')
-            c.argument('destination_address_prefix',
-                       help="Space-separated list of CIDR prefixes or IP ranges. "
-                            "Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' "
-                            "to match all IPs. Besides, it also supports all available Service Tags like "
-                            "'ApiManagement', 'SqlManagement', 'AzureMonitor', etc.",
-                       arg_group='Destination')
-
-        with self.argument_context('network nsg rule {}'.format(item), min_api='2017-09-01') as c:
-            c.argument('source_asgs', nargs='+', help="Space-separated list of application security group names or IDs. Limited by backend server, temporarily this argument only supports one application security group name or ID", arg_group='Source', validator=get_asg_validator(self, 'source_asgs'))
-            c.argument('destination_asgs', nargs='+', help="Space-separated list of application security group names or IDs. Limited by backend server, temporarily this argument only supports one application security group name or ID", arg_group='Destination', validator=get_asg_validator(self, 'destination_asgs'))
-
     # endregion
 
     # region NetworkWatchers
