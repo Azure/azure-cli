@@ -297,7 +297,7 @@ def load_arguments(self, _):
         c.argument('metadata', nargs='+', help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.', validator=validate_metadata)
 
     with self.argument_context('network dns list-references') as c:
-        c.argument('target_resources', nargs='+', min_api='2018-05-01', help='Space-separated list of resource IDs you wish to query.', validator=validate_subresource_list)
+        c.argument('target_resources', nargs='+', help='Space-separated list of resource IDs you wish to query.', validator=validate_subresource_list)
 
     with self.argument_context('network dns zone') as c:
         c.argument('zone_name', name_arg_type)
@@ -332,7 +332,7 @@ def load_arguments(self, _):
         c.argument('parent_zone_name', options_list=['--parent-name', '-p'], help='Specify if parent zone exists for this zone and delegation for the child zone in the parent is to be added.')
 
     with self.argument_context('network dns record-set') as c:
-        c.argument('target_resource', min_api='2018-05-01', help='ID of an Azure resource from which the DNS resource value is taken.')
+        c.argument('target_resource', help='ID of an Azure resource from which the DNS resource value is taken.')
         for item in ['record_type', 'record_set_type']:
             c.argument(item, ignore_type, validator=validate_dns_record_type)
 
