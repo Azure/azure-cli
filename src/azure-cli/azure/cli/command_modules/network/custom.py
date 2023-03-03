@@ -3602,6 +3602,9 @@ class PrivateEndpointCreate(_PrivateEndpointCreate):
         if has_value(args.subnet):
             args.subnet_id = args.subnet
 
+        if has_value(args.edge_zone):
+            args.edge_zone_type = 'EdgeZone'
+
 
 class PrivateEndpointUpdate(_PrivateEndpointUpdate):
     @classmethod
@@ -3778,6 +3781,9 @@ class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
             args.lb_frontend_ip_configs,
             element_transformer=lambda _, lb_frontend_ip_config: {"id": lb_frontend_ip_config}
         )
+
+        if has_value(args.edge_zone):
+            args.edge_zone_type = 'EdgeZone'
 
 
 class PrivateLinkServiceUpdate(_PrivateLinkServiceUpdate):
@@ -5529,46 +5535,6 @@ def list_nw_connection_monitor_v2_test_group(client,
     return connection_monitor.test_groups
 
 
-def add_nw_connection_monitor_v2_output(cmd,
-                                        client,
-                                        watcher_rg,
-                                        watcher_name,
-                                        connection_monitor_name,
-                                        location,
-                                        out_type,
-                                        workspace_id=None):
-    output = _create_nw_connection_monitor_v2_output(cmd, out_type, workspace_id)
-
-    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
-
-    if connection_monitor.outputs is None:
-        connection_monitor.outputs = []
-
-    connection_monitor.outputs.append(output)
-
-    return client.begin_create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
-
-
-def remove_nw_connection_monitor_v2_output(client,
-                                           watcher_rg,
-                                           watcher_name,
-                                           connection_monitor_name,
-                                           location):
-    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
-    connection_monitor.outputs = []
-
-    return client.begin_create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
-
-
-def list_nw_connection_monitor_v2_output(client,
-                                         watcher_rg,
-                                         watcher_name,
-                                         connection_monitor_name,
-                                         location):
-    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
-    return connection_monitor.outputs
-
-
 # combination of resource_group_name and nsg is for old output
 # combination of location and flow_log_name is for new output
 def show_nw_flow_logging(cmd, watcher_rg, watcher_name, location=None, resource_group_name=None, nsg=None,
@@ -6940,3 +6906,23 @@ class UsagesList(_UsagesList):
             item['localName'] = item['name']['localizedValue']
         return result, next_link
 # endregion
+
+
+def remove_nw_connection_monitor_output(cmd, connection_monitor_name, location):
+
+    update_args = {
+        'connection_monitor_name': connection_monitor_name,
+        'location': location
+    }
+    from .operations.watcher import WatcherConnectionMonitorOutputRemove
+    return WatcherConnectionMonitorOutputRemove(cli_ctx=cmd.cli_ctx)(command_args=update_args)
+
+
+def remove_nw_connection_monitor_test_group(cmd, connection_monitor_name, location, name):
+    update_args = {
+        'connection_monitor_name': connection_monitor_name,
+        'location': location,
+        'test_group_name': name
+    }
+    from .operations.watcher import WatcherConnectionMonitorTestGroupRemove
+    return WatcherConnectionMonitorTestGroupRemove(cli_ctx=cmd.cli_ctx)(command_args=update_args)

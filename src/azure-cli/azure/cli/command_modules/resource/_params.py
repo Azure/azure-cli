@@ -103,6 +103,10 @@ def load_arguments(self, _):
     bicep_outdir_type = CLIArgumentType(options_list=['--outdir'], completer=DirectoriesCompleter(), help="When set, saves the output at the specified directory.")
     bicep_outfile_type = CLIArgumentType(options_list=['--outfile'], completer=FilesCompleter(), help="When set, saves the output as the specified file path.")
     bicep_stdout_type = CLIArgumentType(options_list=['--stdout'], action='store_true', help="When set, prints all output to stdout instead of corresponding files.")
+    bicep_indentkind_type = CLIArgumentType(options_list=['--indent-kind'], help="Set indentation kind. Valid values are ( Space | Tab ).")
+    bicep_indentsize_type = CLIArgumentType(options_list=['--indent-size'], help="Number of spaces to indent with (Only valid with --indent-kind set to Space).")
+    bicep_insertfinalnewline_type = CLIArgumentType(options_list=['--insert-final-newline'], action='store_true', help="Insert a final newline.")
+    bicep_newline_type = CLIArgumentType(options_list=['--newline'], action='store_true', help="Set newline char. Valid values are ( Auto | LF | CRLF | CR ).")
     bicep_target_platform_type = CLIArgumentType(options_list=['--target-platform', '-t'],
                                                  arg_type=get_enum_type(
                                                      ["win-x64", "linux-musl-x64", "linux-x64", "osx-x64", "linux-arm64", "osx-arm64"]),
@@ -660,6 +664,16 @@ def load_arguments(self, _):
         c.argument('outfile', arg_type=bicep_outfile_type)
         c.argument('stdout', arg_type=bicep_stdout_type)
         c.argument('no_restore', arg_type=bicep_no_restore_type, help="When set, builds the bicep file without restoring external modules.")
+
+    with self.argument_context('bicep format') as c:
+        c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep file to format in the file system.")
+        c.argument('outdir', arg_type=bicep_outdir_type)
+        c.argument('outfile', arg_type=bicep_outfile_type)
+        c.argument('stdout', arg_type=bicep_stdout_type)
+        c.argument('indent_kind', arg_type=bicep_indentkind_type)
+        c.argument('indent_size', arg_type=bicep_indentsize_type)
+        c.argument('insert_final_newline', arg_type=bicep_insertfinalnewline_type)
+        c.argument('newline', arg_type=bicep_newline_type)
 
     with self.argument_context('bicep decompile') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the ARM template to decompile in the file system.")
