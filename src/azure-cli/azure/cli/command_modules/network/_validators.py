@@ -691,43 +691,16 @@ def load_cert_file(param_name):
     return load_cert_validator
 
 
-def get_network_watcher_from_vm(cmd, namespace):
-    from msrestazure.tools import parse_resource_id
-
-    compute_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machines
-    vm_name = parse_resource_id(namespace.vm)['name']
-    vm = compute_client.get(namespace.resource_group_name, vm_name)
-    namespace.location = vm.location  # pylint: disable=no-member
-    get_network_watcher_from_location()(cmd, namespace)
-
-
-def get_network_watcher_from_vmss(cmd, namespace):
-    from msrestazure.tools import parse_resource_id
-
-    compute_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machine_scale_sets
-    vmss_name = parse_resource_id(namespace.target)['name']
-    vmss = compute_client.get(namespace.resource_group_name, vmss_name)
-    namespace.location = vmss.location  # pylint: disable=no-member
-    get_network_watcher_from_location()(cmd, namespace)
-
-
-def get_network_watcher_from_resource(cmd, namespace):
-    from azure.cli.core.commands.arm import get_arm_resource_by_id
-    resource = get_arm_resource_by_id(cmd.cli_ctx, namespace.resource)
-    namespace.location = resource.location  # pylint: disable=no-member
-    get_network_watcher_from_location(remove=True)(cmd, namespace)
-
-
 def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
                                       rg_name='watcher_rg'):
     def _validator(cmd, namespace):
         from msrestazure.tools import parse_resource_id
 
         location = namespace.location
-        network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK).network_watchers
-        watcher = next((x for x in network_client.list_all() if x.location.lower() == location.lower()), None)
+        watcher_list = List(cli_ctx=cmd.cli_ctx)(command_args={})
+        watcher = next((w for w in watcher_list if w["location"].lower() == location.lower()), None)
         if not watcher:
-            raise CLIError("network watcher is not enabled for region '{}'.".format(location))
+            raise ValidationError(f"network watcher is not enabled for region {location}.")
         id_parts = parse_resource_id(watcher.id)
         setattr(namespace, rg_name, id_parts['resource_group'])
         setattr(namespace, watcher_name, id_parts['name'])
@@ -736,37 +709,6 @@ def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
             del namespace.location
 
     return _validator
-
-
-def process_nw_cm_v1_create_namespace(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
-
-    validate_tags(namespace)
-
-    compute_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machines
-    vm_name = parse_resource_id(namespace.source_resource)['name']
-    rg = namespace.resource_group_name or parse_resource_id(namespace.source_resource).get('resource_group', None)
-    if not rg:
-        raise CLIError('usage error: --source-resource ID | --source-resource NAME --resource-group NAME')
-    vm = compute_client.get(rg, vm_name)
-    namespace.location = vm.location  # pylint: disable=no-member
-    get_network_watcher_from_location()(cmd, namespace)
-
-    if namespace.source_resource and not is_valid_resource_id(namespace.source_resource):
-        namespace.source_resource = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=rg,
-            namespace='Microsoft.Compute',
-            type='virtualMachines',
-            name=namespace.source_resource)
-
-    if namespace.dest_resource and not is_valid_resource_id(namespace.dest_resource):
-        namespace.dest_resource = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Compute',
-            type='virtualMachines',
-            name=namespace.dest_resource)
 
 
 def _process_vnet_name_and_id(vnet, cmd, resource_group_name):
