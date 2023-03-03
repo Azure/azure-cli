@@ -96,8 +96,6 @@ Release History
 * [BREAKING CHANGE] `az network vrouter`: Deprecate `vrouter` and use `routeserver` instead (#25603)
 * [BREAKING CHANGE] `az network watcher connection-monitor endpoint add`: Remove deprecated parameters `filter-item` and `filter-type` (#25518)
 * `az network nsg rule list`: Fix `-o table` cannot be used (#25387)
-* `az network watcher`: Add network watcher base cmd (#25436)
-* `az network watcher connection-monitor`: Add network watcher connection-monitor cmd (#25436)
 * `az network private-endpoint-connection`: Add Provider Microsoft.Monitor/Accounts (#25489)
 * `az network express-route gateway connection create/update`: Add parameters `--inbound-route-map` and `--outbound-route-map` to support route map (#25493)
 * Fix #25408: `az network application-gateway rule create`: Creation fails with `--redirect-config` when there are multiple pools (#25562)
