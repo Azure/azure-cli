@@ -63,21 +63,15 @@ Release History
 
 * `az cosmosdb container create`: GA Client Side Encryption feature (#25547)
 * `az cosmosdb container update`: Fix updates failure for containers with client encryption policy (#25547)
-
-**Deployment Manager**
-
-* [BREAKING CHANGE] `az deploymentmanager`: Remove command module since it is no longer maintained by service (#25523)
-
-**Gremlin**
-
+* `az cosmosdb restore`: Add `--gremlin-databases-to-restore`, `--tables-to-restore` parameters to support restore of gremlin and table accounts (#24530)
 * `az cosmosdb gremlin restorable-resource list`: New command that list restorable gremlin resources (#24530)
 * `az cosmosdb gremlin restorable-database list`: New command that list restorable gremlin databases (#24530)
 * `az cosmosdb gremlin restorable-graph list`: New command that list restorable graphs under a gremlin database (#24530)
 * `az cosmosdb gremlin retrieve-latest-backup-time`: New command that retrieve latest backup time for a graph under a database (#24530)
 
-**Gremlin/Table**
+**Deployment Manager**
 
-* `az cosmosdb restore`: Add `--gremlin-databases-to-restore`, `--tables-to-restore` parameters to support restore of gremlin and table accounts (#24530)
+* [BREAKING CHANGE] `az deploymentmanager`: Remove command module since it is no longer maintained by service (#25523)
 
 **Key Vault**
 
