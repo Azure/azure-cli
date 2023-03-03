@@ -674,7 +674,7 @@ def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
         watcher = next((w for w in watcher_list if w["location"].lower() == location.lower()), None)
         if not watcher:
             raise ValidationError(f"network watcher is not enabled for region {location}.")
-        id_parts = parse_resource_id(watcher.id)
+        id_parts = parse_resource_id(watcher['id'])
         setattr(namespace, rg_name, id_parts['resource_group'])
         setattr(namespace, watcher_name, id_parts['name'])
 

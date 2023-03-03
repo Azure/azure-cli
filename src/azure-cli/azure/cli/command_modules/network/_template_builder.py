@@ -9,6 +9,7 @@ AG_VERSION = "2022-05-01"
 LB_VERSION = "2022-05-01"
 IP_VERSION = "2022-05-01"
 
+
 def _build_frontend_ip_config(cmd, name, public_ip_id=None, subnet_id=None, private_ip_address=None,
                               private_ip_allocation=None, zone=None, private_ip_address_version=None,
                               enable_private_link=False,
