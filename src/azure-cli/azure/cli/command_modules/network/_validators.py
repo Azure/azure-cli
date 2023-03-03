@@ -13,10 +13,10 @@ import os
 from knack.util import CLIError
 from knack.log import get_logger
 
-from azure.cli.core.commands.validators import \
-    (validate_tags, get_default_location_from_resource_group)
+from azure.cli.core.azclierror import ValidationError
+from azure.cli.core.commands.validators import validate_tags, get_default_location_from_resource_group
 from azure.cli.core.commands.template_create import get_folded_parameter_validator
-from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
+from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands.validators import validate_parameter_set
 from azure.cli.core.profiles import ResourceType
 
@@ -667,6 +667,7 @@ def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
                                       rg_name='watcher_rg'):
     def _validator(cmd, namespace):
         from msrestazure.tools import parse_resource_id
+        from .aaz.latest.network.watcher import List
 
         location = namespace.location
         watcher_list = List(cli_ctx=cmd.cli_ctx)(command_args={})

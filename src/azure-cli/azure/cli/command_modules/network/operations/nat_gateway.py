@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=protected-access
+
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
 
 from ..aaz.latest.network.nat.gateway import Create as _NATGatewayCreate, Update as _NATGatewayUpdate
