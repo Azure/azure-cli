@@ -15,9 +15,8 @@ from azure.cli.command_modules.network.azure_stack._client_factory import (
     cf_application_gateways, cf_express_route_circuit_authorizations,
     cf_express_route_circuit_peerings, cf_express_route_circuits,
     cf_express_route_service_providers,
-    cf_network_security_groups, cf_network_watcher, cf_packet_capture,
+    cf_network_watcher, cf_packet_capture,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
-    cf_security_rules,
     cf_connection_monitor, cf_dns_references, cf_private_endpoints,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
@@ -176,16 +175,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations#PrivateLinkServicesOperations.{}',
         client_factory=cf_private_link_services,
         min_api='2019-04-01'
-    )
-
-    network_nsg_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#NetworkSecurityGroupsOperations.{}',
-        client_factory=cf_network_security_groups
-    )
-
-    network_nsg_rule_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#SecurityRulesOperations.{}',
-        client_factory=cf_security_rules
     )
 
     network_watcher_sdk = CliCommandType(
@@ -676,24 +665,6 @@ def load_command_table(self, _):
                          table_transformer=deployment_validate_table_format,
                          validator=process_lb_create_namespace,
                          exception_handler=handle_template_based_exception)
-    # endregion
-
-    # region NetworkSecurityGroups
-    with self.command_group('network nsg', network_nsg_sdk) as g:
-        g.custom_command('create', 'create_nsg', transform=transform_nsg_create_output)
-        g.generic_update_command('update', setter_name='begin_create_or_update')
-
-    with self.command_group('network nsg rule', network_nsg_rule_sdk) as g:
-        g.custom_command('list', 'list_nsg_rules', table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
-        g.show_command('show', 'get', table_transformer=transform_nsg_rule_table_output)
-        g.custom_command('create', 'create_nsg_rule_2017_06_01', min_api='2017-06-01')
-        g.generic_update_command('update', setter_arg_name='security_rule_parameters', min_api='2017-06-01',
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='update_nsg_rule_2017_06_01', doc_string_source='SecurityRule')
-        g.custom_command('create', 'create_nsg_rule_2017_03_01', max_api='2017-03-01')
-        g.generic_update_command('update', max_api='2017-03-01', setter_arg_name='security_rule_parameters',
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='update_nsg_rule_2017_03_01', doc_string_source='SecurityRule')
     # endregion
 
     # region NetworkWatchers
