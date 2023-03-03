@@ -4553,7 +4553,7 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
         self.cmd('network lb list -g {rg}', checks=self.check('[0].sku.name', 'Basic'))
         self.cmd('network public-ip list -g {rg}', checks=[
             self.check('[0].sku.name', 'Basic'),
-            self.check('[0].publicIpAllocationMethod', 'Dynamic')
+            self.check('[0].publicIPAllocationMethod', 'Dynamic')
         ])
 
         # but you can overrides the defaults
@@ -4562,7 +4562,7 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
                  checks=self.check('sku.name', 'Standard'))
         self.cmd('network public-ip show -g {rg} -n {ip}', checks=[
             self.check('sku.name', 'Standard'),
-            self.check('publicIpAllocationMethod', 'Static')
+            self.check('publicIPAllocationMethod', 'Static')
         ])
 
 
@@ -6555,10 +6555,10 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             self.exists('colocationStatus')
         ])
 
-        self.cmd('ppg create -n {ppg2} -t ultra -g {rg}', checks=[
+        self.cmd('ppg create -n {ppg2} -t Standard -g {rg}', checks=[
             self.check('name', '{ppg2}'),
             self.check('location', '{loc}'),
-            self.check('proximityPlacementGroupType', 'Ultra')
+            self.check('proximityPlacementGroupType', 'Standard')
         ])
 
         self.cmd('ppg create -n {ppg3} -g {rg}', checks=[

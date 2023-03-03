@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
-# pylint: disable=too-many-locals, too-many-statements
+# pylint: disable=too-many-locals, too-many-statements, disable=line-too-long
 def load_command_table(self, _):
     from .operations import import_aaz_by_profile
 
@@ -40,6 +40,25 @@ def load_command_table(self, _):
 
     # endregion
 
+    # region NetworkInterfaces
+    operations_tmpl = self.get_module_name_by_profile("operations.nic#{}")
+
+    from .operations.nic import NICCreate, NICUpdate
+    self.command_table["network nic create"] = NICCreate(loader=self)
+    self.command_table["network nic update"] = NICUpdate(loader=self)
+
+    from .operations.nic import NICIPConfigCreate, NICIPConfigUpdate, NICIPConfigNATAdd, NICIPConfigNATRemove
+    self.command_table["network nic ip-config create"] = NICIPConfigCreate(loader=self)
+    self.command_table["network nic ip-config update"] = NICIPConfigUpdate(loader=self)
+    self.command_table["network nic ip-config inbound-nat-rule add"] = NICIPConfigNATAdd(loader=self)
+    self.command_table["network nic ip-config inbound-nat-rule remove"] = NICIPConfigNATRemove(loader=self)
+
+    with self.command_group("network nic ip-config address-pool", operations_tmpl=operations_tmpl) as g:
+        g.custom_command("add", "add_nic_ip_config_address_pool")
+        g.custom_command("remove", "remove_nic_ip_config_address_pool")
+
+    # endregion
+
     # region VirtualNetworkGatewayConnections
     from .operations.vpn_connection import VpnConnSharedKeyUpdate
     self.command_table['network vpn-connection shared-key update'] = VpnConnSharedKeyUpdate(loader=self)
@@ -66,5 +85,32 @@ def load_command_table(self, _):
     self.command_table['network vnet list'] = vnet.List(loader=self, table_transformer=transform_vnet_table_output)
 
     self.command_table['network vnet subnet update'] = VNetSubnetUpdate(loader=self)
+
+    # endregion
+
+    # region NetworkRoot
+    with self.command_group('network'):
+        from .operations.locations import UsagesList
+        from .._format import transform_network_usage_table
+        self.command_table['network list-usages'] = UsagesList(loader=self,
+                                                               table_transformer=transform_network_usage_table)
+    # endregion
+
+    # region PublicIPAddresses
+    public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
+
+    public_ip = import_aaz_by_profile("network.public_ip")
+    operations_tmpl = self.get_module_name_by_profile("operations.public_ip#{}")
+    from .._format import transform_public_ip_create_output
+    from .._validators import process_public_ip_create_namespace
+
+    with self.command_group('network public-ip', operations_tmpl=operations_tmpl) as g:
+        g.custom_command("create", "create_public_ip", transform=transform_public_ip_create_output,
+                         validator=process_public_ip_create_namespace)
+
+    self.command_table['network public-ip list'] = public_ip.List(loader=self,
+                                                                  table_transformer='[].' + public_ip_show_table_transform)
+    self.command_table['network public-ip show'] = public_ip.Show(loader=self,
+                                                                  table_transformer=public_ip_show_table_transform)
 
     # endregion

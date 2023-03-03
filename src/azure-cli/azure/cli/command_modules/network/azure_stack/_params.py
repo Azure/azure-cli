@@ -17,8 +17,7 @@ from azure.cli.core.commands.template_create import get_folded_parameter_help_st
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 from azure.cli.command_modules.network.azure_stack._validators import (
     dns_zone_name_type,
-    validate_ssl_cert, validate_cert, validate_inbound_nat_rule_id_list,
-    validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
+    validate_ssl_cert, validate_cert,
     validate_address_pool_name_or_id, load_cert_file, validate_metadata,
     validate_peering_type, validate_dns_record_type, validate_route_filter, validate_target_listener,
     validate_private_ip_address,
@@ -26,7 +25,7 @@ from azure.cli.command_modules.network.azure_stack._validators import (
     get_network_watcher_from_vm, get_network_watcher_for_pcap_creation, get_network_watcher_from_location, validate_capture_size_and_limit,
     get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
     validate_service_endpoint_policy, validate_delegations, validate_subresource_list,
-    validate_er_peer_circuit, validate_ag_address_pools, validate_custom_error_pages,
+    validate_er_peer_circuit, validate_custom_error_pages,
     validate_custom_headers, validate_status_code_ranges, validate_subnet_ranges,
     WafConfigExclusionAction, validate_express_route_peering, validate_virtual_hub,
     validate_express_route_port, bandwidth_validator_factory,
@@ -1207,70 +1206,12 @@ def load_arguments(self, _):
     # endregion
 
     # region NetworkInterfaces (NIC)
-    with self.argument_context('network nic') as c:
-        c.argument('enable_accelerated_networking', min_api='2016-09-01', options_list=['--accelerated-networking'], help='Enable accelerated networking.', arg_type=get_three_state_flag())
-        c.argument('network_interface_name', nic_type, options_list=['--name', '-n'])
-        c.argument('internal_dns_name_label', options_list='--internal-dns-name', help='The internal DNS name label.', arg_group='DNS')
-        c.argument('dns_servers', help='Space-separated list of DNS server IP addresses.', nargs='+', arg_group='DNS')
-        c.argument('enable_ip_forwarding', options_list='--ip-forwarding', help='Enable IP forwarding.', arg_type=get_three_state_flag())
-
-    with self.argument_context('network nic create') as c:
-        c.argument('private_ip_address_version', min_api='2016-09-01', help='The private IP address version to use.', default=IPVersion.I_PV4.value if IPVersion else '')
-        c.argument('network_interface_name', nic_type, options_list=['--name', '-n'], id_part=None)
-        c.argument('edge_zone', edge_zone)
-
-        public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, default_none=True)
-        c.argument('public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
-
-        nsg_help = get_folded_parameter_help_string('network security group', allow_none=True, default_none=True)
-        c.argument('network_security_group', help=nsg_help, completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
-
-        subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name', allow_cross_sub=False)
-        c.argument('subnet', help=subnet_help, completer=subnet_completion_list)
-
-    with self.argument_context('network nic update') as c:
-        c.argument('network_security_group', help='Name or ID of the associated network security group.', validator=get_nsg_validator(), completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
-        c.argument('dns_servers', help='Space-separated list of DNS server IP addresses. Use ""(\'""\' in PowerShell) to revert to default Azure servers.', nargs='+', arg_group='DNS')
-
-    for item in ['create', 'ip-config update', 'ip-config create']:
-        with self.argument_context('network nic {}'.format(item)) as c:
-            c.argument('application_security_groups', min_api='2017-09-01', help='Space-separated list of application security groups.', nargs='+', validator=get_asg_validator(self, 'application_security_groups'))
-
-        with self.argument_context('network nic {}'.format(item), arg_group='Load Balancer') as c:
-            c.extra('load_balancer_name', options_list='--lb-name', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), help='The name of the load balancer to use when adding NAT rules or address pools by name (ignored when IDs are specified).')
-            c.argument('load_balancer_backend_address_pool_ids', options_list='--lb-address-pools', nargs='+', validator=validate_address_pool_id_list, help='Space-separated list of names or IDs of load balancer address pools to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_subresource_completion_list('backendAddressPools'))
-            c.argument('load_balancer_inbound_nat_rule_ids', options_list='--lb-inbound-nat-rules', nargs='+', validator=validate_inbound_nat_rule_id_list, help='Space-separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_subresource_completion_list('inboundNatRules'))
-
-        with self.argument_context('network nic {}'.format(item), arg_group='Application Gateway') as c:
-            c.argument('app_gateway_backend_address_pools', options_list='--app-gateway-address-pools', nargs='+', help='Space-separated list of names or IDs of application gateway backend address pools to associate with the NIC. If names are used, --gateway-name must be specified.', validator=validate_ag_address_pools, completer=get_ag_subresource_completion_list('backendAddressPools'))
-            c.extra('application_gateway_name', app_gateway_name_type, help='The name of the application gateway to use when adding address pools by name (ignored when IDs are specified).')
-
-    with self.argument_context('network nic ip-config') as c:
-        c.argument('network_interface_name', options_list='--nic-name', metavar='NIC_NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
-        c.argument('ip_config_name', options_list=['--name', '-n'], metavar='IP_CONFIG_NAME', help='The name of the IP configuration.', id_part='child_name_1')
-        c.argument('resource_name', options_list='--nic-name', metavar='NIC_NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
-        c.argument('item_name', options_list=['--name', '-n'], metavar='IP_CONFIG_NAME', help='The name of the IP configuration.', id_part='child_name_1')
-        c.argument('subnet', validator=get_subnet_validator(), help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.')
-        c.argument('virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', id_part=None, metavar='')
-        c.argument('public_ip_address', help='Name or ID of the public IP to use.', validator=get_public_ip_validator())
-        c.argument('make_primary', action='store_true', help='Set to make this configuration the primary one for the NIC.')
-        c.argument('private_ip_address', private_ip_address_type, help='Static IP address to use or ""(\'""\' in PowerShell) to use a dynamic address.')
-        c.argument('gateway_lb', gateway_lb)
-
     with self.argument_context('network nic ip-config address-pool') as c:
-        c.argument('load_balancer_name', options_list='--lb-name', help='The name of the load balancer containing the address pool (Omit if suppying an address pool ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
-        c.argument('application_gateway_name', app_gateway_name_type, help='The name of an application gateway containing the address pool (Omit if suppying an address pool ID).', id_part=None)
+        c.argument('load_balancer_name', options_list='--lb-name', help='The name of the load balancer containing the address pool (Omit if supplying an address pool ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
+        c.argument('application_gateway_name', app_gateway_name_type, help='The name of an application gateway containing the address pool (Omit if supplying an address pool ID).', id_part=None)
         c.argument('backend_address_pool', options_list='--address-pool', help='The name or ID of an existing backend address pool.', validator=validate_address_pool_name_or_id)
-
-    with self.argument_context('network nic ip-config inbound-nat-rule') as c:
-        c.argument('load_balancer_name', options_list='--lb-name', help='The name of the load balancer associated with the NAT rule (Omit if suppying a NAT rule ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
-        c.argument('inbound_nat_rule', options_list='--inbound-nat-rule', help='The name or ID of an existing inbound NAT rule.', validator=validate_inbound_nat_rule_name_or_id)
-
-    for item in ['address-pool', 'inbound-nat-rule']:
-        with self.argument_context('network nic ip-config {}'.format(item)) as c:
-            c.argument('ip_config_name', options_list=['--ip-config-name', '-n'], metavar='IP_CONFIG_NAME', help='The name of the IP configuration.', id_part=None)
-            c.argument('network_interface_name', nic_type, id_part=None)
-
+        c.argument('ip_config_name', options_list=['--ip-config-name', '-n'], metavar='IP_CONFIG_NAME', help='The name of the IP configuration.', id_part=None)
+        c.argument('network_interface_name', nic_type, id_part=None)
     # endregion
 
     # region NetworkSecurityGroups
@@ -1802,17 +1743,6 @@ def load_arguments(self, _):
     for scope in ['public-ip', 'lb frontend-ip', 'cross-region-lb frontend-ip']:
         with self.argument_context('network {}'.format(scope), min_api='2018-07-01') as c:
             c.argument('public_ip_prefix', help='Name or ID of a public IP prefix.')
-
-    with self.argument_context('network public-ip prefix') as c:
-        c.argument('public_ip_prefix_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPPrefixes'), id_part='name', help='The name of the public IP prefix.')
-        c.argument('prefix_length', options_list='--length', help='Length of the prefix (i.e. `XX.XX.XX.XX/<Length>`)')
-        c.argument('zone', zone_type, max_api='2020-07-01')
-        c.argument('zone', zone_compatible_type, min_api='2020-08-01')
-
-    with self.argument_context('network public-ip prefix create') as c:
-        c.argument('edge_zone', edge_zone)
-        c.argument('version', min_api='2019-08-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
-        c.argument('custom_ip_prefix_name', min_api='2020-06-01', help="A custom prefix from which the public prefix derived. If you'd like to cross subscription, please use Resource ID instead.")
     # endregion
 
     # region TrafficManagers
