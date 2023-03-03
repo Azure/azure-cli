@@ -744,21 +744,21 @@ def load_command_table(self, _):
     # endregion
 
     # region NetworkSecurityGroups
-    with self.command_group('network nsg', network_nsg_sdk) as g:
-        g.custom_command('create', 'create_nsg', transform=transform_nsg_create_output)
-        g.generic_update_command('update', setter_name='begin_create_or_update')
+    # with self.command_group('network nsg', network_nsg_sdk) as g:
+    #     g.custom_command('create', 'create_nsg', transform=transform_nsg_create_output)
+    #     g.generic_update_command('update', setter_name='begin_create_or_update')
 
-    with self.command_group('network nsg rule', network_nsg_rule_sdk) as g:
-        g.custom_command('list', 'list_nsg_rules', table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
-        g.show_command('show', 'get', table_transformer=transform_nsg_rule_table_output)
-        g.custom_command('create', 'create_nsg_rule_2017_06_01', min_api='2017-06-01')
-        g.generic_update_command('update', setter_arg_name='security_rule_parameters', min_api='2017-06-01',
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='update_nsg_rule_2017_06_01', doc_string_source='SecurityRule')
-        g.custom_command('create', 'create_nsg_rule_2017_03_01', max_api='2017-03-01')
-        g.generic_update_command('update', max_api='2017-03-01', setter_arg_name='security_rule_parameters',
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='update_nsg_rule_2017_03_01', doc_string_source='SecurityRule')
+    # with self.command_group('network nsg rule', network_nsg_rule_sdk) as g:
+    #     g.custom_command('list', 'list_nsg_rules', table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
+    #     g.show_command('show', 'get', table_transformer=transform_nsg_rule_table_output)
+    #     g.custom_command('create', 'create_nsg_rule_2017_06_01', min_api='2017-06-01')
+    #     g.generic_update_command('update', setter_arg_name='security_rule_parameters', min_api='2017-06-01',
+    #                              setter_name='begin_create_or_update',
+    #                              custom_func_name='update_nsg_rule_2017_06_01', doc_string_source='SecurityRule')
+    #     g.custom_command('create', 'create_nsg_rule_2017_03_01', max_api='2017-03-01')
+    #     g.generic_update_command('update', max_api='2017-03-01', setter_arg_name='security_rule_parameters',
+    #                              setter_name='begin_create_or_update',
+    #                              custom_func_name='update_nsg_rule_2017_03_01', doc_string_source='SecurityRule')
     # endregion
 
     # region NetworkWatchers

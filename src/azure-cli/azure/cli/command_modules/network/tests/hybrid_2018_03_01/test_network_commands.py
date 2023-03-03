@@ -1237,7 +1237,7 @@ class NetworkExtendedNSGScenarioTest(ScenarioTest):
         self.cmd('network nsg create --name {nsg} -g {rg}')
         self.cmd('network nsg rule create --access allow --destination-address-prefixes 10.0.0.0/24 11.0.0.0/24 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefix * -n {rule} --source-port-range 700-900 1000-1100 --destination-port-range 4444 --priority 1000', checks=[
             self.check('length(destinationAddressPrefixes)', 2),
-            self.check('destinationAddressPrefix', ''),
+            self.check('destinationAddressPrefix', None),
             self.check('length(sourceAddressPrefixes)', 0),
             self.check('sourceAddressPrefix', '*'),
             self.check('length(sourcePortRanges)', 2),
@@ -1249,7 +1249,7 @@ class NetworkExtendedNSGScenarioTest(ScenarioTest):
             self.check('length(destinationAddressPrefixes)', 0),
             self.check('destinationAddressPrefix', 'Internet'),
             self.check('length(sourceAddressPrefixes)', 2),
-            self.check('sourceAddressPrefix', ''),
+            self.check('sourceAddressPrefix', None),
             self.check('length(sourcePortRanges)', 0),
             self.check('sourcePortRange', '*'),
             self.check('length(destinationPortRanges)', 3),
