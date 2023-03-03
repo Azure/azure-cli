@@ -719,3 +719,9 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_private_endpoint_connection')
         g.custom_command('list', 'list_private_endpoint_connection')
     # endregion
+
+    # region NatGateway
+    from .operations.nat_gateway import NATGatewayCreate, NATGatewayUpdate
+    self.command_table["network nat gateway create"] = NATGatewayCreate(loader=self)
+    self.command_table["network nat gateway update"] = NATGatewayUpdate(loader=self)
+    # endregion

@@ -5,7 +5,7 @@
 
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
 
-from .aaz.latest.network.nat.gateway import Create as _NATGatewayCreate, Update as _NATGatewayUpdate
+from ..aaz.latest.network.nat.gateway import Create as _NATGatewayCreate, Update as _NATGatewayUpdate
 
 
 class NATGatewayCreate(_NATGatewayCreate):
