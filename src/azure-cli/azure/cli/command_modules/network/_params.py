@@ -604,7 +604,7 @@ def load_arguments(self, _):
         c.argument('reverse_fqdn', help='Reverse FQDN (fully qualified domain name).')
         c.argument('dns_name', help='Globally unique DNS entry.')
         c.argument('idle_timeout', type=int, help='Idle timeout in minutes.')
-        c.argument('zone', zone_type, max_api='2020-07-01')
+        c.argument('zone', zone_type)
         c.argument('zone', zone_compatible_type)
         c.argument('ip_tags', nargs='+', help="Space-separated list of IP tags in 'TYPE=VAL' format.", validator=validate_ip_tags)
         c.argument('ip_address', help='The IP address associated with the public IP address resource.')
@@ -694,7 +694,7 @@ def load_arguments(self, _):
     with self.argument_context('network vnet create', arg_group='Subnet') as c:
         c.argument('subnet_name', help='Name of a new subnet to create within the VNet.',
                    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.SET], scopes=[ALL]))
-        c.argument('subnet_prefix', help='IP address prefix for the new subnet. If omitted, automatically reserves a /24 (or as large as available) block within the VNet address space.', metavar='PREFIX', max_api='2018-07-01')
+        c.argument('subnet_prefix', help='IP address prefix for the new subnet. If omitted, automatically reserves a /24 (or as large as available) block within the VNet address space.', metavar='PREFIX')
         c.argument('subnet_prefix', options_list='--subnet-prefixes', nargs='+', help='Space-separated list of address prefixes in CIDR format for the new subnet. If omitted, automatically reserves a /24 (or as large as available) block within the VNet address space.', metavar='PREFIXES')
         c.argument('network_security_group', options_list=['--network-security-group', '--nsg'], validator=get_nsg_validator(), help='Name or ID of a network security group (NSG).')
 
@@ -718,7 +718,7 @@ def load_arguments(self, _):
     with self.argument_context('network vnet subnet') as c:
         c.argument('subnet_name', arg_type=subnet_name_type, options_list=['--name', '-n'], id_part='child_name_1')
         c.argument('nat_gateway', validator=validate_nat_gateway, help='Name or ID of a NAT gateway to attach.')
-        c.argument('address_prefix', metavar='PREFIX', help='Address prefix in CIDR format.', max_api='2018-07-01')
+        c.argument('address_prefix', metavar='PREFIX', help='Address prefix in CIDR format.')
         c.argument('address_prefix', metavar='PREFIXES', options_list='--address-prefixes', nargs='+', help='Space-separated list of address prefixes in CIDR format.')
         c.argument('virtual_network_name', virtual_network_name_type)
         c.argument('network_security_group', options_list=['--network-security-group', '--nsg'], validator=get_nsg_validator(), help='Name or ID of a network security group (NSG).')
