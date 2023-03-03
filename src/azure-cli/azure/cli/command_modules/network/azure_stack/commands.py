@@ -15,8 +15,9 @@ from azure.cli.command_modules.network.azure_stack._client_factory import (
     cf_application_gateways, cf_express_route_circuit_authorizations,
     cf_express_route_circuit_peerings, cf_express_route_circuits,
     cf_express_route_service_providers,
-    cf_network_interfaces, cf_network_watcher, cf_packet_capture,
+    cf_network_security_groups, cf_network_watcher, cf_packet_capture,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
+    cf_security_rules,
     cf_connection_monitor, cf_dns_references, cf_private_endpoints,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
@@ -29,15 +30,16 @@ from azure.cli.command_modules.network.azure_stack._util import (
 from azure.cli.command_modules.network.azure_stack._format import (
     transform_dns_record_set_output,
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
-    transform_traffic_manager_create_output, transform_nic_create_output,
+    transform_traffic_manager_create_output,
+    transform_nsg_create_output,
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
-    transform_effective_route_table, transform_effective_nsg)
+    transform_nsg_rule_table_output)
 from azure.cli.command_modules.network.azure_stack._validators import (
     get_network_watcher_from_location,
     process_ag_create_namespace, process_ag_http_listener_create_namespace, process_ag_listener_create_namespace, process_ag_settings_create_namespace, process_ag_http_settings_create_namespace,
     process_ag_rule_create_namespace, process_ag_routing_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
-    process_ag_url_path_map_rule_create_namespace, process_auth_create_namespace, process_nic_create_namespace,
+    process_ag_url_path_map_rule_create_namespace, process_auth_create_namespace,
     process_lb_create_namespace, process_nw_cm_v2_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
     process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
@@ -176,9 +178,14 @@ def load_command_table(self, _):
         min_api='2019-04-01'
     )
 
-    network_nic_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#NetworkInterfacesOperations.{}',
-        client_factory=cf_network_interfaces
+    network_nsg_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#NetworkSecurityGroupsOperations.{}',
+        client_factory=cf_network_security_groups
+    )
+
+    network_nsg_rule_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#SecurityRulesOperations.{}',
+        client_factory=cf_security_rules
     )
 
     network_watcher_sdk = CliCommandType(
@@ -246,11 +253,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations#CustomIPPrefixesOperations.{}',
         client_factory=cf_custom_ip_prefixes,
         min_api='2020-06-01'
-    )
-
-    network_nic_custom = CliCommandType(
-        operations_tmpl=custom_operations_tmpl,
-        client_factory=cf_network_interfaces
     )
 
     # endregion
@@ -676,40 +678,23 @@ def load_command_table(self, _):
                          exception_handler=handle_template_based_exception)
     # endregion
 
-    # region NetworkInterfaces: (NIC)
-    with self.command_group('network nic', network_nic_sdk) as g:
-        g.custom_command('create', 'create_nic', transform=transform_nic_create_output, validator=process_nic_create_namespace, supports_no_wait=True)
-        g.command('delete', 'begin_delete', supports_no_wait=True)
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_nics')
-        g.command('show-effective-route-table', 'begin_get_effective_route_table', min_api='2016-09-01', table_transformer=transform_effective_route_table)
-        g.command('list-effective-nsg', 'begin_list_effective_network_security_groups', min_api='2016-09-01', table_transformer=transform_effective_nsg)
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_nic', supports_no_wait=True)
-        g.wait_command('wait')
+    # region NetworkSecurityGroups
+    with self.command_group('network nsg', network_nsg_sdk) as g:
+        g.custom_command('create', 'create_nsg', transform=transform_nsg_create_output)
+        g.generic_update_command('update', setter_name='begin_create_or_update')
 
-    resource = 'network_interfaces'
-    subresource = 'ip_configurations'
-    with self.command_group('network nic ip-config', network_nic_sdk) as g:
-        g.custom_command('create', 'create_nic_ip_config')
-        g.generic_update_command('update',
-                                 child_collection_prop_name='ip_configurations', child_arg_name='ip_config_name',
-                                 setter_name='update_nic_ip_config_setter',
-                                 setter_type=network_nic_custom,
-                                 custom_func_name='set_nic_ip_config')
-        g.command('list', list_network_resource_property(resource, subresource), command_type=network_util)
-        g.show_command('show', get_network_resource_property_entry(resource, subresource), command_type=network_util)
-        g.command('delete', delete_network_resource_property_entry(resource, subresource), command_type=network_util)
-
-    with self.command_group('network nic ip-config address-pool') as g:
-        g.custom_command('add', 'add_nic_ip_config_address_pool')
-        g.custom_command('remove', 'remove_nic_ip_config_address_pool')
-
-    with self.command_group('network nic ip-config inbound-nat-rule') as g:
-        g.custom_command('add', 'add_nic_ip_config_inbound_nat_rule')
-        g.custom_command('remove', 'remove_nic_ip_config_inbound_nat_rule')
-
+    with self.command_group('network nsg rule', network_nsg_rule_sdk) as g:
+        g.custom_command('list', 'list_nsg_rules', table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
+        g.show_command('show', 'get', table_transformer=transform_nsg_rule_table_output)
+        g.custom_command('create', 'create_nsg_rule_2017_06_01', min_api='2017-06-01')
+        g.generic_update_command('update', setter_arg_name='security_rule_parameters', min_api='2017-06-01',
+                                 setter_name='begin_create_or_update',
+                                 custom_func_name='update_nsg_rule_2017_06_01', doc_string_source='SecurityRule')
+        g.custom_command('create', 'create_nsg_rule_2017_03_01', max_api='2017-03-01')
+        g.generic_update_command('update', max_api='2017-03-01', setter_arg_name='security_rule_parameters',
+                                 setter_name='begin_create_or_update',
+                                 custom_func_name='update_nsg_rule_2017_03_01', doc_string_source='SecurityRule')
     # endregion
-
 
     # region NetworkWatchers
     with self.command_group('network watcher', network_watcher_sdk, client_factory=cf_network_watcher, min_api='2016-09-01') as g:

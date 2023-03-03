@@ -1085,14 +1085,14 @@ class NetworkNicScenarioTest(ScenarioTest):
 
         # create with minimum parameters
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet} --vnet-name {vnet}', checks=[
-            self.check('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
+            self.check('NewNIC.ipConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
             self.check('NewNIC.provisioningState', 'Succeeded')
         ])
         # exercise optional parameters
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet_id} --ip-forwarding --private-ip-address {pri_ip} --public-ip-address {pub_ip} --internal-dns-name test --dns-servers 100.1.2.3 --lb-address-pools {address_pool_ids} --lb-inbound-nat-rules {rule_ids} --accelerated-networking --tags foo=doo', checks=[
-            self.check('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Static'),
-            self.check('NewNIC.ipConfigurations[0].privateIpAddress', '{pri_ip}'),
-            self.check('NewNIC.enableIpForwarding', True),
+            self.check('NewNIC.ipConfigurations[0].privateIPAllocationMethod', 'Static'),
+            self.check('NewNIC.ipConfigurations[0].privateIPAddress', '{pri_ip}'),
+            self.check('NewNIC.enableIPForwarding', True),
             self.check('NewNIC.enableAcceleratedNetworking', True),
             self.check('NewNIC.provisioningState', 'Succeeded'),
             self.check('NewNIC.dnsSettings.internalDnsNameLabel', 'test'),
@@ -1100,15 +1100,15 @@ class NetworkNicScenarioTest(ScenarioTest):
         ])
         # exercise creating with NSG
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet} --vnet-name {vnet} --network-security-group {nsg1}', checks=[
-            self.check('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
-            self.check('NewNIC.enableIpForwarding', False),
+            self.check('NewNIC.ipConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
+            self.check('NewNIC.enableIPForwarding', False),
             self.check("NewNIC.networkSecurityGroup.contains(id, '{nsg1}')", True),
             self.check('NewNIC.provisioningState', 'Succeeded')
         ])
         # exercise creating with NSG and Public IP
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet} --vnet-name {vnet} --network-security-group {nsg_id} --public-ip-address {pub_ip_id}', checks=[
-            self.check('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
-            self.check('NewNIC.enableIpForwarding', False),
+            self.check('NewNIC.ipConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
+            self.check('NewNIC.enableIPForwarding', False),
             self.check("NewNIC.networkSecurityGroup.contains(id, '{nsg1}')", True),
             self.check('NewNIC.provisioningState', 'Succeeded')
         ])
@@ -1128,15 +1128,15 @@ class NetworkNicScenarioTest(ScenarioTest):
             self.check('name', '{nic}')
         ])
         self.cmd('network nic update -g {rg} -n {nic} --internal-dns-name noodle --ip-forwarding true --accelerated-networking false --dns-servers "" --network-security-group {nsg2}', checks=[
-            self.check('enableIpForwarding', True),
+            self.check('enableIPForwarding', True),
             self.check('enableAcceleratedNetworking', False),
             self.check('dnsSettings.internalDnsNameLabel', 'noodle'),
             self.check('length(dnsSettings.dnsServers)', 0),
             self.check("networkSecurityGroup.contains(id, '{nsg2}')", True)
         ])
         # test generic update
-        self.cmd('network nic update -g {rg} -n {nic} --set dnsSettings.internalDnsNameLabel=doodle --set enableIpForwarding=false', checks=[
-            self.check('enableIpForwarding', False),
+        self.cmd('network nic update -g {rg} -n {nic} --set dnsSettings.internalDnsNameLabel=doodle --set enableIPForwarding=false', checks=[
+            self.check('enableIPForwarding', False),
             self.check('dnsSettings.internalDnsNameLabel', 'doodle')
         ])
 
@@ -1157,7 +1157,7 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 1))
         self.cmd('network nic ip-config show -g {rg} --nic-name {nic} -n ipconfig1', checks=[
             self.check('name', 'ipconfig1'),
-            self.check('privateIpAllocationMethod', 'Dynamic')
+            self.check('privateIPAllocationMethod', 'Dynamic')
         ])
         self.cmd('network nic ip-config create -g {rg} --nic-name {nic} -n ipconfig2 --make-primary',
                  checks=self.check('primary', True))
@@ -1190,11 +1190,11 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
         self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --lb-name {lb} --lb-address-pools {bap1_id} bap2 --lb-inbound-nat-rules {rule1_id} rule2 --private-ip-address {private_ip}', checks=[
             self.check('length(loadBalancerBackendAddressPools)', 2),
             self.check('length(loadBalancerInboundNatRules)', 2),
-            self.check('privateIpAddress', '{private_ip}'),
-            self.check('privateIpAllocationMethod', 'Static')])
+            self.check('privateIPAddress', '{private_ip}'),
+            self.check('privateIPAllocationMethod', 'Static')])
         # test generic update
-        self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --set privateIpAddress=10.0.0.50',
-                 checks=self.check('privateIpAddress', '10.0.0.50'))
+        self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --set privateIPAddress=10.0.0.50',
+                 checks=self.check('privateIPAddress', '10.0.0.50'))
 
         # test ability to add and remove IDs one at a time with subcommands
         self.cmd('network nic ip-config inbound-nat-rule remove -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --inbound-nat-rule rule1',
@@ -1208,8 +1208,8 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
                  checks=self.check('length(loadBalancerBackendAddressPools)', 2))
 
         self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --private-ip-address "" --public-ip-address {ip_id}', checks=[
-            self.check('privateIpAllocationMethod', 'Dynamic'),
-            self.check("publicIpAddress.contains(id, '{ip_id}')", True)
+            self.check('privateIPAllocationMethod', 'Dynamic'),
+            self.check("publicIPAddress.contains(id, '{ip_id}')", True)
         ])
 
         self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --subnet {subnet} --vnet-name {vnet}',
