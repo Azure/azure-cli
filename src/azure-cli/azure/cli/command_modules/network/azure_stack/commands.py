@@ -30,10 +30,8 @@ from azure.cli.command_modules.network.azure_stack._format import (
     transform_dns_record_set_output,
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
     transform_traffic_manager_create_output,
-    transform_nsg_create_output,
     transform_geographic_hierachy_table_output,
-    transform_service_community_table_output, transform_waf_rule_sets_table_output,
-    transform_nsg_rule_table_output)
+    transform_service_community_table_output, transform_waf_rule_sets_table_output)
 from azure.cli.command_modules.network.azure_stack._validators import (
     get_network_watcher_from_location,
     process_ag_create_namespace, process_ag_http_listener_create_namespace, process_ag_listener_create_namespace, process_ag_settings_create_namespace, process_ag_http_settings_create_namespace,
