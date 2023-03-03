@@ -845,7 +845,7 @@ class VMCreateExistingOptions(ScenarioTest):
         self.cmd('network nsg show -n {nsg} -g {rg}',
                  checks=self.check('networkInterfaces[0].id.ends_with(@, \'{vm}VMNic\')', True))
         self.cmd('network nic show -n {vm}VMNic -g {rg}',
-                 checks=self.check('ipConfigurations[0].publicIpAddress.id.ends_with(@, \'{pubip}\')', True))
+                 checks=self.check('ipConfigurations[0].publicIPAddress.id.ends_with(@, \'{pubip}\')', True))
         self.cmd('vm show -n {vm} -g {rg}',
                  checks=self.check('storageProfile.osDisk.vhd.uri', 'https://{sa}.blob.core.windows.net/{container}/{disk}.vhd'))
 
@@ -898,7 +898,7 @@ class VMCreateExistingIdsOptions(ScenarioTest):
         self.cmd('network nsg show -n {nsg} -g {rg}',
                  checks=self.check('networkInterfaces[0].id.ends_with(@, \'{vm}VMNic\')', True))
         self.cmd('network nic show -n {vm}VMNic -g {rg}',
-                 checks=self.check('ipConfigurations[0].publicIpAddress.id.ends_with(@, \'{pubip}\')', True))
+                 checks=self.check('ipConfigurations[0].publicIPAddress.id.ends_with(@, \'{pubip}\')', True))
         self.cmd('vm show -n {vm} -g {rg}',
                  checks=self.check('storageProfile.osDisk.vhd.uri', 'https://{sa}.blob.core.windows.net/{container}/{disk}.vhd'))
 
