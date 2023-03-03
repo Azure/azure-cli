@@ -201,7 +201,7 @@ def validate_address_pool_name_or_id(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, parse_resource_id
     address_pool = namespace.backend_address_pool
     lb_name = namespace.load_balancer_name
-    gateway_name = namespace.application_gateway_name
+    gateway_name = getattr(namespace, 'application_gateway_name', None)
 
     usage_error = CLIError('usage error: --address-pool ID | --lb-name NAME --address-pool NAME '
                            '| --gateway-name NAME --address-pool NAME')
