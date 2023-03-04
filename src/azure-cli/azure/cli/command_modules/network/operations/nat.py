@@ -7,10 +7,10 @@
 
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
 
-from ..aaz.latest.network.nat.gateway import Create as _NATGatewayCreate, Update as _NATGatewayUpdate
+from ..aaz.latest.network.nat.gateway import Create as _GatewayCreate, Update as _GatewayUpdate
 
 
-class NATGatewayCreate(_NATGatewayCreate):
+class GatewayCreate(_GatewayCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
@@ -55,7 +55,7 @@ class NATGatewayCreate(_NATGatewayCreate):
         args.sku.name = "Standard"
 
 
-class NATGatewayUpdate(_NATGatewayUpdate):
+class GatewayUpdate(_GatewayUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat

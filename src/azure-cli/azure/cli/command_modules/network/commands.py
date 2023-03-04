@@ -698,7 +698,7 @@ def load_command_table(self, _):
     # endregion
 
     # region NatGateway
-    from .operations.nat_gateway import NATGatewayCreate, NATGatewayUpdate
+    from .operations.nat import GatewayCreate as NATGatewayCreate, GatewayUpdate as NATGatewayUpdate
     self.command_table["network nat gateway create"] = NATGatewayCreate(loader=self)
     self.command_table["network nat gateway update"] = NATGatewayUpdate(loader=self)
     # endregion
