@@ -104,10 +104,6 @@ def cf_network_interfaces(cli_ctx, _):
     return network_client_factory(cli_ctx).network_interfaces
 
 
-def cf_network_security_groups(cli_ctx, _):
-    return network_client_factory(cli_ctx).network_security_groups
-
-
 def cf_network_watcher(cli_ctx, _):
     return network_client_factory(cli_ctx).network_watchers
 
@@ -118,10 +114,6 @@ def cf_packet_capture(cli_ctx, _):
 
 def cf_private_access(cli_ctx, _):
     return network_client_factory(cli_ctx).available_private_access_services
-
-
-def cf_security_rules(cli_ctx, _):
-    return network_client_factory(cli_ctx).security_rules
 
 
 def cf_subnets(cli_ctx, _):
