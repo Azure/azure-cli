@@ -16,6 +16,7 @@ def _get_resource_group_location(cli_ctx, resource_group_name):
     # pylint: disable=no-member
     return client.resource_groups.get(resource_group_name).location
 
+
 # pylint: disable=too-many-locals
 def create_search_service(cmd, resource_group_name, search_service_name, sku, location=None, partition_count=0,
                           replica_count=0, public_network_access="enabled", ip_rules=None, identity_type=None,
@@ -106,9 +107,11 @@ def update_search_service(instance, partition_count=0, replica_count=0, public_n
                      nullified and no public IP rule is applied. These IP rules are applicable only when
                      public_network_access is "enabled".
     :param identity_type: The identity type; possible values include: "None", "SystemAssigned".
-    :param disable_local_auth: If calls to the search service will not be permitted to utilize API keys for authentication.
+    :param disable_local_auth: If calls to the search service will not be permitted to utilize
+                     API keys for authentication.
                      This cannot be combined with auth_options
-    :param auth_options: Options for authenticating calls to the search service; possible values include "aadOrApiKey", "apiKeyOnly";
+    :param auth_options: Options for authenticating calls to the search service;
+                     possible values include "aadOrApiKey", "apiKeyOnly";
                      This cannot be combined with disable_local_auth.
     :param aad_auth_failure_mode: Describes response code from calls to the search service that failed authentication;
                     possible values include "http401WithBearerChallenge", "http403";
@@ -163,7 +166,7 @@ def update_private_endpoint_connection(cmd, resource_group_name, search_service_
     """
 
     from azure.mgmt.search.models import PrivateEndpointConnection, \
-         PrivateEndpointConnectionProperties, PrivateEndpointConnectionPropertiesPrivateLinkServiceConnectionState
+        PrivateEndpointConnectionProperties, PrivateEndpointConnectionPropertiesPrivateLinkServiceConnectionState
     from azure.cli.command_modules.search._client_factory import cf_search_private_endpoint_connections
 
     _client = cf_search_private_endpoint_connections(cmd.cli_ctx, None)
@@ -254,7 +257,7 @@ def setup_search_auth(instance, disable_local_auth, auth_options, aad_auth_failu
     """
     Add auth options to a search service
 
-    :param disable_local_auth: If calls to the search service will not be permitted to utilize 
+    :param disable_local_auth: If calls to the search service will not be permitted to utilize
                      API keys for authentication.
                      This cannot be combined with auth_options
     :param auth_options: Options for authenticating calls to the search service;
@@ -274,20 +277,20 @@ def setup_search_auth(instance, disable_local_auth, auth_options, aad_auth_failu
             "SearchService.AuthOptions: only [""aadOrApiKey"", ""apiKeyOnly""] are allowed")
     if (aad_auth_failure_mode is not None and aad_auth_failure_mode not in ["http401WithBearerChallenge", "http403"]):
         raise UnrecognizedArgumentError(
-            "SearchService.AuthOptions.AadAuthFailureMode: only " \
+            "SearchService.AuthOptions.AadAuthFailureMode: only "
             "[""http401WithBearerChallenge"", ""http403""] are allowed")
 
     if disable_local_auth and auth_options:
-        raise MutuallyExclusiveArgumentError("Both the DisableLocalAuth and AuthOptions parameters " \
+        raise MutuallyExclusiveArgumentError("Both the DisableLocalAuth and AuthOptions parameters "
                                              "can't be given at the same time")
     if disable_local_auth and aad_auth_failure_mode:
-        raise MutuallyExclusiveArgumentError("Both the DisableLocalAuth and AadAuthFailureMode parameters " \
+        raise MutuallyExclusiveArgumentError("Both the DisableLocalAuth and AadAuthFailureMode parameters "
                                              "can't be given at the same time")
     if auth_options == "apiKeyOnly" and aad_auth_failure_mode:
-        raise MutuallyExclusiveArgumentError("Both an AuthOptions value of apiKeyOnly and an AadAuthFailureMode " \
+        raise MutuallyExclusiveArgumentError("Both an AuthOptions value of apiKeyOnly and an AadAuthFailureMode "
                                              "can't be given at the same time")
     if auth_options == "aadOrApiKey" and not aad_auth_failure_mode:
-        raise RequiredArgumentMissingError("An AuthOptions value of aadOrApiKey requires " \
+        raise RequiredArgumentMissingError("An AuthOptions value of aadOrApiKey requires "
                                            "an AadAuthFailureMode parameter")
 
     instance.disable_local_auth = disable_local_auth
