@@ -24,6 +24,11 @@ from azure.cli.command_modules.cosmosdb._client_factory import (
     cf_restorable_mongodb_databases,
     cf_restorable_mongodb_collections,
     cf_restorable_mongodb_resources,
+    cf_restorable_gremlin_databases,
+    cf_restorable_gremlin_graphs,
+    cf_restorable_gremlin_resources,
+    cf_restorable_tables,
+    cf_restorable_table_resources,
     cf_db_locations,
     cf_cassandra_cluster,
     cf_cassandra_data_center,
@@ -54,6 +59,7 @@ DATABASE_DEPRECATION_INFO = 'cosmosdb sql database, cosmosdb mongodb database, c
 COLLECTION_DEPRECATON_INFO = 'cosmosdb sql container, cosmosdb mongodb collection, cosmosdb cassandra table, cosmosdb gremlin graph or cosmosdb table'
 
 
+# pylint: disable=too-many-statements,line-too-long,too-many-locals
 def load_command_table(self, _):
 
     cosmosdb_sdk = CliCommandType(
@@ -115,6 +121,26 @@ def load_command_table(self, _):
     cosmosdb_mongodb_restorable_resources_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.cosmosdb.operations#RestorableMongodbResourcesOperations.{}',
         client_factory=cf_restorable_mongodb_resources)
+
+    cosmosdb_restorable_gremlin_databases_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.cosmosdb.operations#RestorableGremlinDatabasesOperations.{}',
+        client_factory=cf_restorable_gremlin_databases)
+
+    cosmosdb_restorable_gremlin_graphs_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.cosmosdb.operations#RestorableGremlinGraphsOperations.{}',
+        client_factory=cf_restorable_gremlin_graphs)
+
+    cosmosdb_restorable_gremlin_resources_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.cosmosdb.operations#RestorableGremlinResourcesOperations.{}',
+        client_factory=cf_restorable_gremlin_resources)
+
+    cosmosdb_restorable_tables_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.cosmosdb.operations#RestorableTablesOperations.{}',
+        client_factory=cf_restorable_tables)
+
+    cosmosdb_restorable_table_resources_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.cosmosdb.operations#RestorableTableResourcesOperations.{}',
+        client_factory=cf_restorable_table_resources)
 
     cosmosdb_locations_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.cosmosdb.operations#LocationsOperations.{}',
@@ -402,6 +428,21 @@ def load_command_table(self, _):
     with self.command_group('cosmosdb mongodb restorable-resource', cosmosdb_mongodb_restorable_resources_sdk, client_factory=cf_restorable_mongodb_resources) as g:
         g.command('list', 'list')
 
+    with self.command_group('cosmosdb gremlin restorable-database', cosmosdb_restorable_gremlin_databases_sdk, client_factory=cf_restorable_gremlin_databases) as g:
+        g.command('list', 'list')
+
+    with self.command_group('cosmosdb gremlin restorable-graph', cosmosdb_restorable_gremlin_graphs_sdk, client_factory=cf_restorable_gremlin_graphs) as g:
+        g.command('list', 'list')
+
+    with self.command_group('cosmosdb gremlin restorable-resource', cosmosdb_restorable_gremlin_resources_sdk, client_factory=cf_restorable_gremlin_resources) as g:
+        g.command('list', 'list')
+
+    with self.command_group('cosmosdb table restorable-table', cosmosdb_restorable_tables_sdk, client_factory=cf_restorable_tables) as g:
+        g.command('list', 'list')
+
+    with self.command_group('cosmosdb table restorable-resource', cosmosdb_restorable_table_resources_sdk, client_factory=cf_restorable_table_resources) as g:
+        g.command('list', 'list')
+
     # Get account locations
     with self.command_group('cosmosdb locations', cosmosdb_locations_sdk, client_factory=cf_db_locations) as g:
         g.show_command('show', 'get')
@@ -414,6 +455,14 @@ def load_command_table(self, _):
     # Retrieve backup info for mongodb
     with self.command_group('cosmosdb mongodb', cosmosdb_mongo_sdk, client_factory=cf_mongo_db_resources) as g:
         g.custom_command('retrieve-latest-backup-time', 'cli_mongo_db_retrieve_latest_backup_time')
+
+    # Retrieve backup info for gremlin
+    with self.command_group('cosmosdb gremlin', cosmosdb_gremlin_sdk, client_factory=cf_gremlin_resources) as g:
+        g.custom_command('retrieve-latest-backup-time', 'cli_gremlin_retrieve_latest_backup_time')
+
+    # Retrieve backup info for table
+    with self.command_group('cosmosdb table', cosmosdb_table_sdk, client_factory=cf_table_resources) as g:
+        g.custom_command('retrieve-latest-backup-time', 'cli_table_retrieve_latest_backup_time')
 
     # managed cassandra cluster
     with self.command_group('managed-cassandra cluster', cosmosdb_managed_cassandra_cluster_sdk, client_factory=cf_cassandra_cluster) as g:
