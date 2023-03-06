@@ -16,14 +16,6 @@ def resource_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
 
 
-def cf_application_gateways(cli_ctx, _):
-    return network_client_factory(cli_ctx).application_gateways
-
-
-def cf_app_gateway_waf_policy(cli_ctx, _):
-    return network_client_factory(cli_ctx).web_application_firewall_policies
-
-
 def cf_connection_monitor(cli_ctx, _):
     return network_client_factory(cli_ctx).connection_monitors
 

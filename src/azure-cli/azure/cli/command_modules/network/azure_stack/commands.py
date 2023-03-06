@@ -12,31 +12,26 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import get_api_version, ResourceType
 
 from azure.cli.command_modules.network.azure_stack._client_factory import (
-    cf_application_gateways, cf_express_route_circuit_authorizations,
+    cf_express_route_circuit_authorizations,
     cf_express_route_circuit_peerings, cf_express_route_circuits,
     cf_express_route_service_providers,
     cf_network_watcher, cf_packet_capture,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_connection_monitor, cf_dns_references, cf_private_endpoints,
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
-    cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
+    cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links,
     cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
     cf_virtual_router, cf_virtual_router_peering, cf_flow_logs,
     cf_private_dns_zone_groups, cf_virtual_hub,
     cf_custom_ip_prefixes)
-from azure.cli.command_modules.network.azure_stack._util import (
-    list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network.azure_stack._format import (
     transform_dns_record_set_output,
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
     transform_traffic_manager_create_output,
     transform_geographic_hierachy_table_output,
-    transform_service_community_table_output, transform_waf_rule_sets_table_output)
+    transform_service_community_table_output)
 from azure.cli.command_modules.network.azure_stack._validators import (
-    get_network_watcher_from_location,
-    process_ag_create_namespace, process_ag_http_listener_create_namespace, process_ag_listener_create_namespace, process_ag_settings_create_namespace, process_ag_http_settings_create_namespace,
-    process_ag_rule_create_namespace, process_ag_routing_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
-    process_ag_url_path_map_rule_create_namespace, process_auth_create_namespace,
+    get_network_watcher_from_location, process_auth_create_namespace,
     process_lb_create_namespace, process_nw_cm_v2_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
     process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
@@ -44,8 +39,7 @@ from azure.cli.command_modules.network.azure_stack._validators import (
     process_nw_packet_capture_create_namespace, process_nw_test_connectivity_namespace, process_nw_topology_namespace,
     process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
     process_vpn_connection_create_namespace,
-    process_nw_config_diagnostic_namespace,
-    process_appgw_waf_policy_update)
+    process_nw_config_diagnostic_namespace)
 
 NETWORK_VROUTER_DEPRECATION_INFO = 'network routeserver'
 NETWORK_VROUTER_PEERING_DEPRECATION_INFO = 'network routeserver peering'
@@ -57,21 +51,6 @@ def load_command_table(self, _):
     # region Command Types
     custom_command_type = self.module_kwargs["custom_command_type"]
     custom_operations_tmpl = custom_command_type.settings["operations_tmpl"]
-
-    network_ag_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ApplicationGatewaysOperations.{}',
-        client_factory=cf_application_gateways
-    )
-
-    network_ag_waf_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#WebApplicationFirewallPoliciesOperations.{}',
-        client_factory=cf_app_gateway_waf_policy
-    )
-
-    network_util = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.azure_stack._util#{}',
-        client_factory=None
-    )
 
     network_dns_zone_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.dns.operations#ZonesOperations.{}',
@@ -241,226 +220,6 @@ def load_command_table(self, _):
         client_factory=cf_custom_ip_prefixes,
         min_api='2020-06-01'
     )
-
-    # endregion
-
-    # region ApplicationGateways
-    with self.command_group('network application-gateway', network_ag_sdk) as g:
-        g.custom_command('create', 'create_application_gateway',
-                         transform=DeploymentOutputLongRunningOperation(self.cli_ctx),
-                         supports_no_wait=True,
-                         table_transformer=deployment_validate_table_format,
-                         validator=process_ag_create_namespace,
-                         exception_handler=handle_template_based_exception)
-        g.command('delete', 'begin_delete', supports_no_wait=True)
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_application_gateways')
-        g.command('start', 'begin_start')
-        g.command('stop', 'begin_stop')
-        g.custom_command('show-backend-health', 'show_ag_backend_health', min_api='2016-09-01', client_factory=cf_application_gateways)
-        g.generic_update_command('update', supports_no_wait=True, setter_name='begin_create_or_update', custom_func_name='update_application_gateway')
-        g.wait_command('wait')
-
-    subresource_properties = [
-        {'prop': 'authentication_certificates', 'name': 'auth-cert'},
-        {'prop': 'ssl_certificates', 'name': 'ssl-cert'},
-        {'prop': 'frontend_ip_configurations', 'name': 'frontend-ip'},
-        {'prop': 'frontend_ports', 'name': 'frontend-port'},
-        {'prop': 'backend_address_pools', 'name': 'address-pool'},
-        {'prop': 'backend_http_settings_collection', 'name': 'http-settings', 'validator': process_ag_http_settings_create_namespace},
-        {'prop': 'http_listeners', 'name': 'http-listener', 'validator': process_ag_http_listener_create_namespace},
-        {'prop': 'request_routing_rules', 'name': 'rule', 'validator': process_ag_rule_create_namespace},
-        {'prop': 'probes', 'name': 'probe'},
-        {'prop': 'url_path_maps', 'name': 'url-path-map', 'validator': process_ag_url_path_map_create_namespace},
-        {'prop': 'rewrite_rule_sets', 'name': 'rewrite-rule set'}
-    ]
-    if self.supported_api_version(min_api='2018-08-01'):
-        subresource_properties.append({'prop': 'trusted_root_certificates', 'name': 'root-cert'})
-    if self.supported_api_version(min_api='2021-08-01'):
-        subresource_properties.append({'prop': 'backend_settings_collection', 'name': 'settings', 'validator': process_ag_settings_create_namespace})
-        subresource_properties.append({'prop': 'listeners', 'name': 'listener', 'validator': process_ag_listener_create_namespace})
-        subresource_properties.append({'prop': 'routing_rules', 'name': 'routing-rule', 'validator': process_ag_routing_rule_create_namespace})
-
-    def _make_singular(value):
-        try:
-            if value.endswith('ies'):
-                value = value[:-3] + 'y'
-            elif value.endswith('s'):
-                value = value[:-1]
-            return value
-        except AttributeError:
-            return value
-
-    for kwargs in subresource_properties:
-        alias = kwargs['name']
-        subresource = kwargs['prop']
-        create_validator = kwargs.get('validator', None)
-        with self.command_group('network application-gateway {}'.format(alias), network_util) as g:
-            g.command('list', list_network_resource_property('application_gateways', subresource))
-            g.show_command('show', get_network_resource_property_entry('application_gateways', subresource))
-            g.command('delete', delete_network_resource_property_entry('application_gateways', subresource), supports_no_wait=True)
-            g.custom_command('create', 'create_ag_{}'.format(_make_singular(subresource)), supports_no_wait=True, validator=create_validator)
-            g.generic_update_command('update', command_type=network_ag_sdk, supports_no_wait=True,
-                                     setter_name='begin_create_or_update',
-                                     custom_func_name='update_ag_{}'.format(_make_singular(subresource)),
-                                     child_collection_prop_name=subresource, validator=create_validator)
-
-    with self.command_group('network application-gateway rewrite-rule', network_ag_sdk, min_api='2018-12-01') as g:
-        g.custom_command('create', 'create_ag_rewrite_rule', supports_no_wait=True)
-        g.custom_show_command('show', 'show_ag_rewrite_rule')
-        g.custom_command('list', 'list_ag_rewrite_rules')
-        g.custom_command('delete', 'delete_ag_rewrite_rule', supports_no_wait=True)
-        g.generic_update_command('update', command_type=network_ag_sdk, supports_no_wait=True,
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='update_ag_rewrite_rule',
-                                 child_collection_prop_name='rewrite_rule_sets.rewrite_rules',
-                                 child_collection_key='name.name',
-                                 child_arg_name='rule_set_name.rule_name')
-
-    with self.command_group('network application-gateway rewrite-rule condition', network_ag_sdk, min_api='2018-12-01') as g:
-        g.custom_command('create', 'create_ag_rewrite_rule_condition', supports_no_wait=True)
-        g.custom_show_command('show', 'show_ag_rewrite_rule_condition')
-        g.custom_command('list', 'list_ag_rewrite_rule_conditions')
-        g.custom_command('delete', 'delete_ag_rewrite_rule_condition', supports_no_wait=True)
-        g.generic_update_command('update', command_type=network_ag_sdk, supports_no_wait=True,
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='update_ag_rewrite_rule_condition',
-                                 child_collection_prop_name='rewrite_rule_sets.rewrite_rules.conditions',
-                                 child_collection_key='name.name.variable',
-                                 child_arg_name='rule_set_name.rule_name.variable')
-
-    with self.command_group('network application-gateway redirect-config', network_util, min_api='2017-06-01') as g:
-        subresource = 'redirect_configurations'
-        g.command('list', list_network_resource_property('application_gateways', subresource))
-        g.show_command('show', get_network_resource_property_entry('application_gateways', subresource))
-        g.command('delete', delete_network_resource_property_entry('application_gateways', subresource), supports_no_wait=True)
-        g.custom_command('create', 'create_ag_{}'.format(_make_singular(subresource)), supports_no_wait=True, doc_string_source='ApplicationGatewayRedirectConfiguration')
-        g.generic_update_command('update', command_type=network_ag_sdk,
-                                 client_factory=cf_application_gateways, supports_no_wait=True,
-                                 setter_name='begin_create_or_update',
-                                 custom_func_name='update_ag_{}'.format(_make_singular(subresource)),
-                                 child_collection_prop_name=subresource, doc_string_source='ApplicationGatewayRedirectConfiguration')
-
-    with self.command_group('network application-gateway rewrite-rule', network_ag_sdk, min_api='2018-12-01') as g:
-        g.command('condition list-server-variables', 'list_available_server_variables')
-        g.command('list-request-headers', 'list_available_request_headers')
-        g.command('list-response-headers', 'list_available_response_headers')
-
-    with self.command_group('network application-gateway ssl-policy') as g:
-        g.custom_command('set', 'set_ag_ssl_policy_2017_06_01', min_api='2017-06-01', supports_no_wait=True, validator=process_ag_ssl_policy_set_namespace, doc_string_source='ApplicationGatewaySslPolicy')
-        g.custom_command('set', 'set_ag_ssl_policy_2017_03_01', max_api='2017-03-01', supports_no_wait=True, validator=process_ag_ssl_policy_set_namespace)
-        g.custom_show_command('show', 'show_ag_ssl_policy')
-
-    with self.command_group('network application-gateway ssl-policy', network_ag_sdk, min_api='2017-06-01') as g:
-        g.command('list-options', 'list_available_ssl_options')
-        g.command('predefined list', 'list_available_ssl_predefined_policies')
-        g.show_command('predefined show', 'get_ssl_predefined_policy')
-
-    with self.command_group('network application-gateway url-path-map rule') as g:
-        g.custom_command('create', 'create_ag_url_path_map_rule', supports_no_wait=True, validator=process_ag_url_path_map_rule_create_namespace)
-        g.custom_command('delete', 'delete_ag_url_path_map_rule', supports_no_wait=True)
-
-    with self.command_group('network application-gateway waf-config') as g:
-        g.custom_command('set', 'set_ag_waf_config_2017_03_01', min_api='2017-03-01', supports_no_wait=True)
-        g.custom_command('set', 'set_ag_waf_config_2016_09_01', max_api='2016-09-01', supports_no_wait=True)
-        g.custom_show_command('show', 'show_ag_waf_config')
-        g.custom_command('list-rule-sets', 'list_ag_waf_rule_sets', min_api='2017-03-01', client_factory=cf_application_gateways, table_transformer=transform_waf_rule_sets_table_output)
-
-    with self.command_group('network application-gateway identity', command_type=network_ag_sdk, min_api='2018-12-01') as g:
-        g.custom_command('assign', 'assign_ag_identity', supports_no_wait=True)
-        g.custom_command('remove', 'remove_ag_identity', supports_no_wait=True)
-        g.custom_show_command('show', 'show_ag_identity')
-
-    with self.command_group('network application-gateway private-link',
-                            command_type=network_ag_sdk,
-                            min_api='2020-05-01',
-                            is_preview=True) as g:
-        g.custom_command('add', 'add_ag_private_link', supports_no_wait=True)
-        g.custom_command('remove', 'remove_ag_private_link', confirmation=True, supports_no_wait=True)
-        g.custom_show_command('show', 'show_ag_private_link')
-        g.custom_command('list', 'list_ag_private_link')
-        g.wait_command('wait')
-
-    with self.command_group('network application-gateway private-link ip-config',
-                            command_type=network_ag_sdk,
-                            min_api='2020-05-01',
-                            is_preview=True) as g:
-        g.custom_command('add', 'add_ag_private_link_ip', supports_no_wait=True)
-        g.custom_command('remove', 'remove_ag_private_link_ip', confirmation=True, supports_no_wait=True)
-        g.custom_show_command('show', 'show_ag_private_link_ip')
-        g.custom_command('list', 'list_ag_private_link_ip')
-        g.wait_command('wait')
-    # endregion
-
-    # region ApplicationGatewayWAFPolicy
-    with self.command_group('network application-gateway waf-policy', min_api='2018-12-01') as g:
-        g.custom_command('create', 'create_ag_waf_policy')
-
-    with self.command_group('network application-gateway waf-policy policy-setting', network_ag_waf_sdk,
-                            client_factory=cf_app_gateway_waf_policy,
-                            min_api='2019-09-01') as g:
-        g.custom_command('list', 'list_waf_policy_setting')
-        g.generic_update_command('update',
-                                 command_type=network_ag_waf_sdk,
-                                 client_factory=cf_app_gateway_waf_policy,
-                                 custom_func_name='update_waf_policy_setting')
-
-    with self.command_group('network application-gateway waf-policy custom-rule', network_ag_waf_sdk,
-                            client_factory=cf_app_gateway_waf_policy,
-                            min_api='2018-12-01') as g:
-        g.custom_command('create', 'create_waf_custom_rule')
-        g.custom_command('delete', 'delete_waf_custom_rule')
-        g.custom_command('list', 'list_waf_custom_rules')
-        g.custom_show_command('show', 'show_waf_custom_rule')
-        g.generic_update_command('update',
-                                 command_type=network_ag_waf_sdk,
-                                 client_factory=cf_app_gateway_waf_policy,
-                                 custom_func_name='update_waf_custom_rule',
-                                 child_collection_prop_name='custom_rules',
-                                 child_arg_name='rule_name')
-
-    with self.command_group('network application-gateway waf-policy custom-rule match-condition', network_ag_waf_sdk,
-                            client_factory=cf_app_gateway_waf_policy,
-                            min_api='2018-12-01') as g:
-        g.custom_command('add', 'add_waf_custom_rule_match_cond')
-        g.custom_command('list', 'list_waf_custom_rule_match_cond')
-        g.custom_command('remove', 'remove_waf_custom_rule_match_cond')
-
-    with self.command_group('network application-gateway waf-policy managed-rule rule-set', min_api='2019-09-01') as g:
-        g.custom_command('add', 'add_waf_managed_rule_set')
-        g.custom_command('remove', 'remove_waf_managed_rule_set')
-        g.custom_command('list', 'list_waf_managed_rule_set')
-        g.custom_command('update', 'update_waf_managed_rule_set', validator=process_appgw_waf_policy_update)
-
-    with self.command_group('network application-gateway waf-policy managed-rule exclusion', network_ag_waf_sdk,
-                            client_factory=cf_app_gateway_waf_policy,
-                            min_api='2019-09-01') as g:
-        g.custom_command('add', 'add_waf_managed_rule_exclusion')
-        g.custom_command('remove', 'remove_waf_managed_rule_exclusion')
-        g.custom_command('list', 'list_waf_managed_rule_exclusion')
-
-    with self.command_group('network application-gateway waf-policy managed-rule exclusion rule-set', network_ag_waf_sdk,
-                            client_factory=cf_app_gateway_waf_policy,
-                            min_api='2021-05-01') as g:
-        g.custom_command('add', 'add_waf_exclusion_rule_set')
-        g.custom_command('remove', 'remove_waf_exclusion_rule_set')
-        g.custom_command('list', 'list_waf_exclusion_rule_set')
-
-    with self.command_group('network application-gateway client-cert', network_ag_sdk, min_api='2020-06-01') as g:
-        g.custom_command('add', 'add_trusted_client_certificate')
-        g.custom_command('remove', 'remove_trusted_client_certificate')
-        g.custom_command('list', 'list_trusted_client_certificate')
-        g.custom_show_command('show', 'show_trusted_client_certificate')
-        g.custom_command('update', 'update_trusted_client_certificate')
-
-    with self.command_group('network application-gateway ssl-profile', network_ag_sdk, min_api='2020-06-01') as g:
-        g.custom_command('add', 'add_ssl_profile')
-        g.custom_command('remove', 'remove_ssl_profile')
-        g.custom_command('list', 'list_ssl_profile')
-        g.custom_show_command('show', 'show_ssl_profile')
-        g.custom_command('update', 'update_ssl_profile')
-
-    # endregion
 
     # region DdosProtectionPlans
     with self.command_group('network ddos-protection', min_api='2018-02-01') as g:
