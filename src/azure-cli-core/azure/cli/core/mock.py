@@ -25,7 +25,7 @@ class DummyCli(AzCli):
 
         super(DummyCli, self).__init__(
             cli_name='az',
-            config_dir=GLOBAL_CONFIG_DIR + random_string(),
+            config_dir=os.path.join(GLOBAL_CONFIG_DIR, random_string()),
             config_env_var_prefix=ENV_VAR_PREFIX,
             commands_loader_cls=commands_loader_cls or MainCommandsLoader,
             parser_cls=AzCliCommandParser,
