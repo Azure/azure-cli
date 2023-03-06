@@ -308,19 +308,6 @@ def validate_dns_record_type(namespace):
             return
 
 
-def validate_user_assigned_identity(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-
-    if namespace.user_assigned_identity and not is_valid_resource_id(namespace.user_assigned_identity):
-        namespace.user_assigned_identity = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.ManagedIdentity',
-            type='userAssignedIdentities',
-            name=namespace.user_assigned_identity
-        )
-
-
 def validate_express_route_peering(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     circuit = namespace.circuit_name
@@ -377,18 +364,6 @@ def validate_virtual_hub(cmd, namespace):
             namespace='Microsoft.Network',
             type='virtualHubs',
             name=namespace.virtual_hub
-        )
-
-
-def validate_waf_policy(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    if namespace.firewall_policy and not is_valid_resource_id(namespace.firewall_policy):
-        namespace.firewall_policy = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type='ApplicationGatewayWebApplicationFirewallPolicies',
-            name=namespace.firewall_policy
         )
 
 
@@ -1661,20 +1636,6 @@ def validate_ag_address_pools(cmd, namespace):
                 child_name_1=item)
             ids.append(item)
     namespace.app_gateway_backend_address_pools = ids
-
-
-def validate_custom_error_pages(namespace):
-    if not namespace.custom_error_pages:
-        return
-
-    values = []
-    for item in namespace.custom_error_pages:
-        try:
-            (code, url) = item.split('=')
-            values.append({'statusCode': code, 'customErrorPageUrl': url})
-        except (ValueError, TypeError):
-            raise CLIError('usage error: --custom-error-pages STATUS_CODE=URL [STATUS_CODE=URL ...]')
-    namespace.custom_error_pages = values
 
 
 def validate_custom_headers(namespace):
