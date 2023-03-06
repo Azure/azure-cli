@@ -21,9 +21,6 @@ from azure.cli.command_modules.network.azure_stack._validators import (
     process_lb_create_namespace,
     process_vpn_connection_create_namespace,)
 
-NETWORK_VROUTER_DEPRECATION_INFO = 'network routeserver'
-NETWORK_VROUTER_PEERING_DEPRECATION_INFO = 'network routeserver peering'
-
 
 # pylint: disable=too-many-locals, too-many-statements
 def load_command_table(self, _):
