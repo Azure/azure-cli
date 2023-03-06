@@ -284,7 +284,7 @@ def __write_kv_and_features_to_file(file_path, key_values=None, features=None, f
                 yaml.safe_dump(exported_keyvalues, fp, sort_keys=False, width=float('inf'))
             elif format_ == 'properties':
                 for key, value in exported_keyvalues.items():
-                    fp.write('{}={}\n'.format(key, value))                
+                    fp.write('{}={}\n'.format(key, value))
     except Exception as exception:
         raise FileOperationError("Failed to export key-values to file. " + str(exception))
 
