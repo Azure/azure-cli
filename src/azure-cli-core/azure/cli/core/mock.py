@@ -16,6 +16,7 @@ class DummyCli(AzCli):
         from azure.cli.core.azlogging import AzCliLogging
         from azure.cli.core.cloud import get_active_cloud
         from azure.cli.core.parser import AzCliCommandParser
+        from azure.cli.core.util import random_string
         from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
         from azure.cli.core._help import AzCliHelp
         from azure.cli.core._output import AzOutputProducer
@@ -24,7 +25,7 @@ class DummyCli(AzCli):
 
         super(DummyCli, self).__init__(
             cli_name='az',
-            config_dir=GLOBAL_CONFIG_DIR,
+            config_dir=GLOBAL_CONFIG_DIR + random_string(),
             config_env_var_prefix=ENV_VAR_PREFIX,
             commands_loader_cls=commands_loader_cls or MainCommandsLoader,
             parser_cls=AzCliCommandParser,
