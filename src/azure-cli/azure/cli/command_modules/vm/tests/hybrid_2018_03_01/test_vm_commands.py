@@ -1053,6 +1053,7 @@ class DiagnosticsExtensionInstallTest(ScenarioTest):
 
 class VMCreateExistingOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_existing')
     @StorageAccountPreparer()
     def test_vm_create_existing_options(self, resource_group, storage_account):
@@ -1081,13 +1082,14 @@ class VMCreateExistingOptions(ScenarioTest):
         self.cmd('network nsg show -n {nsg} -g {rg}',
                  checks=self.check('networkInterfaces[0].id.ends_with(@, \'{vm}VMNic\')', True))
         self.cmd('network nic show -n {vm}VMNic -g {rg}',
-                 checks=self.check('ipConfigurations[0].publicIpAddress.id.ends_with(@, \'{pubip}\')', True))
+                 checks=self.check('ipConfigurations[0].publicIPAddress.id.ends_with(@, \'{pubip}\')', True))
         self.cmd('vm show -n {vm} -g {rg}',
                  checks=self.check('storageProfile.osDisk.vhd.uri', 'https://{sa}.blob.core.windows.net/{container}/{disk}.vhd'))
 
 
 class VMCreateExistingIdsOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_existing_ids')
     @StorageAccountPreparer()
     def test_vm_create_existing_ids_options(self, resource_group, storage_account):
@@ -1133,7 +1135,7 @@ class VMCreateExistingIdsOptions(ScenarioTest):
         self.cmd('network nsg show -n {nsg} -g {rg}',
                  checks=self.check('networkInterfaces[0].id.ends_with(@, \'{vm}VMNic\')', True))
         self.cmd('network nic show -n {vm}VMNic -g {rg}',
-                 checks=self.check('ipConfigurations[0].publicIpAddress.id.ends_with(@, \'{pubip}\')', True))
+                 checks=self.check('ipConfigurations[0].publicIPAddress.id.ends_with(@, \'{pubip}\')', True))
         self.cmd('vm show -n {vm} -g {rg}',
                  checks=self.check('storageProfile.osDisk.vhd.uri', 'https://{sa}.blob.core.windows.net/{container}/{disk}.vhd'))
 
@@ -1153,17 +1155,17 @@ class VMCreateCustomIP(ScenarioTest):
         self.cmd('vm create -n {vm} -g {rg} --image openSUSE-Leap --admin-username user11 --private-ip-address 10.0.0.5 --public-ip-sku {public_ip_sku} --public-ip-address-dns-name {dns} --generate-ssh-keys')
 
         self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', checks=[
-            self.check('publicIpAllocationMethod', 'Static'),
+            self.check('publicIPAllocationMethod', 'Static'),
             self.check('dnsSettings.domainNameLabel', '{dns}'),
             self.check('sku.name', '{public_ip_sku}')
         ])
         self.cmd('network nic show -n {vm}VMNic -g {rg}',
-                 checks=self.check('ipConfigurations[0].privateIpAllocationMethod', 'Static'))
+                 checks=self.check('ipConfigurations[0].privateIPAllocationMethod', 'Static'))
 
         # verify the default should be "Basic" sku with "Dynamic" allocation method
         self.cmd('vm create -n {vm2} -g {rg} --image openSUSE-Leap --admin-username user11 --generate-ssh-keys')
         self.cmd('network public-ip show -n {vm2}PublicIP -g {rg}', checks=[
-            self.check('publicIpAllocationMethod', 'Dynamic'),
+            self.check('publicIPAllocationMethod', 'Dynamic'),
             self.check('sku.name', 'Basic')
         ])
 
@@ -1352,6 +1354,7 @@ class VMSSCreateAndModify(ScenarioTest):
 
 class VMSSCreateOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_options')
     def test_vmss_create_options(self, resource_group):
 
@@ -1367,7 +1370,7 @@ class VMSSCreateOptions(ScenarioTest):
 
         self.cmd('vmss create --image Debian --admin-password testPassword0 -l westus -g {rg} -n {vmss} --disable-overprovision --instance-count {count} --os-disk-caching {caching} --upgrade-policy-mode {update} --authentication-type password --admin-username myadmin --public-ip-address {ip} --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2')
         self.cmd('network lb show -g {rg} -n {vmss}lb ',
-                 checks=self.check('frontendIpConfigurations[0].publicIpAddress.id.ends_with(@, \'{ip}\')', True))
+                 checks=self.check('frontendIPConfigurations[0].publicIPAddress.id.ends_with(@, \'{ip}\')', True))
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('sku.capacity', '{count}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
@@ -1616,6 +1619,7 @@ class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
 
 class VMSSCreateExistingOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_options')
     def test_vmss_create_existing_options(self):
 
@@ -1641,13 +1645,14 @@ class VMSSCreateExistingOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.osDisk.vhdContainers[0].ends_with(@, \'{container}\')', True)
         ])
         self.cmd('network lb show --name {lb} -g {rg}',
-                 checks=self.check('backendAddressPools[0].backendIpConfigurations[0].id.contains(@, \'{vmss}\')', True))
+                 checks=self.check('backendAddressPools[0].backendIPConfigurations[0].id.contains(@, \'{vmss}\')', True))
         self.cmd('network vnet show --name {vnet} -g {rg}',
                  checks=self.check('subnets[0].ipConfigurations[0].id.contains(@, \'{vmss}\')', True))
 
 
 class VMSSCreateExistingIdsOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_ids')
     def test_vmss_create_existing_ids_options(self, resource_group):
 
@@ -1684,7 +1689,7 @@ class VMSSCreateExistingIdsOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.osDisk.vhdContainers[0].ends_with(@, \'{container}\')', True)
         ])
         self.cmd('network lb show --name {lb} -g {rg}',
-                 checks=self.check('backendAddressPools[0].backendIpConfigurations[0].id.contains(@, \'{vmss}\')', True))
+                 checks=self.check('backendAddressPools[0].backendIPConfigurations[0].id.contains(@, \'{vmss}\')', True))
         self.cmd('network vnet show --name {vnet} -g {rg}',
                  checks=self.check('subnets[0].ipConfigurations[0].id.contains(@, \'{vmss}\')', True))
 
@@ -1834,7 +1839,7 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
         self.cmd('network lb list -g {rg}', checks=self.check('[0].sku.name', 'Basic'))
         self.cmd('network public-ip list -g {rg}', checks=[
             self.check('[0].sku.name', 'Basic'),
-            self.check('[0].publicIpAllocationMethod', 'Dynamic')
+            self.check('[0].publicIPAllocationMethod', 'Dynamic')
         ])
 
         # but you can overrides the defaults
@@ -1843,7 +1848,7 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
                  checks=self.check('sku.name', 'Standard'))
         self.cmd('network public-ip show -g {rg} -n {ip}', checks=[
             self.check('sku.name', 'Standard'),
-            self.check('publicIpAllocationMethod', 'Static')
+            self.check('publicIPAllocationMethod', 'Static')
         ])
 
 

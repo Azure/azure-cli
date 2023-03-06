@@ -136,25 +136,27 @@ def transform_nic_create_output(result):
     return None
 
 
-def transform_nsg_create_output(result):
-    return {'NewNSG': result.result()}
-
-
 def transform_nsg_rule_table_output(result):
     item = OrderedDict()
     item['Name'] = result['name']
     item['ResourceGroup'] = result['resourceGroup']
     item['Priority'] = result['priority']
-    item['SourcePortRanges'] = result['sourcePortRange'] or ' '.join(result['sourcePortRanges'])
-    item['SourceAddressPrefixes'] = result['sourceAddressPrefix'] or ' '.join(result['sourceAddressPrefixes'])
-    item['SourceASG'] = result['sourceApplicationSecurityGroups'] or 'None'
     item['Access'] = result['access']
     item['Protocol'] = result['protocol']
     item['Direction'] = result['direction']
-    item['DestinationPortRanges'] = result['destinationPortRange'] or ' '.join(result['destinationPortRanges'])
-    item['DestinationAddressPrefixes'] = result['destinationAddressPrefix'] or \
-        ' '.join(result['destinationAddressPrefixes'])
-    item['DestinationASG'] = result['destinationApplicationSecurityGroups'] or 'None'
+    if 'SourcePortRanges' in result:
+        item['SourcePortRanges'] = result.get('sourcePortRange', ' '.join(result['sourcePortRanges']))
+    if 'SourceAddressPrefixes' in result:
+        item['SourceAddressPrefixes'] = result.get('sourceAddressPrefix', ' '.join(result['sourceAddressPrefixes']))
+    if 'SourceASG' in result:
+        item['SourceASG'] = result.get('sourceApplicationSecurityGroups', 'None')
+    if 'DestinationPortRanges' in result:
+        item['DestinationPortRanges'] = result.get('destinationPortRange', ' '.join(result['destinationPortRanges']))
+    if 'DestinationAddressPrefixes' in result:
+        item['DestinationAddressPrefixes'] = result.get('destinationAddressPrefix',
+                                                        ' '.join(result['destinationAddressPrefixes']))
+    if 'DestinationASG' in result:
+        item['DestinationASG'] = result.get('destinationApplicationSecurityGroups', 'None')
     return item
 
 

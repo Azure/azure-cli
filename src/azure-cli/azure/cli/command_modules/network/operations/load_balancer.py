@@ -26,6 +26,8 @@ from ..aaz.latest.network.lb.address_pool.basic import Create as _LBAddressPoolB
     Delete as _LBAddressPoolBasicDelete
 from ..aaz.latest.network.lb.address_pool.tunnel_interface import Add as _LBAddressPoolTunnelInterfaceAdd, \
     Update as _LBAddressPoolTunnelInterfaceUpdate, Remove as _LBAddressPoolTunnelInterfaceRemove
+from ..aaz.latest.network.lb.probe import Create as _LBProbeCreate, Update as _LBProbeUpdate
+
 
 logger = get_logger(__name__)
 
@@ -712,6 +714,50 @@ class LBAddressPoolTunnelInterfaceUpdate(_LBAddressPoolTunnelInterfaceUpdate):
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
+
+
+class LBProbeCreate(_LBProbeCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.port._required = True
+        args_schema.protocol._required = True
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.probe_threshold):
+            logger.warning(
+                "Please note that the parameter --probe-threshold is currently in preview and is not recommended "
+                "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
+                "by not specifying the value of the property."
+            )
+        if has_value(args.request_path) and args.request_path == "":
+            args.request_path = None
+
+
+class LBProbeUpdate(_LBProbeUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.port._nullable = False
+        args_schema.protocol._nullable = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.probe_threshold):
+            logger.warning(
+                "Please note that the parameter --probe-threshold is currently in preview and is not recommended "
+                "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
+                "by not specifying the value of the property."
+            )
+        if has_value(args.request_path) and args.request_path == "":
+            args.request_path = None
 
 
 # cross-region-lb commands

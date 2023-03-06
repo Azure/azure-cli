@@ -40,7 +40,7 @@ class NetworkLoadBalancerWithSku(ScenarioTest):
         ])
         self.cmd('network public-ip show -g {rg} -n {ip}', checks=[
             self.check('sku.name', 'Standard'),
-            self.check('publicIpAllocationMethod', 'Static')
+            self.check('publicIPAllocationMethod', 'Static')
         ])
 
 
@@ -51,16 +51,17 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
 
         self.kwargs.update({
             'lb': 'lb1',
+            'sku': 'standard',
             'zone': '2',
             'location': 'eastus2',
             'ip': 'pubip1'
         })
 
         # LB with public ip
-        self.cmd('network lb create -g {rg} -l {location} -n {lb} --public-ip-zone {zone} --public-ip-address {ip}')
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --sku {sku} --public-ip-zone {zone} --public-ip-address {ip}')
         # No zone on LB and its front-ip-config
         self.cmd('network lb show -g {rg} -n {lb}', checks=[
-            self.check("frontendIpConfigurations[0].zones", None),
+            self.check("frontendIPConfigurations[0].zones", None),
             self.check("zones", None)
         ])
         # Zone on public-ip which LB uses to infer the zone
@@ -70,10 +71,10 @@ class NetworkLoadBalancerWithZone(ScenarioTest):
 
         # LB w/o public ip, so called ILB
         self.kwargs['lb'] = 'lb2'
-        self.cmd('network lb create -g {rg} -l {location} -n {lb} --frontend-ip-zone {zone} --public-ip-address "" --vnet-name vnet1 --subnet subnet1')
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --sku {sku} --frontend-ip-zone {zone} --public-ip-address "" --vnet-name vnet1 --subnet subnet1')
         # Zone on front-ip-config, and still no zone on LB resource
         self.cmd('network lb show -g {rg} -n {lb}', checks=[
-            self.check("frontendIpConfigurations[0].zones[0]", self.kwargs['zone']),
+            self.check("frontendIPConfigurations[0].zones[0]", self.kwargs['zone']),
             self.check("zones", None)
         ])
         # add a second frontend ip configuration
@@ -96,7 +97,7 @@ class NetworkPublicIpWithSku(ScenarioTest):
         self.cmd('network public-ip create -g {rg} -l {location} -n {ip} --sku {sku} --tags foo=doo')
         self.cmd('network public-ip show -g {rg} -n {ip}', checks=[
             self.check('sku.name', 'Standard'),
-            self.check('publicIpAllocationMethod', 'Static'),
+            self.check('publicIPAllocationMethod', 'Static'),
             self.check('tags.foo', 'doo')
         ])
 
@@ -609,16 +610,16 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
         })
         self.cmd('network public-ip create -g {rg} -n {ip1} --dns-name {dns} --allocation-method static', checks=[
             self.check('publicIp.provisioningState', 'Succeeded'),
-            self.check('publicIp.publicIpAllocationMethod', 'Static'),
+            self.check('publicIp.publicIPAllocationMethod', 'Static'),
             self.check('publicIp.dnsSettings.domainNameLabel', '{dns}')
         ])
         self.cmd('network public-ip create -g {rg} -n {ip2}', checks=[
             self.check('publicIp.provisioningState', 'Succeeded'),
-            self.check('publicIp.publicIpAllocationMethod', 'Dynamic'),
+            self.check('publicIp.publicIPAllocationMethod', 'Dynamic'),
             self.check('publicIp.dnsSettings', None)
         ])
         self.cmd('network public-ip update -g {rg} -n {ip2} --allocation-method static --dns-name wowza --idle-timeout 10 --tags foo=doo', checks=[
-            self.check('publicIpAllocationMethod', 'Static'),
+            self.check('publicIPAllocationMethod', 'Static'),
             self.check('dnsSettings.domainNameLabel', 'wowza'),
             self.check('idleTimeoutInMinutes', 10),
             self.check('tags.foo', 'doo')
@@ -645,11 +646,16 @@ class NetworkZonedPublicIpScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_zoned_public_ip')
     def test_network_zoned_public_ip(self, resource_group):
         self.kwargs['ip'] = 'pubip'
-        self.cmd('network public-ip create -g {rg} -n {ip} -l centralus -z 2',
+        self.cmd('network public-ip create -g {rg} -n {ip} -l centralus -z 2 --sku Standard',
                  checks=self.check('publicIp.zones[0]', '2'))
 
-        table_output = self.cmd('network public-ip show -g {rg} -n {ip} -otable').output
-        self.assertEqual(table_output.splitlines()[2].split(), ['pubip', resource_group, 'centralus', '2', 'IPv4', 'Dynamic', '4', 'Succeeded'])
+        self.cmd(
+            'network public-ip show -g {rg} -n {ip}',
+            checks=[
+                self.check('name', '{ip}'),
+                self.check('publicIPAddressVersion', 'IPv4')
+            ]
+        )
 
 
 class NetworkExpressRouteScenarioTest(ScenarioTest):
@@ -799,7 +805,7 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
         # test internet facing load balancer with new static public IP
         self.cmd('network lb create -n {lb}2 -g {rg} --public-ip-address-allocation static --tags foo=doo')
         self.cmd('network public-ip show -g {rg} -n PublicIP{lb}2', checks=[
-            self.check('publicIpAllocationMethod', 'Static'),
+            self.check('publicIPAllocationMethod', 'Static'),
             self.check('tags.foo', 'doo')
         ])
 
@@ -863,12 +869,12 @@ class NetworkLoadBalancerIpConfigScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 2))
         self.cmd('network lb frontend-ip update -g {rg} --lb-name lb1 -n ipconfig1 --public-ip-address publicip3')
         self.cmd('network lb frontend-ip show -g {rg} --lb-name lb1 -n ipconfig1',
-                 checks=self.check("publicIpAddress.contains(id, 'publicip3')", True))
+                 checks=self.check("publicIPAddress.contains(id, 'publicip3')", True))
 
         # test generic update
         self.kwargs['ip2_id'] = resource_id(subscription=self.get_subscription_id(), resource_group=self.kwargs['rg'], namespace='Microsoft.Network', type='publicIPAddresses', name='publicip2')
-        self.cmd('network lb frontend-ip update -g {rg} --lb-name lb1 -n ipconfig1 --set publicIpAddress.id="{ip2_id}"',
-                 checks=self.check("publicIpAddress.contains(id, 'publicip2')", True))
+        self.cmd('network lb frontend-ip update -g {rg} --lb-name lb1 -n ipconfig1 --set publicIPAddress.id="{ip2_id}"',
+                 checks=self.check("publicIPAddress.contains(id, 'publicip2')", True))
         self.cmd('network lb frontend-ip delete -g {rg} --lb-name lb1 -n ipconfig1')
         self.cmd('network lb frontend-ip list -g {rg} --lb-name lb1',
                  checks=self.check('length(@)', 1))
@@ -897,7 +903,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 3))
         self.cmd('network lb inbound-nat-rule update -g {rg} --lb-name {lb} -n rule1 --floating-ip true --idle-timeout 10')
         self.cmd('network lb inbound-nat-rule show -g {rg} --lb-name {lb} -n rule1', checks=[
-            self.check('enableFloatingIp', True),
+            self.check('enableFloatingIP', True),
             self.check('idleTimeoutInMinutes', 10)
         ])
         # test generic update
@@ -998,7 +1004,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb rule update -g {rg} --lb-name {lb} -n rule1 --floating-ip true --idle-timeout 20 --load-distribution sourceip --protocol udp')
         self.cmd('network lb rule update -g {rg} --lb-name {lb} -n rule2 --backend-pool-name bap2 --load-distribution sourceipprotocol')
         self.cmd('network lb rule show -g {rg} --lb-name {lb} -n rule1', checks=[
-            self.check('enableFloatingIp', True),
+            self.check('enableFloatingIP', True),
             self.check('idleTimeoutInMinutes', 20),
             self.check('loadDistribution', 'SourceIP'),
             self.check('protocol', 'Udp')
@@ -1079,14 +1085,14 @@ class NetworkNicScenarioTest(ScenarioTest):
 
         # create with minimum parameters
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet} --vnet-name {vnet}', checks=[
-            self.check('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
+            self.check('NewNIC.ipConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
             self.check('NewNIC.provisioningState', 'Succeeded')
         ])
         # exercise optional parameters
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet_id} --ip-forwarding --private-ip-address {pri_ip} --public-ip-address {pub_ip} --internal-dns-name test --dns-servers 100.1.2.3 --lb-address-pools {address_pool_ids} --lb-inbound-nat-rules {rule_ids} --accelerated-networking --tags foo=doo', checks=[
-            self.check('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Static'),
-            self.check('NewNIC.ipConfigurations[0].privateIpAddress', '{pri_ip}'),
-            self.check('NewNIC.enableIpForwarding', True),
+            self.check('NewNIC.ipConfigurations[0].privateIPAllocationMethod', 'Static'),
+            self.check('NewNIC.ipConfigurations[0].privateIPAddress', '{pri_ip}'),
+            self.check('NewNIC.enableIPForwarding', True),
             self.check('NewNIC.enableAcceleratedNetworking', True),
             self.check('NewNIC.provisioningState', 'Succeeded'),
             self.check('NewNIC.dnsSettings.internalDnsNameLabel', 'test'),
@@ -1094,15 +1100,15 @@ class NetworkNicScenarioTest(ScenarioTest):
         ])
         # exercise creating with NSG
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet} --vnet-name {vnet} --network-security-group {nsg1}', checks=[
-            self.check('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
-            self.check('NewNIC.enableIpForwarding', False),
+            self.check('NewNIC.ipConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
+            self.check('NewNIC.enableIPForwarding', False),
             self.check("NewNIC.networkSecurityGroup.contains(id, '{nsg1}')", True),
             self.check('NewNIC.provisioningState', 'Succeeded')
         ])
         # exercise creating with NSG and Public IP
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet} --vnet-name {vnet} --network-security-group {nsg_id} --public-ip-address {pub_ip_id}', checks=[
-            self.check('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
-            self.check('NewNIC.enableIpForwarding', False),
+            self.check('NewNIC.ipConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
+            self.check('NewNIC.enableIPForwarding', False),
             self.check("NewNIC.networkSecurityGroup.contains(id, '{nsg1}')", True),
             self.check('NewNIC.provisioningState', 'Succeeded')
         ])
@@ -1122,15 +1128,15 @@ class NetworkNicScenarioTest(ScenarioTest):
             self.check('name', '{nic}')
         ])
         self.cmd('network nic update -g {rg} -n {nic} --internal-dns-name noodle --ip-forwarding true --accelerated-networking false --dns-servers "" --network-security-group {nsg2}', checks=[
-            self.check('enableIpForwarding', True),
+            self.check('enableIPForwarding', True),
             self.check('enableAcceleratedNetworking', False),
             self.check('dnsSettings.internalDnsNameLabel', 'noodle'),
             self.check('length(dnsSettings.dnsServers)', 0),
             self.check("networkSecurityGroup.contains(id, '{nsg2}')", True)
         ])
         # test generic update
-        self.cmd('network nic update -g {rg} -n {nic} --set dnsSettings.internalDnsNameLabel=doodle --set enableIpForwarding=false', checks=[
-            self.check('enableIpForwarding', False),
+        self.cmd('network nic update -g {rg} -n {nic} --set dnsSettings.internalDnsNameLabel=doodle --set enableIPForwarding=false', checks=[
+            self.check('enableIPForwarding', False),
             self.check('dnsSettings.internalDnsNameLabel', 'doodle')
         ])
 
@@ -1151,7 +1157,7 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 1))
         self.cmd('network nic ip-config show -g {rg} --nic-name {nic} -n ipconfig1', checks=[
             self.check('name', 'ipconfig1'),
-            self.check('privateIpAllocationMethod', 'Dynamic')
+            self.check('privateIPAllocationMethod', 'Dynamic')
         ])
         self.cmd('network nic ip-config create -g {rg} --nic-name {nic} -n ipconfig2 --make-primary',
                  checks=self.check('primary', True))
@@ -1184,11 +1190,11 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
         self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --lb-name {lb} --lb-address-pools {bap1_id} bap2 --lb-inbound-nat-rules {rule1_id} rule2 --private-ip-address {private_ip}', checks=[
             self.check('length(loadBalancerBackendAddressPools)', 2),
             self.check('length(loadBalancerInboundNatRules)', 2),
-            self.check('privateIpAddress', '{private_ip}'),
-            self.check('privateIpAllocationMethod', 'Static')])
+            self.check('privateIPAddress', '{private_ip}'),
+            self.check('privateIPAllocationMethod', 'Static')])
         # test generic update
-        self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --set privateIpAddress=10.0.0.50',
-                 checks=self.check('privateIpAddress', '10.0.0.50'))
+        self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --set privateIPAddress=10.0.0.50',
+                 checks=self.check('privateIPAddress', '10.0.0.50'))
 
         # test ability to add and remove IDs one at a time with subcommands
         self.cmd('network nic ip-config inbound-nat-rule remove -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --inbound-nat-rule rule1',
@@ -1202,8 +1208,8 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
                  checks=self.check('length(loadBalancerBackendAddressPools)', 2))
 
         self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --private-ip-address "" --public-ip-address {ip_id}', checks=[
-            self.check('privateIpAllocationMethod', 'Dynamic'),
-            self.check("publicIpAddress.contains(id, '{ip_id}')", True)
+            self.check('privateIPAllocationMethod', 'Dynamic'),
+            self.check("publicIPAddress.contains(id, '{ip_id}')", True)
         ])
 
         self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --subnet {subnet} --vnet-name {vnet}',
@@ -1236,7 +1242,7 @@ class NetworkExtendedNSGScenarioTest(ScenarioTest):
         self.cmd('network nsg create --name {nsg} -g {rg}')
         self.cmd('network nsg rule create --access allow --destination-address-prefixes 10.0.0.0/24 11.0.0.0/24 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefix * -n {rule} --source-port-range 700-900 1000-1100 --destination-port-range 4444 --priority 1000', checks=[
             self.check('length(destinationAddressPrefixes)', 2),
-            self.check('destinationAddressPrefix', ''),
+            self.check('destinationAddressPrefix', None),
             self.check('length(sourceAddressPrefixes)', 0),
             self.check('sourceAddressPrefix', '*'),
             self.check('length(sourcePortRanges)', 2),
@@ -1248,7 +1254,7 @@ class NetworkExtendedNSGScenarioTest(ScenarioTest):
             self.check('length(destinationAddressPrefixes)', 0),
             self.check('destinationAddressPrefix', 'Internet'),
             self.check('length(sourceAddressPrefixes)', 2),
-            self.check('sourceAddressPrefix', ''),
+            self.check('sourceAddressPrefix', None),
             self.check('length(sourcePortRanges)', 0),
             self.check('sourcePortRange', '*'),
             self.check('length(destinationPortRanges)', 3),
@@ -1366,9 +1372,9 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
             self.check('type(@)', 'object'),
             self.check('name', '{route}'),
         ])
-        self.cmd('network route-table route delete --resource-group {rg} --route-table-name {table} --name {route}')
+        self.cmd('network route-table route delete --resource-group {rg} --route-table-name {table} --name {route} -y')
         self.cmd('network route-table route list --resource-group {rg} --route-table-name {table}', checks=self.is_empty())
-        self.cmd('network route-table delete --resource-group {rg} --name {table}')
+        self.cmd('network route-table delete --resource-group {rg} --name {table} -y')
         self.cmd('network route-table list --resource-group {rg}', checks=self.is_empty())
 
 
@@ -1559,9 +1565,9 @@ class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
         self.cmd('network vpn-connection create -g {rg} -n {conn1} --vnet-gateway1 {gw1} --local-gateway2 {lgw1} --shared-key AzureA1b2C3')
 
         self.cmd('network vpn-connection ipsec-policy add -g {rg} --connection-name {conn1} --ike-encryption AES256 --ike-integrity SHA384 --dh-group DHGroup24 --ipsec-encryption GCMAES256 --ipsec-integrity GCMAES256 --pfs-group PFS24 --sa-lifetime 7200 --sa-max-size 2048')
-        self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}')
+        self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}', checks=self.check('length(@)', 1))
         self.cmd('network vpn-connection ipsec-policy clear -g {rg} --connection-name {conn1}')
-        self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}')
+        self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}', checks=self.check('length(@)', 0))
 
 
 class NetworkSubnetSetScenarioTest(ScenarioTest):
@@ -1608,7 +1614,7 @@ class NetworkSubnetEndpointServiceScenarioTest(ScenarioTest):
             'subnet': 'subnet1'
         })
         self.cmd('network vnet list-endpoint-services -l westus', checks=[
-            self.check('length(@)', 11),
+            self.check('length(@)', 12),
             self.check('@[0].name', 'Microsoft.Storage')
         ])
 

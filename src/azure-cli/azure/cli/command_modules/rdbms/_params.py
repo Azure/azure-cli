@@ -669,6 +669,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('replica_name', options_list=['--replica-name'],
                        help='The name of the server to restore to.')
             c.argument('zone', arg_type=zone_arg_type)
+            c.argument('location', arg_type=get_location_type(self.cli_ctx))
             if command_group == 'postgres':
                 c.argument('vnet', arg_type=vnet_arg_type)
                 c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
