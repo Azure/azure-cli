@@ -186,6 +186,7 @@ def validate_load_balancer_sku(namespace):
         if namespace.load_balancer_sku.lower() != "basic" and namespace.load_balancer_sku.lower() != "standard":
             raise CLIError("--load-balancer-sku can only be standard or basic")
 
+
 def validate_sku_tier(namespace):
     """Validates the sku tier string."""
     if namespace.tier is not None:
@@ -193,6 +194,7 @@ def validate_sku_tier(namespace):
             return
         if namespace.tier.lower() != "free" and namespace.tier.lower() != "standard":
             raise CLIError("--tier can only be free or standard")
+
 
 def validate_load_balancer_outbound_ips(namespace):
     """validate load balancer profile outbound IP ids"""
