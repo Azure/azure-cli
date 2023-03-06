@@ -1299,6 +1299,7 @@ def load_arguments(self, _):
                    arg_type=tier_param_type)
 
         c.argument('elastic_pool_id',
+                   required=False,
                    arg_type=elastic_pool_id_param_type)
 
         c.argument('assign_identity',
@@ -1399,6 +1400,7 @@ def load_arguments(self, _):
                    arg_type=tier_param_type)
 
         c.argument('elastic_pool_id',
+                   required=False,
                    arg_type=elastic_pool_id_param_type)
 
         c.argument('assign_identity',
