@@ -12,34 +12,14 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import get_api_version, ResourceType
 
 from azure.cli.command_modules.network.azure_stack._client_factory import (
-    cf_express_route_circuit_authorizations,
-    cf_express_route_circuit_peerings, cf_express_route_circuits,
-    cf_express_route_service_providers,
-    cf_network_watcher, cf_packet_capture,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
-    cf_connection_monitor, cf_dns_references, cf_private_endpoints,
-    cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
-    cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links,
-    cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
-    cf_virtual_router, cf_virtual_router_peering, cf_flow_logs,
-    cf_private_dns_zone_groups, cf_virtual_hub,
-    cf_custom_ip_prefixes)
+    cf_dns_references)
 from azure.cli.command_modules.network.azure_stack._format import (
     transform_dns_record_set_output,
-    transform_dns_record_set_table_output, transform_dns_zone_table_output,
-    transform_traffic_manager_create_output,
-    transform_geographic_hierachy_table_output,
-    transform_service_community_table_output)
+    transform_dns_record_set_table_output, transform_dns_zone_table_output,)
 from azure.cli.command_modules.network.azure_stack._validators import (
-    get_network_watcher_from_location, process_auth_create_namespace,
-    process_lb_create_namespace, process_nw_cm_v2_create_namespace,
-    process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
-    process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
-    process_nw_flow_log_set_namespace, process_nw_flow_log_create_namespace, process_nw_flow_log_show_namespace,
-    process_nw_packet_capture_create_namespace, process_nw_test_connectivity_namespace, process_nw_topology_namespace,
-    process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
-    process_vpn_connection_create_namespace,
-    process_nw_config_diagnostic_namespace)
+    process_lb_create_namespace,
+    process_vpn_connection_create_namespace,)
 
 NETWORK_VROUTER_DEPRECATION_INFO = 'network routeserver'
 NETWORK_VROUTER_PEERING_DEPRECATION_INFO = 'network routeserver peering'
@@ -69,156 +49,6 @@ def load_command_table(self, _):
         client_factory=cf_dns_references,
         resource_type=ResourceType.MGMT_NETWORK_DNS,
         min_api='2018-05-01'
-    )
-
-    network_er_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ExpressRouteCircuitsOperations.{}',
-        client_factory=cf_express_route_circuits,
-        min_api='2016-09-01'
-    )
-
-    network_er_connection_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ExpressRouteConnectionsOperations.{}',
-        client_factory=cf_express_route_connections,
-        min_api='2018-08-01'
-    )
-
-    network_er_gateway_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ExpressRouteGatewaysOperations.{}',
-        client_factory=cf_express_route_gateways,
-        min_api='2018-08-01'
-    )
-
-    network_er_ports_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ExpressRoutePortsOperations.{}',
-        client_factory=cf_express_route_ports,
-        min_api='2018-08-01'
-    )
-
-    network_er_port_locations_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ExpressRoutePortsLocationsOperations.{}',
-        client_factory=cf_express_route_port_locations,
-        min_api='2018-08-01'
-    )
-
-    network_er_links_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ExpressRouteLinksOperations.{}',
-        client_factory=cf_express_route_links,
-        min_api='2018-08-01'
-    )
-
-    network_erca_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ExpressRouteCircuitAuthorizationsOperations.{}',
-        client_factory=cf_express_route_circuit_authorizations,
-        min_api='2016-09-01'
-    )
-
-    network_erconn_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ExpressRouteCircuitConnectionsOperations.{}',
-        client_factory=cf_express_route_circuit_connections,
-        min_api='2018-07-01'
-    )
-
-    network_perconn_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#PeerExpressRouteCircuitConnectionsOperations.{}',
-        client_factory=cf_peer_express_route_circuit_connections,
-        min_api='2019-02-01'
-    )
-
-    network_ersp_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ExpressRouteServiceProvidersOperations.{}',
-        client_factory=cf_express_route_service_providers,
-        min_api='2016-09-01'
-    )
-
-    network_er_peering_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ExpressRouteCircuitPeeringsOperations.{}',
-        client_factory=cf_express_route_circuit_peerings
-    )
-
-    network_private_endpoint_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#PrivateEndpointsOperations.{}',
-        client_factory=cf_private_endpoints,
-        min_api='2020-06-01'
-    )
-
-    network_private_endpoint_dns_zone_group_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#PrivateDnsZoneGroupsOperations.{}',
-        client_factory=cf_private_dns_zone_groups,
-        min_api='2020-03-01'
-    )
-
-    network_private_link_service_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#PrivateLinkServicesOperations.{}',
-        client_factory=cf_private_link_services,
-        min_api='2019-04-01'
-    )
-
-    network_watcher_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#NetworkWatchersOperations.{}',
-        client_factory=cf_network_watcher
-    )
-
-    network_watcher_cm_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ConnectionMonitorsOperations.{}',
-        client_factory=cf_connection_monitor
-    )
-
-    network_watcher_flow_log_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#FlowLogsOperations.{}',
-        client_factory=cf_flow_logs,
-    )
-
-    network_watcher_flow_log_update_sdk = CliCommandType(
-        operations_tmpl=custom_operations_tmpl,
-        client_factory=cf_flow_logs,
-    )
-
-    network_watcher_pc_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#PacketCapturesOperations.{}',
-        client_factory=cf_packet_capture
-    )
-
-    network_virtual_hub_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualHubsOperations.{}',
-        client_factory=cf_virtual_hub,
-        min_api='2020-07-01'
-    )
-
-    network_virtual_hub_update_sdk = CliCommandType(
-        operations_tmpl=custom_operations_tmpl,
-        client_factory=cf_virtual_hub,
-        min_api='2020-07-01'
-    )
-
-    network_vrouter_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualRoutersOperations.{}',
-        client_factory=cf_virtual_router,
-        min_api='2019-08-01'
-    )
-
-    network_vrouter_update_sdk = CliCommandType(
-        operations_tmpl=custom_operations_tmpl,
-        client_factory=cf_virtual_router,
-        min_api='2019-08-01'
-    )
-
-    network_vrouter_peering_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualRouterPeeringsOperations.{}',
-        client_factory=cf_virtual_router_peering,
-        min_api='2019-08-01'
-    )
-
-    network_vrouter_peering_update_sdk = CliCommandType(
-        operations_tmpl=custom_operations_tmpl,
-        client_factory=cf_virtual_router_peering,
-        min_api='2019-08-01'
-    )
-
-    network_custom_ip_prefix_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#CustomIPPrefixesOperations.{}',
-        client_factory=cf_custom_ip_prefixes,
-        min_api='2020-06-01'
     )
 
     # region DNS
@@ -277,74 +107,9 @@ def load_command_table(self, _):
                          exception_handler=handle_template_based_exception)
     # endregion
 
-    # region CustomIpPrefix
-    with self.command_group('network custom-ip prefix', network_custom_ip_prefix_sdk, client_factory=cf_custom_ip_prefixes, is_preview=True, min_api='2020-06-01') as g:
-        g.custom_command('create', 'create_custom_ip_prefix', supports_no_wait=True)
-        g.command('delete', 'begin_delete')
-        g.custom_command('list', 'list_custom_ip_prefixes')
-        g.show_command('show')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_custom_ip_prefix', supports_no_wait=True)
-        g.wait_command('wait')
-    # endRegion
-
-    # region RouteFilters
-    from azure.cli.command_modules.network.aaz.latest.network.route_filter.rule import ListServiceCommunities
-    self.command_table['network route-filter rule list-service-communities'] = ListServiceCommunities(loader=self, table_transformer=transform_service_community_table_output)
-    # endregion
-
-    # region TrafficManagers
-    with self.command_group('network traffic-manager profile') as g:
-        g.custom_command('create', 'create_traffic_manager_profile', transform=transform_traffic_manager_create_output)
-        g.custom_command('update', 'update_traffic_manager_profile')
-
-    with self.command_group('network traffic-manager endpoint') as g:
-        g.custom_command('create', 'create_traffic_manager_endpoint')
-        g.custom_command('update', 'update_traffic_manager_endpoint')
-        g.custom_command('list', 'list_traffic_manager_endpoints')
-
-    from azure.cli.command_modules.network.aaz.latest.network.traffic_manager.endpoint import ShowGeographicHierarchy
-    self.command_table['network traffic-manager endpoint show-geographic-hierarchy'] = ShowGeographicHierarchy(loader=self, table_transformer=transform_geographic_hierachy_table_output)
-    # endregion
-
     # region VirtualNetworkGatewayConnections
     with self.command_group('network vpn-connection') as g:
         g.custom_command('create', 'create_vpn_connection', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), table_transformer=deployment_validate_table_format, validator=process_vpn_connection_create_namespace, exception_handler=handle_template_based_exception)
-    # endregion
-
-    # region VirtualRouter
-    with self.command_group('network vrouter', network_vrouter_sdk,
-                            deprecate_info=self.deprecate(redirect=NETWORK_VROUTER_DEPRECATION_INFO, hide=True)) as g:
-        g.custom_command('create', 'create_virtual_router')
-        g.generic_update_command('update',
-                                 getter_name='virtual_router_update_getter',
-                                 getter_type=network_vrouter_update_sdk,
-                                 setter_name='virtual_router_update_setter',
-                                 setter_type=network_vrouter_update_sdk,
-                                 custom_func_name='update_virtual_router')
-        g.custom_command('delete', 'delete_virtual_router')
-        g.custom_show_command('show', 'show_virtual_router')
-        g.custom_command('list', 'list_virtual_router')
-
-    with self.command_group(
-            'network vrouter peering', network_vrouter_peering_sdk,
-            deprecate_info=self.deprecate(redirect=NETWORK_VROUTER_PEERING_DEPRECATION_INFO, hide=True)) as g:
-        g.custom_command('create', 'create_virtual_router_peering')
-        g.generic_update_command('update',
-                                 getter_name='virtual_router_peering_update_getter',
-                                 getter_type=network_vrouter_peering_update_sdk,
-                                 setter_name='virtual_router_peering_update_setter',
-                                 setter_type=network_vrouter_peering_update_sdk,
-                                 custom_func_name='update_virtual_router_peering')
-        g.custom_command('delete', 'delete_virtual_router_peering')
-        g.custom_show_command('show', 'show_virtual_router_peering')
-        g.custom_command('list', 'list_virtual_router_peering')
-    # endregion
-
-    # region VirtualHub
-    with self.command_group('network routeserver', network_virtual_hub_sdk,
-                            custom_command_type=network_virtual_hub_update_sdk) as g:
-        g.custom_command('create', 'create_virtual_hub')
-        g.custom_command('delete', 'delete_virtual_hub', supports_no_wait=True, confirmation=True)
     # endregion
 
     # region PrivateLinkResource and PrivateEndpointConnection
