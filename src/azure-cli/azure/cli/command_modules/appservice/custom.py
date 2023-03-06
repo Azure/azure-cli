@@ -523,6 +523,11 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
         time.sleep(retry_delay)
 
     is_consumption = is_plan_consumption(cmd, plan_info)
+
+    # if linux consumption, validate that AzureWebJobsStorage app setting exists
+    if is_consumption and app.reserved:
+        validate_zip_deploy_app_setting_exists(cmd, resource_group_name, name, slot)
+
     if (not build_remote) and is_consumption and app.reserved:
         return upload_zip_to_storage(cmd, resource_group_name, name, src, slot)
     if build_remote and app.reserved:
@@ -678,7 +683,7 @@ def remove_remote_build_app_settings(cmd, resource_group_name, name, slot):
             logger.warning("App settings may not be propagated to the SCM site")
 
 
-def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
+def validate_zip_deploy_app_setting_exists(cmd, resource_group_name, name, slot=None):
     settings = get_app_settings(cmd, resource_group_name, name, slot)
 
     storage_connection = None
@@ -687,7 +692,18 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
             storage_connection = str(keyval['value'])
 
     if storage_connection is None:
-        raise ResourceNotFoundError('Could not find a \'AzureWebJobsStorage\' application setting')
+        raise ValidationError(('Unable to automatically deploy using the Azure CLI. Please '
+                               'configure the app to deploy from a remote package using the steps here: '
+                               'https://aka.ms/zipdeploy'))
+
+
+def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
+    settings = get_app_settings(cmd, resource_group_name, name, slot)
+
+    storage_connection = None
+    for keyval in settings:
+        if keyval['name'] == 'AzureWebJobsStorage':
+            storage_connection = str(keyval['value'])
 
     container_name = "function-releases"
     blob_name = "{}-{}.zip".format(datetime.datetime.today().strftime('%Y%m%d%H%M%S'), str(uuid.uuid4()))
