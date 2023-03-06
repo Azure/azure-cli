@@ -9,7 +9,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 class NatGatewayScenarioTests(ScenarioTest):
 
     @ResourceGroupPreparer(location='eastus2')
-    def test_natgateway(self, resource_group, resource_group_location):
+    def test_natgateway_basic(self, resource_group, resource_group_location):
 
         self.kwargs.update({
             'name': "ng1",
