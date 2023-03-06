@@ -88,6 +88,7 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
     def test_app_service_environment_create(self, ase_client_factory_mock, subnet_show_mock,
                                             resource_client_factory_mock, deployment_name_mock):
+        from azure.mgmt.network.models import Subnet
         ase_name = 'mock_ase_name'
         rg_name = 'mock_rg_name'
         vnet_name = 'mock_vnet_name'
@@ -220,6 +221,7 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
     def test_app_service_environment_v3_create(self, ase_client_factory_mock, subnet_show_mock,
                                                resource_client_factory_mock, deployment_name_mock):
+        from azure.mgmt.network.models import (Subnet, Delegation)
         ase_name = 'mock_ase_name'
         rg_name = 'mock_rg_name'
         vnet_name = 'mock_vnet_name'
@@ -262,6 +264,7 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
     def test_app_service_environment_v3_zone_create(self, ase_client_factory_mock, subnet_show_mock,
                                                resource_client_factory_mock, deployment_name_mock):
+        from azure.mgmt.network.models import (Subnet, Delegation)
         ase_name = 'mock_ase_name'
         rg_name = 'mock_rg_name'
         vnet_name = 'mock_vnet_name'
