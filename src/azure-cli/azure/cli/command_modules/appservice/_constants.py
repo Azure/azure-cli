@@ -94,5 +94,3 @@ WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
     'java': 'FunctionApp/windows-java-functionapp-on-azure.yml',
     'powershell': 'FunctionApp/windows-powershell-functionapp-on-azure.yml',
 }
-
-HELLO_WORLD_IMAGE = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"

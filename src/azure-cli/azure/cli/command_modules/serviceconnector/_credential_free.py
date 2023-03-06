@@ -322,10 +322,6 @@ class SqlHandler(TargetHandler):
         target_segments = parse_resource_id(target_id)
         self.server = target_segments.get('name')
         self.dbname = target_segments.get('child_name_1')
-        if self.auth_type == AUTHTYPES[AUTH_TYPE.SystemIdentity]:
-            self.aad_username = self.identity_name
-        if self.auth_type == AUTHTYPES[AUTH_TYPE.UserAccount]:
-            self.aad_username = self.login_username
 
     def set_user_admin(self, user_object_id, **kwargs):
         # pylint: disable=not-an-iterable
@@ -419,6 +415,10 @@ class SqlHandler(TargetHandler):
         return {'connection_string': conn_string, 'attrs_before': {SQL_COPT_SS_ACCESS_TOKEN: token_struct}}
 
     def get_create_query(self):
+        if self.auth_type == AUTHTYPES[AUTH_TYPE.SystemIdentity]:
+            self.aad_username = self.identity_name
+        if self.auth_type == AUTHTYPES[AUTH_TYPE.UserAccount]:
+            self.aad_username = self.login_username
         role_q = "CREATE USER \"{}\" FROM EXTERNAL PROVIDER;".format(
             self.aad_username)
         grant_q = "GRANT CONTROL ON DATABASE::{} TO \"{}\";".format(

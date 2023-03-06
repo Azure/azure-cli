@@ -181,14 +181,6 @@ def validate_add_vnet(cmd, namespace):
                               "Cannot integrate a regional VNET to an app in a different region")
 
 
-def validate_same_location(cmd, first_location, second_location, error_message):
-    normalized_first_location = _normalize_location(cmd, first_location)
-    normalized_second_location = _normalize_location(cmd, second_location)
-
-    if normalized_first_location != normalized_second_location:
-        raise ValidationError(error_message or 'The resources are in different locations.')
-
-
 def validate_front_end_scale_factor(namespace):
     if namespace.front_end_scale_factor:
         min_scale_factor = 5
