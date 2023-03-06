@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-
 def network_client_factory(cli_ctx, **kwargs):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -14,14 +13,6 @@ def resource_client_factory(cli_ctx, **_):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
-
-
-def cf_connection_monitor(cli_ctx, _):
-    return network_client_factory(cli_ctx).connection_monitors
-
-
-def cf_network_watcher(cli_ctx, _):
-    return network_client_factory(cli_ctx).network_watchers
 
 
 def cf_dns_references(cli_ctx, _):

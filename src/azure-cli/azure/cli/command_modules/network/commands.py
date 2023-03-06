@@ -553,7 +553,7 @@ def load_command_table(self, _):
 
     # region PublicIPAddresses
     public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$Address:ipAddress, AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
-    public_ip_show_table_transform = public_ip_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ' if self.supported_api_version(min_api='2017-06-01') else ' ')
+    public_ip_show_table_transform = public_ip_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ')
 
     with self.command_group('network public-ip') as g:
         from .aaz.latest.network.public_ip import List, Show
@@ -695,4 +695,10 @@ def load_command_table(self, _):
         g.custom_command('delete', 'remove_private_endpoint_connection', confirmation=True)
         g.custom_show_command('show', 'show_private_endpoint_connection')
         g.custom_command('list', 'list_private_endpoint_connection')
+    # endregion
+
+    # region NatGateway
+    from .operations.nat import GatewayCreate as NATGatewayCreate, GatewayUpdate as NATGatewayUpdate
+    self.command_table["network nat gateway create"] = NATGatewayCreate(loader=self)
+    self.command_table["network nat gateway update"] = NATGatewayUpdate(loader=self)
     # endregion
