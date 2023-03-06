@@ -3170,12 +3170,6 @@ def restore_long_term_retention_backup(
         target_database_name,
         target_server_name,
         target_resource_group_name,
-        requested_backup_storage_redundancy,
-        high_availability_replica_count,
-        zone_redundant,
-        service_objective,
-        edition,
-        elastic_pool_id,
         assign_identity=False,
         user_assigned_identity_id=None,
         keys=None,
@@ -3201,18 +3195,6 @@ def restore_long_term_retention_backup(
 
     kwargs['create_mode'] = CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP
     kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
-    kwargs['requested_backup_storage_redundancy'] = requested_backup_storage_redundancy
-    kwargs['high_availability_replica_count'] = high_availability_replica_count
-    kwargs['zone_redundant'] = zone_redundant
-    kwargs['sku'].name = service_objective
-    kwargs['sku'].tier = edition
-
-    # Validate elastic pool id
-    kwargs['elastic_pool_id'] = _validate_elastic_pool_id(
-        cmd.cli_ctx,
-        elastic_pool_id,
-        target_server_name,
-        target_resource_group_name)
 
     # Check backup storage redundancy configurations
     if _should_show_backup_storage_redundancy_warnings(kwargs['location']):
@@ -3255,12 +3237,7 @@ def restore_geo_backup(
         target_database_name,
         target_server_name,
         target_resource_group_name,
-        requested_backup_storage_redundancy,
-        high_availability_replica_count,
-        zone_redundant,
-        service_objective,
-        edition,
-        elastic_pool_id,
+        sku,
         assign_identity=False,
         user_assigned_identity_id=None,
         keys=None,
@@ -3268,7 +3245,7 @@ def restore_geo_backup(
         federated_client_id=None,
         **kwargs):
     '''
-    Restores an existing database (i.e. create with 'RestoreGeoBackup' create mode.)
+    Restores an existing database (i.e. create with 'recovery' create mode.)
     '''
 
     if not target_resource_group_name or not target_server_name or not target_database_name:
@@ -3286,18 +3263,14 @@ def restore_geo_backup(
 
     kwargs['create_mode'] = CreateMode.RECOVERY
     kwargs['recoverableDatabaseId'] = geo_backup_id
-    kwargs['requested_backup_storage_redundancy'] = requested_backup_storage_redundancy
-    kwargs['high_availability_replica_count'] = high_availability_replica_count
-    kwargs['zone_redundant'] = zone_redundant
-    kwargs['sku'].name = service_objective
-    kwargs['sku'].tier = edition
 
-    # Validate elastic pool id
-    kwargs['elastic_pool_id'] = _validate_elastic_pool_id(
+    # If sku.name is not specified, resolve the requested sku name
+    # using capabilities.
+    kwargs['sku'] = _find_db_sku_from_capabilities(
         cmd.cli_ctx,
-        elastic_pool_id,
-        target_server_name,
-        target_resource_group_name)
+        kwargs['location'],
+        sku,
+        compute_model=kwargs['compute_model'])
 
     # Check backup storage redundancy configurations
     if _should_show_backup_storage_redundancy_warnings(kwargs['location']):

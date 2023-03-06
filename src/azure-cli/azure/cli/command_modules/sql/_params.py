@@ -644,7 +644,7 @@ def _configure_db_dw_create_params(
 
     # collation and max_size_bytes are ignored when restoring because their values are determined by
     # the source db.
-    if create_mode in [CreateMode.restore, CreateMode.point_in_time_restore]:
+    if create_mode in [CreateMode.restore, CreateMode.point_in_time_restore, CreateMode.RECOVERY, CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP]:
         arg_ctx.ignore('collation', 'max_size_bytes')
 
     if engine == Engine.dw:
@@ -1255,6 +1255,7 @@ def load_arguments(self, _):
                    help='If true, will only return the latest backup for each database')
 
     with self.argument_context('sql db ltr-backup restore') as c:
+        _configure_db_dw_create_params(c, Engine.db, CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP)
         c.argument('target_database_name',
                    options_list=['--dest-database'],
                    required=True,
@@ -1275,32 +1276,6 @@ def load_arguments(self, _):
                    required=True,
                    help='The resource id of the long term retention backup to be restored. '
                    'Use \'az sql db ltr-backup show\' or \'az sql db ltr-backup list\' for backup id.')
-
-        c.argument('requested_backup_storage_redundancy',
-                   required=False,
-                   arg_type=backup_storage_redundancy_param_type)
-
-        c.argument('high_availability_replica_count',
-                   required=False,
-                   arg_type=read_replicas_param_type)
-
-        c.argument('zone_redundant',
-                   required=False,
-                   arg_type=zone_redundant_param_type)
-
-        c.argument('service_objective',
-                   options_list=['--service-objective', '--service-level-objective'],
-                   required=False,
-                   arg_group=sku_arg_group,
-                   help='The name of the new service objective.')
-
-        c.argument('edition',
-                   required=False,
-                   arg_type=tier_param_type)
-
-        c.argument('elastic_pool_id',
-                   required=False,
-                   arg_type=elastic_pool_id_param_type)
 
         c.argument('assign_identity',
                    arg_type=database_assign_identity_param_type)
@@ -1356,6 +1331,7 @@ def load_arguments(self, _):
                    help='Retrieves all requested geo-redundant backups under this resource group.')
 
     with self.argument_context('sql db geo-backup restore') as c:
+        _configure_db_dw_create_params(c, Engine.db, CreateMode.RECOVERY)
         c.argument('target_database_name',
                    options_list=['--dest-database'],
                    required=True,
@@ -1376,32 +1352,6 @@ def load_arguments(self, _):
                    required=True,
                    help='The resource id of the geo-redundant backup to be restored. '
                    'Use \'az sql db geo-backup list\' or \'az sql db geo-backup show\' for backup id.')
-
-        c.argument('requested_backup_storage_redundancy',
-                   required=False,
-                   arg_type=backup_storage_redundancy_param_type)
-
-        c.argument('high_availability_replica_count',
-                   required=False,
-                   arg_type=read_replicas_param_type)
-
-        c.argument('zone_redundant',
-                   required=False,
-                   arg_type=zone_redundant_param_type)
-
-        c.argument('service_objective',
-                   options_list=['--service-objective', '--service-level-objective'],
-                   required=False,
-                   arg_group=sku_arg_group,
-                   help='The name of the new service objective.')
-
-        c.argument('edition',
-                   required=False,
-                   arg_type=tier_param_type)
-
-        c.argument('elastic_pool_id',
-                   required=False,
-                   arg_type=elastic_pool_id_param_type)
 
         c.argument('assign_identity',
                    arg_type=database_assign_identity_param_type)
