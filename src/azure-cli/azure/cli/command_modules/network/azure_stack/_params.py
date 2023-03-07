@@ -32,18 +32,6 @@ from azure.cli.core.profiles import ResourceType
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
 def load_arguments(self, _):
 
-    (AuthenticationMethod, VpnAuthenticationType,
-     IPAllocationMethod, IPVersion, LoadBalancerSkuName,
-     PublicIPAddressSkuName, PublicIPAddressSkuTier, TransportProtocol,
-     VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType,
-     GatewayLoadBalancerTunnelInterfaceType) = self.get_models(
-         'AuthenticationMethod', 'VpnAuthenticationType',
-         'IPAllocationMethod',
-         'IPVersion', 'LoadBalancerSkuName',
-         'PublicIPAddressSkuName', 'PublicIPAddressSkuTier', 'TransportProtocol',
-         'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType',
-         'GatewayLoadBalancerTunnelInterfaceType')
-
     ZoneType = self.get_models('ZoneType', resource_type=ResourceType.MGMT_NETWORK_DNS)
 
     # taken from Xplat. No enums in SDK
@@ -73,7 +61,7 @@ def load_arguments(self, _):
         c.argument('tags', tags_type)
         c.argument('network_security_group_name', nsg_name_type, id_part='name')
         c.argument('private_ip_address', private_ip_address_type)
-        c.argument('private_ip_address_version', arg_type=get_enum_type(IPVersion))
+        c.argument('private_ip_address_version', arg_type=get_enum_type(["IPv4", "IPv6"]))
         c.argument('enable_tcp_reset', arg_type=get_three_state_flag(), help='Receive bidirectional TCP reset on TCP flow idle timeout or unexpected connection termination. Only used when protocol is set to TCP.', min_api='2018-07-01')
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('cache_result', arg_type=get_enum_type(['in', 'out', 'inout']), options_list='--cache', help='Cache the JSON object instead of sending off immediately.')
@@ -214,8 +202,8 @@ def load_arguments(self, _):
         c.argument('frontend_ip_name', help='The name of the frontend IP configuration.', completer=get_lb_subresource_completion_list('frontend_ip_configurations'))
         c.argument('floating_ip', help='Enable floating IP.', arg_type=get_three_state_flag())
         c.argument('idle_timeout', help='Idle timeout in minutes.', type=int)
-        c.argument('protocol', help='Network transport protocol.', arg_type=get_enum_type(TransportProtocol))
-        c.argument('private_ip_address_version', min_api='2019-04-01', help='The private IP address version to use.', default=IPVersion.I_PV4.value if IPVersion else '')
+        c.argument('protocol', help='Network transport protocol.', arg_type=get_enum_type(["Udp", "Tcp", "All"]))
+        c.argument('private_ip_address_version', min_api='2019-04-01', help='The private IP address version to use.', default="IPv4")
         for item in ['backend_pool_name', 'backend_address_pool_name']:
             c.argument(item, options_list='--backend-pool-name', help='The name of the backend address pool.', completer=get_lb_subresource_completion_list('backend_address_pools'))
         c.argument('request', help='Query inbound NAT rule port mapping request.', action=AddMappingRequest, nargs='*')
@@ -223,13 +211,13 @@ def load_arguments(self, _):
     with self.argument_context('network lb create') as c:
         c.argument('frontend_ip_zone', zone_type, min_api='2017-06-01', options_list=['--frontend-ip-zone'], help='used to create internal facing Load balancer')
         c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
-        c.argument('sku', min_api='2017-08-01', help='Load balancer SKU', arg_type=get_enum_type(LoadBalancerSkuName, default='basic'))
+        c.argument('sku', min_api='2017-08-01', help='Load balancer SKU', arg_type=get_enum_type(['Basic', 'Gateway', 'Standard'], default='basic'))
         c.argument('edge_zone', edge_zone)
 
     with self.argument_context('network lb create', arg_group='Public IP') as c:
         public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, allow_new=True)
         c.argument('public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
-        c.argument('public_ip_address_allocation', help='IP allocation method.', arg_type=get_enum_type(IPAllocationMethod))
+        c.argument('public_ip_address_allocation', help='IP allocation method.', arg_type=get_enum_type(['Static', 'Dynamic']))
         c.argument('public_ip_dns_name', help='Globally unique DNS name for a new public IP.')
         c.argument('public_ip_zone', zone_type, min_api='2017-06-01', options_list=['--public-ip-zone'], help='used to created a new public ip for the load balancer, a.k.a public facing Load balancer')
         c.ignore('public_ip_address_type')
@@ -273,14 +261,14 @@ def load_arguments(self, _):
 
     with self.argument_context('network public-ip create') as c:
         c.argument('name', completer=None)
-        c.argument('sku', min_api='2017-08-01', help='Name of a public IP address SKU', arg_type=get_enum_type(PublicIPAddressSkuName))
-        c.argument('tier', min_api='2020-07-01', help='Tier of a public IP address SKU and Global tier is only supported for standard SKU public IP addresses', arg_type=get_enum_type(PublicIPAddressSkuTier))
+        c.argument('sku', min_api='2017-08-01', help='Name of a public IP address SKU', arg_type=get_enum_type(["Basic", "Standard"]))
+        c.argument('tier', min_api='2020-07-01', help='Tier of a public IP address SKU and Global tier is only supported for standard SKU public IP addresses', arg_type=get_enum_type(["Regional", "Global"]))
         c.ignore('dns_name_type')
         c.argument('edge_zone', edge_zone)
 
     with self.argument_context('network public-ip create') as c:
         c.argument('allocation_method', help='IP address allocation method', arg_type=get_enum_type(IPAllocationMethod))
-        c.argument('version', min_api='2016-09-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
+        c.argument('version', min_api='2016-09-01', help='IP address type.', arg_type=get_enum_type(["IPv4", "IPv6"], default='ipv4'))
         c.argument('protection_mode', min_api='2022-01-01', help='The DDoS protection mode of the public IP', arg_type=get_enum_type(['Enabled', 'Disabled', 'VirtualNetworkInherited']))
 
     for scope in ['public-ip']:

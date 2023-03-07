@@ -81,29 +81,6 @@ def transform_local_gateway_table_output(result):
     return final_result
 
 
-def transform_vpn_connection_list(result):
-    return [transform_vpn_connection(v) for v in result]
-
-
-def transform_vpn_connection(result):
-    if result:
-        properties_to_strip = \
-            ['virtual_network_gateway1', 'virtual_network_gateway2', 'local_network_gateway2', 'peer']
-        for prop in properties_to_strip:
-            prop_val = getattr(result, prop, None)
-            if not prop_val:
-                delattr(result, prop)
-            else:
-                null_props = [key for key in prop_val.__dict__ if not prop_val.__dict__[key]]
-                for null_prop in null_props:
-                    delattr(prop_val, null_prop)
-    return result
-
-
-def transform_vnet_create_output(result):
-    return {'newVNet': result.result()}
-
-
 def transform_vnet_table_output(result):
 
     def _transform(result):
@@ -124,12 +101,6 @@ def transform_vnet_table_output(result):
 
 def transform_public_ip_create_output(result):
     return {'publicIp': result.result()}
-
-
-def transform_nic_create_output(result):
-    if result:
-        return {'NewNIC': result.result()}
-    return None
 
 
 def transform_nsg_rule_table_output(result):
@@ -154,20 +125,6 @@ def transform_nsg_rule_table_output(result):
     if 'DestinationASG' in result:
         item['DestinationASG'] = result.get('destinationApplicationSecurityGroups', 'None')
     return item
-
-
-def transform_vnet_gateway_create_output(result):
-    result = {'vnetGateway': result.result()} if result else result
-    return result
-
-
-def transform_network_usage_list(result):
-    result = list(result)
-    for item in result:
-        item.current_value = str(item.current_value)
-        item.limit = str(item.limit)
-        item.local_name = item.name.localized_value
-    return result
 
 
 def transform_network_usage_table(result):
