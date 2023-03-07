@@ -10,6 +10,10 @@ import re
 from ipaddress import ip_network
 from math import isclose, isnan
 
+from azure.cli.command_modules.acs._consts import (
+    CONST_MANAGED_CLUSTER_SKU_TIER_FREE,
+    CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD,
+)
 from azure.cli.core import keys
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
@@ -17,13 +21,11 @@ from azure.cli.core.azclierror import (
     MutuallyExclusiveArgumentError,
     RequiredArgumentMissingError,
 )
+
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
 from knack.log import get_logger
-from azure.cli.command_modules.acs._consts import (
-    CONST_MANAGED_CLUSTER_SKU_TIER_FREE,
-    CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD,
-)
+
 
 logger = get_logger(__name__)
 
