@@ -8,7 +8,7 @@ from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_
 
 from knack.log import get_logger
 
-# pylint: disable=no-self-use,no-member,too-many-lines,unused-argument
+# pylint: disable=no-self-use,no-member,too-many-lines,unused-argument, line-too-long
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
 from azure.cli.core.util import CLIError, sdk_no_wait
@@ -871,6 +871,21 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
 # endregion
+
+
+# workaround for : https://github.com/Azure/azure-cli/issues/17071
+def lb_get(client, resource_group_name, load_balancer_name):
+    lb = client.get(resource_group_name, load_balancer_name)
+    return lb_get_operation(lb)
+
+
+# workaround for : https://github.com/Azure/azure-cli/issues/17071
+def lb_get_operation(lb):
+    for item in lb.frontend_ip_configurations:
+        if item.zones is not None and len(item.zones) >= 3 and item.subnet is None:
+            item.zones = None
+
+    return lb
 
 
 # region VirtualNetworkGatewayConnections

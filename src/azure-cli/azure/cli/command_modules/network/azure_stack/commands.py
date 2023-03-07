@@ -26,8 +26,6 @@ from azure.cli.command_modules.network.azure_stack._validators import (
 def load_command_table(self, _):
 
     # region Command Types
-    custom_command_type = self.module_kwargs["custom_command_type"]
-    custom_operations_tmpl = custom_command_type.settings["operations_tmpl"]
 
     network_dns_zone_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.dns.operations#ZonesOperations.{}',

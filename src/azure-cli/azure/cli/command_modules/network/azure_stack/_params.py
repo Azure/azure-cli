@@ -13,48 +13,38 @@ from azure.cli.core.commands.parameters import (get_location_type, get_resource_
                                                 get_three_state_flag, get_enum_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
-from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
+from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 from azure.cli.command_modules.network.azure_stack._validators import (
     dns_zone_name_type,
-    validate_address_pool_name_or_id, load_cert_file, validate_metadata,
+    validate_address_pool_name_or_id, validate_metadata,
     validate_dns_record_type,
     validate_private_ip_address,
-    get_public_ip_validator, get_nsg_validator,
     get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
-    validate_service_endpoint_policy, validate_delegations, validate_subresource_list,
-    validate_nat_gateway,
-    validate_virtul_network_gateway,
-    process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument,
-    validate_vpn_connection_name_or_id,
-    process_vnet_name_or_id)
+    validate_subresource_list,
+    process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument)
 from azure.cli.command_modules.network.azure_stack._completers import (
     subnet_completion_list, get_lb_subresource_completion_list)
 from azure.cli.command_modules.network.azure_stack._actions import (
-    AddBackendAddressCreate, NatRuleCreate, AddMappingRequest)
-from azure.cli.core.util import get_json_object
+    AddMappingRequest)
 from azure.cli.core.profiles import ResourceType
 
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
 def load_arguments(self, _):
 
-    (AuthenticationMethod, Direction, VpnAuthenticationType,
-     IPAllocationMethod, IPVersion, LoadBalancerSkuName, LoadDistribution, ProbeProtocol, ProcessorArchitecture,
-     Protocol, PublicIPAddressSkuName, PublicIPAddressSkuTier, TransportProtocol,
+    (AuthenticationMethod, VpnAuthenticationType,
+     IPAllocationMethod, IPVersion, LoadBalancerSkuName,
+     PublicIPAddressSkuName, PublicIPAddressSkuTier, TransportProtocol,
      VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType,
-     GatewayLoadBalancerTunnelProtocol, GatewayLoadBalancerTunnelInterfaceType,
-     VpnNatRuleType, VpnNatRuleMode, LoadBalancerBackendAddressAdminState) = self.get_models(
-         'AuthenticationMethod', 'Direction', 'VpnAuthenticationType',
+     GatewayLoadBalancerTunnelInterfaceType) = self.get_models(
+         'AuthenticationMethod', 'VpnAuthenticationType',
          'IPAllocationMethod',
-         'IPVersion', 'LoadBalancerSkuName', 'LoadDistribution', 'ProbeProtocol', 'ProcessorArchitecture',
-         'Protocol', 'PublicIPAddressSkuName', 'PublicIPAddressSkuTier', 'TransportProtocol',
+         'IPVersion', 'LoadBalancerSkuName',
+         'PublicIPAddressSkuName', 'PublicIPAddressSkuTier', 'TransportProtocol',
          'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType',
-         'GatewayLoadBalancerTunnelProtocol', 'GatewayLoadBalancerTunnelInterfaceType',
-         'VpnNatRuleType', 'VpnNatRuleMode', 'LoadBalancerBackendAddressAdminState')
+         'GatewayLoadBalancerTunnelInterfaceType')
 
     ZoneType = self.get_models('ZoneType', resource_type=ResourceType.MGMT_NETWORK_DNS)
-
-    default_existing = 'If only one exists, omit to use as default.'
 
     # taken from Xplat. No enums in SDK
 
@@ -75,8 +65,6 @@ def load_arguments(self, _):
         choices=['1', '2', '3']
     )
     edge_zone = CLIArgumentType(help='The name of edge zone.', is_preview=True, min_api='2021-02-01')
-    gateway_lb = CLIArgumentType(help='The reference to gateway load balancer frontend IP. If you want to delete it, '
-                                      'input \'\"\"\'(Powershell) or \"\"(Linux)', is_preview=True, min_api='2020-08-01')
 
     # region NetworkRoot
     with self.argument_context('network') as c:
@@ -255,13 +243,6 @@ def load_arguments(self, _):
         c.ignore('vnet_type', 'subnet_type')
     # endregion
 
-    # region VnetGateway
-    for item in ['vnet-gateway']:
-        with self.argument_context('network {}'.format(item)) as c:
-            c.argument('asn', type=int, arg_group='BGP Peering', help='Autonomous System Number to use for the BGP settings.')
-            c.argument('peer_weight', arg_group='BGP Peering', help='Weight (0-100) added to routes learned through BGP peering.')
-    # endregion
-
     # region NetworkInterfaces (NIC)
     with self.argument_context('network nic ip-config address-pool') as c:
         c.argument('load_balancer_name', options_list='--lb-name', help='The name of the load balancer containing the address pool (Omit if supplying an address pool ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
@@ -328,37 +309,16 @@ def load_arguments(self, _):
     # endregion
 
     # region VirtualNetworkGateways
-    vnet_gateway_type = CLIArgumentType(help='The gateway type.', arg_type=get_enum_type(VirtualNetworkGatewayType), default=VirtualNetworkGatewayType.vpn.value)
-    vnet_gateway_sku_type = CLIArgumentType(help='VNet gateway SKU.', arg_type=get_enum_type(VirtualNetworkGatewaySkuName), default=VirtualNetworkGatewaySkuName.basic.value)
-    vnet_gateway_routing_type = CLIArgumentType(help='VPN routing type.', arg_type=get_enum_type(VpnType), default=VpnType.route_based.value)
     with self.argument_context('network vnet-gateway') as c:
         c.argument('virtual_network_gateway_name', options_list=['--name', '-n'], help='Name of the VNet gateway.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworkGateways'), id_part='name')
-        c.argument('cert_name', help='Root certificate name', options_list=['--name', '-n'])
         c.argument('gateway_name', help='Virtual network gateway name')
-        c.argument('gateway_type', vnet_gateway_type)
-        c.argument('gateway_default_site', help='Name or ID of a local network gateway representing a local network site with default routes.')
-        c.argument('sku', vnet_gateway_sku_type)
-        c.argument('vpn_type', vnet_gateway_routing_type)
-        c.argument('bgp_peering_address', arg_group='BGP Peering', help='IP address to use for BGP peering.')
-        c.argument('public_ip_address', options_list=['--public-ip-addresses'], nargs='+', help='Specify a single public IP (name or ID) for an active-standby gateway. Specify two space-separated public IPs for an active-active gateway.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
-        c.argument('address_prefixes', help='Space-separated list of CIDR prefixes representing the address space for the P2S Vpnclient.', nargs='+', arg_group='VPN Client')
-        c.argument('radius_server', min_api='2017-06-01', help='Radius server address to connect to.', arg_group='VPN Client')
-        c.argument('radius_secret', min_api='2017-06-01', help='Radius secret to use for authentication.', arg_group='VPN Client')
-        c.argument('client_protocol', min_api='2017-06-01', help='Protocols to use for connecting', nargs='+', arg_group='VPN Client', arg_type=get_enum_type(VpnClientProtocol))
-        c.argument('custom_routes', min_api='2019-02-01', help='Space-separated list of CIDR prefixes representing the custom routes address space specified by the customer for VpnClient.', nargs='+', arg_group='VPN Client')
-        c.argument('vpn_auth_type', min_api='2020-11-01', nargs='+', help='VPN authentication types enabled for the virtual network gateway.', arg_type=get_enum_type(VpnAuthenticationType))
 
-    with self.argument_context('network vnet-gateway', arg_group='AAD Authentication', min_api='2020-11-01') as c:
-        c.argument('aad_tenant', help='The AAD Tenant URI of the VirtualNetworkGateway.')
-        c.argument('aad_audience', help='The AADAudience ID of the VirtualNetworkGateway.')
-        c.argument('aad_issuer', help='The AAD Issuer URI of the VirtualNetworkGateway.')
-
-    with self.argument_context('network vnet-gateway', arg_group='Root Cert Authentication', min_api='2020-11-01') as c:
-        c.argument('root_cert_data', help='Base64 contents of the root certificate file or file path.', type=file_type, completer=FilesCompleter())
-        c.argument('root_cert_name', help='Root certificate name')
-
-    with self.argument_context('network vnet-gateway', arg_group='Nat Rule', min_api='2021-02-01') as c:
-        c.argument('nat_rule', nargs='+', action=NatRuleCreate)
+    with self.argument_context('network vnet-gateway vpn-client') as c:
+        c.argument('processor_architecture', help='Processor architecture of the target system.', arg_type=get_enum_type(['Amd64', 'X86']))
+        c.argument('authentication_method', help='Method used to authenticate with the generated client.', arg_type=get_enum_type(['EAPMSCHAPv2', 'EAPTLS']))
+        c.argument('radius_server_auth_certificate', help='Public certificate data for the Radius server auth certificate in Base-64 format. Required only if external Radius auth has been configured with EAPTLS auth.')
+        c.argument('client_root_certificates', nargs='+', help='Space-separated list of client root certificate public certificate data in Base-64 format. Optional for external Radius-based auth with EAPTLS')
+        c.argument('use_legacy', help='Generate VPN client package using legacy implementation.', arg_type=get_three_state_flag())
     # endregion
 
     # region VirtualNetworkGatewayConnections
@@ -380,26 +340,6 @@ def load_arguments(self, _):
         c.ignore('connection_type')
         for item in ['vnet_gateway2', 'local_gateway2', 'express_route_circuit2']:
             c.argument(item, arg_group='Destination')
-
-    for scope in ['vnet-gateway', 'vnet-gateway vpn-client']:
-        with self.argument_context('network {} ipsec-policy'.format(scope), arg_group='Security Association') as c:
-            c.argument('sa_data_size_kilobytes', options_list=['--sa-max-size'], type=int, help='The payload size in KB for P2S client.')
-            c.argument('sa_life_time_seconds', options_list=['--sa-lifetime'], type=int, help='The lifetime in seconds for P2S client.')
-        with self.argument_context('network {} ipsec-policy'.format(scope), arg_group='IKE Phase 1') as c:
-            c.argument('dh_group', arg_type=get_enum_type(self.get_models('DhGroup')),
-                       help='The DH Groups used for initial SA.')
-            c.argument('ipsec_encryption', arg_type=get_enum_type(self.get_models('IpsecEncryption')),
-                       help='The IPSec encryption algorithm.')
-            c.argument('ipsec_integrity', arg_type=get_enum_type(self.get_models('IpsecIntegrity')),
-                       help='The IPSec integrity algorithm.')
-        with self.argument_context('network {} ipsec-policy'.format(scope), arg_group='IKE Phase 2') as c:
-            c.argument('pfs_group', arg_type=get_enum_type(self.get_models('PfsGroup')),
-                       help='The Pfs Groups used for new child SA.')
-            c.argument('ike_encryption', arg_type=get_enum_type(self.get_models('IkeEncryption')),
-                       help='The IKE encryption algorithm.')
-            c.argument('ike_integrity', arg_type=get_enum_type(self.get_models('IkeIntegrity')),
-                       help='The IKE integrity algorithm.')
-
     # endregion
 
     # region PrivateLinkResource and PrivateEndpointConnection

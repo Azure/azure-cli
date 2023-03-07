@@ -5,9 +5,7 @@
 
 # pylint: disable=too-many-lines
 
-import argparse
 import base64
-import socket
 import os
 
 from knack.util import CLIError
@@ -19,7 +17,6 @@ from azure.cli.core.commands.template_create import get_folded_parameter_validat
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_parameter_set
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.azclierror import RequiredArgumentMissingError
 
 logger = get_logger(__name__)
 
@@ -104,20 +101,6 @@ def get_vnet_validator(dest):
 def _validate_vpn_gateway_generation(namespace):
     if namespace.gateway_type != 'Vpn' and namespace.vpn_gateway_generation:
         raise CLIError('vpn_gateway_generation should not be provided if gateway_type is not Vpn.')
-
-
-def validate_vpn_connection_name_or_id(cmd, namespace):
-    if namespace.vpn_connection_ids:
-        from msrestazure.tools import is_valid_resource_id, resource_id
-        for index, vpn_connection_id in enumerate(namespace.vpn_connection_ids):
-            if not is_valid_resource_id(vpn_connection_id):
-                namespace.vpn_connection_ids[index] = resource_id(
-                    subscription=get_subscription_id(cmd.cli_ctx),
-                    resource_group=namespace.resource_group_name,
-                    namespace='Microsoft.Network',
-                    type='connections',
-                    name=vpn_connection_id
-                )
 
 
 def validate_ddos_name_or_id(cmd, namespace):
@@ -235,19 +218,6 @@ def read_base_64_file(filename):
             return str(base64_data)
 
 
-def validate_delegations(cmd, namespace):
-    if namespace.delegations:
-        Delegation = cmd.get_models('Delegation')
-        delegations = []
-        for i, item in enumerate(namespace.delegations):
-            if '/' not in item and len(item.split('.')) == 3:
-                # convert names to serviceNames
-                _, service, resource_type = item.split('.')
-                item = 'Microsoft.{}/{}'.format(service, resource_type)
-            delegations.append(Delegation(name=str(i), service_name=item))
-        namespace.delegations = delegations
-
-
 def validate_dns_record_type(namespace):
     tokens = namespace.command.split(' ')
     types = ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'soa', 'srv', 'txt']
@@ -258,18 +228,6 @@ def validate_dns_record_type(namespace):
             else:
                 namespace.record_set_type = token
             return
-
-
-def validate_virtul_network_gateway(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    if namespace.hosted_gateway and not is_valid_resource_id(namespace.hosted_gateway):
-        namespace.hosted_gateway = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type='virtualNetworkGateways',
-            name=namespace.hosted_gateway
-        )
 
 
 def validate_circuit_bandwidth(namespace, mbps=True):
@@ -361,17 +319,6 @@ def validate_public_ip_prefix(cmd, namespace):
             name=namespace.public_ip_prefix,
             namespace='Microsoft.Network',
             type='publicIPPrefixes')
-
-
-def validate_nat_gateway(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    if namespace.nat_gateway and not is_valid_resource_id(namespace.nat_gateway):
-        namespace.nat_gateway = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            name=namespace.nat_gateway,
-            namespace='Microsoft.Network',
-            type='natGateways')
 
 
 def validate_private_ip_address(namespace):
@@ -477,22 +424,6 @@ def get_nsg_validator(has_type_field=False, allow_none=False, allow_new=False, d
             allow_none=allow_none, allow_new=allow_new, default_none=default_none)(cmd, namespace)
 
     return complex_validator_with_type if has_type_field else simple_validator
-
-
-def validate_service_endpoint_policy(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
-    if namespace.service_endpoint_policy:
-        policy_ids = []
-        for policy in namespace.service_endpoint_policy:
-            if not is_valid_resource_id(policy):
-                policy = resource_id(
-                    subscription=get_subscription_id(cmd.cli_ctx),
-                    resource_group=namespace.resource_group_name,
-                    name=policy,
-                    namespace='Microsoft.Network',
-                    type='serviceEndpointPolicies')
-            policy_ids.append(policy)
-        namespace.service_endpoint_policy = policy_ids
 
 
 def validate_subresource_list(cmd, namespace):
@@ -759,15 +690,6 @@ def process_vpn_connection_create_namespace(cmd, namespace):
         namespace.connection_type = 'Vnet2Vnet'
 
 
-def load_cert_file(param_name):
-    def load_cert_validator(namespace):
-        attr = getattr(namespace, param_name)
-        if attr and os.path.isfile(attr):
-            setattr(namespace, param_name, read_base_64_file(attr))
-
-    return load_cert_validator
-
-
 def get_network_watcher_from_vmss(cmd, namespace):
     from msrestazure.tools import parse_resource_id
 
@@ -835,6 +757,7 @@ def process_nw_cm_v1_create_namespace(cmd, namespace):
             type='virtualMachines',
             name=namespace.dest_resource)
 
+
 # pylint: disable=protected-access,too-few-public-methods
 def _process_vnet_name_and_id(vnet, cmd, resource_group_name):
     from msrestazure.tools import is_valid_resource_id, resource_id
@@ -858,17 +781,6 @@ def _process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name):
 
         subnet = vnet + f'/subnets/{subnet}'
     return subnet
-
-
-def process_lb_outbound_rule_namespace(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id
-
-    validate_frontend_ip_configs(cmd, namespace)
-
-    if namespace.backend_address_pool:
-        if not is_valid_resource_id(namespace.backend_address_pool):
-            namespace.backend_address_pool = _generate_lb_subproperty_id(
-                cmd.cli_ctx, namespace, 'backendAddressPools', namespace.backend_address_pool)
 
 
 def validate_ag_address_pools(cmd, namespace):
@@ -943,14 +855,3 @@ def process_private_endpoint_connection_id_argument(cmd, namespace):
     namespace.resource_provider = '{}/{}'.format(result['namespace'], result['type'])
     namespace.name = result['child_name_1']
     del namespace.connection_id
-
-
-def process_vnet_name_or_id(cmd, namespace):
-    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
-    if namespace.vnet and not is_valid_resource_id(namespace.vnet):
-        namespace.vnet = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type='virtualNetworks',
-            name=namespace.vnet)
