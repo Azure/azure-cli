@@ -244,7 +244,6 @@ def generate_random_id():
 
 def get_network_resources_from_subnets(cli_ctx, subnets):
     from .aaz.latest.network.vnet.subnet import Show
-    # network_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)
 
     subnet_resources = set()
     for sn in subnets:
