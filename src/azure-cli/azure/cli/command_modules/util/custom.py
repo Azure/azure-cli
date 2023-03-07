@@ -367,7 +367,7 @@ class AccessTokenCredential:  # pylint: disable=too-few-public-methods
 
 
 def azd_cli(args):
-    run_azd_command(args)
+    return run_azd_command(args)
 
 
 def ensure_azd_installation():
@@ -426,6 +426,6 @@ def run_azd_command(args):
 
 def _run_command(command):
     try:
-        subprocess.run(command)
+        return subprocess.run(command)
     except Exception as ex:
         raise ex
