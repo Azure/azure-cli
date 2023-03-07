@@ -6,12 +6,12 @@
 import unittest
 from unittest import mock
 
-from azure.cli.command_modules.vm._template_builder import build_load_balancer_resource
+from azure.cli.command_modules.vm.azure_stack._template_builder import build_load_balancer_resource
 
 
 class TestTemplateBuilder(unittest.TestCase):
 
-    @mock.patch('azure.cli.command_modules.vm._template_builder.get_target_network_api', autospec=True)
+    @mock.patch('azure.cli.command_modules.vm.azure_stack._template_builder.get_target_network_api', autospec=True)
     def test_build_load_balancer_resource(self, mock_get_api):
         mock_get_api.returtn_value = '1970-01-01'
         cmd_mock = mock.MagicMock()
