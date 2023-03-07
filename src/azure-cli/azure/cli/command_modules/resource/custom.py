@@ -3693,7 +3693,7 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
         if insert_final_newline:
             args += ["--insertFinalNewline", insert_final_newline]
 
-        output = run_bicep_command(args)
+        output = run_bicep_command(cmd.cli_ctx, args)
 
         if stdout:
             print(output)
