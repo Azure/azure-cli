@@ -3675,8 +3675,6 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_resto
 
 
 def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline=None, indent_kind=None, indent_size=None, insert_final_newline=None):
-    ensure_bicep_installation()
-
     minimum_supported_version = "0.12.1"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["format", file]
