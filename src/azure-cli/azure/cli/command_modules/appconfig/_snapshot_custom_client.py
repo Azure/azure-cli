@@ -278,8 +278,9 @@ class AppConfigSnapshotClient:
             if_none_match=None,
             **kwargs):
         """
-        Poll after a given interval (default 1s) to ensure that the snapshot is in 'ready' status.
-        The request times out after 30s by default unless specified otherwise.
+        Poll the operation status after a given interval based on the retry-after header (default 5s) to ensure that 
+        the snapshot creation has succeeded or failed.
+        The request times out after 30s by default unless otherwise specified.
         """
         timeout = kwargs.pop("timeout", 30)
         default_polling_interval = kwargs.pop("polling_interval", 5)
