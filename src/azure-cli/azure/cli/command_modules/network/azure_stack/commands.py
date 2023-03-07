@@ -19,7 +19,7 @@ from azure.cli.command_modules.network.azure_stack._format import (
     transform_dns_record_set_table_output, transform_dns_zone_table_output)
 from azure.cli.command_modules.network.azure_stack._validators import (
     process_lb_create_namespace,
-    process_vpn_connection_create_namespace,)
+    process_vpn_connection_create_namespace)
 
 
 # pylint: disable=too-many-locals, too-many-statements
