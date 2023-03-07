@@ -17,4 +17,3 @@ def load_command_table(self, _):  # pylint: disable=unused-argument
 
     from .custom import AssociationCreate
     self.command_table["service-networking traffic-controller association create"] = AssociationCreate(loader=self)
-    pass

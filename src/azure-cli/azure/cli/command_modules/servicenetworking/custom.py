@@ -6,7 +6,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=too-many-lines
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements, protected-access
 
 from knack.log import get_logger
 from .aaz.latest.service_networking.traffic_controller.frontend import Create as _FrontendCreate
@@ -14,16 +14,18 @@ from .aaz.latest.service_networking.traffic_controller.association import Create
 
 logger = get_logger(__name__)
 
+
 class FrontendCreate(_FrontendCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.public_ip_address._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/publicIpAddresses/{}",
         )
         return args_schema
+
 
 class AssociationCreate(_AssociationCreate):
     @classmethod
