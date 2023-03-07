@@ -959,11 +959,16 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         template_obj = show_resource(cmd=cmd, resource_ids=[template_spec], api_version=api_version).properties['mainTemplate']
     else:
         if is_bicepparam_file_provided(parameters):
+            ensure_bicep_installation(cli_ctx)
+
+            minimum_supported_version = "0.14.85"
+            if not bicep_version_greater_than_or_equal_to(minimum_supported_version):
+                raise ArgumentUsageError(f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to { minimum_supported_version} or later.")
             if len(parameters) > 1:
-                raise IncorrectUsageError("Can not use --parameters more than once when using a .bicepparam file")
+                raise ArgumentUsageError("Can not use --parameters argument more than once when using a .bicepparam file")
             bicepparam_file = parameters[0][0]
             if not is_bicep_file(template_file):
-                raise IncorrectUsageError("Only a .bicep template is allowed with a .bicepparam parameter file")
+                raise ArgumentUsageError("Only a .bicep template is allowed with a .bicepparam parameter file")
 
             build_bicepparam_output = run_bicep_command(cmd.cli_ctx, ["build-params", bicepparam_file, "--bicep-file", template_file, "--stdout"])
             build_bicepparam_output_json = json.loads(build_bicepparam_output)

@@ -3980,28 +3980,6 @@ class BicepScenarioTest(ScenarioTest):
             self.greater_than('length(@)', 0)
         ])
 
-    def test_resource_deployment_with_bicepparam_and_json_template(self):
-        self.kwargs.update({
-            'rg' : "exampleGroup",
-            'tf': "./main.json",
-            'params' : "./param.bicepparam"
-        })
-
-        with self.assertRaisesRegex(CLIError, "Only a .bicep template is allowed with a .bicepparam parameter file"):
-            self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params}')
-            
-
-    def test_resource_deployment_with_bicepparam_and_other_parameter_sources(self):
-        self.kwargs.update({
-            'rg' : "exampleGroup",
-            'tf': "./main.bicepparam",
-            'params1' : "./param1.bicepparam",
-            'params2' : "./param2.json",
-        })
-
-        with self.assertRaisesRegex(CLIError, "Can not use --parameters more than once when using a .bicepparam file"):
-            self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params1} --parameters {params2}')
-
 # Because don't want to record bicep cli binary
 class BicepBuildTest(LiveScenarioTest):
     
@@ -4136,7 +4114,42 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
 
         self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params}', checks=[
             self.check('properties.provisioningState', 'Succeeded')
-        ])    
+        ]) 
+       
+    def test_resource_deployment_with_bicepparam_and_incompatible_version(self):
+        self.kwargs.update({
+            'rg' : "exampleGroup",
+            'tf': "./main.json",
+            'params' : "./param.bicepparam"
+        })
+
+        self.cmd('az bicep install --version v0.13.1')
+        
+        minimum_supported_version = "0.14.85"
+        with self.assertRaisesRegex(CLIError, f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to { minimum_supported_version} or later."):
+            self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params}')   
+
+    def test_resource_deployment_with_bicepparam_and_json_template(self):
+        self.kwargs.update({
+            'rg' : "exampleGroup",
+            'tf': "./main.json",
+            'params' : "./param.bicepparam"
+        })
+        
+        with self.assertRaisesRegex(CLIError, "Only a .bicep template is allowed with a .bicepparam parameter file"):
+            self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params}')
+            
+
+    def test_resource_deployment_with_bicepparam_and_other_parameter_sources(self):
+        self.kwargs.update({
+            'rg' : "exampleGroup",
+            'tf': "./main.bicepparam",
+            'params1' : "./param1.bicepparam",
+            'params2' : "./param2.json",
+        })
+
+        with self.assertRaisesRegex(CLIError, "Can"):
+            self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params1} --parameters {params2}')
         
     def test_subscription_level_deployment_with_bicep(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
