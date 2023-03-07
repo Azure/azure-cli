@@ -15,14 +15,13 @@ from msrest import Serializer
 import json
 
 from ._constants import SnapshotConstants
-from ._snapshotmodels import Snapshot, SnapshotListResult
+from ._snapshotmodels import Snapshot, SnapshotListResult, SnapshotCreateData
 
 
 class ProvisioningStatus:
-    PROVISIONING = "provisioning"
-    READY = "ready"
-    ARCHIVED = "archived"
-    FAILED = "failed"
+    RUNNING = "Running"
+    SUCCEEDED = "Succeeded"
+    FAILED = "Failed"
 
 
 class RequestMethod:
@@ -103,6 +102,26 @@ def build_get_snapshot_request(
         if_match=if_match,
         if_none_match=if_none_match,
         sync_token=sync_token,
+        params=_params,
+        **kwargs
+    )
+
+
+def build_get_snapshot_create_status(
+        name,
+        if_match=None,
+        if_none_match=None,
+        sync_token=None,
+        **kwargs
+):
+    _params = {"snapshot": name}
+
+    return _build_request(
+        "/operations",
+        RequestMethod.GET,
+        sync_token=sync_token,
+        if_match=if_match,
+        if_none_match=if_none_match,
         params=_params,
         **kwargs
     )
@@ -263,17 +282,27 @@ class AppConfigSnapshotClient:
         The request times out after 30s by default unless specified otherwise.
         """
         timeout = kwargs.pop("timeout", 30)
-        polling_interval = kwargs.pop("polling_interval", 1)
+        default_polling_interval = kwargs.pop("polling_interval", 5)
+
 
         from datetime import datetime
+        import time
         from azure.cli.core.commands.progress import IndeterminateStandardOut
 
-        def _get_elapsed_time(start_time: datetime):
+        progress = IndeterminateStandardOut()
+
+        def _get_elapsed_time_from(start_time: datetime):
             return (datetime.now() - start_time).total_seconds()
 
-        progress = IndeterminateStandardOut()
+        def _delay(sleep_time_seconds):
+            delay_start = datetime.now()
+
+            while _get_elapsed_time_from(delay_start) < sleep_time_seconds:
+                progress.spinner.step(label="Provisioning")
+                time.sleep(1)
+
         progress.write({"message": "Starting"})
-        current_state = self.create_snapshot(
+        self.create_snapshot(
             name,
             filters,
             composition_type,
@@ -284,23 +313,57 @@ class AppConfigSnapshotClient:
             **kwargs
         )
 
-        import time
-        start_time = datetime.now()
+        current_state = self._get_snapshot_create_status(name)
 
-        while current_state.status == ProvisioningStatus.PROVISIONING:
+        start_time = datetime.now()
+        while current_state.operation_status.status == ProvisioningStatus.RUNNING:
             progress.spinner.step(label="Provisioning")
-            if _get_elapsed_time(start_time) > timeout:
+            if _get_elapsed_time_from(start_time) > timeout:
                 progress.clear()
                 raise TimeoutError("The create request timed out.")
 
-            time.sleep(polling_interval)
-            current_state = self.get_snapshot(name)
+            polling_interval = current_state.retry_after or default_polling_interval
+            _delay(polling_interval)
+
+            current_state = self._get_snapshot_create_status(name)
 
         progress.clear()
-        if current_state.status == ProvisioningStatus.READY:
-            return current_state
+        if current_state.operation_status.status == ProvisioningStatus.SUCCEEDED:
+            return self.get_snapshot(name=name)
 
-        raise HttpResponseError('Snapshot creation failed with status code: {}'.format(current_state.status_code))
+        error = current_state.operation_status.error
+
+        raise HttpResponseError('Snapshot creation failed with status code {}. Reason: {}'.format(
+           error.code, error.message))
+
+    def _get_snapshot_create_status(
+            self,
+            name,
+            if_match=None,
+            if_none_match=None,
+            **kwargs
+    ):
+        _headers = kwargs.pop("headers", {}) or {}
+
+        request = build_get_snapshot_create_status(
+            name=name,
+            if_match=if_match,
+            if_none_match=if_none_match,
+            sync_token=self._sync_token,
+            headers=_headers
+        )
+
+        serialized_endpoint = self._serializer.url("endpoint", self._endpoint, 'str', skip_quote=True)
+        request.url = serialized_endpoint + request.url
+
+        response = self._client.send_request(request)
+
+        if response.status_code not in [200]:
+            map_error(status_code=response.status_code, response=response, error_map=_ERROR_MAP)
+            error = self._deserializer.failsafe_deserialize(AppConfigError, response)
+            raise HttpResponseError(response=response, model=error)
+
+        return SnapshotCreateData.from_response(response)
 
     def create_snapshot(
             self,

@@ -100,7 +100,7 @@ class Snapshot:
             "\nStatus Code: " + str(self.status_code)
 
     @classmethod
-    def from_json(cls, data_dict: any):
+    def from_json(cls, data_dict):
         return cls(
             name=data_dict.get("name", None),
             status=data_dict.get("status", None),
@@ -134,9 +134,89 @@ class SnapshotListResult:
         return str([str(i) for i in self.items])
 
     @classmethod
-    def from_json(cls, data_dict: str):
+    def from_json(cls, data_dict):
 
         return cls(
             items=[Snapshot.from_json(snapshot) for snapshot in data_dict.get("items", [])],
             next_link=data_dict.get("@nextLink", None)
+        )
+
+
+class OperationStatus:
+    '''
+    Class representing the current create status of a snapshot
+    :ivar str id:
+        Name of the Snapshot being created.
+    :ivar str status:
+        The creation status of the snapshot
+    :ivar ErrorDetail error:
+        The details of the error if any.
+    '''
+
+    def __init__(self,
+                 id,
+                 status,
+                 error=None):
+        self.id = id
+        self.status = status
+        self.error = error
+
+    @classmethod
+    def from_json(cls, data_dict):
+        return cls(
+            id=data_dict.get("id", None),
+            status=data_dict.get("status", None),
+            error=ErrorDetail.from_json(data_dict.get("error", None)),
+        )
+
+
+class ErrorDetail:
+    '''
+    Class representing the create error details for a failed snapshot.
+    :ivar str code:
+        Error status code.
+    : ivar str message:
+        Error message.
+    '''
+
+    def __init__(self,
+                 code=None,
+                 message=None):
+        self.code = code
+        self.message = message
+
+    @classmethod
+    def from_json(cls, data_dict):
+        if not data_dict:
+            return None
+
+        return cls(
+            code=data_dict.get("code", None),
+            message=data_dict.get("message", None)
+        )
+
+
+class SnapshotCreateData:
+    '''
+    Class representing the required data needed in tracking snapshot creation 
+    :ivar OperationStatus operation_status:
+        Status of the Snapshot being created.
+    :ivar int retry_after:
+        Number of seconds returned from the server in Retry-After header
+    '''
+
+    def __init__(self,
+                 operation_status,
+                 retry_after=None):
+        self.operation_status = operation_status
+        self.retry_after = retry_after
+
+    @classmethod
+    def from_response(cls, response):
+        response_headers = response.headers
+        retry_seconds = response_headers.pop('Retry-After', None)
+
+        return cls(
+            operation_status=OperationStatus.from_json(response.json()),
+            retry_after=int(retry_seconds) if retry_seconds else None
         )
