@@ -20,6 +20,10 @@ from azure.cli.core.azclierror import (
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
 from knack.log import get_logger
+from azure.cli.command_modules.acs._consts import (
+    CONST_MANAGED_CLUSTER_SKU_TIER_FREE,
+    CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD,
+)
 
 logger = get_logger(__name__)
 
@@ -192,8 +196,8 @@ def validate_sku_tier(namespace):
     if namespace.tier is not None:
         if namespace.tier == '':
             return
-        if namespace.tier.lower() != "free" and namespace.tier.lower() != "standard":
-            raise CLIError("--tier can only be free or standard")
+        if namespace.tier.lower() not in (CONST_MANAGED_CLUSTER_SKU_TIER_FREE, CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD):
+            raise InvalidArgumentValueError("--tier can only be free or standard")
 
 
 def validate_load_balancer_outbound_ips(namespace):
