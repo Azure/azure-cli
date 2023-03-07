@@ -368,23 +368,33 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # py
                                                subscription=res['subscription'])
 
     # retrieve FQDNs for registry and its data endpoint
+    from .aaz.latest.network.nic import Show as NICShow
+    from .aaz.latest.network.private_endpoint import Show as PEShow
+
     pe_ids = [e.private_endpoint.id for e in registry.private_endpoint_connections if e.private_endpoint]
     dns_mappings = {}
     for pe_id in pe_ids:
         res = parse_resource_id(pe_id)
-        network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK,
-                                                 subscription_id=res['subscription'])
-        pe = network_client.private_endpoints.get(res['resource_group'], res['name'])
-        if pe.subnet.id.lower().startswith(vnet_of_private_endpoint.lower()):
-            nic_id = pe.network_interfaces[0].id
-            nic_res = parse_resource_id(nic_id)
-            nic = network_client.network_interfaces.get(nic_res['resource_group'], nic_res['name'])
-            for dns_config in nic.ip_configurations:
-                if dns_config.private_link_connection_properties.fqdns[0] in dns_mappings:
+        # cross subscription
+        ctx = cmd.cli_ctx
+        ctx.update_aux_subscriptions(res['subscription'])
+        pe = PEShow(cli_ctx=ctx)(command_args={
+            "name": res['name'],
+            "resource_group": res['resource_group']
+        })
+        if pe["subnet"]["id"].lower().startswith(vnet_of_private_endpoint.lower()):
+            nic_id = pe["networkInterfaces"][0]["id"]
+            nic_res = parse_resource_id(nic_id.to_serialized_data())
+            nic = NICShow(cli_ctx=ctx)(command_args={
+                "name": nic_res['name'],
+                "resource_group": nic_res['resource_group']
+            })
+            for dns_config in nic["ipConfigurations"]:
+                if dns_config["privateLinkConnectionProperties"]["fqdns"][0] in dns_mappings:
                     err = ('Registry "{}" has more than one private endpoint in the vnet of "{}".'
                            ' DNS routing will be unreliable')
                     raise CLIError(err.format(registry_name, vnet_of_private_endpoint))
-                dns_mappings[dns_config.private_link_connection_properties.fqdns[0]] = dns_config.private_ip_address
+                dns_mappings[dns_config["privateLinkConnectionProperties"]["fqdns"][0]] = dns_config["privateIPAddress"]
 
     dns_ok = True
     if not dns_mappings:
