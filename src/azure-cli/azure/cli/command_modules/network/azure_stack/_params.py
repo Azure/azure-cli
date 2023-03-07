@@ -267,7 +267,7 @@ def load_arguments(self, _):
         c.argument('edge_zone', edge_zone)
 
     with self.argument_context('network public-ip create') as c:
-        c.argument('allocation_method', help='IP address allocation method', arg_type=get_enum_type(IPAllocationMethod))
+        c.argument('allocation_method', help='IP address allocation method', arg_type=get_enum_type(['Static', 'Dynamic']))
         c.argument('version', min_api='2016-09-01', help='IP address type.', arg_type=get_enum_type(["IPv4", "IPv6"], default='ipv4'))
         c.argument('protection_mode', min_api='2022-01-01', help='The DDoS protection mode of the public IP', arg_type=get_enum_type(['Enabled', 'Disabled', 'VirtualNetworkInherited']))
 

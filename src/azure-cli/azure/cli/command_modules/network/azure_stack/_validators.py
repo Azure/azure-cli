@@ -5,9 +5,6 @@
 
 # pylint: disable=too-many-lines
 
-import base64
-import os
-
 from knack.util import CLIError
 from knack.log import get_logger
 
