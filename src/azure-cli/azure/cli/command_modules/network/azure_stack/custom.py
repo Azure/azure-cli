@@ -888,6 +888,17 @@ def lb_get_operation(lb):
     return lb
 
 
+def _get_nic_ip_config(nic, name):
+    if nic.ip_configurations:
+        ip_config = next(
+            (x for x in nic.ip_configurations if x.name.lower() == name.lower()), None)
+    else:
+        ip_config = None
+    if not ip_config:
+        raise CLIError('IP configuration {} not found.'.format(name))
+    return ip_config
+
+
 # region VirtualNetworkGatewayConnections
 # pylint: disable=too-many-locals
 def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gateway1,
