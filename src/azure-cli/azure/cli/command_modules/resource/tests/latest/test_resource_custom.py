@@ -535,11 +535,10 @@ class TestCustom(unittest.TestCase):
         self.assertEqual(ChangeType.modify, result.changes[0].change_type)
 
 class TestFormatBicepFile(unittest.TestCase):
-    @mock.patch("azure.cli.command_modules.resource.custom.ensure_bicep_installation")
     @mock.patch("azure.cli.command_modules.resource.custom.bicep_version_greater_than_or_equal_to", return_value=True)
     @mock.patch("azure.cli.command_modules.resource.custom.run_bicep_command", return_value="formatted content")
     @mock.patch("builtins.print")
-    def test_format_bicep_file(self, mock_print, mock_run_bicep_command, mock_bicep_version_greater_than_or_equal_to, mock_ensure_bicep_installation):
+    def test_format_bicep_file(self, mock_print, mock_run_bicep_command, mock_bicep_version_greater_than_or_equal_to):
         # Arrange.
         file_path = "path/to/file.bicep"
         stdout = True
@@ -548,7 +547,6 @@ class TestFormatBicepFile(unittest.TestCase):
         format_bicep_file(cmd, file_path, stdout=stdout)
 
         # Assert.
-        mock_ensure_bicep_installation.assert_called_once()
         mock_bicep_version_greater_than_or_equal_to.assert_called_once_with("0.12.1")
         mock_run_bicep_command.assert_called_once_with(["format", file_path, "--stdout"])
         mock_print.assert_called_once_with("formatted content")
