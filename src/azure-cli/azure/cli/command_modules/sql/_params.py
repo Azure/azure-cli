@@ -645,9 +645,9 @@ def _configure_db_dw_create_params(
     # collation and max_size_bytes are ignored when restoring because their values are determined by
     # the source db.
     if create_mode in [
-            CreateMode.restore, 
-            CreateMode.point_in_time_restore, 
-            CreateMode.RECOVERY, 
+            CreateMode.restore,
+            CreateMode.point_in_time_restore,
+            CreateMode.RECOVERY,
             CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP]:
         arg_ctx.ignore('collation', 'max_size_bytes')
 
