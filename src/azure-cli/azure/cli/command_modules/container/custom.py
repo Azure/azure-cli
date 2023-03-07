@@ -276,22 +276,12 @@ def _build_identities_info(identities):
     return identity
 
 
-def _get_resource(client, resource_group_name, *subresources):
-    from azure.core.exceptions import HttpResponseError
-    try:
-        resource = client.get(resource_group_name, *subresources)
-        return resource
-    except HttpResponseError as ex:
-        if ex.error.code == "NotFound" or ex.error.code == "ResourceNotFound":
-            return None
-        raise
-
-
 def _get_subnet_id(cmd, location, resource_group_name, vnet, vnet_address_prefix, subnet, subnet_address_prefix):
     from msrestazure.tools import parse_resource_id, is_valid_resource_id
     from azure.cli.core.commands import LongRunningOperation
-    from .aaz.latest.network.vnet import Create as VNetCreate, List as VNetList
-    from .aaz.latest.network.vnet.subnet import Create as SubnetCreate, List as SubnetList, Update as _SubnetUpdate
+    from azure.core.exceptions import HttpResponseError
+    from .aaz.latest.network.vnet import Create as VNetCreate, Show as VNetShow
+    from .aaz.latest.network.vnet.subnet import Create as SubnetCreate, Show as SubnetShow, Update as _SubnetUpdate
 
     aci_delegation_service_name = "Microsoft.ContainerInstance/containerGroups"
     aci_delegation = {
@@ -311,11 +301,17 @@ def _get_subnet_id(cmd, location, resource_group_name, vnet, vnet_address_prefix
         vnet_name = parsed_vnet_id['resource_name']
         resource_group_name = parsed_vnet_id['resource_group']
 
-    subnets = SubnetList(cli_ctx=cmd.cli_ctx)(command_args={
-        "vnet_name": vnet_name,
-        "resource_group": resource_group_name
-    })
-    subnet = next((x for x in subnets if x["name"] == subnet_name), None)
+    try:
+        subnet = SubnetShow(cli_ctx=cmd.cli_ctx)(command_args={
+            "name": subnet_name,
+            "vnet_name": vnet_name,
+            "resource_group": resource_group_name
+        })
+    except HttpResponseError as ex:
+        if ex.error.code == "NotFound" or ex.error.code == "ResourceNotFound":
+            subnet = None
+        else:
+            raise
     # For an existing subnet, validate and add delegation if needed
     if subnet:
         logger.info('Using existing subnet "%s" in resource group "%s"', subnet["name"], resource_group_name)
@@ -343,11 +339,17 @@ def _get_subnet_id(cmd, location, resource_group_name, vnet, vnet_address_prefix
 
     # Create new subnet and Vnet if not exists
     else:
-        vnets = VNetList(cli_ctx=cmd.cli_ctx)(command_args={
-            "name": vnet_name,
-            "resource_group": resource_group_name
-        })
-        vnet = next((x for x in vnets if x["name"] == vnet_name), None)
+        try:
+            vnet = VNetShow(cli_ctx=cmd.cli_ctx)(command_args={
+                "name": vnet_name,
+                "resource_group": resource_group_name
+            })
+        except HttpResponseError as ex:
+            if ex.error.code == "NotFound" or ex.error.code == "ResourceNotFound":
+                vnet = None
+            else:
+                raise
+
         if not vnet:
             logger.info('Creating new vnet "%s" in resource group "%s"', vnet_name, resource_group_name)
             poller = VNetCreate(cli_ctx=cmd.cli_ctx)(command_args={
