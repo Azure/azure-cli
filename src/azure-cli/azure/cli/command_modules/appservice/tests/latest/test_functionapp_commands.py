@@ -15,7 +15,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck, live_only)
 from azure.cli.testsdk.checkers import JMESPathCheckNotExists, JMESPathPatternCheck
-from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError, ArgumentUsageError
+from azure.cli.core.azclierror import ResourceNotFoundError
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -508,79 +508,6 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck('linuxFxVersion', 'PowerShell|7.2')])
 
-class FunctionAppManagedEnvironment(LiveScenarioTest):
-    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
-    def test_functionapp_create_with_appcontainer_managed_environment(self, resource_group, storage_account):
-        functionapp_name = self.create_random_name(
-            'functionappwindowsruntime', 40)
-        managed_environment_name = self.create_random_name(
-            'containerappmanagedenvironment', 40
-        )
-        plan_name = self.create_random_name(
-            'functionappplan', 40
-        )
-
-        self.cmd('containerapp env create --name {} --resource-group {} --location {}'
-        .format(managed_environment_name, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).assert_with_checks([
-                     JMESPathCheck('name', managed_environment_name),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', WINDOWS_ASP_LOCATION_FUNCTIONAPP)])
-
-        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux --location {}'.format(resource_group, plan_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
-
-        self.cmd('functionapp create -g {} -n {} -p {} -s {} --environment {} --runtime dotnet --functions-version 4'
-                 .format(resource_group, functionapp_name, plan_name, storage_account, managed_environment_name)).assert_with_checks([
-                     JMESPathCheck('state', 'Running'),
-                     JMESPathCheck('name', functionapp_name),
-                     JMESPathCheck('kind', 'functionapp,linux'),
-                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
-
-        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('linuxFxVersion', 'DOCKER|mcr.microsoft.com/azuredocs/containerapps-helloworld:latest')])
-
-    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
-    def test_functionapp_create_with_appcontainer_managed_environment_location_mismatch_error(self, resource_group, storage_account):
-        functionapp_name = self.create_random_name(
-            'functionappwindowsruntime', 40)
-        managed_environment_name = self.create_random_name(
-            'containerappmanagedenvironment', 40
-        )
-        plan_name = self.create_random_name(
-            'functionappplan', 40
-        )
-
-        self.cmd('containerapp env create --name {} --resource-group {} --location {}'
-        .format(managed_environment_name, resource_group, LINUX_ASP_LOCATION_WEBAPP)).assert_with_checks([
-                     JMESPathCheck('name', managed_environment_name),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', LINUX_ASP_LOCATION_WEBAPP)])
-
-        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux --location {}'.format(resource_group, plan_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
-
-        with self.assertRaises(ValidationError):
-            self.cmd('functionapp create -g {} -n {} -p {} -s {} --environment {} --runtime dotnet --functions-version 4'
-                    .format(resource_group, functionapp_name, plan_name, storage_account, managed_environment_name))
-
-    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
-    def test_functionapp_create_with_appcontainer_managed_environment_consumption_plan_error(self, resource_group, storage_account):
-        functionapp_name = self.create_random_name(
-            'functionappwindowsruntime', 40)
-        managed_environment_name = self.create_random_name(
-            'containerappmanagedenvironment', 40
-        )
-
-        self.cmd('containerapp env create --name {} --resource-group {} --location {}'
-        .format(managed_environment_name, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).assert_with_checks([
-                     JMESPathCheck('name', managed_environment_name),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', WINDOWS_ASP_LOCATION_FUNCTIONAPP)])
-
-        with self.assertRaises(ArgumentUsageError):
-            self.cmd('functionapp create -g {} -n {} -c {} -s {} --environment {} --runtime dotnet --functions-version 4'
-                    .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account, managed_environment_name))
 
 class FunctionAppOnWindowsWithRuntime(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
