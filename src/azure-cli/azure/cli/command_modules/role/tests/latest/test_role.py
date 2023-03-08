@@ -568,7 +568,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
 
                 self.assertGreaterEqual(len(local_defaults_config), 1)
                 actual = set([(x['name'], x['source'], x['value']) for x in local_defaults_config if x['name'] == 'group'])
-                expected = set([('group', os.path.join(self.cli_ctx.config.config_dir, 'config'), self.kwargs['rg'])])
+                expected = set([('group', os.path.join(temp_dir, os.path.basename(self.cli_ctx.config.config_dir), 'config'), self.kwargs['rg'])])
                 self.assertEqual(actual, expected)
 
                 # test role assignments on a resource group
