@@ -2024,7 +2024,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters'
         })
-
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
@@ -2036,6 +2035,39 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('sku.tier', 'Paid')
         ])
 
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+            
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @AKSCustomRoleBasedServicePrincipalPreparer()
+    def test_aks_create_with_standard_sku(self, resource_group, resource_group_location, sp_name, sp_password):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys(),
+            'location': resource_group_location,
+            'service_principal': sp_name,
+            'client_secret': sp_password,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} --tier standard '
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('sku.tier', 'Paid')
+        ])
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
@@ -4523,19 +4555,16 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('sku.tier', 'Paid')
         ])
-
         # update to no uptime sla
         no_uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --no-uptime-sla'
         self.cmd(no_uptime_sla_cmd, checks=[
             self.check('sku.tier', 'Free')
         ])
-
         # update to uptime sla again
         uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --uptime-sla --no-wait'
         self.cmd(uptime_sla_cmd, checks=[
             self.is_empty()
         ])
-
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])

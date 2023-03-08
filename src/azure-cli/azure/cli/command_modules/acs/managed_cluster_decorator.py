@@ -12,6 +12,8 @@ from typing import Dict, List, Optional, Tuple, TypeVar, Union
 from azure.cli.command_modules.acs._consts import (
     CONST_LOAD_BALANCER_SKU_BASIC,
     CONST_LOAD_BALANCER_SKU_STANDARD,
+    CONST_MANAGED_CLUSTER_SKU_TIER_FREE,
+    CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD,
     CONST_OUTBOUND_TYPE_LOAD_BALANCER,
     CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
@@ -4013,6 +4015,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         # read the original value passed by the command
         uptime_sla = self.raw_param.get("uptime_sla")
+
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
@@ -4029,7 +4032,35 @@ class AKSManagedClusterContext(BaseAKSContext):
                 raise MutuallyExclusiveArgumentError(
                     'Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.'
                 )
+
+            if uptime_sla and self.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_FREE:
+                raise MutuallyExclusiveArgumentError(
+                    'Cannot specify "--uptime-sla" and "--tier free" at the same time.'
+                )
+
         return uptime_sla
+
+    def get_tier(self) -> str:
+        """Obtain the value of tier.
+
+        :return: str
+        """
+        tier = self.raw_param.get("tier")
+        if not tier:
+            return ""
+
+        tierStr = tier.lower()
+        if tierStr == CONST_MANAGED_CLUSTER_SKU_TIER_FREE and self._get_uptime_sla(enable_validation=False):
+            raise MutuallyExclusiveArgumentError(
+                'Cannot specify "--uptime-sla" and "--tier free" at the same time.'
+            )
+
+        if tierStr == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD and self._get_no_uptime_sla(enable_validation=False):
+            raise MutuallyExclusiveArgumentError(
+                'Cannot specify "--no-uptime-sla" and "--tier standard" at the same time.'
+            )
+
+        return tierStr
 
     def get_uptime_sla(self) -> bool:
         """Obtain the value of uptime_sla.
@@ -4060,6 +4091,12 @@ class AKSManagedClusterContext(BaseAKSContext):
                 raise MutuallyExclusiveArgumentError(
                     'Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.'
                 )
+
+            if no_uptime_sla and self.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
+                raise MutuallyExclusiveArgumentError(
+                    'Cannot specify "--no-uptime-sla" and "--tier standard" at the same time.'
+                )
+
         return no_uptime_sla
 
     def get_no_uptime_sla(self) -> bool:
@@ -5483,7 +5520,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
-        if self.context.get_uptime_sla():
+        if self.context.get_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
             mc.sku = self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Paid"
@@ -5966,13 +6003,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
-        if self.context.get_uptime_sla():
+        if self.context.get_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
             mc.sku = self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Paid"
             )
 
-        if self.context.get_no_uptime_sla():
+        if self.context.get_no_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_FREE:
             mc.sku = self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Free"

@@ -16,7 +16,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_GPU_INSTANCE_PROFILE_MIG1_G, CONST_GPU_INSTANCE_PROFILE_MIG2_G,
     CONST_GPU_INSTANCE_PROFILE_MIG3_G, CONST_GPU_INSTANCE_PROFILE_MIG4_G,
     CONST_GPU_INSTANCE_PROFILE_MIG7_G, CONST_LOAD_BALANCER_SKU_BASIC,
-    CONST_LOAD_BALANCER_SKU_STANDARD, CONST_NETWORK_PLUGIN_AZURE,
+    CONST_LOAD_BALANCER_SKU_STANDARD, CONST_MANAGED_CLUSTER_SKU_TIER_FREE,
+    CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD, CONST_NETWORK_PLUGIN_AZURE,
     CONST_NETWORK_PLUGIN_KUBENET, CONST_NETWORK_PLUGIN_NONE,
     CONST_NODE_IMAGE_UPGRADE_CHANNEL, CONST_NODEPOOL_MODE_SYSTEM,
     CONST_NODEPOOL_MODE_USER, CONST_NONE_UPGRADE_CHANNEL,
@@ -44,7 +45,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_linux_host_name, validate_load_balancer_idle_timeout,
     validate_load_balancer_outbound_ip_prefixes,
     validate_load_balancer_outbound_ips, validate_load_balancer_outbound_ports,
-    validate_load_balancer_sku, validate_max_surge,
+    validate_load_balancer_sku, validate_sku_tier, validate_max_surge,
     validate_nat_gateway_idle_timeout,
     validate_nat_gateway_managed_outbound_ip_count, validate_network_policy,
     validate_nodepool_id, validate_nodepool_labels, validate_nodepool_name,
@@ -107,6 +108,7 @@ scale_down_modes = [CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_DOWN_MODE_DEALLOCA
 
 # consts for ManagedCluster
 load_balancer_skus = [CONST_LOAD_BALANCER_SKU_BASIC, CONST_LOAD_BALANCER_SKU_STANDARD]
+sku_tiers = [CONST_MANAGED_CLUSTER_SKU_TIER_FREE, CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD]
 network_plugins = [CONST_NETWORK_PLUGIN_KUBENET, CONST_NETWORK_PLUGIN_AZURE, CONST_NETWORK_PLUGIN_NONE]
 outbound_types = [CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY, CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY]
 auto_upgrade_channels = [
@@ -182,7 +184,8 @@ def load_arguments(self, _):
         c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"],
                    help="Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
-        c.argument('uptime_sla', action='store_true')
+        c.argument('uptime_sla', action='store_true', deprecate_info=c.deprecate(target='--uptime-sla', hide=True))
+        c.argument('tier', arg_type=get_enum_type(sku_tiers), validator=validate_sku_tier)
         c.argument('fqdn_subdomain')
         c.argument('api_server_authorized_ip_ranges', validator=validate_ip_ranges)
         c.argument('enable_private_cluster', action='store_true')
@@ -285,8 +288,9 @@ def load_arguments(self, _):
         c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"],
                    help="Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
-        c.argument('uptime_sla', action='store_true')
-        c.argument('no_uptime_sla', action='store_true')
+        c.argument('uptime_sla', action='store_true', deprecate_info=c.deprecate(target='--uptime-sla', hide=True))
+        c.argument('no_uptime_sla', action='store_true', deprecate_info=c.deprecate(target='--no-uptime-sla', hide=True))
+        c.argument('tier', arg_type=get_enum_type(sku_tiers), validator=validate_sku_tier)
         c.argument('api_server_authorized_ip_ranges', validator=validate_ip_ranges)
         c.argument('enable_public_fqdn', action='store_true')
         c.argument('disable_public_fqdn', action='store_true')
