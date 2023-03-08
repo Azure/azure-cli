@@ -28,15 +28,16 @@ class ConfigTest(ScenarioTest):
         os.chdir(tempdir)
         print("Using temp dir: {}".format(tempdir))
 
-        global_test_args = {"source": os.path.expanduser(os.path.join('~', '.azure', 'config')), "flag": ""}
-        local_test_args = {"source": os.path.join(tempdir, '.azure', 'config'), "flag": " --local"}
+        global_test_args = {"source": os.path.join(self.cli_ctx.config.config_dir, 'config'), "flag": ""}
+        local_test_args = {"source": os.path.join(tempdir, os.path.basename(self.cli_ctx.config.config_dir), 'config'),
+                           "flag": " --local"}
 
         for args in (global_test_args, local_test_args):
             print("Testing for {}".format(args))
 
-            test_option1_expected = {'name': 'test_option1', 'value': 'test_value1'}
-            test_option21_expected = {'name': 'test_option21', 'value': 'test_value21'}
-            test_option22_expected = {'name': 'test_option22', 'value': 'test_value22'}
+            test_option1_expected = {'name': 'test_option1', 'source': args["source"], 'value': 'test_value1'}
+            test_option21_expected = {'name': 'test_option21', 'source': args["source"], 'value': 'test_value21'}
+            test_option22_expected = {'name': 'test_option22', 'source': args["source"], 'value': 'test_value22'}
 
             test_section1_expected = [test_option1_expected]
             test_section2_expected = [test_option21_expected, test_option22_expected]
@@ -50,30 +51,21 @@ class ConfigTest(ScenarioTest):
             # 2. get
             # 2.1 Test get all sections
             output = self.cmd('config get' + args['flag']).get_output_in_json()
-            # 'source' is config dir path, remove it from data as it's random.
-            output['test_section1'][0].pop('source')
-            output['test_section2'][0].pop('source')
-            output['test_section2'][1].pop('source')
             self.assertListEqual(output['test_section1'], test_section1_expected)
             self.assertListEqual(output['test_section2'], test_section2_expected)
 
             # 2.2 Test get one section
             output = self.cmd('config get test_section1' + args['flag']).get_output_in_json()
-            output[0].pop('source')
+            self.assertListEqual(output, test_section1_expected)
             output = self.cmd('config get test_section2' + args['flag']).get_output_in_json()
-            output[0].pop('source')
-            output[1].pop('source')
             self.assertListEqual(output, test_section2_expected)
 
             # 2.3 Test get one item
             output = self.cmd('config get test_section1.test_option1' + args['flag']).get_output_in_json()
-            output.pop('source')
             self.assertDictEqual(output, test_option1_expected)
             output = self.cmd('config get test_section2.test_option21' + args['flag']).get_output_in_json()
-            output.pop('source')
             self.assertDictEqual(output, test_option21_expected)
             output = self.cmd('config get test_section2.test_option22' + args['flag']).get_output_in_json()
-            output.pop('source')
             self.assertDictEqual(output, test_option22_expected)
 
             with self.assertRaises(CLIError):
@@ -84,7 +76,6 @@ class ConfigTest(ScenarioTest):
             self.cmd('config unset test_section1.test_option1' + args['flag'])
             # Test unsetting multiple options
             self.cmd('config unset test_section2.test_option21 test_section2.test_option22' + args['flag'])
-
         os.chdir(original_path)
 
 
