@@ -281,7 +281,7 @@ def _get_subnet_id(cmd, location, resource_group_name, vnet, vnet_address_prefix
     from azure.cli.core.commands import LongRunningOperation
     from azure.core.exceptions import HttpResponseError
     from .aaz.latest.network.vnet import Create as VNetCreate, Show as VNetShow
-    from .aaz.latest.network.vnet.subnet import Create as SubnetCreate, Show as SubnetShow, Update as _SubnetUpdate
+    from .aaz.latest.network.vnet.subnet import Create as SubnetCreate, Show as SubnetShow, Update as SubnetUpdate
 
     aci_delegation_service_name = "Microsoft.ContainerInstance/containerGroups"
     aci_delegation = {
@@ -321,15 +321,11 @@ def _get_subnet_id(cmd, location, resource_group_name, vnet, vnet_address_prefix
 
         if not subnet.get("delegations", None):
             logger.info('Adding ACI delegation to the existing subnet.')
-
-            class SubnetUpdate(_SubnetUpdate):
-                def pre_instance_update(self, instance):
-                    instance.properties.delegations = [aci_delegation]
-
             poller = SubnetUpdate(cli_ctx=cmd.cli_ctx)(command_args={
                 "name": subnet_name,
                 "vnet_name": vnet_name,
-                "resource_group": resource_group_name
+                "resource_group": resource_group_name,
+                "delegated_services": [aci_delegation]
             })
             subnet = LongRunningOperation(cmd.cli_ctx)(poller)
         else:

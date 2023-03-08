@@ -343,8 +343,6 @@ def _check_registry_health(cmd, registry_name, ignore_errors):
 def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # pylint: disable=too-many-locals, too-many-statements
     import socket
     from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
-    from azure.cli.core.profiles import ResourceType
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     if registry_name is None:
         raise CLIError("Registry name must be provided to verify DNS routings of its private endpoints")
@@ -368,24 +366,33 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # py
                                                subscription=res['subscription'])
 
     # retrieve FQDNs for registry and its data endpoint
-    from .aaz.latest.network.nic import Show as NICShow
-    from .aaz.latest.network.private_endpoint import Show as PEShow
+    from .aaz.latest.network.nic import Show as _NICShow
+    from .aaz.latest.network.private_endpoint import Show as _PEShow
 
     pe_ids = [e.private_endpoint.id for e in registry.private_endpoint_connections if e.private_endpoint]
     dns_mappings = {}
     for pe_id in pe_ids:
         res = parse_resource_id(pe_id)
-        # cross subscription
-        ctx = cmd.cli_ctx
-        ctx.update_aux_subscriptions(res['subscription'])
-        pe = PEShow(cli_ctx=ctx)(command_args={
+
+        class PEShow(_PEShow):
+            def pre_operations(self):
+                # cross subscription
+                self.ctx.update_aux_subscriptions(res['subscription'])
+
+        pe = PEShow(cli_ctx=cmd.cli_ctx)(command_args={
             "name": res['name'],
             "resource_group": res['resource_group']
         })
         if pe["subnet"]["id"].lower().startswith(vnet_of_private_endpoint.lower()):
             nic_id = pe["networkInterfaces"][0]["id"]
             nic_res = parse_resource_id(nic_id.to_serialized_data())
-            nic = NICShow(cli_ctx=ctx)(command_args={
+
+            class NICShow(_NICShow):
+                def pre_operations(self):
+                    # cross subscription
+                    self.ctx.update_aux_subscriptions(nic_res['subscription'])
+
+            nic = NICShow(cli_ctx=cmd.cli_ctx)(command_args={
                 "name": nic_res['name'],
                 "resource_group": nic_res['resource_group']
             })
