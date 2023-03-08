@@ -673,6 +673,9 @@ parameters:
   - name: --rotation-poll-interval
     type: string
     short-summary: Set interval of rotation poll. Use with azure-keyvault-secrets-provider addon.
+- name: --ssh-key-value
+    type: string
+    short-summary: Public key path or key contents to install on node VMs for SSH access. For example, 'ssh-rsa AAAAB...snip...UcyupgH azureuser@linuxvm'.
   - name: --enable-windows-gmsa
     type: bool
     short-summary: Enable Windows gmsa on cluster.
@@ -803,6 +806,8 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-keda
   - name: Disable KEDA workload autoscaler for an existing kubernetes cluster.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-keda
+  - name: Update the SSH key on a AKS Cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --ssh-key-value <new SSH key value or SSH key file>    
 """
 
 helps['aks delete'] = """
