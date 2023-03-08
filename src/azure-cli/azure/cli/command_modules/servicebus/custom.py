@@ -328,7 +328,7 @@ def return_valid_duration_create(update_value):
 
 
 # NetwrokRuleSet Region
-def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_name, subnet=None, ip_mask=None, ignore_missing_vnet_service_endpoint=False, action='Allow'):
+'''def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_name, subnet=None, ip_mask=None, ignore_missing_vnet_service_endpoint=False, action='Allow'):
     NWRuleSetVirtualNetworkRules = cmd.get_models('NWRuleSetVirtualNetworkRules', resource_type=ResourceType.MGMT_SERVICEBUS)
     Subnet = cmd.get_models('Subnet', resource_type=ResourceType.MGMT_SERVICEBUS)
     NWRuleSetIpRules = cmd.get_models('NWRuleSetIpRules', resource_type=ResourceType.MGMT_SERVICEBUS)
@@ -390,7 +390,7 @@ def cli_networkrule_delete(cmd, client, resource_group_name, namespace_name, sub
         if ipruletodelete in netwrokruleset.ip_rules:
             netwrokruleset.ip_rules.remove(ipruletodelete)
 
-    return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
+    return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)'''
 
 
 def cli_returnnsdetails(cmd, resource_group_name, namespace_name, max_size_in_megabytes):
