@@ -23,9 +23,12 @@ class DummyCli(AzCli):
 
         from knack.completion import ARGCOMPLETE_ENV_NAME
 
+        random_config_dir = kwargs.get('random_config_dir', False)
+
         super(DummyCli, self).__init__(
             cli_name='az',
-            config_dir=os.path.join(GLOBAL_CONFIG_DIR, 'dummy_cli_config_dir', random_string()),
+            config_dir=os.path.join(GLOBAL_CONFIG_DIR, 'dummy_cli_config_dir',
+                                    random_string()) if random_config_dir else GLOBAL_CONFIG_DIR,
             config_env_var_prefix=ENV_VAR_PREFIX,
             commands_loader_cls=commands_loader_cls or MainCommandsLoader,
             parser_cls=AzCliCommandParser,

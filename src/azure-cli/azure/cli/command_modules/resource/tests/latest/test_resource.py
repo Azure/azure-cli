@@ -326,6 +326,9 @@ class ResourceCreateAndShowScenarioTest(ScenarioTest):
 
 class TagScenarioTest(ScenarioTest):
 
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, random_config_dir=True, **kwargs)
+
     def test_tag_scenario(self):
 
         self.kwargs.update({

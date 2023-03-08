@@ -255,6 +255,9 @@ class RoleDefinitionScenarioTest(RoleScenarioTestBase):
 
 class RoleAssignmentScenarioTest(RoleScenarioTestBase):
 
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, random_config_dir=True, **kwargs)
+
     @ResourceGroupPreparer(name_prefix='cli_role_assign')
     @AllowLargeResponse()
     def test_role_assignment_scenario(self, resource_group):

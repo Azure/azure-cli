@@ -13,6 +13,9 @@ from knack.util import CLIError
 
 class ConfigTest(ScenarioTest):
 
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, random_config_dir=True, **kwargs)
+
     def test_config(self):
 
         # [test_section1]
