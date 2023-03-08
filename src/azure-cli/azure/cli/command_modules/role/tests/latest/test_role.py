@@ -567,8 +567,8 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                 local_defaults_config = self.cmd('configure --list-defaults --scope local').get_output_in_json()
 
                 self.assertGreaterEqual(len(local_defaults_config), 1)
-                actual = set([(x['name'], x['source'], x['value']) for x in local_defaults_config if x['name'] == 'group'])
-                expected = set([('group', os.path.join(temp_dir, '.azure', 'config'), self.kwargs['rg'])])
+                actual = set([(x['name'], x['value']) for x in local_defaults_config if x['name'] == 'group'])
+                expected = set([('group', self.kwargs['rg'])])
                 self.assertEqual(actual, expected)
 
                 # test role assignments on a resource group

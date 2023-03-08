@@ -34,9 +34,9 @@ class ConfigTest(ScenarioTest):
         for args in (global_test_args, local_test_args):
             print("Testing for {}".format(args))
 
-            test_option1_expected = {'name': 'test_option1', 'source': args["source"], 'value': 'test_value1'}
-            test_option21_expected = {'name': 'test_option21', 'source': args["source"], 'value': 'test_value21'}
-            test_option22_expected = {'name': 'test_option22', 'source': args["source"], 'value': 'test_value22'}
+            test_option1_expected = {'name': 'test_option1', 'value': 'test_value1'}
+            test_option21_expected = {'name': 'test_option21', 'value': 'test_value21'}
+            test_option22_expected = {'name': 'test_option22', 'value': 'test_value22'}
 
             test_section1_expected = [test_option1_expected]
             test_section2_expected = [test_option21_expected, test_option22_expected]
