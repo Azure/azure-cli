@@ -50,21 +50,30 @@ class ConfigTest(ScenarioTest):
             # 2. get
             # 2.1 Test get all sections
             output = self.cmd('config get' + args['flag']).get_output_in_json()
+            # 'source' is config dir path, remove it from data as it's random.
+            output['test_section1'][0].pop('source')
+            output['test_section2'][0].pop('source')
+            output['test_section2'][1].pop('source')
             self.assertListEqual(output['test_section1'], test_section1_expected)
             self.assertListEqual(output['test_section2'], test_section2_expected)
 
             # 2.2 Test get one section
             output = self.cmd('config get test_section1' + args['flag']).get_output_in_json()
-            self.assertListEqual(output, test_section1_expected)
+            output[0].pop('source')
             output = self.cmd('config get test_section2' + args['flag']).get_output_in_json()
+            output[0].pop('source')
+            output[1].pop('source')
             self.assertListEqual(output, test_section2_expected)
 
             # 2.3 Test get one item
             output = self.cmd('config get test_section1.test_option1' + args['flag']).get_output_in_json()
+            output.pop('source')
             self.assertDictEqual(output, test_option1_expected)
             output = self.cmd('config get test_section2.test_option21' + args['flag']).get_output_in_json()
+            output.pop('source')
             self.assertDictEqual(output, test_option21_expected)
             output = self.cmd('config get test_section2.test_option22' + args['flag']).get_output_in_json()
+            output.pop('source')
             self.assertDictEqual(output, test_option22_expected)
 
             with self.assertRaises(CLIError):
