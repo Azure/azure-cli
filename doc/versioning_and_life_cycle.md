@@ -61,7 +61,7 @@ All breaking changes for commands will be marked as **\[BREAKING CHANGE\]** in [
 
 Azure CLI has bi-annual breaking change releases coinciding with Microsoft **Build** and **Ignite** events. Azure CLI **generally** releases the breaking changes **only** in these two breaking change windows. This approach allows customers to maintain stability, especially in automation scenarios, while keeping up-to-date with the latest and most secure versions of Azure CLI. It also allows customers to plan, test, and migrate Azure CLI commands and features properly when breaking changes are released.
 
-However, there are special cases where breaking changes need to be released as soon as possible. In the following cases, a breaking change to a command or feature **doesn't** need to wait for the next breaking change release cycle and can be released as soon as the change is ready.
+However, under the following circumstances, breaking changes cannot wait the next breaking change release and we will proceed with an out of band breaking change release. We will notify about this change as early as possible in the [upcoming breaking changes](https://learn.microsoft.com/cli/azure/upcoming-breaking-changes) page:
 
 - A critical bug is affecting customers and requires a hot fix.
 - A security patch is required. 
