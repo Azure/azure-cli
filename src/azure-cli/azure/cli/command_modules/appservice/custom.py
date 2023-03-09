@@ -4280,12 +4280,13 @@ def _vnet_delegation_check(cmd, subnet_subscription_id, vnet_resource_group, vne
                 delegated = True
 
         if not delegated:
-            SubnetUpdate(cli_ctx=cmd.cli_ctx)(command_args={
+            poller = SubnetUpdate(cli_ctx=cmd.cli_ctx)(command_args={
                 "name": subnet_name,
                 "vnet_name": vnet_name,
                 "resource_group": vnet_resource_group,
                 "delegations": [{"name": "delegation", "service_name": "Microsoft.Web/serverFarms"}]
             })
+            LongRunningOperation(cmd.cli_ctx)(poller)
 
 
 def _validate_subnet(cli_ctx, subnet, vnet, resource_group_name):
@@ -4310,7 +4311,7 @@ def _validate_subnet(cli_ctx, subnet, vnet, resource_group_name):
             child_name_1=subnet)
 
     # Reuse logic from existing command to stay backwards compatible
-    list_all_vnets = VNetList(cli_ctx=cmd.cli_ctx)(command_args={})
+    list_all_vnets = VNetList(cli_ctx=cli_ctx)(command_args={})
 
     vnets = []
     for v in list_all_vnets:

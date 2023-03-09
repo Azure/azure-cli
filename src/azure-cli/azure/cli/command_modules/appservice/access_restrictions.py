@@ -5,13 +5,12 @@
 
 import json
 
-from azure.cli.command_modules.network._client_factory import network_client_factory
 from azure.cli.core.azclierror import (ResourceNotFoundError, ArgumentUsageError, InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError)
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.mgmt.network.models import ServiceEndpointPropertiesFormat
 from azure.mgmt.web.models import IpSecurityRestriction
+from importlib import import_module
 from knack.log import get_logger
 from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
 
@@ -180,23 +179,31 @@ def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
                                  ' Use --ignore-missing-endpoint or -i to'
                                  ' skip validation and manually verify service endpoint.')
 
-    vnet_client = network_client_factory(cli_ctx, api_version=AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]
-                                         ['appservice_ensure_subnet'])
-    subnet_obj = vnet_client.subnets.get(subnet_resource_group, subnet_vnet_name, subnet_name)
-    subnet_obj.service_endpoints = subnet_obj.service_endpoints or []
+    Subnet = import_module(".aaz.2019_03_01_hybrid.network.vnet.subnet")  # ad-hoc api version 2019-02-01
+    subnet_obj = Subnet.Show(cli_ctx=cli_ctx)(command_args={
+        "name": subnet_name,
+        "vnet_name": subnet_vnet_name,
+        "resource_group": subnet_resource_group
+    })
+    subnet_obj["serviceEndpoints"] = subnet_obj["serviceEndpoints"] or []
     service_endpoint_exists = False
-    for s in subnet_obj.service_endpoints:
-        if s.service == "Microsoft.Web":
+    for s in subnet_obj["serviceEndpoints"]:
+        if s["service"] == "Microsoft.Web":
             service_endpoint_exists = True
             break
 
     if not service_endpoint_exists:
-        web_service_endpoint = ServiceEndpointPropertiesFormat(service="Microsoft.Web")
-        subnet_obj.service_endpoints.append(web_service_endpoint)
-        poller = vnet_client.subnets.begin_create_or_update(
-            subnet_resource_group, subnet_vnet_name,
-            subnet_name, subnet_parameters=subnet_obj)
-        # Ensure subnet is updated to avoid update conflict
+        class SubnetUpdate(Subnet.Update):
+            @staticmethod
+            def pre_instance_update(instance):
+                instance.properties.service_endpoints.append({"service": "Microsoft.Web"})
+
+        poller = SubnetUpdate(cli_ctx=cli_ctx)(command_args={
+            "name": subnet_name,
+            "vnet_name": subnet_vnet_name,
+            "resource_group": subnet_resource_group
+        })
+        # ensure subnet is updated to avoid update conflict
         LongRunningOperation(cli_ctx)(poller)
 
 
