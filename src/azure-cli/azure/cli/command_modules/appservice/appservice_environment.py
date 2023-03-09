@@ -26,12 +26,12 @@ from msrestazure.tools import (parse_resource_id, is_valid_resource_id, resource
 VERSION_2019_08_01 = "2019-08-01"
 VERSION_2019_10_01 = "2019-10-01"
 # ad-hoc api version 2020-04-01
-network_prefix = "azure.cli.command_modules.network"
-NSG = import_module(".aaz.2020_09_01_hybrid.network.nsg", package=network_prefix)
-NSGRule = import_module(".aaz.2020_09_01_hybrid.network.nsg.rule", package=network_prefix)
-RouteTable = import_module(".aaz.2020_09_01_hybrid.network.route_table", package=network_prefix)
-RouteTableRoute = import_module(".aaz.2020_09_01_hybrid.network.route_table.route", package=network_prefix)
-Subnet = import_module(".aaz.2020_09_01_hybrid.network.vnet.subnet", package=network_prefix)
+appservice = "azure.cli.command_modules.appservice"
+NSG = import_module(".aaz.2020_09_01_hybrid.network.nsg", package=appservice)
+NSGRule = import_module(".aaz.2020_09_01_hybrid.network.nsg.rule", package=appservice)
+RouteTable = import_module(".aaz.2020_09_01_hybrid.network.route_table", package=appservice)
+RouteTableRoute = import_module(".aaz.2020_09_01_hybrid.network.route_table.route", package=appservice)
+Subnet = import_module(".aaz.2020_09_01_hybrid.network.vnet.subnet", package=appservice)
 
 logger = get_logger(__name__)
 
