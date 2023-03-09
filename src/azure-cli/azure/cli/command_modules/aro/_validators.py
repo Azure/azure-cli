@@ -252,8 +252,6 @@ def validate_refresh_cluster_credentials(namespace):
         raise RequiredArgumentMissingError('--client-id and --client-secret must be not set with --refresh-credentials.')  # pylint: disable=line-too-long
 
 
-def validate_install_version_format(namespace):
-    if namespace.install_version is not None and not re.match(r'^' +
-                                                              r'[4-9]{1}\.[0-9]{1,2}\.[0-9]{1,2}' +
-                                                              r'$', namespace.install_version):
-        raise InvalidArgumentValueError('--install-version is invalid')
+def validate_version_format(namespace):
+    if namespace.version is not None and not re.match(r'^[4-9]{1}\.[0-9]{1,2}\.[0-9]{1,2}$', namespace.version):
+        raise InvalidArgumentValueError('--version is invalid')

@@ -677,7 +677,9 @@ def load_arguments(self, _):
                 c.argument(dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
 
     with self.argument_context('vmss reimage') as c:
-        c.argument('instance_id', nargs='+', help='Space-separated list of VM instance ID. If missing, reimage all instances.')
+        c.argument('instance_ids', nargs='+',
+                   help='Space-separated list of VM instance ID. If missing, reimage all instances.',
+                   options_list=['--instance-ids', c.deprecate(target='--instance-id', redirect='--instance-ids', hide=True)])
 
     with self.argument_context('vmss create', operation_group='virtual_machine_scale_sets') as c:
         VirtualMachineEvictionPolicyTypes = self.get_models('VirtualMachineEvictionPolicyTypes', resource_type=ResourceType.MGMT_COMPUTE)
@@ -1077,7 +1079,11 @@ def load_arguments(self, _):
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
-            c.argument('identity_role', options_list=['--role'], help="Role name or id the system assigned identity will have")
+            c.argument('identity_role', options_list=['--role'],
+                       help='Role name or id the system assigned identity will have. '
+                            'Please note that the default value "Contributor" will be removed in the breaking change '
+                            'release of the fall, so please specify "--role" and "--scope" at the same time '
+                            'when assigning a role to the managed identity')
 
     with self.argument_context('vm auto-shutdown') as c:
         c.argument('off', action='store_true', help='Turn off auto-shutdown for VM. Configuration will be cleared.')
@@ -1441,9 +1447,6 @@ def load_arguments(self, _):
     for scope in ['ppg create', 'ppg update']:
         with self.argument_context(scope) as c:
             c.argument('intent_vm_sizes', nargs='*', min_api='2021-11-01', help="Specify possible sizes of virtual machines that can be created in the proximity placement group.")
-
-    with self.argument_context('ppg show', min_api='2019-07-01') as c:
-        c.argument('include_colocation_status', action='store_true', help='Enable fetching the colocation status of all the resources in the proximity placement group.')
 
     for scope, item in [('vm create', 'VM'), ('vmss create', 'VMSS'),
                         ('vm availability-set create', 'availability set'),

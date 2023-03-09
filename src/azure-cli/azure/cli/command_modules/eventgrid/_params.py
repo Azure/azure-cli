@@ -225,7 +225,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         c.argument('public_network_access', arg_type=public_network_access_type)
         c.argument('inbound_ip_rules', action=AddInboundIpRule, nargs='+')
         c.argument('sku', arg_type=sku_type)
-        c.argument('identity', arg_type=identity_type, deprecate_info=c.deprecate(expiration='2.46.0'))
+        c.argument('identity', arg_type=identity_type, deprecate_info=c.deprecate())
         c.argument('delivery_identity', arg_type=delivery_identity_type)
         c.argument('deadletter_identity', arg_type=deadletter_identity_type)
         c.argument('partner_registration_name', arg_type=partner_registration_name_type)

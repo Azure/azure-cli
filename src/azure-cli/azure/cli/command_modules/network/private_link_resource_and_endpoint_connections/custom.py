@@ -51,6 +51,7 @@ def register_providers():
     # _register_one_provider("Microsoft.Media/videoanalyzers", "2021-11-01-preview", True)
     # "Microsoft.Migrate/assessmentProjects", "2020-05-01-preview", False
     # "Microsoft.Migrate/migrateProjects", "2020-06-01-preview", False
+    _register_one_provider("Microsoft.Monitor/accounts", "2021-06-03-preview", True)
     _register_one_provider('Microsoft.Network/applicationGateways', '2020-05-01', True)
     _register_one_provider('Microsoft.Network/privateLinkServices', '2021-05-01', True)
     # "Microsoft.OffAzure/masterSites", "2020-07-07", False
@@ -73,6 +74,7 @@ def register_providers():
     _register_one_provider("Microsoft.KubernetesConfiguration/privateLinkScopes", '2022-04-02-preview', True)
     _register_one_provider("Microsoft.OpenEnergyPlatform/energyServices", '2022-04-04-preview', True)
     _register_one_provider("Microsoft.MachineLearningServices/registries", '2022-10-01-preview', True)
+    _register_one_provider('Microsoft.DBforMySQL/flexibleServers', '2022-09-30-privatepreview', False)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None, support_connection_operation=True):  # pylint: disable=line-too-long
