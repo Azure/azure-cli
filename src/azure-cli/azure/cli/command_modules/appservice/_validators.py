@@ -20,6 +20,9 @@ from ._client_factory import web_client_factory
 from .utils import (_normalize_sku, get_sku_tier, _normalize_location, get_resource_name_and_group,
                     get_resource_if_exists, is_functionapp, is_logicapp, is_webapp)
 
+from .aaz.latest.network import ListServiceTags
+from .aaz.latest.network.vnet import List as VNetList, Show as VNetShow
+
 logger = get_logger(__name__)
 
 
@@ -133,8 +136,6 @@ def validate_add_vnet(cmd, namespace):
     from azure.core.exceptions import ResourceNotFoundError as ResNotFoundError
 
     resource_group_name = namespace.resource_group_name
-    from azure.cli.command_modules.network._client_factory import network_client_factory
-
     vnet_identifier = namespace.vnet
     name = namespace.name
     slot = namespace.slot
@@ -148,22 +149,23 @@ def validate_add_vnet(cmd, namespace):
         vnet_name = parsed_vnet['name']
 
         cmd.cli_ctx.data['subscription_id'] = vnet_sub_id
-        vnet_client = network_client_factory(cmd.cli_ctx)
-        vnet_loc = vnet_client.virtual_networks.get(resource_group_name=vnet_group,
-                                                    virtual_network_name=vnet_name).location
+        vnet_loc = VNetShow(cli_ctx=cmd.cli_ctx)(command_args={
+            "name": vnet_name,
+            "resource_group": vnet_group
+        })["location"]
         cmd.cli_ctx.data['subscription_id'] = current_sub_id
     else:
-        vnet_client = network_client_factory(cmd.cli_ctx)
-
         try:
-            vnet_loc = vnet_client.virtual_networks.get(resource_group_name=namespace.resource_group_name,
-                                                        virtual_network_name=vnet_identifier).location
+            vnet_loc = VNetShow(cli_ctx=cmd.cli_ctx)(command_args={
+                "name": vnet_identifier,
+                "resource_group": namespace.resource_group_name
+            })["location"]
         except ResNotFoundError:
-            vnets = vnet_client.virtual_networks.list_all()
+            vnets = VNetList(cli_ctx=cmd.cli_ctx)(command_args={})
             vnet_loc = ''
             for v in vnets:
-                if vnet_identifier == v.name:
-                    vnet_loc = v.location
+                if vnet_identifier == v["name"]:
+                    vnet_loc = v["location"]
                     break
 
     if not vnet_loc:
@@ -255,11 +257,12 @@ def _validate_service_tag_format(cmd, namespace):
         input_tags = input_value.split(',')
         if len(input_tags) > 8:
             raise InvalidArgumentValueError('Maximum 8 service tags are allowed per rule.')
-        network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK)
         resource_group_name = namespace.resource_group_name
         name = namespace.name
         webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
-        service_tag_full_list = network_client.service_tags.list(webapp.location).values
+        service_tag_full_list = ListServiceTags(cli_ctx=cmd.cli_ctx)(command_args={
+            "location": webapp.location
+        })["values"]
         if service_tag_full_list is None:
             logger.warning('Not able to get full Service Tag list. Cannot validate Service Tag.')
             return

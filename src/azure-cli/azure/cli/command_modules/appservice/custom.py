@@ -38,7 +38,6 @@ from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 from azure.mgmt.relay.models import AccessRights
 from azure.mgmt.web.models import KeyInfo
 from azure.cli.command_modules.relay._client_factory import hycos_mgmt_client_factory, namespaces_mgmt_client_factory
-from azure.cli.command_modules.network._client_factory import network_client_factory
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
@@ -81,6 +80,9 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH)
 from ._github_oauth import (get_github_access_token, cache_github_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
+
+from .aaz.latest.network.vnet import List as VNetList, Show as VNetShow
+from .aaz.latest.network.vnet.subnet import Show as SubnetShow, Update as SubnetUpdate
 
 logger = get_logger(__name__)
 
@@ -287,9 +289,10 @@ def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, w
     if vnet_sub_id:
         cmd.cli_ctx.data['subscription_id'] = vnet_sub_id
 
-    vnet_client = network_client_factory(cmd.cli_ctx).virtual_networks
-    vnet_location = vnet_client.get(resource_group_name=subnet_resource_group,
-                                    virtual_network_name=vnet_name).location
+    vnet_location = VNetShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": vnet_name,
+        "resource_group": subnet_resource_group
+    })["location"]
 
     cmd.cli_ctx.data['subscription_id'] = current_sub_id
 
@@ -4255,8 +4258,6 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
 
 def _vnet_delegation_check(cmd, subnet_subscription_id, vnet_resource_group, vnet_name, subnet_name):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    Delegation = cmd.get_models('Delegation', resource_type=ResourceType.MGMT_NETWORK)
-    vnet_client = network_client_factory(cmd.cli_ctx)
 
     if get_subscription_id(cmd.cli_ctx).lower() != subnet_subscription_id.lower():
         logger.warning('Cannot validate subnet in other subscription for delegation to Microsoft.Web/serverFarms.'
@@ -4267,17 +4268,24 @@ def _vnet_delegation_check(cmd, subnet_subscription_id, vnet_resource_group, vne
                        '--vnet-name %s '
                        '--delegations Microsoft.Web/serverFarms', vnet_resource_group, subnet_name, vnet_name)
     else:
-        subnetObj = vnet_client.subnets.get(vnet_resource_group, vnet_name, subnet_name)
-        delegations = subnetObj.delegations
+        subnetObj = SubnetShow(cli_ctx=cmd.cli_ctx)(command_args={
+            "name": subnet_name,
+            "vnet_name": vnet_name,
+            "resource_group": vnet_resource_group
+        })
+        delegations = subnetObj["delegations"]
         delegated = False
         for d in delegations:
-            if d.service_name.lower() == "microsoft.web/serverfarms".lower():
+            if d["serviceName"].lower() == "microsoft.web/serverfarms".lower():
                 delegated = True
 
         if not delegated:
-            subnetObj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/serverFarms")]
-            vnet_client.subnets.begin_create_or_update(vnet_resource_group, vnet_name, subnet_name,
-                                                       subnet_parameters=subnetObj)
+            SubnetUpdate(cli_ctx=cmd.cli_ctx)(command_args={
+                "name": subnet_name,
+                "vnet_name": vnet_name,
+                "resource_group": vnet_resource_group,
+                "delegations": [{"name": "delegation", "service_name": "Microsoft.Web/serverFarms"}]
+            })
 
 
 def _validate_subnet(cli_ctx, subnet, vnet, resource_group_name):
@@ -4302,15 +4310,14 @@ def _validate_subnet(cli_ctx, subnet, vnet, resource_group_name):
             child_name_1=subnet)
 
     # Reuse logic from existing command to stay backwards compatible
-    vnet_client = network_client_factory(cli_ctx)
-    list_all_vnets = vnet_client.virtual_networks.list_all()
+    list_all_vnets = VNetList(cli_ctx=cmd.cli_ctx)(command_args={})
 
     vnets = []
     for v in list_all_vnets:
-        if vnet in (v.name, v.id):
-            vnet_details = parse_resource_id(v.id)
+        if vnet in (v["name"], v["id"]):
+            vnet_details = parse_resource_id(v["id"].to_serialized_data())
             vnet_resource_group = vnet_details['resource_group']
-            vnets.append((v.id, v.name, vnet_resource_group))
+            vnets.append((v["id"], v["name"], vnet_resource_group))
 
     if not vnets:
         return logger.warning("The virtual network %s was not found in the subscription.", vnet)
@@ -4325,7 +4332,7 @@ def _validate_subnet(cli_ctx, subnet, vnet, resource_group_name):
         logger.warning("Multiple virtual networks of name %s were found. Using virtual network with resource ID: %s. "
                        "To use a different virtual network, specify the virtual network resource ID using --vnet.",
                        vnet, vnet_id)
-    vnet_id_parts = parse_resource_id(vnet_id)
+    vnet_id_parts = parse_resource_id(vnet_id.to_serialized_data())
     return resource_id(
         subscription=vnet_id_parts['subscription'],
         resource_group=vnet_id_parts['resource_group'],
