@@ -421,3 +421,14 @@ def validate_app_is_functionapp(cmd, namespace):
         raise ValidationError(f"App '{name}' in group '{rg}' is a logic app.")
     if is_webapp(app):
         raise ValidationError(f"App '{name}' in group '{rg}' is a web app.")
+
+
+def validate_centauri_delete_function(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    slot = namespace.slot
+    function_app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    if function_app.managed_environment_id is not None:
+        raise ValidationError(
+            'Delete function for a function app on container app environment is not supported.',
+            'This function app is created in an App Environment. Go to App environment to delete functions.')

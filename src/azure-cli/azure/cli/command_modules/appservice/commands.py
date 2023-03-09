@@ -11,7 +11,7 @@ from ._client_factory import cf_web_client, cf_plans, cf_webapps
 from ._validators import (validate_onedeploy_params, validate_staticsite_link_function, validate_staticsite_sku,
                           validate_vnet_integration, validate_asp_create, validate_functionapp_asp_create,
                           validate_webapp_up, validate_app_exists, validate_add_vnet, validate_app_is_functionapp,
-                          validate_app_is_webapp)
+                          validate_app_is_webapp, validate_centauri_delete_function)
 
 
 def output_slots_in_table(slots):
@@ -412,7 +412,7 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp function') as g:
         g.custom_command('show', 'show_function')  # pylint: disable=show-command
-        g.custom_command('delete', 'delete_function')
+        g.custom_command('delete', 'delete_function', validator=validate_centauri_delete_function, exception_handler=ex_handler_factory())
         g.custom_command('list', 'list_functions')
 
     with self.command_group('functionapp function keys') as g:
