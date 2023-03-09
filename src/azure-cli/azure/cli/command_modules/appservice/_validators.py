@@ -7,8 +7,7 @@ import ipaddress
 
 
 from azure.cli.core.azclierror import (InvalidArgumentValueError, ArgumentUsageError, RequiredArgumentMissingError,
-                                       ResourceNotFoundError, ValidationError, MutuallyExclusiveArgumentError,
-                                       UnsupportOperationError)
+                                       ResourceNotFoundError, ValidationError, MutuallyExclusiveArgumentError)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import validate_tags
@@ -141,7 +140,7 @@ def validate_functionapp_on_containerapp_vnet(cmd, namespace):
     slot = namespace.slot
     function_app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if function_app.managed_environment_id is not None:
-        raise UnsupportOperationError(
+        raise ValidationError(
             'Config vnet for a function app on container app environment is not supported.',
             'This function app is created in an App Environment. Go to App environment to configure Networking.')
 
