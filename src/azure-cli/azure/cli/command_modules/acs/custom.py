@@ -384,10 +384,14 @@ def aks_create(
     no_ssh_key=False,
     pod_cidr=None,
     service_cidr=None,
+    ip_families=None,
+    pod_cidrs=None,
+    service_cidrs=None,
     dns_service_ip=None,
     docker_bridge_address=None,
     load_balancer_sku=None,
     load_balancer_managed_outbound_ip_count=None,
+    load_balancer_managed_outbound_ipv6_count=None,
     load_balancer_outbound_ips=None,
     load_balancer_outbound_ip_prefixes=None,
     load_balancer_outbound_ports=None,
@@ -400,6 +404,7 @@ def aks_create(
     auto_upgrade_channel=None,
     cluster_autoscaler_profile=None,
     uptime_sla=False,
+    tier=None,
     fqdn_subdomain=None,
     api_server_authorized_ip_ranges=None,
     enable_private_cluster=False,
@@ -517,6 +522,7 @@ def aks_update(
     disable_local_accounts=False,
     enable_local_accounts=False,
     load_balancer_managed_outbound_ip_count=None,
+    load_balancer_managed_outbound_ipv6_count=None,
     load_balancer_outbound_ips=None,
     load_balancer_outbound_ip_prefixes=None,
     load_balancer_outbound_ports=None,
@@ -527,6 +533,7 @@ def aks_update(
     cluster_autoscaler_profile=None,
     uptime_sla=False,
     no_uptime_sla=False,
+    tier=None,
     api_server_authorized_ip_ranges=None,
     enable_public_fqdn=False,
     disable_public_fqdn=False,
@@ -1104,7 +1111,7 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
     # in which case we ignore the KUBECONFIG variable
     # KUBECONFIG can be colon separated. If we find that condition, use the first entry
     if "KUBECONFIG" in os.environ and path == os.path.join(os.path.expanduser('~'), '.kube', 'config'):
-        kubeconfig_path = os.environ["KUBECONFIG"].split(":")[0]
+        kubeconfig_path = os.environ["KUBECONFIG"].split(os.pathsep)[0]
         if kubeconfig_path:
             logger.info("The default path '%s' is replaced by '%s' defined in KUBECONFIG.", path, kubeconfig_path)
             path = kubeconfig_path

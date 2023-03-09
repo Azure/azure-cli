@@ -11,11 +11,8 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import get_api_version, ResourceType
 
 from azure.cli.command_modules.network._client_factory import (
-    cf_network_watcher, cf_packet_capture,
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
-    cf_connection_monitor,
-    cf_dns_references,
-    cf_virtual_router, cf_virtual_router_peering, cf_flow_logs)
+    cf_dns_references)
 from azure.cli.command_modules.network._format import (
     transform_local_gateway_table_output, transform_dns_record_set_output,
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
@@ -27,17 +24,11 @@ from azure.cli.command_modules.network._format import (
     transform_vnet_table_output, transform_effective_route_table, transform_effective_nsg,
     transform_vnet_gateway_routes_table, transform_vnet_gateway_bgp_peer_table)
 from azure.cli.command_modules.network._validators import (
-    get_network_watcher_from_location,
     process_ag_create_namespace,
-    process_lb_create_namespace, process_nw_cm_v2_create_namespace,
-    process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
-    process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
-    process_nw_flow_log_set_namespace, process_nw_flow_log_create_namespace, process_nw_flow_log_show_namespace,
-    process_nw_packet_capture_create_namespace, process_nw_test_connectivity_namespace, process_nw_topology_namespace,
-    process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
+    process_lb_create_namespace,
+    process_nw_flow_log_show_namespace,
     process_public_ip_create_namespace,
     process_vpn_connection_create_namespace,
-    process_nw_config_diagnostic_namespace,
     process_appgw_waf_policy_update, process_cross_region_lb_create_namespace)
 
 NETWORK_VROUTER_DEPRECATION_INFO = 'network routeserver'
@@ -65,55 +56,6 @@ def load_command_table(self, _):
         client_factory=cf_dns_references,
         resource_type=ResourceType.MGMT_NETWORK_DNS,
         min_api='2018-05-01'
-    )
-
-    network_watcher_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#NetworkWatchersOperations.{}',
-        client_factory=cf_network_watcher
-    )
-
-    network_watcher_cm_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#ConnectionMonitorsOperations.{}',
-        client_factory=cf_connection_monitor
-    )
-
-    network_watcher_flow_log_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#FlowLogsOperations.{}',
-        client_factory=cf_flow_logs,
-    )
-
-    network_watcher_flow_log_update_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.custom#{}',
-        client_factory=cf_flow_logs,
-    )
-
-    network_watcher_pc_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#PacketCapturesOperations.{}',
-        client_factory=cf_packet_capture
-    )
-
-    network_vrouter_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualRoutersOperations.{}',
-        client_factory=cf_virtual_router,
-        min_api='2019-08-01'
-    )
-
-    network_vrouter_update_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.custom#{}',
-        client_factory=cf_virtual_router,
-        min_api='2019-08-01'
-    )
-
-    network_vrouter_peering_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.network.operations#VirtualRouterPeeringsOperations.{}',
-        client_factory=cf_virtual_router_peering,
-        min_api='2019-08-01'
-    )
-
-    network_vrouter_peering_update_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.network.custom#{}',
-        client_factory=cf_virtual_router_peering,
-        min_api='2019-08-01'
     )
     # endregion
 
@@ -271,7 +213,7 @@ def load_command_table(self, _):
     # endregion
 
     # region DdosProtectionPlans
-    with self.command_group('network ddos-protection', min_api='2018-02-01') as g:
+    with self.command_group('network ddos-protection') as g:
         g.custom_command('create', 'create_ddos_plan')
         g.custom_command('update', 'update_ddos_plan')
     # endregion
@@ -388,11 +330,6 @@ def load_command_table(self, _):
     with self.command_group('network private-link-service connection'):
         from azure.cli.command_modules.network.custom import PrivateEndpointConnectionUpdate
         self.command_table['network private-link-service connection update'] = PrivateEndpointConnectionUpdate(loader=self)
-
-    # TODO: Due to service limitation.
-    # with self.command_group('network private-link-service ip-configs', network_private_link_service_sdk) as g:
-    #     g.custom_command('add', 'add_private_link_services_ipconfig')
-    #     g.custom_command('remove', 'remove_private_link_services_ipconfig')
     # endregion
 
     # region LoadBalancers
@@ -533,29 +470,20 @@ def load_command_table(self, _):
     # endregion
 
     # region NetworkWatchers
-    with self.command_group("network watcher", network_watcher_sdk, client_factory=cf_network_watcher) as g:
-        from .operations.watcher import TestIPFlow, ShowNextHop, ShowSecurityGroupView
+    with self.command_group("network watcher") as g:
+        from .operations.watcher import RunConfigurationDiagnostic, ShowNextHop, ShowSecurityGroupView, ShowTopology, TestConnectivity, TestIPFlow
         self.command_table["network watcher test-ip-flow"] = TestIPFlow(loader=self)
         self.command_table["network watcher show-next-hop"] = ShowNextHop(loader=self)
         self.command_table["network watcher show-security-group-view"] = ShowSecurityGroupView(loader=self)
+        self.command_table["network watcher run-configuration-diagnostic"] = RunConfigurationDiagnostic(loader=self)
+        self.command_table["network watcher show-topology"] = ShowTopology(loader=self)
+        self.command_table["network watcher test-connectivity"] = TestConnectivity(loader=self)
         g.custom_command("configure", "configure_network_watcher")
-
-        g.custom_command('test-connectivity', 'check_nw_connectivity', client_factory=cf_network_watcher, validator=process_nw_test_connectivity_namespace, is_preview=True)
-        g.custom_command('show-topology', 'show_topology_watcher', validator=process_nw_topology_namespace)
-        g.custom_command('run-configuration-diagnostic', 'run_network_configuration_diagnostic', client_factory=cf_network_watcher, min_api='2018-06-01', validator=process_nw_config_diagnostic_namespace)
-
-    with self.command_group('network watcher connection-monitor', network_watcher_cm_sdk, client_factory=cf_connection_monitor, min_api='2018-01-01') as g:
-        g.custom_command('create', 'create_nw_connection_monitor', validator=process_nw_cm_v2_create_namespace)
-        # g.command('delete', 'begin_delete')
-        # g.show_command('show', 'get')
-        # g.command('stop', 'begin_stop')
-        # g.command('start', 'begin_start')
-        # g.command('query', 'begin_query')
-        # g.command('list', 'list')
 
     from .operations.watcher import WatcherConnectionMonitorStart, WatcherConnectionMonitorStop, \
         WatcherConnectionMonitorList, WatcherConnectionMonitorQuery, WatcherConnectionMonitorShow, \
-        WatcherConnectionMonitorDelete
+        WatcherConnectionMonitorDelete, WatcherConnectionMonitorCreate
+    self.command_table["network watcher connection-monitor create"] = WatcherConnectionMonitorCreate(loader=self)
     self.command_table["network watcher connection-monitor start"] = WatcherConnectionMonitorStart(loader=self)
     self.command_table["network watcher connection-monitor stop"] = WatcherConnectionMonitorStop(loader=self)
     self.command_table["network watcher connection-monitor list"] = WatcherConnectionMonitorList(loader=self)
@@ -563,91 +491,69 @@ def load_command_table(self, _):
     self.command_table["network watcher connection-monitor delete"] = WatcherConnectionMonitorDelete(loader=self)
     self.command_table["network watcher connection-monitor show"] = WatcherConnectionMonitorShow(loader=self)
 
-    with self.command_group('network watcher connection-monitor endpoint',
-                            network_watcher_cm_sdk,
-                            min_api='2019-11-01',
-                            client_factory=cf_connection_monitor,
-                            is_preview=True,
-                            validator=process_nw_cm_v2_endpoint_namespace) as g:
-        g.custom_command('add', 'add_nw_connection_monitor_v2_endpoint')
-        g.custom_command('remove', 'remove_nw_connection_monitor_v2_endpoint')
-        g.custom_show_command('show', 'show_nw_connection_monitor_v2_endpoint')
-        g.custom_command('list', 'list_nw_connection_monitor_v2_endpoint')
+    from .operations.watcher import WatcherConnectionMonitorEndpointAdd, WatcherConnectionMonitorEndpointShow, \
+        WatcherConnectionMonitorEndpointList, WatcherConnectionMonitorEndpointRemove
+    self.command_table["network watcher connection-monitor endpoint add"] = WatcherConnectionMonitorEndpointAdd(
+        loader=self)
+    self.command_table["network watcher connection-monitor endpoint remove"] = WatcherConnectionMonitorEndpointRemove(
+        loader=self)
+    self.command_table["network watcher connection-monitor endpoint show"] = WatcherConnectionMonitorEndpointShow(
+        loader=self)
+    self.command_table["network watcher connection-monitor endpoint list"] = WatcherConnectionMonitorEndpointList(
+        loader=self)
 
-    with self.command_group('network watcher connection-monitor test-configuration',
-                            network_watcher_cm_sdk,
-                            min_api='2019-11-01',
-                            client_factory=cf_connection_monitor,
-                            is_preview=True,
-                            validator=process_nw_cm_v2_test_configuration_namespace) as c:
-        c.custom_command('add', 'add_nw_connection_monitor_v2_test_configuration')
-        c.custom_command('remove', 'remove_nw_connection_monitor_v2_test_configuration')
-        c.custom_show_command('show', 'show_nw_connection_monitor_v2_test_configuration')
-        c.custom_command('list', 'list_nw_connection_monitor_v2_test_configuration')
+    from .operations.watcher import WatcherConnectionMonitorTestConfigurationAdd as WCMTAdd, \
+        WatcherConnectionMonitorTestConfigurationShow as WCMTCShow, \
+        WatcherConnectionMonitorTestConfigurationList as WCMTCList, \
+        WatcherConnectionMonitorTestConfigurationRemove as WCMTRemove
+    self.command_table["network watcher connection-monitor test-configuration add"] = WCMTAdd(loader=self)
+    self.command_table["network watcher connection-monitor test-configuration remove"] = WCMTRemove(loader=self)
+    self.command_table["network watcher connection-monitor test-configuration show"] = WCMTCShow(loader=self)
+    self.command_table["network watcher connection-monitor test-configuration list"] = WCMTCList(loader=self)
 
-    with self.command_group('network watcher connection-monitor test-group',
-                            network_watcher_cm_sdk,
-                            min_api='2019-11-01',
-                            client_factory=cf_connection_monitor,
-                            is_preview=True,
-                            validator=process_nw_cm_v2_test_group) as c:
-        c.custom_command('add', 'add_nw_connection_monitor_v2_test_group')
-        c.custom_command('remove', 'remove_nw_connection_monitor_v2_test_group')
-        c.custom_show_command('show', 'show_nw_connection_monitor_v2_test_group')
-        c.custom_command('list', 'list_nw_connection_monitor_v2_test_group')
+    with self.command_group('network watcher connection-monitor test-group', is_preview=True) as c:
+        from .operations.watcher import WatcherConnectionMonitorTestGroupAdd as WCMTGAdd, \
+            WatcherConnectionMonitorTestGroupShow as WCMTGShow, \
+            WatcherConnectionMonitorTestGroupList as WCMTGList
+        self.command_table["network watcher connection-monitor test-group add"] = WCMTGAdd(loader=self)
+        self.command_table["network watcher connection-monitor test-group show"] = WCMTGShow(loader=self)
+        self.command_table["network watcher connection-monitor test-group list"] = WCMTGList(loader=self)
+        c.custom_command('remove', 'remove_nw_connection_monitor_test_group')
 
-    with self.command_group('network watcher connection-monitor output',
-                            network_watcher_cm_sdk,
-                            min_api='2019-11-01',
-                            client_factory=cf_connection_monitor,
-                            is_preview=True,
-                            validator=process_nw_cm_v2_output_namespace) as c:
-        c.custom_command('add', 'add_nw_connection_monitor_v2_output')
-        c.custom_command('remove', 'remove_nw_connection_monitor_v2_output')
-        c.custom_command('list', 'list_nw_connection_monitor_v2_output')
+    with self.command_group('network watcher connection-monitor output', is_preview=True) as c:
+        from .operations.watcher import WatcherConnectionMonitorOutputAdd, WatcherConnectionMonitorOutputList
+        self.command_table["network watcher connection-monitor output add"] = WatcherConnectionMonitorOutputAdd(
+            loader=self)
+        self.command_table["network watcher connection-monitor output list"] = WatcherConnectionMonitorOutputList(
+            loader=self)
+        c.custom_command('remove', 'remove_nw_connection_monitor_output')
 
-    with self.command_group('network watcher packet-capture', network_watcher_pc_sdk, min_api='2016-09-01') as g:
-        g.custom_command('create', 'create_nw_packet_capture', client_factory=cf_packet_capture, validator=process_nw_packet_capture_create_namespace)
-        g.show_command('show', 'get')
-        g.command('show-status', 'begin_get_status')
-        g.command('delete', 'begin_delete')
-        g.command('stop', 'begin_stop')
-        g.command('list', 'list')
+    with self.command_group("network watcher packet-capture"):
+        from .operations.watcher import PacketCaptureCreate, PacketCaptureDelete, PacketCaptureList, PacketCaptureShow, PacketCaptureShowStatus, PacketCaptureStop
+        self.command_table["network watcher packet-capture create"] = PacketCaptureCreate(loader=self)
+        self.command_table["network watcher packet-capture delete"] = PacketCaptureDelete(loader=self)
+        self.command_table["network watcher packet-capture list"] = PacketCaptureList(loader=self)
+        self.command_table["network watcher packet-capture show"] = PacketCaptureShow(loader=self)
+        self.command_table["network watcher packet-capture show-status"] = PacketCaptureShowStatus(loader=self)
+        self.command_table["network watcher packet-capture stop"] = PacketCaptureStop(loader=self)
 
-    with self.command_group('network watcher flow-log', client_factory=cf_network_watcher, min_api='2016-09-01') as g:
-        g.custom_command('configure',
-                         'set_nsg_flow_logging',
-                         validator=process_nw_flow_log_set_namespace,
-                         deprecate_info=self.deprecate(redirect='network watcher flow-log create', hide=False))
+    with self.command_group('network watcher flow-log') as g:
+        from .operations.watcher import NwFlowLogCreate, NwFlowLogUpdate, NwFlowLogList, NwFlowLogDelete
+        self.command_table["network watcher flow-log create"] = NwFlowLogCreate(loader=self)
+        self.command_table["network watcher flow-log update"] = NwFlowLogUpdate(loader=self)
+        self.command_table["network watcher flow-log list"] = NwFlowLogList(loader=self)
+        self.command_table["network watcher flow-log delete"] = NwFlowLogDelete(loader=self)
         g.custom_show_command('show', 'show_nw_flow_logging', validator=process_nw_flow_log_show_namespace)
 
-    with self.command_group('network watcher flow-log',
-                            network_watcher_flow_log_sdk,
-                            client_factory=cf_flow_logs,
-                            min_api='2019-11-01',
-                            validator=get_network_watcher_from_location(remove=False)) as g:
-        g.custom_command('list', 'list_nw_flow_log', validator=get_network_watcher_from_location(remove=False))
-        g.custom_command('delete', 'delete_nw_flow_log', validator=get_network_watcher_from_location(remove=False))
-        g.custom_command('create',
-                         'create_nw_flow_log',
-                         client_factory=cf_flow_logs,
-                         validator=process_nw_flow_log_create_namespace)
-        g.generic_update_command('update',
-                                 getter_name='update_nw_flow_log_getter',
-                                 getter_type=network_watcher_flow_log_update_sdk,
-                                 setter_name='update_nw_flow_log_setter',
-                                 setter_type=network_watcher_flow_log_update_sdk,
-                                 custom_func_name='update_nw_flow_log',
-                                 validator=process_nw_flow_log_create_namespace)
-
-    with self.command_group('network watcher troubleshooting', client_factory=cf_network_watcher, min_api='2016-09-01') as g:
-        g.custom_command('start', 'start_nw_troubleshooting', supports_no_wait=True, validator=process_nw_troubleshooting_start_namespace)
-        g.custom_show_command('show', 'show_nw_troubleshooting_result', validator=process_nw_troubleshooting_show_namespace)
+    with self.command_group('network watcher troubleshooting') as g:
+        from .operations.watcher import NwTroubleshootingStart, NwTroubleshootingShow
+        self.command_table["network watcher troubleshooting start"] = NwTroubleshootingStart(loader=self)
+        self.command_table["network watcher troubleshooting show"] = NwTroubleshootingShow(loader=self)
     # endregion
 
     # region PublicIPAddresses
     public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$Address:ipAddress, AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
-    public_ip_show_table_transform = public_ip_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ' if self.supported_api_version(min_api='2017-06-01') else ' ')
+    public_ip_show_table_transform = public_ip_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ')
 
     with self.command_group('network public-ip') as g:
         from .aaz.latest.network.public_ip import List, Show
@@ -714,16 +620,10 @@ def load_command_table(self, _):
         self.command_table['network vnet-gateway list-learned-routes'] = ListLearnedRoutes(loader=self, table_transformer=transform_vnet_gateway_routes_table)
 
     with self.command_group('network vnet-gateway packet-capture'):
-        from .custom import VnetGatewayPackageCaptureStart, VnetGatewayPackageCaptureStop
         from .aaz.latest.network.vnet_gateway import Wait
-        self.command_table['network vnet-gateway packet-capture start'] = VnetGatewayPackageCaptureStart(loader=self)
-        self.command_table['network vnet-gateway packet-capture stop'] = VnetGatewayPackageCaptureStop(loader=self)
         self.command_table['network vnet-gateway packet-capture wait'] = Wait(loader=self)
 
     with self.command_group('network vnet-gateway vpn-client') as g:
-        from .custom import VpnProfilePackageUrlShow, VpnClientConnectionHealthShow
-        self.command_table['network vnet-gateway vpn-client show-url'] = VpnProfilePackageUrlShow(loader=self)
-        self.command_table['network vnet-gateway vpn-client show-health'] = VpnClientConnectionHealthShow(loader=self)
         g.custom_command('generate', 'generate_vpn_client')
 
     with self.command_group('network vnet-gateway vpn-client ipsec-policy'):
@@ -773,40 +673,10 @@ def load_command_table(self, _):
         g.custom_command('clear', 'clear_vpn_conn_ipsec_policies', supports_no_wait=True)
 
     with self.command_group('network vpn-connection packet-capture'):
-        from .custom import VpnConnPackageCaptureStart, VpnConnPackageCaptureStop
+        from .custom import VpnConnPackageCaptureStop
         from .aaz.latest.network.vpn_connection import Wait
-        self.command_table['network vpn-connection packet-capture start'] = VpnConnPackageCaptureStart(loader=self)
         self.command_table['network vpn-connection packet-capture stop'] = VpnConnPackageCaptureStop(loader=self)
         self.command_table['network vpn-connection packet-capture wait'] = Wait(loader=self)
-    # endregion
-
-    # region VirtualRouter
-    with self.command_group('network vrouter', network_vrouter_sdk,
-                            deprecate_info=self.deprecate(redirect=NETWORK_VROUTER_DEPRECATION_INFO, hide=True)) as g:
-        g.custom_command('create', 'create_virtual_router')
-        g.generic_update_command('update',
-                                 getter_name='virtual_router_update_getter',
-                                 getter_type=network_vrouter_update_sdk,
-                                 setter_name='virtual_router_update_setter',
-                                 setter_type=network_vrouter_update_sdk,
-                                 custom_func_name='update_virtual_router')
-        g.custom_command('delete', 'delete_virtual_router')
-        g.custom_show_command('show', 'show_virtual_router')
-        g.custom_command('list', 'list_virtual_router')
-
-    with self.command_group(
-            'network vrouter peering', network_vrouter_peering_sdk,
-            deprecate_info=self.deprecate(redirect=NETWORK_VROUTER_PEERING_DEPRECATION_INFO, hide=True)) as g:
-        g.custom_command('create', 'create_virtual_router_peering')
-        g.generic_update_command('update',
-                                 getter_name='virtual_router_peering_update_getter',
-                                 getter_type=network_vrouter_peering_update_sdk,
-                                 setter_name='virtual_router_peering_update_setter',
-                                 setter_type=network_vrouter_peering_update_sdk,
-                                 custom_func_name='update_virtual_router_peering')
-        g.custom_command('delete', 'delete_virtual_router_peering')
-        g.custom_show_command('show', 'show_virtual_router_peering')
-        g.custom_command('list', 'list_virtual_router_peering')
     # endregion
 
     # region VirtualHub
@@ -825,4 +695,10 @@ def load_command_table(self, _):
         g.custom_command('delete', 'remove_private_endpoint_connection', confirmation=True)
         g.custom_show_command('show', 'show_private_endpoint_connection')
         g.custom_command('list', 'list_private_endpoint_connection')
+    # endregion
+
+    # region NatGateway
+    from .operations.nat import GatewayCreate as NATGatewayCreate, GatewayUpdate as NATGatewayUpdate
+    self.command_table["network nat gateway create"] = NATGatewayCreate(loader=self)
+    self.command_table["network nat gateway update"] = NATGatewayUpdate(loader=self)
     # endregion

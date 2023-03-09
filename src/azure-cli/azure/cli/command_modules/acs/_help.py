@@ -160,6 +160,10 @@ parameters:
     type: int
     short-summary: Load balancer managed outbound IP count.
     long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+  - name: --load-balancer-managed-outbound-ipv6-count
+    type: int
+    short-summary: Load balancer managed outbound IPv6 IP count.
+    long-summary: Desired number of managed outbound IPv6 IPs for load balancer outbound connection. Valid for dual-stack (--ip-families IPv4,IPv6) only. If updated, it will wipe off the existing setting on Load balancer managed outbound IPv6 count; Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs.
   - name: --load-balancer-outbound-ips
     type: string
     short-summary: Load balancer outbound IP resource IDs.
@@ -254,6 +258,18 @@ parameters:
     type: string
     short-summary: A CIDR notation IP range from which to assign service cluster IPs.
     long-summary: This range must not overlap with any Subnet IP ranges. For example, 10.0.0.0/16.
+  - name: --service-cidrs
+    type: string
+    short-summary: A comma separated list of CIDR notation IP ranges from which to assign service cluster IPs.
+    long-summary: Each range must not overlap with any Subnet IP ranges. For example, "10.0.0.0/16,2001:abcd::/108".
+  - name: --pod-cidrs
+    type: string
+    short-summary: A comma separated list of CIDR notation IP ranges from which to assign pod IPs when kubenet is used.
+    long-summary: Each range must not overlap with any Subnet IP ranges. For example, "172.244.0.0/16,fd0:abcd::/64".
+  - name: --ip-families
+    type: string
+    short-summary: A comma separated list of IP versions to use for cluster networking.
+    long-summary: Each IP version should be in the format IPvN. For example, IPv4.
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
@@ -283,7 +299,10 @@ parameters:
     short-summary: Path to JSON file containing data collection settings for Monitoring addon.
   - name: --uptime-sla
     type: bool
-    short-summary: Enable a paid managed cluster service with a financially backed SLA.
+    short-summary: --uptime-sla is deprecated. Please use '--tier standard' instead.
+  - name: --tier
+    type: string
+    short-summary: Specify SKU tier for managed clusters. '--tier standard' enables a standard managed cluster service with a financially backed SLA. '--tier free' does not have a financially backed SLA.
   - name: --attach-acr
     type: string
     short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
@@ -532,14 +551,21 @@ parameters:
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
   - name: --uptime-sla
     type: bool
-    short-summary: Enable a paid managed cluster service with a financially backed SLA.
+    short-summary: Enable a standard managed cluster service with a financially backed SLA. --uptime-sla is deprecated. Please use '--tier standard' instead.
   - name: --no-uptime-sla
     type: bool
-    short-summary: Change a paid managed cluster to a free one.
+    short-summary: Change a standard managed cluster to a free one. --no-uptime-sla is deprecated. Please use '--tier free' instead.
+  - name: --tier
+    type: string
+    short-summary: Specify SKU tier for managed clusters. '--tier standard' enables a standard managed cluster service with a financially backed SLA. '--tier free' changes a standard managed cluster to a free one.
   - name: --load-balancer-managed-outbound-ip-count
     type: int
     short-summary: Load balancer managed outbound IP count.
     long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. --load-balancer-managed-outbound-ip-count, --load-balancer-outbound-ips and --load-balancer-outbound-ip-prefixes are mutually exclusive. If updated, it will wipe off the existing setting on Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs. If the new value is greater than the original value, new additional outbound IPs will be created. If the value is less than the original value, existing outbound IPs will be deleted and outbound connections may fail due to configuration update.
+  - name: --load-balancer-managed-outbound-ipv6-count
+    type: int
+    short-summary: Load balancer managed outbound IPv6 IP count.
+    long-summary: Desired number of managed outbound IPv6 IPs for load balancer outbound connection. Valid for dual-stack (--ip-families IPv4,IPv6) only. If updated, it will wipe off the existing setting on Load balancer managed outbound IPv6 count; Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs.
   - name: --load-balancer-outbound-ips
     type: string
     short-summary: Load balancer outbound IP resource IDs.

@@ -124,7 +124,7 @@ def acr_config_soft_delete_update(cmd,
     policies.soft_delete_policy = policies.soft_delete_policy if policies.soft_delete_policy else SoftDeletePolicy()
 
     if status:
-        if(policies.soft_delete_policy.status == 'enabled' and status == 'disabled'):
+        if (policies.soft_delete_policy.status == 'enabled' and status == 'disabled'):
             logger.warning("Disabling soft-delete does not affect purge behavior for previously deleted artifacts."
                            " Artifacts currently in a soft-deleted state will continue to be purged in accordance"
                            " with the current soft-delete retention days policy.")
