@@ -963,7 +963,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
 
             minimum_supported_version = "0.14.85"
             if not bicep_version_greater_than_or_equal_to(minimum_supported_version):
-                raise ArgumentUsageError(f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to { minimum_supported_version} or later.")
+                raise ArgumentUsageError(f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to {minimum_supported_version} or later.")
             if len(parameters) > 1:
                 raise ArgumentUsageError("Can not use --parameters argument more than once when using a .bicepparam file")
             bicepparam_file = parameters[0][0]
