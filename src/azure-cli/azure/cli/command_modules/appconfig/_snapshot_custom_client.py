@@ -15,7 +15,7 @@ from msrest import Serializer
 import json
 
 from ._constants import SnapshotConstants
-from ._snapshotmodels import Snapshot, SnapshotListResult, SnapshotCreateData
+from ._snapshotmodels import Snapshot, SnapshotListResult, OperationStatusResponse
 
 
 class ProvisioningStatus:
@@ -280,10 +280,10 @@ class AppConfigSnapshotClient:
         """
         Poll the operation status after a given interval based on the retry-after header (default 5s) to ensure that 
         the snapshot creation has succeeded or failed.
-        The request times out after 30s by default unless otherwise specified.
+        The request times out after 10 mins by default unless otherwise specified.
         """
-        timeout = kwargs.pop("timeout", 30)
-        default_polling_interval = kwargs.pop("polling_interval", 5)
+        timeout = kwargs.pop("timeout", 600)
+        default_polling_interval = kwargs.pop("polling_interval", 10)
 
 
         from datetime import datetime
@@ -364,7 +364,7 @@ class AppConfigSnapshotClient:
             error = self._deserializer.failsafe_deserialize(AppConfigError, response)
             raise HttpResponseError(response=response, model=error)
 
-        return SnapshotCreateData.from_response(response)
+        return OperationStatusResponse.from_response(response)
 
     def create_snapshot(
             self,

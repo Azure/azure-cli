@@ -196,7 +196,7 @@ class ErrorDetail:
         )
 
 
-class SnapshotCreateData:
+class OperationStatusResponse:
     '''
     Class representing the required data needed in tracking snapshot creation 
     :ivar OperationStatus operation_status:
