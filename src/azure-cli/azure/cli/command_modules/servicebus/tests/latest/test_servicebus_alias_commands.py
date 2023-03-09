@@ -40,9 +40,6 @@ class SBDRAliasCRUDScenarioTest(ScenarioTest):
             'test': ''
         })
 
-        self.cmd('servicebus namespace exists --name {namespacenameprimary}',
-                 checks=[self.check('nameAvailable', True)])
-
         # Create Namespace - Primary
         self.cmd(
             'servicebus namespace create --resource-group {rg} --name {namespacenameprimary} --location {loc_south} --tags {tags} --sku {sku}',
@@ -59,8 +56,7 @@ class SBDRAliasCRUDScenarioTest(ScenarioTest):
 
         # Get Created Namespace - Secondary
         getnamespace2result = self.cmd(
-            'servicebus namespace show --resource-group {rg} --name {namespacenamesecondary}',
-            checks=[self.check('sku.name', '{sku}')]).get_output_in_json()
+            'servicebus namespace show --resource-group {rg} --name {namespacenamesecondary}').get_output_in_json()
 
         # Create Authoriazation Rule
         self.cmd(

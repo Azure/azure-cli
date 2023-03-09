@@ -26,6 +26,7 @@ from azure.cli.command_modules.resource.custom import (
     deploy_arm_template_at_subscription_scope,
     deploy_arm_template_at_management_group,
     deploy_arm_template_at_tenant_scope,
+    format_bicep_file,
 )
 
 from azure.cli.core.mock import DummyCli
@@ -541,5 +542,24 @@ class TestCustom(unittest.TestCase):
         self.assertEqual(1, len(result.changes))
         self.assertEqual(ChangeType.modify, result.changes[0].change_type)
 
+class TestFormatBicepFile(unittest.TestCase):
+    @mock.patch("azure.cli.command_modules.resource.custom.ensure_bicep_installation")
+    @mock.patch("azure.cli.command_modules.resource.custom.bicep_version_greater_than_or_equal_to", return_value=True)
+    @mock.patch("azure.cli.command_modules.resource.custom.run_bicep_command", return_value="formatted content")
+    @mock.patch("builtins.print")
+    def test_format_bicep_file(self, mock_print, mock_run_bicep_command, mock_bicep_version_greater_than_or_equal_to, mock_ensure_bicep_installation):
+        # Arrange.
+        file_path = "path/to/file.bicep"
+        stdout = True
+
+        # Act.
+        format_bicep_file(cmd, file_path, stdout=stdout)
+
+        # Assert.
+        mock_ensure_bicep_installation.assert_called_once()
+        mock_bicep_version_greater_than_or_equal_to.assert_called_once_with("0.12.1")
+        mock_run_bicep_command.assert_called_once_with(["format", file_path, "--stdout"])
+        mock_print.assert_called_once_with("formatted content")
+        
 if __name__ == '__main__':
     unittest.main()
