@@ -317,7 +317,7 @@ def load_command_table(self, _):
                          validator=validate_vnet_integration)
         g.custom_command('list-runtimes', 'list_function_app_runtimes')
         g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
-        g.custom_show_command('show', 'show_app', table_transformer=transform_web_output)
+        g.custom_show_command('show', 'show_functionapp', table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_function_app')
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')

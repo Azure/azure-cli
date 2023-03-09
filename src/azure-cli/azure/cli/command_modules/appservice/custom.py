@@ -915,6 +915,19 @@ def list_function_app(cmd, resource_group_name=None):
                 _list_app(cmd.cli_ctx, resource_group_name)))
 
 
+def show_functionapp(cmd, resource_group_name, name, slot=None):
+    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    if not app:
+        raise ResourceNotFoundError("Unable to find resource'{}', in ResourceGroup '{}'.".format(name,
+                                                                                                 resource_group_name))
+    app.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration',
+                                              slot)
+    _rename_server_farm_props(app)
+    if app.managed_environment_id is None:
+        _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
+    return app
+
+
 def show_app(cmd, resource_group_name, name, slot=None):
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not app:
