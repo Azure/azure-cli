@@ -44,11 +44,9 @@ class Session(MutableMapping):
             if isinstance(load_exception, json.JSONDecodeError):
                 log_level = logging.WARNING
 
-            # DummyCLI uses random config folder, it will always use default settings. This avoids unnecessary warning.
-            if 'PYTEST_CURRENT_TEST' not in os.environ:
-                get_logger(__name__).log(log_level,
-                                         "Failed to load or parse file %s. It will be overridden by default settings.",
-                                         self.filename)
+            get_logger(__name__).log(log_level,
+                                     "Failed to load or parse file %s. It will be overridden by default settings.",
+                                     self.filename)
             self.save()
 
     def save(self):
