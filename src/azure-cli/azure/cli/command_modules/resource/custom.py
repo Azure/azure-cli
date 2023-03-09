@@ -47,7 +47,7 @@ from ._formatters import format_what_if_operation_result
 from ._bicep import (
     run_bicep_command,
     is_bicep_file,
-    is_bicepparam_file_provided,
+    is_bicepparam_file,
     ensure_bicep_installation,
     remove_bicep_installation,
     get_bicep_latest_release_tag,
@@ -268,6 +268,16 @@ def _get_missing_parameters(parameters, template, prompt_fn, no_prompt=False):
             except NoTTYException:
                 raise CLIError("Missing input parameters: {}".format(', '.join(sorted(missing.keys()))))
     return parameters
+
+
+def _is_bicepparam_file_provided(parameters):
+    if not parameters or len(parameters) < 1:
+        return False
+
+    for parameter in parameters:
+        if is_bicepparam_file(parameter[0]):
+            return True
+    return False
 
 
 def _ssl_context():
@@ -958,7 +968,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS)
         template_obj = show_resource(cmd=cmd, resource_ids=[template_spec], api_version=api_version).properties['mainTemplate']
     else:
-        if is_bicepparam_file_provided(parameters):
+        if _is_bicepparam_file_provided(parameters):
             ensure_bicep_installation(cli_ctx)
 
             minimum_supported_version = "0.14.85"
@@ -973,9 +983,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
             build_bicepparam_output = run_bicep_command(cmd.cli_ctx, ["build-params", bicepparam_file, "--bicep-file", template_file, "--stdout"])
             build_bicepparam_output_json = json.loads(build_bicepparam_output)
             template_content = build_bicepparam_output_json["templateJson"]
-
             bicepparam_json_content = build_bicepparam_output_json["parametersJson"]
-
         else:
             template_content = (
                 run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
@@ -997,7 +1005,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
     template_param_defs = template_obj.get('parameters', {})
     template_obj['resources'] = template_obj.get('resources', [])
 
-    if is_bicepparam_file_provided(parameters):
+    if _is_bicepparam_file_provided(parameters):
         parameters = json.loads(bicepparam_json_content).get('parameters', {})
     else:
         parameters = _process_parameters(template_param_defs, parameters) or {}

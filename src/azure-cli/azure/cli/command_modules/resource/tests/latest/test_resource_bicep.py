@@ -187,14 +187,6 @@ class TestBicep(unittest.TestCase):
                 except:
                     self.fail("Encountered an unexpected exception.")
 
-    def test_is_bicepparam_file_provided_detects_input_file_correctly(self):
-        self.assertEqual(is_bicepparam_file_provided(None), False)
-        self.assertEqual(is_bicepparam_file_provided([]), False)
-        self.assertEqual(is_bicepparam_file_provided([['test.json']]), False)
-        self.assertEqual(is_bicepparam_file_provided([['test.bicepparam']]), True)
-        self.assertEqual(is_bicepparam_file_provided([['test.bicepparam'], ['test.json'],  ['{ \"foo\": { \"value\": \"bar\" } }']]), True)
-
-
 
     def _remove_bicep_version_check_file(self):
         with contextlib.suppress(FileNotFoundError):

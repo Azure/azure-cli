@@ -4100,8 +4100,8 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
     def test_resource_group_level_deployment_with_bicepparams(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
-            'tf': os.path.join(curr_dir, 'bicepparam\\storage_account_template.bicep').replace('\\', '\\\\'),
-            'params': os.path.join(curr_dir, 'bicepparam\\storage_account_params.bicepparam').replace('\\', '\\\\')
+            'tf': os.path.join(curr_dir, 'data\\bicepparam\\storage_account_template.bicep').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'data\\bicepparam\\storage_account_params.bicepparam').replace('\\', '\\\\')
         })
 
         self.cmd('deployment group validate --resource-group {rg} --template-file "{tf}" --parameters {params}', checks=[
