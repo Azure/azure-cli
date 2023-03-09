@@ -373,11 +373,12 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # py
     dns_mappings = {}
     for pe_id in pe_ids:
         res = parse_resource_id(pe_id)
+        subscription = res['subscription']
 
         class PEShow(_PEShow):
             def pre_operations(self):
                 # cross subscription
-                self.ctx.update_aux_subscriptions(res['subscription'])
+                self.ctx.update_aux_subscriptions(subscription)
 
         pe = PEShow(cli_ctx=cmd.cli_ctx)(command_args={
             "name": res['name'],
@@ -390,7 +391,7 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # py
             class NICShow(_NICShow):
                 def pre_operations(self):
                     # cross subscription
-                    self.ctx.update_aux_subscriptions(nic_res['subscription'])
+                    self.ctx.update_aux_subscriptions(subscription)
 
             nic = NICShow(cli_ctx=cmd.cli_ctx)(command_args={
                 "name": nic_res['name'],
