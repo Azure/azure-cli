@@ -13,7 +13,6 @@ from azure.cli.command_modules.resource._bicep import (
     ensure_bicep_installation,
     run_bicep_command,
     validate_bicep_target_scope,
-    is_bicepparam_file_provided,
     _bicep_version_check_file_path,
 )
 from azure.cli.core.azclierror import InvalidTemplateError
