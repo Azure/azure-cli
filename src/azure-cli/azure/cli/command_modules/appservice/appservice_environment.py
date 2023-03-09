@@ -26,11 +26,12 @@ from msrestazure.tools import (parse_resource_id, is_valid_resource_id, resource
 VERSION_2019_08_01 = "2019-08-01"
 VERSION_2019_10_01 = "2019-10-01"
 # ad-hoc api version 2020-04-01
-NSG = import_module(".aaz.2020_09_01_hybrid.network.nsg")
-NSGRule = import_module(".aaz.2020_09_01_hybrid.network.nsg.rule")
-RouteTable = import_module(".aaz.2020_09_01_hybrid.network.route_table")
-RouteTableRoute = import_module(".aaz.2020_09_01_hybrid.network.route_table.route")
-Subnet = import_module(".aaz.2020_09_01_hybrid.network.vnet.subnet")
+network_prefix = "azure.cli.command_modules.network"
+NSG = import_module(".aaz.2020_09_01_hybrid.network.nsg", package=network_prefix)
+NSGRule = import_module(".aaz.2020_09_01_hybrid.network.nsg.rule", package=network_prefix)
+RouteTable = import_module(".aaz.2020_09_01_hybrid.network.route_table", package=network_prefix)
+RouteTableRoute = import_module(".aaz.2020_09_01_hybrid.network.route_table.route", package=network_prefix)
+Subnet = import_module(".aaz.2020_09_01_hybrid.network.vnet.subnet", package=network_prefix)
 
 logger = get_logger(__name__)
 
@@ -421,7 +422,7 @@ def _ensure_route_table(cli_ctx, resource_group_name, ase_name, location, subnet
             "name": ase_route_table_name,
             "resource_group": resource_group_name
         })
-        if subnet_obj.get("routeTable", None) or subnet_obj["routeTable"]["id"] != rt["id"]:
+        if not subnet_obj.get("routeTable", None) or subnet_obj["routeTable"]["id"] != rt["id"]:
             logger.info('Associate Route Table with Subnet...')
             poller = Subnet.Update(cli_ctx=cli_ctx)(command_args={
                 "name": subnet_name,
@@ -480,7 +481,7 @@ def _ensure_network_security_group(cli_ctx, resource_group_name, ase_name, locat
             "name": ase_nsg_name,
             "resource_group": resource_group_name
         })
-        if subnet_obj.get("networkSecurityGroup", None) or subnet_obj["networkSecurityGroup"]["id"] != nsg["id"]:
+        if not subnet_obj.get("networkSecurityGroup", None) or subnet_obj["networkSecurityGroup"]["id"] != nsg["id"]:
             logger.info('Associate Network Security Group with Subnet...')
             poller = Subnet.Update(cli_ctx=cli_ctx)(command_args={
                 "name": subnet_name,
