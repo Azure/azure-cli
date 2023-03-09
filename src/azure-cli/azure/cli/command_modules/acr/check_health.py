@@ -371,31 +371,47 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # py
 
     pe_ids = [e.private_endpoint.id for e in registry.private_endpoint_connections if e.private_endpoint]
     dns_mappings = {}
+
+    class PEShow(_PEShow):
+        @classmethod
+        def _build_arguments_schema(cls, *args, **kwargs):
+            from azure.cli.core.aaz import AAZStrArg
+            args_schema = super()._build_arguments_schema(*args, **kwargs)
+            args_schema.subscription = AAZStrArg()
+            return args_schema
+
+        def pre_operations(self):
+            args = self.ctx.args
+            # cross subscription
+            self.ctx.update_aux_subscriptions(args.subscription)
+
+    class NICShow(_NICShow):
+        @classmethod
+        def _build_arguments_schema(cls, *args, **kwargs):
+            from azure.cli.core.aaz import AAZStrArg
+            args_schema = super()._build_arguments_schema(*args, **kwargs)
+            args_schema.subscription = AAZStrArg()
+            return args_schema
+
+        def pre_operations(self):
+            args = self.ctx.args
+            # cross subscription
+            self.ctx.update_aux_subscriptions(args.subscription)
+
     for pe_id in pe_ids:
         res = parse_resource_id(pe_id)
-        subscription = res['subscription']
-
-        class PEShow(_PEShow):
-            def pre_operations(self):
-                # cross subscription
-                self.ctx.update_aux_subscriptions(subscription)
-
         pe = PEShow(cli_ctx=cmd.cli_ctx)(command_args={
             "name": res['name'],
-            "resource_group": res['resource_group']
+            "resource_group": res['resource_group'],
+            "subscription": res['subscription']
         })
         if pe["subnet"]["id"].lower().startswith(vnet_of_private_endpoint.lower()):
             nic_id = pe["networkInterfaces"][0]["id"]
             nic_res = parse_resource_id(nic_id.to_serialized_data())
-
-            class NICShow(_NICShow):
-                def pre_operations(self):
-                    # cross subscription
-                    self.ctx.update_aux_subscriptions(subscription)
-
             nic = NICShow(cli_ctx=cmd.cli_ctx)(command_args={
                 "name": nic_res['name'],
-                "resource_group": nic_res['resource_group']
+                "resource_group": nic_res['resource_group'],
+                "subscription": nic_res['subscription']
             })
             for dns_config in nic["ipConfigurations"]:
                 if dns_config["privateLinkConnectionProperties"]["fqdns"][0] in dns_mappings:
