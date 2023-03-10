@@ -702,3 +702,15 @@ def load_command_table(self, _):
     self.command_table["network nat gateway create"] = NATGatewayCreate(loader=self)
     self.command_table["network nat gateway update"] = NATGatewayUpdate(loader=self)
     # endregion
+
+    # region SecurityPartnerProvider
+    from .custom import SecurityPartnerProviderCreate, SecurityPartnerProviderUpdate
+    self.command_table["network security-partner-provider create"] = SecurityPartnerProviderCreate(loader=self)
+    self.command_table["network security-partner-provider update"] = SecurityPartnerProviderUpdate(loader=self)
+    # endregion
+
+    # region VirtualAppliance
+    from .custom import VirtualApplianceCreate, VirtualApplianceUpdate
+    self.command_table["network virtual-appliance create"] = VirtualApplianceCreate(loader=self)
+    self.command_table["network virtual-appliance update"] = VirtualApplianceUpdate(loader=self)
+    # endregion

@@ -49,7 +49,6 @@ class Create(AAZCommand):
             options=["-n", "--name"],
             help="ExpressRoute gateway name.",
             required=True,
-            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -348,7 +347,7 @@ class Create(AAZCommand):
             routing_configuration.associated_route_table = AAZObjectType(
                 serialized_name="associatedRouteTable",
             )
-            _build_schema_sub_resource_read(routing_configuration.associated_route_table)
+            _CreateHelper._build_schema_sub_resource_read(routing_configuration.associated_route_table)
             routing_configuration.propagated_route_tables = AAZObjectType(
                 serialized_name="propagatedRouteTables",
             )
@@ -362,7 +361,7 @@ class Create(AAZCommand):
 
             ids = cls._schema_on_200_201.properties.express_route_connections.Element.properties.routing_configuration.propagated_route_tables.ids
             ids.Element = AAZObjectType()
-            _build_schema_sub_resource_read(ids.Element)
+            _CreateHelper._build_schema_sub_resource_read(ids.Element)
 
             labels = cls._schema_on_200_201.properties.express_route_connections.Element.properties.routing_configuration.propagated_route_tables.labels
             labels.Element = AAZStrType()
@@ -378,7 +377,7 @@ class Create(AAZCommand):
 
             bgp_connections = cls._schema_on_200_201.properties.express_route_connections.Element.properties.routing_configuration.vnet_routes.bgp_connections
             bgp_connections.Element = AAZObjectType()
-            _build_schema_sub_resource_read(bgp_connections.Element)
+            _CreateHelper._build_schema_sub_resource_read(bgp_connections.Element)
 
             static_routes = cls._schema_on_200_201.properties.express_route_connections.Element.properties.routing_configuration.vnet_routes.static_routes
             static_routes.Element = AAZObjectType()
@@ -404,27 +403,29 @@ class Create(AAZCommand):
             return cls._schema_on_200_201
 
 
-def _build_schema_sub_resource_create(_builder):
-    if _builder is None:
-        return
-    _builder.set_prop("id", AAZStrType, ".id")
+class _CreateHelper:
+    """Helper class for Create"""
 
+    @classmethod
+    def _build_schema_sub_resource_create(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("id", AAZStrType, ".id")
 
-_schema_sub_resource_read = None
+    _schema_sub_resource_read = None
 
+    @classmethod
+    def _build_schema_sub_resource_read(cls, _schema):
+        if cls._schema_sub_resource_read is not None:
+            _schema.id = cls._schema_sub_resource_read.id
+            return
 
-def _build_schema_sub_resource_read(_schema):
-    global _schema_sub_resource_read
-    if _schema_sub_resource_read is not None:
-        _schema.id = _schema_sub_resource_read.id
-        return
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
 
-    _schema_sub_resource_read = AAZObjectType()
+        sub_resource_read = _schema_sub_resource_read
+        sub_resource_read.id = AAZStrType()
 
-    sub_resource_read = _schema_sub_resource_read
-    sub_resource_read.id = AAZStrType()
-
-    _schema.id = _schema_sub_resource_read.id
+        _schema.id = cls._schema_sub_resource_read.id
 
 
 __all__ = ["Create"]

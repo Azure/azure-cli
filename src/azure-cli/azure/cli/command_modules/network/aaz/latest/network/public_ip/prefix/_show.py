@@ -189,7 +189,7 @@ class Show(AAZCommand):
             properties.custom_ip_prefix = AAZObjectType(
                 serialized_name="customIPPrefix",
             )
-            _build_schema_sub_resource_read(properties.custom_ip_prefix)
+            _ShowHelper._build_schema_sub_resource_read(properties.custom_ip_prefix)
             properties.ip_prefix = AAZStrType(
                 serialized_name="ipPrefix",
                 flags={"read_only": True},
@@ -200,7 +200,7 @@ class Show(AAZCommand):
             properties.load_balancer_frontend_ip_configuration = AAZObjectType(
                 serialized_name="loadBalancerFrontendIpConfiguration",
             )
-            _build_schema_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
+            _ShowHelper._build_schema_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
             properties.nat_gateway = AAZObjectType(
                 serialized_name="natGateway",
             )
@@ -275,15 +275,15 @@ class Show(AAZCommand):
 
             public_ip_addresses = cls._schema_on_200.properties.nat_gateway.properties.public_ip_addresses
             public_ip_addresses.Element = AAZObjectType()
-            _build_schema_sub_resource_read(public_ip_addresses.Element)
+            _ShowHelper._build_schema_sub_resource_read(public_ip_addresses.Element)
 
             public_ip_prefixes = cls._schema_on_200.properties.nat_gateway.properties.public_ip_prefixes
             public_ip_prefixes.Element = AAZObjectType()
-            _build_schema_sub_resource_read(public_ip_prefixes.Element)
+            _ShowHelper._build_schema_sub_resource_read(public_ip_prefixes.Element)
 
             subnets = cls._schema_on_200.properties.nat_gateway.properties.subnets
             subnets.Element = AAZObjectType()
-            _build_schema_sub_resource_read(subnets.Element)
+            _ShowHelper._build_schema_sub_resource_read(subnets.Element)
 
             sku = cls._schema_on_200.properties.nat_gateway.sku
             sku.name = AAZStrType()
@@ -313,21 +313,23 @@ class Show(AAZCommand):
             return cls._schema_on_200
 
 
-_schema_sub_resource_read = None
+class _ShowHelper:
+    """Helper class for Show"""
 
+    _schema_sub_resource_read = None
 
-def _build_schema_sub_resource_read(_schema):
-    global _schema_sub_resource_read
-    if _schema_sub_resource_read is not None:
-        _schema.id = _schema_sub_resource_read.id
-        return
+    @classmethod
+    def _build_schema_sub_resource_read(cls, _schema):
+        if cls._schema_sub_resource_read is not None:
+            _schema.id = cls._schema_sub_resource_read.id
+            return
 
-    _schema_sub_resource_read = AAZObjectType()
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
 
-    sub_resource_read = _schema_sub_resource_read
-    sub_resource_read.id = AAZStrType()
+        sub_resource_read = _schema_sub_resource_read
+        sub_resource_read.id = AAZStrType()
 
-    _schema.id = _schema_sub_resource_read.id
+        _schema.id = cls._schema_sub_resource_read.id
 
 
 __all__ = ["Show"]

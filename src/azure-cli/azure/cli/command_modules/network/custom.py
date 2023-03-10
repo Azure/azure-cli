@@ -86,6 +86,9 @@ from .aaz.latest.network.private_link_service import Create as _PrivateLinkServi
     Update as _PrivateLinkServiceUpdate
 from .aaz.latest.network.private_link_service.connection import Update as _PrivateEndpointConnectionUpdate
 from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
+from .aaz.latest.network.security_partner_provider import Create as _SecurityPartnerProviderCreate, \
+    Update as _SecurityPartnerProviderUpdate
+from .aaz.latest.network.virtual_appliance import Create as _VirtualApplianceCreate, Update as _VirtualApplianceUpdate
 from .aaz.latest.network.vnet import Create as _VNetCreate, Update as _VNetUpdate
 from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
 from .aaz.latest.network.vnet.subnet import Create as _VNetSubnetCreate, Update as _VNetSubnetUpdate
@@ -3230,7 +3233,7 @@ def _validate_ipv6_address_prefixes(prefixes):
 class ExpressRoutePeeringCreate(_ExpressRoutePeeringCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat, AAZArgEnum
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.ip_version = AAZStrArg(
             options=['--ip-version'],
@@ -3238,7 +3241,13 @@ class ExpressRoutePeeringCreate(_ExpressRoutePeeringCreate):
             help="The IP version to update Microsoft Peering settings for. Allowed values: IPv4, IPv6. Default: IPv4.",
             default='IPv4'
         )
+        args_schema.route_filter._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/routeFilters/{}",
+        )
+        # taken from Xplat. No enums in SDK
+        args_schema.routing_registry_name.enum = AAZArgEnum({"ARIN": "ARIN", "APNIC": "APNIC", "AFRINIC": "AFRINIC", "LACNIC": "LACNIC", "RIPENCC": "RIPENCC", "RADB": "RADB", "ALTDB": "ALTDB", "LEVEL3": "LEVEL3"})
         args_schema.ipv6_peering_config._registered = False
+        args_schema.peering_name._required = False
         args_schema.peering_name._registered = False
 
         return args_schema
@@ -3278,7 +3287,7 @@ class ExpressRoutePeeringUpdate(_ExpressRoutePeeringUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat, AAZArgEnum
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.ip_version = AAZStrArg(
             options=['--ip-version'],
@@ -3286,6 +3295,11 @@ class ExpressRoutePeeringUpdate(_ExpressRoutePeeringUpdate):
             help="The IP version to update Microsoft Peering settings for. Allowed values: IPv4, IPv6. Default: IPv4.",
             default='IPv4'
         )
+        args_schema.route_filter._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/routeFilters/{}",
+        )
+        # taken from Xplat. No enums in SDK
+        args_schema.routing_registry_name.enum = AAZArgEnum({"ARIN": "ARIN", "APNIC": "APNIC", "AFRINIC": "AFRINIC", "LACNIC": "LACNIC", "RIPENCC": "RIPENCC", "RADB": "RADB", "ALTDB": "ALTDB", "LEVEL3": "LEVEL3"})
         args_schema.ipv6_peering_config._registered = False
         args_schema.peering_type._registered = False
         return args_schema
@@ -3668,6 +3682,7 @@ class PrivateEndpointPrivateDnsZoneAdd(_PrivateEndpointPrivateDnsZoneAdd):
             )
         )
         args_schema.private_dns_zone_id._registered = False
+        args_schema.name._required = False
 
         return args_schema
 
@@ -3712,6 +3727,13 @@ class PrivateEndpointIpConfigRemove(_PrivateEndpointIpConfigRemove):
 
 
 class PrivateEndpointAsgAdd(_PrivateEndpointAsgAdd):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.asg_id._required = False
+
+        return args_schema
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -5418,6 +5440,9 @@ class VNetCreate(_VNetCreate):
                          "/networkSecurityGroups/{}",
             ),
         )
+        args_schema.ddos_protection_plan._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/ddosProtectionPlans/{}",
+        )
         # filter arguments
         args_schema.extended_location._registered = False
         return args_schema
@@ -5528,6 +5553,18 @@ class VNetSubnetCreate(_VNetSubnetCreate):
                 "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
             },
             blank="Disabled",
+        )
+        args_schema.nat_gateway._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/natGateways/{}",
+        )
+        args_schema.network_security_group._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/networkSecurityGroups/{}",
+        )
+        args_schema.route_table._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/routeTables/{}",
         )
         # filter arguments
         args_schema.policies._registered = False
@@ -5716,8 +5753,12 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
 class VNetPeeringCreate(_VNetPeeringCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.sync_remote._registered = False
+        args_schema.remote_vnet._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}",
+        )
         return args_schema
 
 
@@ -6445,3 +6486,55 @@ def remove_nw_connection_monitor_test_group(cmd, connection_monitor_name, locati
     }
     from .operations.watcher import WatcherConnectionMonitorTestGroupRemove
     return WatcherConnectionMonitorTestGroupRemove(cli_ctx=cmd.cli_ctx)(command_args=update_args)
+
+
+class SecurityPartnerProviderCreate(_SecurityPartnerProviderCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vhub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
+class SecurityPartnerProviderUpdate(_SecurityPartnerProviderUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vhub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
+class VirtualApplianceCreate(_VirtualApplianceCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vhub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
+class VirtualApplianceUpdate(_VirtualApplianceUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vhub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema

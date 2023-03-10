@@ -86,22 +86,17 @@ class Update(AAZCommand):
             help="Space-separated list of services to whom the subnet should be delegated, e.g., `Microsoft.Sql/servers`.",
             nullable=True,
         )
-        _args_schema.nat_gateway = AAZResourceIdArg(
+        _args_schema.nat_gateway = AAZStrArg(
             options=["--nat-gateway"],
             help="Name or ID of a NAT gateway to attach. Use null to detach it.",
             nullable=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/natGateways/{}",
-            ),
         )
         _args_schema.network_security_group = AAZResourceIdArg(
             options=["--nsg", "--network-security-group"],
             help="Name or ID of a network security group (NSG). Use null to detach it.",
             nullable=True,
             fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/networkSecurityGroups/{}",
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/networkSecurityGroups/{}",
             ),
         )
         _args_schema.private_endpoint_network_policies = AAZStrArg(
@@ -121,8 +116,7 @@ class Update(AAZCommand):
             help="Name or ID of a route table to associate with the subnet. Use null to detach it.",
             nullable=True,
             fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/routeTables/{}",
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/routeTables/{}",
             ),
         )
         _args_schema.policies = AAZListArg(

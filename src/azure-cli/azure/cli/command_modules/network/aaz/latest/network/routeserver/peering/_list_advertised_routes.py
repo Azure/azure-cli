@@ -175,15 +175,15 @@ class ListAdvertisedRoutes(AAZCommand):
             if cls._schema_on_200 is not None:
                 return cls._schema_on_200
 
-            cls._schema_on_200 = AAZDictType()
+            cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.Element = AAZListType()
+            _schema_on_200.value = AAZListType()
 
-            _element = cls._schema_on_200.Element
-            _element.Element = AAZObjectType()
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.Element.Element
+            _element = cls._schema_on_200.value.Element
             _element.as_path = AAZStrType(
                 serialized_name="asPath",
                 flags={"read_only": True},
@@ -211,6 +211,10 @@ class ListAdvertisedRoutes(AAZCommand):
             )
 
             return cls._schema_on_200
+
+
+class _ListAdvertisedRoutesHelper:
+    """Helper class for ListAdvertisedRoutes"""
 
 
 __all__ = ["ListAdvertisedRoutes"]

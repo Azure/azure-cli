@@ -80,32 +80,6 @@ class Assign(AAZCommand):
         # define Arg Group "Parameters.properties.vpnClientConfiguration"
         return cls._args_schema
 
-    _args_address_space_update = None
-
-    @classmethod
-    def _build_args_address_space_update(cls, _schema):
-        if cls._args_address_space_update is not None:
-            _schema.address_prefixes = cls._args_address_space_update.address_prefixes
-            return
-
-        cls._args_address_space_update = AAZObjectArg(
-            nullable=True,
-        )
-
-        address_space_update = cls._args_address_space_update
-        address_space_update.address_prefixes = AAZListArg(
-            options=["address-prefixes"],
-            help="A list of address blocks reserved for this virtual network in CIDR notation.",
-            nullable=True,
-        )
-
-        address_prefixes = cls._args_address_space_update.address_prefixes
-        address_prefixes.Element = AAZStrArg(
-            nullable=True,
-        )
-
-        _schema.address_prefixes = cls._args_address_space_update.address_prefixes
-
     def _execute_operations(self):
         self.pre_operations()
         self.VirtualNetworkGatewaysGet(ctx=self.ctx)()
@@ -360,16 +334,6 @@ class Assign(AAZCommand):
 
 class _AssignHelper:
     """Helper class for Assign"""
-
-    @classmethod
-    def _build_schema_address_space_update(cls, _builder):
-        if _builder is None:
-            return
-        _builder.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
-
-        address_prefixes = _builder.get(".addressPrefixes")
-        if address_prefixes is not None:
-            address_prefixes.set_elements(AAZStrType, ".")
 
     _schema_address_space_read = None
 
