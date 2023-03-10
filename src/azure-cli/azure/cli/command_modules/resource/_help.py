@@ -2471,6 +2471,18 @@ examples:
     crafted: true
 """
 
+helps['resource patch'] = """
+type: command
+short-summary: Update a resource by PATCH request.
+examples:
+  - name: Update a webapp by using the latest api-version whether this version is a preview version.
+    text: >
+        az resource patch --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp} --latest-include-preview
+  - name: Update a resource.
+    text: |
+        az resource patch --name MyResource --resource-group MyResourceGroup --resource-type subnets
+"""
+
 helps['resource wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of a resources is met.

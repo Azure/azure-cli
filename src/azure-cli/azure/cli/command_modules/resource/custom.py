@@ -1779,9 +1779,9 @@ def update_resource(cmd, parameters, resource_ids=None,
          for id_dict in parsed_ids])
 
 
-def patch_resource(cmd, resource_ids=None, resource_group_name=None,
-                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
-                   resource_name=None, api_version=None, latest_include_preview=False):
+def patch_update_resource(cmd, resource_ids=None, resource_group_name=None,
+                          resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
+                          resource_name=None, api_version=None, latest_include_preview=False):
     parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(cmd.cli_ctx,
                                                                               resource_group_name,
                                                                               resource_provider_namespace,
@@ -1794,6 +1794,7 @@ def patch_resource(cmd, resource_ids=None, resource_group_name=None,
         [_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version, latest_include_preview)
          .patch_update(parameters) for id_dict in parsed_ids]
     )
+
 
 def tag_resource(cmd, tags, resource_ids=None, resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None, api_version=None,
