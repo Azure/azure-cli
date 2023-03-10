@@ -383,7 +383,7 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # py
         def pre_operations(self):
             args = self.ctx.args
             # cross subscription
-            self.ctx.update_aux_subscriptions(args.subscription)
+            self.ctx._subscription_id = args.subscription
 
     class NICShow(_NICShow):
         @classmethod
@@ -396,7 +396,7 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # py
         def pre_operations(self):
             args = self.ctx.args
             # cross subscription
-            self.ctx.update_aux_subscriptions(args.subscription)
+            self.ctx._subscription_id = args.subscription
 
     for pe_id in pe_ids:
         res = parse_resource_id(pe_id)
@@ -407,7 +407,7 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # py
         })
         if pe["subnet"]["id"].lower().startswith(vnet_of_private_endpoint.lower()):
             nic_id = pe["networkInterfaces"][0]["id"]
-            nic_res = parse_resource_id(nic_id.to_serialized_data())
+            nic_res = parse_resource_id(nic_id)
             nic = NICShow(cli_ctx=cmd.cli_ctx)(command_args={
                 "name": nic_res['name'],
                 "resource_group": nic_res['resource_group'],

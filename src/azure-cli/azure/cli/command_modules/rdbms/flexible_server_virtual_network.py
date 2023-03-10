@@ -110,7 +110,7 @@ def _create_vnet_subnet_delegation(cmd, nw_subscription, resource_client, delega
         class VNetCreate(_VNetCreate):
             def pre_operations(self):
                 # cross subscription
-                self.ctx.update_aux_subscriptions(nw_subscription)
+                self.ctx._subscription_id = nw_subscription
 
         poller = VNetCreate(cli_ctx=cmd.cli_ctx)(command_args={
             "name": vnet_name,
@@ -125,7 +125,7 @@ def _create_vnet_subnet_delegation(cmd, nw_subscription, resource_client, delega
         class VNetShow(_VNetShow):
             def pre_operations(self):
                 # cross subscription
-                self.ctx.update_aux_subscriptions(nw_subscription)
+                self.ctx._subscription_id = nw_subscription
 
         # check if vnet prefix is in address space and add if not there
         vnet = VNetShow(cli_ctx=cmd.cli_ctx)(command_args={
@@ -142,7 +142,7 @@ def _create_vnet_subnet_delegation(cmd, nw_subscription, resource_client, delega
             class VNetUpdate(_VNetUpdate):
                 def pre_operations(self):
                     # cross subscription
-                    self.ctx.update_aux_subscriptions(nw_subscription)
+                    self.ctx._subscription_id = nw_subscription
 
                 def pre_instance_update(self, instance):
                     instance.properties.address_space.address_prefixes.append(vnet_address_pref)
@@ -165,7 +165,7 @@ def _create_subnet_delegation(cmd, nw_subscription, resource_client, delegation_
         class VNetShow(_VNetShow):
             def pre_operations(self):
                 # cross subscription
-                self.ctx.update_aux_subscriptions(nw_subscription)
+                self.ctx._subscription_id = nw_subscription
 
         vnet = VNetShow(cli_ctx=cmd.cli_ctx)(command_args={
             "name": vnet_name,
@@ -181,7 +181,7 @@ def _create_subnet_delegation(cmd, nw_subscription, resource_client, delegation_
         class SubnetCreate(_SubnetCreate):
             def pre_operations(self):
                 # cross subscription
-                self.ctx.update_aux_subscriptions(nw_subscription)
+                self.ctx._subscription_id = nw_subscription
 
         poller = SubnetCreate(cli_ctx=cmd.cli_ctx)(command_args={
             "name": subnet_name,
@@ -196,7 +196,7 @@ def _create_subnet_delegation(cmd, nw_subscription, resource_client, delegation_
         class SubnetShow(_SubnetShow):
             def pre_operations(self):
                 # cross subscription
-                self.ctx.update_aux_subscriptions(nw_subscription)
+                self.ctx._subscription_id = nw_subscription
 
         subnet = SubnetShow(cli_ctx=cmd.cli_ctx)(command_args={
             "name": subnet_name,
@@ -214,7 +214,7 @@ def _create_subnet_delegation(cmd, nw_subscription, resource_client, delegation_
             class SubnetUpdate(_SubnetUpdate):
                 def pre_operations(self):
                     # cross subscription
-                    self.ctx.update_aux_subscriptions(nw_subscription)
+                    self.ctx._subscription_id = nw_subscription
 
             poller = SubnetUpdate(cli_ctx=cmd.cli_ctx)(command_args={
                 "name": subnet_name,
@@ -254,7 +254,7 @@ def prepare_private_dns_zone(db_context, database_engine, resource_group, server
     class VNetShow(_VNetShow):
         def pre_operations(self):
             # cross subscription
-            self.ctx.update_aux_subscriptions(vnet_subscription)
+            self.ctx._subscription_id = vnet_subscription
 
     vnet = VNetShow(cli_ctx=cmd.cli_ctx)(command_args={
         "name": vnet_name,
