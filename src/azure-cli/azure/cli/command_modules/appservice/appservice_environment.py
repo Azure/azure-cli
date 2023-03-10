@@ -365,7 +365,7 @@ def _ensure_subnet_delegation(cli_ctx, subnet_id, delegation_service_name):
                 "name": subnet_name,
                 "vnet_name": vnet_name,
                 "resource_group": vnet_resource_group,
-                "delegations": [{"name": "delegation", "service_name": delegation_service_name}]
+                "delegated_services": [{"name": "delegation", "service_name": delegation_service_name}]
             })
             LongRunningOperation(cli_ctx)(poller)
         except Exception:

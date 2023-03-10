@@ -167,7 +167,6 @@ def _validate_subnet(cli_ctx, subnet, vnet_name, resource_group_name):
 
 
 def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
-    from azure.cli.core.profiles import AD_HOC_API_VERSIONS, ResourceType
     subnet_id_parts = parse_resource_id(subnet_id)
     subnet_subscription_id = subnet_id_parts['subscription']
     subnet_resource_group = subnet_id_parts['resource_group']
@@ -178,8 +177,8 @@ def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
         raise ArgumentUsageError('Cannot validate subnet in different subscription for missing service endpoint.'
                                  ' Use --ignore-missing-endpoint or -i to'
                                  ' skip validation and manually verify service endpoint.')
-
-    Subnet = import_module(".aaz.2019_03_01_hybrid.network.vnet.subnet")  # ad-hoc api version 2019-02-01
+    # ad-hoc api version 2019-02-01
+    Subnet = import_module("azure.cli.command_modules.appservice.aaz.2019_03_01_hybrid.network.vnet.subnet")
     subnet_obj = Subnet.Show(cli_ctx=cli_ctx)(command_args={
         "name": subnet_name,
         "vnet_name": subnet_vnet_name,
@@ -193,7 +192,7 @@ def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
             break
 
     if not service_endpoint_exists:
-        class SubnetUpdate(Subnet.Update):
+        class SubnetUpdate(Subnet.Update):  # pylint: disable=too-few-public-methods
             @staticmethod
             def pre_instance_update(instance):
                 instance.properties.service_endpoints.append({"service": "Microsoft.Web"})

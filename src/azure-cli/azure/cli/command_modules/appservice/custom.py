@@ -4284,7 +4284,7 @@ def _vnet_delegation_check(cmd, subnet_subscription_id, vnet_resource_group, vne
                 "name": subnet_name,
                 "vnet_name": vnet_name,
                 "resource_group": vnet_resource_group,
-                "delegations": [{"name": "delegation", "service_name": "Microsoft.Web/serverFarms"}]
+                "delegated_services": [{"name": "delegation", "service_name": "Microsoft.Web/serverFarms"}]
             })
             LongRunningOperation(cmd.cli_ctx)(poller)
 

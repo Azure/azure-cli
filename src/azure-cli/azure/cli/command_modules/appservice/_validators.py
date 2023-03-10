@@ -9,7 +9,6 @@ import ipaddress
 from azure.cli.core.azclierror import (InvalidArgumentValueError, ArgumentUsageError, RequiredArgumentMissingError,
                                        ResourceNotFoundError, ValidationError, MutuallyExclusiveArgumentError)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
-from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import validate_tags
 
 from knack.log import get_logger
@@ -269,7 +268,7 @@ def _validate_service_tag_format(cmd, namespace):
         for tag in input_tags:
             valid_tag = False
             for tag_full_list in service_tag_full_list:
-                if tag.lower() == tag_full_list.name.lower():
+                if tag.lower() == tag_full_list["name"].lower():
                     valid_tag = True
                     continue
             if not valid_tag:
