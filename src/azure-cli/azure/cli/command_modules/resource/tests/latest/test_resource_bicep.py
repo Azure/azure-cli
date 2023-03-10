@@ -28,7 +28,7 @@ class TestBicep(unittest.TestCase):
         isfile_stub.return_value = False
 
         with contextlib.suppress(FileNotFoundError):
-            remove_bicep_installation()
+            remove_bicep_installation(cli_ctx)
         with self.assertRaisesRegex(CLIError, 'Bicep CLI not found. Install it now by running "az bicep install".'):
             run_bicep_command(cli_ctx, ["--version"], auto_install=False)
 
