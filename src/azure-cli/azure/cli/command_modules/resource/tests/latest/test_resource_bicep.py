@@ -11,6 +11,7 @@ from unittest import mock
 from knack.util import CLIError
 from azure.cli.command_modules.resource._bicep import (
     ensure_bicep_installation,
+    remove_bicep_installation,
     run_bicep_command,
     validate_bicep_target_scope,
     _bicep_version_check_file_path,
@@ -26,6 +27,8 @@ class TestBicep(unittest.TestCase):
     def test_run_bicep_command_raise_error_if_not_installed_and_not_auto_install(self, isfile_stub):
         isfile_stub.return_value = False
 
+        with contextlib.suppress(FileNotFoundError):
+            remove_bicep_installation()
         with self.assertRaisesRegex(CLIError, 'Bicep CLI not found. Install it now by running "az bicep install".'):
             run_bicep_command(cli_ctx, ["--version"], auto_install=False)
 
@@ -87,8 +90,6 @@ class TestBicep(unittest.TestCase):
             "Bicep CLI version 0.13.1 (e3ac80d678)",
         )
 
-        cli_ctx.config.set_value("bicep", "use_binary_from_path", "false")
-
     @mock.patch("azure.cli.command_modules.resource._bicep._logger.warning")
     @mock.patch("azure.cli.command_modules.resource._bicep._run_command")
     @mock.patch("azure.cli.command_modules.resource._bicep.ensure_bicep_installation")
@@ -108,6 +109,7 @@ class TestBicep(unittest.TestCase):
         _get_bicep_installed_version_stub.return_value = "1.0.0"
         get_bicep_latest_release_tag_stub.return_value = "v2.0.0"
 
+        cli_ctx.config.set_value("bicep", "check_version", "True")
         run_bicep_command(cli_ctx, ["--version"])
 
         warning_mock.assert_called_once_with(
