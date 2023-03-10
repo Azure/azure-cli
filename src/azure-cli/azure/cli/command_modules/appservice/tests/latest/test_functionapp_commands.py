@@ -15,7 +15,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck, live_only)
 from azure.cli.testsdk.checkers import JMESPathCheckNotExists, JMESPathPatternCheck
-from azure.cli.core.azclierror import ResourceNotFoundError, UnsupportOperationError
+from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -2006,7 +2006,7 @@ class FunctionAppConfigTest(ScenarioTest):
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
 
 
-        with self.assertRaises(UnsupportOperationError):
+        with self.assertRaises(ValidationError):
             self.cmd('functionapp config set -g {} -n {}'
             .format(resource_group, functionapp_name))
     
@@ -2033,7 +2033,7 @@ class FunctionAppConfigTest(ScenarioTest):
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
 
 
-        with self.assertRaises(UnsupportOperationError):
+        with self.assertRaises(ValidationError):
             self.cmd('functionapp config show -g {} -n {}'
             .format(resource_group, functionapp_name))
 

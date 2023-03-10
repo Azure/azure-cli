@@ -7,8 +7,7 @@ import ipaddress
 
 
 from azure.cli.core.azclierror import (InvalidArgumentValueError, ArgumentUsageError, RequiredArgumentMissingError,
-                                       ResourceNotFoundError, ValidationError, MutuallyExclusiveArgumentError,
-                                       UnsupportOperationError)
+                                       ResourceNotFoundError, ValidationError, MutuallyExclusiveArgumentError)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import validate_tags
@@ -121,15 +120,26 @@ def validate_functionapp_asp_create(namespace):
             raise ArgumentUsageError("--max-burst is only supported for Elastic Premium (EP) plans")
 
 
-def validate_functionapp_on_containerapp_site_config(cmd, namespace):
+def validate_functionapp_on_containerapp_site_config_set(cmd, namespace):
     resource_group_name = namespace.resource_group_name
     name = namespace.name
     slot = namespace.slot
     function_app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if function_app.managed_environment_id is not None:
-        raise UnsupportOperationError(
-            "This command is not supported for function apps deployed in managed environments.",
-            "Please view or update your function app's site configuration in the container app environment.")
+        raise ValidationError(
+            "Invalid command. This is not supported for Azure Functions on Azure Container app environments.",
+            "Please use the following command instead: az functionapp config container set")
+
+
+def validate_functionapp_on_containerapp_site_config_show(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    slot = namespace.slot
+    function_app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    if function_app.managed_environment_id is not None:
+        raise ValidationError(
+            "Invalid command. This is not supported for Azure Functions on Azure Container app environments.",
+            "Please use the following command instead: az functionapp config container show")
 
 
 def validate_app_exists(cmd, namespace):

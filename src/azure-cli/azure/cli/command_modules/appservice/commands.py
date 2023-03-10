@@ -12,7 +12,8 @@ from ._validators import (validate_onedeploy_params, validate_staticsite_link_fu
                           validate_vnet_integration, validate_asp_create, validate_functionapp_asp_create,
                           validate_webapp_up, validate_app_exists, validate_add_vnet, validate_app_is_functionapp,
                           validate_app_is_webapp,
-                          validate_functionapp_on_containerapp_site_config)
+                          validate_functionapp_on_containerapp_site_config_set,
+                          validate_functionapp_on_containerapp_site_config_show)
 
 
 def output_slots_in_table(slots):
@@ -332,8 +333,8 @@ def load_command_table(self, _):
                                  custom_func_name='update_functionapp', getter_type=appservice_custom, setter_type=appservice_custom, command_type=webapp_sdk)
 
     with self.command_group('functionapp config') as g:
-        g.custom_command('set', 'update_site_configs', validator=validate_functionapp_on_containerapp_site_config, exception_handler=ex_handler_factory())
-        g.custom_show_command('show', 'get_site_configs', validator=validate_functionapp_on_containerapp_site_config, exception_handler=ex_handler_factory())
+        g.custom_command('set', 'update_site_configs', validator=validate_functionapp_on_containerapp_site_config_set, exception_handler=ex_handler_factory())
+        g.custom_show_command('show', 'get_site_configs', validator=validate_functionapp_on_containerapp_site_config_show, exception_handler=ex_handler_factory())
 
     with self.command_group('functionapp config appsettings') as g:
         g.custom_command('list', 'get_app_settings', exception_handler=empty_on_404)
