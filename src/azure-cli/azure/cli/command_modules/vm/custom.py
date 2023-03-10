@@ -1493,15 +1493,15 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
             'resource_group': resource_group_name
         })
     if not apply_to_subnet:
-        nsg = nic.network_security_group
+        nsg = nic['networkSecurityGroup']
     else:
-        subnet_id = parse_resource_id(nic.ip_configurations[0].subnet.id)
+        subnet_id = parse_resource_id(nic['ipConfigurations'][0]['subnet']['id'])
         subnet = SubnetShow(cli_ctx=cmd.cli_ctx)(command_args={
             'name': subnet_id['name'],
             'vnet_name': subnet_id['child_name_1'],
             'resource_group': resource_group_name
         })
-        nsg = subnet['network_security_group']
+        nsg = subnet['networkSecurityGroup']
 
     if not nsg:
         nsg = LongRunningOperation(cmd.cli_ctx, 'Creating network security group')(
@@ -1537,12 +1537,12 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
         'source_address_prefix': '*',
         'destination_address_prefix': '*'
     }
-    nsg_name = nsg.name or os.path.split(nsg.id)[1]
+    nsg_name = nsg['name'] if 'name' in nsg else os.path.split(nsg['id'])[1]
     LongRunningOperation(cmd.cli_ctx, 'Adding security rule')(
         NSGCreate(cli_ctx=cmd.cli_ctx)(command_args={
             'name': nsg_name,
             'resource_group': resource_group_name,
-            'security_rules': rule
+            'security_rules': [rule]
         })
     )
 

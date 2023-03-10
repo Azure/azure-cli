@@ -34,9 +34,6 @@ Vnet = import_module("azure.cli.command_modules.vm.aaz.latest.network.vnet")
 logger = get_logger(__name__)
 
 
-
-
-
 def validate_asg_names_or_ids(cmd, namespace):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.profiles import ResourceType
