@@ -5,6 +5,7 @@
 import os
 import re
 import shutil
+import py_compile
 
 
 class CompactorCtx:
@@ -18,7 +19,6 @@ class CompactorCtx:
 
     def add_code_piece(self, key, code):
         assert self._namespace is not None and self._write_mode, "Namespace is not set or readonly"
-        key = code
         if key not in self._code_pieces:
             self._code_pieces[key] = {
                 self._namespace: {
@@ -78,7 +78,7 @@ class CompactorCtx:
         """find code piece in frozen namespaces"""
         if key not in self._code_pieces:
             return
-        for namespace, value in self._code_pieces[key].items:
+        for namespace, value in self._code_pieces[key].items():
             if namespace not in self._parent_namespaces:
                 continue
             if value["max_count_code"] == code and value["codes"][code] > 1:
@@ -93,6 +93,15 @@ class CompactorCtx:
                 code == self._code_pieces[key][self._namespace]["max_count_code"] and \
                 self._code_pieces[key][self._namespace]["codes"][code] > 1:
             return self._namespace
+
+    def fetch_helper_code_piece(self, key):
+        assert not self._write_mode, "Fetch code piece is not supported in write mode"
+        if key not in self._code_pieces or self._namespace not in self._code_pieces[key]:
+            return
+        value = self._code_pieces[key][self._namespace]
+        code = value["max_count_code"]
+        if value["codes"][code] > 1:
+            return code
 
 
 _PY_HEADER = """# --------------------------------------------------------------------------------------------
@@ -111,11 +120,15 @@ class MainModuleCompactor:
 
     _command_group_pattern = re.compile(r'^class\s+(.*)\(.*AAZCommandGroup.*\)\s*:\s*$')
     _command_pattern = re.compile(r'^class\s+(.*)\(.*AAZ(Wait)?Command.*\)\s*:\s*$')
-    _file_end_pattern = re.compile(r'^__all__ = \[.*\]\s*$')
+    _command_helper_pattern = re.compile(r'^class\s+(_(.+)Helper)\s*:\s*$')
+    _command_helper_func_pattern = re.compile(r'^\s{4}def (.+)\(cls.*\)\s*:\s*$')
+    _file_end_pattern = re.compile(r'^__all__ = \[.*]\s*$')
+    _class_method_register = "    @classmethod"
 
-    def __init__(self, mod_name):
+    def __init__(self, mod_name, compiled_to_pyc=False):
         self._mod_name = mod_name
         self._folder = self._get_module_folder()
+        self._compiled_to_pyc = compiled_to_pyc
 
     def compact(self):
         self._create_compact_aaz_folder()
@@ -138,6 +151,9 @@ class MainModuleCompactor:
         init_content = _PY_HEADER + content
         with open(path, 'w') as f:
             f.write(init_content)
+        if self._compiled_to_pyc:
+            py_compile.compile(path)
+            os.remove(path)
 
     def _create_compact_aaz_folder(self):
         folder = self._get_compact_aaz_folder()
@@ -174,12 +190,66 @@ class MainModuleCompactor:
 
         cmds_content, grp_cls = self._parse_cmd_group_file(folder, None)
 
-        cmds_content, cmd_clses = self._parse_cmd_files(folder, cmds_content)
+        cmds_content, cmd_clses, cmd_cls_helpers = self._parse_cmd_files(folder, cmds_content)
+
+        if cmd_cls_helpers:
+            link_helper_codes = {}
+            for helper in cmd_cls_helpers.values():
+                helper_codes = helper["codes"]
+                for k, v in helper_codes.items():
+                    ctx.add_code_piece(k, v)
+
+            helper_content = ""
+
+            ctx.set_current_namespace(dirs, write_mode=False)
+            for name, helper in cmd_cls_helpers.items():
+                helper_codes = helper["codes"]
+                helper_properties = helper["properties"]
+                helper_cls_links = []
+                helper_cls_content = f'class {name}:\n{helper_properties}'
+                for k, v in helper_codes.items():
+                    link_dirs = ctx.fetch_code_piece(k, v)
+                    if not link_dirs:
+                        helper_cls_content += '\n'
+                        helper_cls_content += v
+                        continue
+                    assert dirs.startswith(link_dirs)
+                    if link_dirs == dirs:
+                        helper_cls_links.append(f'    ("{k}", _Helper),')
+                        linker_code = ctx.fetch_helper_code_piece(k)
+                        assert linker_code
+                        link_helper_codes[k] = linker_code
+                    else:
+                        relative_path = '.' * (len(dirs.split(os.sep))-len(link_dirs.split(os.sep))) + '.__cmds'
+                        helper_cls_links.append(f'    ("{k}", "{relative_path}"),')
+                if helper_cls_links:
+                    helper_cls_content = '\n'.join(['@link_helper(','    __package__,', *helper_cls_links, ')']) + '\n' + helper_cls_content
+                helper_content += '\n\n' + helper_cls_content
+
+            if link_helper_codes:
+                cmds_content += f'\n\nclass _Helper:\n'
+                for v in link_helper_codes.values():
+                    cmds_content += "\n"
+                    assert v.startswith(self._class_method_register)
+                    cmds_content += f"    @staticmethod" + v[len(self._class_method_register):]
+
+            cmds_content += helper_content
 
         init_content = "from .__cmds import *\n" if cmds_content else ""
         self._write_py_file(os.path.join(compact_folder, '__init__.py'), content=init_content)
 
         if cmds_content:
+            if cmd_clses:
+                all_clses = [f'"{cmd_cls}"' for cmd_cls in cmd_clses]
+            else:
+                all_clses = []
+
+            if grp_cls:
+                all_clses.append(f'"{grp_cls}"')
+
+            if all_clses:
+                cmds_content += ''.join(['\n', '\n', f'__all__ = [{",".join(all_clses)}]\n'])
+
             self._write_py_file(os.path.join(compact_folder, '__cmds.py'), content=cmds_content)
 
         ctx.set_current_namespace(None, write_mode=False)
@@ -198,14 +268,18 @@ class MainModuleCompactor:
         with open(cmd_group_file, 'r') as f:
             while f.readable():
                 line = f.readline()
-                if line.startswith('@register_command_group('):
+                if not cg_lines and line.startswith('@register_command_group('):
                     cg_lines.append(line)
                     continue
+                if not grp_cls:
+                    match = self._command_group_pattern.match(line)
+                    if match:
+                        grp_cls = match[1]
+                        cg_lines.append(line)
+                        continue
                 if not cg_lines:
                     continue
-                match = self._command_group_pattern.match(line)
-                if match:
-                    grp_cls = match[1]
+
                 if self._file_end_pattern.match(line):
                     break
                 cg_lines.append(line)
@@ -218,15 +292,121 @@ class MainModuleCompactor:
 
     def _parse_cmd_files(self, folder,  cmds_content):
         cmd_clses = []
+        cmd_cls_helpers = {}
         for name in os.listdir(folder):
             if name.startswith('__') or not name.startswith('_') or not name.endswith('.py'):
                 continue
             cmd_file = os.path.join(folder, name)
             if not os.path.isfile(cmd_file):
                 continue
+            cmd_cls, cmd_lines, cmd_helper_lines = self._parse_cmd_file(cmd_file)
+            if not cmd_cls:
+                continue
+            cmd_clses.append(cmd_cls)
+            cmds_content += ''.join(['\n', '\n', *cmd_lines])
 
+            if cmd_helper_lines:
+                helper_name, helper_properties, helper_codes = self._parse_cmd_helper_lines(cmd_helper_lines)
+                if helper_properties or helper_codes:
+                    cmd_cls_helpers[helper_name] = {
+                        "properties": helper_properties,
+                        "codes": helper_codes
+                    }
 
-        return cmds_content, cmd_clses
+        return cmds_content, cmd_clses, cmd_cls_helpers
+
+    def _parse_cmd_file(self, cmd_file):
+        cmd_cls = None
+        cmd_lines = []
+        cmd_helper_lines = []
+        with open(cmd_file, 'r') as f:
+            # read the cmd_cls definition
+            while f.readable():
+                line = f.readline()
+                if not cmd_lines and line.startswith('@register_command('):
+                    cmd_lines.append(line)
+                    continue
+                if not cmd_cls:
+                    match = self._command_pattern.match(line)
+                    if match:
+                        cmd_cls = match[1]
+                        cmd_lines.append(line)
+                        continue
+                if not cmd_lines:
+                    continue
+
+                if self._file_end_pattern.match(line):
+                    break
+                match = self._command_helper_pattern.match(line)
+                if match:
+                    cmd_helper_lines.append(line)
+                    break
+                cmd_lines.append(line)
+
+            # read the cmd_helper_cls definition
+            while f.readable() and cmd_helper_lines:
+                line = f.readline()
+                if self._file_end_pattern.match(line):
+                    break
+                cmd_helper_lines.append(line)
+
+        while cmd_lines and not cmd_lines[-1].strip():
+            cmd_lines.pop()
+
+        while cmd_helper_lines and not cmd_helper_lines[-1].strip():
+            cmd_helper_lines.pop()
+
+        return cmd_cls, cmd_lines, cmd_helper_lines
+
+    def _parse_cmd_helper_lines(self, cmd_helper_lines):
+        helper_name, helper_codes = None, {}
+        idx = 0
+        code_key = None
+        code_lines = []
+        properties_lines = []
+        while idx < len(cmd_helper_lines):
+            line = cmd_helper_lines[idx]
+            if not helper_name:
+                match = self._command_helper_pattern.match(line)
+                if match:
+                    helper_name = match[1]
+                    continue
+            if not helper_name:
+                continue
+            if line.startswith(self._class_method_register) or line.startswith("    _"):
+                if code_key and code_lines:
+                    while code_lines and not code_lines[-1].strip():
+                        code_lines.pop()
+                    helper_codes[code_key] = ''.join(code_lines)
+                code_lines = []
+                code_key = None
+                if line.startswith("    _"):
+                    while not line.startswith(self._class_method_register) and idx < len(cmd_helper_lines):
+                        properties_lines.append(line)
+                        idx += 1
+                        line = cmd_helper_lines[idx]
+
+            if line.startswith(self._class_method_register):
+                code_lines.append(line)
+                idx += 1
+                line = cmd_helper_lines[idx]
+                match = self._command_helper_func_pattern.match(line)
+                if match:
+                    code_key = match[1]
+
+            if code_key:
+                code_lines.append(line)
+
+            idx += 1
+
+        if code_key and code_lines:
+            while code_lines and not code_lines[-1].strip():
+                code_lines.pop()
+            helper_codes[code_key] = ''.join(code_lines)
+
+        properties_code = ''.join(properties_lines)
+
+        return helper_name, properties_code, helper_codes
 
     def _get_module_folder(self):
         cli_folder = '..'

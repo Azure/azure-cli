@@ -251,29 +251,29 @@ class MainCommandsLoader(CLICommandsLoader):
             logger.debug(self.header_mod)
 
             for mod in [m for m in command_modules if m not in BLOCKED_MODS]:
-                try:
-                    start_time = timeit.default_timer()
-                    module_command_table, module_group_table = _load_module_command_loader(self, args, mod)
-                    for cmd in module_command_table.values():
-                        cmd.command_source = mod
-                    self.command_table.update(module_command_table)
-                    self.command_group_table.update(module_group_table)
+                # try:
+                start_time = timeit.default_timer()
+                module_command_table, module_group_table = _load_module_command_loader(self, args, mod)
+                for cmd in module_command_table.values():
+                    cmd.command_source = mod
+                self.command_table.update(module_command_table)
+                self.command_group_table.update(module_group_table)
 
-                    elapsed_time = timeit.default_timer() - start_time
-                    logger.debug(self.item_format_string, mod, elapsed_time,
-                                 len(module_group_table), len(module_command_table))
-                    count += 1
-                    cumulative_elapsed_time += elapsed_time
-                    cumulative_group_count += len(module_group_table)
-                    cumulative_command_count += len(module_command_table)
-                except Exception as ex:  # pylint: disable=broad-except
-                    # Changing this error message requires updating CI script that checks for failed
-                    # module loading.
-                    from azure.cli.core import telemetry
-                    logger.error("Error loading command module '%s': %s", mod, ex)
-                    telemetry.set_exception(exception=ex, fault_type='module-load-error-' + mod,
-                                            summary='Error loading module: {}'.format(mod))
-                    logger.debug(traceback.format_exc())
+                elapsed_time = timeit.default_timer() - start_time
+                logger.debug(self.item_format_string, mod, elapsed_time,
+                             len(module_group_table), len(module_command_table))
+                count += 1
+                cumulative_elapsed_time += elapsed_time
+                cumulative_group_count += len(module_group_table)
+                cumulative_command_count += len(module_command_table)
+                # except Exception as ex:  # pylint: disable=broad-except
+                #     # Changing this error message requires updating CI script that checks for failed
+                #     # module loading.
+                #     from azure.cli.core import telemetry
+                #     logger.error("Error loading command module '%s': %s", mod, ex)
+                #     telemetry.set_exception(exception=ex, fault_type='module-load-error-' + mod,
+                #                             summary='Error loading module: {}'.format(mod))
+                #     logger.debug(traceback.format_exc())
             # Summary line
             logger.debug(self.item_format_string,
                          "Total ({})".format(count), cumulative_elapsed_time,
