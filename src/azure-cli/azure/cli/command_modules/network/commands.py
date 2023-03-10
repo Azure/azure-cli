@@ -723,3 +723,8 @@ def load_command_table(self, _):
     self.command_table["network virtual-appliance create"] = VirtualApplianceCreate(loader=self)
     self.command_table["network virtual-appliance update"] = VirtualApplianceUpdate(loader=self)
     # endregion
+
+    # region CustomIp
+    from .custom import CustomIpPrefixUpdate
+    self.command_table["network custom-ip prefix update"] = CustomIpPrefixUpdate(loader=self)
+    # endregion

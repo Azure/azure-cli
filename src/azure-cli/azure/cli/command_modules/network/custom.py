@@ -61,6 +61,7 @@ from .aaz.latest.network.application_gateway.waf_policy import Create as _WAFCre
 from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condition import \
     Add as _WAFCustomRuleMatchConditionAdd
 from .aaz.latest.network.application_gateway.waf_policy.policy_setting import Update as _WAFPolicySettingUpdate
+from .aaz.latest.network.custom_ip.prefix import Update as _CustomIpPrefixUpdate
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
 from .aaz.latest.network.express_route.gateway import Create as _ExpressRouteGatewayCreate, \
     Update as _ExpressRouteGatewayUpdate
@@ -6584,5 +6585,16 @@ class VirtualApplianceUpdate(_VirtualApplianceUpdate):
         args_schema.vhub._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
         )
+
+        return args_schema
+
+
+class CustomIpPrefixUpdate(_CustomIpPrefixUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZArgEnum
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.state.enum = AAZArgEnum({"commission": "Commissioning", "decommission": "Decommissioning", "deprovision": "Deprovisioning", "provision": "Provisioning"})
 
         return args_schema
