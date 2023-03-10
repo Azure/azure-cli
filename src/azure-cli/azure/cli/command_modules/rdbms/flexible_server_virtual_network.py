@@ -18,8 +18,8 @@ from ._client_factory import resource_client_factory, private_dns_client_factory
 from ._flexible_server_util import get_id_components, check_existence, _is_resource_name, parse_public_access_input, get_user_confirmation, _check_resource_group_existence
 from .validators import validate_private_dns_zone, validate_vnet_location
 
-from .aaz.latest.network.vnet import Create as _VNetCreate, Show as _VNetShow, Update as _VNetUpdate
-from .aaz.latest.network.vnet.subnet import Create as _SubnetCreate, Show as _SubnetShow, Update as _SubnetUpdate
+from .aaz.latest.network.vnet import Create as VNetCreate, Show as VNetShow, Update as _VNetUpdate
+from .aaz.latest.network.vnet.subnet import Create as SubnetCreate, Show as SubnetShow, Update as SubnetUpdate
 
 logger = get_logger(__name__)
 DEFAULT_VNET_ADDRESS_PREFIX = '10.0.0.0/16'
@@ -106,14 +106,9 @@ def _create_vnet_subnet_delegation(cmd, nw_subscription, resource_client, delega
     if not check_existence(resource_client, vnet_name, resource_group, 'Microsoft.Network', 'virtualNetworks'):
         user_confirmation("Do you want to create a new Vnet {0} in resource group {1}".format(vnet_name, resource_group), yes=yes)
         logger.warning('Creating new Vnet "%s" in resource group "%s"', vnet_name, resource_group)
-
-        class VNetCreate(_VNetCreate):
-            def pre_operations(self):
-                # cross subscription
-                self.ctx._subscription_id = nw_subscription
-
         poller = VNetCreate(cli_ctx=cmd.cli_ctx)(command_args={
             "name": vnet_name,
+            "subscription": nw_subscription,
             "resource_group": resource_group,
             "location": location,
             "address_prefixes": [vnet_address_pref]
@@ -121,15 +116,10 @@ def _create_vnet_subnet_delegation(cmd, nw_subscription, resource_client, delega
         LongRunningOperation(cmd.cli_ctx)(poller)
     else:
         logger.warning('Using existing Vnet "%s" in resource group "%s"', vnet_name, resource_group)
-
-        class VNetShow(_VNetShow):
-            def pre_operations(self):
-                # cross subscription
-                self.ctx._subscription_id = nw_subscription
-
         # check if vnet prefix is in address space and add if not there
         vnet = VNetShow(cli_ctx=cmd.cli_ctx)(command_args={
             "name": vnet_name,
+            "subscription": nw_subscription,
             "resource_group": resource_group
         })
         # validate whether vnet location is same as server
@@ -140,15 +130,12 @@ def _create_vnet_subnet_delegation(cmd, nw_subscription, resource_client, delega
             logger.warning('The address prefix does not exist in the Vnet. Adding address prefix %s to Vnet %s.', vnet_address_pref, vnet_name)
 
             class VNetUpdate(_VNetUpdate):
-                def pre_operations(self):
-                    # cross subscription
-                    self.ctx._subscription_id = nw_subscription
-
                 def pre_instance_update(self, instance):
                     instance.properties.address_space.address_prefixes.append(vnet_address_pref)
 
             poller = VNetUpdate(cli_ctx=cmd.cli_ctx)(command_args={
                 "name": vnet_name,
+                "subscription": nw_subscription,
                 "resource_group": resource_group
             })
             LongRunningOperation(cmd.cli_ctx)(poller)
@@ -161,14 +148,9 @@ def _create_subnet_delegation(cmd, nw_subscription, resource_client, delegation_
 
     # subnet not exist
     if not check_existence(resource_client, subnet_name, resource_group, 'Microsoft.Network', 'subnets', parent_name=vnet_name, parent_type='virtualNetworks'):
-
-        class VNetShow(_VNetShow):
-            def pre_operations(self):
-                # cross subscription
-                self.ctx._subscription_id = nw_subscription
-
         vnet = VNetShow(cli_ctx=cmd.cli_ctx)(command_args={
             "name": vnet_name,
+            "subscription": nw_subscription,
             "resource_group": resource_group
         })
         vnet_subnet_prefixes = [subnet["addressPrefix"] for subnet in vnet.get("subnets", [])]
@@ -177,15 +159,10 @@ def _create_subnet_delegation(cmd, nw_subscription, resource_client, delegation_
 
         user_confirmation("Do you want to create a new Subnet {0} in resource group {1}".format(subnet_name, resource_group), yes=yes)
         logger.warning('Creating new Subnet "%s" in resource group "%s"', subnet_name, resource_group)
-
-        class SubnetCreate(_SubnetCreate):
-            def pre_operations(self):
-                # cross subscription
-                self.ctx._subscription_id = nw_subscription
-
         poller = SubnetCreate(cli_ctx=cmd.cli_ctx)(command_args={
             "name": subnet_name,
             "vnet_name": vnet_name,
+            "subscription": nw_subscription,
             "resource_group": resource_group,
             "address_prefix": subnet_address_pref,
             "delegated_services": [delegation]
@@ -193,14 +170,10 @@ def _create_subnet_delegation(cmd, nw_subscription, resource_client, delegation_
         subnet = LongRunningOperation(cmd.cli_ctx)(poller)
     # subnet exist
     else:
-        class SubnetShow(_SubnetShow):
-            def pre_operations(self):
-                # cross subscription
-                self.ctx._subscription_id = nw_subscription
-
         subnet = SubnetShow(cli_ctx=cmd.cli_ctx)(command_args={
             "name": subnet_name,
             "vnet_name": vnet_name,
+            "subscription": nw_subscription,
             "resource_group": resource_group
         })
         logger.warning('Using existing Subnet "%s" in resource group "%s"', subnet_name, resource_group)
@@ -210,15 +183,10 @@ def _create_subnet_delegation(cmd, nw_subscription, resource_client, delegation_
         # Add Delegation if not delegated already
         if not subnet.get("delegations", None):
             logger.warning('Adding "%s" delegation to the existing subnet %s.', delegation_service_name, subnet_name)
-
-            class SubnetUpdate(_SubnetUpdate):
-                def pre_operations(self):
-                    # cross subscription
-                    self.ctx._subscription_id = nw_subscription
-
             poller = SubnetUpdate(cli_ctx=cmd.cli_ctx)(command_args={
                 "name": subnet_name,
                 "vnet_name": vnet_name,
+                "subscription": nw_subscription,
                 "resource_group": resource_group,
                 "delegated_services": [delegation]
             })
@@ -250,14 +218,9 @@ def prepare_private_dns_zone(db_context, database_engine, resource_group, server
                           namespace='Microsoft.Network',
                           type='virtualNetworks',
                           name=vnet_name)
-
-    class VNetShow(_VNetShow):
-        def pre_operations(self):
-            # cross subscription
-            self.ctx._subscription_id = vnet_subscription
-
     vnet = VNetShow(cli_ctx=cmd.cli_ctx)(command_args={
         "name": vnet_name,
+        "subscription": vnet_subscription,
         "resource_group": vnet_rg
     })
 

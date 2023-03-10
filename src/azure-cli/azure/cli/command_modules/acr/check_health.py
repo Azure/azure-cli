@@ -366,52 +366,26 @@ def _check_private_endpoint(cmd, registry_name, vnet_of_private_endpoint):  # py
                                                subscription=res['subscription'])
 
     # retrieve FQDNs for registry and its data endpoint
-    from .aaz.latest.network.nic import Show as _NICShow
-    from .aaz.latest.network.private_endpoint import Show as _PEShow
+    from .aaz.latest.network.nic import Show as NICShow
+    from .aaz.latest.network.private_endpoint import Show as PEShow
 
     pe_ids = [e.private_endpoint.id for e in registry.private_endpoint_connections if e.private_endpoint]
     dns_mappings = {}
-
-    class PEShow(_PEShow):
-        @classmethod
-        def _build_arguments_schema(cls, *args, **kwargs):
-            from azure.cli.core.aaz import AAZStrArg
-            args_schema = super()._build_arguments_schema(*args, **kwargs)
-            args_schema.subscription = AAZStrArg()
-            return args_schema
-
-        def pre_operations(self):
-            args = self.ctx.args
-            # cross subscription
-            self.ctx._subscription_id = args.subscription
-
-    class NICShow(_NICShow):
-        @classmethod
-        def _build_arguments_schema(cls, *args, **kwargs):
-            from azure.cli.core.aaz import AAZStrArg
-            args_schema = super()._build_arguments_schema(*args, **kwargs)
-            args_schema.subscription = AAZStrArg()
-            return args_schema
-
-        def pre_operations(self):
-            args = self.ctx.args
-            # cross subscription
-            self.ctx._subscription_id = args.subscription
 
     for pe_id in pe_ids:
         res = parse_resource_id(pe_id)
         pe = PEShow(cli_ctx=cmd.cli_ctx)(command_args={
             "name": res['name'],
-            "resource_group": res['resource_group'],
-            "subscription": res['subscription']
+            "subscription": res['subscription'],
+            "resource_group": res['resource_group']
         })
         if pe["subnet"]["id"].lower().startswith(vnet_of_private_endpoint.lower()):
             nic_id = pe["networkInterfaces"][0]["id"]
             nic_res = parse_resource_id(nic_id)
             nic = NICShow(cli_ctx=cmd.cli_ctx)(command_args={
                 "name": nic_res['name'],
-                "resource_group": nic_res['resource_group'],
-                "subscription": nic_res['subscription']
+                "subscription": nic_res['subscription'],
+                "resource_group": nic_res['resource_group']
             })
             for dns_config in nic["ipConfigurations"]:
                 if dns_config["privateLinkConnectionProperties"]["fqdns"][0] in dns_mappings:
