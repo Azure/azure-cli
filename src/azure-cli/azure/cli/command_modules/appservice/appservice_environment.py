@@ -318,7 +318,7 @@ def _validate_subnet_empty(cli_ctx, subnet_id):
         "vnet_name": vnet_name,
         "resource_group": vnet_resource_group
     })
-    if subnet_obj["resourceNavigationLinks"] or subnet_obj["serviceAssociationLinks"]:
+    if subnet_obj.get("resourceNavigationLinks", None) or subnet_obj.get("serviceAssociationLinks", None):
         raise ValidationError('Subnet is not empty.')
 
 
@@ -432,7 +432,7 @@ def _ensure_route_table(cli_ctx, resource_group_name, ase_name, location, subnet
             })
             LongRunningOperation(cli_ctx)(poller)
     else:
-        route_table_id_parts = parse_resource_id(subnet_obj["routeTable"]["id"].to_serialized_data())
+        route_table_id_parts = parse_resource_id(subnet_obj["routeTable"]["id"])
         rt_name = route_table_id_parts['name']
         if rt_name.lower() != ase_route_table_name.lower():
             err_msg = 'Route table already exists.'
@@ -491,7 +491,7 @@ def _ensure_network_security_group(cli_ctx, resource_group_name, ase_name, locat
             })
             LongRunningOperation(cli_ctx)(poller)
     else:
-        nsg_id_parts = parse_resource_id(subnet_obj["networkSecurityGroup"]["id"].to_serialized_data())
+        nsg_id_parts = parse_resource_id(subnet_obj["networkSecurityGroup"]["id"])
         nsg_name = nsg_id_parts['name']
         if nsg_name.lower() != ase_nsg_name.lower():
             err_msg = 'Network Security Group already exists.'

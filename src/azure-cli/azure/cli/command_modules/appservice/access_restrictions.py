@@ -184,9 +184,9 @@ def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
         "vnet_name": subnet_vnet_name,
         "resource_group": subnet_resource_group
     })
-    subnet_obj["serviceEndpoints"] = subnet_obj["serviceEndpoints"] or []
+    service_endpoints = subnet_obj.get("serviceEndpoints", [])
     service_endpoint_exists = False
-    for s in subnet_obj["serviceEndpoints"]:
+    for s in service_endpoints:
         if s["service"] == "Microsoft.Web":
             service_endpoint_exists = True
             break

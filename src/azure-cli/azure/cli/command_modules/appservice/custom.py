@@ -4316,7 +4316,7 @@ def _validate_subnet(cli_ctx, subnet, vnet, resource_group_name):
     vnets = []
     for v in list_all_vnets:
         if vnet in (v["name"], v["id"]):
-            vnet_details = parse_resource_id(v["id"].to_serialized_data())
+            vnet_details = parse_resource_id(v["id"])
             vnet_resource_group = vnet_details['resource_group']
             vnets.append((v["id"], v["name"], vnet_resource_group))
 
@@ -4333,7 +4333,7 @@ def _validate_subnet(cli_ctx, subnet, vnet, resource_group_name):
         logger.warning("Multiple virtual networks of name %s were found. Using virtual network with resource ID: %s. "
                        "To use a different virtual network, specify the virtual network resource ID using --vnet.",
                        vnet, vnet_id)
-    vnet_id_parts = parse_resource_id(vnet_id.to_serialized_data())
+    vnet_id_parts = parse_resource_id(vnet_id)
     return resource_id(
         subscription=vnet_id_parts['subscription'],
         resource_group=vnet_id_parts['resource_group'],
