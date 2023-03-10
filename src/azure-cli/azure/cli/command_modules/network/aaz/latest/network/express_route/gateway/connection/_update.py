@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-07-01",
+        "version": "2022-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutegateways/{}/expressrouteconnections/{}", "2022-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutegateways/{}/expressrouteconnections/{}", "2022-01-01"],
         ]
     }
 
@@ -128,22 +128,6 @@ class Update(AAZCommand):
         )
 
         # define Arg Group "RoutingConfiguration"
-
-        _args_schema = cls._args_schema
-        _args_schema.inbound_route_map = AAZObjectArg(
-            options=["--inbound-route-map"],
-            arg_group="RoutingConfiguration",
-            help="The resource id of the RouteMap associated with this RoutingConfiguration for inbound learned routes.",
-            nullable=True,
-        )
-        cls._build_args_sub_resource_update(_args_schema.inbound_route_map)
-        _args_schema.outbound_route_map = AAZObjectArg(
-            options=["--outbound-route-map"],
-            arg_group="RoutingConfiguration",
-            help="The resource id of theRouteMap associated with this RoutingConfiguration for outbound advertised routes.",
-            nullable=True,
-        )
-        cls._build_args_sub_resource_update(_args_schema.outbound_route_map)
         return cls._args_schema
 
     _args_sub_resource_update = None
@@ -249,7 +233,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-07-01",
+                    "api-version", "2022-01-01",
                     required=True,
                 ),
             }
@@ -352,7 +336,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-07-01",
+                    "api-version", "2022-01-01",
                     required=True,
                 ),
             }
@@ -428,8 +412,6 @@ class Update(AAZCommand):
             routing_configuration = _builder.get(".properties.routingConfiguration")
             if routing_configuration is not None:
                 _UpdateHelper._build_schema_sub_resource_update(routing_configuration.set_prop("associatedRouteTable", AAZObjectType, ".associated_id"))
-                _UpdateHelper._build_schema_sub_resource_update(routing_configuration.set_prop("inboundRouteMap", AAZObjectType, ".inbound_route_map"))
-                _UpdateHelper._build_schema_sub_resource_update(routing_configuration.set_prop("outboundRouteMap", AAZObjectType, ".outbound_route_map"))
                 routing_configuration.set_prop("propagatedRouteTables", AAZObjectType)
 
             propagated_route_tables = _builder.get(".properties.routingConfiguration.propagatedRouteTables")
@@ -493,9 +475,6 @@ class _UpdateHelper:
         properties.enable_internet_security = AAZBoolType(
             serialized_name="enableInternetSecurity",
         )
-        properties.enable_private_link_fast_path = AAZBoolType(
-            serialized_name="enablePrivateLinkFastPath",
-        )
         properties.express_route_circuit_peering = AAZObjectType(
             serialized_name="expressRouteCircuitPeering",
             flags={"required": True},
@@ -522,14 +501,6 @@ class _UpdateHelper:
             serialized_name="associatedRouteTable",
         )
         cls._build_schema_sub_resource_read(routing_configuration.associated_route_table)
-        routing_configuration.inbound_route_map = AAZObjectType(
-            serialized_name="inboundRouteMap",
-        )
-        cls._build_schema_sub_resource_read(routing_configuration.inbound_route_map)
-        routing_configuration.outbound_route_map = AAZObjectType(
-            serialized_name="outboundRouteMap",
-        )
-        cls._build_schema_sub_resource_read(routing_configuration.outbound_route_map)
         routing_configuration.propagated_route_tables = AAZObjectType(
             serialized_name="propagatedRouteTables",
         )
@@ -556,9 +527,6 @@ class _UpdateHelper:
         vnet_routes.static_routes = AAZListType(
             serialized_name="staticRoutes",
         )
-        vnet_routes.static_routes_config = AAZObjectType(
-            serialized_name="staticRoutesConfig",
-        )
 
         bgp_connections = _schema_express_route_connection_read.properties.routing_configuration.vnet_routes.bgp_connections
         bgp_connections.Element = AAZObjectType()
@@ -578,15 +546,6 @@ class _UpdateHelper:
 
         address_prefixes = _schema_express_route_connection_read.properties.routing_configuration.vnet_routes.static_routes.Element.address_prefixes
         address_prefixes.Element = AAZStrType()
-
-        static_routes_config = _schema_express_route_connection_read.properties.routing_configuration.vnet_routes.static_routes_config
-        static_routes_config.propagate_static_routes = AAZBoolType(
-            serialized_name="propagateStaticRoutes",
-            flags={"read_only": True},
-        )
-        static_routes_config.vnet_local_route_override_criteria = AAZStrType(
-            serialized_name="vnetLocalRouteOverrideCriteria",
-        )
 
         _schema.id = cls._schema_express_route_connection_read.id
         _schema.name = cls._schema_express_route_connection_read.name

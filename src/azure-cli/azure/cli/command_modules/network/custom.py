@@ -62,10 +62,13 @@ from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condit
     Add as _WAFCustomRuleMatchConditionAdd
 from .aaz.latest.network.application_gateway.waf_policy.policy_setting import Update as _WAFPolicySettingUpdate
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
+from .aaz.latest.network.express_route.gateway import Create as _ExpressRouteGatewayCreate, \
+    Update as _ExpressRouteGatewayUpdate
 from .aaz.latest.network.express_route.gateway.connection import Create as _ExpressRouteConnectionCreate, \
     Update as _ExpressRouteConnectionUpdate
 from .aaz.latest.network.express_route.peering import Create as _ExpressRoutePeeringCreate, \
     Update as _ExpressRoutePeeringUpdate
+from .aaz.latest.network.express_route.peering.connection import Create as _ExpressRoutePeeringConnectionCreate
 from .aaz.latest.network.express_route.port import Create as _ExpressRoutePortCreate
 from .aaz.latest.network.express_route.port.identity import Assign as _ExpressRoutePortIdentityAssign
 from .aaz.latest.network.express_route.port.link import Update as _ExpressRoutePortLinkUpdate
@@ -3152,7 +3155,7 @@ class ExpressRouteCreate(_ExpressRouteCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.bandwidth = AAZListArg(
             options=["--bandwidth"],
@@ -3162,6 +3165,9 @@ class ExpressRouteCreate(_ExpressRouteCreate):
         args_schema.bandwidth_in_mbps._registered = False
         args_schema.bandwidth_in_gbps._registered = False
         args_schema.sku_name._registered = False
+        args_schema.express_route_port._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRoutePorts/{}",
+        )
         return args_schema
 
     def pre_operations(self):
@@ -3182,7 +3188,7 @@ class ExpressRouteUpdate(_ExpressRouteUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.bandwidth = AAZListArg(
             options=["--bandwidth"],
@@ -3193,6 +3199,9 @@ class ExpressRouteUpdate(_ExpressRouteUpdate):
         args_schema.bandwidth_in_mbps._registered = False
         args_schema.bandwidth_in_gbps._registered = False
         args_schema.sku_name._registered = False
+        args_schema.express_route_port._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRoutePorts/{}",
+        )
         return args_schema
 
     def pre_operations(self):
@@ -3329,11 +3338,50 @@ class ExpressRoutePeeringUpdate(_ExpressRoutePeeringUpdate):
                 args.route_filter = None
             if microsoft_config is not None:
                 args.ipv6_peering_config['microsoft_peering_config'] = microsoft_config
+
+
+class ExpressRoutePeeringConnectionCreate(_ExpressRoutePeeringConnectionCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.peer_circuit._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{}/peerings/{peering_name}",
+        )
+        args_schema.source_circuit._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{circuit_name}/peerings/{peering_name}",
+        )
+
+        return args_schema
 # endregion
 
 
 # region ExpressRoute Connection
 # pylint: disable=unused-argument
+class ExpressRouteGatewayCreate(_ExpressRouteGatewayCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.virtual_hub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
+class ExpressRouteGatewayUpdate(_ExpressRouteGatewayUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.virtual_hub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
 class ExpressRouteConnectionCreate(_ExpressRouteConnectionCreate):
 
     @classmethod

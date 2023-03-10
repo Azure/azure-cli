@@ -67,12 +67,9 @@ class Create(AAZCommand):
             options=["--bandwidth-in-gbps"],
             help="Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Mbps.  Values from: az network express-route list-service-providers.",
         )
-        _args_schema.express_route_port = AAZResourceIdArg(
+        _args_schema.express_route_port = AAZStrArg(
             options=["--express-route-port"],
             help="Name or ID of an ExpressRoute port.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRoutePorts/{}"
-            )
         )
         _args_schema.allow_global_reach = AAZBoolArg(
             options=["--allow-global-reach"],
