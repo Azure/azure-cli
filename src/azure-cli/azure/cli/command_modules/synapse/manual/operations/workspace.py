@@ -21,9 +21,12 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
                      sql_admin_login_user, sql_admin_login_password, location=None, key_name="default", key_identifier=None, enable_managed_virtual_network=None,
                      allowed_aad_tenant_ids=None, prevent_data_exfiltration=None, tags=None, repository_type=None, host_name=None, account_name=None,
                      collaboration_branch=None, repository_name=None, root_folder='/', project_name=None, last_commit_id=None, tenant_id=None,
-                     managed_resource_group_name=None, no_wait=False):
-    identity_type = "SystemAssigned"
-    identity = ManagedIdentity(type=identity_type)
+                     managed_resource_group_name=None, user_assigned_identity_id=None, no_wait=False):
+    identity_type = "SystemAssigned,UserAssigned" if user_assigned_identity_id else "SystemAssigned"
+    if user_assigned_identity_id:
+        identity = ManagedIdentity(type=identity_type,user_assigned_identities=user_assigned_identity_id)
+    else:
+        identity = ManagedIdentity(type=identity_type)
     account_url = "https://{}.dfs.{}".format(storage_account, cmd.cli_ctx.cloud.suffixes.storage_endpoint)
     default_data_lake_storage = DataLakeStorageAccountDetails(account_url=account_url, filesystem=file_system)
     encryption = None

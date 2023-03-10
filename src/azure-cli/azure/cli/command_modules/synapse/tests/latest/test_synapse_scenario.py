@@ -3111,4 +3111,41 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse link-connection show --workspace-name {workspace_name} --name {link_connection_name}',
             expect_failure=True)
+        
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
+    def test_user_assigned_identity_id_workspace(self):
+        self.kwargs.update({
+            'uami_name1': 'autotestuami1',
+            'uami_name2': 'autotestuami2',
+            'workspace': self.create_random_name(prefix='clitest', length=16),
+            'location': self.location,
+            'file-system': 'testfilesystem',
+            'login-user': 'cliuser1',
+            'login-password': self.create_random_name(prefix='Pswd1', length=16)
+        })
+        # test workspace with managed virtual network
+        self.cmd('az identity create --name {uami_name1} --resource-group {rg}')
+        self.cmd('az identity create --name {uami_name2} --resource-group {rg}')
+        uamis = self.cmd('az identity list --resource-group {rg}').get_output_in_json()
+        print(uamis)
+        
+        # create synapse workspace
+        self.cmd(
+            'az synapse workspace create --name {workspace} --resource-group {rg} --storage-account {storage-account} '
+            '--file-system {file-system} --sql-admin-login-user {login-user} '
+            '--sql-admin-login-password {login-password} '
+            '--location {location} --user_assigned_identity_id', checks=[
+                self.check('name', self.kwargs['workspace']),
+                self.check('type', 'Microsoft.Synapse/workspaces'),
+                self.check('provisioningState', 'Succeeded')
+            ])
+
+        self.cmd('az synapse workspace show --name {workspace} --resource-group {rg}', checks=[
+            self.check('name', self.kwargs['workspace']),
+            self.check('type', 'Microsoft.Synapse/workspaces'),
+            self.check('provisioningState', 'Succeeded')
+        ])
+        ws = self.cmd('az synapse workspace show --name {workspace} --resource-group {rg}').get_output_in_json()
+        print(ws)
 
