@@ -726,7 +726,7 @@ jobs:
       
       echo "== Test rpm package on ${IMAGE} =="
       docker pull $IMAGE
-      docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_rpm_in_docker.sh"
+      docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_mariner_in_docker.sh"
 
     displayName: 'Test Rpm Package Mariner'
 
