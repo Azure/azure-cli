@@ -29,6 +29,8 @@ class TestBicep(unittest.TestCase):
 
         with contextlib.suppress(FileNotFoundError):
             remove_bicep_installation(cli_ctx)
+
+        cli_ctx.config.set_value("bicep", "use_binary_from_path", "false")
         with self.assertRaisesRegex(CLIError, 'Bicep CLI not found. Install it now by running "az bicep install".'):
             run_bicep_command(cli_ctx, ["--version"], auto_install=False)
 
@@ -110,6 +112,7 @@ class TestBicep(unittest.TestCase):
         get_bicep_latest_release_tag_stub.return_value = "v2.0.0"
 
         cli_ctx.config.set_value("bicep", "check_version", "True")
+        cli_ctx.config.set_value("bicep", "use_binary_from_path", "false")
         run_bicep_command(cli_ctx, ["--version"])
 
         warning_mock.assert_called_once_with(
