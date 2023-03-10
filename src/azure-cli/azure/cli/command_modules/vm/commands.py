@@ -367,6 +367,7 @@ def load_command_table(self, _):
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
         g.custom_command('auto-shutdown', 'auto_shutdown_vm')
         g.command('assess-patches', 'begin_assess_patches', min_api='2020-06-01')
+        g.custom_command('reimage', 'reimage_vm', supports_no_wait=True, min_api='2022-11-01')
 
     with self.command_group('vm', compute_vm_sdk, client_factory=cf_vm) as g:
         g.custom_command('install-patches', 'install_vm_patches', supports_no_wait=True, min_api='2020-12-01')
