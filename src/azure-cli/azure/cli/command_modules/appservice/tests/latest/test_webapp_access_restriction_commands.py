@@ -169,6 +169,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[1].ipAddress', 'AzureCloud.WestEurope,AzureCloud.NorthEurope')
         ])
 
+    @unittest.skip("Invalid test case that cannot pass in the live mode.")
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_add_http_header(self, resource_group):

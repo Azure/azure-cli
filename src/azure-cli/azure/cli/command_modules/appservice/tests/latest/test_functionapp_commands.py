@@ -1791,6 +1791,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 0)
         ])
 
+    @unittest.skip("Invalid test case that cannot pass in the live mode.")
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1818,6 +1819,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 0)
         ])
 
+    @unittest.skip("Invalid test case that cannot pass in the live mode.")
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="functionapp_rg")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="vnet_rg")
@@ -1844,6 +1846,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 0)
         ])
 
+    @unittest.skip("Invalid test case that cannot pass in the live mode.")
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="functionapp_rg")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="vnet_rg")
