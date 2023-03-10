@@ -63,6 +63,22 @@ class VMImageListByAliasesScenarioTest(ScenarioTest):
         self.assertEqual(result[0]['architecture'], 'x64')
 
 
+class VmReimageTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_reimage_')
+    def test_vm_reimage(self, resource_group):
+
+        self.kwargs.update({
+            'vm': 'vm'
+        })
+        
+        self.cmd('vm create -g {rg} -n {vm} --admin-username ubuntu --image UbuntuLTS --admin-password testPassword0 '
+                 '--authentication-type password --use-unmanaged-disk --nsg-rule NONE')
+
+        self.cmd('vm reimage --name {vm} --resource-group {rg} --temp-disk true')
+
+
+
 class VMUsageScenarioTest(ScenarioTest):
 
     def test_vm_usage(self):

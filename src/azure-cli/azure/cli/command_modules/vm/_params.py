@@ -474,9 +474,6 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('include_user_data', action='store_true', options_list=['--include-user-data', '-u'], help='Include the user data properties in the query result.', min_api='2021-03-01')
 
-    with self.argument_context('vm reimage', min_api='2022-11-01') as c:
-        c.argument('temp_disk', help='List VM instances in a specific VMSS. Please specify the VMSS id or VMSS name')
-
     for scope in ['vm get-instance-view', 'vm wait', 'vmss wait']:
         with self.argument_context(scope) as c:
             c.ignore('include_user_data')
