@@ -165,7 +165,7 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
         self.assertEqual(ns.subnet, 'vnet1subnet')
         self.assertEqual(ns.vnet_type, 'existing')
 
-    @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_network_client_with_existing_subnet)
+    @mock.patch('azure.command_modules.vm._validators.Vnet.show', _mock_network_client_with_existing_subnet)
     def test_matching_vnet_no_subnet_size_matching(self):
         ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
         ns.instance_count = 1000
