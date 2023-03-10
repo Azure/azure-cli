@@ -22,9 +22,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-01-01",
+        "version": "2022-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutegateways/{}/expressrouteconnections", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutegateways/{}/expressrouteconnections", "2022-07-01"],
         ]
     }
 
@@ -119,7 +119,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2022-07-01",
                     required=True,
                 ),
             }
@@ -173,6 +173,9 @@ class List(AAZCommand):
             properties.enable_internet_security = AAZBoolType(
                 serialized_name="enableInternetSecurity",
             )
+            properties.enable_private_link_fast_path = AAZBoolType(
+                serialized_name="enablePrivateLinkFastPath",
+            )
             properties.express_route_circuit_peering = AAZObjectType(
                 serialized_name="expressRouteCircuitPeering",
                 flags={"required": True},
@@ -199,6 +202,14 @@ class List(AAZCommand):
                 serialized_name="associatedRouteTable",
             )
             _ListHelper._build_schema_sub_resource_read(routing_configuration.associated_route_table)
+            routing_configuration.inbound_route_map = AAZObjectType(
+                serialized_name="inboundRouteMap",
+            )
+            _ListHelper._build_schema_sub_resource_read(routing_configuration.inbound_route_map)
+            routing_configuration.outbound_route_map = AAZObjectType(
+                serialized_name="outboundRouteMap",
+            )
+            _ListHelper._build_schema_sub_resource_read(routing_configuration.outbound_route_map)
             routing_configuration.propagated_route_tables = AAZObjectType(
                 serialized_name="propagatedRouteTables",
             )
@@ -225,6 +236,9 @@ class List(AAZCommand):
             vnet_routes.static_routes = AAZListType(
                 serialized_name="staticRoutes",
             )
+            vnet_routes.static_routes_config = AAZObjectType(
+                serialized_name="staticRoutesConfig",
+            )
 
             bgp_connections = cls._schema_on_200.value.Element.properties.routing_configuration.vnet_routes.bgp_connections
             bgp_connections.Element = AAZObjectType()
@@ -244,6 +258,15 @@ class List(AAZCommand):
 
             address_prefixes = cls._schema_on_200.value.Element.properties.routing_configuration.vnet_routes.static_routes.Element.address_prefixes
             address_prefixes.Element = AAZStrType()
+
+            static_routes_config = cls._schema_on_200.value.Element.properties.routing_configuration.vnet_routes.static_routes_config
+            static_routes_config.propagate_static_routes = AAZBoolType(
+                serialized_name="propagateStaticRoutes",
+                flags={"read_only": True},
+            )
+            static_routes_config.vnet_local_route_override_criteria = AAZStrType(
+                serialized_name="vnetLocalRouteOverrideCriteria",
+            )
 
             return cls._schema_on_200
 

@@ -554,7 +554,7 @@ def load_command_table(self, _):
         self.command_table["network watcher flow-log delete"] = NwFlowLogDelete(loader=self)
         g.custom_show_command('show', 'show_nw_flow_logging', validator=process_nw_flow_log_show_namespace)
 
-    with self.command_group('network watcher troubleshooting') as g:
+    with self.command_group('network watcher troubleshooting'):
         from .operations.watcher import NwTroubleshootingStart, NwTroubleshootingShow
         self.command_table["network watcher troubleshooting start"] = NwTroubleshootingStart(loader=self)
         self.command_table["network watcher troubleshooting show"] = NwTroubleshootingShow(loader=self)
