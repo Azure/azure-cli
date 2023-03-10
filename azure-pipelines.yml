@@ -687,22 +687,21 @@ jobs:
   displayName: Test Rpm Package Mariner
   timeoutInMinutes: 120
   dependsOn:
-  - BuildRpmPackagesMariner
+  - BuildRpmPackageMariner
   - ExtractMetadata
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     name: $(pool)
   strategy:
     matrix:
-      matrix:
-        2.0 AMD64:
-          image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-          artifact: rpm-mariner2.0-amd64
-          pool: ${{ variables.ubuntu_pool }}
-        2.0 ARM64:
-          image: mcr.microsoft.com/cbl-mariner/base/core:2.0
-          artifact: rpm-mariner2.0-arm64
-          pool: ${{ variables.ubuntu_arm64_pool }}
+      2.0 AMD64:
+        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
+        artifact: rpm-mariner2.0-amd64
+        pool: ${{ variables.ubuntu_pool }}
+      2.0 ARM64:
+        image: mcr.microsoft.com/cbl-mariner/base/core:2.0
+        artifact: rpm-mariner2.0-arm64
+        pool: ${{ variables.ubuntu_arm64_pool }}
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
