@@ -878,9 +878,9 @@ def __flatten_key_value(key, value, flattened_data, depth, separator):
             if key in flattened_data:
                 logger.debug(
                     "The key %s already exist, value has been overwritten.", key)
-            flattened_data[key] = str(value)
+            flattened_data[key] = value if isinstance(value, str) else json.dumps(value) # Ensure boolean values are properly stringified.
     else:
-        flattened_data[key] = str(value)
+        flattened_data[key] = value if isinstance(value, str) else json.dumps(value)
 
 
 def __export_keyvalue(key_segments, value, constructed_data):
