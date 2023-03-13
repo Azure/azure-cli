@@ -457,6 +457,7 @@ class MainModuleCompactor:
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     cli_src = sys.argv[1] if len(sys.argv) >= 2 else os.path.join('..', 'src')
     _LOGGER.info("Source folder {} is used.".format(cli_src))
     for module in ["network"]:
