@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import os
+import sys
 import re
 import shutil
 import py_compile
@@ -199,6 +200,10 @@ class MainModuleCompactor:
 
     def compact_resource_group_commands(self, ctx: CompactorCtx, dirs):
         folder = self._get_aaz_rg_path(dirs)
+        cmds_file = os.path.join(folder, '__cmds.py')
+        if os.path.exists(cmds_file):
+            raise ValueError("Module is already compacted: {}".format(cmds_file))
+
         ctx.set_current_namespace(dirs, write_mode=True)
 
         compact_folder = self._get_compact_aaz_rg_path(dirs)
@@ -452,7 +457,8 @@ class MainModuleCompactor:
 
 
 if __name__ == "__main__":
-    cli_src = "../src"
+    cli_src = sys.argv[1] if len(sys.argv) >= 2 else os.path.join('..', 'src')
+    _LOGGER.info("Source folder {} is used.".format(cli_src))
     for module in ["network"]:
         compactor = MainModuleCompactor(module, cli_src=cli_src)
         compactor.compact()
