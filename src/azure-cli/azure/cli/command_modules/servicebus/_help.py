@@ -308,12 +308,36 @@ examples:
     text: az servicebus namespace network-rule-set ip-rule remove --resource-group myresourcegroup --namespace-name mynamespace --ip-rule-index 1
 """
 
+helps['servicebus namespace network-rule-set ip-rule show'] = """
+type: command
+short-summary: Show ip-rule of network for a namespace
+examples:
+  - name: Show IP rule from NetworkruleSet for a namespace
+    text: az servicebus namespace network-rule-set ip-rule show --resource-group myresourcegroup --namespace-name mynamespace --ip-rule-index 1
+"""
+
+helps['servicebus namespace network-rule-set ip-rule update'] = """
+type: command
+short-summary: update the ip-rule of network for a namespace for particular index
+examples:
+  - name: update the ip-rule of network for particular index
+    text: az servicebus namespace network-rule-set ip-rule update --resource-group myresourcegroup --namespace-name mynamespace --ip-rule-index 1 --ip-address 2.2.2.2
+"""
+
 helps['servicebus namespace network-rule-set virtual-network-rule remove'] = """
 type: command
 short-summary: Remove subnet-rule of network for a namespace
 examples:
   - name: remove VirtualNetwork rule from NetworkruleSet for a namespace
-    text: az servicebus namespace network-rule-set remove --resource-group myresourcegroup --namespace-name mynamespace --subnet {subnetId}
+    text: az servicebus namespace network-rule-set virtual-network-rule remove --resource-group myresourcegroup --namespace-name mynamespace --subnet {subnetId}
+"""
+
+helps['servicebus namespace network-rule-set virtual-network-rule update'] = """
+type: command
+short-summary: update the subnet-rule of network for a namespace for particular index
+examples:
+  - name: update the subnet-rule of network for particular index
+    text: az servicebus namespace network-rule-set virtual-network-rule update --resource-group myresourcegroup --namespace-name mynamespace --virtual-network-rule-index 0 --subnet mysubnetid --ignore-missing-endpoint True
 """
 
 helps['servicebus namespace show'] = """

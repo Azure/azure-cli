@@ -55,14 +55,15 @@ class Add(AAZCommand):
             required=True,
         )
         _args_schema.virtual_network_rule_index = AAZIntArg(
-            options=["--virtual-network-rule-index"],
+            options=["--network-rule-index", "--virtual-network-rule-index"],
+            help="virtual-network-rule-index network-rule-index",
         )
 
         # define Arg Group "Parameters.properties.virtualNetworkRules[]"
 
         _args_schema = cls._args_schema
         _args_schema.ignore_missing_endpoint = AAZBoolArg(
-            options=["--ignore-missing-endpoint"],
+            options=["--missing-endpoint", "--ignore-missing-endpoint"],
             arg_group="Parameters.properties.virtualNetworkRules[]",
             help="Value that indicates whether to ignore missing VNet Service Endpoint",
         )

@@ -81,7 +81,7 @@ class Update(AAZCommand):
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
         _args_schema.enable_trusted_service_access = AAZBoolArg(
-            options=["--enable-trusted-service-access"],
+            options=["-t", "--enable-trusted-service-access"],
             arg_group="Properties",
             help="Value that indicates whether Trusted Service Access is Enabled or not.",
             nullable=True,
@@ -118,19 +118,12 @@ class Update(AAZCommand):
 
         _element = cls._args_schema.virtual_network_rules.Element
         _element.ignore_missing_endpoint = AAZBoolArg(
-            options=["ignore-missing-endpoint"],
+            options=["missing-endpoint", "ignore-missing-endpoint"],
             help="Value that indicates whether to ignore missing VNet Service Endpoint",
             nullable=True,
         )
-        _element.subnet = AAZObjectArg(
+        _element.subnet = AAZStrArg(
             options=["subnet"],
-            help="Subnet properties",
-            nullable=True,
-        )
-
-        subnet = cls._args_schema.virtual_network_rules.Element.subnet
-        subnet.id = AAZStrArg(
-            options=["id"],
             help="Resource ID of Virtual Network Subnet",
         )
         return cls._args_schema
@@ -380,11 +373,11 @@ class Update(AAZCommand):
             _elements = _builder.get(".properties.virtualNetworkRules[]")
             if _elements is not None:
                 _elements.set_prop("ignoreMissingVnetServiceEndpoint", AAZBoolType, ".ignore_missing_endpoint")
-                _elements.set_prop("subnet", AAZObjectType, ".subnet")
+                _elements.set_prop("subnet", AAZObjectType)
 
             subnet = _builder.get(".properties.virtualNetworkRules[].subnet")
             if subnet is not None:
-                subnet.set_prop("id", AAZStrType, ".id", typ_kwargs={"flags": {"required": True}})
+                subnet.set_prop("id", AAZStrType, ".subnet", typ_kwargs={"flags": {"required": True}})
 
             return _instance_value
 

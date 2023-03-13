@@ -57,7 +57,8 @@ class Update(AAZCommand):
             required=True,
         )
         _args_schema.virtual_network_rule_index = AAZIntArg(
-            options=["--virtual-network-rule-index"],
+            options=["--network-rule-index", "--virtual-network-rule-index"],
+            help="virtual-network-rule-index network-rule-index",
             required=True,
         )
 
@@ -65,21 +66,18 @@ class Update(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.ignore_missing_endpoint = AAZBoolArg(
-            options=["--ignore-missing-endpoint"],
+            options=["--missing-endpoint", "--ignore-missing-endpoint"],
             arg_group="Parameters.properties.virtualNetworkRules[]",
             help="Value that indicates whether to ignore missing VNet Service Endpoint",
             nullable=True,
         )
-        _args_schema.subnet = AAZObjectArg(
-            options=["--subnet"],
-            arg_group="Parameters.properties.virtualNetworkRules[]",
-            help="Subnet properties",
-            nullable=True,
-        )
 
-        subnet = cls._args_schema.subnet
-        subnet.id = AAZStrArg(
-            options=["id"],
+        # define Arg Group "Subnet"
+
+        _args_schema = cls._args_schema
+        _args_schema.subnet = AAZStrArg(
+            options=["--subnet"],
+            arg_group="Subnet",
             help="Resource ID of Virtual Network Subnet",
         )
         return cls._args_schema
@@ -330,11 +328,11 @@ class Update(AAZCommand):
                 typ=AAZObjectType
             )
             _builder.set_prop("ignoreMissingVnetServiceEndpoint", AAZBoolType, ".ignore_missing_endpoint")
-            _builder.set_prop("subnet", AAZObjectType, ".subnet")
+            _builder.set_prop("subnet", AAZObjectType)
 
             subnet = _builder.get(".subnet")
             if subnet is not None:
-                subnet.set_prop("id", AAZStrType, ".id", typ_kwargs={"flags": {"required": True}})
+                subnet.set_prop("id", AAZStrType, ".subnet", typ_kwargs={"flags": {"required": True}})
 
             return _instance_value
 

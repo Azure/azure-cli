@@ -32,8 +32,10 @@ class SBNetworkrulesetCRUDScenarioTest(ScenarioTest):
             'accessrights': 'Send',
             'namevnet': 'sbehvnettest1',
             'namevnet1': 'sbehvnettest2',
+            'namevnet2': 'sbehvnettest2',
             'namesubnet1': 'default',
             'namesubnet2': 'secondvnet',
+            'namesubnet3': 'secondvnet',
             'isautoinflateenabled': 'True',
             'maximumthroughputunits': 4,
             'maximumthroughputunits_update': 5,
@@ -44,11 +46,14 @@ class SBNetworkrulesetCRUDScenarioTest(ScenarioTest):
 
         self.cmd('network vnet create --resource-group {rg} --name {namevnet}')
         self.cmd('network vnet create --resource-group {rg} --name {namevnet1}')
+        self.cmd('network vnet create --resource-group {rg} --name {namevnet2}')
 
         created_subnet1 = self.cmd(
             'network vnet subnet create --resource-group {rg} --name {namesubnet1} --vnet-name {namevnet} --address-prefixes 10.0.0.0/24').get_output_in_json()
         created_subnet2 = self.cmd(
             'network vnet subnet create --resource-group {rg} --name {namesubnet2} --vnet-name {namevnet1} --address-prefixes 10.0.0.0/24').get_output_in_json()
+        created_subnet3 = self.cmd(
+            'network vnet subnet create --resource-group {rg} --name {namesubnet3} --vnet-name {namevnet2} --address-prefixes 10.0.0.0/24').get_output_in_json()
 
         # Create Namespace
         self.cmd(
@@ -139,6 +144,11 @@ class SBNetworkrulesetCRUDScenarioTest(ScenarioTest):
         self.assertEqual('Enabled', networkRule['publicNetworkAccess'])
         self.assertEqual('Allow', networkRule['defaultAction'])
 
+        # show the vnet from particular index subnet-rule
+        networkRule = self.cmd('servicebus namespace network-rule-set virtual-network-rule show --resource-group {rg} '
+                               '--name {namespacename} --virtual-network-rule-index 0').get_output_in_json()
+        self.assertEqual(networkRule['subnet']['id'].lower(), created_subnet1['id'].lower())
+
         networkRule = self.cmd('servicebus namespace network-rule-set update --resource-group {rg} --name {namespacename} '
                                '--public-network-access Disabled').get_output_in_json()
         self.assertEqual(len(networkRule['virtualNetworkRules']), 2)
@@ -197,10 +207,10 @@ class SBNetworkrulesetCRUDScenarioTest(ScenarioTest):
 
         # list Vnetrules
         networkRule = self.cmd(
-            'servicebus namespace network-rule-set virtual-network-rule list --resource-group {rg} --name {namespacename}')
+            'servicebus namespace network-rule-set virtual-network-rule list --resource-group {rg} --name {namespacename}').get_output_in_json()
         self.assertEqual(len(networkRule), 2)
-        self.assertEqual(networkRule['virtualNetworkRules'][0]['subnet']['id'].lower(), created_subnet1['id'].lower())
-        self.assertEqual(networkRule['virtualNetworkRules'][1]['subnet']['id'].lower(), created_subnet2['id'].lower())
+        self.assertEqual(networkRule[0]['subnet']['id'].lower(), created_subnet1['id'].lower())
+        self.assertEqual(networkRule[1]['subnet']['id'].lower(), created_subnet2['id'].lower())
 
         # remove Vnetrule
         self.cmd(

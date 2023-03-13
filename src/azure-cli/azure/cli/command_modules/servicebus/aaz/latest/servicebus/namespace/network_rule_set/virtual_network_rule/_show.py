@@ -55,7 +55,8 @@ class Show(AAZCommand):
             required=True,
         )
         _args_schema.virtual_network_rule_index = AAZIntArg(
-            options=["--virtual-network-rule-index"],
+            options=["--network-rule-index", "--virtual-network-rule-index"],
+            help="virtual-network-rule-index network-rule-index",
             required=True,
         )
         return cls._args_schema
