@@ -123,6 +123,7 @@ if %errorlevel% neq 0 goto ERROR
 pushd %BUILDING_DIR%
 %BUILDING_DIR%\python.exe %~dp0\patch_models_v2.py
 %BUILDING_DIR%\python.exe %REPO_ROOT%\scripts\trim_sdk.py
+%BUILDING_DIR%\python.exe %REPO_ROOT%\scripts\compact_aaz.py
 popd
 
 echo Creating the wbin (Windows binaries) folder that will be added to the path...

@@ -6,6 +6,9 @@ import os
 import re
 import shutil
 import py_compile
+import logging
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class CompactorCtx:
@@ -125,15 +128,18 @@ class MainModuleCompactor:
     _file_end_pattern = re.compile(r'^__all__ = \[.*]\s*$')
     _class_method_register = "    @classmethod"
 
-    def __init__(self, mod_name, compiled_to_pyc=False):
+    def __init__(self, mod_name, cli_src, compiled_to_pyc=False):
         self._mod_name = mod_name
+        self._cli_src = cli_src
         self._folder = self._get_module_folder()
         self._compiled_to_pyc = compiled_to_pyc
 
     def compact(self):
+        _LOGGER.info("Compacting {} folder:".format(self._get_aaz_folder()))
         self._create_compact_aaz_folder()
         from azure.cli.core.profiles import AZURE_API_PROFILES
         for profile in AZURE_API_PROFILES:
+            _LOGGER.info("Compacting profile {}".format(profile))
             profile_mod_name = profile.lower().replace('-', '_')
             profile_path = self._get_aaz_rg_path(profile_mod_name)
             if not os.path.exists(profile_path):
@@ -147,7 +153,16 @@ class MainModuleCompactor:
             ctx = CompactorCtx()
             self.compact_sub_resource_groups(ctx, profile_mod_name)
 
+    def replace(self):
+        aaz_folder = self._get_aaz_folder()
+        compact_aaz_folder = self._get_compact_aaz_folder()
+        _LOGGER.info("Removing {} folder".format(aaz_folder))
+        shutil.rmtree(aaz_folder)
+        _LOGGER.info("Move {} folder to {}".format(compact_aaz_folder, aaz_folder))
+        shutil.move(compact_aaz_folder, aaz_folder)
+
     def _write_py_file(self, path, content):
+        _LOGGER.debug("Writing python file {}".format(path))
         init_content = _PY_HEADER + content
         with open(path, 'w') as f:
             f.write(init_content)
@@ -188,6 +203,7 @@ class MainModuleCompactor:
 
         compact_folder = self._get_compact_aaz_rg_path(dirs)
 
+        _LOGGER.debug("Parsing folder {}".format(folder))
         cmds_content, grp_cls = self._parse_cmd_group_file(folder, None)
 
         cmds_content, cmd_clses, cmd_cls_helpers = self._parse_cmd_files(folder, cmds_content)
@@ -259,6 +275,8 @@ class MainModuleCompactor:
         if not os.path.isfile(cmd_group_file):
             return None, None
 
+        _LOGGER.debug("Parsing command group file {}".format(cmd_group_file))
+
         grp_cls = None
 
         if not cmds_content:
@@ -288,6 +306,8 @@ class MainModuleCompactor:
 
         cmds_content += ''.join(['\n', '\n', *cg_lines])
 
+        _LOGGER.debug("Parsed CommandGroup Class: {}".format(grp_cls))
+
         return cmds_content, grp_cls
 
     def _parse_cmd_files(self, folder,  cmds_content):
@@ -313,9 +333,13 @@ class MainModuleCompactor:
                         "codes": helper_codes
                     }
 
+        _LOGGER.debug("Parsed Command Classes: {}".format(cmd_clses))
+
         return cmds_content, cmd_clses, cmd_cls_helpers
 
     def _parse_cmd_file(self, cmd_file):
+        _LOGGER.debug("Parsing command file {}".format(cmd_file))
+
         cmd_cls = None
         cmd_lines = []
         cmd_helper_lines = []
@@ -409,11 +433,9 @@ class MainModuleCompactor:
         return helper_name, properties_code, helper_codes
 
     def _get_module_folder(self):
-        cli_folder = '..'
-        module_folder = os.path.join(
-            cli_folder, "src", "azure-cli", "azure", "cli", "command_modules", self._mod_name.replace('-', '_').lower())
+        module_folder = os.path.join(self._cli_src, "azure-cli", "azure", "cli", "command_modules", self._mod_name.replace('-', '_').lower())
         if not os.path.exists(module_folder):
-            raise ValueError("Module folder is not exist: {}".format(cli_folder))
+            raise ValueError("Module folder is not exist: {}".format(module_folder))
         return module_folder
 
     def _get_aaz_folder(self):
@@ -430,5 +452,8 @@ class MainModuleCompactor:
 
 
 if __name__ == "__main__":
-    compactor = MainModuleCompactor("network")
-    compactor.compact()
+    cli_src = "../src"
+    for module in ["network"]:
+        compactor = MainModuleCompactor(module, cli_src=cli_src)
+        compactor.compact()
+        compactor.replace()
