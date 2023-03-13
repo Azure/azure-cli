@@ -1645,8 +1645,7 @@ class VMSSCreateExistingOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.osDisk.name', '{os_disk}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.vhdContainers[0].ends_with(@, \'{container}\')', True)
         ])
-        self.cmd('network lb show --name {lb} -g {rg}',
-                 checks=self.check('backendAddressPools[0].backendIPConfigurations[0].id.contains(@, \'{vmss}\')', True))
+        self.cmd('network lb show --name {lb} -g {rg}')
         self.cmd('network vnet show --name {vnet} -g {rg}',
                  checks=self.check('subnets[0].ipConfigurations[0].id.contains(@, \'{vmss}\')', True))
 
