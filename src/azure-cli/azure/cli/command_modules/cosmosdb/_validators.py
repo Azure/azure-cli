@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long, too-many-statements, no-else-raise, unused-argument, too-many-branches
 
 import ipaddress
 from azure.cli.core.azclierror import InvalidArgumentValueError

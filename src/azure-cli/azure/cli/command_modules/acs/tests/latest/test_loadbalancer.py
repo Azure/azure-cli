@@ -15,6 +15,7 @@ class TestLoadBalancer(unittest.TestCase):
     def test_configure_load_balancer_profile(self):
         cmd = MockCmd(MockCLI())
         managed_outbound_ip_count = 5
+        managed_outbound_ipv6_count = 4
         outbound_ips = None
         outbound_ip_prefixes = None
         outbound_ports = 80
@@ -37,7 +38,8 @@ class TestLoadBalancer(unittest.TestCase):
 
         profile = ManagedClusterLoadBalancerProfile()
         profile.managed_outbound_i_ps = ManagedClusterLoadBalancerProfileManagedOutboundIPs(
-            count=2
+            count=2,
+            count_ipv6=3
         )
         profile.outbound_i_ps = ManagedClusterLoadBalancerProfileOutboundIPs(
             public_i_ps="public_i_ps"
@@ -48,6 +50,7 @@ class TestLoadBalancer(unittest.TestCase):
 
         p = loadbalancer.configure_load_balancer_profile(
             managed_outbound_ip_count,
+            managed_outbound_ipv6_count,
             outbound_ips,
             outbound_ip_prefixes,
             outbound_ports,
@@ -57,6 +60,7 @@ class TestLoadBalancer(unittest.TestCase):
         )
 
         self.assertEqual(p.managed_outbound_i_ps.count, 5)
+        self.assertEqual(p.managed_outbound_i_ps.count_ipv6, 4)
         self.assertEqual(p.outbound_i_ps, None)
         self.assertEqual(p.outbound_ip_prefixes, None)
         self.assertEqual(p.allocated_outbound_ports, 80)

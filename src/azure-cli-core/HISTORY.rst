@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.46.0
+++++++
+* Add announcement for WAM-based login (#25416)
+
 2.45.0
 ++++++
 * `aaz`: Support AAZFileArg (#25075)

@@ -370,7 +370,7 @@ class TagScenarioTest(ScenarioTest):
         })
 
         vault = self.cmd('resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults '
-                         '--is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",'
+                '--is-full-object -p "{{\\"properties\\":{{\\"publicNetworkAccess\\":\\"Enabled\\"}},\\"location\\":\\"{loc}\\",'
                          '\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
                          checks=self.check('name', '{vault}')).get_output_in_json()
         self.kwargs['vault_id'] = vault['id']

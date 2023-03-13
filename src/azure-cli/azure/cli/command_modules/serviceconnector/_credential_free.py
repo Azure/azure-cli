@@ -35,6 +35,19 @@ AUTHTYPES = {
 # pylint: disable=line-too-long, consider-using-f-string
 # For db(mysqlFlex/psql/psqlFlex/sql) linker with auth type=systemAssignedIdentity, enable AAD auth and create db user on data plane
 # For other linker, ignore the steps
+def is_passwordless_command(cmd, auth_info):
+    # return if connection is not for db mi
+    if auth_info['auth_type'] not in {AUTHTYPES[AUTH_TYPE.SystemIdentity], AUTHTYPES[AUTH_TYPE.UserAccount]}:
+        return False
+    source_type = get_source_resource_name(cmd)
+    target_type = get_target_resource_name(cmd)
+    if source_type not in {RESOURCE.WebApp, RESOURCE.ContainerApp, RESOURCE.SpringCloud, RESOURCE.SpringCloudDeprecated, RESOURCE.Local}:
+        return False
+    if target_type not in {RESOURCE.Sql, RESOURCE.Postgres, RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible}:
+        return False
+    return True
+
+
 def enable_mi_for_db_linker(cmd, source_id, target_id, auth_info, client_type, connection_name):
     # return if connection is not for db mi
     if auth_info['auth_type'] not in {AUTHTYPES[AUTH_TYPE.SystemIdentity], AUTHTYPES[AUTH_TYPE.UserAccount]}:
@@ -131,7 +144,7 @@ class TargetHandler:
             'az account show').get("user").get("name")
         self.login_usertype = run_cli_cmd(
             'az account show').get("user").get("type")
-        if(self.login_usertype not in ['servicePrincipal', 'user']):
+        if self.login_usertype not in ['servicePrincipal', 'user']:
             raise CLIInternalError(
                 f'{self.login_usertype} is not supported. Please login as user or servicePrincipal')
         self.aad_username = "aad_" + connection_name
@@ -309,10 +322,6 @@ class SqlHandler(TargetHandler):
         target_segments = parse_resource_id(target_id)
         self.server = target_segments.get('name')
         self.dbname = target_segments.get('child_name_1')
-        if self.auth_type == AUTHTYPES[AUTH_TYPE.SystemIdentity]:
-            self.aad_username = self.identity_name
-        if self.auth_type == AUTHTYPES[AUTH_TYPE.UserAccount]:
-            self.aad_username = self.login_username
 
     def set_user_admin(self, user_object_id, **kwargs):
         # pylint: disable=not-an-iterable
@@ -406,6 +415,10 @@ class SqlHandler(TargetHandler):
         return {'connection_string': conn_string, 'attrs_before': {SQL_COPT_SS_ACCESS_TOKEN: token_struct}}
 
     def get_create_query(self):
+        if self.auth_type == AUTHTYPES[AUTH_TYPE.SystemIdentity]:
+            self.aad_username = self.identity_name
+        if self.auth_type == AUTHTYPES[AUTH_TYPE.UserAccount]:
+            self.aad_username = self.login_username
         role_q = "CREATE USER \"{}\" FROM EXTERNAL PROVIDER;".format(
             self.aad_username)
         grant_q = "GRANT CONTROL ON DATABASE::{} TO \"{}\";".format(

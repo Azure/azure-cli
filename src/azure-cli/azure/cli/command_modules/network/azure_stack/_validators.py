@@ -201,7 +201,7 @@ def validate_address_pool_name_or_id(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, parse_resource_id
     address_pool = namespace.backend_address_pool
     lb_name = namespace.load_balancer_name
-    gateway_name = namespace.application_gateway_name
+    gateway_name = getattr(namespace, 'application_gateway_name', None)
 
     usage_error = CLIError('usage error: --address-pool ID | --lb-name NAME --address-pool NAME '
                            '| --gateway-name NAME --address-pool NAME')
@@ -475,14 +475,13 @@ def validate_inbound_nat_rule_name_or_id(cmd, namespace):
             cmd.cli_ctx, namespace, 'inboundNatRules', rule_name)
 
 
-def validate_ip_tags(cmd, namespace):
+def validate_ip_tags(namespace):
     ''' Extracts multiple space-separated tags in TYPE=VALUE format '''
-    IpTag = cmd.get_models('IpTag')
-    if namespace.ip_tags and IpTag:
+    if namespace.ip_tags:
         ip_tags = []
         for item in namespace.ip_tags:
             tag_type, tag_value = item.split('=', 1)
-            ip_tags.append(IpTag(ip_tag_type=tag_type, tag=tag_value))
+            ip_tags.append({"ip_tag_type": tag_type, "tag": tag_value})
         namespace.ip_tags = ip_tags
 
 
@@ -1054,10 +1053,13 @@ def process_nic_create_namespace(cmd, namespace):
 
 def process_public_ip_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
-    validate_public_ip_prefix(cmd, namespace)
-    validate_ip_tags(cmd, namespace)
+    if 'public_ip_prefix' in namespace:
+        validate_public_ip_prefix(cmd, namespace)
+    if 'ip_tags' in namespace:
+        validate_ip_tags(namespace)
     validate_tags(namespace)
-    _inform_coming_breaking_change_for_public_ip(namespace)
+    if 'sku' in namespace or 'zone' in namespace:
+        _inform_coming_breaking_change_for_public_ip(namespace)
 
 
 def _inform_coming_breaking_change_for_public_ip(namespace):

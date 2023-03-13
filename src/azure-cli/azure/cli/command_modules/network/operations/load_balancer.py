@@ -5,7 +5,8 @@
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
 from knack.log import get_logger
 from azure.cli.core.azclierror import ArgumentUsageError
-from azure.cli.core.aaz import register_command, AAZResourceIdArgFormat, has_value
+from azure.cli.core.aaz import register_command, AAZResourceIdArgFormat, has_value, AAZListArg, AAZResourceIdArg, \
+    AAZStrArg, AAZArgEnum
 from ..aaz.latest.network.lb import Delete as _LBDelete, Update as _LBUpdate, List as _LBList, Show as _LBShow
 from ..aaz.latest.network.lb.frontend_ip import Create as _LBFrontendIPCreate, Update as _LBFrontendIPUpdate, \
     Show as _LBFrontendIPShow, Delete as _LBFrontendIPDelete, List as _LBFrontendIPList
@@ -16,13 +17,16 @@ from ..aaz.latest.network.lb.inbound_nat_rule import Create as _LBInboundNatRule
 from ..aaz.latest.network.lb.rule import Create as _LBRuleCreate, Update as _LBRuleUpdate, Show as _LBRuleShow, \
     Delete as _LBRuleDelete, List as _LBRuleList
 from ..aaz.latest.network.lb.outbound_rule import Create as _LBOutboundRuleCreate, Update as _LBOutboundRuleUpdate
-# from ..aaz.latest.network.lb.address_pool import Create as _LBAddressPoolCreate, Update as _LBAddressPoolUpdate, \
-#     Show as _LBAddressPoolShow, List as _LBAddressPoolList, Delete as _LBAddressPoolDelete
-
-from ..aaz.latest.network.cross_region_lb.address_pool import Create as _CrossRegionLoadBalancerAddressPoolCreate, \
-    Update as _CrossRegionLoadBalancerAddressPoolUpdate
-from ..aaz.latest.network.cross_region_lb.address_pool.address import Add as _CrossRegionLoadBalancerAddressPoolAddressAdd, \
-    Update as _CrossRegionLoadBalancerAddressPoolAddressUpdate, Remove as _CrossRegionLoadBalancerAddressPoolAddressRemove
+from ..aaz.latest.network.lb.address_pool import Create as _LBAddressPoolCreate, Update as _LBAddressPoolUpdate, \
+    Show as _LBAddressPoolShow, Delete as _LBAddressPoolDelete, List as _LBAddressPoolList
+from ..aaz.latest.network.lb.address_pool.address import Add as _LBAddressPoolAddressAdd, \
+    Update as _LBAddressPoolAddressUpdate, Show as _LBAddressPoolAddressShow, \
+    Remove as _LBAddressPoolAddressRemove, List as _LBAddressPoolAddressList
+from ..aaz.latest.network.lb.address_pool.basic import Create as _LBAddressPoolBasicCreate, \
+    Delete as _LBAddressPoolBasicDelete
+from ..aaz.latest.network.lb.address_pool.tunnel_interface import Add as _LBAddressPoolTunnelInterfaceAdd, \
+    Update as _LBAddressPoolTunnelInterfaceUpdate, Remove as _LBAddressPoolTunnelInterfaceRemove
+from ..aaz.latest.network.lb.probe import Create as _LBProbeCreate, Update as _LBProbeUpdate
 
 
 logger = get_logger(__name__)
@@ -40,7 +44,6 @@ class LBFrontendIPCreate(_LBFrontendIPCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZArgEnum
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.vnet_name = AAZStrArg(
             arg_group="Properties",
@@ -91,7 +94,6 @@ class LBFrontendIPUpdate(_LBFrontendIPUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZArgEnum
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.vnet_name = AAZStrArg(
             arg_group="Properties",
@@ -231,7 +233,6 @@ class LBRuleCreate(_LBRuleCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
         args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
@@ -287,7 +288,6 @@ class LBRuleUpdate(_LBRuleUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
@@ -337,7 +337,6 @@ class LBOutboundRuleCreate(_LBOutboundRuleCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
         args_schema.backend_address_pool._fmt = AAZResourceIdArgFormat(
@@ -373,7 +372,6 @@ class LBOutboundRuleUpdate(_LBOutboundRuleUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
         args_schema.backend_address_pool._fmt = AAZResourceIdArgFormat(
@@ -404,6 +402,362 @@ class LBOutboundRuleUpdate(_LBOutboundRuleUpdate):
             args.frontend_ip_configs,
             element_transformer=lambda _, id: {"id": id}
         )
+
+
+@register_command("network lb address-pool create")
+class LBAddressPoolCreate(_LBAddressPoolBasicCreate):
+    """Create load balancer backend address pool.
+
+    :example: Create an address pool.
+        az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool
+
+    :example: Create an address pool with several backend addresses using shorthand syntax arguments.
+        az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --vnet MyVnetResource --backend-addresses "[{name:addr1,ip-address:10.0.0.1},{name:addr2,ip-address:10.0.0.2,subnet:subnetName}]"
+
+    :example: Create an address pool with several backend addresses using config file
+        az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses config_file.json
+
+    :example: Create an address pool with one backend address using key-value arguments.
+        az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-address name=addr1 ip-address=10.0.0.1 subnet=/subscriptions/000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1
+    """
+
+    # inherient the BackendAddressPoolsCreateOrUpdate operation
+    class LoadBalancerBackendAddressPoolsCreateOrUpdate(_LBAddressPoolCreate.LoadBalancerBackendAddressPoolsCreateOrUpdate):
+
+        def on_200_201(self, session):
+            # ignore the response data.
+            pass
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vnet = AAZResourceIdArg(
+            options=["--vnet"],
+            arg_group="Properties",
+            help="Name or Id of the default virtual network applied to backend addresses in `--backend-addresses`.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}"
+            )
+        )
+
+        args_schema.admin_state = AAZStrArg(
+            options=["--admin-state"],
+            arg_group="Properties",
+            help="Default administrative state to backend addresses in `--backend-addresses`.",
+        )
+        args_schema.admin_state.enum = args_schema.backend_addresses.Element.admin_state.enum
+
+        args_schema.backend_addresses.Element.virtual_network._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}"
+        )
+
+        args_schema.backend_addresses.Element.name._required = True
+        args_schema.backend_addresses.Element.ip_address._required = True
+        args_schema.backend_addresses.Element.frontend_ip_address._registered = False
+        return args_schema
+
+    def _execute_operations(self):
+        self.pre_operations()
+        self.LoadBalancersGet(ctx=self.ctx)()
+        self.pre_instance_create()
+        sku = self.ctx.vars.instance.sku.name.to_serialized_data()
+        if sku.lower() == "basic":
+            self.InstanceCreateByJson(ctx=self.ctx)()
+            self.post_instance_create(self.ctx.selectors.subresource.required())
+            yield self.LoadBalancersCreateOrUpdate(ctx=self.ctx)()
+        else:
+            # use AddressPoolsCreateOrUpdate API to update Standarded or Geteway lb
+            yield self.LoadBalancerBackendAddressPoolsCreateOrUpdate(ctx=self.ctx)()
+            self.LoadBalancersGet(ctx=self.ctx)()
+        self.post_operations()
+
+    def pre_operations(self):
+        from azure.mgmt.core.tools import is_valid_resource_id
+
+        args = self.ctx.args
+        if has_value(args.backend_addresses):
+            for backend_address in args.backend_addresses:
+                if not has_value(backend_address.admin_state) and has_value(args.admin_state):
+                    # use the command level argument --admin-state
+                    backend_address.admin_state = args.admin_state
+
+                virtual_network = backend_address.virtual_network.to_serialized_data()
+                if not virtual_network and has_value(args.vnet):
+                    # use the command level argument --vnet
+                    virtual_network = args.vnet.to_serialized_data()
+                    backend_address.virtual_network = virtual_network
+
+                subnet = backend_address.subnet.to_serialized_data()
+                if subnet and not is_valid_resource_id(subnet):
+                    if not virtual_network:
+                        raise ArgumentUsageError(
+                            "Invalid backend address `{}`: vnet name or vnet ID is required when using subnet name only.".format(
+                                backend_address.name)
+                        )
+                    # convert subnet name to subnet id
+                    subnet = f"{virtual_network}/subnets/{subnet}"
+                    backend_address.subnet = subnet
+
+                if not virtual_network and not subnet:
+                    raise ArgumentUsageError(
+                        "Invalid backend address `{}`: vnet or subnet is required.".format(
+                            backend_address.name)
+                    )
+
+    def pre_instance_create(self):
+        args = self.ctx.args
+        if not has_value(args.tunnel_interfaces):
+            instance = self.ctx.vars.instance
+            if has_value(instance.sku.name) and instance.sku.name.to_serialized_data().lower() == 'gateway':
+                # when sku is 'gateway', 'tunnelInterfaces' can't be None. Otherwise, service will respond error
+                args.tunnel_interfaces = [{"identifier": 900, "type": 'Internal', "protocol": 'VXLAN'}]
+
+
+class LBAddressPoolUpdate(_LBAddressPoolUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vnet = AAZResourceIdArg(
+            options=["--vnet"],
+            arg_group="Properties",
+            help="Name or Id of the default virtual network applied to backend addresses in `--backend-addresses`.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}"
+            )
+        )
+        args_schema.admin_state = AAZStrArg(
+            options=["--admin-state"],
+            arg_group="Properties",
+            help="Default administrative state to backend addresses in `--backend-addresses`.",
+        )
+        args_schema.admin_state.enum = args_schema.backend_addresses.Element.admin_state.enum
+
+        args_schema.backend_addresses.Element.virtual_network._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}"
+        )
+
+        args_schema.backend_addresses.Element.name._nullable = False
+        args_schema.backend_addresses.Element.ip_address._nullable = False
+        args_schema.backend_addresses.Element.frontend_ip_address._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        from azure.mgmt.core.tools import is_valid_resource_id
+
+        args = self.ctx.args
+        if has_value(args.backend_addresses) and args.backend_addresses.to_serialized_data() is not None:
+            for backend_address in args.backend_addresses:
+                if not has_value(backend_address.admin_state) and has_value(args.admin_state):
+                    # use the command level argument --admin-state
+                    backend_address.admin_state = args.admin_state
+                if not has_value(backend_address.virtual_network) and has_value(args.vnet):
+                    # use the command level argument --vnet
+                    backend_address.virtual_network = args.vnet
+                subnet = backend_address.subnet.to_serialized_data()
+                if subnet and not is_valid_resource_id(subnet):
+                    virtual_network = backend_address.virtual_network.to_serialized_data()
+                    if not virtual_network:
+                        raise ArgumentUsageError(
+                            "Invalid backend address: vnet name or vnet ID is required when using subnet name only."
+                        )
+                    # convert subnet name to subnet id
+                    subnet = f"{virtual_network}/subnets/{subnet}"
+                    backend_address.subnet = subnet
+
+    def post_instance_update(self, instance):
+        if has_value(instance.properties.load_balancer_backend_addresses):
+            for backend_address in instance.properties.load_balancer_backend_addresses:
+                if not has_value(backend_address.properties.virtual_network.id):
+                    backend_address.properties.virtual_network = None
+                if not has_value(backend_address.properties.subnet.id):
+                    backend_address.properties.subnet = None
+
+
+@register_command("network lb address-pool delete")
+class LBAddressPoolDelete(_LBAddressPoolBasicDelete):
+    """Delete the specified load balancer backend address pool.
+
+    :example: Delete an address pool.
+        az network lb address-pool delete -g MyResourceGroup --lb-name MyLb -n MyAddressPool
+    """
+
+
+class LBAddressPoolAddressAdd(_LBAddressPoolAddressAdd):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.virtual_network._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}"
+        )
+        args_schema.ip_address._required = True
+        args_schema.frontend_ip_address._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        from azure.mgmt.core.tools import is_valid_resource_id
+
+        args = self.ctx.args
+        virtual_network = args.virtual_network.to_serialized_data()
+        subnet = args.subnet.to_serialized_data()
+        if subnet and not is_valid_resource_id(subnet):
+            if not virtual_network:
+                raise ArgumentUsageError(
+                    "vnet name or vnet ID is required when using subnet name only."
+                )
+            # convert subnet name to subnet id
+            subnet = f"{virtual_network}/subnets/{subnet}"
+            args.subnet = subnet
+
+        if not virtual_network and not subnet:
+            raise ArgumentUsageError(
+                "vnet or subnet is required."
+            )
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class LBAddressPoolAddressRemove(_LBAddressPoolAddressRemove):
+
+    def _handler(self, command_args):
+        lro_poller = super()._handler(command_args)
+        lro_poller._result_callback = self._output
+        return lro_poller
+
+    def _output(self, *args, **kwargs):  # pylint: disable=unused-argument
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class LBAddressPoolAddressUpdate(_LBAddressPoolAddressUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.virtual_network._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}"
+        )
+        args_schema.ip_address._nullable = False
+        args_schema.frontend_ip_address._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        from azure.mgmt.core.tools import is_valid_resource_id
+
+        args = self.ctx.args
+        virtual_network = args.virtual_network.to_serialized_data()
+        subnet = args.subnet.to_serialized_data()
+        if subnet and not is_valid_resource_id(subnet):
+            if not virtual_network:
+                raise ArgumentUsageError(
+                    "vnet name or vnet ID is required when using subnet name only."
+                )
+            # convert subnet name to subnet id
+            subnet = f"{virtual_network}/subnets/{subnet}"
+            args.subnet = subnet
+
+    def post_instance_update(self, instance):
+        if not has_value(instance.properties.virtual_network.id):
+            instance.properties.virtual_network = None
+        if not has_value(instance.properties.subnet.id):
+            instance.properties.subnet = None
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class LBAddressPoolTunnelInterfaceAdd(_LBAddressPoolTunnelInterfaceAdd):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.identifier._required = True
+        args_schema.type._required = True
+        args_schema.protocol._required = True
+        return args_schema
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class LBAddressPoolTunnelInterfaceRemove(_LBAddressPoolTunnelInterfaceRemove):
+
+    def _handler(self, command_args):
+        lro_poller = super()._handler(command_args)
+        lro_poller._result_callback = self._output
+        return lro_poller
+
+    def _output(self, *args, **kwargs):  # pylint: disable=unused-argument
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class LBAddressPoolTunnelInterfaceUpdate(_LBAddressPoolTunnelInterfaceUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.identifier._nullable = False
+        args_schema.type._nullable = False
+        args_schema.protocol._nullable = False
+        return args_schema
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class LBProbeCreate(_LBProbeCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.port._required = True
+        args_schema.protocol._required = True
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.probe_threshold):
+            logger.warning(
+                "Please note that the parameter --probe-threshold is currently in preview and is not recommended "
+                "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
+                "by not specifying the value of the property."
+            )
+        if has_value(args.request_path) and args.request_path == "":
+            args.request_path = None
+
+
+class LBProbeUpdate(_LBProbeUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.port._nullable = False
+        args_schema.protocol._nullable = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        if has_value(args.probe_threshold):
+            logger.warning(
+                "Please note that the parameter --probe-threshold is currently in preview and is not recommended "
+                "for production workloads. For most scenarios, we recommend maintaining the default value of 1 "
+                "by not specifying the value of the property."
+            )
+        if has_value(args.request_path) and args.request_path == "":
+            args.request_path = None
 
 
 # cross-region-lb commands
@@ -483,8 +837,6 @@ class CrossRegionLoadBalancerFrontendIPCreate(_LBFrontendIPCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZArgEnum
-
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.public_ip_prefix._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIpPrefixes/{}",
@@ -516,8 +868,6 @@ class CrossRegionLoadBalancerFrontendIPUpdate(_LBFrontendIPUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZArgEnum
-
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.public_ip_prefix._fmt = EmptyResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIpPrefixes/{}",
@@ -582,7 +932,6 @@ class CrossRegionLoadBalancerRuleCreate(_LBRuleCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
 
         args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
@@ -643,7 +992,6 @@ class CrossRegionLoadBalancerRuleUpdate(_LBRuleUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
@@ -687,7 +1035,19 @@ class CrossRegionLoadBalancerRuleUpdate(_LBRuleUpdate):
         instance.properties.backend_address_pool = None
 
 
-class CrossRegionLoadBalancerAddressPoolCreate(_CrossRegionLoadBalancerAddressPoolCreate):
+@register_command("network cross-region-lb address-pool create")
+class CrossRegionLoadBalancerAddressPoolCreate(_LBAddressPoolCreate):
+    """Create load balancer backend address pool.
+
+    :example: Create an address pool.
+        az network cross-region-lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool
+
+    :example: Create an address pool with several backend addresses using shorthand syntax arguments.
+        az network cross-region-lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses "[{name:addr1,frontend-ip-address:'/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb1'},{name:addr2,frontend-ip-address:'/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb2'}]"
+
+    :example: Create an address pool with several backend addresses using config file
+        az network cross-region-lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses config_file.json
+    """
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -699,10 +1059,28 @@ class CrossRegionLoadBalancerAddressPoolCreate(_CrossRegionLoadBalancerAddressPo
         )
         args_schema.backend_addresses.Element.name._required = True
         args_schema.backend_addresses.Element.frontend_ip_address._required = True
+
+        args_schema.tunnel_interfaces._registered = False
+        args_schema.backend_addresses.Element.admin_state._registered = False
+        args_schema.backend_addresses.Element.ip_address._registered = False
+        args_schema.backend_addresses.Element.subnet._registered = False
+        args_schema.backend_addresses.Element.virtual_network._registered = False
         return args_schema
 
 
-class CrossRegionLoadBalancerAddressPoolUpdate(_CrossRegionLoadBalancerAddressPoolUpdate):
+@register_command("network cross-region-lb address-pool update")
+class CrossRegionLoadBalancerAddressPoolUpdate(_LBAddressPoolUpdate):
+    """Update a load balancer backend address pool.
+
+    :example: Update all backend addresses in the address pool using shorthand syntax
+        az network cross-region-lb address-pool update -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses "[{name:addr1,frontend-ip-address:'/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb1'},{name:addr2,frontend-ip-address:'/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb2'}]"
+
+    :example: Update the frontend-ip-address of the first backend address in the address pool using shorthand syntax
+        az network cross-region-lb address-pool update -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses [0].frontend-ip-address=/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb1
+
+    :example: Remove the first backend address in the address pool using shorthand syntax
+        az network cross-region-lb address-pool update -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses [0]=null
+    """
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -714,10 +1092,49 @@ class CrossRegionLoadBalancerAddressPoolUpdate(_CrossRegionLoadBalancerAddressPo
         )
         args_schema.backend_addresses.Element.name._nullable = False
         args_schema.backend_addresses.Element.frontend_ip_address._nullable = False
+
+        args_schema.tunnel_interfaces._registered = False
+        args_schema.backend_addresses.Element.admin_state._registered = False
+        args_schema.backend_addresses.Element.ip_address._registered = False
+        args_schema.backend_addresses.Element.subnet._registered = False
+        args_schema.backend_addresses.Element.virtual_network._registered = False
         return args_schema
 
 
-class CrossRegionLoadBalancerAddressPoolAddressAdd(_CrossRegionLoadBalancerAddressPoolAddressAdd):
+@register_command("network cross-region-lb address-pool show")
+class CrossRegionLoadBalancerAddressPoolShow(_LBAddressPoolShow):
+    """Get load balancer backend address pool.
+
+    :example: Get the details of an address pool.
+        az network cross-region-lb address-pool show -g MyResourceGroup --lb-name MyLb -n MyAddressPool
+    """
+
+
+@register_command("network cross-region-lb address-pool delete")
+class CrossRegionLoadBalancerAddressPoolDelete(_LBAddressPoolDelete):
+    """Delete the specified load balancer backend address pool.
+
+    :example: Delete an address pool.
+        az network cross-region-lb address-pool delete -g MyResourceGroup --lb-name MyLb -n MyAddressPool
+    """
+
+
+@register_command("network cross-region-lb address-pool list")
+class CrossRegionLoadBalancerAddressPoolList(_LBAddressPoolList):
+    """List all the load balancer backed address pools.
+
+    :example: List address pools.
+        az network cross-region-lb address-pool list -g MyResourceGroup --lb-name MyLb -o table
+    """
+
+
+@register_command("network cross-region-lb address-pool address add")
+class CrossRegionLoadBalancerAddressPoolAddressAdd(_LBAddressPoolAddressAdd):
+    """Add one backend address into the load balance backend address pool.
+
+    :example: Add one backend address into the load balance backend address pool.
+        az network cross-region-lb address-pool address add -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress --frontend-ip-address /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb2
+    """
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -727,6 +1144,10 @@ class CrossRegionLoadBalancerAddressPoolAddressAdd(_CrossRegionLoadBalancerAddre
         )
 
         args_schema.frontend_ip_address._required = True
+        args_schema.admin_state._registered = False
+        args_schema.ip_address._registered = False
+        args_schema.subnet._registered = False
+        args_schema.virtual_network._registered = False
         return args_schema
 
     def _output(self, *args, **kwargs):
@@ -734,7 +1155,13 @@ class CrossRegionLoadBalancerAddressPoolAddressAdd(_CrossRegionLoadBalancerAddre
         return result
 
 
-class CrossRegionLoadBalancerAddressPoolAddressRemove(_CrossRegionLoadBalancerAddressPoolAddressRemove):
+@register_command("network cross-region-lb address-pool address remove")
+class CrossRegionLoadBalancerAddressPoolAddressRemove(_LBAddressPoolAddressRemove):
+    """Remove one backend address from the load balance backend address pool.
+
+    :example: Remove one backend address from the load balance backend address pool.
+        az network cross-region-lb address-pool address remove -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress
+    """
 
     def _handler(self, command_args):
         lro_poller = super()._handler(command_args)
@@ -746,7 +1173,13 @@ class CrossRegionLoadBalancerAddressPoolAddressRemove(_CrossRegionLoadBalancerAd
         return result
 
 
-class CrossRegionLoadBalancerAddressPoolAddressUpdate(_CrossRegionLoadBalancerAddressPoolAddressUpdate):
+@register_command("network cross-region-lb address-pool address update")
+class CrossRegionLoadBalancerAddressPoolAddressUpdate(_LBAddressPoolAddressUpdate):
+    """Update the backend address into the load balance backend address pool.
+
+    :example: Update the frontend ip of the backend address into the load balance backend address pool.
+        az network cross-region-lb address-pool address update -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress --frontend-ip-address /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb2
+    """
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -756,8 +1189,30 @@ class CrossRegionLoadBalancerAddressPoolAddressUpdate(_CrossRegionLoadBalancerAd
         )
 
         args_schema.frontend_ip_address._nullable = False
+        args_schema.admin_state._registered = False
+        args_schema.ip_address._registered = False
+        args_schema.subnet._registered = False
+        args_schema.virtual_network._registered = False
         return args_schema
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
+
+
+@register_command("network cross-region-lb address-pool address list")
+class CrossRegionLoadBalancerAddressPoolAddressList(_LBAddressPoolAddressList):
+    """List all backend addresses of the load balance backend address pool.
+
+    :example: List all backend addresses of the load balance backend address pool.
+        az network cross-region-lb address-pool address list -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool
+    """
+
+
+@register_command("network cross-region-lb address-pool address show")
+class CrossRegionLoadBalancerAddressPoolAddressShow(_LBAddressPoolAddressShow):
+    """Show the backend address from the load balance backend address pool.
+
+    :example: Show the backend address from the load balance backend address pool.
+        az network cross-region-lb address-pool address show -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress
+    """
