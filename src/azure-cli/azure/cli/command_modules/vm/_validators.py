@@ -36,7 +36,6 @@ logger = get_logger(__name__)
 
 def validate_asg_names_or_ids(cmd, namespace):
     from msrestazure.tools import resource_id, is_valid_resource_id
-    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     resource_group = namespace.resource_group_name
@@ -985,7 +984,6 @@ def _validate_vm_vmss_create_public_ip(cmd, namespace):
         namespace.public_ip_address_type = 'new'
         logger.debug('new public IP address will be created')
 
-    from azure.cli.core.profiles import ResourceType
     # Use standard public IP address automatically when using zones.
     if hasattr(namespace, 'zone') and namespace.zone is not None:
         namespace.public_ip_sku = 'Standard'

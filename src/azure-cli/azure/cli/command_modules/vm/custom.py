@@ -1437,7 +1437,8 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
                     }
 
                     try:
-                        public_ip_addr_info['zone'] = public_ip_address['zones'][0]
+                        public_ip_addr_info['zone'] = public_ip_address['zones'][0] \
+                            if 'zones' in public_ip_address else None
                     except (AttributeError, IndexError, TypeError):
                         pass
 
@@ -1464,7 +1465,6 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
     from .aaz.latest.network.nsg import Create as NSGCreate
     from .aaz.latest.network.nsg.rule import Create as NSGRuleCreate
     from .aaz.latest.network.nsg import Show as NSGShow
-
 
     vm = get_vm(cmd, resource_group_name, vm_name)
     location = vm.location
@@ -3749,10 +3749,9 @@ def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
               'Please use the "az network public-ip list/show" to retrieve networking information.')
 
     result = ListInstancePublicIps(cli_ctx=cmd.cli_ctx)(command_args={
-            'virtual_machine_scale_set_name': vm_scale_set_name,
-            'resource_group': resource_group_name
-        })
-    result = list(result)
+        'virtual_machine_scale_set_name': vm_scale_set_name,
+        'resource_group': resource_group_name
+    })
     # filter away over-provisioned instances which are deleted after 'create/update' returns
     return [r for r in result if 'ipAddress' in r and r['ipAddress']]
 
