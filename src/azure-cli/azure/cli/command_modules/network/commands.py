@@ -266,31 +266,40 @@ def load_command_table(self, _):
 
     # region ExpressRoutes
     with self.command_group('network express-route'):
-        from azure.cli.command_modules.network.custom import ExpressRouteCreate, ExpressRouteUpdate
+        from .custom import ExpressRouteCreate, ExpressRouteUpdate
         self.command_table['network express-route create'] = ExpressRouteCreate(loader=self)
         self.command_table['network express-route update'] = ExpressRouteUpdate(loader=self)
 
+    with self.command_group('network express-route gateway'):
+        from .custom import ExpressRouteGatewayCreate, ExpressRouteGatewayUpdate
+        self.command_table['network express-route gateway create'] = ExpressRouteGatewayCreate(loader=self)
+        self.command_table['network express-route gateway update'] = ExpressRouteGatewayUpdate(loader=self)
+
     with self.command_group('network express-route gateway connection'):
-        from azure.cli.command_modules.network.custom import ExpressRouteConnectionUpdate, ExpressRouteConnectionCreate
+        from .custom import ExpressRouteConnectionUpdate, ExpressRouteConnectionCreate
         self.command_table['network express-route gateway connection create'] = ExpressRouteConnectionCreate(loader=self)
         self.command_table['network express-route gateway connection update'] = ExpressRouteConnectionUpdate(loader=self)
 
     with self.command_group('network express-route peering'):
-        from azure.cli.command_modules.network.custom import ExpressRoutePeeringCreate, ExpressRoutePeeringUpdate
+        from .custom import ExpressRoutePeeringCreate, ExpressRoutePeeringUpdate
         self.command_table['network express-route peering create'] = ExpressRoutePeeringCreate(loader=self)
         self.command_table['network express-route peering update'] = ExpressRoutePeeringUpdate(loader=self)
 
+    with self.command_group('network express-route peering connection'):
+        from .custom import ExpressRoutePeeringConnectionCreate
+        self.command_table['network express-route peering connection create'] = ExpressRoutePeeringConnectionCreate(loader=self)
+
     with self.command_group('network express-route port') as g:
-        from azure.cli.command_modules.network.custom import ExpressRoutePortCreate
+        from .custom import ExpressRoutePortCreate
         self.command_table['network express-route port create'] = ExpressRoutePortCreate(loader=self)
         g.custom_command('generate-loa', 'download_generated_loa_as_pdf')
 
     with self.command_group('network express-route port identity'):
-        from azure.cli.command_modules.network.custom import ExpressRoutePortIdentityAssign
+        from .custom import ExpressRoutePortIdentityAssign
         self.command_table['network express-route port identity assign'] = ExpressRoutePortIdentityAssign(loader=self)
 
     with self.command_group('network express-route port link'):
-        from azure.cli.command_modules.network.custom import ExpressRoutePortLinkUpdate
+        from .custom import ExpressRoutePortLinkUpdate
         self.command_table['network express-route port link update'] = ExpressRoutePortLinkUpdate(loader=self)
     # endregion
 
@@ -545,7 +554,7 @@ def load_command_table(self, _):
         self.command_table["network watcher flow-log delete"] = NwFlowLogDelete(loader=self)
         g.custom_show_command('show', 'show_nw_flow_logging', validator=process_nw_flow_log_show_namespace)
 
-    with self.command_group('network watcher troubleshooting') as g:
+    with self.command_group('network watcher troubleshooting'):
         from .operations.watcher import NwTroubleshootingStart, NwTroubleshootingShow
         self.command_table["network watcher troubleshooting start"] = NwTroubleshootingStart(loader=self)
         self.command_table["network watcher troubleshooting show"] = NwTroubleshootingShow(loader=self)
@@ -701,4 +710,21 @@ def load_command_table(self, _):
     from .operations.nat import GatewayCreate as NATGatewayCreate, GatewayUpdate as NATGatewayUpdate
     self.command_table["network nat gateway create"] = NATGatewayCreate(loader=self)
     self.command_table["network nat gateway update"] = NATGatewayUpdate(loader=self)
+    # endregion
+
+    # region SecurityPartnerProvider
+    from .custom import SecurityPartnerProviderCreate, SecurityPartnerProviderUpdate
+    self.command_table["network security-partner-provider create"] = SecurityPartnerProviderCreate(loader=self)
+    self.command_table["network security-partner-provider update"] = SecurityPartnerProviderUpdate(loader=self)
+    # endregion
+
+    # region VirtualAppliance
+    from .custom import VirtualApplianceCreate, VirtualApplianceUpdate
+    self.command_table["network virtual-appliance create"] = VirtualApplianceCreate(loader=self)
+    self.command_table["network virtual-appliance update"] = VirtualApplianceUpdate(loader=self)
+    # endregion
+
+    # region CustomIp
+    from .custom import CustomIpPrefixUpdate
+    self.command_table["network custom-ip prefix update"] = CustomIpPrefixUpdate(loader=self)
     # endregion
