@@ -129,7 +129,7 @@ class MainModuleCompactor:
     _file_end_pattern = re.compile(r'^__all__ = \[.*]\s*$')
     _class_method_register = "    @classmethod"
 
-    def __init__(self, mod_name, compiled_to_pyc=False):
+    def __init__(self, mod_name, compiled_to_pyc=True):
         self._mod_name = mod_name
         self._modules_dir = azure.cli.command_modules.__path__[0]
         self._folder = self._get_module_folder()
@@ -169,7 +169,6 @@ class MainModuleCompactor:
             f.write(init_content)
         if self._compiled_to_pyc:
             py_compile.compile(path)
-            os.remove(path)
 
     def _create_compact_aaz_folder(self):
         folder = self._get_compact_aaz_folder()
