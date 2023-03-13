@@ -121,8 +121,8 @@ REM Check azure.cli can be executed. This also prints the Python version.
 if %errorlevel% neq 0 goto ERROR
 
 pushd %BUILDING_DIR%
+%BUILDING_DIR%\python.exe %REPO_ROOT%\scripts\compact_aaz.py
 %BUILDING_DIR%\python.exe %~dp0\patch_models_v2.py
-%BUILDING_DIR%\python.exe %REPO_ROOT%\scripts\compact_aaz.py %CLI_SRC%
 %BUILDING_DIR%\python.exe %REPO_ROOT%\scripts\trim_sdk.py
 popd
 

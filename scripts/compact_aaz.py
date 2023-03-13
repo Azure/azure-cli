@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import os
-import sys
+import azure.cli.command_modules
 import re
 import shutil
 import py_compile
@@ -129,9 +129,9 @@ class MainModuleCompactor:
     _file_end_pattern = re.compile(r'^__all__ = \[.*]\s*$')
     _class_method_register = "    @classmethod"
 
-    def __init__(self, mod_name, cli_src, compiled_to_pyc=False):
+    def __init__(self, mod_name, compiled_to_pyc=False):
         self._mod_name = mod_name
-        self._cli_src = cli_src
+        self._modules_dir = azure.cli.command_modules.__path__[0]
         self._folder = self._get_module_folder()
         self._compiled_to_pyc = compiled_to_pyc
 
@@ -438,7 +438,7 @@ class MainModuleCompactor:
         return helper_name, properties_code, helper_codes
 
     def _get_module_folder(self):
-        module_folder = os.path.join(self._cli_src, "azure-cli", "azure", "cli", "command_modules", self._mod_name.replace('-', '_').lower())
+        module_folder = os.path.join(self._modules_dir, self._mod_name.replace('-', '_').lower())
         if not os.path.exists(module_folder):
             raise ValueError("Module folder is not exist: {}".format(module_folder))
         return module_folder
@@ -457,10 +457,8 @@ class MainModuleCompactor:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    cli_src = sys.argv[1] if len(sys.argv) >= 2 else os.path.join('..', 'src')
-    _LOGGER.info("Source folder {} is used.".format(cli_src))
+    logging.basicConfig(level=logging.DEBUG)
     for module in ["network"]:
-        compactor = MainModuleCompactor(module, cli_src=cli_src)
+        compactor = MainModuleCompactor(module)
         compactor.compact()
         compactor.replace()
