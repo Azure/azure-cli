@@ -88,6 +88,30 @@ def _mock_resource_client(cli_ctx, client_type, **kwargs):
     return client
 
 
+def _mock_network_client_with_existing_vnet_location(*_, **kwargs):
+    def _mock_list(command_args):
+
+        def _get_mock_vnet(name, rg, location):
+            vnet = {}
+            vnet['name'] = name
+            vnet['rg'] = command_args['resource_group']
+            vnet['location'] = location
+            subnet = {}
+            subnet['name'] = '{}subnet'.format(name)
+            subnet['addressPrefix'] = '10.0.0.0/24'
+            vnet['subnets'] = [subnet]
+            return vnet
+        all_mocks = [
+            _get_mock_vnet('vnet1', 'rg1', 'eastus'),
+            _get_mock_vnet('vnet2', 'rg1', 'westus'),
+            _get_mock_vnet('vnet3', 'rg2', 'westus'),
+            _get_mock_vnet('vnet4', 'rg2', 'eastus')
+        ]
+        return [x for x in all_mocks if x['rg'] == command_args['resource_group']]
+    vnet_list = _mock_list
+    return vnet_list
+
+
 def _mock_network_client_with_existing_subnet(*_, **kwargs):
     client = mock.MagicMock()
 
@@ -156,7 +180,7 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
         ns.disable_overprovision = None
         return ns
 
-    @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_network_client_with_existing_subnet)
+    @mock.patch('azure.cli.command_modules.vm._validators.Vnet.List', _mock_network_client_with_existing_vnet_location)
     def test_matching_vnet_subnet_size_matching(self):
         ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
         ns.instance_count = 5
