@@ -8,7 +8,13 @@
 # pylint: skip-file
 # flake8: noqa
 
-from .__cmd_group import *
-from ._create import *
-from ._show import *
-from ._update import *
+from azure.cli.core.aaz import *
+
+
+class __CMDGroup(AAZCommandGroup):
+    """Manage network security group rules.
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]

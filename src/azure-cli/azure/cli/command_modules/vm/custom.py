@@ -986,10 +986,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                 vnet_exists = \
                     check_existence(cmd.cli_ctx, vnet_name, resource_group_name, 'Microsoft.Network', 'virtualNetworks')
                 if vnet_exists:
-                    from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection_for_aaz
-                    from .aaz.latest.network.nic import Create as NICCreate
-                    from .aaz.latest.network.vnet import Update as VnetUpdate
+                    from azure.cli.core.commands import cached_put, cached_get, upsert_to_collection_for_aaz
                     from .aaz.latest.network.vnet import Show as VnetShow
+                    from .aaz.latest.network.vnet.subnet import Create as SubnetCreate
                     vnet = cached_get(cmd, VnetShow(cli_ctx=cmd.cli_ctx), command_args={
                         'name': vnet_name,
                         'resource_group': resource_group_name
@@ -1001,21 +1000,12 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                     }
                     upsert_to_collection_for_aaz(vnet, 'subnets', subnet_obj, 'name')
                     try:
-                        # NICCreate(cli_ctx=cmd.cli_ctx)(command_args={
-                        #     'name': nic_name,
-                        #     'resource_group': resource_group_name,
-                        #     'location': location,
-                        #     'subnet': subnet
-                        # }).result()
-                        vnet['address_space'] = vnet.pop('addressSpace', None)
-                        vnet['address_space']['address_prefixes'] = vnet['address_space'].pop('addressPrefixes', None)
-                        vnet['enable_ddos_protection'] = vnet.pop('enableDdosProtection', None)
-                        vnet['virtual_network_peerings'] = vnet.pop('virtualNetworkPeerings', None)
-                        cached_put(cmd, VnetUpdate(cli_ctx=cmd.cli_ctx), {
-                            'name': vnet_name,
+                        cached_put(cmd, SubnetCreate(cli_ctx=cmd.cli_ctx), {
+                            'name': subnet,
+                            'vnet_name': vnet_name,
                             'resource_group': resource_group_name,
-                            'subnet': [vnet],
-                            'location': location
+                            'address_prefixes': [subnet_address_prefix],
+                            'address_prefix': subnet_address_prefix
                         }, setter_arg_name='command_args').result()
                     except Exception:
                         raise CLIError('Subnet({}) does not exist, but failed to create a new subnet with address '
@@ -1413,14 +1403,14 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
     # Virtual Machine, we can't constrain the lookup to only a single group...
     from .aaz.latest.network.nic import List as NicList
     from .aaz.latest.network.public_ip import List as PublicIPList
-    nics = NicList(cli_ctx=cmd.cli_ctx)()
-    public_ip_addresses = PublicIPList(cli_ctx=cmd.cli_ctx)()
+    nics = NicList(cli_ctx=cmd.cli_ctx)(command_args={})
+    public_ip_addresses = PublicIPList(cli_ctx=cmd.cli_ctx)(command_args={})
 
-    ip_address_lookup = {pip.id: pip for pip in list(public_ip_addresses)}
+    ip_address_lookup = {pip['id']: pip for pip in list(public_ip_addresses)}
 
     result = []
-    for nic in [n for n in list(nics) if n.virtual_machine]:
-        nic_resource_group, nic_vm_name = _parse_rg_name(nic.virtual_machine.id)
+    for nic in [n for n in list(nics) if 'virtualMachine' in n and n['virtualMachine']]:
+        nic_resource_group, nic_vm_name = _parse_rg_name(nic['virtualMachine']['id'])
 
         # If provided, make sure that resource group name and vm name match the NIC we are
         # looking at before adding it to the result...
@@ -1433,20 +1423,21 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
                 'privateIpAddresses': [],
                 'publicIpAddresses': []
             }
-            for ip_configuration in nic.ip_configurations:
-                network_info['privateIpAddresses'].append(ip_configuration.private_ip_address)
-                if ip_configuration.public_ip_address and ip_configuration.public_ip_address.id in ip_address_lookup:
-                    public_ip_address = ip_address_lookup[ip_configuration.public_ip_address.id]
+            for ip_configuration in nic['ipConfigurations']:
+                network_info['privateIpAddresses'].append(ip_configuration['privateIPAddress'])
+                if 'publicIPAddress' in ip_configuration and ip_configuration['publicIPAddress'] and \
+                        ip_configuration['publicIPAddress']['id'] in ip_address_lookup:
+                    public_ip_address = ip_address_lookup[ip_configuration['publicIPAddress']['id']]
 
                     public_ip_addr_info = {
-                        'id': public_ip_address.id,
-                        'name': public_ip_address.name,
-                        'ipAddress': public_ip_address.ip_address,
-                        'ipAllocationMethod': public_ip_address.public_ip_allocation_method
+                        'id': public_ip_address['id'],
+                        'name': public_ip_address['name'],
+                        'ipAddress': public_ip_address['ipAddress'],
+                        'ipAllocationMethod': public_ip_address['publicIPAllocationMethod']
                     }
 
                     try:
-                        public_ip_addr_info['zone'] = public_ip_address.zones[0]
+                        public_ip_addr_info['zone'] = public_ip_address['zones'][0]
                     except (AttributeError, IndexError, TypeError):
                         pass
 
@@ -1471,6 +1462,7 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
     from .aaz.latest.network.vnet.subnet import Show as SubnetShow
     from .aaz.latest.network.vnet.subnet import Update as SubnetUpdate
     from .aaz.latest.network.nsg import Create as NSGCreate
+    from .aaz.latest.network.nsg.rule import Create as NSGRuleCreate
     from .aaz.latest.network.nsg import Show as NSGShow
 
 
@@ -1489,19 +1481,19 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
     # get existing NSG or create a new one
     created_nsg = False
     nic = NicShow(cli_ctx=cmd.cli_ctx)(command_args={
-            'name': os.path.split(nic_ids[0].id)[1],
-            'resource_group': resource_group_name
-        })
+        'name': os.path.split(nic_ids[0].id)[1],
+        'resource_group': resource_group_name
+    })
     if not apply_to_subnet:
         nsg = nic['networkSecurityGroup']
     else:
         subnet_id = parse_resource_id(nic['ipConfigurations'][0]['subnet']['id'])
         subnet = SubnetShow(cli_ctx=cmd.cli_ctx)(command_args={
-            'name': subnet_id['name'],
-            'vnet_name': subnet_id['child_name_1'],
+            'name': subnet_id['child_name_1'],
+            'vnet_name': subnet_id['name'],
             'resource_group': resource_group_name
         })
-        nsg = subnet['networkSecurityGroup']
+        nsg = subnet['networkSecurityGroup'] if 'networkSecurityGroup' in subnet else None
 
     if not nsg:
         nsg = LongRunningOperation(cmd.cli_ctx, 'Creating network security group')(
@@ -1526,44 +1518,42 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
             'destination_port_ranges': port.split(',')
         }
 
-    rule = {
-        'protocol': '*',
-        'access': 'allow',
-        'direction': 'inbound',
-        'name': rule_name,
-        'source_port_range': '*',
-        **port_arg,
-        'priority': priority,
-        'source_address_prefix': '*',
-        'destination_address_prefix': '*'
-    }
     nsg_name = nsg['name'] if 'name' in nsg else os.path.split(nsg['id'])[1]
     LongRunningOperation(cmd.cli_ctx, 'Adding security rule')(
-        NSGCreate(cli_ctx=cmd.cli_ctx)(command_args={
-            'name': nsg_name,
+        NSGRuleCreate(cli_ctx=cmd.cli_ctx)(command_args={
+            'name': rule_name,
+            'nsg_name': nsg_name,
             'resource_group': resource_group_name,
-            'security_rules': [rule]
+            'protocol': '*',
+            'access': 'allow',
+            'direction': 'inbound',
+            'source_port_range': '*',
+            **port_arg,
+            'priority': priority,
+            'source_address_prefix': '*',
+            'destination_address_prefix': '*'
         })
     )
 
     # update the NIC or subnet if a new NSG was created
     if created_nsg and not apply_to_subnet:
-        nic.network_security_group = nsg
+        nic['networkSecurityGroup'] = nsg
         LongRunningOperation(cmd.cli_ctx, 'Updating NIC')(
             NicUpdate(cli_ctx=cmd.cli_ctx)(command_args={
-                'name': nic.name,
+                'name': nic['name'],
                 'resource_group': resource_group_name,
-                'security_rules': nsg
+                'security_rules': nic
             }))
     elif created_nsg and apply_to_subnet:
-        subnet.network_security_group = nsg
+        subnet['networkSecurityGroup'] = nsg
         LongRunningOperation(cmd.cli_ctx, 'Updating subnet')(
             SubnetUpdate(cli_ctx=cmd.cli_ctx)(command_args={
                 'name': subnet_id['child_name_1'],
                 'resource_group': resource_group_name,
                 'vnet_name': subnet_id['name'],
                 'subnet': subnet
-        }))
+            })
+        )
 
     return NSGShow(cli_ctx=cmd.cli_ctx)(command_args={
         'name': nsg_name,
@@ -3711,13 +3701,13 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
             'name': public_ip_name,
             'resource_group': public_ip_rg
         })
-        public_ip_address = public_ip['ipAddress']
+        public_ip_address = public_ip['ipAddress'] if 'ipAddress' in public_ip else None
         # For NAT pool, get the frontend port and VMSS instance from inboundNatRules
         is_nat_pool = True
         instance_addresses = {}
         for rule in lb['inboundNatRules']:
             # If backend_ip_configuration does not exist, it means that NAT rule V2 is used
-            if not rule['backendIPConfiguration']:
+            if 'backendIPConfiguration' not in rule or not rule['backendIPConfiguration']:
                 is_nat_pool = False
                 break
             instance_id = parse_resource_id(rule['backendIPConfiguration']['id'])['child_name_1']
@@ -3728,18 +3718,19 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
 
         # For NAT rule V2, get the frontend port and VMSS instance from loadBalancerBackendAddresses
         for backend_address_pool in lb['backendAddressPools']:
-            if not backend_address_pool['loadBalancerBackendAddresses']:
+            if 'loadBalancerBackendAddresses' not in backend_address_pool or \
+                    not backend_address_pool['loadBalancerBackendAddresses']:
                 raise CLIError('There is no connection information. '
                                'If you are using NAT rule V2, please confirm whether the load balancer SKU is Standard')
 
             for load_balancer_backend_addresse in backend_address_pool['loadBalancerBackendAddresses']:
 
-                network_interface_ip_configuration = load_balancer_backend_addresse['networkInterfaceIpConfiguration']
+                network_interface_ip_configuration = load_balancer_backend_addresse['networkInterfaceIPConfiguration']
                 if not network_interface_ip_configuration or 'id' not in network_interface_ip_configuration:
                     continue
                 instance_id = parse_resource_id(network_interface_ip_configuration['id'])['child_name_1']
 
-                if not load_balancer_backend_addresse['InboundNatRulesPortMapping']:
+                if not load_balancer_backend_addresse['inboundNatRulesPortMapping']:
                     continue
                 frontend_port = load_balancer_backend_addresse['inboundNatRulesPortMapping'][0]['frontendPort']
                 instance_addresses['instance ' + instance_id] = '{}:{}'.format(public_ip_address, frontend_port)

@@ -100,7 +100,7 @@ class VMImageListThruServiceScenarioTest(ScenarioTest):
 
 class VMOpenPortTest(ScenarioTest):
 
-    # @record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='cli_test_open_port')
     def test_vm_open_port(self, resource_group):
 
