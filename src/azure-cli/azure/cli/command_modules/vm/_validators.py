@@ -1505,7 +1505,7 @@ def process_vm_update_namespace(cmd, namespace):
 # region VMSS Create Validators
 def _get_default_address_pool(cli_ctx, resource_group, balancer_name, balancer_type):
     option_name = '--backend-pool-name'
-    client = get_network_client(balancer_type)
+    client = get_network_client(cli_ctx, balancer_type)
     if not client:
         raise CLIError('unrecognized balancer type: {}'.format(balancer_type))
 
@@ -1558,7 +1558,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
     if balancer_type == 'applicationGateway':
 
         if namespace.application_gateway:
-            client = get_network_client('application_gateways')
+            client = get_network_client(cmd.cli_ctx, 'application_gateways')
             try:
                 rg = parse_resource_id(namespace.application_gateway).get(
                     'resource_group', namespace.resource_group_name)
@@ -1640,13 +1640,19 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
                 raise CLIError('usage error:{}'.format(err))
 
 
-def get_network_client(balancer_type):
+def get_network_client(cli_ctx, balancer_type):
     import importlib
-    network = importlib.import_module("azure.cli.command_modules.vm.aaz.latest.network")
+
     if balancer_type == 'application_gateways':
-        client = network.application_gateway
+        client = importlib.import_module("azure.cli.command_modules.vm.aaz.latest.network.application_gateway")
     if balancer_type == 'load_balancers':
-        client = network.lb
+        client = importlib.import_module("azure.cli.command_modules.vm.aaz.latest.network.lb")
+    if cli_ctx.cloud.profile == '2018-11-01':
+        if balancer_type == 'application_gateways':
+            client = importlib.import_module("azure.cli.command_modules.vm.aaz.2020_09_01_hybrid.network.application_gateway")  # pylint: disable=line-too-long
+        if balancer_type == 'load_balancers':
+            client = importlib.import_module("azure.cli.command_modules.vm.aaz.2020_09_01_hybrid.network.lb")
+
     return client
 
 

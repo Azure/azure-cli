@@ -587,6 +587,7 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
             self.check('instanceView.statuses[1].code', expected_power_state),
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_state_mod')
     def test_vm_create_state_modifications(self, resource_group):
 
@@ -595,7 +596,7 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
             'vm': 'vm-state-mod',
             'nsg': 'mynsg',
             'ip': 'mypubip',
-            'sa': self.create_random_name('clistorage', 15),
+            'sa': self.create_random_name('clistorage', 20),
             'vnet': 'myvnet'
         })
 
