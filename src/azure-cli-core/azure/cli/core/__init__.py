@@ -456,8 +456,8 @@ class MainCommandsLoader(CLICommandsLoader):
                     raw_cmd = ' '.join(raw_cmd.split()[:-1])
                     logger.debug("In autocomplete mode, try to match shorter cmd: '%s'", raw_cmd)
                     if not raw_cmd:
-                        # If full command is 'az acc', raw_cmd is '', we don't need to match it.
-                        logger.debug("Cmd is empty, return")
+                        # If full command is 'az acc', raw_cmd is ''.
+                        logger.debug("Cmd is empty, return command table.")
                         return self.command_table
                     if raw_cmd in self.command_group_table:
                         logger.debug("Found a match in the command group table for '%s'.", raw_cmd)
@@ -572,8 +572,6 @@ class CommandIndex:
         index_modules_extensions = index.get(top_command)
         if not index_modules_extensions and is_autocomplete():
             # If user type `az acco`, command begin with `acco` will be matched.
-            # If the user just installed a new extension which contains a command named `acco`, he can't get the
-            # expected suggestion. But it's a rare scenario, and it's okay to ignore.
             logger.debug("In autocomplete mode, load command begin with: '%s'", top_command)
             index_modules_extensions = []
             for command in index:
