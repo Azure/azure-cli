@@ -47,6 +47,7 @@ make
 make install
 
 $WORKDIR/python_env/bin/python3 -m pip install --upgrade pip setuptools
+$WORKDIR/python_env/bin/python3 ${WORKDIR}/scripts/trim_sdk.py
 
 export PATH=$PATH:$WORKDIR/python_env/bin
 
