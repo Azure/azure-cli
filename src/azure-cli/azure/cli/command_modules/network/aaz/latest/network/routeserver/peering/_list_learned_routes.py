@@ -175,15 +175,15 @@ class ListLearnedRoutes(AAZCommand):
             if cls._schema_on_200 is not None:
                 return cls._schema_on_200
 
-            cls._schema_on_200 = AAZObjectType()
+            cls._schema_on_200 = AAZDictType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.Element = AAZListType()
 
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
+            _element = cls._schema_on_200.Element
+            _element.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.value.Element
+            _element = cls._schema_on_200.Element.Element
             _element.as_path = AAZStrType(
                 serialized_name="asPath",
                 flags={"read_only": True},
@@ -211,10 +211,6 @@ class ListLearnedRoutes(AAZCommand):
             )
 
             return cls._schema_on_200
-
-
-class _ListLearnedRoutesHelper:
-    """Helper class for ListLearnedRoutes"""
 
 
 __all__ = ["ListLearnedRoutes"]
