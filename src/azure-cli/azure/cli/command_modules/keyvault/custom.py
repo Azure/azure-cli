@@ -583,6 +583,7 @@ def create_hsm(cmd, client,
                resource_group_name, hsm_name, administrators, location=None, sku=None,
                enable_purge_protection=None,
                retention_days=None,
+               public_network_access=None,
                bypass=None,
                default_action=None,
                tags=None,
@@ -610,7 +611,8 @@ def create_hsm(cmd, client,
                                       enable_purge_protection=enable_purge_protection,
                                       soft_delete_retention_in_days=retention_days,
                                       initial_admin_object_ids=administrators,
-                                      network_acls=_create_network_rule_set(cmd, bypass, default_action))
+                                      network_acls=_create_network_rule_set(cmd, bypass, default_action),
+                                      public_network_access=public_network_access)
     parameters = ManagedHsm(location=location,
                             tags=tags,
                             sku=ManagedHsmSku(name=sku, family='B'),
@@ -873,13 +875,17 @@ def update_hsm(cmd, instance,
                enable_purge_protection=None,
                bypass=None,
                default_action=None,
-               secondary_locations=None):
+               secondary_locations=None,
+               public_network_access=None):
     if enable_purge_protection is not None:
         instance.properties.enable_purge_protection = enable_purge_protection
 
     if secondary_locations is not None:
         # service not ready
         raise InvalidArgumentValueError('--secondary-locations has not been supported yet for hsm')
+
+    if public_network_access is not None:
+        instance.properties.public_network_access = public_network_access
 
     if bypass or default_action and (hasattr(instance.properties, 'network_acls')):
         if instance.properties.network_acls is None:

@@ -538,22 +538,15 @@ def validate_mysql_ha_enabled(server):
 
 
 def validate_vnet_location(vnet, location):
-    if vnet.location != location:
+    if vnet["location"] != location:
         raise ValidationError("The location of Vnet should be same as the location of the server")
 
 
-def validate_mysql_replica(cmd, server):
+def validate_mysql_replica(server):
     # Tier validation
     if server.sku.tier == 'Burstable':
         raise ValidationError("Read replica is not supported for the Burstable pricing tier. "
                               "Scale up the source server to General Purpose or Memory Optimized. ")
-
-    # single az validation
-    list_skus_info = get_mysql_list_skus_info(cmd, server.location)
-    single_az = list_skus_info['single_az']
-    if single_az:
-        raise ValidationError("Replica can only be created for multi-availability zone regions. "
-                              "The location of the source server is in a single availability zone region.")
 
 
 def validate_postgres_replica(cmd, server):

@@ -82,7 +82,7 @@ def run_bicep_command(cli_ctx, args, auto_install=True):
 
     if not installed:
         if auto_install:
-            ensure_bicep_installation(stdout=False)
+            ensure_bicep_installation(cli_ctx, stdout=False)
         else:
             raise FileOperationError('Bicep CLI not found. Install it now by running "az bicep install".')
     elif check_version:
@@ -107,7 +107,7 @@ def run_bicep_command(cli_ctx, args, auto_install=True):
     return _run_command(installation_path, args)
 
 
-def ensure_bicep_installation(release_tag=None, target_platform=None, stdout=True):
+def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, stdout=True):
     system = platform.system()
     installation_path = _get_bicep_installation_path(system)
 
@@ -137,6 +137,11 @@ def ensure_bicep_installation(release_tag=None, target_platform=None, stdout=Tru
             f.write(request.read())
 
         os.chmod(installation_path, os.stat(installation_path).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+
+        use_binary_from_path = cli_ctx.config.get("bicep", "use_binary_from_path").lower()
+        if use_binary_from_path in ["0", "no", "false", "off"]:
+            _logger.warning("The configuration value of bicep.use_binary_from_path has been set to 'false'.")
+            cli_ctx.config.set_value("bicep", "use_binary_from_path", "false")
 
         if stdout:
             print(f'Successfully installed Bicep CLI to "{installation_path}".')

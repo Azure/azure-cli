@@ -49,6 +49,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_COMPUTE = ('azure.mgmt.compute', 'ComputeManagementClient')
     MGMT_NETWORK = ('azure.mgmt.network', 'NetworkManagementClient')
     MGMT_NETWORK_DNS = ('azure.mgmt.dns', 'DnsManagementClient')
+    MGMT_NETWORK_PRIVATEDNS = ('azure.mgmt.privatedns', 'PrivateDnsManagementClient')
     MGMT_AUTHORIZATION = ('azure.mgmt.authorization', 'AuthorizationManagementClient')
     MGMT_CONTAINERREGISTRY = ('azure.mgmt.containerregistry', 'ContainerRegistryManagementClient')
     MGMT_RESOURCE_FEATURES = ('azure.mgmt.resource.features', 'FeatureClient')
@@ -96,7 +97,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_CONSUMPTION = ('azure.mgmt.consumption', None)
     MGMT_CONTAINERINSTANCE = ('azure.mgmt.containerinstance', None)
     MGMT_COSMOSDB = ('azure.mgmt.cosmosdb', None)
-    MGMT_DEPLOYMENTMANAGER = ('azure.mgmt.deploymentmanager', None)
     MGMT_DATALAKE_ANALYTICS = ('azure.mgmt.datalake.analytics', None)
     MGMT_DATALAKE_STORE = ('azure.mgmt.datalake.store', None)
     MGMT_DATAMIGRATION = ('azure.mgmt.datamigration', None)
@@ -178,6 +178,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2021-05-01',
         ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
+        ResourceType.MGMT_NETWORK_PRIVATEDNS: None,
         ResourceType.MGMT_KEYVAULT: '2022-07-01',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2022-04-01', {
             'classic_administrators': '2015-06-01',
@@ -189,7 +190,9 @@ AZURE_API_PROFILES = {
             'tasks': '2019-06-01-preview',
             'task_runs': '2019-06-01-preview',
             'runs': '2019-06-01-preview',
-            'network_rule': '2021-08-01-preview'
+            'network_rule': '2021-08-01-preview',
+            'cache_rules': '2023-01-01-preview',
+            'credential_sets': '2023-01-01-preview'
         }),
         # The order does make things different.
         # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
@@ -204,7 +207,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE_FILESHARE: '2021-06-08',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
-        ResourceType.MGMT_SERVICEBUS: '2022-01-01-preview',
+        ResourceType.MGMT_SERVICEBUS: '2022-10-01-preview',
         ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
         ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
             'action_groups': '2022-06-01',
@@ -297,7 +300,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
         ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
-        ResourceType.MGMT_SERVICEBUS: '2022-01-01-preview',
+        ResourceType.MGMT_SERVICEBUS: '2022-10-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-07-01-preview',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01',
         ResourceType.MGMT_CONTAINERREGISTRY: '2019-05-01',
@@ -344,7 +347,7 @@ AZURE_API_PROFILES = {
         # API versions
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
         ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
-        ResourceType.MGMT_SERVICEBUS: '2022-01-01-preview',
+        ResourceType.MGMT_SERVICEBUS: '2022-10-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-03-22',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01'
     },

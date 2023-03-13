@@ -384,10 +384,14 @@ def aks_create(
     no_ssh_key=False,
     pod_cidr=None,
     service_cidr=None,
+    ip_families=None,
+    pod_cidrs=None,
+    service_cidrs=None,
     dns_service_ip=None,
     docker_bridge_address=None,
     load_balancer_sku=None,
     load_balancer_managed_outbound_ip_count=None,
+    load_balancer_managed_outbound_ipv6_count=None,
     load_balancer_outbound_ips=None,
     load_balancer_outbound_ip_prefixes=None,
     load_balancer_outbound_ports=None,
@@ -400,6 +404,7 @@ def aks_create(
     auto_upgrade_channel=None,
     cluster_autoscaler_profile=None,
     uptime_sla=False,
+    tier=None,
     fqdn_subdomain=None,
     api_server_authorized_ip_ranges=None,
     enable_private_cluster=False,
@@ -517,6 +522,7 @@ def aks_update(
     disable_local_accounts=False,
     enable_local_accounts=False,
     load_balancer_managed_outbound_ip_count=None,
+    load_balancer_managed_outbound_ipv6_count=None,
     load_balancer_outbound_ips=None,
     load_balancer_outbound_ip_prefixes=None,
     load_balancer_outbound_ports=None,
@@ -527,6 +533,7 @@ def aks_update(
     cluster_autoscaler_profile=None,
     uptime_sla=False,
     no_uptime_sla=False,
+    tier=None,
     api_server_authorized_ip_ranges=None,
     enable_public_fqdn=False,
     disable_public_fqdn=False,
@@ -1104,7 +1111,7 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
     # in which case we ignore the KUBECONFIG variable
     # KUBECONFIG can be colon separated. If we find that condition, use the first entry
     if "KUBECONFIG" in os.environ and path == os.path.join(os.path.expanduser('~'), '.kube', 'config'):
-        kubeconfig_path = os.environ["KUBECONFIG"].split(":")[0]
+        kubeconfig_path = os.environ["KUBECONFIG"].split(os.pathsep)[0]
         if kubeconfig_path:
             logger.info("The default path '%s' is replaced by '%s' defined in KUBECONFIG.", path, kubeconfig_path)
             path = kubeconfig_path
@@ -2069,9 +2076,9 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           kubernetes_version='',
                           node_image_only=False,
                           max_surge=None,
+                          snapshot_id=None,
                           no_wait=False,
                           aks_custom_headers=None,
-                          snapshot_id=None,
                           yes=False):
     AgentPoolUpgradeSettings = cmd.get_models(
         "AgentPoolUpgradeSettings",
@@ -2079,7 +2086,7 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         operation_group="managed_clusters",
     )
     if kubernetes_version != '' and node_image_only:
-        raise CLIError(
+        raise MutuallyExclusiveArgumentError(
             'Conflicting flags. Upgrading the Kubernetes version will also '
             'upgrade node image version. If you only want to upgrade the '
             'node version please use the "--node-image-only" option only.'
@@ -2101,7 +2108,7 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                                                       nodepool_name,
                                                       snapshot_id)
 
-    # load model CreationData
+    # load model CreationData, for nodepool snapshot
     CreationData = cmd.get_models(
         "CreationData",
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
@@ -2123,9 +2130,9 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
     if kubernetes_version != '' or instance.orchestrator_version == kubernetes_version:
         msg = "The new kubernetes version is the same as the current kubernetes version."
         if instance.provisioning_state == "Succeeded":
-            msg = "The cluster is already on version {} and is not in a failed state. No operations will occur when upgrading to the same version if the cluster is not in a failed state.".format(instance.kubernetes_version)
+            msg = "The cluster is already on version {} and is not in a failed state. No operations will occur when upgrading to the same version if the cluster is not in a failed state.".format(instance.orchestrator_version)
         elif instance.provisioning_state == "Failed":
-            msg = "Cluster currently in failed state. Proceeding with upgrade to existing version {} to attempt resolution of failed cluster state.".format(instance.kubernetes_version)
+            msg = "Cluster currently in failed state. Proceeding with upgrade to existing version {} to attempt resolution of failed cluster state.".format(instance.orchestrator_version)
         if not yes and not prompt_y_n(msg):
             return None
 
