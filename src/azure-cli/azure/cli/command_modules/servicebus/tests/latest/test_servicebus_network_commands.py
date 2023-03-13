@@ -196,8 +196,11 @@ class SBNetworkrulesetCRUDScenarioTest(ScenarioTest):
         self.assertEqual('Allow', networkRule['defaultAction'])
 
         # list Vnetrules
-        self.cmd(
-            'servicebus namespace network-rule-set list --resource-group {rg} --name {namespacename}')
+        networkRule = self.cmd(
+            'servicebus namespace network-rule-set virtual-network-rule list --resource-group {rg} --name {namespacename}')
+        self.assertEqual(len(networkRule), 2)
+        self.assertEqual(networkRule['virtualNetworkRules'][0]['subnet']['id'].lower(), created_subnet1['id'].lower())
+        self.assertEqual(networkRule['virtualNetworkRules'][1]['subnet']['id'].lower(), created_subnet2['id'].lower())
 
         # remove Vnetrule
         self.cmd(
@@ -205,3 +208,6 @@ class SBNetworkrulesetCRUDScenarioTest(ScenarioTest):
 
         networkRule = self.cmd('servicebus namespace network-rule-set show --resource-group {rg} --name {namespacename}').get_output_in_json()
         self.assertEqual(len(networkRule['virtualNetworkRules']), 1)
+
+        #remove namesoace
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename}')

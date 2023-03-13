@@ -53,7 +53,6 @@ def load_command_table(self, _):
         client_factory=private_link_mgmt_client_factory,
         resource_type=ResourceType.MGMT_SERVICEBUS)
 
-    from ._validators import validate_subnet
 
 # Namespace Region
     with self.command_group('servicebus namespace', custom_command_type=sb_namespace_custom,
