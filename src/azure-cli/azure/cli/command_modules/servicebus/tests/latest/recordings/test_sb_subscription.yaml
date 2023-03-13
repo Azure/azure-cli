@@ -13,13 +13,13 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags --sku
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_subscription000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001","name":"cli_test_sb_subscription000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-08T01:21:38Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001","name":"cli_test_sb_subscription000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-03-13T13:54:13Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -28,7 +28,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 01:21:40 GMT
+      - Mon, 13 Mar 2023 13:54:14 GMT
       expires:
       - '-1'
       pragma:
@@ -43,9 +43,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "tags": {"{tag1: value1,": "", "tag2: value2}":
-      ""}, "sku": {"name": "Standard", "tier": "Standard"}, "properties": {"publicNetworkAccess":
-      "Enabled"}}'
+    body: '{"identity": {"type": "None"}, "location": "westus", "sku": {"name": "Standard",
+      "tier": "Standard"}, "tags": {"{tag2: value2,": "", "tag1: value1}": ""}}'
     headers:
       Accept:
       - application/json
@@ -56,29 +55,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '174'
+      - '154'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --tags --sku
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-10-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:sb-nscli000002","createdAt":"2023-02-08T01:21:42.997Z","updatedAt":"2023-02-08T01:21:42.997Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{"{tag2: value2,":"","tag1: value1}":""},"properties":{"premiumMessagingPartitions":0,"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:sb-nscli000002","createdAt":"2023-03-13T13:54:16.227Z","updatedAt":"2023-03-13T13:54:16.227Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '730'
+      - '761'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 01:21:43 GMT
+      - Mon, 13 Mar 2023 13:54:17 GMT
       expires:
       - '-1'
       pragma:
@@ -97,7 +96,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1196'
     status:
       code: 200
       message: OK
@@ -115,32 +114,32 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags --sku
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-10-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:sb-nscli000002","createdAt":"2023-02-08T01:21:42.997Z","updatedAt":"2023-02-08T01:21:42.997Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{"{tag2: value2,":"","tag1: value1}":""},"properties":{"premiumMessagingPartitions":0,"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:sb-nscli000002","createdAt":"2023-03-13T13:54:16.227Z","updatedAt":"2023-03-13T13:54:16.227Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '730'
+      - '761'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 01:22:14 GMT
+      - Mon, 13 Mar 2023 13:54:47 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -166,83 +165,32 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags --sku
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-10-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:sb-nscli000002","createdAt":"2023-02-08T01:21:42.997Z","updatedAt":"2023-02-08T01:22:26.437Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"{tag2: value2,":"","tag1: value1}":""},"properties":{"premiumMessagingPartitions":0,"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:sb-nscli000002","createdAt":"2023-03-13T13:54:16.227Z","updatedAt":"2023-03-13T13:55:01.083Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '728'
+      - '759'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 01:22:44 GMT
+      - Mon, 13 Mar 2023 13:55:17 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/SN1
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus namespace create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name --tags --sku
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:sb-nscli000002","createdAt":"2023-02-08T01:21:42.997Z","updatedAt":"2023-02-08T01:22:26.437Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '728'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 08 Feb 2023 01:22:44 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -268,23 +216,23 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-10-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1: value1,":"","tag2: value2}":""},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:sb-nscli000002","createdAt":"2023-02-08T01:21:42.997Z","updatedAt":"2023-02-08T01:22:26.437Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"{tag2: value2,":"","tag1: value1}":""},"properties":{"premiumMessagingPartitions":0,"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:sb-nscli000002","createdAt":"2023-03-13T13:54:16.227Z","updatedAt":"2023-03-13T13:55:01.083Z","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '728'
+      - '759'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 01:22:45 GMT
+      - Mon, 13 Mar 2023 13:55:17 GMT
       expires:
       - '-1'
       pragma:
@@ -323,58 +271,13 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000005?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000005","name":"sb-topiccli000005","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2023-02-08T01:22:47.45Z","updatedAt":"2023-02-08T01:22:47.483Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '965'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 08 Feb 2023 01:22:47 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus topic show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --namespace-name --name
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000005?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000005","name":"sb-topiccli000005","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2023-02-08T01:22:47.45Z","updatedAt":"2023-02-08T01:22:47.483Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000005","name":"sb-topiccli000005","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2023-03-13T13:55:20.007Z","updatedAt":"2023-03-13T13:55:20.043Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -383,7 +286,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 01:22:47 GMT
+      - Mon, 13 Mar 2023 13:55:19 GMT
       expires:
       - '-1'
       pragma:
@@ -396,53 +299,6 @@ interactions:
       - chunked
       vary:
       - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus topic create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '2'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --resource-group --namespace-name --name
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2023-02-08T01:22:50.077Z","updatedAt":"2023-02-08T01:22:50.117Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '966'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 08 Feb 2023 01:22:50 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
@@ -464,13 +320,13 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000005?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2023-02-08T01:22:50.077Z","updatedAt":"2023-02-08T01:22:50.117Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000005","name":"sb-topiccli000005","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2023-03-13T13:55:20.007Z","updatedAt":"2023-03-13T13:55:20.043Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -479,7 +335,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 01:22:50 GMT
+      - Mon, 13 Mar 2023 13:55:20 GMT
       expires:
       - '-1'
       pragma:
@@ -515,13 +371,13 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000006?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000006","name":"sb-topiccli000006","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2023-02-08T01:22:52.53Z","updatedAt":"2023-02-08T01:22:52.57Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2023-03-13T13:55:22.66Z","updatedAt":"2023-03-13T13:55:22.69Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -530,7 +386,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 01:22:52 GMT
+      - Mon, 13 Mar 2023 13:55:22 GMT
       expires:
       - '-1'
       pragma:
@@ -539,10 +395,14 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1194'
     status:
       code: 200
       message: OK
@@ -560,13 +420,13 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000006?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000006","name":"sb-topiccli000006","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2023-02-08T01:22:52.53Z","updatedAt":"2023-02-08T01:22:52.57Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2023-03-13T13:55:22.66Z","updatedAt":"2023-03-13T13:55:22.69Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -575,7 +435,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 01:22:53 GMT
+      - Mon, 13 Mar 2023 13:55:23 GMT
       expires:
       - '-1'
       pragma:
@@ -594,10 +454,110 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"lockDuration": "PT3M", "defaultMessageTimeToLive": "P1Y2M3DT3H11M2S",
-      "deadLetteringOnMessageExpiration": true, "maxDeliveryCount": 12, "status":
-      "Active", "enableBatchedOperations": true, "forwardTo": "sb-topiccli000005",
-      "forwardDeadLetteredMessagesTo": "sb-topiccli000005"}}'
+    body: '{}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus topic create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --namespace-name --name
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000006?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000006","name":"sb-topiccli000006","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2023-03-13T13:55:25.327Z","updatedAt":"2023-03-13T13:55:25.473Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '966'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 13:55:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1194'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus topic show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name --name
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000006?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000006","name":"sb-topiccli000006","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2023-03-13T13:55:25.327Z","updatedAt":"2023-03-13T13:55:25.473Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '967'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 13:55:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"deadLetteringOnMessageExpiration": true, "defaultMessageTimeToLive":
+      "P1Y2M3DT3H11M2S", "enableBatchedOperations": true, "forwardDeadLetteredMessagesTo":
+      "sb-topiccli000005", "forwardTo": "sb-topiccli000005", "lockDuration": "PT3M",
+      "maxDeliveryCount": 12, "status": "Active"}}'
     headers:
       Accept:
       - application/json
@@ -616,13 +576,13 @@ interactions:
         --max-delivery-count --status --enable-batched-operations --forward-to --forward-dead-lettered-messages-to
         --default-message-time-to-live
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT3M","requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":true,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":12,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:22:55.2503315Z","updatedAt":"2023-02-08T01:22:55.2503315Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT3M","requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":true,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":12,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:27.8569635Z","updatedAt":"2023-03-13T13:55:27.8569635Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
     headers:
       cache-control:
       - no-cache
@@ -631,7 +591,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 01:22:55 GMT
+      - Mon, 13 Mar 2023 13:55:27 GMT
       expires:
       - '-1'
       pragma:
@@ -647,7 +607,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -665,13 +625,13 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --topic-name --default-message-time-to-live
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT3M","requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":true,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":12,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:22:55.2528109Z","updatedAt":"2023-02-08T01:22:55.2528109Z","accessedAt":"2023-02-08T01:22:55.253Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT3M","requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":true,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":12,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:27.8560621Z","updatedAt":"2023-03-13T13:55:27.8560621Z","accessedAt":"2023-03-13T13:55:27.857Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
     headers:
       cache-control:
       - no-cache
@@ -680,7 +640,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 01:22:55 GMT
+      - Mon, 13 Mar 2023 13:55:27 GMT
       expires:
       - '-1'
       pragma:
@@ -699,11 +659,12 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"lockDuration": "PT3M", "requiresSession": false, "defaultMessageTimeToLive":
-      "P1DT3M4S", "deadLetteringOnFilterEvaluationExceptions": true, "deadLetteringOnMessageExpiration":
-      true, "maxDeliveryCount": 12, "status": "Active", "enableBatchedOperations":
-      true, "forwardTo": "sb-topiccli000005", "forwardDeadLetteredMessagesTo": "sb-topiccli000005",
-      "isClientAffine": false}}'
+    body: '{"properties": {"autoDeleteOnIdle": "P10675199DT2H48M5.4775807S", "countDetails":
+      {}, "deadLetteringOnFilterEvaluationExceptions": true, "deadLetteringOnMessageExpiration":
+      true, "defaultMessageTimeToLive": "P428DT3H11M2S", "enableBatchedOperations":
+      true, "forwardDeadLetteredMessagesTo": "sb-topiccli000005", "forwardTo": "sb-topiccli000005",
+      "isClientAffine": false, "lockDuration": "PT3M", "maxDeliveryCount": 12, "requiresSession":
+      false, "status": "Active"}}'
     headers:
       Accept:
       - application/json
@@ -714,735 +675,19 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '389'
+      - '464'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --namespace-name --name --topic-name --default-message-time-to-live
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT3M","requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":12,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:22:56.8949046Z","updatedAt":"2023-02-08T01:22:56.8949046Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1032'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 08 Feb 2023 01:22:56 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus topic subscription update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --namespace-name --name --topic-name --enable-dead-lettering-on-message-expiration
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT3M","requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":true,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":12,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:22:55.2528109Z","updatedAt":"2023-02-08T01:22:56.8934435Z","accessedAt":"2023-02-08T01:22:55.253Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1037'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 08 Feb 2023 01:22:56 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"lockDuration": "PT3M", "requiresSession": false, "defaultMessageTimeToLive":
-      "P1DT3M4S", "deadLetteringOnFilterEvaluationExceptions": true, "deadLetteringOnMessageExpiration":
-      false, "maxDeliveryCount": 12, "status": "Active", "enableBatchedOperations":
-      true, "forwardTo": "sb-topiccli000005", "forwardDeadLetteredMessagesTo": "sb-topiccli000005",
-      "isClientAffine": false}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus topic subscription update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '390'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --resource-group --namespace-name --name --topic-name --enable-dead-lettering-on-message-expiration
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT3M","requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":12,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:22:57.8948732Z","updatedAt":"2023-02-08T01:22:57.8948732Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1033'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 08 Feb 2023 01:22:57 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus topic subscription update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --namespace-name --name --topic-name --lock-duration
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT3M","requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":12,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:22:55.2528109Z","updatedAt":"2023-02-08T01:22:57.8934715Z","accessedAt":"2023-02-08T01:22:55.253Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1038'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 08 Feb 2023 01:22:58 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"lockDuration": "PT1M", "requiresSession": false, "defaultMessageTimeToLive":
-      "P1DT3M4S", "deadLetteringOnFilterEvaluationExceptions": true, "deadLetteringOnMessageExpiration":
-      false, "maxDeliveryCount": 12, "status": "Active", "enableBatchedOperations":
-      true, "forwardTo": "sb-topiccli000005", "forwardDeadLetteredMessagesTo": "sb-topiccli000005",
-      "isClientAffine": false}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus topic subscription update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '390'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --resource-group --namespace-name --name --topic-name --lock-duration
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":12,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:22:58.6593986Z","updatedAt":"2023-02-08T01:22:58.6593986Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1033'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 08 Feb 2023 01:22:58 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus topic subscription update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --namespace-name --name --topic-name --max-delivery-count
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":12,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:22:55.2528109Z","updatedAt":"2023-02-08T01:22:58.6590677Z","accessedAt":"2023-02-08T01:22:55.253Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1038'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 08 Feb 2023 01:22:58 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"lockDuration": "PT1M", "requiresSession": false, "defaultMessageTimeToLive":
-      "P1DT3M4S", "deadLetteringOnFilterEvaluationExceptions": true, "deadLetteringOnMessageExpiration":
-      false, "maxDeliveryCount": 8, "status": "Active", "enableBatchedOperations":
-      true, "forwardTo": "sb-topiccli000005", "forwardDeadLetteredMessagesTo": "sb-topiccli000005",
-      "isClientAffine": false}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus topic subscription update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '389'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --resource-group --namespace-name --name --topic-name --max-delivery-count
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":8,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:22:59.6292637Z","updatedAt":"2023-02-08T01:22:59.6292637Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1032'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 08 Feb 2023 01:22:59 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus topic subscription update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --namespace-name --name --topic-name --enable-batched-operations
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":8,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:22:55.2528109Z","updatedAt":"2023-02-08T01:22:59.629286Z","accessedAt":"2023-02-08T01:22:55.253Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1036'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 08 Feb 2023 01:22:59 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"lockDuration": "PT1M", "requiresSession": false, "defaultMessageTimeToLive":
-      "P1DT3M4S", "deadLetteringOnFilterEvaluationExceptions": true, "deadLetteringOnMessageExpiration":
-      false, "maxDeliveryCount": 8, "status": "Active", "enableBatchedOperations":
-      false, "forwardTo": "sb-topiccli000005", "forwardDeadLetteredMessagesTo": "sb-topiccli000005",
-      "isClientAffine": false}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus topic subscription update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '390'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --resource-group --namespace-name --name --topic-name --enable-batched-operations
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":8,"status":"Active","enableBatchedOperations":false,"createdAt":"2023-02-08T01:23:00.9093961Z","updatedAt":"2023-02-08T01:23:00.9093961Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1033'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 08 Feb 2023 01:23:00 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus topic subscription update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --namespace-name --name --topic-name --forward-to
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":8,"status":"Active","enableBatchedOperations":false,"createdAt":"2023-02-08T01:22:55.2528109Z","updatedAt":"2023-02-08T01:23:00.9261636Z","accessedAt":"2023-02-08T01:22:55.253Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1038'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 08 Feb 2023 01:23:01 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"lockDuration": "PT1M", "requiresSession": false, "defaultMessageTimeToLive":
-      "P1DT3M4S", "deadLetteringOnFilterEvaluationExceptions": true, "deadLetteringOnMessageExpiration":
-      false, "maxDeliveryCount": 8, "status": "Active", "enableBatchedOperations":
-      false, "forwardTo": "sb-topiccli000006", "forwardDeadLetteredMessagesTo": "sb-topiccli000005",
-      "isClientAffine": false}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus topic subscription update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '390'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --resource-group --namespace-name --name --topic-name --forward-to
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":8,"status":"Active","enableBatchedOperations":false,"createdAt":"2023-02-08T01:23:02.2062628Z","updatedAt":"2023-02-08T01:23:02.2062628Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000006","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1033'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 08 Feb 2023 01:23:01 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus topic subscription update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --namespace-name --name --topic-name --forward-dead-lettered-messages-to
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":8,"status":"Active","enableBatchedOperations":false,"createdAt":"2023-02-08T01:22:55.2528109Z","updatedAt":"2023-02-08T01:23:02.2074784Z","accessedAt":"2023-02-08T01:22:55.253Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000006","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1038'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 08 Feb 2023 01:23:01 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"lockDuration": "PT1M", "requiresSession": false, "defaultMessageTimeToLive":
-      "P1DT3M4S", "deadLetteringOnFilterEvaluationExceptions": true, "deadLetteringOnMessageExpiration":
-      false, "maxDeliveryCount": 8, "status": "Active", "enableBatchedOperations":
-      false, "forwardTo": "sb-topiccli000006", "forwardDeadLetteredMessagesTo": "sb-topiccli000006",
-      "isClientAffine": false}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus topic subscription update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '390'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --resource-group --namespace-name --name --topic-name --forward-dead-lettered-messages-to
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":8,"status":"Active","enableBatchedOperations":false,"createdAt":"2023-02-08T01:23:02.911545Z","updatedAt":"2023-02-08T01:23:02.911545Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000006","forwardDeadLetteredMessagesTo":"sb-topiccli000006"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1031'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 08 Feb 2023 01:23:02 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus topic subscription update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --namespace-name --name --topic-name --status
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":8,"status":"Active","enableBatchedOperations":false,"createdAt":"2023-02-08T01:22:55.2528109Z","updatedAt":"2023-02-08T01:23:02.9105497Z","accessedAt":"2023-02-08T01:22:55.253Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000006","forwardDeadLetteredMessagesTo":"sb-topiccli000006"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1038'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 08 Feb 2023 01:23:03 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"lockDuration": "PT1M", "requiresSession": false, "defaultMessageTimeToLive":
-      "P1DT3M4S", "deadLetteringOnFilterEvaluationExceptions": true, "deadLetteringOnMessageExpiration":
-      false, "maxDeliveryCount": 8, "status": "ReceiveDisabled", "enableBatchedOperations":
-      false, "forwardTo": "sb-topiccli000006", "forwardDeadLetteredMessagesTo": "sb-topiccli000006",
-      "isClientAffine": false}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus topic subscription update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '399'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --resource-group --namespace-name --name --topic-name --status
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":8,"status":"ReceiveDisabled","enableBatchedOperations":false,"createdAt":"2023-02-08T01:23:03.9034876Z","updatedAt":"2023-02-08T01:23:03.9034876Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000006","forwardDeadLetteredMessagesTo":"sb-topiccli000006"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT3M","requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":true,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":12,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:27.8560621Z","updatedAt":"2023-03-13T13:55:27.8560621Z","accessedAt":"2023-03-13T13:55:27.857Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
     headers:
       cache-control:
       - no-cache
@@ -1451,161 +696,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 01:23:03 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"requiresSession": true, "deadLetteringOnFilterEvaluationExceptions":
-      true, "autoDeleteOnIdle": "P7D"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus topic subscription create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '119'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --resource-group --namespace-name --name --topic-name --enable-session --auto-delete-on-idle
-        --dead-letter-on-filter-exceptions
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012","name":"sb-subscli000012","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:23:05.300037Z","updatedAt":"2023-02-08T01:23:05.300037Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P7D"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '941'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 08 Feb 2023 01:23:05 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus topic subscription update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --namespace-name --name --topic-name --auto-delete-on-idle
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012","name":"sb-subscli000012","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:23:05.3012719Z","updatedAt":"2023-02-08T01:23:05.3012719Z","accessedAt":"2023-02-08T01:23:05.3012719Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P7D"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '952'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 08 Feb 2023 01:23:05 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"lockDuration": "PT1M", "requiresSession": true, "deadLetteringOnFilterEvaluationExceptions":
-      true, "deadLetteringOnMessageExpiration": false, "maxDeliveryCount": 10, "status":
-      "Active", "enableBatchedOperations": true, "autoDeleteOnIdle": "P1DT3M4S", "isClientAffine":
-      false}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus topic subscription update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '293'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --resource-group --namespace-name --name --topic-name --auto-delete-on-idle
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012","name":"sb-subscli000012","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:23:06.1146423Z","updatedAt":"2023-02-08T01:23:06.1146423Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P1DT3M4S"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '948'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 08 Feb 2023 01:23:05 GMT
+      - Mon, 13 Mar 2023 13:55:27 GMT
       expires:
       - '-1'
       pragma:
@@ -1637,24 +728,24 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --resource-group --namespace-name --name --topic-name --dead-letter-on-filter-exceptions
+      - --resource-group --namespace-name --name --topic-name --enable-dead-lettering-on-message-expiration
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012","name":"sb-subscli000012","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:23:05.3012719Z","updatedAt":"2023-02-08T01:23:06.1293068Z","accessedAt":"2023-02-08T01:23:05.3012719Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P1DT3M4S"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT3M","requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":true,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":12,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:27.8560621Z","updatedAt":"2023-03-13T13:55:27.8560621Z","accessedAt":"2023-03-13T13:55:27.857Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '957'
+      - '1042'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 01:23:05 GMT
+      - Mon, 13 Mar 2023 13:55:28 GMT
       expires:
       - '-1'
       pragma:
@@ -1673,10 +764,12 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"lockDuration": "PT1M", "requiresSession": true, "deadLetteringOnFilterEvaluationExceptions":
-      false, "deadLetteringOnMessageExpiration": false, "maxDeliveryCount": 10, "status":
-      "Active", "enableBatchedOperations": true, "autoDeleteOnIdle": "P1DT3M4S", "isClientAffine":
-      false}}'
+    body: '{"properties": {"autoDeleteOnIdle": "P10675199DT2H48M5.4775807S", "countDetails":
+      {}, "deadLetteringOnFilterEvaluationExceptions": true, "deadLetteringOnMessageExpiration":
+      false, "defaultMessageTimeToLive": "P428DT3H11M2S", "enableBatchedOperations":
+      true, "forwardDeadLetteredMessagesTo": "sb-topiccli000005", "forwardTo": "sb-topiccli000005",
+      "isClientAffine": false, "lockDuration": "PT3M", "maxDeliveryCount": 12, "requiresSession":
+      false, "status": "Active"}}'
     headers:
       Accept:
       - application/json
@@ -1687,28 +780,339 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '294'
+      - '465'
       Content-Type:
       - application/json
       ParameterSetName:
-      - --resource-group --namespace-name --name --topic-name --dead-letter-on-filter-exceptions
+      - --resource-group --namespace-name --name --topic-name --enable-dead-lettering-on-message-expiration
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012","name":"sb-subscli000012","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":false,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:23:07.2338313Z","updatedAt":"2023-02-08T01:23:07.2338313Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P1DT3M4S"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT3M","requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":12,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:29.1616441Z","updatedAt":"2023-03-13T13:55:29.1616441Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '949'
+      - '1038'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 01:23:07 GMT
+      - Mon, 13 Mar 2023 13:55:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus topic subscription update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name --name --topic-name --lock-duration
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT3M","requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":12,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:27.8560621Z","updatedAt":"2023-03-13T13:55:29.1685311Z","accessedAt":"2023-03-13T13:55:27.857Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1043'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 13:55:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"autoDeleteOnIdle": "P10675199DT2H48M5.4775807S", "countDetails":
+      {}, "deadLetteringOnFilterEvaluationExceptions": true, "deadLetteringOnMessageExpiration":
+      false, "defaultMessageTimeToLive": "P428DT3H11M2S", "enableBatchedOperations":
+      true, "forwardDeadLetteredMessagesTo": "sb-topiccli000005", "forwardTo": "sb-topiccli000005",
+      "isClientAffine": false, "lockDuration": "PT1M", "maxDeliveryCount": 12, "requiresSession":
+      false, "status": "Active"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus topic subscription update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '465'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --namespace-name --name --topic-name --lock-duration
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":12,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:29.6761269Z","updatedAt":"2023-03-13T13:55:29.6761269Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1038'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 13:55:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus topic subscription update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name --name --topic-name --max-delivery-count
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":12,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:27.8560621Z","updatedAt":"2023-03-13T13:55:29.6841555Z","accessedAt":"2023-03-13T13:55:27.857Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1043'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 13:55:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"autoDeleteOnIdle": "P10675199DT2H48M5.4775807S", "countDetails":
+      {}, "deadLetteringOnFilterEvaluationExceptions": true, "deadLetteringOnMessageExpiration":
+      false, "defaultMessageTimeToLive": "P428DT3H11M2S", "enableBatchedOperations":
+      true, "forwardDeadLetteredMessagesTo": "sb-topiccli000005", "forwardTo": "sb-topiccli000005",
+      "isClientAffine": false, "lockDuration": "PT1M", "maxDeliveryCount": 8, "requiresSession":
+      false, "status": "Active"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus topic subscription update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '464'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --namespace-name --name --topic-name --max-delivery-count
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":8,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:30.8462275Z","updatedAt":"2023-03-13T13:55:30.8462275Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1037'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 13:55:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus topic subscription update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name --name --topic-name --enable-batched-operations
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":8,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:27.8560621Z","updatedAt":"2023-03-13T13:55:30.8560429Z","accessedAt":"2023-03-13T13:55:27.857Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1042'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 13:55:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"autoDeleteOnIdle": "P10675199DT2H48M5.4775807S", "countDetails":
+      {}, "deadLetteringOnFilterEvaluationExceptions": true, "deadLetteringOnMessageExpiration":
+      false, "defaultMessageTimeToLive": "P428DT3H11M2S", "enableBatchedOperations":
+      false, "forwardDeadLetteredMessagesTo": "sb-topiccli000005", "forwardTo": "sb-topiccli000005",
+      "isClientAffine": false, "lockDuration": "PT1M", "maxDeliveryCount": 8, "requiresSession":
+      false, "status": "Active"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus topic subscription update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '465'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --namespace-name --name --topic-name --enable-batched-operations
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":8,"status":"Active","enableBatchedOperations":false,"createdAt":"2023-03-13T13:55:31.5474417Z","updatedAt":"2023-03-13T13:55:31.5474417Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1038'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 13:55:30 GMT
       expires:
       - '-1'
       pragma:
@@ -1720,7 +1124,481 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus topic subscription update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name --name --topic-name --forward-to
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":8,"status":"Active","enableBatchedOperations":false,"createdAt":"2023-03-13T13:55:27.8560621Z","updatedAt":"2023-03-13T13:55:31.5435397Z","accessedAt":"2023-03-13T13:55:27.857Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000005","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1043'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 13:55:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"autoDeleteOnIdle": "P10675199DT2H48M5.4775807S", "countDetails":
+      {}, "deadLetteringOnFilterEvaluationExceptions": true, "deadLetteringOnMessageExpiration":
+      false, "defaultMessageTimeToLive": "P428DT3H11M2S", "enableBatchedOperations":
+      false, "forwardDeadLetteredMessagesTo": "sb-topiccli000005", "forwardTo": "sb-topiccli000006",
+      "isClientAffine": false, "lockDuration": "PT1M", "maxDeliveryCount": 8, "requiresSession":
+      false, "status": "Active"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus topic subscription update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '465'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --namespace-name --name --topic-name --forward-to
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":8,"status":"Active","enableBatchedOperations":false,"createdAt":"2023-03-13T13:55:32.458783Z","updatedAt":"2023-03-13T13:55:32.458783Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000006","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1036'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 13:55:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus topic subscription update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name --name --topic-name --forward-dead-lettered-messages-to
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":8,"status":"Active","enableBatchedOperations":false,"createdAt":"2023-03-13T13:55:27.8560621Z","updatedAt":"2023-03-13T13:55:32.4654764Z","accessedAt":"2023-03-13T13:55:27.857Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000006","forwardDeadLetteredMessagesTo":"sb-topiccli000005"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1043'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 13:55:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"autoDeleteOnIdle": "P10675199DT2H48M5.4775807S", "countDetails":
+      {}, "deadLetteringOnFilterEvaluationExceptions": true, "deadLetteringOnMessageExpiration":
+      false, "defaultMessageTimeToLive": "P428DT3H11M2S", "enableBatchedOperations":
+      false, "forwardDeadLetteredMessagesTo": "sb-topiccli000006", "forwardTo": "sb-topiccli000006",
+      "isClientAffine": false, "lockDuration": "PT1M", "maxDeliveryCount": 8, "requiresSession":
+      false, "status": "Active"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus topic subscription update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '465'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --namespace-name --name --topic-name --forward-dead-lettered-messages-to
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":8,"status":"Active","enableBatchedOperations":false,"createdAt":"2023-03-13T13:55:33.4431741Z","updatedAt":"2023-03-13T13:55:33.4431741Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000006","forwardDeadLetteredMessagesTo":"sb-topiccli000006"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1038'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 13:55:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus topic subscription update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name --name --topic-name --status
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":8,"status":"Active","enableBatchedOperations":false,"createdAt":"2023-03-13T13:55:27.8560621Z","updatedAt":"2023-03-13T13:55:33.4498032Z","accessedAt":"2023-03-13T13:55:27.857Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000006","forwardDeadLetteredMessagesTo":"sb-topiccli000006"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1043'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 13:55:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"autoDeleteOnIdle": "P10675199DT2H48M5.4775807S", "countDetails":
+      {}, "deadLetteringOnFilterEvaluationExceptions": true, "deadLetteringOnMessageExpiration":
+      false, "defaultMessageTimeToLive": "P428DT3H11M2S", "enableBatchedOperations":
+      false, "forwardDeadLetteredMessagesTo": "sb-topiccli000006", "forwardTo": "sb-topiccli000006",
+      "isClientAffine": false, "lockDuration": "PT1M", "maxDeliveryCount": 8, "requiresSession":
+      false, "status": "ReceiveDisabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus topic subscription update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '474'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --namespace-name --name --topic-name --status
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":8,"status":"ReceiveDisabled","enableBatchedOperations":false,"createdAt":"2023-03-13T13:55:34.2944784Z","updatedAt":"2023-03-13T13:55:34.2944784Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000006","forwardDeadLetteredMessagesTo":"sb-topiccli000006"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1047'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 13:55:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"autoDeleteOnIdle": "P7D", "deadLetteringOnFilterEvaluationExceptions":
+      true, "requiresSession": true}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus topic subscription create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '119'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --namespace-name --name --topic-name --enable-session --auto-delete-on-idle
+        --dead-letter-on-filter-exceptions
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012","name":"sb-subscli000012","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:35.5833178Z","updatedAt":"2023-03-13T13:55:35.5833178Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P7D"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '943'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 13:55:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus topic subscription update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name --name --topic-name --auto-delete-on-idle
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012","name":"sb-subscli000012","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:35.5915052Z","updatedAt":"2023-03-13T13:55:35.5915052Z","accessedAt":"2023-03-13T13:55:35.5915052Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P7D"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '952'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 13:55:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"autoDeleteOnIdle": "P428DT3H11M2S", "countDetails": {},
+      "deadLetteringOnFilterEvaluationExceptions": true, "deadLetteringOnMessageExpiration":
+      false, "defaultMessageTimeToLive": "P10675199DT2H48M5.4775807S", "enableBatchedOperations":
+      true, "isClientAffine": false, "lockDuration": "PT1M", "maxDeliveryCount": 10,
+      "requiresSession": true, "status": "Active"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus topic subscription update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '376'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --namespace-name --name --topic-name --auto-delete-on-idle
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012","name":"sb-subscli000012","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:36.552077Z","updatedAt":"2023-03-13T13:55:36.552077Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P428DT3H11M2S"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '951'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 13:55:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
     status:
       code: 200
       message: OK
@@ -1738,22 +1616,22 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --topic-name --dead-letter-on-filter-exceptions
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012","name":"sb-subscli000012","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":false,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:23:05.3012719Z","updatedAt":"2023-02-08T01:23:07.2543351Z","accessedAt":"2023-02-08T01:23:05.3012719Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P1DT3M4S"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012","name":"sb-subscli000012","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:35.5915052Z","updatedAt":"2023-03-13T13:55:36.5602426Z","accessedAt":"2023-03-13T13:55:35.5915052Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P428DT3H11M2S"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '958'
+      - '962'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 01:23:07 GMT
+      - Mon, 13 Mar 2023 13:55:36 GMT
       expires:
       - '-1'
       pragma:
@@ -1762,16 +1640,21 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"lockDuration": "PT1M", "requiresSession": true, "deadLetteringOnFilterEvaluationExceptions":
-      true, "deadLetteringOnMessageExpiration": false, "maxDeliveryCount": 10, "status":
-      "Active", "enableBatchedOperations": true, "autoDeleteOnIdle": "P1DT3M4S", "isClientAffine":
-      false}}'
+    body: '{"properties": {"autoDeleteOnIdle": "P428DT3H11M2S", "countDetails": {},
+      "deadLetteringOnFilterEvaluationExceptions": false, "deadLetteringOnMessageExpiration":
+      false, "defaultMessageTimeToLive": "P10675199DT2H48M5.4775807S", "enableBatchedOperations":
+      true, "isClientAffine": false, "lockDuration": "PT1M", "maxDeliveryCount": 10,
+      "requiresSession": true, "status": "Active"}}'
     headers:
       Accept:
       - application/json
@@ -1782,28 +1665,132 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '293'
+      - '377'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --namespace-name --name --topic-name --dead-letter-on-filter-exceptions
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012","name":"sb-subscli000012","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:23:07.9090852Z","updatedAt":"2023-02-08T01:23:07.9090852Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P1DT3M4S"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012","name":"sb-subscli000012","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":false,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:37.4427406Z","updatedAt":"2023-03-13T13:55:37.4427406Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P428DT3H11M2S"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '948'
+      - '954'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 01:23:07 GMT
+      - Mon, 13 Mar 2023 13:55:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus topic subscription update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name --name --topic-name --dead-letter-on-filter-exceptions
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012","name":"sb-subscli000012","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":false,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:35.5915052Z","updatedAt":"2023-03-13T13:55:37.450854Z","accessedAt":"2023-03-13T13:55:35.5915052Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P428DT3H11M2S"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '962'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 13:55:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"autoDeleteOnIdle": "P428DT3H11M2S", "countDetails": {},
+      "deadLetteringOnFilterEvaluationExceptions": true, "deadLetteringOnMessageExpiration":
+      false, "defaultMessageTimeToLive": "P10675199DT2H48M5.4775807S", "enableBatchedOperations":
+      true, "isClientAffine": false, "lockDuration": "PT1M", "maxDeliveryCount": 10,
+      "requiresSession": true, "status": "Active"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus topic subscription update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '376'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --namespace-name --name --topic-name --dead-letter-on-filter-exceptions
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012","name":"sb-subscli000012","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:38.2993823Z","updatedAt":"2023-03-13T13:55:38.2993823Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P428DT3H11M2S"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '953'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Mar 2023 13:55:37 GMT
       expires:
       - '-1'
       pragma:
@@ -1841,13 +1828,13 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --topic-name --name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000009?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000009","name":"sb-subscli000009","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:23:09.9403172Z","updatedAt":"2023-02-08T01:23:09.9403172Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000009","name":"sb-subscli000009","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:39.7708507Z","updatedAt":"2023-03-13T13:55:39.7708507Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S"}}'
     headers:
       cache-control:
       - no-cache
@@ -1856,7 +1843,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 01:23:09 GMT
+      - Mon, 13 Mar 2023 13:55:38 GMT
       expires:
       - '-1'
       pragma:
@@ -1872,7 +1859,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -1890,13 +1877,13 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --topic-name --name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000009?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000009","name":"sb-subscli000009","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:23:09.9418338Z","updatedAt":"2023-02-08T01:23:09.9418338Z","accessedAt":"2023-02-08T01:23:09.9418338Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000009","name":"sb-subscli000009","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:39.7804586Z","updatedAt":"2023-03-13T13:55:39.7804586Z","accessedAt":"2023-03-13T13:55:39.7804586Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S"}}'
     headers:
       cache-control:
       - no-cache
@@ -1905,7 +1892,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 01:23:09 GMT
+      - Mon, 13 Mar 2023 13:55:40 GMT
       expires:
       - '-1'
       pragma:
@@ -1914,6 +1901,10 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -1933,22 +1924,22 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --topic-name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P1DT3M4S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":8,"status":"ReceiveDisabled","enableBatchedOperations":false,"createdAt":"2023-02-08T01:22:55.2528109Z","updatedAt":"2023-02-08T01:23:03.9105476Z","accessedAt":"2023-02-08T01:22:55.253Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000006","forwardDeadLetteredMessagesTo":"sb-topiccli000006"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012","name":"sb-subscli000012","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:23:05.3012719Z","updatedAt":"2023-02-08T01:23:07.9105762Z","accessedAt":"2023-02-08T01:23:05.3012719Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P1DT3M4S"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000009","name":"sb-subscli000009","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:23:09.9418338Z","updatedAt":"2023-02-08T01:23:09.9418338Z","accessedAt":"2023-02-08T01:23:09.9418338Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000009","name":"sb-subscli000009","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:39.7804586Z","updatedAt":"2023-03-13T13:55:39.7804586Z","accessedAt":"2023-03-13T13:55:39.7804586Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000012","name":"sb-subscli000012","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":true,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:35.5915052Z","updatedAt":"2023-03-13T13:55:38.3102604Z","accessedAt":"2023-03-13T13:55:35.5915052Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P428DT3H11M2S"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000011","name":"sb-subscli000011","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P428DT3H11M2S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":8,"status":"ReceiveDisabled","enableBatchedOperations":false,"createdAt":"2023-03-13T13:55:27.8560621Z","updatedAt":"2023-03-13T13:55:34.3092204Z","accessedAt":"2023-03-13T13:55:27.857Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","forwardTo":"sb-topiccli000006","forwardDeadLetteredMessagesTo":"sb-topiccli000006"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2994'
+      - '3004'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 01:23:10 GMT
+      - Mon, 13 Mar 2023 13:55:40 GMT
       expires:
       - '-1'
       pragma:
@@ -1984,13 +1975,13 @@ interactions:
         --dead-letter-on-filter-exceptions --enable-dead-lettering-on-message-expiration
         --auto-delete-on-idle --default-message-time-to-live --lock-duration
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000009?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000009","name":"sb-subscli000009","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:23:09.9418338Z","updatedAt":"2023-02-08T01:23:09.9418338Z","accessedAt":"2023-02-08T01:23:09.9418338Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000009","name":"sb-subscli000009","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT1M","requiresSession":false,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":true,"messageCount":0,"maxDeliveryCount":10,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:39.7804586Z","updatedAt":"2023-03-13T13:55:39.7804586Z","accessedAt":"2023-03-13T13:55:39.7804586Z","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S"}}'
     headers:
       cache-control:
       - no-cache
@@ -1999,7 +1990,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 01:23:11 GMT
+      - Mon, 13 Mar 2023 13:55:41 GMT
       expires:
       - '-1'
       pragma:
@@ -2018,10 +2009,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"lockDuration": "PT4M", "requiresSession": false, "defaultMessageTimeToLive":
-      "PT7M", "deadLetteringOnFilterEvaluationExceptions": false, "deadLetteringOnMessageExpiration":
-      false, "maxDeliveryCount": 3, "status": "Active", "enableBatchedOperations":
-      true, "autoDeleteOnIdle": "P9D", "isClientAffine": false}}'
+    body: '{"properties": {"autoDeleteOnIdle": "P9D", "countDetails": {}, "deadLetteringOnFilterEvaluationExceptions":
+      false, "deadLetteringOnMessageExpiration": false, "defaultMessageTimeToLive":
+      "PT7M", "enableBatchedOperations": true, "isClientAffine": false, "lockDuration":
+      "PT4M", "maxDeliveryCount": 3, "requiresSession": false, "status": "Active"}}'
     headers:
       Accept:
       - application/json
@@ -2032,7 +2023,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '325'
+      - '345'
       Content-Type:
       - application/json
       ParameterSetName:
@@ -2040,13 +2031,13 @@ interactions:
         --dead-letter-on-filter-exceptions --enable-dead-lettering-on-message-expiration
         --auto-delete-on-idle --default-message-time-to-live --lock-duration
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000009?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000009","name":"sb-subscli000009","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT4M","requiresSession":false,"defaultMessageTimeToLive":"PT7M","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":false,"messageCount":0,"maxDeliveryCount":3,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-02-08T01:23:11.5809588Z","updatedAt":"2023-02-08T01:23:11.5809588Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P9D"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000009","name":"sb-subscli000009","type":"Microsoft.ServiceBus/namespaces/topics/subscriptions","location":"westus","properties":{"isClientAffine":false,"lockDuration":"PT4M","requiresSession":false,"defaultMessageTimeToLive":"PT7M","deadLetteringOnMessageExpiration":false,"deadLetteringOnFilterEvaluationExceptions":false,"messageCount":0,"maxDeliveryCount":3,"status":"Active","enableBatchedOperations":true,"createdAt":"2023-03-13T13:55:41.9740184Z","updatedAt":"2023-03-13T13:55:41.9740184Z","accessedAt":"0001-01-01T00:00:00","countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0},"autoDeleteOnIdle":"P9D"}}'
     headers:
       cache-control:
       - no-cache
@@ -2055,7 +2046,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 08 Feb 2023 01:23:11 GMT
+      - Mon, 13 Mar 2023 13:55:41 GMT
       expires:
       - '-1'
       pragma:
@@ -2071,7 +2062,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -2079,97 +2070,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus topic subscription delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --resource-group --namespace-name --topic-name --name
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/subscriptions/sb-subscli000009?api-version=2022-01-01-preview
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Wed, 08 Feb 2023 01:23:11 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - servicebus topic delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --resource-group --namespace-name --name
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Wed, 08 Feb 2023 01:23:12 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2181,10 +2082,10 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2022-10-01-preview
   response:
     body:
       string: ''
@@ -2194,24 +2095,24 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 08 Feb 2023 01:23:14 GMT
+      - Mon, 13 Mar 2023 13:55:43 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/locations/westus/operationStatus/sb-nscli000002?api-version=2022-01-01-preview&resourceType=Namespace
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/locations/westus/operationStatus/sb-nscli000002?api-version=2022-10-01-preview&resourceType=Namespace
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14998'
+      - '14999'
     status:
       code: 202
       message: Accepted
@@ -2229,10 +2130,10 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-servicebus/8.1.0 Python/3.10.9 (Linux-5.15.0-1031-azure-x86_64-with-glibc2.31)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
         VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/locations/westus/operationStatus/sb-nscli000002?api-version=2022-01-01-preview&resourceType=Namespace
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_subscription000001/providers/Microsoft.ServiceBus/locations/westus/operationStatus/sb-nscli000002?api-version=2022-10-01-preview&resourceType=Namespace
   response:
     body:
       string: ''
@@ -2240,7 +2141,7 @@ interactions:
       cache-control:
       - no-cache
       date:
-      - Wed, 08 Feb 2023 01:23:44 GMT
+      - Mon, 13 Mar 2023 13:56:12 GMT
       expires:
       - '-1'
       pragma:
