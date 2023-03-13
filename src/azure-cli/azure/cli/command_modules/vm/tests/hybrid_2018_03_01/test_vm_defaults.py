@@ -34,6 +34,7 @@ def _get_test_cmd():
 
 
 def _mock_resource_client(cli_ctx, client_type, **kwargs):
+    client = mock.MagicMock()
     if client_type is ResourceType.MGMT_RESOURCE_RESOURCES:
         def _mock_get(rg):
             def _get_mock_rg(name, location):
