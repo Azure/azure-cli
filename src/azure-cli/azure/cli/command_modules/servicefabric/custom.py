@@ -726,8 +726,8 @@ def _add_node_type_to_sfrp(cmd, client, resource_group_name, cluster_name, clust
 
 
 def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name, durability_level, vm_password, vm_user_name, vm_sku, vm_tier, capacity):
-    from .aaz.latest.network.lb import Create as LBCreate, Show as LBShow, Update as LBUpdate
-    from .aaz.latest.network.public_ip import Create as PIPCreate
+    from .aaz.latest.network.lb import Create as LBCreate, Show as LBShow
+    from .aaz.latest.network.public_ip import Create as PublicIPCreate
     from .aaz.latest.network.vnet import List as VNetList
     from .aaz.latest.network.vnet.subnet import Create as SubnetCreate, List as SubnetList
 
@@ -757,24 +757,22 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
 
     if address_prefix is None:
         raise CLIError("Failed to generate the address prefix")
+
     poller = SubnetCreate(cli_ctx=cli_ctx)(command_args={
         "name": subnet_name,
         "vnet_name": virtual_network["name"],
         "resource_group": resource_group_name,
         "address_prefix": address_prefix
     })
-
     subnet = LongRunningOperation(cli_ctx)(poller)
 
-    public_address_name = 'LBIP-{}-{}{}'.format(
-        cluster_name.lower(), node_type_name.lower(), index)
-    dns_label = '{}-{}{}'.format(cluster_name.lower(),
-                                 node_type_name.lower(), index)
-    lb_name = 'LB-{}-{}{}'.format(cluster_name.lower(),
-                                  node_type_name.lower(), index)
+    public_address_name = 'LBIP-{}-{}{}'.format(cluster_name.lower(), node_type_name.lower(), index)
+    dns_label = '{}-{}{}'.format(cluster_name.lower(), node_type_name.lower(), index)
+    lb_name = 'LB-{}-{}{}'.format(cluster_name.lower(), node_type_name.lower(), index)
     if len(lb_name) >= 24:
         lb_name = '{}{}'.format(lb_name[0:21], index)
-    poller = PIPCreate(cli_ctx=cli_ctx)(command_args={
+
+    poller = PublicIPCreate(cli_ctx=cli_ctx)(command_args={
         "name": public_address_name,
         "resource_group": resource_group_name,
         "location": location,
@@ -792,12 +790,6 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
     inbound_nat_pools_name = "LoadBalancerBEAddressNatPool"
 
     poller = LBCreate(cli_ctx=cli_ctx)(command_args={
-        "name": lb_name,
-        "resource_group": resource_group_name
-    })
-    LongRunningOperation(cli_ctx)(poller)
-
-    poller = LBUpdate(cli_ctx=cli_ctx)(command_args={
         "name": lb_name,
         "resource_group": resource_group_name,
         "location": location,
