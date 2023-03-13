@@ -1235,7 +1235,12 @@ def get_site_configs(cmd, resource_group_name, name, slot=None):
 def get_app_settings(cmd, resource_group_name, name, slot=None):
     result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory(cmd.cli_ctx)
-    slot_app_setting_names = client.web_apps.list_slot_configuration_names(resource_group_name, name).app_setting_names
+    slot_app_setting_names = None
+    try:
+        slot_app_setting_names = client.web_apps.list_slot_configuration_names(resource_group_name, name) \
+                                       .app_setting_names
+    except:  # pylint: disable=bare-except
+        pass
     return _build_app_settings_output(result.properties, slot_app_setting_names)
 
 
