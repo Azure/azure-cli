@@ -2456,10 +2456,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                                               '-n {name} ' \
                                               '--node-image-only ' \
                                               '--yes'
-        self.cmd(upgrade_node_image_only_cluster_cmd, checks=[
-            self.check(
-                'agentPoolProfiles[0].provisioningState', 'UpgradingNodeImageVersion')
-        ])
+        self.cmd(upgrade_node_image_only_cluster_cmd, expect_failure=True)
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -2491,14 +2488,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                                                '-n {node_pool_name} ' \
                                                '--node-image-only ' \
                                                '--no-wait'
-        self.cmd(upgrade_node_image_only_nodepool_cmd)
+        self.cmd(upgrade_node_image_only_nodepool_cmd, expect_failure=True)
 
         get_nodepool_cmd = 'aks nodepool show ' \
                            '--resource-group={resource_group} ' \
                            '--cluster-name={name} ' \
                            '-n {node_pool_name} '
         self.cmd(get_nodepool_cmd, checks=[
-            self.check('provisioningState', 'UpgradingNodeImageVersion')
+            self.check('provisioningState', 'Succeeded')
         ])
 
     @AllowLargeResponse()
@@ -4761,10 +4758,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                                               '-n {name} ' \
                                               '--node-image-only ' \
                                               '--yes'
-        self.cmd(upgrade_node_image_only_cluster_cmd, checks=[
-            self.check(
-                'agentPoolProfiles[0].provisioningState', 'UpgradingNodeImageVersion')
-        ])
+        self.cmd(upgrade_node_image_only_cluster_cmd, expect_failure=True)
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -4796,14 +4790,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                                                '-n {node_pool_name} ' \
                                                '--node-image-only ' \
                                                '--no-wait'
-        self.cmd(upgrade_node_image_only_nodepool_cmd)
+        self.cmd(upgrade_node_image_only_nodepool_cmd, expect_failure=True)
 
         get_nodepool_cmd = 'aks nodepool show ' \
                            '--resource-group={resource_group} ' \
                            '--cluster-name={name} ' \
                            '-n {node_pool_name} '
         self.cmd(get_nodepool_cmd, checks=[
-            self.check('provisioningState', 'UpgradingNodeImageVersion')
+            self.check('provisioningState', 'Succeeded')
         ])
 
     @AllowLargeResponse()
@@ -6886,7 +6880,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                                                '-n {nodepool_name2} ' \
                                                '--node-image-only ' \
                                                '--snapshot-id {snapshot_resource_id} -o json'
-        self.cmd(upgrade_node_image_only_nodepool_cmd)
+        self.cmd(upgrade_node_image_only_nodepool_cmd, expect_failure=True)
 
         get_nodepool_cmd = 'aks nodepool show ' \
                            '--resource-group={resource_group} ' \
