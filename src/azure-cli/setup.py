@@ -142,7 +142,6 @@ DEPENDENCIES = [
     'jsondiff~=2.0.0',
     'packaging>=20.9',
     'PyGithub~=1.38',
-    'PyMySQL~=1.0.2',
     'PyNaCl~=1.5.0',
     'scp~=0.13.2',
     'semver==2.13.0',
