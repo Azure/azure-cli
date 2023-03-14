@@ -45,7 +45,7 @@ class List(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.authorization_rule_name = AAZStrArg(
-            options=["--name", "--authorization-rule-name"],
+            options=["-n", "--name", "--authorization-rule-name"],
             help="The authorization rule name.",
             required=True,
             fmt=AAZStrArgFormat(

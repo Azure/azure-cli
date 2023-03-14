@@ -167,3 +167,18 @@ def load_command_table(self, _):
 
     self.command_table['network public-ip prefix create'] = PublicIpPrefixCreate(loader=self)
     # endregion
+
+    # region NetworkSecurityGroups
+    from .operations.nsg import NSGCreate, NSGRuleCreate, NSGRuleUpdate
+    from .._format import transform_nsg_rule_table_output
+    operations_tmpl = self.get_module_name_by_profile("operations.nsg#{}")
+    nsgRule = import_aaz_by_profile("network.nsg.rule")
+    self.command_table["network nsg create"] = NSGCreate(loader=self)
+
+    self.command_table["network nsg rule create"] = NSGRuleCreate(loader=self)
+    self.command_table["network nsg rule update"] = NSGRuleUpdate(loader=self)
+
+    self.command_table["network nsg rule show"] = nsgRule.Show(loader=self, table_transformer=transform_nsg_rule_table_output)
+    with self.command_group("network nsg rule", operations_tmpl=operations_tmpl) as g:
+        g.custom_command("list", "list_nsg_rules", table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
+    # endregion

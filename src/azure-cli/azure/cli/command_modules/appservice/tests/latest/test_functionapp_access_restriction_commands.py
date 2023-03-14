@@ -132,6 +132,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[1].ipAddress', '2004::1000/128')
         ])
 
+    @unittest.skip("Invalid test case that cannot pass in the live mode.")
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @StorageAccountPreparer()
     def test_functionapp_access_restriction_add_service_endpoint(self, resource_group, location):

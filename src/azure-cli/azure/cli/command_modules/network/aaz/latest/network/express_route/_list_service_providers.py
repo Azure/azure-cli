@@ -188,4 +188,8 @@ class ListServiceProviders(AAZCommand):
             return cls._schema_on_200
 
 
+class _ListServiceProvidersHelper:
+    """Helper class for ListServiceProviders"""
+
+
 __all__ = ["ListServiceProviders"]

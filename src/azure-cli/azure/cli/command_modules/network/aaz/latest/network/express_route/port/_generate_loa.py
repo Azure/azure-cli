@@ -180,4 +180,8 @@ class GenerateLoa(AAZCommand):
             return cls._schema_on_200
 
 
+class _GenerateLoaHelper:
+    """Helper class for GenerateLoa"""
+
+
 __all__ = ["GenerateLoa"]

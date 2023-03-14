@@ -31,10 +31,11 @@ fix_failure_tests = sys.argv[5].lower() == 'true' if len(sys.argv) >= 6 else Fal
 target = sys.argv[6].lower() if len(sys.argv) >= 7 else 'cli'
 working_directory = os.getenv('BUILD_SOURCESDIRECTORY') if target == 'cli' else f"{os.getenv('BUILD_SOURCESDIRECTORY')}/azure-cli-extensions"
 azdev_test_result_dir = os.path.expanduser("~/.azdev/env_config/mnt/vss/_work/1/s/env")
-python_version = os.environ.get('PYTHON_VERSION')
-job_name = os.environ.get('JOB_NAME')
-unique_job_name = ' '.join([job_name, python_version, profile, str(instance_idx)])
-pull_request_number = os.environ.get('PULL_REQUEST_NUMBER')
+python_version = os.environ.get('PYTHON_VERSION', None)
+job_name = os.environ.get('JOB_NAME', None)
+pull_request_number = os.environ.get('PULL_REQUEST_NUMBER', None)
+enable_pipeline_result = bool(job_name and python_version)
+unique_job_name = ' '.join([job_name, python_version, profile, str(instance_idx)]) if enable_pipeline_result else None
 cli_jobs = {
             'acr': 45,
             'acs': 62,
@@ -575,20 +576,20 @@ class AutomaticScheduling(object):
                 serial_tests.append(k)
             else:
                 parallel_tests.append(k)
-        pipeline_result = build_pipeline_result()
+        pipeline_result = build_pipeline_result() if enable_pipeline_result else None
         if serial_tests:
             azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{python_version}_{profile}_{instance_idx}.serial.xml")
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + serial_tests + \
                   ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '-o junit_family=xunit1 --durations=10 --tb=no']
             serial_error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
-            pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result)
+            pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result) if enable_pipeline_result else None
         if parallel_tests:
             azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{python_version}_{profile}_{instance_idx}.parallel.xml")
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + parallel_tests + \
                   ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '-o junit_family=xunit1 --durations=10 --tb=no']
             parallel_error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
-            pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result)
-        save_pipeline_result(pipeline_result)
+            pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result) if enable_pipeline_result else None
+        save_pipeline_result(pipeline_result) if enable_pipeline_result else None
         return serial_error_flag or parallel_error_flag
 
     def run_extension_instance_modules(self, instance_modules):

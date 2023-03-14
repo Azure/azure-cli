@@ -72,3 +72,9 @@ class KVSetConstants:
 class ImportExportProfiles:
     KVSET = "appconfig/kvset"
     DEFAULT = "appconfig/default"
+
+
+class JsonDiff:
+    ADD = "add"
+    DELETE = "delete"
+    UPDATE = "update"
