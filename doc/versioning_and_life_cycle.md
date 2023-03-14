@@ -64,7 +64,7 @@ Azure CLI has bi-annual breaking change releases coinciding with Microsoft **Bui
 However, under the following circumstances, breaking changes cannot wait the next breaking change release and we will proceed with an out of band breaking change release. We will notify about this change as early as possible in the [upcoming breaking changes](https://learn.microsoft.com/cli/azure/upcoming-breaking-changes) page:
 
 - A critical bug is affecting customers and requires a hot fix.
-- A security patch is required. 
+- A security or data loss related fix is required. 
 - A service-side breaking change requires an Azure CLI adjustment to avoid customer interruption.
 
 ### Planning for breaking changes
