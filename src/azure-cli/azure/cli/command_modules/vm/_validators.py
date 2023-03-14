@@ -735,7 +735,7 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
         logger.debug('no subnet specified. Attempting to find an existing Vnet and subnet...')
 
         # if nothing specified, try to find an existing vnet and subnet in the target resource group
-        VnetList = import_aaz_by_profile(cli_ctx.cloud.profile, "network.vnet").List
+        VnetList = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.vnet").List
 
         vnet_list = VnetList(cli_ctx=cmd.cli_ctx)(command_args={
             "resource_group": rg
