@@ -548,6 +548,149 @@ class FunctionAppManagedEnvironment(LiveScenarioTest):
         with self.assertRaises(ArgumentUsageError):
             self.cmd('functionapp create -g {} -n {} -c {} -s {} --environment {} --runtime dotnet --functions-version 4'
                     .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account, managed_environment_name))
+            
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_create_with_appcontainer_managed_environment_vnet_config_error(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionappwindowsruntime', 40)
+        managed_environment_name = self.create_random_name('containerappmanagedenvironment', 40)
+        plan_name = self.create_random_name('functionappplan', 40)
+        subnet_name = self.create_random_name('swiftsubnet', 24)
+        vnet_name = self.create_random_name('swiftname', 24)
+
+        self.cmd('containerapp env create --name {} --resource-group {} --location {}'
+        .format(managed_environment_name, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).assert_with_checks([
+                     JMESPathCheck('name', managed_environment_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('location', WINDOWS_ASP_LOCATION_FUNCTIONAPP)])
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name))
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan_name))
+
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('functionapp create -g {} -n {} -p {} -s {} --vnet {} --subnet {}  --environment {} --runtime dotnet --functions-version 4'
+                    .format(resource_group, functionapp_name, plan_name, storage_account, vnet_name, subnet_name, managed_environment_name))
+            
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_create_with_appcontainer_managed_environment_add_vnet_error(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionappwindowsruntime', 40)
+        managed_environment_name = self.create_random_name('containerappmanagedenvironment', 40)
+        plan_name = self.create_random_name('functionappplan', 40)
+        subnet_name = self.create_random_name('swiftsubnet', 24)
+        vnet_name = self.create_random_name('swiftname', 24)
+
+        self.cmd('containerapp env create --name {} --resource-group {} --location {}'
+        .format(managed_environment_name, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).assert_with_checks([
+                     JMESPathCheck('name', managed_environment_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('location', WINDOWS_ASP_LOCATION_FUNCTIONAPP)])
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name))
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan_name))
+        self.cmd(
+            'functionapp create -g {} -n {} -p {} -s {} --environment {} --runtime dotnet --functions-version 4'
+            .format(resource_group, functionapp_name, plan_name, storage_account, managed_environment_name)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+
+        with self.assertRaises(ValidationError):
+            self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'
+            .format(resource_group, functionapp_name, vnet_name, subnet_name))
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_create_with_appcontainer_managed_environment_remove_vnet_error(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionappwindowsruntime', 40)
+        managed_environment_name = self.create_random_name('containerappmanagedenvironment', 40)
+        plan_name = self.create_random_name('functionappplan', 40)
+        subnet_name = self.create_random_name('swiftsubnet', 24)
+        vnet_name = self.create_random_name('swiftname', 24)
+
+        self.cmd('containerapp env create --name {} --resource-group {} --location {}'
+        .format(managed_environment_name, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).assert_with_checks([
+                     JMESPathCheck('name', managed_environment_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('location', WINDOWS_ASP_LOCATION_FUNCTIONAPP)])
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name))
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan_name))
+        self.cmd(
+            'functionapp create -g {} -n {} -p {} -s {} --environment {} --runtime dotnet --functions-version 4'
+            .format(resource_group, functionapp_name, plan_name, storage_account, managed_environment_name)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+        with self.assertRaises(ValidationError):
+            self.cmd('functionapp vnet-integration remove -g {} -n {}'.format(
+                resource_group, functionapp_name), expect_failure=True)
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_create_with_appcontainer_managed_environment_list_vnet_error(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionappwindowsruntime', 40)
+        managed_environment_name = self.create_random_name('containerappmanagedenvironment', 40)
+        plan_name = self.create_random_name('functionappplan', 40)
+        subnet_name = self.create_random_name('swiftsubnet', 24)
+        vnet_name = self.create_random_name('swiftname', 24)
+
+        self.cmd('containerapp env create --name {} --resource-group {} --location {}'
+        .format(managed_environment_name, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).assert_with_checks([
+                     JMESPathCheck('name', managed_environment_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('location', WINDOWS_ASP_LOCATION_FUNCTIONAPP)])
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name))
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan_name))
+        self.cmd(
+            'functionapp create -g {} -n {} -p {} -s {} --environment {} --runtime dotnet --functions-version 4'
+            .format(resource_group, functionapp_name, plan_name, storage_account, managed_environment_name)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        with self.assertRaises(ValidationError):
+            self.cmd('functionapp vnet-integration list -g {} -n {}'.format(
+                resource_group, functionapp_name), expect_failure=True)
+            
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_delete_functions(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionappwindowsruntime', 40)
+        function_name = self.create_random_name('functionappwindowsruntimefunctions', 40)
+        managed_environment_name = self.create_random_name('containerappmanagedenvironment', 40)
+        plan_name = self.create_random_name('functionappplan', 40)
+
+        self.cmd('containerapp env create --name {} --resource-group {} --location {}'
+        .format(managed_environment_name, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).assert_with_checks([
+                     JMESPathCheck('name', managed_environment_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('location', WINDOWS_ASP_LOCATION_FUNCTIONAPP)])
+
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan_name))
+
+        self.cmd(
+            'functionapp create -g {} -n {} -p {} -s {} --environment {} --runtime dotnet --functions-version 4'
+            .format(resource_group, functionapp_name, plan_name, storage_account, managed_environment_name)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+
+        with self.assertRaises(ValidationError):
+            self.cmd('functionapp function delete -g {} -n {} --function-name {}'
+            .format(resource_group, functionapp_name, function_name))
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()

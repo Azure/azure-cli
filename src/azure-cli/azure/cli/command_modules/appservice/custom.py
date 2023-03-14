@@ -3569,6 +3569,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     client = web_client_factory(cmd.cli_ctx)
 
     if vnet or subnet:
+        if environment is not None:
+            raise ArgumentUsageError(
+                "Unspported operation on function app.",
+                "Please set vNet Configuration for the function app at Container app environment level.")
         if plan:
             if is_valid_resource_id(plan):
                 parse_result = parse_resource_id(plan)
@@ -4216,6 +4220,10 @@ def remove_hc(cmd, resource_group_name, name, namespace, hybrid_connection, slot
     return return_hc
 
 
+def list_functionapp_vnet_integration(cmd, name, resource_group_name, slot=None):
+    return list_vnet_integration(cmd, name, resource_group_name, slot=None)
+
+
 def list_vnet_integration(cmd, name, resource_group_name, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     if slot is None:
@@ -4397,6 +4405,10 @@ def _validate_subnet(cli_ctx, subnet, vnet, resource_group_name):
         name=vnet_id_parts['name'],
         child_type_1='subnets',
         child_name_1=subnet)
+
+
+def remove_functionapp_vnet_integration(cmd, name, resource_group_name, slot=None):
+    return remove_vnet_integration(cmd, name, resource_group_name, slot)
 
 
 def remove_vnet_integration(cmd, name, resource_group_name, slot=None):

@@ -131,6 +131,22 @@ def validate_app_exists(cmd, namespace):
         raise ResourceNotFoundError("'{}' app not found in ResourceGroup '{}'".format(app, resource_group_name))
 
 
+def validate_functionapp_on_containerapp_vnet_add(cmd, namespace):
+    validate_functionapp_on_containerapp_vnet(cmd, namespace)
+    validate_add_vnet(cmd, namespace)
+
+
+def validate_functionapp_on_containerapp_vnet(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    slot = namespace.slot
+    function_app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    if function_app.managed_environment_id is not None:
+        raise ValidationError(
+            'Unspported operation on function app.',
+            'Please set vNet Configuration for the function app at Container app environment level')
+
+
 def validate_add_vnet(cmd, namespace):
     from azure.core.exceptions import ResourceNotFoundError as ResNotFoundError
 
@@ -423,3 +439,14 @@ def validate_app_is_functionapp(cmd, namespace):
         raise ValidationError(f"App '{name}' in group '{rg}' is a logic app.")
     if is_webapp(app):
         raise ValidationError(f"App '{name}' in group '{rg}' is a web app.")
+
+
+def validate_centauri_delete_function(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    slot = namespace.slot
+    function_app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    if function_app.managed_environment_id is not None:
+        raise ValidationError(
+            "Invalid Operation. This function is currently present in your image",
+            "Please modify your image to remove the function and provide an updated image.")
