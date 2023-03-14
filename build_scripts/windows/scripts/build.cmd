@@ -139,24 +139,19 @@ REM Remove .py and only deploy .pyc files
 pushd %BUILDING_DIR%\Lib\site-packages
 for /f %%f in ('dir /b /s *.pyc') do (
     set PARENT_DIR=%%~df%%~pf..
-    echo !PARENT_DIR! | findstr /C:\Lib\site-packages\pip\ 1>nul
-    if !errorlevel! neq  0 (
-        REM Only take the file name without 'pyc' extension: e.g., (same below) __init__.cpython-310
-        set FILENAME=%%~nf
-        REM Truncate the '.cpython-310' postfix which is 12 chars long: __init__
-        REM https://stackoverflow.com/a/636391/2199657
-        set BASE_FILENAME=!FILENAME:~0,-12!
-        REM __init__.pyc
-        set pyc=!BASE_FILENAME!.pyc
-        REM Delete ..\__init__.py
-        del !PARENT_DIR!\!BASE_FILENAME!.py
-        REM Copy to ..\__init__.pyc
-        copy %%~f !PARENT_DIR!\!pyc! >nul
-        REM Delete __init__.pyc
-        del %%~f
-    ) ELSE (
-        echo --SKIP !PARENT_DIR! under pip
-    )
+    REM Only take the file name without 'pyc' extension: e.g., (same below) __init__.cpython-310
+    set FILENAME=%%~nf
+    REM Truncate the '.cpython-310' postfix which is 12 chars long: __init__
+    REM https://stackoverflow.com/a/636391/2199657
+    set BASE_FILENAME=!FILENAME:~0,-12!
+    REM __init__.pyc
+    set pyc=!BASE_FILENAME!.pyc
+    REM Delete ..\__init__.py
+    del !PARENT_DIR!\!BASE_FILENAME!.py
+    REM Copy to ..\__init__.pyc
+    copy %%~f !PARENT_DIR!\!pyc! >nul
+    REM Delete __init__.pyc
+    del %%~f
 )
 popd
 
