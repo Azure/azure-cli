@@ -528,6 +528,7 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                         tags=None,
                         no_wait=False,
                         public_network_access=None,
+                        what_if=None,
                         ):
     if is_azure_stack_profile(cmd) or vault_name:
         return create_vault(cmd=cmd,
@@ -550,7 +551,8 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                             no_self_perms=no_self_perms,
                             tags=tags,
                             no_wait=no_wait,
-                            public_network_access=public_network_access)
+                            public_network_access=public_network_access,
+                            what_if=what_if)
 
     if hsm_name:
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
@@ -644,7 +646,8 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
                  no_self_perms=None,
                  tags=None,
                  no_wait=False,
-                 public_network_access=None):
+                 public_network_access=None,
+                 what_if=None):
     from azure.core.exceptions import HttpResponseError
     try:
         vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
@@ -736,43 +739,26 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
                                              permissions=permissions)]
 
     deploy_parameters = {
-        "vaultName": {
-            "value": vault_name
-        },
-        "tenantId": {
-            "value": tenant_id
-        }
+        "vaultName": {"value": vault_name},
+        "location": {"value": location},
+        "enabledForDeployment": {"value": enabled_for_deployment},
+        "enabledForDiskEncryption": {"value": enabled_for_deployment},
+        "enabledForTemplateDeployment": {"value": enabled_for_template_deployment},
+        "enablePurgeProtection": {"value": enable_purge_protection},
+        "enableRbacAuthorization": {"value": enable_rbac_authorization},
+        "softDeleteRetentionInDays": {"value": int(retention_days)},
+        "tenantId": {"value": tenant_id},
+        "networkRuleBypassOptions": {"value": bypass},
+        "NetworkRuleAction": {"value": default_action},
+        "ipRules": {"value": network_acls_ips},
+        "accessPolicies": {"value": access_policies},
+        "virtualNetworkRules": {"value": network_acls_vnets},
+        "skuName": {"value": sku},
+        "tags": {"value": tags},
     }
 
-    if location:
-        deploy_parameters["location"] = {"value": location}
-    if enabled_for_deployment is not None:
-        deploy_parameters["enabledForDeployment"] = {"value": enabled_for_deployment}
-    if enabled_for_disk_encryption is not None:
-        deploy_parameters["enabledForDiskEncryption"] = {"value": enabled_for_disk_encryption}
-    if enabled_for_template_deployment is not None:
-        deploy_parameters["enabledForTemplateDeployment"] = {"value": enabled_for_template_deployment}
-    if enable_purge_protection is not None:
-        deploy_parameters["enablePurgeProtection"] = {"value": enable_purge_protection}
-    if enable_rbac_authorization is not None:
-        deploy_parameters["enableRbacAuthorization"] = {"value": enable_rbac_authorization}
-    if retention_days:
-        deploy_parameters["softDeleteRetentionInDays"] = {"value": int(retention_days)}
-    if bypass:
-        deploy_parameters["networkRuleBypassOptions"] = {"value": bypass}
-    if default_action:
-        deploy_parameters["NetworkRuleAction"] = {"value": default_action}
-    if network_acls_ips:
-        deploy_parameters["ipRules"] = {"value": network_acls_ips}
-    if network_acls_vnets:
-        deploy_parameters["virtualNetworkRules"] = {"value": network_acls_vnets}
-    if access_policies:
-        deploy_parameters["accessPolicies"] = {"value": access_policies}
-    if sku:
-        deploy_parameters["skuName"] = {"value": sku}
-    if tags:
-        deploy_parameters["tags"] = {"value": tags}
-
+    from azure.cli.core.util import random_string
+    from azure.cli.core.commands import LongRunningOperation
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     deploy_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
@@ -781,16 +767,10 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
     properties = DeploymentProperties(template_link=template_link, parameters=deploy_parameters, mode='incremental')
     Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     deployment = Deployment(properties=properties)
-
-    from azure.cli.core.util import random_string
-    from azure.cli.core.commands import LongRunningOperation
-    from azure.cli.core.commands.progress import IndeterminateProgressBar
-
     deployment_name = 'keyvault_deploy_' + random_string(32)
-    validation_progress_bar = IndeterminateProgressBar(cmd.cli_ctx, message='validating')
 
     validation_poller = deploy_client.begin_validate(resource_group_name, deployment_name, deployment)
-    LongRunningOperation(cmd.cli_ctx, validation_progress_bar)(validation_poller)
+    LongRunningOperation(cmd.cli_ctx)(validation_poller)
 
     if no_wait:
         return sdk_no_wait(no_wait, deploy_client.begin_create_or_update, resource_group_name, deployment_name, deployment)

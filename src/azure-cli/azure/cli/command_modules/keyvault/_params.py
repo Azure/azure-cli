@@ -167,6 +167,8 @@ def load_arguments(self, _):
                    help='[Vault Only] Don\'t add permissions for the current user/service principal in the new vault.')
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90.', default='90')
+        c.argument('what_if', options_list=['--what-if', '-w'], action='store_true',
+                   help='Instruct the command to run deployment What-If.')
 
     with self.argument_context('keyvault create', arg_group='Network Rule') as c:
         c.argument('network_acls', type=validate_file_or_dict,
