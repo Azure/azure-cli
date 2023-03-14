@@ -66,11 +66,11 @@ class ListAvailableDelegations(AAZCommand):
             self.AvailableDelegationsList(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -103,7 +103,7 @@ class ListAvailableDelegations(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -207,7 +207,7 @@ class ListAvailableDelegations(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -282,6 +282,10 @@ class ListAvailableDelegations(AAZCommand):
             actions.Element = AAZStrType()
 
             return cls._schema_on_200
+
+
+class _ListAvailableDelegationsHelper:
+    """Helper class for ListAvailableDelegations"""
 
 
 __all__ = ["ListAvailableDelegations"]

@@ -80,13 +80,9 @@ class Create(AAZCommand):
             help="Whether the VMs in the local virtual network space would be able to access the VMs in remote virtual network space.",
             default=False,
         )
-        _args_schema.remote_vnet = AAZResourceIdArg(
+        _args_schema.remote_vnet = AAZStrArg(
             options=["--remote-vnet"],
             help="Name or ID of the remote VNet.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/virtualNetworks/{}",
-            ),
         )
         _args_schema.use_remote_gateways = AAZBoolArg(
             options=["--use-remote-gateways"],

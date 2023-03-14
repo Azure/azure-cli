@@ -103,7 +103,6 @@ class Create(AAZCommand):
             options=["--edge-zone-type"],
             arg_group="ExtendedLocation",
             help="The type of the extended location.",
-            default="EdgeZone",
             enum={"EdgeZone": "EdgeZone"},
         )
 

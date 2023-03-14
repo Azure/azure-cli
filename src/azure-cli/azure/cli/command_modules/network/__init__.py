@@ -18,7 +18,6 @@ class NetworkCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.custom#{}')
         super(NetworkCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                    resource_type=ResourceType.MGMT_NETWORK,
                                                     custom_command_type=network_custom,
                                                     suppress_extension=[
                                                         ModExtensionSuppress(__name__, 'dns', '0.0.2',
@@ -75,12 +74,20 @@ class AzureStackNetworkCommandsLoader(AzCommandsLoader):
             from . import aaz
         except ImportError:
             aaz = None
+
         if aaz:
-            load_aaz_command_table(
-                loader=self,
-                aaz_pkg_name=aaz.__name__,
-                args=args
-            )
+            profile = self.cli_ctx.cloud.profile
+            try:
+                if profile.lower() == "2019-03-01-hybrid":
+                    # use aaz in 2018-03-01-hybrid profile, because apis are the some.
+                    self.cli_ctx.cloud.profile = "2018-03-01-hybrid"
+                load_aaz_command_table(
+                    loader=self,
+                    aaz_pkg_name=aaz.__name__,
+                    args=args
+                )
+            finally:
+                self.cli_ctx.cloud.profile = profile
 
         load_command_table(self, args)
 

@@ -29,7 +29,7 @@ from azure.cli.core.azclierror import (FileOperationError,
                                        AzureResponseError,
                                        RequiredArgumentMissingError)
 
-from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles, AppServiceConstants)
+from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles, AppServiceConstants, JsonDiff)
 from ._utils import prep_label_filter_for_url_encoding
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
@@ -623,11 +623,67 @@ def __serialize_kv_list_to_comparable_json_list(keyvalues, profile=None):
     return res
 
 
-def __print_features_preview(old_json, new_json, strict=False):
-    logger.warning('\n---------------- Feature Flags Preview -------------')
+def __print_features_preview(old_json, new_json, strict=False, yes=False):
+    if not yes:
+        logger.warning('\n---------------- Feature Flags Preview -------------')
+
     if not strict and not new_json:
         logger.warning('\nSource configuration is empty. No changes will be made.')
         return False
+
+    diff_output = __find_ff_diff(old_json=old_json, new_json=new_json, strict=strict)
+
+    if diff_output == {}:
+        logger.warning('\nThe target configuration already contains all feature flags in source. No changes will be made.')
+        return False
+
+    if not yes:
+        __print_preview(diff_output=diff_output)
+    return True
+
+
+def __print_kv_preview(old_json, new_json, strict=False, yes=False):
+    if not yes:
+        logger.warning('\n---------------- Key Values Preview ----------------')
+
+    if not strict and not new_json:
+        logger.warning('\nSource configuration is empty. No changes will be made.')
+        return False
+
+    diff_output = __find_kv_diff(old_json=old_json, new_json=new_json, strict=strict)
+
+    if diff_output == {}:
+        logger.warning('\nTarget configuration already contains all key-values in source. No changes will be made.')
+        return False
+
+    if not yes:
+        __print_preview(diff_output=diff_output)
+    return True
+
+
+def __print_preview(diff_output):
+    # format result printing
+    for action, changes in diff_output.items():
+        if action == JsonDiff.UPDATE and len(changes) > 0:
+            logger.warning('\nUpdating:')
+            for update in changes:
+                logger.warning('- %s', json.dumps(update["old"], ensure_ascii=False))
+                logger.warning('+ %s', json.dumps(update["new"], ensure_ascii=False))
+
+        elif action in (JsonDiff.DELETE, JsonDiff.ADD):
+            subtitle = 'Deleting' if action == JsonDiff.DELETE else 'Adding'
+            logger.warning('\n %s:', subtitle)
+
+            for record in changes:
+                logger.warning(json.dumps(record, ensure_ascii=False))
+
+    logger.warning("")  # printing an empty line for formatting purpose
+
+
+def __find_ff_diff(old_json, new_json, strict=False):
+    ff_diff = {}
+    if not strict and not new_json:
+        return ff_diff
 
     # perform diff operation
     # to simplify output, add one shared key in src and dest configuration
@@ -636,31 +692,29 @@ def __print_features_preview(old_json, new_json, strict=False):
     differ = JsonDiffer(syntax='explicit')
     res = differ.diff(old_json, new_json)
     keys = str(res.keys())
+
+    # return the empty diff if there are no additions, deletions or updates
     if res == {} or (('update' not in keys) and ('insert' not in keys) and (not strict or ('delete' not in keys))):
-        logger.warning('\nTarget configuration already contains all feature flags in source. No changes will be made.')
-        return False
+        return ff_diff
 
     # format result printing
     for action, changes in res.items():
         if action.label == 'delete':
             if strict:
-                logger.warning('\nDeleting:')
-                for key in changes:
-                    record = {'key': key}
-                    logger.warning(json.dumps(record, ensure_ascii=False))
+                ff_diff[JsonDiff.DELETE] = [{"key": key} for key in changes]
             else:
                 continue  # we do not delete KVs while importing/exporting unless it is strict mode.
         if action.label == 'insert':
-            logger.warning('\nAdding:')
+            ff_diff[JsonDiff.ADD] = []
             for key, adding in changes.items():
                 record = {'feature': key}
                 for attribute, value in adding.items():
                     if attribute in ('description', 'conditions'):
                         continue
                     record[str(attribute)] = str(value)
-                logger.warning(json.dumps(record, ensure_ascii=False))
+                ff_diff[JsonDiff.ADD].append(record)
         elif action.label == 'update':
-            logger.warning('\nUpdating:')
+            ff_diff[JsonDiff.UPDATE] = []
             for key, updates in changes.items():
                 updates = list(updates.values())[0]
                 attributes = list(updates.keys())
@@ -669,17 +723,15 @@ def __print_features_preview(old_json, new_json, strict=False):
                 for attribute in attributes:
                     old_record[attribute] = old_json[key][attribute]
                     new_record[attribute] = new_json[key][attribute]
-                logger.warning('- %s', str(old_record))
-                logger.warning('+ %s', str(new_record))
-    logger.warning("")  # printing an empty line for formatting purpose
-    return True
+                ff_diff[JsonDiff.UPDATE].append({"old": old_record, "new": new_record})
+    return ff_diff
 
 
-def __print_preview(old_json, new_json, strict=False):
-    logger.warning('\n---------------- Key Values Preview ----------------')
+def __find_kv_diff(old_json, new_json, strict=False):
+    kv_diff = {}
+
     if not strict and not new_json:
-        logger.warning('\nSource configuration is empty. No changes will be made.')
-        return False
+        return kv_diff
 
     # perform diff operation
     # to simplify output, add one shared key in src and dest configuration
@@ -688,29 +740,26 @@ def __print_preview(old_json, new_json, strict=False):
     differ = JsonDiffer(syntax='explicit')
     res = differ.diff(old_json, new_json)
     keys = str(res.keys())
-    if res == {} or (('update' not in keys) and ('insert' not in keys) and (not strict or ('delete' not in keys))):
-        logger.warning('\nTarget configuration already contains all key-values in source. No changes will be made.')
-        return False
 
-    # format result printing
+    # return the empty diff if there are no additions, deletions or updates
+    if res == {} or (('update' not in keys) and ('insert' not in keys) and (not strict or ('delete' not in keys))):
+        return kv_diff
+
     for action, changes in res.items():
         if action.label == 'delete':
             if strict:
-                logger.warning('\nDeleting:')
-                for key in changes:
-                    record = {'key': key}
-                    logger.warning(json.dumps(record, ensure_ascii=False))
+                kv_diff[JsonDiff.DELETE] = [{"key": key} for key in changes]
             else:
                 continue  # we do not delete KVs while importing/exporting unless it is strict mode.
         if action.label == 'insert':
-            logger.warning('\nAdding:')
+            kv_diff[JsonDiff.ADD] = []
             for key, adding in changes.items():
                 record = {'key': key}
                 for attribute, value in adding.items():
                     record[str(attribute)] = str(value)
-                logger.warning(json.dumps(record, ensure_ascii=False))
+                kv_diff[JsonDiff.ADD].append(record)
         elif action.label == 'update':
-            logger.warning('\nUpdating:')
+            kv_diff[JsonDiff.UPDATE] = []
             for key, updates in changes.items():
                 updates = list(updates.values())[0]
                 attributes = list(updates.keys())
@@ -719,21 +768,21 @@ def __print_preview(old_json, new_json, strict=False):
                 for attribute in attributes:
                     old_record[attribute] = old_json[key][attribute]
                     new_record[attribute] = new_json[key][attribute]
-                logger.warning('- %s', json.dumps(old_record, ensure_ascii=False))
-                logger.warning('+ %s', json.dumps(new_record, ensure_ascii=False))
-    logger.warning("")  # printing an empty line for formatting purpose
-    return True
+                kv_diff[JsonDiff.UPDATE].append({"old": old_record, "new": new_record})
+    return kv_diff
 
 
 def __export_kvset_to_file(file_path, keyvalues, yes):
     kvset = __serialize_kv_list_to_comparable_json_list(keyvalues, ImportExportProfiles.KVSET)
     obj = {KVSetConstants.KVSETRootElementName: kvset}
+
+    if len(kvset) == 0:
+        logger.warning('\nSource configuration is empty. Nothing to export.')
+        return
+
+    __print_kvset_json_diff(new_obj=obj, yes=yes)
+
     if not yes:
-        logger.warning('\n---------------- KVSet Preview ----------------')
-        if len(kvset) == 0:
-            logger.warning('\nSource configuration is empty. Nothing to export.')
-            return
-        __print_preview_json_diff(new_obj=obj)
         user_confirmation('Do you want to continue? \n')
     try:
         with open(file_path, 'w', encoding='utf-8') as fp:
@@ -1079,31 +1128,29 @@ def __import_kvset_from_file(client, path, strict, yes):
         if __validate_import_config_setting(config_setting):
             kvset_to_import.append(config_setting)
 
-    if strict or not yes:
-        existing_kvset = __read_kv_from_config_store(client,
-                                                     key=SearchFilterOptions.ANY_KEY,
-                                                     label=SearchFilterOptions.ANY_LABEL)
+    existing_kvset = __read_kv_from_config_store(client,
+                                                 key=SearchFilterOptions.ANY_KEY,
+                                                 label=SearchFilterOptions.ANY_LABEL)
     kvset_to_delete = []
     if strict:
         kvset_to_delete = list(filterfalse(lambda kv: any(kv_import.key == kv.key and kv_import.label == kv.label
                                                           for kv_import in kvset_to_import), existing_kvset))
+
+    # When strict mode is not enabled, we don't delete configurations if they are missing from the import file,
+    # so don't need to show them in the diff, so omit them from existing kvset
+    if not strict:
+        existing_kvset = list(filter(lambda kv: any(kv_import.key == kv.key and kv_import.label == kv.label
+                                                    for kv_import in kvset_to_import), existing_kvset))
+
+    existing_kvset_list = __serialize_kv_list_to_comparable_json_list(existing_kvset, ImportExportProfiles.KVSET)
+    kvset_to_import_list = __serialize_kv_list_to_comparable_json_list(kvset_to_import, ImportExportProfiles.KVSET)
+
+    changes_detected = __print_kvset_json_diff(existing_kvset_list, kvset_to_import_list, yes=yes)
+
+    if not changes_detected:
+        return
+
     if not yes:
-
-        # When strict mode is not enabled, we don't delete configurations if they are missing from the import file,
-        # so don't need to show them in the diff, so omit them from existing kvset
-        if not strict:
-            existing_kvset = list(filter(lambda kv: any(kv_import.key == kv.key and kv_import.label == kv.label
-                                                        for kv_import in kvset_to_import), existing_kvset))
-
-        existing_kvset_list = __serialize_kv_list_to_comparable_json_list(existing_kvset, ImportExportProfiles.KVSET)
-        kvset_to_import_list = __serialize_kv_list_to_comparable_json_list(kvset_to_import, ImportExportProfiles.KVSET)
-
-        logger.warning('\n---------------- KVSet Preview ----------------')
-        changes_detected = __print_preview_json_diff(existing_kvset_list, kvset_to_import_list)
-        if not changes_detected:
-            logger.warning('Target configuration store already contains all configuration settings in source. No changes will be made.')
-            return
-
         user_confirmation('Do you want to continue?\n')
 
     if len(kvset_to_delete) > 0:
@@ -1214,7 +1261,7 @@ def __delete_configuration_setting_from_config_store(azconfig_client, configurat
         raise AzureInternalError(str(exception))
 
 
-def __print_preview_json_diff(old_obj=None, new_obj=None):
+def __get_json_diff(old_obj=None, new_obj=None):
     # prints the json diff if two objects differ, returns whether the diff was found.
 
     old_json = "" if old_obj is None else json.dumps(old_obj, indent=2, ensure_ascii=False).splitlines(True)
@@ -1223,13 +1270,23 @@ def __print_preview_json_diff(old_obj=None, new_obj=None):
     differ = Differ()
     diff = list(differ.compare(old_json, new_json))
 
+    return diff
+
+
+def __print_kvset_json_diff(old_obj=None, new_obj=None, yes=False):
+    if not yes:
+        logger.warning('\n---------------- KVSet Preview ----------------')
+
+    diff = __get_json_diff(old_obj=old_obj, new_obj=new_obj)
     if not any(line.startswith('-') or line.startswith('+') for line in diff):
+        logger.warning('Target configuration store already contains all configuration settings in source. No changes will be made.')
         return False
 
-    # omit minuscule details of the diff outlining the characters that changed, and show rest of the diff.
-    logger.warning(''.join(filter(lambda line: not line.startswith('?'), diff)))
-    # print newline for readability
-    logger.warning('\n')
+    if not yes:
+        # omit minuscule details of the diff outlining the characters that changed, and show rest of the diff.
+        logger.warning(''.join(filter(lambda line: not line.startswith('?'), diff)))
+        # print newline for readability
+        logger.warning('\n')
     return True
 
 

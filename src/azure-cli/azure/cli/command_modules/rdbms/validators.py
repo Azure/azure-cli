@@ -538,7 +538,7 @@ def validate_mysql_ha_enabled(server):
 
 
 def validate_vnet_location(vnet, location):
-    if vnet.location != location:
+    if vnet["location"] != location:
         raise ValidationError("The location of Vnet should be same as the location of the server")
 
 
