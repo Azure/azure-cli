@@ -21,7 +21,6 @@ from azure.cli.core.azclierror import InvalidArgumentValueError, ValidationError
     UnrecognizedArgumentError, ResourceNotFoundError, ArgumentUsageError
 from azure.cli.core.profiles import ResourceType, supported_api_version
 
-from azure.cli.command_modules.network._client_factory import network_client_factory
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 
@@ -62,11 +61,15 @@ from .aaz.latest.network.application_gateway.waf_policy import Create as _WAFCre
 from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condition import \
     Add as _WAFCustomRuleMatchConditionAdd
 from .aaz.latest.network.application_gateway.waf_policy.policy_setting import Update as _WAFPolicySettingUpdate
+from .aaz.latest.network.custom_ip.prefix import Update as _CustomIpPrefixUpdate
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
+from .aaz.latest.network.express_route.gateway import Create as _ExpressRouteGatewayCreate, \
+    Update as _ExpressRouteGatewayUpdate
 from .aaz.latest.network.express_route.gateway.connection import Create as _ExpressRouteConnectionCreate, \
     Update as _ExpressRouteConnectionUpdate
 from .aaz.latest.network.express_route.peering import Create as _ExpressRoutePeeringCreate, \
     Update as _ExpressRoutePeeringUpdate
+from .aaz.latest.network.express_route.peering.connection import Create as _ExpressRoutePeeringConnectionCreate
 from .aaz.latest.network.express_route.port import Create as _ExpressRoutePortCreate
 from .aaz.latest.network.express_route.port.identity import Assign as _ExpressRoutePortIdentityAssign
 from .aaz.latest.network.express_route.port.link import Update as _ExpressRoutePortLinkUpdate
@@ -87,6 +90,9 @@ from .aaz.latest.network.private_link_service import Create as _PrivateLinkServi
     Update as _PrivateLinkServiceUpdate
 from .aaz.latest.network.private_link_service.connection import Update as _PrivateEndpointConnectionUpdate
 from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
+from .aaz.latest.network.security_partner_provider import Create as _SecurityPartnerProviderCreate, \
+    Update as _SecurityPartnerProviderUpdate
+from .aaz.latest.network.virtual_appliance import Create as _VirtualApplianceCreate, Update as _VirtualApplianceUpdate
 from .aaz.latest.network.vnet import Create as _VNetCreate, Update as _VNetUpdate
 from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
 from .aaz.latest.network.vnet.subnet import Create as _VNetSubnetCreate, Update as _VNetSubnetUpdate
@@ -2449,7 +2455,7 @@ def create_dns_zone(cmd, client, resource_group_name, zone_name, parent_zone_nam
     created_zone = client.create_or_update(resource_group_name, zone_name, zone,
                                            if_none_match='*' if if_none_match else None)
 
-    if cmd.supported_api_version(min_api='2016-04-01') and parent_zone_name is not None:
+    if cmd.supported_api_version(min_api='2016-04-01', resource_type=ResourceType.MGMT_NETWORK_DNS) and parent_zone_name is not None:
         logger.info('Attempting to add delegation in the parent zone')
         add_dns_delegation(cmd, created_zone, parent_zone_name, resource_group_name, zone_name)
     return created_zone
@@ -3150,7 +3156,7 @@ class ExpressRouteCreate(_ExpressRouteCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.bandwidth = AAZListArg(
             options=["--bandwidth"],
@@ -3160,6 +3166,9 @@ class ExpressRouteCreate(_ExpressRouteCreate):
         args_schema.bandwidth_in_mbps._registered = False
         args_schema.bandwidth_in_gbps._registered = False
         args_schema.sku_name._registered = False
+        args_schema.express_route_port._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRoutePorts/{}",
+        )
         return args_schema
 
     def pre_operations(self):
@@ -3180,7 +3189,7 @@ class ExpressRouteUpdate(_ExpressRouteUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.bandwidth = AAZListArg(
             options=["--bandwidth"],
@@ -3191,6 +3200,9 @@ class ExpressRouteUpdate(_ExpressRouteUpdate):
         args_schema.bandwidth_in_mbps._registered = False
         args_schema.bandwidth_in_gbps._registered = False
         args_schema.sku_name._registered = False
+        args_schema.express_route_port._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRoutePorts/{}",
+        )
         return args_schema
 
     def pre_operations(self):
@@ -3231,7 +3243,7 @@ def _validate_ipv6_address_prefixes(prefixes):
 class ExpressRoutePeeringCreate(_ExpressRoutePeeringCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat, AAZArgEnum
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.ip_version = AAZStrArg(
             options=['--ip-version'],
@@ -3239,7 +3251,13 @@ class ExpressRoutePeeringCreate(_ExpressRoutePeeringCreate):
             help="The IP version to update Microsoft Peering settings for. Allowed values: IPv4, IPv6. Default: IPv4.",
             default='IPv4'
         )
+        args_schema.route_filter._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/routeFilters/{}",
+        )
+        # taken from Xplat. No enums in SDK
+        args_schema.routing_registry_name.enum = AAZArgEnum({"ARIN": "ARIN", "APNIC": "APNIC", "AFRINIC": "AFRINIC", "LACNIC": "LACNIC", "RIPENCC": "RIPENCC", "RADB": "RADB", "ALTDB": "ALTDB", "LEVEL3": "LEVEL3"})
         args_schema.ipv6_peering_config._registered = False
+        args_schema.peering_name._required = False
         args_schema.peering_name._registered = False
 
         return args_schema
@@ -3279,7 +3297,7 @@ class ExpressRoutePeeringUpdate(_ExpressRoutePeeringUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat, AAZArgEnum
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.ip_version = AAZStrArg(
             options=['--ip-version'],
@@ -3287,6 +3305,11 @@ class ExpressRoutePeeringUpdate(_ExpressRoutePeeringUpdate):
             help="The IP version to update Microsoft Peering settings for. Allowed values: IPv4, IPv6. Default: IPv4.",
             default='IPv4'
         )
+        args_schema.route_filter._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/routeFilters/{}",
+        )
+        # taken from Xplat. No enums in SDK
+        args_schema.routing_registry_name.enum = AAZArgEnum({"ARIN": "ARIN", "APNIC": "APNIC", "AFRINIC": "AFRINIC", "LACNIC": "LACNIC", "RIPENCC": "RIPENCC", "RADB": "RADB", "ALTDB": "ALTDB", "LEVEL3": "LEVEL3"})
         args_schema.ipv6_peering_config._registered = False
         args_schema.peering_type._registered = False
         return args_schema
@@ -3316,11 +3339,50 @@ class ExpressRoutePeeringUpdate(_ExpressRoutePeeringUpdate):
                 args.route_filter = None
             if microsoft_config is not None:
                 args.ipv6_peering_config['microsoft_peering_config'] = microsoft_config
+
+
+class ExpressRoutePeeringConnectionCreate(_ExpressRoutePeeringConnectionCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.peer_circuit._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{}/peerings/{peering_name}",
+        )
+        args_schema.source_circuit._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{circuit_name}/peerings/{peering_name}",
+        )
+
+        return args_schema
 # endregion
 
 
 # region ExpressRoute Connection
 # pylint: disable=unused-argument
+class ExpressRouteGatewayCreate(_ExpressRouteGatewayCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.virtual_hub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
+class ExpressRouteGatewayUpdate(_ExpressRouteGatewayUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.virtual_hub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
 class ExpressRouteConnectionCreate(_ExpressRouteConnectionCreate):
 
     @classmethod
@@ -3669,6 +3731,7 @@ class PrivateEndpointPrivateDnsZoneAdd(_PrivateEndpointPrivateDnsZoneAdd):
             )
         )
         args_schema.private_dns_zone_id._registered = False
+        args_schema.name._required = False
 
         return args_schema
 
@@ -3713,6 +3776,13 @@ class PrivateEndpointIpConfigRemove(_PrivateEndpointIpConfigRemove):
 
 
 class PrivateEndpointAsgAdd(_PrivateEndpointAsgAdd):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.asg_id._required = False
+
+        return args_schema
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -3867,7 +3937,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
         subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
         namespace='Microsoft.Network')
 
-    if edge_zone and cmd.supported_api_version(min_api='2020-08-01'):
+    if edge_zone:
         edge_zone_type = 'EdgeZone'
     else:
         edge_zone_type = None
@@ -4891,350 +4961,6 @@ def configure_network_watcher(cmd, locations, resource_group_name=None, enabled=
     return List(cli_ctx=cmd.cli_ctx)(command_args={})
 
 
-def create_nw_connection_monitor(cmd,
-                                 client,
-                                 connection_monitor_name,
-                                 watcher_rg,
-                                 watcher_name,
-                                 resource_group_name=None,
-                                 location=None,
-                                 tags=None,
-                                 endpoint_source_name=None,
-                                 endpoint_source_resource_id=None,
-                                 endpoint_source_address=None,
-                                 endpoint_source_type=None,
-                                 endpoint_source_coverage_level=None,
-                                 endpoint_dest_name=None,
-                                 endpoint_dest_resource_id=None,
-                                 endpoint_dest_address=None,
-                                 endpoint_dest_type=None,
-                                 endpoint_dest_coverage_level=None,
-                                 test_config_name=None,
-                                 test_config_frequency=None,
-                                 test_config_protocol=None,
-                                 test_config_preferred_ip_version=None,
-                                 test_config_threshold_failed_percent=None,
-                                 test_config_threshold_round_trip_time=None,
-                                 test_config_tcp_disable_trace_route=None,
-                                 test_config_tcp_port=None,
-                                 test_config_tcp_port_behavior=None,
-                                 test_config_icmp_disable_trace_route=None,
-                                 test_config_http_port=None,
-                                 test_config_http_method=None,
-                                 test_config_http_path=None,
-                                 test_config_http_valid_status_codes=None,
-                                 test_config_http_prefer_https=None,
-                                 test_group_name=None,
-                                 test_group_disable=None,
-                                 output_type=None,
-                                 workspace_ids=None,
-                                 notes=None):
-    connection_monitor = _create_nw_connection_monitor_v2(cmd,
-                                                          location,
-                                                          tags,
-                                                          endpoint_source_name,
-                                                          endpoint_source_resource_id,
-                                                          endpoint_source_address,
-                                                          endpoint_source_type,
-                                                          endpoint_source_coverage_level,
-                                                          endpoint_dest_name,
-                                                          endpoint_dest_resource_id,
-                                                          endpoint_dest_address,
-                                                          endpoint_dest_type,
-                                                          endpoint_dest_coverage_level,
-                                                          test_config_name,
-                                                          test_config_frequency,
-                                                          test_config_protocol,
-                                                          test_config_preferred_ip_version,
-                                                          test_config_threshold_failed_percent,
-                                                          test_config_threshold_round_trip_time,
-                                                          test_config_tcp_port,
-                                                          test_config_tcp_port_behavior,
-                                                          test_config_tcp_disable_trace_route,
-                                                          test_config_icmp_disable_trace_route,
-                                                          test_config_http_port,
-                                                          test_config_http_method,
-                                                          test_config_http_path,
-                                                          test_config_http_valid_status_codes,
-                                                          test_config_http_prefer_https,
-                                                          test_group_name,
-                                                          test_group_disable,
-                                                          output_type,
-                                                          workspace_ids,
-                                                          notes)
-
-    return client.begin_create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
-
-
-def _create_nw_connection_monitor_v2(cmd,
-                                     location=None,
-                                     tags=None,
-                                     endpoint_source_name=None,
-                                     endpoint_source_resource_id=None,
-                                     endpoint_source_address=None,
-                                     endpoint_source_type=None,
-                                     endpoint_source_coverage_level=None,
-                                     endpoint_dest_name=None,
-                                     endpoint_dest_resource_id=None,
-                                     endpoint_dest_address=None,
-                                     endpoint_dest_type=None,
-                                     endpoint_dest_coverage_level=None,
-                                     test_config_name=None,
-                                     test_config_frequency=None,
-                                     test_config_protocol=None,
-                                     test_config_preferred_ip_version=None,
-                                     test_config_threshold_failed_percent=None,
-                                     test_config_threshold_round_trip_time=None,
-                                     test_config_tcp_port=None,
-                                     test_config_tcp_port_behavior=None,
-                                     test_config_tcp_disable_trace_route=False,
-                                     test_config_icmp_disable_trace_route=False,
-                                     test_config_http_port=None,
-                                     test_config_http_method=None,
-                                     test_config_http_path=None,
-                                     test_config_http_valid_status_codes=None,
-                                     test_config_http_prefer_https=None,
-                                     test_group_name=None,
-                                     test_group_disable=False,
-                                     output_type=None,
-                                     workspace_ids=None,
-                                     notes=None):
-    src_endpoint = _create_nw_connection_monitor_v2_endpoint(cmd,
-                                                             endpoint_source_name,
-                                                             endpoint_resource_id=endpoint_source_resource_id,
-                                                             address=endpoint_source_address,
-                                                             endpoint_type=endpoint_source_type,
-                                                             coverage_level=endpoint_source_coverage_level)
-    dst_endpoint = _create_nw_connection_monitor_v2_endpoint(cmd,
-                                                             endpoint_dest_name,
-                                                             endpoint_resource_id=endpoint_dest_resource_id,
-                                                             address=endpoint_dest_address,
-                                                             endpoint_type=endpoint_dest_type,
-                                                             coverage_level=endpoint_dest_coverage_level)
-    test_config = _create_nw_connection_monitor_v2_test_configuration(cmd,
-                                                                      test_config_name,
-                                                                      test_config_frequency,
-                                                                      test_config_protocol,
-                                                                      test_config_threshold_failed_percent,
-                                                                      test_config_threshold_round_trip_time,
-                                                                      test_config_preferred_ip_version,
-                                                                      test_config_tcp_port,
-                                                                      test_config_tcp_port_behavior,
-                                                                      test_config_tcp_disable_trace_route,
-                                                                      test_config_icmp_disable_trace_route,
-                                                                      test_config_http_port,
-                                                                      test_config_http_method,
-                                                                      test_config_http_path,
-                                                                      test_config_http_valid_status_codes,
-                                                                      test_config_http_prefer_https)
-    test_group = _create_nw_connection_monitor_v2_test_group(cmd,
-                                                             test_group_name,
-                                                             test_group_disable,
-                                                             [test_config],
-                                                             [src_endpoint],
-                                                             [dst_endpoint])
-
-    # If 'workspace_ids' option is specified but 'output_type' is not then still it should be implicit that 'output-type' is 'Workspace'
-    # since only supported value for output_type is 'Workspace' currently.
-    if workspace_ids and not output_type:
-        output_type = 'Workspace'
-
-    if output_type:
-        outputs = []
-        if workspace_ids:
-            for workspace_id in workspace_ids:
-                output = _create_nw_connection_monitor_v2_output(cmd, output_type, workspace_id)
-                outputs.append(output)
-    else:
-        outputs = []
-
-    ConnectionMonitor = cmd.get_models('ConnectionMonitor')
-    cmv2 = ConnectionMonitor(location=location,
-                             tags=tags,
-                             auto_start=None,
-                             monitoring_interval_in_seconds=None,
-                             endpoints=[src_endpoint, dst_endpoint],
-                             test_configurations=[test_config],
-                             test_groups=[test_group],
-                             outputs=outputs,
-                             notes=notes)
-    return cmv2
-
-
-def _create_nw_connection_monitor_v2_endpoint(cmd,
-                                              name,
-                                              endpoint_resource_id=None,
-                                              address=None,
-                                              filter_type=None,
-                                              filter_items=None,
-                                              endpoint_type=None,
-                                              coverage_level=None):
-    if (filter_type and not filter_items) or (not filter_type and filter_items):
-        raise CLIError('usage error: '
-                       '--filter-type and --filter-item for endpoint filter must be present at the same time.')
-
-    ConnectionMonitorEndpoint, ConnectionMonitorEndpointFilter = cmd.get_models(
-        'ConnectionMonitorEndpoint', 'ConnectionMonitorEndpointFilter')
-
-    endpoint = ConnectionMonitorEndpoint(name=name,
-                                         resource_id=endpoint_resource_id,
-                                         address=address,
-                                         type=endpoint_type,
-                                         coverage_level=coverage_level)
-
-    if filter_type and filter_items:
-        endpoint_filter = ConnectionMonitorEndpointFilter(type=filter_type, items=filter_items)
-        endpoint.filter = endpoint_filter
-
-    return endpoint
-
-
-def _create_nw_connection_monitor_v2_test_configuration(cmd,
-                                                        name,
-                                                        test_frequency,
-                                                        protocol,
-                                                        threshold_failed_percent,
-                                                        threshold_round_trip_time,
-                                                        preferred_ip_version,
-                                                        tcp_port=None,
-                                                        tcp_port_behavior=None,
-                                                        tcp_disable_trace_route=None,
-                                                        icmp_disable_trace_route=None,
-                                                        http_port=None,
-                                                        http_method=None,
-                                                        http_path=None,
-                                                        http_valid_status_codes=None,
-                                                        http_prefer_https=None,
-                                                        http_request_headers=None):
-    (ConnectionMonitorTestConfigurationProtocol,
-     ConnectionMonitorTestConfiguration, ConnectionMonitorSuccessThreshold) = cmd.get_models(
-         'ConnectionMonitorTestConfigurationProtocol',
-         'ConnectionMonitorTestConfiguration', 'ConnectionMonitorSuccessThreshold')
-
-    test_config = ConnectionMonitorTestConfiguration(name=name,
-                                                     test_frequency_sec=test_frequency,
-                                                     protocol=protocol,
-                                                     preferred_ip_version=preferred_ip_version)
-
-    if threshold_failed_percent or threshold_round_trip_time:
-        threshold = ConnectionMonitorSuccessThreshold(checks_failed_percent=threshold_failed_percent,
-                                                      round_trip_time_ms=threshold_round_trip_time)
-        test_config.success_threshold = threshold
-
-    if protocol == ConnectionMonitorTestConfigurationProtocol.tcp:
-        ConnectionMonitorTcpConfiguration = cmd.get_models('ConnectionMonitorTcpConfiguration')
-        tcp_config = ConnectionMonitorTcpConfiguration(
-            port=tcp_port,
-            destination_port_behavior=tcp_port_behavior,
-            disable_trace_route=tcp_disable_trace_route
-        )
-        test_config.tcp_configuration = tcp_config
-    elif protocol == ConnectionMonitorTestConfigurationProtocol.icmp:
-        ConnectionMonitorIcmpConfiguration = cmd.get_models('ConnectionMonitorIcmpConfiguration')
-        icmp_config = ConnectionMonitorIcmpConfiguration(disable_trace_route=icmp_disable_trace_route)
-        test_config.icmp_configuration = icmp_config
-    elif protocol == ConnectionMonitorTestConfigurationProtocol.http:
-        ConnectionMonitorHttpConfiguration = cmd.get_models('ConnectionMonitorHttpConfiguration')
-        http_config = ConnectionMonitorHttpConfiguration(
-            port=http_port,
-            method=http_method,
-            path=http_path,
-            request_headers=http_request_headers,
-            valid_status_code_ranges=http_valid_status_codes,
-            prefer_https=http_prefer_https)
-        test_config.http_configuration = http_config
-    else:
-        raise CLIError('Unsupported protocol: "{}" for test configuration'.format(protocol))
-
-    return test_config
-
-
-def _create_nw_connection_monitor_v2_test_group(cmd,
-                                                name,
-                                                disable,
-                                                test_configurations,
-                                                source_endpoints,
-                                                destination_endpoints):
-    ConnectionMonitorTestGroup = cmd.get_models('ConnectionMonitorTestGroup')
-
-    test_group = ConnectionMonitorTestGroup(name=name,
-                                            disable=disable,
-                                            test_configurations=[tc.name for tc in test_configurations],
-                                            sources=[e.name for e in source_endpoints],
-                                            destinations=[e.name for e in destination_endpoints])
-    return test_group
-
-
-def _create_nw_connection_monitor_v2_output(cmd,
-                                            output_type,
-                                            workspace_id=None):
-    ConnectionMonitorOutput, OutputType = cmd.get_models('ConnectionMonitorOutput', 'OutputType')
-    output = ConnectionMonitorOutput(type=output_type)
-
-    if output_type == OutputType.workspace:
-        ConnectionMonitorWorkspaceSettings = cmd.get_models('ConnectionMonitorWorkspaceSettings')
-        workspace = ConnectionMonitorWorkspaceSettings(workspace_resource_id=workspace_id)
-        output.workspace_settings = workspace
-    else:
-        raise CLIError('Unsupported output type: "{}"'.format(output_type))
-
-    return output
-
-
-def add_nw_connection_monitor_v2_endpoint(cmd,
-                                          client,
-                                          watcher_rg,
-                                          watcher_name,
-                                          connection_monitor_name,
-                                          location,
-                                          name,
-                                          coverage_level=None,
-                                          endpoint_type=None,
-                                          source_test_groups=None,
-                                          dest_test_groups=None,
-                                          endpoint_resource_id=None,
-                                          address=None,
-                                          filter_type=None,
-                                          filter_items=None,
-                                          address_include=None,
-                                          address_exclude=None):
-    (ConnectionMonitorEndpoint, ConnectionMonitorEndpointFilter,
-     ConnectionMonitorEndpointScope, ConnectionMonitorEndpointScopeItem) = cmd.get_models(
-         'ConnectionMonitorEndpoint', 'ConnectionMonitorEndpointFilter',
-         'ConnectionMonitorEndpointScope', 'ConnectionMonitorEndpointScopeItem')
-
-    endpoint_scope = ConnectionMonitorEndpointScope(include=[], exclude=[])
-    for ip in address_include or []:
-        include_item = ConnectionMonitorEndpointScopeItem(address=ip)
-        endpoint_scope.include.append(include_item)
-    for ip in address_exclude or []:
-        exclude_item = ConnectionMonitorEndpointScopeItem(address=ip)
-        endpoint_scope.exclude.append(exclude_item)
-
-    endpoint = ConnectionMonitorEndpoint(name=name,
-                                         resource_id=endpoint_resource_id,
-                                         address=address,
-                                         type=endpoint_type,
-                                         coverage_level=coverage_level,
-                                         scope=endpoint_scope if address_include or address_exclude else None)
-
-    if filter_type and filter_items:
-        endpoint_filter = ConnectionMonitorEndpointFilter(type=filter_type, items=filter_items)
-        endpoint.filter = endpoint_filter
-
-    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
-    connection_monitor.endpoints.append(endpoint)
-
-    src_test_groups, dst_test_groups = set(source_test_groups or []), set(dest_test_groups or [])
-    for test_group in connection_monitor.test_groups:
-        if test_group.name in src_test_groups:
-            test_group.sources.append(endpoint.name)
-        if test_group.name in dst_test_groups:
-            test_group.destinations.append(endpoint.name)
-
-    return client.begin_create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
-
-
 def remove_nw_connection_monitor_v2_endpoint(client,
                                              watcher_rg,
                                              watcher_name,
@@ -5287,57 +5013,6 @@ def list_nw_connection_monitor_v2_endpoint(client,
     return connection_monitor.endpoints
 
 
-def add_nw_connection_monitor_v2_test_configuration(cmd,
-                                                    client,
-                                                    watcher_rg,
-                                                    watcher_name,
-                                                    connection_monitor_name,
-                                                    location,
-                                                    name,
-                                                    protocol,
-                                                    test_groups,
-                                                    frequency=None,
-                                                    threshold_failed_percent=None,
-                                                    threshold_round_trip_time=None,
-                                                    preferred_ip_version=None,
-                                                    tcp_port=None,
-                                                    tcp_port_behavior=None,
-                                                    tcp_disable_trace_route=None,
-                                                    icmp_disable_trace_route=None,
-                                                    http_port=None,
-                                                    http_method=None,
-                                                    http_path=None,
-                                                    http_valid_status_codes=None,
-                                                    http_prefer_https=None,
-                                                    http_request_headers=None):
-    new_test_config = _create_nw_connection_monitor_v2_test_configuration(cmd,
-                                                                          name,
-                                                                          frequency,
-                                                                          protocol,
-                                                                          threshold_failed_percent,
-                                                                          threshold_round_trip_time,
-                                                                          preferred_ip_version,
-                                                                          tcp_port,
-                                                                          tcp_port_behavior,
-                                                                          tcp_disable_trace_route,
-                                                                          icmp_disable_trace_route,
-                                                                          http_port,
-                                                                          http_method,
-                                                                          http_path,
-                                                                          http_valid_status_codes,
-                                                                          http_prefer_https,
-                                                                          http_request_headers)
-
-    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
-    connection_monitor.test_configurations.append(new_test_config)
-
-    for test_group in connection_monitor.test_groups:
-        if test_group.name in test_groups:
-            test_group.test_configurations.append(new_test_config.name)
-
-    return client.begin_create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
-
-
 def remove_nw_connection_monitor_v2_test_configuration(client,
                                                        watcher_rg,
                                                        watcher_name,
@@ -5385,92 +5060,6 @@ def list_nw_connection_monitor_v2_test_configuration(client,
                                                      location):
     connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
     return connection_monitor.test_configurations
-
-
-def add_nw_connection_monitor_v2_test_group(cmd,
-                                            client,
-                                            connection_monitor_name,
-                                            watcher_rg,
-                                            watcher_name,
-                                            location,
-                                            name,
-                                            endpoint_source_name,
-                                            endpoint_dest_name,
-                                            test_config_name,
-                                            disable=False,
-                                            endpoint_source_resource_id=None,
-                                            endpoint_source_address=None,
-                                            endpoint_dest_resource_id=None,
-                                            endpoint_dest_address=None,
-                                            test_config_frequency=None,
-                                            test_config_protocol=None,
-                                            test_config_preferred_ip_version=None,
-                                            test_config_threshold_failed_percent=None,
-                                            test_config_threshold_round_trip_time=None,
-                                            test_config_tcp_disable_trace_route=None,
-                                            test_config_tcp_port=None,
-                                            test_config_icmp_disable_trace_route=None,
-                                            test_config_http_port=None,
-                                            test_config_http_method=None,
-                                            test_config_http_path=None,
-                                            test_config_http_valid_status_codes=None,
-                                            test_config_http_prefer_https=None):
-    new_test_configuration_creation_requirements = [
-        test_config_protocol, test_config_preferred_ip_version,
-        test_config_threshold_failed_percent, test_config_threshold_round_trip_time,
-        test_config_tcp_disable_trace_route, test_config_tcp_port,
-        test_config_icmp_disable_trace_route,
-        test_config_http_port, test_config_http_method,
-        test_config_http_path, test_config_http_valid_status_codes, test_config_http_prefer_https
-    ]
-
-    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
-
-    new_test_group = _create_nw_connection_monitor_v2_test_group(cmd,
-                                                                 name,
-                                                                 disable,
-                                                                 [], [], [])
-
-    # deal with endpoint
-    if any([endpoint_source_address, endpoint_source_resource_id]):
-        src_endpoint = _create_nw_connection_monitor_v2_endpoint(cmd,
-                                                                 endpoint_source_name,
-                                                                 endpoint_source_resource_id,
-                                                                 endpoint_source_address)
-        connection_monitor.endpoints.append(src_endpoint)
-    if any([endpoint_dest_address, endpoint_dest_resource_id]):
-        dst_endpoint = _create_nw_connection_monitor_v2_endpoint(cmd,
-                                                                 endpoint_dest_name,
-                                                                 endpoint_dest_resource_id,
-                                                                 endpoint_dest_address)
-        connection_monitor.endpoints.append(dst_endpoint)
-
-    new_test_group.sources.append(endpoint_source_name)
-    new_test_group.destinations.append(endpoint_dest_name)
-
-    # deal with test configuration
-    if any(new_test_configuration_creation_requirements):
-        test_config = _create_nw_connection_monitor_v2_test_configuration(cmd,
-                                                                          test_config_name,
-                                                                          test_config_frequency,
-                                                                          test_config_protocol,
-                                                                          test_config_threshold_failed_percent,
-                                                                          test_config_threshold_round_trip_time,
-                                                                          test_config_preferred_ip_version,
-                                                                          test_config_tcp_port,
-                                                                          test_config_tcp_disable_trace_route,
-                                                                          test_config_icmp_disable_trace_route,
-                                                                          test_config_http_port,
-                                                                          test_config_http_method,
-                                                                          test_config_http_path,
-                                                                          test_config_http_valid_status_codes,
-                                                                          test_config_http_prefer_https)
-        connection_monitor.test_configurations.append(test_config)
-    new_test_group.test_configurations.append(test_config_name)
-
-    connection_monitor.test_groups.append(new_test_group)
-
-    return client.begin_create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
 
 
 def remove_nw_connection_monitor_v2_test_group(client,
@@ -5900,6 +5489,9 @@ class VNetCreate(_VNetCreate):
                          "/networkSecurityGroups/{}",
             ),
         )
+        args_schema.ddos_protection_plan._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/ddosProtectionPlans/{}",
+        )
         # filter arguments
         args_schema.extended_location._registered = False
         return args_schema
@@ -6010,6 +5602,18 @@ class VNetSubnetCreate(_VNetSubnetCreate):
                 "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
             },
             blank="Disabled",
+        )
+        args_schema.nat_gateway._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/natGateways/{}",
+        )
+        args_schema.network_security_group._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/networkSecurityGroups/{}",
+        )
+        args_schema.route_table._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/routeTables/{}",
         )
         # filter arguments
         args_schema.policies._registered = False
@@ -6198,8 +5802,12 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
 class VNetPeeringCreate(_VNetPeeringCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.sync_remote._registered = False
+        args_schema.remote_vnet._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}",
+        )
         return args_schema
 
 
@@ -6823,9 +6431,6 @@ def create_virtual_hub(cmd,
             raise CLIError('The VirtualHub "{}" under resource group "{}" exists'.format(
                 virtual_hub_name, resource_group_name))
 
-    SubResource, HubIpConfiguration, PublicIPAddress = cmd.get_models('SubResource',
-                                                                      'HubIpConfiguration', 'PublicIPAddress')
-
     args = {
         'resource_group': resource_group_name,
         'name': virtual_hub_name,
@@ -6833,23 +6438,29 @@ def create_virtual_hub(cmd,
         'tags': tags,
         'sku': 'Standard',
     }
-    from azure.cli.command_modules.network.aaz.latest.network.routeserver import Create
+    from .aaz.latest.network.routeserver import Create
     vhub_poller = Create(cli_ctx=cmd.cli_ctx)(command_args=args)
     LongRunningOperation(cmd.cli_ctx)(vhub_poller)
 
-    ip_config = HubIpConfiguration(
-        subnet=SubResource(id=hosted_subnet),
-        public_ip_address=PublicIPAddress(id=public_ip_address)
-    )
-    vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
+    from .aaz.latest.network.routeserver.ip_config import Create as IPConfigCreate, Delete as IPConfigDelete
     try:
-        vhub_ip_poller = vhub_ip_config_client.begin_create_or_update(
-            resource_group_name, virtual_hub_name, 'Default', ip_config)
-        LongRunningOperation(cmd.cli_ctx)(vhub_ip_poller)
+        create_poller = IPConfigCreate(cli_ctx=cmd.cli_ctx)(command_args={
+            'name': 'Default',
+            'vhub_name': virtual_hub_name,
+            'resource_group': resource_group_name,
+            'subnet': hosted_subnet,
+            'public_ip_address': public_ip_address
+        })
+        LongRunningOperation(cmd.cli_ctx)(create_poller)
     except Exception as ex:
         logger.error(ex)
         try:
-            vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, 'Default')
+            delete_poller = IPConfigDelete(cli_ctx=cmd.cli_ctx)(command_args={
+                'name': 'Default',
+                'vhub_name': virtual_hub_name,
+                'resource_group': resource_group_name
+            })
+            LongRunningOperation(cmd.cli_ctx)(delete_poller)
         except HttpResponseError:
             pass
         from .aaz.latest.network.routeserver import Delete
@@ -6861,12 +6472,21 @@ def create_virtual_hub(cmd,
 
 def delete_virtual_hub(cmd, resource_group_name, virtual_hub_name):
     from azure.cli.core.commands import LongRunningOperation
-    vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
-    ip_configs = list(vhub_ip_config_client.list(resource_group_name, virtual_hub_name))
-    if ip_configs:
-        ip_config = ip_configs[0]   # There will always be only 1
-        poller = vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, ip_config.name)
+    from .aaz.latest.network.routeserver.ip_config import List as IPConfigList, Delete as IPConfigDelete
+    ip_configs = IPConfigList(cli_ctx=cmd.cli_ctx)(command_args={
+        'vhub_name': virtual_hub_name,
+        'resource_group': resource_group_name
+    })
+    try:
+        ip_config = next(ip_configs)  # there will always be only 1
+        poller = IPConfigDelete(cli_ctx=cmd.cli_ctx)(command_args={
+            'name': ip_config['name'],
+            'vhub_name': virtual_hub_name,
+            'resource_group': resource_group_name
+        })
         LongRunningOperation(cmd.cli_ctx)(poller)
+    except StopIteration:
+        pass
     from .aaz.latest.network.routeserver import Delete
     return Delete(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': virtual_hub_name})
 # endregion
@@ -6915,3 +6535,66 @@ def remove_nw_connection_monitor_test_group(cmd, connection_monitor_name, locati
     }
     from .operations.watcher import WatcherConnectionMonitorTestGroupRemove
     return WatcherConnectionMonitorTestGroupRemove(cli_ctx=cmd.cli_ctx)(command_args=update_args)
+
+
+class SecurityPartnerProviderCreate(_SecurityPartnerProviderCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vhub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
+class SecurityPartnerProviderUpdate(_SecurityPartnerProviderUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vhub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
+class VirtualApplianceCreate(_VirtualApplianceCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vhub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
+class VirtualApplianceUpdate(_VirtualApplianceUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vhub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
+class CustomIpPrefixUpdate(_CustomIpPrefixUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZArgEnum
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.state.enum = AAZArgEnum({"commission": "Commissioning", "decommission": "Decommissioning", "deprovision": "Deprovisioning", "provision": "Provisioning"})
+
+        return args_schema

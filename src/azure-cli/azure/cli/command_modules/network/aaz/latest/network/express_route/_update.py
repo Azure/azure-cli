@@ -58,21 +58,18 @@ class Update(AAZCommand):
         )
         _args_schema.allow_classic_operations = AAZBoolArg(
             options=["--allow-classic-operations"],
-            help="Allow classic operations.  Allowed values: false, true.",
+            help="Allow classic operations.",
             nullable=True,
         )
         _args_schema.bandwidth_in_gbps = AAZFloatArg(
             options=["--bandwidth-in-gbps"],
-            help="Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Mbps.  Values from: az network express-route list-service-providers.",
+            help="Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Mbps.",
             nullable=True,
         )
-        _args_schema.express_route_port = AAZResourceIdArg(
+        _args_schema.express_route_port = AAZStrArg(
             options=["--express-route-port"],
             help="Name or ID of an ExpressRoute port.",
             nullable=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRoutePorts/{}"
-            )
         )
         _args_schema.allow_global_reach = AAZBoolArg(
             options=["--allow-global-reach"],
@@ -91,7 +88,7 @@ class Update(AAZCommand):
         )
         _args_schema.sku_family = AAZStrArg(
             options=["--sku-family"],
-            help="Chosen SKU family of ExpressRoute circuit.  Allowed values: MeteredData, UnlimitedData.  Default: MeteredData.",
+            help="Chosen SKU family of ExpressRoute circuit.  Allowed values: MeteredData, UnlimitedData.",
             nullable=True,
             enum={"MeteredData": "MeteredData", "UnlimitedData": "UnlimitedData"},
         )
@@ -102,7 +99,7 @@ class Update(AAZCommand):
         )
         _args_schema.sku_tier = AAZStrArg(
             options=["--sku-tier"],
-            help="SKU Tier of ExpressRoute circuit.  Allowed values: Basic, Local, Premium, Standard.  Default: Standard.",
+            help="SKU Tier of ExpressRoute circuit.  Allowed values: Basic, Local, Premium, Standard.",
             nullable=True,
             enum={"Basic": "Basic", "Local": "Local", "Premium": "Premium", "Standard": "Standard"},
         )
@@ -321,7 +318,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_express_route_circuit_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_express_route_circuit_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -432,7 +429,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _build_schema_express_route_circuit_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_express_route_circuit_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -490,442 +487,440 @@ class Update(AAZCommand):
             )
 
 
-def _build_schema_express_route_circuit_peering_config_update(_builder):
-    if _builder is None:
-        return
-    _builder.set_prop("advertisedCommunities", AAZListType, ".advertised_communities")
-    _builder.set_prop("advertisedPublicPrefixes", AAZListType, ".advertised_public_prefixes")
-    _builder.set_prop("customerASN", AAZIntType, ".customer_asn")
-    _builder.set_prop("legacyMode", AAZIntType, ".legacy_mode")
-    _builder.set_prop("routingRegistryName", AAZStrType, ".routing_registry_name")
+class _UpdateHelper:
+    """Helper class for Update"""
 
-    advertised_communities = _builder.get(".advertisedCommunities")
-    if advertised_communities is not None:
-        advertised_communities.set_elements(AAZStrType, ".")
+    @classmethod
+    def _build_schema_express_route_circuit_peering_config_update(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("advertisedCommunities", AAZListType, ".advertised_communities")
+        _builder.set_prop("advertisedPublicPrefixes", AAZListType, ".advertised_public_prefixes")
+        _builder.set_prop("customerASN", AAZIntType, ".customer_asn")
+        _builder.set_prop("legacyMode", AAZIntType, ".legacy_mode")
+        _builder.set_prop("routingRegistryName", AAZStrType, ".routing_registry_name")
 
-    advertised_public_prefixes = _builder.get(".advertisedPublicPrefixes")
-    if advertised_public_prefixes is not None:
-        advertised_public_prefixes.set_elements(AAZStrType, ".")
+        advertised_communities = _builder.get(".advertisedCommunities")
+        if advertised_communities is not None:
+            advertised_communities.set_elements(AAZStrType, ".")
 
+        advertised_public_prefixes = _builder.get(".advertisedPublicPrefixes")
+        if advertised_public_prefixes is not None:
+            advertised_public_prefixes.set_elements(AAZStrType, ".")
 
-def _build_schema_sub_resource_update(_builder):
-    if _builder is None:
-        return
-    _builder.set_prop("id", AAZStrType, ".id")
+    @classmethod
+    def _build_schema_sub_resource_update(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("id", AAZStrType, ".id")
 
+    _schema_express_route_circuit_peering_config_read = None
 
-_schema_express_route_circuit_peering_config_read = None
+    @classmethod
+    def _build_schema_express_route_circuit_peering_config_read(cls, _schema):
+        if cls._schema_express_route_circuit_peering_config_read is not None:
+            _schema.advertised_communities = cls._schema_express_route_circuit_peering_config_read.advertised_communities
+            _schema.advertised_public_prefixes = cls._schema_express_route_circuit_peering_config_read.advertised_public_prefixes
+            _schema.advertised_public_prefixes_state = cls._schema_express_route_circuit_peering_config_read.advertised_public_prefixes_state
+            _schema.customer_asn = cls._schema_express_route_circuit_peering_config_read.customer_asn
+            _schema.legacy_mode = cls._schema_express_route_circuit_peering_config_read.legacy_mode
+            _schema.routing_registry_name = cls._schema_express_route_circuit_peering_config_read.routing_registry_name
+            return
 
+        cls._schema_express_route_circuit_peering_config_read = _schema_express_route_circuit_peering_config_read = AAZObjectType()
 
-def _build_schema_express_route_circuit_peering_config_read(_schema):
-    global _schema_express_route_circuit_peering_config_read
-    if _schema_express_route_circuit_peering_config_read is not None:
-        _schema.advertised_communities = _schema_express_route_circuit_peering_config_read.advertised_communities
-        _schema.advertised_public_prefixes = _schema_express_route_circuit_peering_config_read.advertised_public_prefixes
-        _schema.advertised_public_prefixes_state = _schema_express_route_circuit_peering_config_read.advertised_public_prefixes_state
-        _schema.customer_asn = _schema_express_route_circuit_peering_config_read.customer_asn
-        _schema.legacy_mode = _schema_express_route_circuit_peering_config_read.legacy_mode
-        _schema.routing_registry_name = _schema_express_route_circuit_peering_config_read.routing_registry_name
-        return
+        express_route_circuit_peering_config_read = _schema_express_route_circuit_peering_config_read
+        express_route_circuit_peering_config_read.advertised_communities = AAZListType(
+            serialized_name="advertisedCommunities",
+        )
+        express_route_circuit_peering_config_read.advertised_public_prefixes = AAZListType(
+            serialized_name="advertisedPublicPrefixes",
+        )
+        express_route_circuit_peering_config_read.advertised_public_prefixes_state = AAZStrType(
+            serialized_name="advertisedPublicPrefixesState",
+            flags={"read_only": True},
+        )
+        express_route_circuit_peering_config_read.customer_asn = AAZIntType(
+            serialized_name="customerASN",
+        )
+        express_route_circuit_peering_config_read.legacy_mode = AAZIntType(
+            serialized_name="legacyMode",
+        )
+        express_route_circuit_peering_config_read.routing_registry_name = AAZStrType(
+            serialized_name="routingRegistryName",
+        )
 
-    _schema_express_route_circuit_peering_config_read = AAZObjectType()
+        advertised_communities = _schema_express_route_circuit_peering_config_read.advertised_communities
+        advertised_communities.Element = AAZStrType()
 
-    express_route_circuit_peering_config_read = _schema_express_route_circuit_peering_config_read
-    express_route_circuit_peering_config_read.advertised_communities = AAZListType(
-        serialized_name="advertisedCommunities",
-    )
-    express_route_circuit_peering_config_read.advertised_public_prefixes = AAZListType(
-        serialized_name="advertisedPublicPrefixes",
-    )
-    express_route_circuit_peering_config_read.advertised_public_prefixes_state = AAZStrType(
-        serialized_name="advertisedPublicPrefixesState",
-        flags={"read_only": True},
-    )
-    express_route_circuit_peering_config_read.customer_asn = AAZIntType(
-        serialized_name="customerASN",
-    )
-    express_route_circuit_peering_config_read.legacy_mode = AAZIntType(
-        serialized_name="legacyMode",
-    )
-    express_route_circuit_peering_config_read.routing_registry_name = AAZStrType(
-        serialized_name="routingRegistryName",
-    )
+        advertised_public_prefixes = _schema_express_route_circuit_peering_config_read.advertised_public_prefixes
+        advertised_public_prefixes.Element = AAZStrType()
 
-    advertised_communities = _schema_express_route_circuit_peering_config_read.advertised_communities
-    advertised_communities.Element = AAZStrType()
+        _schema.advertised_communities = cls._schema_express_route_circuit_peering_config_read.advertised_communities
+        _schema.advertised_public_prefixes = cls._schema_express_route_circuit_peering_config_read.advertised_public_prefixes
+        _schema.advertised_public_prefixes_state = cls._schema_express_route_circuit_peering_config_read.advertised_public_prefixes_state
+        _schema.customer_asn = cls._schema_express_route_circuit_peering_config_read.customer_asn
+        _schema.legacy_mode = cls._schema_express_route_circuit_peering_config_read.legacy_mode
+        _schema.routing_registry_name = cls._schema_express_route_circuit_peering_config_read.routing_registry_name
 
-    advertised_public_prefixes = _schema_express_route_circuit_peering_config_read.advertised_public_prefixes
-    advertised_public_prefixes.Element = AAZStrType()
+    _schema_express_route_circuit_read = None
 
-    _schema.advertised_communities = _schema_express_route_circuit_peering_config_read.advertised_communities
-    _schema.advertised_public_prefixes = _schema_express_route_circuit_peering_config_read.advertised_public_prefixes
-    _schema.advertised_public_prefixes_state = _schema_express_route_circuit_peering_config_read.advertised_public_prefixes_state
-    _schema.customer_asn = _schema_express_route_circuit_peering_config_read.customer_asn
-    _schema.legacy_mode = _schema_express_route_circuit_peering_config_read.legacy_mode
-    _schema.routing_registry_name = _schema_express_route_circuit_peering_config_read.routing_registry_name
+    @classmethod
+    def _build_schema_express_route_circuit_read(cls, _schema):
+        if cls._schema_express_route_circuit_read is not None:
+            _schema.etag = cls._schema_express_route_circuit_read.etag
+            _schema.id = cls._schema_express_route_circuit_read.id
+            _schema.location = cls._schema_express_route_circuit_read.location
+            _schema.name = cls._schema_express_route_circuit_read.name
+            _schema.properties = cls._schema_express_route_circuit_read.properties
+            _schema.sku = cls._schema_express_route_circuit_read.sku
+            _schema.tags = cls._schema_express_route_circuit_read.tags
+            _schema.type = cls._schema_express_route_circuit_read.type
+            return
 
+        cls._schema_express_route_circuit_read = _schema_express_route_circuit_read = AAZObjectType()
 
-_schema_express_route_circuit_read = None
+        express_route_circuit_read = _schema_express_route_circuit_read
+        express_route_circuit_read.etag = AAZStrType(
+            flags={"read_only": True},
+        )
+        express_route_circuit_read.id = AAZStrType()
+        express_route_circuit_read.location = AAZStrType()
+        express_route_circuit_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        express_route_circuit_read.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        express_route_circuit_read.sku = AAZObjectType()
+        express_route_circuit_read.tags = AAZDictType()
+        express_route_circuit_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
+        properties = _schema_express_route_circuit_read.properties
+        properties.allow_classic_operations = AAZBoolType(
+            serialized_name="allowClassicOperations",
+        )
+        properties.authorization_key = AAZStrType(
+            serialized_name="authorizationKey",
+        )
+        properties.authorizations = AAZListType()
+        properties.bandwidth_in_gbps = AAZFloatType(
+            serialized_name="bandwidthInGbps",
+        )
+        properties.circuit_provisioning_state = AAZStrType(
+            serialized_name="circuitProvisioningState",
+        )
+        properties.express_route_port = AAZObjectType(
+            serialized_name="expressRoutePort",
+        )
+        cls._build_schema_sub_resource_read(properties.express_route_port)
+        properties.gateway_manager_etag = AAZStrType(
+            serialized_name="gatewayManagerEtag",
+        )
+        properties.global_reach_enabled = AAZBoolType(
+            serialized_name="globalReachEnabled",
+        )
+        properties.peerings = AAZListType()
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.service_key = AAZStrType(
+            serialized_name="serviceKey",
+        )
+        properties.service_provider_notes = AAZStrType(
+            serialized_name="serviceProviderNotes",
+        )
+        properties.service_provider_properties = AAZObjectType(
+            serialized_name="serviceProviderProperties",
+        )
+        properties.service_provider_provisioning_state = AAZStrType(
+            serialized_name="serviceProviderProvisioningState",
+        )
+        properties.stag = AAZIntType(
+            flags={"read_only": True},
+        )
 
-def _build_schema_express_route_circuit_read(_schema):
-    global _schema_express_route_circuit_read
-    if _schema_express_route_circuit_read is not None:
-        _schema.etag = _schema_express_route_circuit_read.etag
-        _schema.id = _schema_express_route_circuit_read.id
-        _schema.location = _schema_express_route_circuit_read.location
-        _schema.name = _schema_express_route_circuit_read.name
-        _schema.properties = _schema_express_route_circuit_read.properties
-        _schema.sku = _schema_express_route_circuit_read.sku
-        _schema.tags = _schema_express_route_circuit_read.tags
-        _schema.type = _schema_express_route_circuit_read.type
-        return
+        authorizations = _schema_express_route_circuit_read.properties.authorizations
+        authorizations.Element = AAZObjectType()
 
-    _schema_express_route_circuit_read = AAZObjectType()
+        _element = _schema_express_route_circuit_read.properties.authorizations.Element
+        _element.etag = AAZStrType(
+            flags={"read_only": True},
+        )
+        _element.id = AAZStrType()
+        _element.name = AAZStrType()
+        _element.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        _element.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
-    express_route_circuit_read = _schema_express_route_circuit_read
-    express_route_circuit_read.etag = AAZStrType(
-        flags={"read_only": True},
-    )
-    express_route_circuit_read.id = AAZStrType()
-    express_route_circuit_read.location = AAZStrType()
-    express_route_circuit_read.name = AAZStrType(
-        flags={"read_only": True},
-    )
-    express_route_circuit_read.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
-    express_route_circuit_read.sku = AAZObjectType()
-    express_route_circuit_read.tags = AAZDictType()
-    express_route_circuit_read.type = AAZStrType(
-        flags={"read_only": True},
-    )
+        properties = _schema_express_route_circuit_read.properties.authorizations.Element.properties
+        properties.authorization_key = AAZStrType(
+            serialized_name="authorizationKey",
+        )
+        properties.authorization_use_status = AAZStrType(
+            serialized_name="authorizationUseStatus",
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
 
-    properties = _schema_express_route_circuit_read.properties
-    properties.allow_classic_operations = AAZBoolType(
-        serialized_name="allowClassicOperations",
-    )
-    properties.authorization_key = AAZStrType(
-        serialized_name="authorizationKey",
-    )
-    properties.authorizations = AAZListType()
-    properties.bandwidth_in_gbps = AAZFloatType(
-        serialized_name="bandwidthInGbps",
-    )
-    properties.circuit_provisioning_state = AAZStrType(
-        serialized_name="circuitProvisioningState",
-    )
-    properties.express_route_port = AAZObjectType(
-        serialized_name="expressRoutePort",
-    )
-    _build_schema_sub_resource_read(properties.express_route_port)
-    properties.gateway_manager_etag = AAZStrType(
-        serialized_name="gatewayManagerEtag",
-    )
-    properties.global_reach_enabled = AAZBoolType(
-        serialized_name="globalReachEnabled",
-    )
-    properties.peerings = AAZListType()
-    properties.provisioning_state = AAZStrType(
-        serialized_name="provisioningState",
-        flags={"read_only": True},
-    )
-    properties.service_key = AAZStrType(
-        serialized_name="serviceKey",
-    )
-    properties.service_provider_notes = AAZStrType(
-        serialized_name="serviceProviderNotes",
-    )
-    properties.service_provider_properties = AAZObjectType(
-        serialized_name="serviceProviderProperties",
-    )
-    properties.service_provider_provisioning_state = AAZStrType(
-        serialized_name="serviceProviderProvisioningState",
-    )
-    properties.stag = AAZIntType(
-        flags={"read_only": True},
-    )
+        peerings = _schema_express_route_circuit_read.properties.peerings
+        peerings.Element = AAZObjectType()
 
-    authorizations = _schema_express_route_circuit_read.properties.authorizations
-    authorizations.Element = AAZObjectType()
+        _element = _schema_express_route_circuit_read.properties.peerings.Element
+        _element.etag = AAZStrType(
+            flags={"read_only": True},
+        )
+        _element.id = AAZStrType()
+        _element.name = AAZStrType()
+        _element.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        _element.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
-    _element = _schema_express_route_circuit_read.properties.authorizations.Element
-    _element.etag = AAZStrType(
-        flags={"read_only": True},
-    )
-    _element.id = AAZStrType()
-    _element.name = AAZStrType()
-    _element.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
-    _element.type = AAZStrType(
-        flags={"read_only": True},
-    )
+        properties = _schema_express_route_circuit_read.properties.peerings.Element.properties
+        properties.azure_asn = AAZIntType(
+            serialized_name="azureASN",
+        )
+        properties.connections = AAZListType()
+        properties.express_route_connection = AAZObjectType(
+            serialized_name="expressRouteConnection",
+        )
+        properties.gateway_manager_etag = AAZStrType(
+            serialized_name="gatewayManagerEtag",
+        )
+        properties.ipv6_peering_config = AAZObjectType(
+            serialized_name="ipv6PeeringConfig",
+        )
+        properties.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+            flags={"read_only": True},
+        )
+        properties.microsoft_peering_config = AAZObjectType(
+            serialized_name="microsoftPeeringConfig",
+        )
+        cls._build_schema_express_route_circuit_peering_config_read(properties.microsoft_peering_config)
+        properties.peer_asn = AAZIntType(
+            serialized_name="peerASN",
+        )
+        properties.peered_connections = AAZListType(
+            serialized_name="peeredConnections",
+            flags={"read_only": True},
+        )
+        properties.peering_type = AAZStrType(
+            serialized_name="peeringType",
+        )
+        properties.primary_azure_port = AAZStrType(
+            serialized_name="primaryAzurePort",
+        )
+        properties.primary_peer_address_prefix = AAZStrType(
+            serialized_name="primaryPeerAddressPrefix",
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.route_filter = AAZObjectType(
+            serialized_name="routeFilter",
+        )
+        cls._build_schema_sub_resource_read(properties.route_filter)
+        properties.secondary_azure_port = AAZStrType(
+            serialized_name="secondaryAzurePort",
+        )
+        properties.secondary_peer_address_prefix = AAZStrType(
+            serialized_name="secondaryPeerAddressPrefix",
+        )
+        properties.shared_key = AAZStrType(
+            serialized_name="sharedKey",
+        )
+        properties.state = AAZStrType()
+        properties.stats = AAZObjectType()
+        properties.vlan_id = AAZIntType(
+            serialized_name="vlanId",
+        )
 
-    properties = _schema_express_route_circuit_read.properties.authorizations.Element.properties
-    properties.authorization_key = AAZStrType(
-        serialized_name="authorizationKey",
-    )
-    properties.authorization_use_status = AAZStrType(
-        serialized_name="authorizationUseStatus",
-    )
-    properties.provisioning_state = AAZStrType(
-        serialized_name="provisioningState",
-        flags={"read_only": True},
-    )
+        connections = _schema_express_route_circuit_read.properties.peerings.Element.properties.connections
+        connections.Element = AAZObjectType()
 
-    peerings = _schema_express_route_circuit_read.properties.peerings
-    peerings.Element = AAZObjectType()
+        _element = _schema_express_route_circuit_read.properties.peerings.Element.properties.connections.Element
+        _element.etag = AAZStrType(
+            flags={"read_only": True},
+        )
+        _element.id = AAZStrType()
+        _element.name = AAZStrType()
+        _element.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        _element.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
-    _element = _schema_express_route_circuit_read.properties.peerings.Element
-    _element.etag = AAZStrType(
-        flags={"read_only": True},
-    )
-    _element.id = AAZStrType()
-    _element.name = AAZStrType()
-    _element.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
-    _element.type = AAZStrType(
-        flags={"read_only": True},
-    )
+        properties = _schema_express_route_circuit_read.properties.peerings.Element.properties.connections.Element.properties
+        properties.address_prefix = AAZStrType(
+            serialized_name="addressPrefix",
+        )
+        properties.authorization_key = AAZStrType(
+            serialized_name="authorizationKey",
+        )
+        properties.circuit_connection_status = AAZStrType(
+            serialized_name="circuitConnectionStatus",
+            flags={"read_only": True},
+        )
+        properties.express_route_circuit_peering = AAZObjectType(
+            serialized_name="expressRouteCircuitPeering",
+        )
+        cls._build_schema_sub_resource_read(properties.express_route_circuit_peering)
+        properties.ipv6_circuit_connection_config = AAZObjectType(
+            serialized_name="ipv6CircuitConnectionConfig",
+        )
+        properties.peer_express_route_circuit_peering = AAZObjectType(
+            serialized_name="peerExpressRouteCircuitPeering",
+        )
+        cls._build_schema_sub_resource_read(properties.peer_express_route_circuit_peering)
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
 
-    properties = _schema_express_route_circuit_read.properties.peerings.Element.properties
-    properties.azure_asn = AAZIntType(
-        serialized_name="azureASN",
-    )
-    properties.connections = AAZListType()
-    properties.express_route_connection = AAZObjectType(
-        serialized_name="expressRouteConnection",
-    )
-    properties.gateway_manager_etag = AAZStrType(
-        serialized_name="gatewayManagerEtag",
-    )
-    properties.ipv6_peering_config = AAZObjectType(
-        serialized_name="ipv6PeeringConfig",
-    )
-    properties.last_modified_by = AAZStrType(
-        serialized_name="lastModifiedBy",
-        flags={"read_only": True},
-    )
-    properties.microsoft_peering_config = AAZObjectType(
-        serialized_name="microsoftPeeringConfig",
-    )
-    _build_schema_express_route_circuit_peering_config_read(properties.microsoft_peering_config)
-    properties.peer_asn = AAZIntType(
-        serialized_name="peerASN",
-    )
-    properties.peered_connections = AAZListType(
-        serialized_name="peeredConnections",
-        flags={"read_only": True},
-    )
-    properties.peering_type = AAZStrType(
-        serialized_name="peeringType",
-    )
-    properties.primary_azure_port = AAZStrType(
-        serialized_name="primaryAzurePort",
-    )
-    properties.primary_peer_address_prefix = AAZStrType(
-        serialized_name="primaryPeerAddressPrefix",
-    )
-    properties.provisioning_state = AAZStrType(
-        serialized_name="provisioningState",
-        flags={"read_only": True},
-    )
-    properties.route_filter = AAZObjectType(
-        serialized_name="routeFilter",
-    )
-    _build_schema_sub_resource_read(properties.route_filter)
-    properties.secondary_azure_port = AAZStrType(
-        serialized_name="secondaryAzurePort",
-    )
-    properties.secondary_peer_address_prefix = AAZStrType(
-        serialized_name="secondaryPeerAddressPrefix",
-    )
-    properties.shared_key = AAZStrType(
-        serialized_name="sharedKey",
-    )
-    properties.state = AAZStrType()
-    properties.stats = AAZObjectType()
-    properties.vlan_id = AAZIntType(
-        serialized_name="vlanId",
-    )
+        ipv6_circuit_connection_config = _schema_express_route_circuit_read.properties.peerings.Element.properties.connections.Element.properties.ipv6_circuit_connection_config
+        ipv6_circuit_connection_config.address_prefix = AAZStrType(
+            serialized_name="addressPrefix",
+        )
+        ipv6_circuit_connection_config.circuit_connection_status = AAZStrType(
+            serialized_name="circuitConnectionStatus",
+            flags={"read_only": True},
+        )
 
-    connections = _schema_express_route_circuit_read.properties.peerings.Element.properties.connections
-    connections.Element = AAZObjectType()
+        express_route_connection = _schema_express_route_circuit_read.properties.peerings.Element.properties.express_route_connection
+        express_route_connection.id = AAZStrType(
+            flags={"read_only": True},
+        )
 
-    _element = _schema_express_route_circuit_read.properties.peerings.Element.properties.connections.Element
-    _element.etag = AAZStrType(
-        flags={"read_only": True},
-    )
-    _element.id = AAZStrType()
-    _element.name = AAZStrType()
-    _element.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
-    _element.type = AAZStrType(
-        flags={"read_only": True},
-    )
+        ipv6_peering_config = _schema_express_route_circuit_read.properties.peerings.Element.properties.ipv6_peering_config
+        ipv6_peering_config.microsoft_peering_config = AAZObjectType(
+            serialized_name="microsoftPeeringConfig",
+        )
+        cls._build_schema_express_route_circuit_peering_config_read(ipv6_peering_config.microsoft_peering_config)
+        ipv6_peering_config.primary_peer_address_prefix = AAZStrType(
+            serialized_name="primaryPeerAddressPrefix",
+        )
+        ipv6_peering_config.route_filter = AAZObjectType(
+            serialized_name="routeFilter",
+        )
+        cls._build_schema_sub_resource_read(ipv6_peering_config.route_filter)
+        ipv6_peering_config.secondary_peer_address_prefix = AAZStrType(
+            serialized_name="secondaryPeerAddressPrefix",
+        )
+        ipv6_peering_config.state = AAZStrType()
 
-    properties = _schema_express_route_circuit_read.properties.peerings.Element.properties.connections.Element.properties
-    properties.address_prefix = AAZStrType(
-        serialized_name="addressPrefix",
-    )
-    properties.authorization_key = AAZStrType(
-        serialized_name="authorizationKey",
-    )
-    properties.circuit_connection_status = AAZStrType(
-        serialized_name="circuitConnectionStatus",
-        flags={"read_only": True},
-    )
-    properties.express_route_circuit_peering = AAZObjectType(
-        serialized_name="expressRouteCircuitPeering",
-    )
-    _build_schema_sub_resource_read(properties.express_route_circuit_peering)
-    properties.ipv6_circuit_connection_config = AAZObjectType(
-        serialized_name="ipv6CircuitConnectionConfig",
-    )
-    properties.peer_express_route_circuit_peering = AAZObjectType(
-        serialized_name="peerExpressRouteCircuitPeering",
-    )
-    _build_schema_sub_resource_read(properties.peer_express_route_circuit_peering)
-    properties.provisioning_state = AAZStrType(
-        serialized_name="provisioningState",
-        flags={"read_only": True},
-    )
+        peered_connections = _schema_express_route_circuit_read.properties.peerings.Element.properties.peered_connections
+        peered_connections.Element = AAZObjectType()
 
-    ipv6_circuit_connection_config = _schema_express_route_circuit_read.properties.peerings.Element.properties.connections.Element.properties.ipv6_circuit_connection_config
-    ipv6_circuit_connection_config.address_prefix = AAZStrType(
-        serialized_name="addressPrefix",
-    )
-    ipv6_circuit_connection_config.circuit_connection_status = AAZStrType(
-        serialized_name="circuitConnectionStatus",
-        flags={"read_only": True},
-    )
+        _element = _schema_express_route_circuit_read.properties.peerings.Element.properties.peered_connections.Element
+        _element.etag = AAZStrType(
+            flags={"read_only": True},
+        )
+        _element.id = AAZStrType()
+        _element.name = AAZStrType()
+        _element.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        _element.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
-    express_route_connection = _schema_express_route_circuit_read.properties.peerings.Element.properties.express_route_connection
-    express_route_connection.id = AAZStrType(
-        flags={"read_only": True},
-    )
+        properties = _schema_express_route_circuit_read.properties.peerings.Element.properties.peered_connections.Element.properties
+        properties.address_prefix = AAZStrType(
+            serialized_name="addressPrefix",
+        )
+        properties.auth_resource_guid = AAZStrType(
+            serialized_name="authResourceGuid",
+        )
+        properties.circuit_connection_status = AAZStrType(
+            serialized_name="circuitConnectionStatus",
+            flags={"read_only": True},
+        )
+        properties.connection_name = AAZStrType(
+            serialized_name="connectionName",
+        )
+        properties.express_route_circuit_peering = AAZObjectType(
+            serialized_name="expressRouteCircuitPeering",
+        )
+        cls._build_schema_sub_resource_read(properties.express_route_circuit_peering)
+        properties.peer_express_route_circuit_peering = AAZObjectType(
+            serialized_name="peerExpressRouteCircuitPeering",
+        )
+        cls._build_schema_sub_resource_read(properties.peer_express_route_circuit_peering)
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
 
-    ipv6_peering_config = _schema_express_route_circuit_read.properties.peerings.Element.properties.ipv6_peering_config
-    ipv6_peering_config.microsoft_peering_config = AAZObjectType(
-        serialized_name="microsoftPeeringConfig",
-    )
-    _build_schema_express_route_circuit_peering_config_read(ipv6_peering_config.microsoft_peering_config)
-    ipv6_peering_config.primary_peer_address_prefix = AAZStrType(
-        serialized_name="primaryPeerAddressPrefix",
-    )
-    ipv6_peering_config.route_filter = AAZObjectType(
-        serialized_name="routeFilter",
-    )
-    _build_schema_sub_resource_read(ipv6_peering_config.route_filter)
-    ipv6_peering_config.secondary_peer_address_prefix = AAZStrType(
-        serialized_name="secondaryPeerAddressPrefix",
-    )
-    ipv6_peering_config.state = AAZStrType()
+        stats = _schema_express_route_circuit_read.properties.peerings.Element.properties.stats
+        stats.primarybytes_in = AAZIntType(
+            serialized_name="primarybytesIn",
+        )
+        stats.primarybytes_out = AAZIntType(
+            serialized_name="primarybytesOut",
+        )
+        stats.secondarybytes_in = AAZIntType(
+            serialized_name="secondarybytesIn",
+        )
+        stats.secondarybytes_out = AAZIntType(
+            serialized_name="secondarybytesOut",
+        )
 
-    peered_connections = _schema_express_route_circuit_read.properties.peerings.Element.properties.peered_connections
-    peered_connections.Element = AAZObjectType()
+        service_provider_properties = _schema_express_route_circuit_read.properties.service_provider_properties
+        service_provider_properties.bandwidth_in_mbps = AAZIntType(
+            serialized_name="bandwidthInMbps",
+        )
+        service_provider_properties.peering_location = AAZStrType(
+            serialized_name="peeringLocation",
+        )
+        service_provider_properties.service_provider_name = AAZStrType(
+            serialized_name="serviceProviderName",
+        )
 
-    _element = _schema_express_route_circuit_read.properties.peerings.Element.properties.peered_connections.Element
-    _element.etag = AAZStrType(
-        flags={"read_only": True},
-    )
-    _element.id = AAZStrType()
-    _element.name = AAZStrType()
-    _element.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
-    _element.type = AAZStrType(
-        flags={"read_only": True},
-    )
+        sku = _schema_express_route_circuit_read.sku
+        sku.family = AAZStrType()
+        sku.name = AAZStrType()
+        sku.tier = AAZStrType()
 
-    properties = _schema_express_route_circuit_read.properties.peerings.Element.properties.peered_connections.Element.properties
-    properties.address_prefix = AAZStrType(
-        serialized_name="addressPrefix",
-    )
-    properties.auth_resource_guid = AAZStrType(
-        serialized_name="authResourceGuid",
-    )
-    properties.circuit_connection_status = AAZStrType(
-        serialized_name="circuitConnectionStatus",
-        flags={"read_only": True},
-    )
-    properties.connection_name = AAZStrType(
-        serialized_name="connectionName",
-    )
-    properties.express_route_circuit_peering = AAZObjectType(
-        serialized_name="expressRouteCircuitPeering",
-    )
-    _build_schema_sub_resource_read(properties.express_route_circuit_peering)
-    properties.peer_express_route_circuit_peering = AAZObjectType(
-        serialized_name="peerExpressRouteCircuitPeering",
-    )
-    _build_schema_sub_resource_read(properties.peer_express_route_circuit_peering)
-    properties.provisioning_state = AAZStrType(
-        serialized_name="provisioningState",
-        flags={"read_only": True},
-    )
+        tags = _schema_express_route_circuit_read.tags
+        tags.Element = AAZStrType()
 
-    stats = _schema_express_route_circuit_read.properties.peerings.Element.properties.stats
-    stats.primarybytes_in = AAZIntType(
-        serialized_name="primarybytesIn",
-    )
-    stats.primarybytes_out = AAZIntType(
-        serialized_name="primarybytesOut",
-    )
-    stats.secondarybytes_in = AAZIntType(
-        serialized_name="secondarybytesIn",
-    )
-    stats.secondarybytes_out = AAZIntType(
-        serialized_name="secondarybytesOut",
-    )
+        _schema.etag = cls._schema_express_route_circuit_read.etag
+        _schema.id = cls._schema_express_route_circuit_read.id
+        _schema.location = cls._schema_express_route_circuit_read.location
+        _schema.name = cls._schema_express_route_circuit_read.name
+        _schema.properties = cls._schema_express_route_circuit_read.properties
+        _schema.sku = cls._schema_express_route_circuit_read.sku
+        _schema.tags = cls._schema_express_route_circuit_read.tags
+        _schema.type = cls._schema_express_route_circuit_read.type
 
-    service_provider_properties = _schema_express_route_circuit_read.properties.service_provider_properties
-    service_provider_properties.bandwidth_in_mbps = AAZIntType(
-        serialized_name="bandwidthInMbps",
-    )
-    service_provider_properties.peering_location = AAZStrType(
-        serialized_name="peeringLocation",
-    )
-    service_provider_properties.service_provider_name = AAZStrType(
-        serialized_name="serviceProviderName",
-    )
+    _schema_sub_resource_read = None
 
-    sku = _schema_express_route_circuit_read.sku
-    sku.family = AAZStrType()
-    sku.name = AAZStrType()
-    sku.tier = AAZStrType()
+    @classmethod
+    def _build_schema_sub_resource_read(cls, _schema):
+        if cls._schema_sub_resource_read is not None:
+            _schema.id = cls._schema_sub_resource_read.id
+            return
 
-    tags = _schema_express_route_circuit_read.tags
-    tags.Element = AAZStrType()
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
 
-    _schema.etag = _schema_express_route_circuit_read.etag
-    _schema.id = _schema_express_route_circuit_read.id
-    _schema.location = _schema_express_route_circuit_read.location
-    _schema.name = _schema_express_route_circuit_read.name
-    _schema.properties = _schema_express_route_circuit_read.properties
-    _schema.sku = _schema_express_route_circuit_read.sku
-    _schema.tags = _schema_express_route_circuit_read.tags
-    _schema.type = _schema_express_route_circuit_read.type
+        sub_resource_read = _schema_sub_resource_read
+        sub_resource_read.id = AAZStrType()
 
-
-_schema_sub_resource_read = None
-
-
-def _build_schema_sub_resource_read(_schema):
-    global _schema_sub_resource_read
-    if _schema_sub_resource_read is not None:
-        _schema.id = _schema_sub_resource_read.id
-        return
-
-    _schema_sub_resource_read = AAZObjectType()
-
-    sub_resource_read = _schema_sub_resource_read
-    sub_resource_read.id = AAZStrType()
-
-    _schema.id = _schema_sub_resource_read.id
+        _schema.id = cls._schema_sub_resource_read.id
 
 
 __all__ = ["Update"]

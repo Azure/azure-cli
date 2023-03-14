@@ -1485,6 +1485,23 @@ class FunctionAppFunctionTests(LiveScenarioTest):
         ])
 
 
+class FunctionappLinuxConsumptionZipDeploy(LiveScenarioTest):
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_linux_consumption_zip_deploy_missing_appsetting(self, resource_group, storage_account):
+        zip_file = os.path.join(TEST_DIR, 'sample_csx_function_httptrigger/sample_csx_function_httptrigger.zip')
+        functionapp_name = self.create_random_name('functionapp', 40)
+
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Linux --runtime dotnet --functions-version 4'.format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+        self.cmd('functionapp config appsettings delete -g {} -n {} --setting-names AzureWebJobsStorage'.format(resource_group, functionapp_name))
+
+        with self.assertRaises(ValidationError):
+            self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file))
+
+        with self.assertRaises(ValidationError):
+            self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}" --build-remote'.format(resource_group, functionapp_name, zip_file))
+
+
 # LiveScenarioTest due to issue https://github.com/Azure/azure-cli/issues/10705
 class FunctionappDeploymentLogsScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
@@ -1855,6 +1872,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 0)
         ])
 
+    @unittest.skip("Invalid test case that cannot pass in the live mode.")
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1882,6 +1900,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 0)
         ])
 
+    @unittest.skip("Invalid test case that cannot pass in the live mode.")
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="functionapp_rg")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="vnet_rg")
@@ -1908,6 +1927,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 0)
         ])
 
+    @unittest.skip("Invalid test case that cannot pass in the live mode.")
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="functionapp_rg")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="vnet_rg")

@@ -50,7 +50,9 @@ class ListTypes(AAZCommand):
                 resource_group_arg="resource_group",
             ),
         )
-        _args_schema.resource_group = AAZResourceGroupNameArg()
+        _args_schema.resource_group = AAZResourceGroupNameArg(
+            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
+        )
         return cls._args_schema
 
     def _execute_operations(self):

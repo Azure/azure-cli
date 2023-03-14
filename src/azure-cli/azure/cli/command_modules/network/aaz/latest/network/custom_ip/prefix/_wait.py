@@ -196,7 +196,7 @@ class Wait(AAZWaitCommand):
             properties.custom_ip_prefix_parent = AAZObjectType(
                 serialized_name="customIpPrefixParent",
             )
-            _build_schema_sub_resource_read(properties.custom_ip_prefix_parent)
+            _WaitHelper._build_schema_sub_resource_read(properties.custom_ip_prefix_parent)
             properties.express_route_advertise = AAZBoolType(
                 serialized_name="expressRouteAdvertise",
             )
@@ -229,11 +229,11 @@ class Wait(AAZWaitCommand):
 
             child_custom_ip_prefixes = cls._schema_on_200.properties.child_custom_ip_prefixes
             child_custom_ip_prefixes.Element = AAZObjectType()
-            _build_schema_sub_resource_read(child_custom_ip_prefixes.Element)
+            _WaitHelper._build_schema_sub_resource_read(child_custom_ip_prefixes.Element)
 
             public_ip_prefixes = cls._schema_on_200.properties.public_ip_prefixes
             public_ip_prefixes.Element = AAZObjectType()
-            _build_schema_sub_resource_read(public_ip_prefixes.Element)
+            _WaitHelper._build_schema_sub_resource_read(public_ip_prefixes.Element)
 
             tags = cls._schema_on_200.tags
             tags.Element = AAZStrType()
@@ -244,21 +244,23 @@ class Wait(AAZWaitCommand):
             return cls._schema_on_200
 
 
-_schema_sub_resource_read = None
+class _WaitHelper:
+    """Helper class for Wait"""
 
+    _schema_sub_resource_read = None
 
-def _build_schema_sub_resource_read(_schema):
-    global _schema_sub_resource_read
-    if _schema_sub_resource_read is not None:
-        _schema.id = _schema_sub_resource_read.id
-        return
+    @classmethod
+    def _build_schema_sub_resource_read(cls, _schema):
+        if cls._schema_sub_resource_read is not None:
+            _schema.id = cls._schema_sub_resource_read.id
+            return
 
-    _schema_sub_resource_read = AAZObjectType()
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
 
-    sub_resource_read = _schema_sub_resource_read
-    sub_resource_read.id = AAZStrType()
+        sub_resource_read = _schema_sub_resource_read
+        sub_resource_read.id = AAZStrType()
 
-    _schema.id = _schema_sub_resource_read.id
+        _schema.id = cls._schema_sub_resource_read.id
 
 
 __all__ = ["Wait"]
