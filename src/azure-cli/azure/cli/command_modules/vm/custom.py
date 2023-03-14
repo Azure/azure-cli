@@ -3746,7 +3746,7 @@ def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
               'Please use the "az network public-ip list/show" to retrieve networking information.')
 
     result = ListInstancePublicIps(cli_ctx=cmd.cli_ctx)(command_args={
-        'virtual_machine_scale_set_name': vm_scale_set_name,
+        'vmss_name': vm_scale_set_name,
         'resource_group': resource_group_name
     })
     # filter away over-provisioned instances which are deleted after 'create/update' returns
