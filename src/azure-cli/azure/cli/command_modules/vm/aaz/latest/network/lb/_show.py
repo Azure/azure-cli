@@ -19,9 +19,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-05-01",
+        "version": "2022-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}", "2022-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers/{}", "2022-01-01"],
         ]
     }
 
@@ -124,7 +124,7 @@ class Show(AAZCommand):
                     "$expand", self.ctx.args.expand,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2022-05-01",
+                    "api-version", "2022-01-01",
                     required=True,
                 ),
             }
@@ -409,9 +409,6 @@ class Show(AAZCommand):
             )
             properties.port = AAZIntType(
                 flags={"required": True},
-            )
-            properties.probe_threshold = AAZIntType(
-                serialized_name="probeThreshold",
             )
             properties.protocol = AAZStrType(
                 flags={"required": True},
@@ -1108,9 +1105,6 @@ class _ShowHelper:
         properties = _schema_network_interface_read.properties
         properties.auxiliary_mode = AAZStrType(
             serialized_name="auxiliaryMode",
-        )
-        properties.disable_tcp_state_tracking = AAZBoolType(
-            serialized_name="disableTcpStateTracking",
         )
         properties.dns_settings = AAZObjectType(
             serialized_name="dnsSettings",
@@ -1854,12 +1848,15 @@ class _ShowHelper:
         cls._build_schema_public_ip_address_read(properties.service_public_ip_address)
 
         ddos_settings = _schema_public_ip_address_read.properties.ddos_settings
-        ddos_settings.ddos_protection_plan = AAZObjectType(
-            serialized_name="ddosProtectionPlan",
+        ddos_settings.ddos_custom_policy = AAZObjectType(
+            serialized_name="ddosCustomPolicy",
         )
-        cls._build_schema_sub_resource_read(ddos_settings.ddos_protection_plan)
-        ddos_settings.protection_mode = AAZStrType(
-            serialized_name="protectionMode",
+        cls._build_schema_sub_resource_read(ddos_settings.ddos_custom_policy)
+        ddos_settings.protected_ip = AAZBoolType(
+            serialized_name="protectedIP",
+        )
+        ddos_settings.protection_coverage = AAZStrType(
+            serialized_name="protectionCoverage",
         )
 
         dns_settings = _schema_public_ip_address_read.properties.dns_settings

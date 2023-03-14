@@ -1642,11 +1642,10 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
 
 
 def get_network_client(cli_ctx, balancer_type):
-    client = import_aaz_by_profile(cli_ctx.cloud.profile, "network.lb")
-    if balancer_type == 'application_gateways' and cli_ctx.cloud.profile.lower() == "latest":
-        # only latest profile supports application_gateways
-        client = import_aaz_by_profile(cli_ctx.cloud.profile, "network.application_gateway")
-    return client
+    if balancer_type == 'application_gateways':
+        return import_aaz_by_profile(cli_ctx.cloud.profile, "network.application_gateway")
+    elif balancer_type == 'load_balancers':
+        return import_aaz_by_profile(cli_ctx.cloud.profile, "network.lb")
 
 
 def get_network_lb(cli_ctx, resource_group_name, lb_name):
