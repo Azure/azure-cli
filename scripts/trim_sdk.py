@@ -72,7 +72,8 @@ def remove_unused_api_versions(resource_type):
             # value is str like '2022-01-01' or SDKProfile
             value = profile[resource_type]
             if value is None:
-                continue
+                _LOGGER.info(f'{resource_type}\'s API version is None, skip')
+                return
             if isinstance(value, str):
                 used_api_versions.add(value)
             else:
