@@ -205,6 +205,8 @@ class WheelExtension(Extension):
                     ext = WheelExtension(ext_name, ext_path)
                     if ext not in exts:
                         exts.append(ext)
+        # https://docs.python.org/3/library/os.html#os.listdir, listdir is in arbitrary order.
+        exts.sort(key=lambda ext: ext.name)
         return exts
 
 
@@ -272,6 +274,8 @@ class DevExtension(Extension):
                     _collect(os.path.join(path, item), depth + 1, max_depth)
         for source in DEV_EXTENSION_SOURCES:
             _collect(source)
+        # https://docs.python.org/3/library/os.html#os.listdir, listdir is in arbitrary order.
+        exts.sort(key=lambda ext: ext.name)
         return exts
 
 
