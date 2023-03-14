@@ -3571,8 +3571,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if vnet or subnet:
         if environment is not None:
             raise ArgumentUsageError(
-                "Unspported operation on function app.",
-                "Please set vNet Configuration for the function app at Container app environment level.")
+                "Unsupported operation on function app.",
+                "Please set virtual network configuration for the function app at Container app environment level.")
         if plan:
             if is_valid_resource_id(plan):
                 parse_result = parse_resource_id(plan)

@@ -143,8 +143,8 @@ def validate_functionapp_on_containerapp_vnet(cmd, namespace):
     function_app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if function_app.managed_environment_id is not None:
         raise ValidationError(
-            'Unspported operation on function app.',
-            'Please set vNet Configuration for the function app at Container app environment level')
+            'Unsupported operation on function app.',
+            'Please set virtual network configuration for the function app at Container app environment level.')
 
 
 def validate_add_vnet(cmd, namespace):
