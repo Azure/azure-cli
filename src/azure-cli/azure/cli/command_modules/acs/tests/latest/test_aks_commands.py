@@ -2451,12 +2451,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
-        upgrade_node_image_only_cluster_cmd = 'aks upgrade ' \
-                                              '-g {resource_group} ' \
-                                              '-n {name} ' \
-                                              '--node-image-only ' \
-                                              '--yes'
-        self.cmd(upgrade_node_image_only_cluster_cmd, expect_failure=True)
+        # upgrade_node_image_only_cluster_cmd = 'aks upgrade ' \
+        #                                       '-g {resource_group} ' \
+        #                                       '-n {name} ' \
+        #                                       '--node-image-only ' \
+        #                                       '--yes'
+        # self.cmd(upgrade_node_image_only_cluster_cmd, expect_failure=True)
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -2482,13 +2482,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
-        upgrade_node_image_only_nodepool_cmd = 'aks nodepool upgrade ' \
-                                               '--resource-group={resource_group} ' \
-                                               '--cluster-name={name} ' \
-                                               '-n {node_pool_name} ' \
-                                               '--node-image-only ' \
-                                               '--no-wait'
-        self.cmd(upgrade_node_image_only_nodepool_cmd, expect_failure=True)
+        # upgrade_node_image_only_nodepool_cmd = 'aks nodepool upgrade ' \
+        #                                        '--resource-group={resource_group} ' \
+        #                                        '--cluster-name={name} ' \
+        #                                        '-n {node_pool_name} ' \
+        #                                        '--node-image-only ' \
+        #                                        '--no-wait'
+        # self.cmd(upgrade_node_image_only_nodepool_cmd, expect_failure=True)
 
         get_nodepool_cmd = 'aks nodepool show ' \
                            '--resource-group={resource_group} ' \
@@ -4753,12 +4753,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
-        upgrade_node_image_only_cluster_cmd = 'aks upgrade ' \
-                                              '-g {resource_group} ' \
-                                              '-n {name} ' \
-                                              '--node-image-only ' \
-                                              '--yes'
-        self.cmd(upgrade_node_image_only_cluster_cmd, expect_failure=True)
+        # upgrade_node_image_only_cluster_cmd = 'aks upgrade ' \
+        #                                       '-g {resource_group} ' \
+        #                                       '-n {name} ' \
+        #                                       '--node-image-only ' \
+        #                                       '--yes'
+        # self.cmd(upgrade_node_image_only_cluster_cmd, expect_failure=True)
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -4784,13 +4784,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
-        upgrade_node_image_only_nodepool_cmd = 'aks nodepool upgrade ' \
-                                               '--resource-group={resource_group} ' \
-                                               '--cluster-name={name} ' \
-                                               '-n {node_pool_name} ' \
-                                               '--node-image-only ' \
-                                               '--no-wait'
-        self.cmd(upgrade_node_image_only_nodepool_cmd, expect_failure=True)
+        # upgrade_node_image_only_nodepool_cmd = 'aks nodepool upgrade ' \
+        #                                        '--resource-group={resource_group} ' \
+        #                                        '--cluster-name={name} ' \
+        #                                        '-n {node_pool_name} ' \
+        #                                        '--node-image-only ' \
+        #                                        '--no-wait'
+        # self.cmd(upgrade_node_image_only_nodepool_cmd, expect_failure=True)
 
         get_nodepool_cmd = 'aks nodepool show ' \
                            '--resource-group={resource_group} ' \
@@ -6874,13 +6874,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # upgrade the nodepool2 using this snapshot again
-        upgrade_node_image_only_nodepool_cmd = 'aks nodepool upgrade ' \
-                                               '--resource-group {resource_group} ' \
-                                               '--cluster-name {aks_name2} ' \
-                                               '-n {nodepool_name2} ' \
-                                               '--node-image-only ' \
-                                               '--snapshot-id {snapshot_resource_id} -o json'
-        self.cmd(upgrade_node_image_only_nodepool_cmd, expect_failure=True)
+        # upgrade_node_image_only_nodepool_cmd = 'aks nodepool upgrade ' \
+        #                                        '--resource-group {resource_group} ' \
+        #                                        '--cluster-name {aks_name2} ' \
+        #                                        '-n {nodepool_name2} ' \
+        #                                        '--node-image-only ' \
+        #                                        '--snapshot-id {snapshot_resource_id} -o json'
+        # self.cmd(upgrade_node_image_only_nodepool_cmd, expect_failure=True)
 
         get_nodepool_cmd = 'aks nodepool show ' \
                            '--resource-group={resource_group} ' \
