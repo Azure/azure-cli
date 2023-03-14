@@ -94,41 +94,6 @@ def create(
     Create an Azure Cognitive Services account.
     """
 
-    terms = 'Notice\nMicrosoft will use data you send to Bing Search Services'\
-        ' to improve Microsoft products and services.'\
-        'Where you send personal data to these Cognitive Services, you are responsible '\
-        'for obtaining sufficient consent from the data subjects.'\
-        'The General Privacy and Security Terms in the Online Services Terms '\
-        'do not apply to these Cognitive Services.'\
-        'Please refer to the Microsoft Cognitive Services section in the Online '\
-        'Services Terms'\
-        ' (https://www.microsoft.com/Licensing/product-licensing/products.aspx)'\
-        ' for details.'\
-        'Microsoft offers policy controls that may be used to disable new Cognitive'\
-        ' Services deployments (https://docs.microsoft.com/azure/cognitive-servic'\
-        'es/cognitive-services-apis-create-account).'
-    terms_not_police = 'Notice\n' \
-                       'I certify that use of this service is not by or for a police department in the United States.'
-    hint = 'Please select'
-    import re
-    pattern = re.compile("^[Bb]ing\\..*$")
-    if pattern.match(kind):
-        if yes:
-            logger.warning(terms)
-        else:
-            logger.warning(terms)
-            option = prompt_y_n(hint)
-            if not option:
-                raise CLIError('Operation cancelled.')
-    if kind.lower() == 'face' or kind.lower() == 'cognitiveservices':
-        if yes:
-            logger.warning(terms_not_police)
-        else:
-            logger.warning(terms_not_police)
-            option = prompt_y_n(hint)
-            if not option:
-                raise CLIError('Operation cancelled.')
-
     sku = Sku(name=sku_name)
 
     properties = CognitiveServicesAccountProperties()
