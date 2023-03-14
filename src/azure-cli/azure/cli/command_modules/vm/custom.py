@@ -988,13 +988,14 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                 if vnet_exists:
                     SubnetCreate = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.vnet.subnet").Create
                     try:
-                        cached_put(cmd, SubnetCreate(cli_ctx=cmd.cli_ctx), {
+                        poller = SubnetCreate(cli_ctx=cmd.cli_ctx)(command_args={
                             'name': subnet,
                             'vnet_name': vnet_name,
                             'resource_group': resource_group_name,
                             'address_prefixes': [subnet_address_prefix],
                             'address_prefix': subnet_address_prefix
-                        }, setter_arg_name='command_args').result()
+                        })
+                        LongRunningOperation(cmd.cli_ctx)(poller)
                     except Exception:
                         raise CLIError('Subnet({}) does not exist, but failed to create a new subnet with address '
                                        'prefix {}. It may be caused by name or address prefix conflict. Please specify '
