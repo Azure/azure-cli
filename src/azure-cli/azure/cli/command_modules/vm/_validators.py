@@ -20,7 +20,8 @@ from azure.cli.core.azclierror import (ValidationError, ArgumentUsageError, Requ
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
-from azure.cli.command_modules.vm._vm_utils import (check_existence, get_storage_blob_uri, list_sku_info)
+from azure.cli.command_modules.vm._vm_utils import (check_existence, get_storage_blob_uri, list_sku_info,
+                                                    import_aaz_by_profile)
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 from azure.cli.core import keys
 from azure.core.exceptions import ResourceNotFoundError
@@ -29,7 +30,6 @@ from importlib import import_module
 from ._client_factory import _compute_client_factory
 from ._actions import _get_latest_image_version
 
-Vnet = import_module("azure.cli.command_modules.vm.aaz.latest.network.vnet")
 
 logger = get_logger(__name__)
 
@@ -735,7 +735,8 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
         logger.debug('no subnet specified. Attempting to find an existing Vnet and subnet...')
 
         # if nothing specified, try to find an existing vnet and subnet in the target resource group
-        from .aaz.latest.network.vnet import List as VnetList
+        VnetList = import_aaz_by_profile(cli_ctx.cloud.profile, "network.vnet").List
+
         vnet_list = VnetList(cli_ctx=cmd.cli_ctx)(command_args={
             "resource_group": rg
         })
@@ -1641,24 +1642,16 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
 
 
 def get_network_client(cli_ctx, balancer_type):
-    import importlib
-
-    if balancer_type == 'application_gateways':
-        client = importlib.import_module("azure.cli.command_modules.vm.aaz.latest.network.application_gateway")
-    if balancer_type == 'load_balancers':
-        client = importlib.import_module("azure.cli.command_modules.vm.aaz.latest.network.lb")
-    if cli_ctx.cloud.profile == '2018-11-01':
-        if balancer_type == 'application_gateways':
-            client = importlib.import_module("azure.cli.command_modules.vm.aaz.2020_09_01_hybrid.network.application_gateway")  # pylint: disable=line-too-long
-        if balancer_type == 'load_balancers':
-            client = importlib.import_module("azure.cli.command_modules.vm.aaz.2020_09_01_hybrid.network.lb")
-
+    client = import_aaz_by_profile(cli_ctx.cloud.profile, "network.lb")
+    if balancer_type == 'application_gateways' and cli_ctx.cloud.profile.lower() == "latest":
+        # only latest profile supports application_gateways
+        client = import_aaz_by_profile(cli_ctx.cloud.profile, "network.application_gateway")
     return client
 
 
 def get_network_lb(cli_ctx, resource_group_name, lb_name):
     from azure.core.exceptions import HttpResponseError
-    from .aaz.latest.network.lb import Show as LBShow
+    LBShow = import_aaz_by_profile(cli_ctx.cloud.profile, "network.lb").Show
     try:
         return LBShow(cli_ctx=cli_ctx)({
             "name": lb_name,

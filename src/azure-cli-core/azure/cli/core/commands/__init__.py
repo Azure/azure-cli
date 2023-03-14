@@ -491,24 +491,6 @@ def upsert_to_collection(parent, collection_name, obj_to_add, key_name, warn=Tru
     collection.append(obj_to_add)
 
 
-def upsert_to_collection_for_aaz(parent, collection_name, obj_to_add, key_name, warn=True):
-
-    if collection_name not in parent:
-        parent[collection_name] = []
-    collection = parent[collection_name]
-
-    value = obj_to_add[key_name]
-    if value is None:
-        raise CLIError(
-            "Unable to resolve a value for key '{}' with which to match.".format(key_name))
-    match = next((x for x in collection if key_name in x and x[key_name] == value), None)
-    if match:
-        if warn:
-            logger.warning("Item '%s' already exists. Replacing with new values.", value)
-        collection.remove(match)
-    collection.append(obj_to_add)
-
-
 def get_property(items, name):
     result = next((x for x in items if x.name.lower() == name.lower()), None)
     if not result:

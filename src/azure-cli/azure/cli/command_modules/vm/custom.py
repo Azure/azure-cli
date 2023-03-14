@@ -39,7 +39,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import sdk_no_wait
 
-from ._vm_utils import read_content_if_is_file
+from ._vm_utils import read_content_if_is_file, import_aaz_by_profile
 from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
@@ -986,19 +986,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                 vnet_exists = \
                     check_existence(cmd.cli_ctx, vnet_name, resource_group_name, 'Microsoft.Network', 'virtualNetworks')
                 if vnet_exists:
-                    from azure.cli.core.commands import cached_put, cached_get, upsert_to_collection_for_aaz
-                    from .aaz.latest.network.vnet import Show as VnetShow
-                    from .aaz.latest.network.vnet.subnet import Create as SubnetCreate
-                    vnet = cached_get(cmd, VnetShow(cli_ctx=cmd.cli_ctx), command_args={
-                        'name': vnet_name,
-                        'resource_group': resource_group_name
-                    })
-                    subnet_obj = {
-                        'name': subnet,
-                        'address_prefixes': [subnet_address_prefix],
-                        'address_prefix': subnet_address_prefix
-                    }
-                    upsert_to_collection_for_aaz(vnet, 'subnets', subnet_obj, 'name')
+                    SubnetCreate = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.vnet.subnet").Create
                     try:
                         cached_put(cmd, SubnetCreate(cli_ctx=cmd.cli_ctx), {
                             'name': subnet,
@@ -1308,8 +1296,10 @@ def get_vm_to_update(cmd, resource_group_name, vm_name):
 
 def get_vm_details(cmd, resource_group_name, vm_name, include_user_data=False):
     from msrestazure.tools import parse_resource_id
-    from .aaz.latest.network.nic import Show as NicShow
-    from .aaz.latest.network.public_ip import Show as PublicIPShow
+
+    NicShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nic").Show
+    PublicIPShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.public_ip").Show
+
     result = get_instance_view(cmd, resource_group_name, vm_name, include_user_data)
     public_ips = []
     fqdns = []
@@ -1401,8 +1391,9 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
     #
     # Since there is no guarantee that a NIC is in the same resource group as a given
     # Virtual Machine, we can't constrain the lookup to only a single group...
-    from .aaz.latest.network.nic import List as NicList
-    from .aaz.latest.network.public_ip import List as PublicIPList
+    NicList = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nic").List
+    PublicIPList = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.public_ip").List
+
     nics = NicList(cli_ctx=cmd.cli_ctx)(command_args={})
     public_ip_addresses = PublicIPList(cli_ctx=cmd.cli_ctx)(command_args={})
 
@@ -1458,13 +1449,13 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
 def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_security_group_name=None,
                  apply_to_subnet=False):
     from msrestazure.tools import parse_resource_id
-    from .aaz.latest.network.nic import Show as NicShow
-    from .aaz.latest.network.nic import Update as NicUpdate
-    from .aaz.latest.network.vnet.subnet import Show as SubnetShow
-    from .aaz.latest.network.vnet.subnet import Update as SubnetUpdate
-    from .aaz.latest.network.nsg import Create as NSGCreate
-    from .aaz.latest.network.nsg.rule import Create as NSGRuleCreate
-    from .aaz.latest.network.nsg import Show as NSGShow
+    _nic = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nic")
+    NicShow, NicUpdate = _nic.Show, _nic.Update
+    _subnet = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.vnet.subnet")
+    SubnetShow, SubnetUpdate = _subnet.Show, _subnet.Update
+    _nsg = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nsg")
+    NSGShow, NSGCreate = _nsg.Show, _nsg.Create
+    NSGRuleCreate = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nsg.rule").Create
 
     vm = get_vm(cmd, resource_group_name, vm_name)
     location = vm.location
@@ -2447,7 +2438,9 @@ def get_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
 # region VirtualMachines NetworkInterfaces (NICs)
 def show_vm_nic(cmd, resource_group_name, vm_name, nic):
     from msrestazure.tools import parse_resource_id
-    from .aaz.latest.network.nic import Show as NicShow
+
+    NicShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nic").Show
+
     vm = get_vm(cmd, resource_group_name, vm_name)
     found = next(
         (n for n in vm.network_profile.network_interfaces if nic.lower() == n.id.lower()), None
@@ -2493,7 +2486,8 @@ def set_vm_nic(cmd, resource_group_name, vm_name, nics, primary_nic=None):
 
 
 def _build_nic_list(cmd, nic_ids):
-    from .aaz.latest.network.nic import Show as NicShow
+    NicShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nic").Show
+
     NetworkInterfaceReference = cmd.get_models('NetworkInterfaceReference')
     nic_list = []
     if nic_ids:
@@ -3655,8 +3649,10 @@ def list_vmss(cmd, resource_group_name=None):
 
 def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_name):
     from msrestazure.tools import parse_resource_id
-    from .aaz.latest.network.lb import Show as LBShow
-    from .aaz.latest.network.public_ip import Show as PublicIPAddress
+
+    LBShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.lb").Show
+    PublicIPAddress = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.public_ip").Show
+
     client = _compute_client_factory(cmd.cli_ctx)
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
 
@@ -3740,7 +3736,8 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
 
 
 def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
-    from .aaz.latest.network.vmss import ListInstancePublicIps
+    ListInstancePublicIps = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "vmss").ListInstancePublicIps
+
     compute_client = _compute_client_factory(cmd.cli_ctx)
     vmss = compute_client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
     from ._vm_utils import raise_unsupported_error_for_flex_vmss

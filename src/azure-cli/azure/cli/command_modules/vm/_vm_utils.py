@@ -6,6 +6,7 @@
 import json
 import os
 import re
+import importlib
 
 from azure.cli.core.commands.arm import ArmTemplateBuilder
 
@@ -584,3 +585,8 @@ def display_region_recommendation(cmd, namespace):
                        identified_region)
         from azure.cli.core import telemetry
         telemetry.set_region_identified(namespace.location, identified_region)
+
+
+def import_aaz_by_profile(profile, module_name):
+    profile_module_name = profile.lower().replace('-', '_')
+    return importlib.import_module(f"azure.cli.command_modules.vm.aaz.{profile_module_name}.{module_name}")
