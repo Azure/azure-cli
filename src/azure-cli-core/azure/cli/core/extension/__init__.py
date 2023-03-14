@@ -306,7 +306,7 @@ def get_extension_modname(ext_name=None, ext_dir=None):
                 if n.startswith(EXTENSIONS_MOD_PREFIX) and os.path.isdir(os.path.join(ext_dir, n))]
     if len(pos_mods) != 1:
         raise AssertionError("Expected 1 module to load starting with '{}': got {}. Please delete {} and "
-                             "install the extension again.".format( EXTENSIONS_MOD_PREFIX, pos_mods, ext_dir))
+                             "install the extension again.".format(EXTENSIONS_MOD_PREFIX, pos_mods, ext_dir))
     return pos_mods[0]
 
 
