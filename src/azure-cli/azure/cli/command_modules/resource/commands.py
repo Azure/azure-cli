@@ -23,7 +23,6 @@ from azure.cli.command_modules.resource._validators import (
     process_assign_identity_namespace, process_assignment_create_namespace, validate_deployment_stack_files)
 
 from ._exception_handler import managementgroups_exception_handler
-import json
 
 
 logger = get_logger(__name__)
@@ -96,21 +95,19 @@ def transform_deployments_list(result):
     return [transform_deployment(r) for r in sort_list]
 
 def transform_stacks(result):
-    r = result
-    return OrderedDict([('Name', r['name']),
-                        ('State', r['provisioningState']),
-                        ('Last Modified', r['systemData']['lastModifiedAt']),
-                        ('Deployment Id', r['deploymentId'])])
+    return OrderedDict([('Name', result['name']),
+                        ('State', result['provisioningState']),
+                        ('Last Modified', result['systemData']['lastModifiedAt']),
+                        ('Deployment Id', result['deploymentId'])])
 
 def transform_stacks_show(result):
-    r = result
     resources = ""
     for res in result['resources']: 
         resources += res['id'] + ","
     
-    return OrderedDict([('Name', r['name']),
-                        ('State', r['provisioningState']),
-                        ('Last Modified', r['systemData']['lastModifiedAt']),
+    return OrderedDict([('Name', result['name']),
+                        ('State', result['provisioningState']),
+                        ('Last Modified', result['systemData']['lastModifiedAt']),
                         ('Resource IDs', resources[:-1])])
 
 def transform_stacks_list(result):
@@ -126,9 +123,8 @@ def transform_stacks_list(result):
     return transformed
 
 def transform_stacks_export(result):
-    r = result
-    return OrderedDict([('$schema', r['template']['$schema']),
-                       ('ContentVersion', r['template']['contentVersion'])])
+    return OrderedDict([('$schema', result['template']['$schema']),
+                       ('ContentVersion', result['template']['contentVersion'])])
 
 # pylint: disable=too-many-statements
 def load_command_table(self, _):

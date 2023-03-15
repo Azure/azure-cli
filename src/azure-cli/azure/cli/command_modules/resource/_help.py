@@ -2778,7 +2778,7 @@ short-summary: List out all available versions of Bicep CLI.
 
 helps['stack'] = """
 type: group
-short-summary: (Version 1.9) 
+short-summary: A deployment stack is a native Azure resource type that enables you to perform operations on a resource collection as an atomic unit. Deployment stacks are defined in ARM as the type Microsoft.Resources/deploymentStacks. (Version 1.9)
 """
 
 helps['stack mg create'] = """
