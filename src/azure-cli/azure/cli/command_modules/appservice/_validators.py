@@ -122,6 +122,28 @@ def validate_functionapp_asp_create(namespace):
             raise ArgumentUsageError("--max-burst is only supported for Elastic Premium (EP) plans")
 
 
+def validate_functionapp_on_containerapp_site_config_set(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    slot = namespace.slot
+    function_app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    if function_app.managed_environment_id is not None:
+        raise ValidationError(
+            "Invalid command. This is not supported for Azure Functions on Azure Container app environments.",
+            "Please use the following command instead: az functionapp config container set")
+
+
+def validate_functionapp_on_containerapp_site_config_show(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    slot = namespace.slot
+    function_app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    if function_app.managed_environment_id is not None:
+        raise ValidationError(
+            "Invalid command. This is not supported for Azure Functions on Azure Container app environments.",
+            "Please use the following command instead: az functionapp config container show")
+
+
 def validate_app_exists(cmd, namespace):
     app = namespace.name
     resource_group_name = namespace.resource_group_name

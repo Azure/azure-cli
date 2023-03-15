@@ -2197,5 +2197,33 @@ class FunctionAppConfigTest(ScenarioTest):
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_config_with_appcontainer_managed_environment_error(self, resource_group, storage_account):
+
+        functionapp_name = self.create_random_name('functionapp', 40)
+        managed_environment_name = self.create_random_name('containerappmanagedenvironment', 40)
+
+        self.cmd('containerapp env create --name {} --resource-group {} --location {}'
+        .format(managed_environment_name, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).assert_with_checks([
+                     JMESPathCheck('name', managed_environment_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('location', WINDOWS_ASP_LOCATION_FUNCTIONAPP)])
+        self.cmd(
+            'functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet --functions-version 4'
+            .format(resource_group, functionapp_name, storage_account, managed_environment_name)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        with self.assertRaises(ValidationError):
+            self.cmd('functionapp config set -g {} -n {}'
+            .format(resource_group, functionapp_name))
+
+        with self.assertRaises(ValidationError):
+            self.cmd('functionapp config show -g {} -n {}'
+            .format(resource_group, functionapp_name))
+
+
 if __name__ == '__main__':
     unittest.main()
