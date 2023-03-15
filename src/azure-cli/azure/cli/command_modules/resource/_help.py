@@ -2456,7 +2456,9 @@ examples:
 
 helps['resource update'] = """
 type: command
-short-summary: Update a resource.
+short-summary: Update a resource by PUT request.
+long-summary: Compared to 'az resource patch' command, it is recommended to use this command to update a resource. 
+              If the update operation fails, try run 'az resource patch' instead.
 examples:
   - name: Update a webapp by using the latest api-version whether this version is a preview version.
     text: >
@@ -2474,6 +2476,8 @@ examples:
 helps['resource patch'] = """
 type: command
 short-summary: Update a resource by PATCH request.
+long-summary: It is recommended to use 'az resource update' to update a resource. 
+              If the update operation fails, try run this command instead.
 examples:
   - name: Update a webapp by using the latest api-version whether this version is a preview version.
     text: >

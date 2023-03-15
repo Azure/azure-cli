@@ -246,9 +246,15 @@ class ResourceIDScenarioTest(ScenarioTest):
 
         self.kwargs['vm_id'] = self.cmd(
             'vm create -g {rg} -n {vm} --image UbuntuLTS --size Standard_D2s_v3 --v-cpus-available 1 '
-            '--v-cpus-per-core 1 --admin-username vmtest --admin-username vmtest').get_output_in_json()['id']
+            '--v-cpus-per-core 1 --admin-username vmtest').get_output_in_json()['id']
 
-        self.cmd('resource patch --id {vm_id}')
+        self.cmd('resource patch --id {vm_id}', checks=[
+            self.check('id', '{vm_id}'),
+            self.check('properties.hardwareProfile.vmSize', 'Standard_D2s_v3'),
+            self.check('properties.hardwareProfile.vmSizeProperties.vCPUsAvailable', '1'),
+            self.check('properties.hardwareProfile.vmSizeProperties.vCPUsPerCore', '1'),
+            self.check('properties.osProfile.adminUsername', 'vmtest'),
+        ])
 
 
 class ResourceGenericUpdate(LiveScenarioTest):

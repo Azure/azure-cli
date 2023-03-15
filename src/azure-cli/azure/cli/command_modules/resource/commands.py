@@ -253,7 +253,7 @@ def load_command_table(self, _):
         g.custom_command('invoke-action', 'invoke_resource_action', transform=DeploymentOutputLongRunningOperation(self.cli_ctx))
         g.generic_update_command('update', getter_name='show_resource', setter_name='update_resource',
                                  client_factory=None)
-        g.custom_command('patch', 'patch_update_resource')
+        g.custom_command('patch', 'patch_resource')
         g.wait_command('wait', getter_name='show_resource')
 
     with self.command_group('resource lock', resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
