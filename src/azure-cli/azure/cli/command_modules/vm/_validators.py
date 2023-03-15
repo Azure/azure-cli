@@ -25,7 +25,6 @@ from azure.cli.command_modules.vm._vm_utils import (check_existence, get_storage
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 from azure.cli.core import keys
 from azure.core.exceptions import ResourceNotFoundError
-from importlib import import_module
 
 from ._client_factory import _compute_client_factory
 from ._actions import _get_latest_image_version
@@ -1644,7 +1643,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
 def get_network_client(cli_ctx, balancer_type):
     if balancer_type == 'application_gateways':
         return import_aaz_by_profile(cli_ctx.cloud.profile, "network.application_gateway")
-    elif balancer_type == 'load_balancers':
+    if balancer_type == 'load_balancers':
         return import_aaz_by_profile(cli_ctx.cloud.profile, "network.lb")
 
 
