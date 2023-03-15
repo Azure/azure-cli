@@ -1505,8 +1505,12 @@ def process_vm_update_namespace(cmd, namespace):
 # region VMSS Create Validators
 def _get_default_address_pool(cli_ctx, resource_group, balancer_name, balancer_type):
     option_name = '--backend-pool-name'
-    client = get_network_client(cli_ctx, balancer_type)
-    if not client:
+
+    if balancer_type == 'application_gateways':
+        client = import_aaz_by_profile(cli_ctx.cloud.profile, "network.application_gateway")
+    elif balancer_type == 'load_balancers':
+        client = import_aaz_by_profile(cli_ctx.cloud.profile, "network.lb")
+    else:
         raise CLIError('unrecognized balancer type: {}'.format(balancer_type))
 
     balancer = client.Show(cli_ctx=cli_ctx)(command_args={
@@ -1558,7 +1562,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
     if balancer_type == 'applicationGateway':
 
         if namespace.application_gateway:
-            client = get_network_client(cmd.cli_ctx, 'application_gateways')
+            client = import_aaz_by_profile(cli_ctx.cloud.profile, "network.application_gateway")
             try:
                 rg = parse_resource_id(namespace.application_gateway).get(
                     'resource_group', namespace.resource_group_name)
@@ -1638,13 +1642,6 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
                     err = "'Standard' load balancer is required because 'single placement group' is turned off"
 
                 raise CLIError('usage error:{}'.format(err))
-
-
-def get_network_client(cli_ctx, balancer_type):
-    if balancer_type == 'application_gateways':
-        return import_aaz_by_profile(cli_ctx.cloud.profile, "network.application_gateway")
-    if balancer_type == 'load_balancers':
-        return import_aaz_by_profile(cli_ctx.cloud.profile, "network.lb")
 
 
 def get_network_lb(cli_ctx, resource_group_name, lb_name):
