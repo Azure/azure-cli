@@ -47,7 +47,7 @@ class Create(AAZCommand):
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="The name of the Route Server.",
+            help="Name of the route server.",
             required=True,
         )
         _args_schema.location = AAZResourceLocationArg(
@@ -57,9 +57,14 @@ class Create(AAZCommand):
                 resource_group_arg="resource_group",
             ),
         )
+        _args_schema.hub_routing_preference = AAZStrArg(
+            options=["--hub-routing-preference"],
+            help="Routing preference of the route server.",
+            enum={"ASPath": "ASPath", "ExpressRoute": "ExpressRoute", "VpnGateway": "VpnGateway"},
+        )
         _args_schema.sku = AAZStrArg(
             options=["--sku"],
-            help="The sku of this VirtualHub.",
+            help="SKU of the route server.",
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
@@ -204,6 +209,7 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("hubRoutingPreference", AAZStrType, ".hub_routing_preference")
                 properties.set_prop("sku", AAZStrType, ".sku")
 
             tags = _builder.get(".tags")
