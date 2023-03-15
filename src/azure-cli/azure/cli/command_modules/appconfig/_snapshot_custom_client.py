@@ -107,26 +107,6 @@ def build_get_snapshot_request(
     )
 
 
-def build_get_snapshot_create_status(
-        name,
-        if_match=None,
-        if_none_match=None,
-        sync_token=None,
-        **kwargs
-):
-    _params = {"snapshot": name}
-
-    return _build_request(
-        "/operations",
-        RequestMethod.GET,
-        sync_token=sync_token,
-        if_match=if_match,
-        if_none_match=if_none_match,
-        params=_params,
-        **kwargs
-    )
-
-
 def build_list_snapshots_request(
     name_filter=None,
     status_filter=None,
@@ -278,7 +258,7 @@ class AppConfigSnapshotClient:
             if_none_match=None,
             **kwargs):
         """
-        Poll the operation status after a given interval based on the retry-after header (default 5s) to ensure that 
+        Poll the operation status after a given interval based on the retry-after header (default 10s) to ensure that 
         the snapshot creation has succeeded or failed.
         The request times out after 10 mins by default unless otherwise specified.
         """
@@ -303,7 +283,7 @@ class AppConfigSnapshotClient:
                 time.sleep(1)
 
         progress.write({"message": "Starting"})
-        self.create_snapshot(
+        initial_response = self.create_snapshot(
             name,
             filters,
             composition_type,
@@ -313,8 +293,9 @@ class AppConfigSnapshotClient:
             if_none_match=if_none_match,
             **kwargs
         )
+        status_link = initial_response.headers["Operation-Location"]
 
-        current_state = self._get_snapshot_create_status(name)
+        current_state = self._get_operation_status(status_link)
 
         start_time = datetime.now()
         while current_state.operation_status.status == ProvisioningStatus.RUNNING:
@@ -326,7 +307,7 @@ class AppConfigSnapshotClient:
             polling_interval = current_state.retry_after or default_polling_interval
             _delay(polling_interval)
 
-            current_state = self._get_snapshot_create_status(name)
+            current_state = self._get_operation_status(status_link)
 
         progress.clear()
         if current_state.operation_status.status == ProvisioningStatus.SUCCEEDED:
@@ -337,25 +318,8 @@ class AppConfigSnapshotClient:
         raise HttpResponseError('Snapshot creation failed with status code {}. Reason: {}'.format(
            error.code, error.message))
 
-    def _get_snapshot_create_status(
-            self,
-            name,
-            if_match=None,
-            if_none_match=None,
-            **kwargs
-    ):
-        _headers = kwargs.pop("headers", {}) or {}
-
-        request = build_get_snapshot_create_status(
-            name=name,
-            if_match=if_match,
-            if_none_match=if_none_match,
-            sync_token=self._sync_token,
-            headers=_headers
-        )
-
-        serialized_endpoint = self._serializer.url("endpoint", self._endpoint, 'str', skip_quote=True)
-        request.url = serialized_endpoint + request.url
+    def _get_operation_status(self, status_link):
+        request = HttpRequest(RequestMethod.GET, url=status_link)
 
         response = self._client.send_request(request)
 
@@ -400,7 +364,7 @@ class AppConfigSnapshotClient:
             error = self._deserializer.failsafe_deserialize(AppConfigError, response)
             raise HttpResponseError(response=response, model=error)
 
-        return Snapshot.from_json(json.loads(response.text()))
+        return response
 
     def get_snapshot(
             self,
