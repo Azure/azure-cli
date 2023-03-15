@@ -530,7 +530,7 @@ class FunctionAppManagedEnvironment(LiveScenarioTest):
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
 
-        r = self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name))
+        r = self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).get_output_in_json()
 
         self.assertTrue('ftpPublishingUrl' not in r)
 
