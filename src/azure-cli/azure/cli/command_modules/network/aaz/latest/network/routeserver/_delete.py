@@ -47,7 +47,7 @@ class Delete(AAZCommand):
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="The name of the Route Server.",
+            help="Name of the route server.",
             required=True,
             id_part="name",
         )
