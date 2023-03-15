@@ -172,7 +172,7 @@ class TestVMCreateDefaultVnet(unittest.TestCase):
         ns.location = None
         self.ns = ns
 
-    @mock.patch('azure.cli.command_modules.aaz.2020_09_01_hybrid.network.vnet.List', _mock_network_client_with_existing_vnet)
+    @mock.patch('azure.cli.command_modules.vm.aaz.2020_09_01_hybrid.network.vnet.List', _mock_network_client_with_existing_vnet)
     def test_no_matching_vnet(self):
         self._set_ns('emptyrg', 'eastus')
         _validate_vm_vmss_create_vnet(_get_test_cmd(), self.ns)

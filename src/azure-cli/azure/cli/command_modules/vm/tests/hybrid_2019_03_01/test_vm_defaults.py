@@ -184,7 +184,7 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
         ns.disable_overprovision = None
         return ns
 
-    @mock.patch('azure.cli.command_modules.aaz.2019_03_01_hybrid.network.vnet.List', _mock_network_client_with_existing_vnet_location)
+    @mock.patch('azure.cli.command_modules.vm.aaz.2019_03_01_hybrid.network.vnet.List', _mock_network_client_with_existing_vnet_location)
     def test_matching_vnet_subnet_size_matching(self):
         ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
         ns.instance_count = 5
@@ -193,7 +193,7 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
         self.assertEqual(ns.subnet, 'vnet1subnet')
         self.assertEqual(ns.vnet_type, 'existing')
 
-    @mock.patch('azure.cli.command_modules.aaz.2019_03_01_hybrid.network.vnet.List', _mock_network_client_with_existing_subnet)
+    @mock.patch('azure.cli.command_modules.vm.aaz.2019_03_01_hybrid.network.vnet.List', _mock_network_client_with_existing_subnet)
     def test_matching_vnet_no_subnet_size_matching(self):
         ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
         ns.instance_count = 1000

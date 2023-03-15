@@ -16,9 +16,9 @@ class ListInstancePublicIps(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2018-10-01",
+        "version": "2017-03-30",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets/{}/publicipaddresses", "2018-10-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets/{}/publicipaddresses", "2017-03-30"],
         ]
     }
 
@@ -89,7 +89,7 @@ class ListInstancePublicIps(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -113,7 +113,7 @@ class ListInstancePublicIps(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2018-10-01",
+                    "api-version", "2017-03-30",
                     required=True,
                 ),
             }
@@ -215,124 +215,6 @@ class _ListInstancePublicIpsHelper:
         _schema.tags = cls._schema_application_security_group_read.tags
         _schema.type = cls._schema_application_security_group_read.type
 
-    _schema_extended_location_read = None
-
-    @classmethod
-    def _build_schema_extended_location_read(cls, _schema):
-        if cls._schema_extended_location_read is not None:
-            _schema.name = cls._schema_extended_location_read.name
-            _schema.type = cls._schema_extended_location_read.type
-            return
-
-        cls._schema_extended_location_read = _schema_extended_location_read = AAZObjectType()
-
-        extended_location_read = _schema_extended_location_read
-        extended_location_read.name = AAZStrType()
-        extended_location_read.type = AAZStrType()
-
-        _schema.name = cls._schema_extended_location_read.name
-        _schema.type = cls._schema_extended_location_read.type
-
-    _schema_frontend_ip_configuration_read = None
-
-    @classmethod
-    def _build_schema_frontend_ip_configuration_read(cls, _schema):
-        if cls._schema_frontend_ip_configuration_read is not None:
-            _schema.etag = cls._schema_frontend_ip_configuration_read.etag
-            _schema.id = cls._schema_frontend_ip_configuration_read.id
-            _schema.name = cls._schema_frontend_ip_configuration_read.name
-            _schema.properties = cls._schema_frontend_ip_configuration_read.properties
-            _schema.type = cls._schema_frontend_ip_configuration_read.type
-            _schema.zones = cls._schema_frontend_ip_configuration_read.zones
-            return
-
-        cls._schema_frontend_ip_configuration_read = _schema_frontend_ip_configuration_read = AAZObjectType()
-
-        frontend_ip_configuration_read = _schema_frontend_ip_configuration_read
-        frontend_ip_configuration_read.etag = AAZStrType(
-            flags={"read_only": True},
-        )
-        frontend_ip_configuration_read.id = AAZStrType()
-        frontend_ip_configuration_read.name = AAZStrType()
-        frontend_ip_configuration_read.properties = AAZObjectType(
-            flags={"client_flatten": True},
-        )
-        frontend_ip_configuration_read.type = AAZStrType(
-            flags={"read_only": True},
-        )
-        frontend_ip_configuration_read.zones = AAZListType()
-
-        properties = _schema_frontend_ip_configuration_read.properties
-        properties.gateway_load_balancer = AAZObjectType(
-            serialized_name="gatewayLoadBalancer",
-        )
-        cls._build_schema_sub_resource_read(properties.gateway_load_balancer)
-        properties.inbound_nat_pools = AAZListType(
-            serialized_name="inboundNatPools",
-            flags={"read_only": True},
-        )
-        properties.inbound_nat_rules = AAZListType(
-            serialized_name="inboundNatRules",
-            flags={"read_only": True},
-        )
-        properties.load_balancing_rules = AAZListType(
-            serialized_name="loadBalancingRules",
-            flags={"read_only": True},
-        )
-        properties.outbound_rules = AAZListType(
-            serialized_name="outboundRules",
-            flags={"read_only": True},
-        )
-        properties.private_ip_address = AAZStrType(
-            serialized_name="privateIPAddress",
-        )
-        properties.private_ip_address_version = AAZStrType(
-            serialized_name="privateIPAddressVersion",
-        )
-        properties.private_ip_allocation_method = AAZStrType(
-            serialized_name="privateIPAllocationMethod",
-        )
-        properties.provisioning_state = AAZStrType(
-            serialized_name="provisioningState",
-            flags={"read_only": True},
-        )
-        properties.public_ip_address = AAZObjectType(
-            serialized_name="publicIPAddress",
-        )
-        cls._build_schema_public_ip_address_read(properties.public_ip_address)
-        properties.public_ip_prefix = AAZObjectType(
-            serialized_name="publicIPPrefix",
-        )
-        cls._build_schema_sub_resource_read(properties.public_ip_prefix)
-        properties.subnet = AAZObjectType()
-        cls._build_schema_subnet_read(properties.subnet)
-
-        inbound_nat_pools = _schema_frontend_ip_configuration_read.properties.inbound_nat_pools
-        inbound_nat_pools.Element = AAZObjectType()
-        cls._build_schema_sub_resource_read(inbound_nat_pools.Element)
-
-        inbound_nat_rules = _schema_frontend_ip_configuration_read.properties.inbound_nat_rules
-        inbound_nat_rules.Element = AAZObjectType()
-        cls._build_schema_sub_resource_read(inbound_nat_rules.Element)
-
-        load_balancing_rules = _schema_frontend_ip_configuration_read.properties.load_balancing_rules
-        load_balancing_rules.Element = AAZObjectType()
-        cls._build_schema_sub_resource_read(load_balancing_rules.Element)
-
-        outbound_rules = _schema_frontend_ip_configuration_read.properties.outbound_rules
-        outbound_rules.Element = AAZObjectType()
-        cls._build_schema_sub_resource_read(outbound_rules.Element)
-
-        zones = _schema_frontend_ip_configuration_read.zones
-        zones.Element = AAZStrType()
-
-        _schema.etag = cls._schema_frontend_ip_configuration_read.etag
-        _schema.id = cls._schema_frontend_ip_configuration_read.id
-        _schema.name = cls._schema_frontend_ip_configuration_read.name
-        _schema.properties = cls._schema_frontend_ip_configuration_read.properties
-        _schema.type = cls._schema_frontend_ip_configuration_read.type
-        _schema.zones = cls._schema_frontend_ip_configuration_read.zones
-
     _schema_ip_configuration_read = None
 
     @classmethod
@@ -347,9 +229,7 @@ class _ListInstancePublicIpsHelper:
         cls._schema_ip_configuration_read = _schema_ip_configuration_read = AAZObjectType()
 
         ip_configuration_read = _schema_ip_configuration_read
-        ip_configuration_read.etag = AAZStrType(
-            flags={"read_only": True},
-        )
+        ip_configuration_read.etag = AAZStrType()
         ip_configuration_read.id = AAZStrType()
         ip_configuration_read.name = AAZStrType()
         ip_configuration_read.properties = AAZObjectType(
@@ -365,7 +245,6 @@ class _ListInstancePublicIpsHelper:
         )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
-            flags={"read_only": True},
         )
         properties.public_ip_address = AAZObjectType(
             serialized_name="publicIPAddress",
@@ -388,21 +267,17 @@ class _ListInstancePublicIpsHelper:
             _schema.id = cls._schema_network_interface_ip_configuration_read.id
             _schema.name = cls._schema_network_interface_ip_configuration_read.name
             _schema.properties = cls._schema_network_interface_ip_configuration_read.properties
-            _schema.type = cls._schema_network_interface_ip_configuration_read.type
             return
 
         cls._schema_network_interface_ip_configuration_read = _schema_network_interface_ip_configuration_read = AAZObjectType()
 
         network_interface_ip_configuration_read = _schema_network_interface_ip_configuration_read
-        network_interface_ip_configuration_read.etag = AAZStrType(
-            flags={"read_only": True},
-        )
+        network_interface_ip_configuration_read.etag = AAZStrType()
         network_interface_ip_configuration_read.id = AAZStrType()
         network_interface_ip_configuration_read.name = AAZStrType()
         network_interface_ip_configuration_read.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
-        network_interface_ip_configuration_read.type = AAZStrType()
 
         properties = _schema_network_interface_ip_configuration_read.properties
         properties.application_gateway_backend_address_pools = AAZListType(
@@ -411,10 +286,6 @@ class _ListInstancePublicIpsHelper:
         properties.application_security_groups = AAZListType(
             serialized_name="applicationSecurityGroups",
         )
-        properties.gateway_load_balancer = AAZObjectType(
-            serialized_name="gatewayLoadBalancer",
-        )
-        cls._build_schema_sub_resource_read(properties.gateway_load_balancer)
         properties.load_balancer_backend_address_pools = AAZListType(
             serialized_name="loadBalancerBackendAddressPools",
         )
@@ -431,12 +302,8 @@ class _ListInstancePublicIpsHelper:
         properties.private_ip_allocation_method = AAZStrType(
             serialized_name="privateIPAllocationMethod",
         )
-        properties.private_link_connection_properties = AAZObjectType(
-            serialized_name="privateLinkConnectionProperties",
-        )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
-            flags={"read_only": True},
         )
         properties.public_ip_address = AAZObjectType(
             serialized_name="publicIPAddress",
@@ -452,17 +319,13 @@ class _ListInstancePublicIpsHelper:
         application_gateway_backend_address_pools.Element = AAZObjectType()
 
         _element = _schema_network_interface_ip_configuration_read.properties.application_gateway_backend_address_pools.Element
-        _element.etag = AAZStrType(
-            flags={"read_only": True},
-        )
+        _element.etag = AAZStrType()
         _element.id = AAZStrType()
         _element.name = AAZStrType()
         _element.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
-        _element.type = AAZStrType(
-            flags={"read_only": True},
-        )
+        _element.type = AAZStrType()
 
         properties = _schema_network_interface_ip_configuration_read.properties.application_gateway_backend_address_pools.Element.properties
         properties.backend_addresses = AAZListType(
@@ -470,11 +333,9 @@ class _ListInstancePublicIpsHelper:
         )
         properties.backend_ip_configurations = AAZListType(
             serialized_name="backendIPConfigurations",
-            flags={"read_only": True},
         )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
-            flags={"read_only": True},
         )
 
         backend_addresses = _schema_network_interface_ip_configuration_read.properties.application_gateway_backend_address_pools.Element.properties.backend_addresses
@@ -498,9 +359,7 @@ class _ListInstancePublicIpsHelper:
         load_balancer_backend_address_pools.Element = AAZObjectType()
 
         _element = _schema_network_interface_ip_configuration_read.properties.load_balancer_backend_address_pools.Element
-        _element.etag = AAZStrType(
-            flags={"read_only": True},
-        )
+        _element.etag = AAZStrType()
         _element.id = AAZStrType()
         _element.name = AAZStrType()
         _element.properties = AAZObjectType(
@@ -515,21 +374,10 @@ class _ListInstancePublicIpsHelper:
             serialized_name="backendIPConfigurations",
             flags={"read_only": True},
         )
-        properties.drain_period_in_seconds = AAZIntType(
-            serialized_name="drainPeriodInSeconds",
-        )
-        properties.inbound_nat_rules = AAZListType(
-            serialized_name="inboundNatRules",
-            flags={"read_only": True},
-        )
-        properties.load_balancer_backend_addresses = AAZListType(
-            serialized_name="loadBalancerBackendAddresses",
-        )
         properties.load_balancing_rules = AAZListType(
             serialized_name="loadBalancingRules",
             flags={"read_only": True},
         )
-        properties.location = AAZStrType()
         properties.outbound_rule = AAZObjectType(
             serialized_name="outboundRule",
         )
@@ -540,72 +388,11 @@ class _ListInstancePublicIpsHelper:
         )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
-            flags={"read_only": True},
         )
-        properties.tunnel_interfaces = AAZListType(
-            serialized_name="tunnelInterfaces",
-        )
-        properties.virtual_network = AAZObjectType(
-            serialized_name="virtualNetwork",
-        )
-        cls._build_schema_sub_resource_read(properties.virtual_network)
 
         backend_ip_configurations = _schema_network_interface_ip_configuration_read.properties.load_balancer_backend_address_pools.Element.properties.backend_ip_configurations
         backend_ip_configurations.Element = AAZObjectType()
         cls._build_schema_network_interface_ip_configuration_read(backend_ip_configurations.Element)
-
-        inbound_nat_rules = _schema_network_interface_ip_configuration_read.properties.load_balancer_backend_address_pools.Element.properties.inbound_nat_rules
-        inbound_nat_rules.Element = AAZObjectType()
-        cls._build_schema_sub_resource_read(inbound_nat_rules.Element)
-
-        load_balancer_backend_addresses = _schema_network_interface_ip_configuration_read.properties.load_balancer_backend_address_pools.Element.properties.load_balancer_backend_addresses
-        load_balancer_backend_addresses.Element = AAZObjectType()
-
-        _element = _schema_network_interface_ip_configuration_read.properties.load_balancer_backend_address_pools.Element.properties.load_balancer_backend_addresses.Element
-        _element.name = AAZStrType()
-        _element.properties = AAZObjectType(
-            flags={"client_flatten": True},
-        )
-
-        properties = _schema_network_interface_ip_configuration_read.properties.load_balancer_backend_address_pools.Element.properties.load_balancer_backend_addresses.Element.properties
-        properties.admin_state = AAZStrType(
-            serialized_name="adminState",
-        )
-        properties.inbound_nat_rules_port_mapping = AAZListType(
-            serialized_name="inboundNatRulesPortMapping",
-            flags={"read_only": True},
-        )
-        properties.ip_address = AAZStrType(
-            serialized_name="ipAddress",
-        )
-        properties.load_balancer_frontend_ip_configuration = AAZObjectType(
-            serialized_name="loadBalancerFrontendIPConfiguration",
-        )
-        cls._build_schema_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
-        properties.network_interface_ip_configuration = AAZObjectType(
-            serialized_name="networkInterfaceIPConfiguration",
-        )
-        cls._build_schema_sub_resource_read(properties.network_interface_ip_configuration)
-        properties.subnet = AAZObjectType()
-        cls._build_schema_sub_resource_read(properties.subnet)
-        properties.virtual_network = AAZObjectType(
-            serialized_name="virtualNetwork",
-        )
-        cls._build_schema_sub_resource_read(properties.virtual_network)
-
-        inbound_nat_rules_port_mapping = _schema_network_interface_ip_configuration_read.properties.load_balancer_backend_address_pools.Element.properties.load_balancer_backend_addresses.Element.properties.inbound_nat_rules_port_mapping
-        inbound_nat_rules_port_mapping.Element = AAZObjectType()
-
-        _element = _schema_network_interface_ip_configuration_read.properties.load_balancer_backend_address_pools.Element.properties.load_balancer_backend_addresses.Element.properties.inbound_nat_rules_port_mapping.Element
-        _element.backend_port = AAZIntType(
-            serialized_name="backendPort",
-        )
-        _element.frontend_port = AAZIntType(
-            serialized_name="frontendPort",
-        )
-        _element.inbound_nat_rule_name = AAZStrType(
-            serialized_name="inboundNatRuleName",
-        )
 
         load_balancing_rules = _schema_network_interface_ip_configuration_read.properties.load_balancer_backend_address_pools.Element.properties.load_balancing_rules
         load_balancing_rules.Element = AAZObjectType()
@@ -615,22 +402,11 @@ class _ListInstancePublicIpsHelper:
         outbound_rules.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(outbound_rules.Element)
 
-        tunnel_interfaces = _schema_network_interface_ip_configuration_read.properties.load_balancer_backend_address_pools.Element.properties.tunnel_interfaces
-        tunnel_interfaces.Element = AAZObjectType()
-
-        _element = _schema_network_interface_ip_configuration_read.properties.load_balancer_backend_address_pools.Element.properties.tunnel_interfaces.Element
-        _element.identifier = AAZIntType()
-        _element.port = AAZIntType()
-        _element.protocol = AAZStrType()
-        _element.type = AAZStrType()
-
         load_balancer_inbound_nat_rules = _schema_network_interface_ip_configuration_read.properties.load_balancer_inbound_nat_rules
         load_balancer_inbound_nat_rules.Element = AAZObjectType()
 
         _element = _schema_network_interface_ip_configuration_read.properties.load_balancer_inbound_nat_rules.Element
-        _element.etag = AAZStrType(
-            flags={"read_only": True},
-        )
+        _element.etag = AAZStrType()
         _element.id = AAZStrType()
         _element.name = AAZStrType()
         _element.properties = AAZObjectType(
@@ -641,10 +417,6 @@ class _ListInstancePublicIpsHelper:
         )
 
         properties = _schema_network_interface_ip_configuration_read.properties.load_balancer_inbound_nat_rules.Element.properties
-        properties.backend_address_pool = AAZObjectType(
-            serialized_name="backendAddressPool",
-        )
-        cls._build_schema_sub_resource_read(properties.backend_address_pool)
         properties.backend_ip_configuration = AAZObjectType(
             serialized_name="backendIPConfiguration",
         )
@@ -665,36 +437,13 @@ class _ListInstancePublicIpsHelper:
         properties.frontend_port = AAZIntType(
             serialized_name="frontendPort",
         )
-        properties.frontend_port_range_end = AAZIntType(
-            serialized_name="frontendPortRangeEnd",
-        )
-        properties.frontend_port_range_start = AAZIntType(
-            serialized_name="frontendPortRangeStart",
-        )
         properties.idle_timeout_in_minutes = AAZIntType(
             serialized_name="idleTimeoutInMinutes",
         )
         properties.protocol = AAZStrType()
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
-            flags={"read_only": True},
         )
-
-        private_link_connection_properties = _schema_network_interface_ip_configuration_read.properties.private_link_connection_properties
-        private_link_connection_properties.fqdns = AAZListType(
-            flags={"read_only": True},
-        )
-        private_link_connection_properties.group_id = AAZStrType(
-            serialized_name="groupId",
-            flags={"read_only": True},
-        )
-        private_link_connection_properties.required_member_name = AAZStrType(
-            serialized_name="requiredMemberName",
-            flags={"read_only": True},
-        )
-
-        fqdns = _schema_network_interface_ip_configuration_read.properties.private_link_connection_properties.fqdns
-        fqdns.Element = AAZStrType()
 
         virtual_network_taps = _schema_network_interface_ip_configuration_read.properties.virtual_network_taps
         virtual_network_taps.Element = AAZObjectType()
@@ -704,7 +453,6 @@ class _ListInstancePublicIpsHelper:
         _schema.id = cls._schema_network_interface_ip_configuration_read.id
         _schema.name = cls._schema_network_interface_ip_configuration_read.name
         _schema.properties = cls._schema_network_interface_ip_configuration_read.properties
-        _schema.type = cls._schema_network_interface_ip_configuration_read.type
 
     _schema_network_interface_tap_configuration_read = None
 
@@ -721,9 +469,7 @@ class _ListInstancePublicIpsHelper:
         cls._schema_network_interface_tap_configuration_read = _schema_network_interface_tap_configuration_read = AAZObjectType()
 
         network_interface_tap_configuration_read = _schema_network_interface_tap_configuration_read
-        network_interface_tap_configuration_read.etag = AAZStrType(
-            flags={"read_only": True},
-        )
+        network_interface_tap_configuration_read.etag = AAZStrType()
         network_interface_tap_configuration_read.id = AAZStrType()
         network_interface_tap_configuration_read.name = AAZStrType()
         network_interface_tap_configuration_read.properties = AAZObjectType(
@@ -755,7 +501,6 @@ class _ListInstancePublicIpsHelper:
     def _build_schema_network_interface_read(cls, _schema):
         if cls._schema_network_interface_read is not None:
             _schema.etag = cls._schema_network_interface_read.etag
-            _schema.extended_location = cls._schema_network_interface_read.extended_location
             _schema.id = cls._schema_network_interface_read.id
             _schema.location = cls._schema_network_interface_read.location
             _schema.name = cls._schema_network_interface_read.name
@@ -767,13 +512,7 @@ class _ListInstancePublicIpsHelper:
         cls._schema_network_interface_read = _schema_network_interface_read = AAZObjectType()
 
         network_interface_read = _schema_network_interface_read
-        network_interface_read.etag = AAZStrType(
-            flags={"read_only": True},
-        )
-        network_interface_read.extended_location = AAZObjectType(
-            serialized_name="extendedLocation",
-        )
-        cls._build_schema_extended_location_read(network_interface_read.extended_location)
+        network_interface_read.etag = AAZStrType()
         network_interface_read.id = AAZStrType()
         network_interface_read.location = AAZStrType()
         network_interface_read.name = AAZStrType(
@@ -788,19 +527,9 @@ class _ListInstancePublicIpsHelper:
         )
 
         properties = _schema_network_interface_read.properties
-        properties.auxiliary_mode = AAZStrType(
-            serialized_name="auxiliaryMode",
-        )
-        properties.disable_tcp_state_tracking = AAZBoolType(
-            serialized_name="disableTcpStateTracking",
-        )
         properties.dns_settings = AAZObjectType(
             serialized_name="dnsSettings",
         )
-        properties.dscp_configuration = AAZObjectType(
-            serialized_name="dscpConfiguration",
-        )
-        cls._build_schema_sub_resource_read(properties.dscp_configuration)
         properties.enable_accelerated_networking = AAZBoolType(
             serialized_name="enableAcceleratedNetworking",
         )
@@ -816,56 +545,33 @@ class _ListInstancePublicIpsHelper:
         )
         properties.mac_address = AAZStrType(
             serialized_name="macAddress",
-            flags={"read_only": True},
-        )
-        properties.migration_phase = AAZStrType(
-            serialized_name="migrationPhase",
         )
         properties.network_security_group = AAZObjectType(
             serialized_name="networkSecurityGroup",
         )
         cls._build_schema_network_security_group_read(properties.network_security_group)
-        properties.nic_type = AAZStrType(
-            serialized_name="nicType",
-        )
-        properties.primary = AAZBoolType(
-            flags={"read_only": True},
-        )
+        properties.primary = AAZBoolType()
         properties.private_endpoint = AAZObjectType(
             serialized_name="privateEndpoint",
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
-        properties.private_link_service = AAZObjectType(
-            serialized_name="privateLinkService",
-        )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
-            flags={"read_only": True},
         )
         properties.resource_guid = AAZStrType(
             serialized_name="resourceGuid",
-            flags={"read_only": True},
         )
         properties.tap_configurations = AAZListType(
             serialized_name="tapConfigurations",
-            flags={"read_only": True},
         )
         properties.virtual_machine = AAZObjectType(
             serialized_name="virtualMachine",
         )
         cls._build_schema_sub_resource_read(properties.virtual_machine)
-        properties.vnet_encryption_supported = AAZBoolType(
-            serialized_name="vnetEncryptionSupported",
-            flags={"read_only": True},
-        )
-        properties.workload_type = AAZStrType(
-            serialized_name="workloadType",
-        )
 
         dns_settings = _schema_network_interface_read.properties.dns_settings
         dns_settings.applied_dns_servers = AAZListType(
             serialized_name="appliedDnsServers",
-            flags={"read_only": True},
         )
         dns_settings.dns_servers = AAZListType(
             serialized_name="dnsServers",
@@ -875,11 +581,9 @@ class _ListInstancePublicIpsHelper:
         )
         dns_settings.internal_domain_name_suffix = AAZStrType(
             serialized_name="internalDomainNameSuffix",
-            flags={"read_only": True},
         )
         dns_settings.internal_fqdn = AAZStrType(
             serialized_name="internalFqdn",
-            flags={"read_only": True},
         )
 
         applied_dns_servers = _schema_network_interface_read.properties.dns_settings.applied_dns_servers
@@ -895,152 +599,6 @@ class _ListInstancePublicIpsHelper:
         ip_configurations.Element = AAZObjectType()
         cls._build_schema_network_interface_ip_configuration_read(ip_configurations.Element)
 
-        private_link_service = _schema_network_interface_read.properties.private_link_service
-        private_link_service.etag = AAZStrType(
-            flags={"read_only": True},
-        )
-        private_link_service.extended_location = AAZObjectType(
-            serialized_name="extendedLocation",
-        )
-        cls._build_schema_extended_location_read(private_link_service.extended_location)
-        private_link_service.id = AAZStrType()
-        private_link_service.location = AAZStrType()
-        private_link_service.name = AAZStrType(
-            flags={"read_only": True},
-        )
-        private_link_service.properties = AAZObjectType(
-            flags={"client_flatten": True},
-        )
-        private_link_service.tags = AAZDictType()
-        private_link_service.type = AAZStrType(
-            flags={"read_only": True},
-        )
-
-        properties = _schema_network_interface_read.properties.private_link_service.properties
-        properties.alias = AAZStrType(
-            flags={"read_only": True},
-        )
-        properties.auto_approval = AAZObjectType(
-            serialized_name="autoApproval",
-        )
-        properties.enable_proxy_protocol = AAZBoolType(
-            serialized_name="enableProxyProtocol",
-        )
-        properties.fqdns = AAZListType()
-        properties.ip_configurations = AAZListType(
-            serialized_name="ipConfigurations",
-        )
-        properties.load_balancer_frontend_ip_configurations = AAZListType(
-            serialized_name="loadBalancerFrontendIpConfigurations",
-        )
-        properties.network_interfaces = AAZListType(
-            serialized_name="networkInterfaces",
-            flags={"read_only": True},
-        )
-        properties.private_endpoint_connections = AAZListType(
-            serialized_name="privateEndpointConnections",
-            flags={"read_only": True},
-        )
-        properties.provisioning_state = AAZStrType(
-            serialized_name="provisioningState",
-            flags={"read_only": True},
-        )
-        properties.visibility = AAZObjectType()
-
-        auto_approval = _schema_network_interface_read.properties.private_link_service.properties.auto_approval
-        auto_approval.subscriptions = AAZListType()
-
-        subscriptions = _schema_network_interface_read.properties.private_link_service.properties.auto_approval.subscriptions
-        subscriptions.Element = AAZStrType()
-
-        fqdns = _schema_network_interface_read.properties.private_link_service.properties.fqdns
-        fqdns.Element = AAZStrType()
-
-        ip_configurations = _schema_network_interface_read.properties.private_link_service.properties.ip_configurations
-        ip_configurations.Element = AAZObjectType()
-
-        _element = _schema_network_interface_read.properties.private_link_service.properties.ip_configurations.Element
-        _element.etag = AAZStrType(
-            flags={"read_only": True},
-        )
-        _element.id = AAZStrType()
-        _element.name = AAZStrType()
-        _element.properties = AAZObjectType(
-            flags={"client_flatten": True},
-        )
-        _element.type = AAZStrType(
-            flags={"read_only": True},
-        )
-
-        properties = _schema_network_interface_read.properties.private_link_service.properties.ip_configurations.Element.properties
-        properties.primary = AAZBoolType()
-        properties.private_ip_address = AAZStrType(
-            serialized_name="privateIPAddress",
-        )
-        properties.private_ip_address_version = AAZStrType(
-            serialized_name="privateIPAddressVersion",
-        )
-        properties.private_ip_allocation_method = AAZStrType(
-            serialized_name="privateIPAllocationMethod",
-        )
-        properties.provisioning_state = AAZStrType(
-            serialized_name="provisioningState",
-            flags={"read_only": True},
-        )
-        properties.subnet = AAZObjectType()
-        cls._build_schema_subnet_read(properties.subnet)
-
-        load_balancer_frontend_ip_configurations = _schema_network_interface_read.properties.private_link_service.properties.load_balancer_frontend_ip_configurations
-        load_balancer_frontend_ip_configurations.Element = AAZObjectType()
-        cls._build_schema_frontend_ip_configuration_read(load_balancer_frontend_ip_configurations.Element)
-
-        network_interfaces = _schema_network_interface_read.properties.private_link_service.properties.network_interfaces
-        network_interfaces.Element = AAZObjectType()
-        cls._build_schema_network_interface_read(network_interfaces.Element)
-
-        private_endpoint_connections = _schema_network_interface_read.properties.private_link_service.properties.private_endpoint_connections
-        private_endpoint_connections.Element = AAZObjectType()
-
-        _element = _schema_network_interface_read.properties.private_link_service.properties.private_endpoint_connections.Element
-        _element.etag = AAZStrType(
-            flags={"read_only": True},
-        )
-        _element.id = AAZStrType()
-        _element.name = AAZStrType()
-        _element.properties = AAZObjectType(
-            flags={"client_flatten": True},
-        )
-        _element.type = AAZStrType(
-            flags={"read_only": True},
-        )
-
-        properties = _schema_network_interface_read.properties.private_link_service.properties.private_endpoint_connections.Element.properties
-        properties.link_identifier = AAZStrType(
-            serialized_name="linkIdentifier",
-            flags={"read_only": True},
-        )
-        properties.private_endpoint = AAZObjectType(
-            serialized_name="privateEndpoint",
-        )
-        cls._build_schema_private_endpoint_read(properties.private_endpoint)
-        properties.private_link_service_connection_state = AAZObjectType(
-            serialized_name="privateLinkServiceConnectionState",
-        )
-        cls._build_schema_private_link_service_connection_state_read(properties.private_link_service_connection_state)
-        properties.provisioning_state = AAZStrType(
-            serialized_name="provisioningState",
-            flags={"read_only": True},
-        )
-
-        visibility = _schema_network_interface_read.properties.private_link_service.properties.visibility
-        visibility.subscriptions = AAZListType()
-
-        subscriptions = _schema_network_interface_read.properties.private_link_service.properties.visibility.subscriptions
-        subscriptions.Element = AAZStrType()
-
-        tags = _schema_network_interface_read.properties.private_link_service.tags
-        tags.Element = AAZStrType()
-
         tap_configurations = _schema_network_interface_read.properties.tap_configurations
         tap_configurations.Element = AAZObjectType()
         cls._build_schema_network_interface_tap_configuration_read(tap_configurations.Element)
@@ -1049,7 +607,6 @@ class _ListInstancePublicIpsHelper:
         tags.Element = AAZStrType()
 
         _schema.etag = cls._schema_network_interface_read.etag
-        _schema.extended_location = cls._schema_network_interface_read.extended_location
         _schema.id = cls._schema_network_interface_read.id
         _schema.location = cls._schema_network_interface_read.location
         _schema.name = cls._schema_network_interface_read.name
@@ -1074,9 +631,7 @@ class _ListInstancePublicIpsHelper:
         cls._schema_network_security_group_read = _schema_network_security_group_read = AAZObjectType()
 
         network_security_group_read = _schema_network_security_group_read
-        network_security_group_read.etag = AAZStrType(
-            flags={"read_only": True},
-        )
+        network_security_group_read.etag = AAZStrType()
         network_security_group_read.id = AAZStrType()
         network_security_group_read.location = AAZStrType()
         network_security_group_read.name = AAZStrType(
@@ -1093,14 +648,6 @@ class _ListInstancePublicIpsHelper:
         properties = _schema_network_security_group_read.properties
         properties.default_security_rules = AAZListType(
             serialized_name="defaultSecurityRules",
-            flags={"read_only": True},
-        )
-        properties.flow_logs = AAZListType(
-            serialized_name="flowLogs",
-            flags={"read_only": True},
-        )
-        properties.flush_connection = AAZBoolType(
-            serialized_name="flushConnection",
         )
         properties.network_interfaces = AAZListType(
             serialized_name="networkInterfaces",
@@ -1108,11 +655,9 @@ class _ListInstancePublicIpsHelper:
         )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
-            flags={"read_only": True},
         )
         properties.resource_guid = AAZStrType(
             serialized_name="resourceGuid",
-            flags={"read_only": True},
         )
         properties.security_rules = AAZListType(
             serialized_name="securityRules",
@@ -1124,83 +669,6 @@ class _ListInstancePublicIpsHelper:
         default_security_rules = _schema_network_security_group_read.properties.default_security_rules
         default_security_rules.Element = AAZObjectType()
         cls._build_schema_security_rule_read(default_security_rules.Element)
-
-        flow_logs = _schema_network_security_group_read.properties.flow_logs
-        flow_logs.Element = AAZObjectType()
-
-        _element = _schema_network_security_group_read.properties.flow_logs.Element
-        _element.etag = AAZStrType(
-            flags={"read_only": True},
-        )
-        _element.id = AAZStrType()
-        _element.location = AAZStrType()
-        _element.name = AAZStrType(
-            flags={"read_only": True},
-        )
-        _element.properties = AAZObjectType(
-            flags={"client_flatten": True},
-        )
-        _element.tags = AAZDictType()
-        _element.type = AAZStrType(
-            flags={"read_only": True},
-        )
-
-        properties = _schema_network_security_group_read.properties.flow_logs.Element.properties
-        properties.enabled = AAZBoolType()
-        properties.flow_analytics_configuration = AAZObjectType(
-            serialized_name="flowAnalyticsConfiguration",
-        )
-        properties.format = AAZObjectType()
-        properties.provisioning_state = AAZStrType(
-            serialized_name="provisioningState",
-            flags={"read_only": True},
-        )
-        properties.retention_policy = AAZObjectType(
-            serialized_name="retentionPolicy",
-        )
-        properties.storage_id = AAZStrType(
-            serialized_name="storageId",
-            flags={"required": True},
-        )
-        properties.target_resource_guid = AAZStrType(
-            serialized_name="targetResourceGuid",
-            flags={"read_only": True},
-        )
-        properties.target_resource_id = AAZStrType(
-            serialized_name="targetResourceId",
-            flags={"required": True},
-        )
-
-        flow_analytics_configuration = _schema_network_security_group_read.properties.flow_logs.Element.properties.flow_analytics_configuration
-        flow_analytics_configuration.network_watcher_flow_analytics_configuration = AAZObjectType(
-            serialized_name="networkWatcherFlowAnalyticsConfiguration",
-        )
-
-        network_watcher_flow_analytics_configuration = _schema_network_security_group_read.properties.flow_logs.Element.properties.flow_analytics_configuration.network_watcher_flow_analytics_configuration
-        network_watcher_flow_analytics_configuration.enabled = AAZBoolType()
-        network_watcher_flow_analytics_configuration.traffic_analytics_interval = AAZIntType(
-            serialized_name="trafficAnalyticsInterval",
-        )
-        network_watcher_flow_analytics_configuration.workspace_id = AAZStrType(
-            serialized_name="workspaceId",
-        )
-        network_watcher_flow_analytics_configuration.workspace_region = AAZStrType(
-            serialized_name="workspaceRegion",
-        )
-        network_watcher_flow_analytics_configuration.workspace_resource_id = AAZStrType(
-            serialized_name="workspaceResourceId",
-        )
-
-        format = _schema_network_security_group_read.properties.flow_logs.Element.properties.format
-        format.type = AAZStrType()
-        format.version = AAZIntType()
-
-        retention_policy = _schema_network_security_group_read.properties.flow_logs.Element.properties.retention_policy
-        retention_policy.days = AAZIntType()
-        retention_policy.enabled = AAZBoolType()
-
-        tags = _schema_network_security_group_read.properties.flow_logs.Element.tags
-        tags.Element = AAZStrType()
 
         network_interfaces = _schema_network_security_group_read.properties.network_interfaces
         network_interfaces.Element = AAZObjectType()
@@ -1231,7 +699,6 @@ class _ListInstancePublicIpsHelper:
     def _build_schema_private_endpoint_read(cls, _schema):
         if cls._schema_private_endpoint_read is not None:
             _schema.etag = cls._schema_private_endpoint_read.etag
-            _schema.extended_location = cls._schema_private_endpoint_read.extended_location
             _schema.id = cls._schema_private_endpoint_read.id
             _schema.location = cls._schema_private_endpoint_read.location
             _schema.name = cls._schema_private_endpoint_read.name
@@ -1243,13 +710,7 @@ class _ListInstancePublicIpsHelper:
         cls._schema_private_endpoint_read = _schema_private_endpoint_read = AAZObjectType()
 
         private_endpoint_read = _schema_private_endpoint_read
-        private_endpoint_read.etag = AAZStrType(
-            flags={"read_only": True},
-        )
-        private_endpoint_read.extended_location = AAZObjectType(
-            serialized_name="extendedLocation",
-        )
-        cls._build_schema_extended_location_read(private_endpoint_read.extended_location)
+        private_endpoint_read.etag = AAZStrType()
         private_endpoint_read.id = AAZStrType()
         private_endpoint_read.location = AAZStrType()
         private_endpoint_read.name = AAZStrType(
@@ -1264,18 +725,6 @@ class _ListInstancePublicIpsHelper:
         )
 
         properties = _schema_private_endpoint_read.properties
-        properties.application_security_groups = AAZListType(
-            serialized_name="applicationSecurityGroups",
-        )
-        properties.custom_dns_configs = AAZListType(
-            serialized_name="customDnsConfigs",
-        )
-        properties.custom_network_interface_name = AAZStrType(
-            serialized_name="customNetworkInterfaceName",
-        )
-        properties.ip_configurations = AAZListType(
-            serialized_name="ipConfigurations",
-        )
         properties.manual_private_link_service_connections = AAZListType(
             serialized_name="manualPrivateLinkServiceConnections",
         )
@@ -1293,48 +742,6 @@ class _ListInstancePublicIpsHelper:
         properties.subnet = AAZObjectType()
         cls._build_schema_subnet_read(properties.subnet)
 
-        application_security_groups = _schema_private_endpoint_read.properties.application_security_groups
-        application_security_groups.Element = AAZObjectType()
-        cls._build_schema_application_security_group_read(application_security_groups.Element)
-
-        custom_dns_configs = _schema_private_endpoint_read.properties.custom_dns_configs
-        custom_dns_configs.Element = AAZObjectType()
-
-        _element = _schema_private_endpoint_read.properties.custom_dns_configs.Element
-        _element.fqdn = AAZStrType()
-        _element.ip_addresses = AAZListType(
-            serialized_name="ipAddresses",
-        )
-
-        ip_addresses = _schema_private_endpoint_read.properties.custom_dns_configs.Element.ip_addresses
-        ip_addresses.Element = AAZStrType()
-
-        ip_configurations = _schema_private_endpoint_read.properties.ip_configurations
-        ip_configurations.Element = AAZObjectType()
-
-        _element = _schema_private_endpoint_read.properties.ip_configurations.Element
-        _element.etag = AAZStrType(
-            flags={"read_only": True},
-        )
-        _element.name = AAZStrType()
-        _element.properties = AAZObjectType(
-            flags={"client_flatten": True},
-        )
-        _element.type = AAZStrType(
-            flags={"read_only": True},
-        )
-
-        properties = _schema_private_endpoint_read.properties.ip_configurations.Element.properties
-        properties.group_id = AAZStrType(
-            serialized_name="groupId",
-        )
-        properties.member_name = AAZStrType(
-            serialized_name="memberName",
-        )
-        properties.private_ip_address = AAZStrType(
-            serialized_name="privateIPAddress",
-        )
-
         manual_private_link_service_connections = _schema_private_endpoint_read.properties.manual_private_link_service_connections
         manual_private_link_service_connections.Element = AAZObjectType()
         cls._build_schema_private_link_service_connection_read(manual_private_link_service_connections.Element)
@@ -1351,36 +758,12 @@ class _ListInstancePublicIpsHelper:
         tags.Element = AAZStrType()
 
         _schema.etag = cls._schema_private_endpoint_read.etag
-        _schema.extended_location = cls._schema_private_endpoint_read.extended_location
         _schema.id = cls._schema_private_endpoint_read.id
         _schema.location = cls._schema_private_endpoint_read.location
         _schema.name = cls._schema_private_endpoint_read.name
         _schema.properties = cls._schema_private_endpoint_read.properties
         _schema.tags = cls._schema_private_endpoint_read.tags
         _schema.type = cls._schema_private_endpoint_read.type
-
-    _schema_private_link_service_connection_state_read = None
-
-    @classmethod
-    def _build_schema_private_link_service_connection_state_read(cls, _schema):
-        if cls._schema_private_link_service_connection_state_read is not None:
-            _schema.actions_required = cls._schema_private_link_service_connection_state_read.actions_required
-            _schema.description = cls._schema_private_link_service_connection_state_read.description
-            _schema.status = cls._schema_private_link_service_connection_state_read.status
-            return
-
-        cls._schema_private_link_service_connection_state_read = _schema_private_link_service_connection_state_read = AAZObjectType()
-
-        private_link_service_connection_state_read = _schema_private_link_service_connection_state_read
-        private_link_service_connection_state_read.actions_required = AAZStrType(
-            serialized_name="actionsRequired",
-        )
-        private_link_service_connection_state_read.description = AAZStrType()
-        private_link_service_connection_state_read.status = AAZStrType()
-
-        _schema.actions_required = cls._schema_private_link_service_connection_state_read.actions_required
-        _schema.description = cls._schema_private_link_service_connection_state_read.description
-        _schema.status = cls._schema_private_link_service_connection_state_read.status
 
     _schema_private_link_service_connection_read = None
 
@@ -1416,7 +799,6 @@ class _ListInstancePublicIpsHelper:
         properties.private_link_service_connection_state = AAZObjectType(
             serialized_name="privateLinkServiceConnectionState",
         )
-        cls._build_schema_private_link_service_connection_state_read(properties.private_link_service_connection_state)
         properties.private_link_service_id = AAZStrType(
             serialized_name="privateLinkServiceId",
         )
@@ -1431,6 +813,13 @@ class _ListInstancePublicIpsHelper:
         group_ids = _schema_private_link_service_connection_read.properties.group_ids
         group_ids.Element = AAZStrType()
 
+        private_link_service_connection_state = _schema_private_link_service_connection_read.properties.private_link_service_connection_state
+        private_link_service_connection_state.actions_required = AAZStrType(
+            serialized_name="actionsRequired",
+        )
+        private_link_service_connection_state.description = AAZStrType()
+        private_link_service_connection_state.status = AAZStrType()
+
         _schema.etag = cls._schema_private_link_service_connection_read.etag
         _schema.id = cls._schema_private_link_service_connection_read.id
         _schema.name = cls._schema_private_link_service_connection_read.name
@@ -1443,7 +832,6 @@ class _ListInstancePublicIpsHelper:
     def _build_schema_public_ip_address_read(cls, _schema):
         if cls._schema_public_ip_address_read is not None:
             _schema.etag = cls._schema_public_ip_address_read.etag
-            _schema.extended_location = cls._schema_public_ip_address_read.extended_location
             _schema.id = cls._schema_public_ip_address_read.id
             _schema.location = cls._schema_public_ip_address_read.location
             _schema.name = cls._schema_public_ip_address_read.name
@@ -1457,13 +845,7 @@ class _ListInstancePublicIpsHelper:
         cls._schema_public_ip_address_read = _schema_public_ip_address_read = AAZObjectType()
 
         public_ip_address_read = _schema_public_ip_address_read
-        public_ip_address_read.etag = AAZStrType(
-            flags={"read_only": True},
-        )
-        public_ip_address_read.extended_location = AAZObjectType(
-            serialized_name="extendedLocation",
-        )
-        cls._build_schema_extended_location_read(public_ip_address_read.extended_location)
+        public_ip_address_read.etag = AAZStrType()
         public_ip_address_read.id = AAZStrType()
         public_ip_address_read.location = AAZStrType()
         public_ip_address_read.name = AAZStrType(
@@ -1483,9 +865,6 @@ class _ListInstancePublicIpsHelper:
         properties.ddos_settings = AAZObjectType(
             serialized_name="ddosSettings",
         )
-        properties.delete_option = AAZStrType(
-            serialized_name="deleteOption",
-        )
         properties.dns_settings = AAZObjectType(
             serialized_name="dnsSettings",
         )
@@ -1502,19 +881,8 @@ class _ListInstancePublicIpsHelper:
         properties.ip_tags = AAZListType(
             serialized_name="ipTags",
         )
-        properties.linked_public_ip_address = AAZObjectType(
-            serialized_name="linkedPublicIPAddress",
-        )
-        cls._build_schema_public_ip_address_read(properties.linked_public_ip_address)
-        properties.migration_phase = AAZStrType(
-            serialized_name="migrationPhase",
-        )
-        properties.nat_gateway = AAZObjectType(
-            serialized_name="natGateway",
-        )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
-            flags={"read_only": True},
         )
         properties.public_ip_address_version = AAZStrType(
             serialized_name="publicIPAddressVersion",
@@ -1528,20 +896,15 @@ class _ListInstancePublicIpsHelper:
         cls._build_schema_sub_resource_read(properties.public_ip_prefix)
         properties.resource_guid = AAZStrType(
             serialized_name="resourceGuid",
-            flags={"read_only": True},
         )
-        properties.service_public_ip_address = AAZObjectType(
-            serialized_name="servicePublicIPAddress",
-        )
-        cls._build_schema_public_ip_address_read(properties.service_public_ip_address)
 
         ddos_settings = _schema_public_ip_address_read.properties.ddos_settings
-        ddos_settings.ddos_protection_plan = AAZObjectType(
-            serialized_name="ddosProtectionPlan",
+        ddos_settings.ddos_custom_policy = AAZObjectType(
+            serialized_name="ddosCustomPolicy",
         )
-        cls._build_schema_sub_resource_read(ddos_settings.ddos_protection_plan)
-        ddos_settings.protection_mode = AAZStrType(
-            serialized_name="protectionMode",
+        cls._build_schema_sub_resource_read(ddos_settings.ddos_custom_policy)
+        ddos_settings.protection_coverage = AAZStrType(
+            serialized_name="protectionCoverage",
         )
 
         dns_settings = _schema_public_ip_address_read.properties.dns_settings
@@ -1562,71 +925,8 @@ class _ListInstancePublicIpsHelper:
         )
         _element.tag = AAZStrType()
 
-        nat_gateway = _schema_public_ip_address_read.properties.nat_gateway
-        nat_gateway.etag = AAZStrType(
-            flags={"read_only": True},
-        )
-        nat_gateway.id = AAZStrType()
-        nat_gateway.location = AAZStrType()
-        nat_gateway.name = AAZStrType(
-            flags={"read_only": True},
-        )
-        nat_gateway.properties = AAZObjectType(
-            flags={"client_flatten": True},
-        )
-        nat_gateway.sku = AAZObjectType()
-        nat_gateway.tags = AAZDictType()
-        nat_gateway.type = AAZStrType(
-            flags={"read_only": True},
-        )
-        nat_gateway.zones = AAZListType()
-
-        properties = _schema_public_ip_address_read.properties.nat_gateway.properties
-        properties.idle_timeout_in_minutes = AAZIntType(
-            serialized_name="idleTimeoutInMinutes",
-        )
-        properties.provisioning_state = AAZStrType(
-            serialized_name="provisioningState",
-            flags={"read_only": True},
-        )
-        properties.public_ip_addresses = AAZListType(
-            serialized_name="publicIpAddresses",
-        )
-        properties.public_ip_prefixes = AAZListType(
-            serialized_name="publicIpPrefixes",
-        )
-        properties.resource_guid = AAZStrType(
-            serialized_name="resourceGuid",
-            flags={"read_only": True},
-        )
-        properties.subnets = AAZListType(
-            flags={"read_only": True},
-        )
-
-        public_ip_addresses = _schema_public_ip_address_read.properties.nat_gateway.properties.public_ip_addresses
-        public_ip_addresses.Element = AAZObjectType()
-        cls._build_schema_sub_resource_read(public_ip_addresses.Element)
-
-        public_ip_prefixes = _schema_public_ip_address_read.properties.nat_gateway.properties.public_ip_prefixes
-        public_ip_prefixes.Element = AAZObjectType()
-        cls._build_schema_sub_resource_read(public_ip_prefixes.Element)
-
-        subnets = _schema_public_ip_address_read.properties.nat_gateway.properties.subnets
-        subnets.Element = AAZObjectType()
-        cls._build_schema_sub_resource_read(subnets.Element)
-
-        sku = _schema_public_ip_address_read.properties.nat_gateway.sku
-        sku.name = AAZStrType()
-
-        tags = _schema_public_ip_address_read.properties.nat_gateway.tags
-        tags.Element = AAZStrType()
-
-        zones = _schema_public_ip_address_read.properties.nat_gateway.zones
-        zones.Element = AAZStrType()
-
         sku = _schema_public_ip_address_read.sku
         sku.name = AAZStrType()
-        sku.tier = AAZStrType()
 
         tags = _schema_public_ip_address_read.tags
         tags.Element = AAZStrType()
@@ -1635,7 +935,6 @@ class _ListInstancePublicIpsHelper:
         zones.Element = AAZStrType()
 
         _schema.etag = cls._schema_public_ip_address_read.etag
-        _schema.extended_location = cls._schema_public_ip_address_read.extended_location
         _schema.id = cls._schema_public_ip_address_read.id
         _schema.location = cls._schema_public_ip_address_read.location
         _schema.name = cls._schema_public_ip_address_read.name
@@ -1654,21 +953,17 @@ class _ListInstancePublicIpsHelper:
             _schema.id = cls._schema_security_rule_read.id
             _schema.name = cls._schema_security_rule_read.name
             _schema.properties = cls._schema_security_rule_read.properties
-            _schema.type = cls._schema_security_rule_read.type
             return
 
         cls._schema_security_rule_read = _schema_security_rule_read = AAZObjectType()
 
         security_rule_read = _schema_security_rule_read
-        security_rule_read.etag = AAZStrType(
-            flags={"read_only": True},
-        )
+        security_rule_read.etag = AAZStrType()
         security_rule_read.id = AAZStrType()
         security_rule_read.name = AAZStrType()
         security_rule_read.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
-        security_rule_read.type = AAZStrType()
 
         properties = _schema_security_rule_read.properties
         properties.access = AAZStrType(
@@ -1699,7 +994,6 @@ class _ListInstancePublicIpsHelper:
         )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
-            flags={"read_only": True},
         )
         properties.source_address_prefix = AAZStrType(
             serialized_name="sourceAddressPrefix",
@@ -1741,7 +1035,6 @@ class _ListInstancePublicIpsHelper:
         _schema.id = cls._schema_security_rule_read.id
         _schema.name = cls._schema_security_rule_read.name
         _schema.properties = cls._schema_security_rule_read.properties
-        _schema.type = cls._schema_security_rule_read.type
 
     _schema_sub_resource_read = None
 
@@ -1767,21 +1060,17 @@ class _ListInstancePublicIpsHelper:
             _schema.id = cls._schema_subnet_read.id
             _schema.name = cls._schema_subnet_read.name
             _schema.properties = cls._schema_subnet_read.properties
-            _schema.type = cls._schema_subnet_read.type
             return
 
         cls._schema_subnet_read = _schema_subnet_read = AAZObjectType()
 
         subnet_read = _schema_subnet_read
-        subnet_read.etag = AAZStrType(
-            flags={"read_only": True},
-        )
+        subnet_read.etag = AAZStrType()
         subnet_read.id = AAZStrType()
         subnet_read.name = AAZStrType()
         subnet_read.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
-        subnet_read.type = AAZStrType()
 
         properties = _schema_subnet_read.properties
         properties.address_prefix = AAZStrType(
@@ -1790,13 +1079,7 @@ class _ListInstancePublicIpsHelper:
         properties.address_prefixes = AAZListType(
             serialized_name="addressPrefixes",
         )
-        properties.application_gateway_ip_configurations = AAZListType(
-            serialized_name="applicationGatewayIpConfigurations",
-        )
         properties.delegations = AAZListType()
-        properties.ip_allocations = AAZListType(
-            serialized_name="ipAllocations",
-        )
         properties.ip_configuration_profiles = AAZListType(
             serialized_name="ipConfigurationProfiles",
             flags={"read_only": True},
@@ -1825,21 +1108,18 @@ class _ListInstancePublicIpsHelper:
         )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
-            flags={"read_only": True},
         )
         properties.purpose = AAZStrType(
             flags={"read_only": True},
         )
         properties.resource_navigation_links = AAZListType(
             serialized_name="resourceNavigationLinks",
-            flags={"read_only": True},
         )
         properties.route_table = AAZObjectType(
             serialized_name="routeTable",
         )
         properties.service_association_links = AAZListType(
             serialized_name="serviceAssociationLinks",
-            flags={"read_only": True},
         )
         properties.service_endpoint_policies = AAZListType(
             serialized_name="serviceEndpointPolicies",
@@ -1851,48 +1131,19 @@ class _ListInstancePublicIpsHelper:
         address_prefixes = _schema_subnet_read.properties.address_prefixes
         address_prefixes.Element = AAZStrType()
 
-        application_gateway_ip_configurations = _schema_subnet_read.properties.application_gateway_ip_configurations
-        application_gateway_ip_configurations.Element = AAZObjectType()
-
-        _element = _schema_subnet_read.properties.application_gateway_ip_configurations.Element
-        _element.etag = AAZStrType(
-            flags={"read_only": True},
-        )
-        _element.id = AAZStrType()
-        _element.name = AAZStrType()
-        _element.properties = AAZObjectType(
-            flags={"client_flatten": True},
-        )
-        _element.type = AAZStrType(
-            flags={"read_only": True},
-        )
-
-        properties = _schema_subnet_read.properties.application_gateway_ip_configurations.Element.properties
-        properties.provisioning_state = AAZStrType(
-            serialized_name="provisioningState",
-            flags={"read_only": True},
-        )
-        properties.subnet = AAZObjectType()
-        cls._build_schema_sub_resource_read(properties.subnet)
-
         delegations = _schema_subnet_read.properties.delegations
         delegations.Element = AAZObjectType()
 
         _element = _schema_subnet_read.properties.delegations.Element
-        _element.etag = AAZStrType(
-            flags={"read_only": True},
-        )
+        _element.etag = AAZStrType()
         _element.id = AAZStrType()
         _element.name = AAZStrType()
         _element.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
-        _element.type = AAZStrType()
 
         properties = _schema_subnet_read.properties.delegations.Element.properties
-        properties.actions = AAZListType(
-            flags={"read_only": True},
-        )
+        properties.actions = AAZListType()
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
@@ -1904,17 +1155,11 @@ class _ListInstancePublicIpsHelper:
         actions = _schema_subnet_read.properties.delegations.Element.properties.actions
         actions.Element = AAZStrType()
 
-        ip_allocations = _schema_subnet_read.properties.ip_allocations
-        ip_allocations.Element = AAZObjectType()
-        cls._build_schema_sub_resource_read(ip_allocations.Element)
-
         ip_configuration_profiles = _schema_subnet_read.properties.ip_configuration_profiles
         ip_configuration_profiles.Element = AAZObjectType()
 
         _element = _schema_subnet_read.properties.ip_configuration_profiles.Element
-        _element.etag = AAZStrType(
-            flags={"read_only": True},
-        )
+        _element.etag = AAZStrType()
         _element.id = AAZStrType()
         _element.name = AAZStrType()
         _element.properties = AAZObjectType(
@@ -1969,9 +1214,7 @@ class _ListInstancePublicIpsHelper:
         )
 
         route_table = _schema_subnet_read.properties.route_table
-        route_table.etag = AAZStrType(
-            flags={"read_only": True},
-        )
+        route_table.etag = AAZStrType()
         route_table.id = AAZStrType()
         route_table.location = AAZStrType()
         route_table.name = AAZStrType(
@@ -1991,11 +1234,6 @@ class _ListInstancePublicIpsHelper:
         )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
-            flags={"read_only": True},
-        )
-        properties.resource_guid = AAZStrType(
-            serialized_name="resourceGuid",
-            flags={"read_only": True},
         )
         properties.routes = AAZListType()
         properties.subnets = AAZListType(
@@ -2006,22 +1244,16 @@ class _ListInstancePublicIpsHelper:
         routes.Element = AAZObjectType()
 
         _element = _schema_subnet_read.properties.route_table.properties.routes.Element
-        _element.etag = AAZStrType(
-            flags={"read_only": True},
-        )
+        _element.etag = AAZStrType()
         _element.id = AAZStrType()
         _element.name = AAZStrType()
         _element.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
-        _element.type = AAZStrType()
 
         properties = _schema_subnet_read.properties.route_table.properties.routes.Element.properties
         properties.address_prefix = AAZStrType(
             serialized_name="addressPrefix",
-        )
-        properties.has_bgp_override = AAZBoolType(
-            serialized_name="hasBgpOverride",
         )
         properties.next_hop_ip_address = AAZStrType(
             serialized_name="nextHopIpAddress",
@@ -2032,7 +1264,6 @@ class _ListInstancePublicIpsHelper:
         )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
-            flags={"read_only": True},
         )
 
         subnets = _schema_subnet_read.properties.route_table.properties.subnets
@@ -2054,9 +1285,7 @@ class _ListInstancePublicIpsHelper:
         _element.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
-        _element.type = AAZStrType(
-            flags={"read_only": True},
-        )
+        _element.type = AAZStrType()
 
         properties = _schema_subnet_read.properties.service_association_links.Element.properties
         properties.allow_delete = AAZBoolType(
@@ -2079,13 +1308,8 @@ class _ListInstancePublicIpsHelper:
         service_endpoint_policies.Element = AAZObjectType()
 
         _element = _schema_subnet_read.properties.service_endpoint_policies.Element
-        _element.etag = AAZStrType(
-            flags={"read_only": True},
-        )
+        _element.etag = AAZStrType()
         _element.id = AAZStrType()
-        _element.kind = AAZStrType(
-            flags={"read_only": True},
-        )
         _element.location = AAZStrType()
         _element.name = AAZStrType(
             flags={"read_only": True},
@@ -2099,9 +1323,6 @@ class _ListInstancePublicIpsHelper:
         )
 
         properties = _schema_subnet_read.properties.service_endpoint_policies.Element.properties
-        properties.contextual_service_endpoint_policies = AAZListType(
-            serialized_name="contextualServiceEndpointPolicies",
-        )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
@@ -2110,9 +1331,6 @@ class _ListInstancePublicIpsHelper:
             serialized_name="resourceGuid",
             flags={"read_only": True},
         )
-        properties.service_alias = AAZStrType(
-            serialized_name="serviceAlias",
-        )
         properties.service_endpoint_policy_definitions = AAZListType(
             serialized_name="serviceEndpointPolicyDefinitions",
         )
@@ -2120,22 +1338,16 @@ class _ListInstancePublicIpsHelper:
             flags={"read_only": True},
         )
 
-        contextual_service_endpoint_policies = _schema_subnet_read.properties.service_endpoint_policies.Element.properties.contextual_service_endpoint_policies
-        contextual_service_endpoint_policies.Element = AAZStrType()
-
         service_endpoint_policy_definitions = _schema_subnet_read.properties.service_endpoint_policies.Element.properties.service_endpoint_policy_definitions
         service_endpoint_policy_definitions.Element = AAZObjectType()
 
         _element = _schema_subnet_read.properties.service_endpoint_policies.Element.properties.service_endpoint_policy_definitions.Element
-        _element.etag = AAZStrType(
-            flags={"read_only": True},
-        )
+        _element.etag = AAZStrType()
         _element.id = AAZStrType()
         _element.name = AAZStrType()
         _element.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
-        _element.type = AAZStrType()
 
         properties = _schema_subnet_read.properties.service_endpoint_policies.Element.properties.service_endpoint_policy_definitions.Element.properties
         properties.description = AAZStrType()
@@ -2165,7 +1377,6 @@ class _ListInstancePublicIpsHelper:
         _element.locations = AAZListType()
         _element.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
-            flags={"read_only": True},
         )
         _element.service = AAZStrType()
 
@@ -2176,7 +1387,6 @@ class _ListInstancePublicIpsHelper:
         _schema.id = cls._schema_subnet_read.id
         _schema.name = cls._schema_subnet_read.name
         _schema.properties = cls._schema_subnet_read.properties
-        _schema.type = cls._schema_subnet_read.type
 
     _schema_virtual_network_tap_read = None
 
@@ -2195,9 +1405,7 @@ class _ListInstancePublicIpsHelper:
         cls._schema_virtual_network_tap_read = _schema_virtual_network_tap_read = AAZObjectType()
 
         virtual_network_tap_read = _schema_virtual_network_tap_read
-        virtual_network_tap_read.etag = AAZStrType(
-            flags={"read_only": True},
-        )
+        virtual_network_tap_read.etag = AAZStrType()
         virtual_network_tap_read.id = AAZStrType()
         virtual_network_tap_read.location = AAZStrType()
         virtual_network_tap_read.name = AAZStrType(
@@ -2215,7 +1423,6 @@ class _ListInstancePublicIpsHelper:
         properties.destination_load_balancer_front_end_ip_configuration = AAZObjectType(
             serialized_name="destinationLoadBalancerFrontEndIPConfiguration",
         )
-        cls._build_schema_frontend_ip_configuration_read(properties.destination_load_balancer_front_end_ip_configuration)
         properties.destination_network_interface_ip_configuration = AAZObjectType(
             serialized_name="destinationNetworkInterfaceIPConfiguration",
         )
@@ -2235,6 +1442,77 @@ class _ListInstancePublicIpsHelper:
             serialized_name="resourceGuid",
             flags={"read_only": True},
         )
+
+        destination_load_balancer_front_end_ip_configuration = _schema_virtual_network_tap_read.properties.destination_load_balancer_front_end_ip_configuration
+        destination_load_balancer_front_end_ip_configuration.etag = AAZStrType()
+        destination_load_balancer_front_end_ip_configuration.id = AAZStrType()
+        destination_load_balancer_front_end_ip_configuration.name = AAZStrType()
+        destination_load_balancer_front_end_ip_configuration.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        destination_load_balancer_front_end_ip_configuration.type = AAZStrType(
+            flags={"read_only": True},
+        )
+        destination_load_balancer_front_end_ip_configuration.zones = AAZListType()
+
+        properties = _schema_virtual_network_tap_read.properties.destination_load_balancer_front_end_ip_configuration.properties
+        properties.inbound_nat_pools = AAZListType(
+            serialized_name="inboundNatPools",
+            flags={"read_only": True},
+        )
+        properties.inbound_nat_rules = AAZListType(
+            serialized_name="inboundNatRules",
+            flags={"read_only": True},
+        )
+        properties.load_balancing_rules = AAZListType(
+            serialized_name="loadBalancingRules",
+            flags={"read_only": True},
+        )
+        properties.outbound_rules = AAZListType(
+            serialized_name="outboundRules",
+            flags={"read_only": True},
+        )
+        properties.private_ip_address = AAZStrType(
+            serialized_name="privateIPAddress",
+        )
+        properties.private_ip_address_version = AAZStrType(
+            serialized_name="privateIPAddressVersion",
+        )
+        properties.private_ip_allocation_method = AAZStrType(
+            serialized_name="privateIPAllocationMethod",
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+        )
+        properties.public_ip_address = AAZObjectType(
+            serialized_name="publicIPAddress",
+        )
+        cls._build_schema_public_ip_address_read(properties.public_ip_address)
+        properties.public_ip_prefix = AAZObjectType(
+            serialized_name="publicIPPrefix",
+        )
+        cls._build_schema_sub_resource_read(properties.public_ip_prefix)
+        properties.subnet = AAZObjectType()
+        cls._build_schema_subnet_read(properties.subnet)
+
+        inbound_nat_pools = _schema_virtual_network_tap_read.properties.destination_load_balancer_front_end_ip_configuration.properties.inbound_nat_pools
+        inbound_nat_pools.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(inbound_nat_pools.Element)
+
+        inbound_nat_rules = _schema_virtual_network_tap_read.properties.destination_load_balancer_front_end_ip_configuration.properties.inbound_nat_rules
+        inbound_nat_rules.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(inbound_nat_rules.Element)
+
+        load_balancing_rules = _schema_virtual_network_tap_read.properties.destination_load_balancer_front_end_ip_configuration.properties.load_balancing_rules
+        load_balancing_rules.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(load_balancing_rules.Element)
+
+        outbound_rules = _schema_virtual_network_tap_read.properties.destination_load_balancer_front_end_ip_configuration.properties.outbound_rules
+        outbound_rules.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(outbound_rules.Element)
+
+        zones = _schema_virtual_network_tap_read.properties.destination_load_balancer_front_end_ip_configuration.zones
+        zones.Element = AAZStrType()
 
         network_interface_tap_configurations = _schema_virtual_network_tap_read.properties.network_interface_tap_configurations
         network_interface_tap_configurations.Element = AAZObjectType()
