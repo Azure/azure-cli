@@ -1562,7 +1562,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
     if balancer_type == 'applicationGateway':
 
         if namespace.application_gateway:
-            client = import_aaz_by_profile(cli_ctx.cloud.profile, "network.application_gateway")
+            client = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.application_gateway")
             try:
                 rg = parse_resource_id(namespace.application_gateway).get(
                     'resource_group', namespace.resource_group_name)
