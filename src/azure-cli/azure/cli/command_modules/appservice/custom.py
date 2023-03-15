@@ -3632,16 +3632,18 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if environment is not None:
         if consumption_plan_location is not None:
             raise ArgumentUsageError(
-                '--consumption-plan-location is not a valid input for Azure Functions on Azure Container App environments. Please try again without the '
-                '--consumption-plan-location parameter.')
+                '--consumption-plan-location is not a valid input for Azure Functions on Azure Container App '
+                'environments. Please try again without the --consumption-plan-location parameter.')
 
         if plan is not None:
             raise ArgumentUsageError(
-                '--plan is not a valid input for Azure Functions on Azure Container App environments. Please try again without the --plan parameter.')
+                '--plan is not a valid input for Azure Functions on Azure Container App environments. '
+                'Please try again without the --plan parameter.')
 
         if os_type is not None:
             raise ArgumentUsageError(
-                '--os-type is not a valid input for Azure Functions on Azure Container App environments. Please try again without the --os-type parameter.')
+                '--os-type is not a valid input for Azure Functions on Azure Container App environments. '
+                'Please try again without the --os-type parameter.')
 
         managed_environment = get_managed_environment(cmd, resource_group_name, environment)
 
