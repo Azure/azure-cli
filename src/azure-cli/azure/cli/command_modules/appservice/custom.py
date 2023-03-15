@@ -1247,12 +1247,10 @@ def get_site_configs(cmd, resource_group_name, name, slot=None):
 def get_app_settings(cmd, resource_group_name, name, slot=None):
     result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory(cmd.cli_ctx)
-    slot_app_setting_names = []
-    try:
-        slot_app_setting_names = client.web_apps.list_slot_configuration_names(resource_group_name, name) \
-                                       .app_setting_names
-    except:  # pylint: disable=bare-except
-        pass
+    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    slot_app_setting_names = [] if app.managed_environment_id is not None \
+        else client.web_apps.list_slot_configuration_names(resource_group_name, name) \
+        .app_setting_names
     return _build_app_settings_output(result.properties, slot_app_setting_names)
 
 
@@ -1475,14 +1473,10 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
 def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None):
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory(cmd.cli_ctx)
-
-    slot_cfg_names = {}
+    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    slot_cfg_names = {} if app.managed_environment_id is not None \
+        else client.web_apps.list_slot_configuration_names(resource_group_name, name)
     is_slot_settings = False
-
-    try:
-        slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
-    except:  # pylint: disable=bare-except
-        pass
 
     for setting_name in setting_names:
         app_settings.properties.pop(setting_name, None)
@@ -1497,7 +1491,7 @@ def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None
                                          'update_application_settings',
                                          app_settings, slot, client)
 
-    return _build_app_settings_output(result.properties, slot_cfg_names.app_setting_names)
+    return _build_app_settings_output(result.properties, slot_cfg_names.app_setting_names if slot_cfg_names else [])
 
 
 def delete_azure_storage_accounts(cmd, resource_group_name, name, custom_id, slot=None):
