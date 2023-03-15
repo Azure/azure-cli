@@ -2693,6 +2693,14 @@ examples:
 helps['bicep'] = """
 type: group
 short-summary: Bicep CLI command group.
+long-summary: |
+  Bicep CLI command group. There are two configurations that can be set for the command group, including bicep.check_version and bicep.use_binary_from_path:
+
+  [1] az config set bicep.version_check=True/False
+      Turn on/off Bicep CLI version check when executing az bicep commands.
+
+  [2] az config set bicep.use_binary_from_path=True/False/if_found_in_ci
+      Specify whether to use Bicep CLI from PATH or not. The default value is if_found_in_ci.
 """
 
 helps['bicep install'] = """
@@ -2738,6 +2746,26 @@ examples:
     text: az bicep build --file {bicep_file} --no-restore
 """
 
+helps['bicep format'] = """
+type: command
+short-summary: Format a Bicep file.
+examples:
+  - name: Format a Bicep file.
+    text: az bicep format --file {bicep_file}
+  - name: Format a Bicep file and print all output to stdout.
+    text: az bicep format --file {bicep_file} --stdout
+  - name: Format a Bicep file and save the result to the specified directory.
+    text: az bicep format --file {bicep_file} --outdir {out_dir}
+  - name: Format a Bicep file and save the result to the specified file.
+    text: az bicep format --file {bicep_file} --outfile {out_file}
+  - name: Format a Bicep file insert a final newline.
+    text: az bicep format --file {bicep_file} --insert-final-newline
+  - name: Format a Bicep file set indentation kind. Valid values are ( Space | Tab ).
+    text: az bicep format --file {bicep_file} --indent-kind {indent_kind}
+  - name: Format a Bicep file set number of spaces to indent with (Only valid with --indent-kind set to Space).
+    text: az bicep format --file {bicep_file} --indent-size {indent_size}
+"""
+
 helps['bicep decompile'] = """
 type: command
 short-summary: Attempt to decompile an ARM template file to a Bicep file.
@@ -2754,6 +2782,8 @@ short-summary: Publish a bicep file to a remote module registry.
 examples:
   - name: Publish a bicep file.
     text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}"
+  - name: Publish a bicep file with documentation uri.
+    text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}" --documentationUri {documentationUri}
 """
 
 helps['bicep restore'] = """

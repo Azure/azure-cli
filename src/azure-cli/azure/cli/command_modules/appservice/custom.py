@@ -38,7 +38,6 @@ from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 from azure.mgmt.relay.models import AccessRights
 from azure.mgmt.web.models import KeyInfo
 from azure.cli.command_modules.relay._client_factory import hycos_mgmt_client_factory, namespaces_mgmt_client_factory
-from azure.cli.command_modules.network._client_factory import network_client_factory
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
@@ -62,11 +61,13 @@ from .utils import (_normalize_sku,
                     raise_missing_token_suggestion,
                     _get_location_from_resource_group,
                     _list_app,
+                    is_functionapp,
                     _rename_server_farm_props,
                     _get_location_from_webapp,
                     _normalize_location,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
-                    get_resource_if_exists, repo_url_to_name, get_token)
+                    get_resource_if_exists, repo_url_to_name, get_token,
+                    app_service_plan_exists)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -79,6 +80,9 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH)
 from ._github_oauth import (get_github_access_token, cache_github_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
+
+from .aaz.latest.network.vnet import List as VNetList, Show as VNetShow
+from .aaz.latest.network.vnet.subnet import Show as SubnetShow, Update as SubnetUpdate
 
 logger = get_logger(__name__)
 
@@ -168,17 +172,18 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                vnet_resource_group=subnet_info["resource_group_name"],
                                vnet_name=subnet_info["vnet_name"],
                                subnet_name=subnet_info["subnet_name"])
-        site_config.vnet_route_all_enabled = True
         subnet_resource_id = subnet_info["subnet_resource_id"]
+        vnet_route_all_enabled = True
     else:
         subnet_resource_id = None
+        vnet_route_all_enabled = None
 
     if using_webapp_up:
         https_only = using_webapp_up
 
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
                       https_only=https_only, virtual_network_subnet_id=subnet_resource_id,
-                      public_network_access=public_network_access)
+                      public_network_access=public_network_access, vnet_route_all_enabled=vnet_route_all_enabled)
     if runtime:
         runtime = _StackRuntimeHelper.remove_delimiters(runtime)
 
@@ -284,9 +289,10 @@ def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, w
     if vnet_sub_id:
         cmd.cli_ctx.data['subscription_id'] = vnet_sub_id
 
-    vnet_client = network_client_factory(cmd.cli_ctx).virtual_networks
-    vnet_location = vnet_client.get(resource_group_name=subnet_resource_group,
-                                    virtual_network_name=vnet_name).location
+    vnet_location = VNetShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": vnet_name,
+        "resource_group": subnet_resource_group
+    })["location"]
 
     cmd.cli_ctx.data['subscription_id'] = current_sub_id
 
@@ -394,7 +400,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                     for t in temp:
                         if 'slotSetting' in t.keys():
                             slot_result[t['name']] = t['slotSetting']
-                        if setting_type == "SlotSettings":
+                        elif setting_type == "SlotSettings":
                             slot_result[t['name']] = True
                         result[t['name']] = t['value']
                 else:
@@ -520,6 +526,11 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
         time.sleep(retry_delay)
 
     is_consumption = is_plan_consumption(cmd, plan_info)
+
+    # if linux consumption, validate that AzureWebJobsStorage app setting exists
+    if is_consumption and app.reserved:
+        validate_zip_deploy_app_setting_exists(cmd, resource_group_name, name, slot)
+
     if (not build_remote) and is_consumption and app.reserved:
         return upload_zip_to_storage(cmd, resource_group_name, name, src, slot)
     if build_remote and app.reserved:
@@ -675,7 +686,7 @@ def remove_remote_build_app_settings(cmd, resource_group_name, name, slot):
             logger.warning("App settings may not be propagated to the SCM site")
 
 
-def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
+def validate_zip_deploy_app_setting_exists(cmd, resource_group_name, name, slot=None):
     settings = get_app_settings(cmd, resource_group_name, name, slot)
 
     storage_connection = None
@@ -684,7 +695,18 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
             storage_connection = str(keyval['value'])
 
     if storage_connection is None:
-        raise ResourceNotFoundError('Could not find a \'AzureWebJobsStorage\' application setting')
+        raise ValidationError(('The Azure CLI does not support this deployment path. Please '
+                               'configure the app to deploy from a remote package using the steps here: '
+                               'https://aka.ms/deployfromurl'))
+
+
+def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
+    settings = get_app_settings(cmd, resource_group_name, name, slot)
+
+    storage_connection = None
+    for keyval in settings:
+        if keyval['name'] == 'AzureWebJobsStorage':
+            storage_connection = str(keyval['value'])
 
     container_name = "function-releases"
     blob_name = "{}-{}.zip".format(datetime.datetime.today().strftime('%Y%m%d%H%M%S'), str(uuid.uuid4()))
@@ -870,7 +892,37 @@ def list_deleted_webapp(cmd, resource_group_name=None, name=None, slot=None):
     return sorted(result, key=lambda site: site.deleted_site_id)
 
 
-def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None, restore_content_only=None):
+def webapp_exists(cmd, resource_group_name, name, slot=None):
+    from azure.core.exceptions import ResourceNotFoundError as RNFR
+    exists = True
+    try:
+        if slot:
+            get_webapp(cmd, resource_group_name=resource_group_name, name=name, slot=slot)
+        else:
+            get_webapp(cmd, resource_group_name=resource_group_name, name=name)
+    except RNFR:
+        exists = False
+    return exists
+
+
+def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None, restore_content_only=None,
+                           target_app_svc_plan=None):
+    # If web app doesn't exist, Try creating it in the provided app service plan
+    if not webapp_exists(cmd, resource_group_name, name, slot):
+        logger.debug('Web app %s with slot %s not found under resource group %s', name, slot, resource_group_name)
+        if not target_app_svc_plan:
+            raise ValidationError(
+                f'Target app "{name}" does not exist. '
+                'Specify --target-app-svc-plan for it to be created automatically.')
+        if not app_service_plan_exists(cmd, resource_group_name, target_app_svc_plan):
+            raise ValidationError(
+                f'Target app service plan "{target_app_svc_plan}" not found '
+                f'in the target resource group "{resource_group_name}"')
+        # create webapp in the plan
+        create_webapp(cmd, resource_group_name, name, target_app_svc_plan)
+        logger.debug(
+            'Web app %s is created on plan %s, resource group %s', name, target_app_svc_plan, resource_group_name)
+
     DeletedAppRestoreRequest = cmd.get_models('DeletedAppRestoreRequest')
     request = DeletedAppRestoreRequest(deleted_site_id=deleted_id, recover_configuration=not restore_content_only)
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_restore_from_deleted_app',
@@ -878,8 +930,8 @@ def restore_deleted_webapp(cmd, deleted_id, resource_group_name, name, slot=None
 
 
 def list_function_app(cmd, resource_group_name=None):
-    return list(filter(lambda x: x.kind is not None and "function" in x.kind.lower(),
-                       _list_app(cmd.cli_ctx, resource_group_name)))
+    return list(filter(lambda x: x.kind is not None and is_functionapp(x),
+                _list_app(cmd.cli_ctx, resource_group_name)))
 
 
 def show_app(cmd, resource_group_name, name, slot=None):
@@ -1335,7 +1387,7 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
 # pylint: disable=unused-argument
 def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_workers=None, linux_fx_version=None,
                         windows_fx_version=None, pre_warmed_instance_count=None, php_version=None,
-                        python_version=None, net_framework_version=None,
+                        python_version=None, net_framework_version=None, power_shell_version=None,
                         java_version=None, java_container=None, java_container_version=None,
                         remote_debugging_enabled=None, web_sockets_enabled=None,
                         always_on=None, auto_heal_enabled=None,
@@ -2164,6 +2216,13 @@ def restore_backup(cmd, resource_group_name, webapp_name, storage_account_url, b
     return client.web_apps.begin_restore(resource_group_name, webapp_name, 0, restore_request)
 
 
+def delete_backup(cmd, resource_group_name, webapp_name, backup_id, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.delete_backup_slot(resource_group_name, webapp_name, backup_id, slot)
+    return client.web_apps.delete_backup(resource_group_name, webapp_name, backup_id)
+
+
 def list_snapshots(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_snapshots',
                                    slot)
@@ -2655,7 +2714,10 @@ def _get_log(url, user_name, password, log_file=None):
     r.release_conn()
 
 
-def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certificate_file, slot=None):
+def upload_ssl_cert(cmd, resource_group_name,
+                    name, certificate_password,
+                    certificate_file, slot=None,
+                    certificate_name=None):
     Certificate = cmd.get_models('Certificate')
     client = web_client_factory(cmd.cli_ctx)
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
@@ -2664,9 +2726,16 @@ def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certif
     hosting_environment_profile_param = (webapp.hosting_environment_profile.name
                                          if webapp.hosting_environment_profile else '')
 
-    thumb_print = _get_cert(certificate_password, certificate_file)
-    cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
-                                    webapp.location, resource_group_name)
+    try:
+        thumb_print = _get_cert(certificate_password, certificate_file)
+    except OpenSSL.crypto.Error as e:
+        raise UnclassifiedUserFault(f"Failed to get the certificate's thrumbprint with error: '{e}'. "
+                                    "Please double check the certificate password.") from e
+    if certificate_name:
+        cert_name = certificate_name
+    else:
+        cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
+                                        webapp.location, resource_group_name)
     cert = Certificate(password=certificate_password, pfx_blob=cert_contents,
                        location=webapp.location, server_farm_id=webapp.server_farm_id)
     return client.certificates.create_or_update(resource_group_name, cert_name, cert)
@@ -2704,7 +2773,7 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
     raise ResourceNotFoundError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
 
 
-def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certificate_name):
+def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certificate_name, certificate_name=None):
     Certificate = cmd.get_models('Certificate')
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, name)
@@ -2760,7 +2829,11 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     if not kv_secret_name:
         kv_secret_name = key_vault_certificate_name
 
-    cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
+        if certificate_name:
+            cert_name = certificate_name
+        else:
+            cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
+
     lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
     lnk_msg = 'Find more details here: {}'.format(lnk)
     if not _check_service_principal_permissions(cmd, kv_resource_group_name, kv_name, kv_subscription):
@@ -2775,7 +2848,7 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
                                                 certificate_envelope=kv_cert_def)
 
 
-def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None):
+def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None, certificate_name=None):
     Certificate = cmd.get_models('Certificate')
     hostname = hostname.lower()
     client = web_client_factory(cmd.cli_ctx)
@@ -2805,7 +2878,8 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
 
     # TODO: Update manual polling to use LongRunningOperation once backend API & new SDK supports polling
     try:
-        return client.certificates.create_or_update(name=hostname, resource_group_name=resource_group_name,
+        certificate_name = hostname if not certificate_name else certificate_name
+        return client.certificates.create_or_update(name=certificate_name, resource_group_name=resource_group_name,
                                                     certificate_envelope=easy_cert_def)
     except Exception as ex:
         poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
@@ -2824,7 +2898,7 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
                     return r.text
             logger.warning("Managed Certificate creation in progress. Please use the command "
                            "'az webapp config ssl show -g %s --certificate-name %s' "
-                           " to view your certificate once it is created", resource_group_name, hostname)
+                           " to view your certificate once it is created", resource_group_name, certificate_name)
             return
         raise CLIError(ex)
 
@@ -2866,7 +2940,7 @@ def _update_host_name_ssl_state(cmd, resource_group_name, webapp_name, webapp,
                                    slot, updated_webapp)
 
 
-def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
+def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, ssl_type, hostname, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, name)
     if not webapp:
@@ -2885,14 +2959,16 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
             if webapp_cert.thumbprint == certificate_thumbprint:
                 found_cert = webapp_cert
     if found_cert:
-        if len(found_cert.host_names) == 1 and not found_cert.host_names[0].startswith('*'):
-            return _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
-                                               found_cert.host_names[0], ssl_type,
-                                               certificate_thumbprint, slot)
-
-        query_result = list_hostnames(cmd, resource_group_name, name, slot)
-        hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
-        to_update = _match_host_names_from_cert(found_cert.host_names, hostnames_in_webapp)
+        if not hostname:
+            if len(found_cert.host_names) == 1 and not found_cert.host_names[0].startswith('*'):
+                return _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
+                                                   found_cert.host_names[0], ssl_type,
+                                                   certificate_thumbprint, slot)
+            query_result = list_hostnames(cmd, resource_group_name, name, slot)
+            hostnames_in_webapp = [x.name.split('/')[-1] for x in query_result]
+            to_update = _match_host_names_from_cert(found_cert.host_names, hostnames_in_webapp)
+        else:
+            to_update = [hostname]
         for h in to_update:
             _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
                                         h, ssl_type, certificate_thumbprint, slot)
@@ -2902,16 +2978,16 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
     raise ResourceNotFoundError("Certificate for thumbprint '{}' not found.".format(certificate_thumbprint))
 
 
-def bind_ssl_cert(cmd, resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
+def bind_ssl_cert(cmd, resource_group_name, name, certificate_thumbprint, ssl_type, hostname=None, slot=None):
     SslState = cmd.get_models('SslState')
     return _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint,
-                               SslState.sni_enabled if ssl_type == 'SNI' else SslState.ip_based_enabled, slot)
+                               SslState.sni_enabled if ssl_type == 'SNI' else SslState.ip_based_enabled, hostname, slot)
 
 
-def unbind_ssl_cert(cmd, resource_group_name, name, certificate_thumbprint, slot=None):
+def unbind_ssl_cert(cmd, resource_group_name, name, certificate_thumbprint, hostname=None, slot=None):
     SslState = cmd.get_models('SslState')
     return _update_ssl_binding(cmd, resource_group_name, name,
-                               certificate_thumbprint, SslState.disabled, slot)
+                               certificate_thumbprint, SslState.disabled, hostname, slot)
 
 
 def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
@@ -3504,13 +3580,15 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                vnet_resource_group=subnet_info["resource_group_name"],
                                vnet_name=subnet_info["vnet_name"],
                                subnet_name=subnet_info["subnet_name"])
-        site_config.vnet_route_all_enabled = True
         subnet_resource_id = subnet_info["subnet_resource_id"]
+        vnet_route_all_enabled = True
     else:
         subnet_resource_id = None
+        vnet_route_all_enabled = None
 
     functionapp_def = Site(location=None, site_config=site_config, tags=tags,
-                           virtual_network_subnet_id=subnet_resource_id, https_only=https_only)
+                           virtual_network_subnet_id=subnet_resource_id, https_only=https_only,
+                           vnet_route_all_enabled=vnet_route_all_enabled)
 
     plan_info = None
     if runtime is not None:
@@ -4180,14 +4258,10 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
                                subnet_name=subnet_info["subnet_name"])
 
     app.virtual_network_subnet_id = subnet_info["subnet_resource_id"]
+    app.vnet_route_all_enabled = True
 
     _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_create_or_update', slot,
                             client=client, extra_parameter=app)
-
-    # Enable Route All configuration
-    config = get_site_configs(cmd, resource_group_name, name, slot)
-    if config.vnet_route_all_enabled is not True:
-        config = update_site_configs(cmd, resource_group_name, name, slot=slot, vnet_route_all_enabled='true')
 
     return {
         "id": subnet_info["vnet_resource_id"],
@@ -4200,8 +4274,6 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
 
 def _vnet_delegation_check(cmd, subnet_subscription_id, vnet_resource_group, vnet_name, subnet_name):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    Delegation = cmd.get_models('Delegation', resource_type=ResourceType.MGMT_NETWORK)
-    vnet_client = network_client_factory(cmd.cli_ctx)
 
     if get_subscription_id(cmd.cli_ctx).lower() != subnet_subscription_id.lower():
         logger.warning('Cannot validate subnet in other subscription for delegation to Microsoft.Web/serverFarms.'
@@ -4212,17 +4284,25 @@ def _vnet_delegation_check(cmd, subnet_subscription_id, vnet_resource_group, vne
                        '--vnet-name %s '
                        '--delegations Microsoft.Web/serverFarms', vnet_resource_group, subnet_name, vnet_name)
     else:
-        subnetObj = vnet_client.subnets.get(vnet_resource_group, vnet_name, subnet_name)
-        delegations = subnetObj.delegations
+        subnetObj = SubnetShow(cli_ctx=cmd.cli_ctx)(command_args={
+            "name": subnet_name,
+            "vnet_name": vnet_name,
+            "resource_group": vnet_resource_group
+        })
+        delegations = subnetObj["delegations"]
         delegated = False
         for d in delegations:
-            if d.service_name.lower() == "microsoft.web/serverfarms".lower():
+            if d["serviceName"].lower() == "microsoft.web/serverfarms".lower():
                 delegated = True
 
         if not delegated:
-            subnetObj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/serverFarms")]
-            vnet_client.subnets.begin_create_or_update(vnet_resource_group, vnet_name, subnet_name,
-                                                       subnet_parameters=subnetObj)
+            poller = SubnetUpdate(cli_ctx=cmd.cli_ctx)(command_args={
+                "name": subnet_name,
+                "vnet_name": vnet_name,
+                "resource_group": vnet_resource_group,
+                "delegated_services": [{"name": "delegation", "service_name": "Microsoft.Web/serverFarms"}]
+            })
+            LongRunningOperation(cmd.cli_ctx)(poller)
 
 
 def _validate_subnet(cli_ctx, subnet, vnet, resource_group_name):
@@ -4247,15 +4327,14 @@ def _validate_subnet(cli_ctx, subnet, vnet, resource_group_name):
             child_name_1=subnet)
 
     # Reuse logic from existing command to stay backwards compatible
-    vnet_client = network_client_factory(cli_ctx)
-    list_all_vnets = vnet_client.virtual_networks.list_all()
+    list_all_vnets = VNetList(cli_ctx=cli_ctx)(command_args={})
 
     vnets = []
     for v in list_all_vnets:
-        if vnet in (v.name, v.id):
-            vnet_details = parse_resource_id(v.id)
+        if vnet in (v["name"], v["id"]):
+            vnet_details = parse_resource_id(v["id"])
             vnet_resource_group = vnet_details['resource_group']
-            vnets.append((v.id, v.name, vnet_resource_group))
+            vnets.append((v["id"], v["name"], vnet_resource_group))
 
     if not vnets:
         return logger.warning("The virtual network %s was not found in the subscription.", vnet)
@@ -5016,6 +5095,11 @@ def delete_host_key(cmd, resource_group_name, name, key_type, key_name, slot=Non
     if slot:
         return client.web_apps.delete_host_secret_slot(resource_group_name, name, key_type, key_name, slot)
     return client.web_apps.delete_host_secret(resource_group_name, name, key_type, key_name)
+
+
+def list_functions(cmd, resource_group_name, name):
+    client = web_client_factory(cmd.cli_ctx)
+    return client.web_apps.list_functions(resource_group_name, name)
 
 
 def show_function(cmd, resource_group_name, name, function_name):

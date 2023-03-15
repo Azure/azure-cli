@@ -42,7 +42,7 @@ class List(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.gallery_application_name = AAZStrArg(
             options=["--application-name", "--gallery-application-name"],
-            help="The name of the gallery Application.",
+            help="The name of the gallery application.",
             required=True,
         )
         _args_schema.gallery_name = AAZStrArg(

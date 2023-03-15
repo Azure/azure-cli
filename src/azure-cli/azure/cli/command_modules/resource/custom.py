@@ -322,7 +322,7 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     else:
         template_content = (
-            run_bicep_command(["build", "--stdout", template_file])
+            run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
             if is_bicep_file(template_file)
             else read_file_content(template_file)
         )
@@ -959,7 +959,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         template_obj = show_resource(cmd=cmd, resource_ids=[template_spec], api_version=api_version).properties['mainTemplate']
     else:
         template_content = (
-            run_bicep_command(["build", "--stdout", template_file])
+            run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
             if is_bicep_file(template_file)
             else read_file_content(template_file)
         )
@@ -1921,7 +1921,7 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
         if template_file:
             from azure.cli.command_modules.resource._packing_engine import (pack)
             if is_bicep_file(template_file):
-                template_content = run_bicep_command(["build", "--stdout", template_file])
+                template_content = run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
                 input_content = _remove_comments_from_json(template_content, file_path=template_file)
                 input_template = json.loads(json.dumps(input_content))
                 artifacts = []
@@ -1971,7 +1971,7 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
     if template_file:
         from azure.cli.command_modules.resource._packing_engine import (pack)
         if is_bicep_file(template_file):
-            template_content = run_bicep_command(["build", "--stdout", template_file])
+            template_content = run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
             input_content = _remove_comments_from_json(template_content, file_path=template_file)
             input_template = json.loads(json.dumps(input_content))
             artifacts = []
@@ -2783,7 +2783,7 @@ def show_provider_operations(cmd, resource_provider_namespace):
     version = getattr(get_api_version(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION), 'provider_operations_metadata')
     auth_client = _authorization_management_client(cmd.cli_ctx)
     if version == '2015-07-01':
-        return auth_client.provider_operations_metadata.get(resource_provider_namespace, version)
+        return auth_client.provider_operations_metadata.get(resource_provider_namespace, api_version=version)
     return auth_client.provider_operations_metadata.get(resource_provider_namespace)
 
 
@@ -4124,7 +4124,7 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
         need_patch_service = ['Microsoft.RecoveryServices/vaults', 'Microsoft.Resources/resourceGroups',
                               'Microsoft.ContainerRegistry/registries/webhooks',
                               'Microsoft.ContainerInstance/containerGroups',
-                              'Microsoft.Network/publicIPAddresses']
+                              'Microsoft.Network/publicIPAddresses', 'Microsoft.insights/workbooks']
 
         if resource is not None and resource.type in need_patch_service:
             parameters = GenericResource(tags=tags)
@@ -4287,7 +4287,7 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
 
 def install_bicep_cli(cmd, version=None, target_platform=None):
     # The parameter version is actually a git tag here.
-    ensure_bicep_installation(release_tag=version, target_platform=target_platform)
+    ensure_bicep_installation(cmd.cli_ctx, release_tag=version, target_platform=target_platform)
 
 
 def uninstall_bicep_cli(cmd):
@@ -4296,7 +4296,7 @@ def uninstall_bicep_cli(cmd):
 
 def upgrade_bicep_cli(cmd, target_platform=None):
     latest_release_tag = get_bicep_latest_release_tag()
-    ensure_bicep_installation(release_tag=latest_release_tag, target_platform=target_platform)
+    ensure_bicep_installation(cmd.cli_ctx, release_tag=latest_release_tag, target_platform=target_platform)
 
 
 def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_restore=None):
@@ -4310,31 +4310,63 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_resto
     if stdout:
         args += ["--stdout"]
 
-    output = run_bicep_command(args)
+    output = run_bicep_command(cmd.cli_ctx, args)
 
     if stdout:
         print(output)
 
 
-def publish_bicep_file(cmd, file, target):
+def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline=None, indent_kind=None, indent_size=None, insert_final_newline=None):
     ensure_bicep_installation()
 
+    minimum_supported_version = "0.12.1"
+    if bicep_version_greater_than_or_equal_to(minimum_supported_version):
+        args = ["format", file]
+        if outdir:
+            args += ["--outdir", outdir]
+        if outfile:
+            args += ["--outfile", outfile]
+        if stdout:
+            args += ["--stdout"]
+        if newline:
+            args += ["--newline", newline]
+        if indent_kind:
+            args += ["--indentKind", indent_kind]
+        if indent_size:
+            args += ["--indentSize", indent_size]
+        if insert_final_newline:
+            args += ["--insertFinalNewline", insert_final_newline]
+
+        output = run_bicep_command(args)
+
+        if stdout:
+            print(output)
+    else:
+        logger.error("az bicep format could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
+
+
+def publish_bicep_file(cmd, file, target, documentationUri=None):
     minimum_supported_version = "0.4.1008"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
-        run_bicep_command(["publish", file, "--target", target])
+        args = ["publish", file, "--target", target]
+        if documentationUri:
+            minimum_supported_version_for_documentationUri_parameter = "0.14.46"
+            if bicep_version_greater_than_or_equal_to(minimum_supported_version_for_documentationUri_parameter):
+                args += ["--documentationUri", documentationUri]
+            else:
+                logger.error("az bicep publish with --documentationUri/-d parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_documentationUri_parameter)
+        run_bicep_command(cmd.cli_ctx, args)
     else:
         logger.error("az bicep publish could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
 
 def restore_bicep_file(cmd, file, force=None):
-    ensure_bicep_installation()
-
     minimum_supported_version = "0.4.1008"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["restore", file]
         if force:
             args += ["--force"]
-        run_bicep_command(args)
+        run_bicep_command(cmd.cli_ctx, args)
     else:
         logger.error("az bicep restore could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
@@ -4343,11 +4375,11 @@ def decompile_bicep_file(cmd, file, force=None):
     args = ["decompile", file]
     if force:
         args += ["--force"]
-    run_bicep_command(args)
+    run_bicep_command(cmd.cli_ctx, args)
 
 
 def show_bicep_cli_version(cmd):
-    print(run_bicep_command(["--version"], auto_install=False))
+    print(run_bicep_command(cmd.cli_ctx, ["--version"], auto_install=False))
 
 
 def list_bicep_cli_versions(cmd):
@@ -4355,8 +4387,6 @@ def list_bicep_cli_versions(cmd):
 
 
 def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, stdout=None):
-    ensure_bicep_installation()
-
     minimum_supported_version = "0.7.4"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["generate-params", file]
@@ -4369,7 +4399,7 @@ def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, 
         if stdout:
             args += ["--stdout"]
 
-        output = run_bicep_command(args)
+        output = run_bicep_command(cmd.cli_ctx, args)
 
         if stdout:
             print(output)

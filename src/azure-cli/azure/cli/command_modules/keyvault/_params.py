@@ -67,6 +67,7 @@ def load_arguments(self, _):
     class CLISecurityDomainOperation(str, Enum):
         download = "download"  #: Download operation
         upload = "upload"  #: Upload operation
+        restore_blob = "restore_blob"  #: Restore blob operation
 
     (KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions,
      NetworkRuleBypassOptions, NetworkRuleAction, PublicNetworkAccess) = self.get_models(
@@ -136,10 +137,8 @@ def load_arguments(self, _):
                         'irrecoverable deletion. The setting is effective only if soft delete is also enabled. '
                         'Enabling this functionality is irreversible.')
         c.argument('public_network_access', arg_type=get_enum_type(PublicNetworkAccess),
-                   help="Property to specify whether the vault will accept traffic from public internet. If set to "
-                        "'disabled' all traffic except private endpoint traffic and that originates from trusted "
-                        "services will be blocked. This will override the set firewall rules, meaning that even if the "
-                        "firewall rules are present we will not honor the rules.")
+                   help='Control permission for data plane traffic coming from public networks '
+                        'while private endpoint is enabled')
 
     with self.argument_context('keyvault', arg_group='Network Rule', min_api='2018-02-14') as c:
         c.argument('bypass', arg_type=get_enum_type(NetworkRuleBypassOptions),
@@ -583,12 +582,24 @@ def load_arguments(self, _):
     with self.argument_context('keyvault security-domain upload') as c:
         c.argument('sd_file', help='This file contains security domain encrypted using SD Exchange file downloaded '
                                    'in security-domain init-recovery command.')
+        c.argument('restore_blob', help='Indicator if blob is already restored.')
         c.argument('sd_exchange_key', help='The exchange key for security domain.')
         c.argument('sd_wrapping_keys', nargs='*',
                    help='Space-separated file paths to PEM files containing private keys.')
         c.argument('passwords', nargs='*', help='Space-separated password list for --sd-wrapping-keys. '
                                                 'CLI will match them in order. Can be omitted if your keys are without '
                                                 'password protection.')
+
+    with self.argument_context('keyvault security-domain restore-blob') as c:
+        c.argument('sd_file', help='This file contains security domain encrypted using SD Exchange file downloaded '
+                                   'in security-domain init-recovery command.')
+        c.argument('sd_exchange_key', help='The exchange key for security domain.')
+        c.argument('sd_wrapping_keys', nargs='*',
+                   help='Space-separated file paths to PEM files containing private keys.')
+        c.argument('passwords', nargs='*', help='Space-separated password list for --sd-wrapping-keys. '
+                                                'CLI will match them in order. Can be omitted if your keys are without '
+                                                'password protection.')
+        c.argument('sd_file_restore_blob', help='Local file path to store the security domain encrypted with the exchange key.')
 
     with self.argument_context('keyvault security-domain download') as c:
         c.argument('sd_wrapping_keys', nargs='*',

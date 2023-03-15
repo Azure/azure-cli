@@ -583,6 +583,7 @@ def create_hsm(cmd, client,
                resource_group_name, hsm_name, administrators, location=None, sku=None,
                enable_purge_protection=None,
                retention_days=None,
+               public_network_access=None,
                bypass=None,
                default_action=None,
                tags=None,
@@ -610,7 +611,8 @@ def create_hsm(cmd, client,
                                       enable_purge_protection=enable_purge_protection,
                                       soft_delete_retention_in_days=retention_days,
                                       initial_admin_object_ids=administrators,
-                                      network_acls=_create_network_rule_set(cmd, bypass, default_action))
+                                      network_acls=_create_network_rule_set(cmd, bypass, default_action),
+                                      public_network_access=public_network_access)
     parameters = ManagedHsm(location=location,
                             tags=tags,
                             sku=ManagedHsmSku(name=sku, family='B'),
@@ -849,13 +851,17 @@ def update_hsm(cmd, instance,
                enable_purge_protection=None,
                bypass=None,
                default_action=None,
-               secondary_locations=None):
+               secondary_locations=None,
+               public_network_access=None):
     if enable_purge_protection is not None:
         instance.properties.enable_purge_protection = enable_purge_protection
 
     if secondary_locations is not None:
         # service not ready
         raise InvalidArgumentValueError('--secondary-locations has not been supported yet for hsm')
+
+    if public_network_access is not None:
+        instance.properties.public_network_access = public_network_access
 
     if bypass or default_action and (hasattr(instance.properties, 'network_acls')):
         if instance.properties.network_acls is None:
@@ -2468,8 +2474,13 @@ def _security_domain_gen_blob(sd_exchange_key, share_arrays, enc_data, required)
     return json.dumps(security_domain_restore_data.to_json())
 
 
-def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_wrapping_keys, passwords=None,
-                           identifier=None, vault_base_url=None, no_wait=False):  # pylint: disable=unused-argument
+def _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, passwords=None):
+
+    if not sd_exchange_key:
+        raise RequiredArgumentMissingError('Please specify --sd-exchange-key')
+    if not sd_wrapping_keys:
+        raise RequiredArgumentMissingError('Please specify --sd-wrapping-keys')
+
     resource_paths = [sd_file, sd_exchange_key]
     for p in resource_paths:
         if not os.path.exists(p):
@@ -2506,10 +2517,15 @@ def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_w
         shared_keys=shared_keys,
         required=required
     )
-    SecurityDomainObject = cmd.get_models('SecurityDomainObject', resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
+    return restore_blob_value
+
+
+def _security_domain_upload_blob(cmd, client, hsm_name, restore_blob_value, identifier=None,
+                                 vault_base_url=None, no_wait=False):
+    SecurityDomainObject = cmd.get_models('SecurityDomainObject',
+                                          resource_type=ResourceType.DATA_PRIVATE_KEYVAULT)
     security_domain = SecurityDomainObject(value=restore_blob_value)
     retval = client.upload(vault_base_url=hsm_name or vault_base_url, security_domain=security_domain)
-
     if no_wait:
         return retval
 
@@ -2519,6 +2535,34 @@ def security_domain_upload(cmd, client, hsm_name, sd_file, sd_exchange_key, sd_w
     if new_retval:
         return new_retval
     return retval
+
+
+def security_domain_upload(cmd, client, hsm_name, sd_file, restore_blob=False, sd_exchange_key=None,
+                           sd_wrapping_keys=None, passwords=None, identifier=None, vault_base_url=None,
+                           no_wait=False):  # pylint: disable=unused-argument
+    if not restore_blob:
+        restore_blob_value = _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys)
+    else:
+        with open(sd_file, 'r') as f:
+            restore_blob_value = f.read()
+            if not restore_blob_value:
+                raise CLIError('Empty restore_blob_value.')
+    retval = _security_domain_upload_blob(cmd, client, hsm_name, restore_blob_value,
+                                          identifier, vault_base_url, no_wait)
+    return retval
+
+
+def security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, sd_file_restore_blob,
+                                 passwords=None):  # pylint: disable=unused-argument
+    restore_blob_value = _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys,
+                                                       passwords)
+    try:
+        with open(sd_file_restore_blob, 'w') as f:
+            f.write(restore_blob_value)
+    except Exception as ex:  # pylint: disable=broad-except
+        if os.path.isfile(sd_file_restore_blob):
+            os.remove(sd_file_restore_blob)
+        raise ex
 
 
 def security_domain_download(cmd, client, hsm_name, sd_wrapping_keys, security_domain_file, sd_quorum,

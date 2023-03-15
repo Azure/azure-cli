@@ -351,6 +351,66 @@ class AzureSearchServicesTests(ScenarioTest):
         _services = self.cmd('az search service list -g {rg}').get_output_in_json()
         self.assertTrue(len(_services) == 0)
 
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
+    def test_service_create_auth(self, resource_group):
+        self.kwargs.update({
+            'sku_name': 'basic',
+            'name': self.create_random_name(prefix='test', length=24),
+            'replica_count': 1,
+            'partition_count': 1,
+            'disable_local_auth': True
+        })
+
+        self.cmd('az search service create -n {name} -g {rg} --sku {sku_name}'
+                 ' --disable-local-auth {disable_local_auth}',
+                 checks=[self.check('name', '{name}'),
+                         self.check('sku.name', '{sku_name}'),
+                         self.check('replicaCount', '{replica_count}'),
+                         self.check('partitionCount', '{partition_count}'),
+                         self.check('disableLocalAuth', '{disable_local_auth}')])
+
+        self.kwargs.update({
+            'disable_local_auth': False,
+            'auth_options': 'apiKeyOnly'
+        })
+
+        self.cmd(
+            'az search service update -n {name} -g {rg}'
+            ' --disable-local-auth {disable_local_auth}'
+            ' --auth-options {auth_options}',
+            checks=[self.check('name', '{name}'),
+                    self.check('disableLocalAuth', '{disable_local_auth}'),
+                    self.check('authOptions', {'apiKeyOnly': {}, 'aadOrApiKey': None })])
+
+        self.kwargs.update({
+            'disable_local_auth': False,
+            'auth_options': 'aadOrApiKey',
+            'aad_auth_failure_mode': 'http401WithBearerChallenge'
+        })
+
+        self.cmd(
+            'az search service update -n {name} -g {rg}'
+            ' --disable-local-auth {disable_local_auth}'
+            ' --auth-options {auth_options}'
+            ' --aad-auth-failure-mode {aad_auth_failure_mode}',
+            checks=[self.check('name', '{name}'),
+                    self.check('disableLocalAuth', '{disable_local_auth}'),
+                    self.check('authOptions', { 'aadOrApiKey': { 'aadAuthFailureMode': 'http401WithBearerChallenge' }, 'apiKeyOnly': None } )])
+
+        self.kwargs.update({
+            'disable_local_auth': False,
+            'auth_options': 'aadOrApiKey',
+            'aad_auth_failure_mode': 'http403'
+        })
+
+        self.cmd(
+            'az search service update -n {name} -g {rg}'
+            ' --disable-local-auth {disable_local_auth}'
+            ' --auth-options {auth_options}'
+            ' --aad-auth-failure-mode {aad_auth_failure_mode}',
+            checks=[self.check('name', '{name}'),
+                    self.check('disableLocalAuth', '{disable_local_auth}'),
+                    self.check('authOptions', { 'aadOrApiKey': { 'aadAuthFailureMode': 'http403' }, 'apiKeyOnly': None } )])
 
 if __name__ == '__main__':
     unittest.main()

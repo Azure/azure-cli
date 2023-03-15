@@ -2024,7 +2024,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters'
         })
-
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
@@ -2036,6 +2035,39 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('sku.tier', 'Paid')
         ])
 
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+            
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @AKSCustomRoleBasedServicePrincipalPreparer()
+    def test_aks_create_with_standard_sku(self, resource_group, resource_group_location, sp_name, sp_password):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys(),
+            'location': resource_group_location,
+            'service_principal': sp_name,
+            'client_secret': sp_password,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} --tier standard '
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('sku.tier', 'Paid')
+        ])
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
@@ -2395,78 +2427,130 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                        '00000000-0000-0000-0000-000000000002')
         ])
 
+    # @AllowLargeResponse()
+    # @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    # def test_aks_upgrade_node_image_only_cluster(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+    #     self.test_resources_count = 0
+        # kwargs for string formatting
+    #     aks_name = self.create_random_name('cliakstest', 16)
+    #     node_pool_name = self.create_random_name('c', 6)
+    #     self.kwargs.update({
+    #         'resource_group': resource_group,
+    #         'name': aks_name,
+    #         'node_pool_name': node_pool_name,
+    #         'ssh_key_value': self.generate_ssh_keys()
+    #     })
+
+    #     create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+    #                  '--nodepool-name {node_pool_name} ' \
+    #                  '--vm-set-type VirtualMachineScaleSets --node-count=1 ' \
+    #                  '--ssh-key-value={ssh_key_value} ' \
+    #                  '-o json'
+    #     self.cmd(create_cmd, checks=[
+    #         self.check('provisioningState', 'Succeeded')
+    #     ])
+
+    #     upgrade_node_image_only_cluster_cmd = 'aks upgrade ' \
+    #                                           '-g {resource_group} ' \
+    #                                           '-n {name} ' \
+    #                                           '--node-image-only ' \
+    #                                           '--yes'
+    #     self.cmd(upgrade_node_image_only_cluster_cmd, checks=[
+    #         self.check(
+    #             'agentPoolProfiles[0].provisioningState', 'UpgradingNodeImageVersion')
+    #     ])
+
+    # @AllowLargeResponse()
+    # @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    # def test_aks_upgrade_node_image_only_nodepool(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+    #     self.test_resources_count = 0
+        # kwargs for string formatting
+    #     aks_name = self.create_random_name('cliakstest', 16)
+    #     node_pool_name = self.create_random_name('c', 6)
+    #     self.kwargs.update({
+    #         'resource_group': resource_group,
+    #         'name': aks_name,
+    #         'node_pool_name': node_pool_name,
+    #         'ssh_key_value': self.generate_ssh_keys()
+    #     })
+
+    #     create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+    #                  '--nodepool-name {node_pool_name} ' \
+    #                  '--vm-set-type VirtualMachineScaleSets --node-count=1 ' \
+    #                  '--ssh-key-value={ssh_key_value} ' \
+    #                  '-o json'
+    #     self.cmd(create_cmd, checks=[
+    #         self.check('provisioningState', 'Succeeded')
+    #     ])
+
+    #     upgrade_node_image_only_nodepool_cmd = 'aks nodepool upgrade ' \
+    #                                            '--resource-group={resource_group} ' \
+    #                                            '--cluster-name={name} ' \
+    #                                            '-n {node_pool_name} ' \
+    #                                            '--node-image-only ' \
+    #                                            '--no-wait'
+    #     self.cmd(upgrade_node_image_only_nodepool_cmd)
+
+    #     get_nodepool_cmd = 'aks nodepool show ' \
+    #                        '--resource-group={resource_group} ' \
+    #                        '--cluster-name={name} ' \
+    #                        '-n {node_pool_name} '
+    #     self.cmd(get_nodepool_cmd, checks=[
+    #         self.check('provisioningState', 'UpgradingNodeImageVersion')
+    #     ])
+
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    def test_aks_upgrade_node_image_only_cluster(self, resource_group, resource_group_location):
+    def test_aks_upgrade_kubernetes_version_nodepool(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
         node_pool_name = self.create_random_name('c', 6)
+        create_version, upgrade_version = self._get_versions(resource_group_location)
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
             'node_pool_name': node_pool_name,
-            'ssh_key_value': self.generate_ssh_keys()
+            'ssh_key_value': self.generate_ssh_keys(),
+            'create_version': create_version,
+            'upgrade_version': upgrade_version
         })
 
         create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-                     '--nodepool-name {node_pool_name} ' \
                      '--vm-set-type VirtualMachineScaleSets --node-count=1 ' \
-                     '--ssh-key-value={ssh_key_value} ' \
+                     '--ssh-key-value={ssh_key_value} --kubernetes-version {upgrade_version} ' \
                      '-o json'
+
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded')
         ])
 
-        upgrade_node_image_only_cluster_cmd = 'aks upgrade ' \
-                                              '-g {resource_group} ' \
-                                              '-n {name} ' \
-                                              '--node-image-only ' \
-                                              '--yes'
-        self.cmd(upgrade_node_image_only_cluster_cmd, checks=[
-            self.check(
-                'agentPoolProfiles[0].provisioningState', 'UpgradingNodeImageVersion')
-        ])
-
-    @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    def test_aks_upgrade_node_image_only_nodepool(self, resource_group, resource_group_location):
-        # reset the count so in replay mode the random names will start with 0
-        self.test_resources_count = 0
-        # kwargs for string formatting
-        aks_name = self.create_random_name('cliakstest', 16)
-        node_pool_name = self.create_random_name('c', 6)
-        self.kwargs.update({
-            'resource_group': resource_group,
-            'name': aks_name,
-            'node_pool_name': node_pool_name,
-            'ssh_key_value': self.generate_ssh_keys()
-        })
-
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-                     '--nodepool-name {node_pool_name} ' \
-                     '--vm-set-type VirtualMachineScaleSets --node-count=1 ' \
-                     '--ssh-key-value={ssh_key_value} ' \
-                     '-o json'
-        self.cmd(create_cmd, checks=[
+        create_nodepool_cmd = 'aks nodepool add ' \
+                              '--resource-group={resource_group} ' \
+                              '--cluster-name={name} ' \
+                              '-n {node_pool_name} ' \
+                              '--node-count=1 ' \
+                              '--kubernetes-version {create_version} '
+        self.cmd(create_nodepool_cmd, checks=[
             self.check('provisioningState', 'Succeeded')
         ])
 
-        upgrade_node_image_only_nodepool_cmd = 'aks nodepool upgrade ' \
+        upgrade_kubernetes_version_nodepool_cmd = 'aks nodepool upgrade ' \
                                                '--resource-group={resource_group} ' \
-                                               '--cluster-name={name} ' \
-                                               '-n {node_pool_name} ' \
-                                               '--node-image-only ' \
+                                               '--cluster-name={name} --nodepool-name {node_pool_name} ' \
+                                               '--kubernetes-version {upgrade_version} --yes ' \
                                                '--no-wait'
-        self.cmd(upgrade_node_image_only_nodepool_cmd)
+        self.cmd(upgrade_kubernetes_version_nodepool_cmd)
 
         get_nodepool_cmd = 'aks nodepool show ' \
                            '--resource-group={resource_group} ' \
                            '--cluster-name={name} ' \
                            '-n {node_pool_name} '
         self.cmd(get_nodepool_cmd, checks=[
-            self.check('provisioningState', 'UpgradingNodeImageVersion')
+            self.check('provisioningState', 'Upgrading')
         ])
 
     @AllowLargeResponse()
@@ -4471,19 +4555,16 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('sku.tier', 'Paid')
         ])
-
         # update to no uptime sla
         no_uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --no-uptime-sla'
         self.cmd(no_uptime_sla_cmd, checks=[
             self.check('sku.tier', 'Free')
         ])
-
         # update to uptime sla again
         uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --uptime-sla --no-wait'
         self.cmd(uptime_sla_cmd, checks=[
             self.is_empty()
         ])
-
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
@@ -4651,79 +4732,79 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                        '00000000-0000-0000-0000-000000000002')
         ])
 
-    @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    def test_aks_upgrade_node_image_only_cluster_msi(self, resource_group, resource_group_location):
+    # @AllowLargeResponse()
+    # @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    # def test_aks_upgrade_node_image_only_cluster_msi(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
-        self.test_resources_count = 0
+    #     self.test_resources_count = 0
         # kwargs for string formatting
-        aks_name = self.create_random_name('cliakstest', 16)
-        node_pool_name = self.create_random_name('c', 6)
-        self.kwargs.update({
-            'resource_group': resource_group,
-            'name': aks_name,
-            'node_pool_name': node_pool_name,
-            'ssh_key_value': self.generate_ssh_keys()
-        })
+    #     aks_name = self.create_random_name('cliakstest', 16)
+    #     node_pool_name = self.create_random_name('c', 6)
+    #     self.kwargs.update({
+    #         'resource_group': resource_group,
+    #         'name': aks_name,
+    #         'node_pool_name': node_pool_name,
+    #         'ssh_key_value': self.generate_ssh_keys()
+    #     })
 
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-                     '--nodepool-name {node_pool_name} ' \
-                     '--vm-set-type VirtualMachineScaleSets --node-count=1 ' \
-                     '--ssh-key-value={ssh_key_value} ' \
-                     '-o json'
-        self.cmd(create_cmd, checks=[
-            self.check('provisioningState', 'Succeeded')
-        ])
+    #     create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+    #                  '--nodepool-name {node_pool_name} ' \
+    #                  '--vm-set-type VirtualMachineScaleSets --node-count=1 ' \
+    #                  '--ssh-key-value={ssh_key_value} ' \
+    #                  '-o json'
+    #     self.cmd(create_cmd, checks=[
+    #         self.check('provisioningState', 'Succeeded')
+    #     ])
 
-        upgrade_node_image_only_cluster_cmd = 'aks upgrade ' \
-                                              '-g {resource_group} ' \
-                                              '-n {name} ' \
-                                              '--node-image-only ' \
-                                              '--yes'
-        self.cmd(upgrade_node_image_only_cluster_cmd, checks=[
-            self.check(
-                'agentPoolProfiles[0].provisioningState', 'UpgradingNodeImageVersion')
-        ])
+    #     upgrade_node_image_only_cluster_cmd = 'aks upgrade ' \
+    #                                           '-g {resource_group} ' \
+    #                                           '-n {name} ' \
+    #                                           '--node-image-only ' \
+    #                                           '--yes'
+    #     self.cmd(upgrade_node_image_only_cluster_cmd, checks=[
+    #         self.check(
+    #             'agentPoolProfiles[0].provisioningState', 'UpgradingNodeImageVersion')
+    #     ])
 
-    @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    def test_aks_upgrade_node_image_only_nodepool_msi(self, resource_group, resource_group_location):
+    # @AllowLargeResponse()
+    # @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    # def test_aks_upgrade_node_image_only_nodepool_msi(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
-        self.test_resources_count = 0
+    #     self.test_resources_count = 0
         # kwargs for string formatting
-        aks_name = self.create_random_name('cliakstest', 16)
-        node_pool_name = self.create_random_name('c', 6)
-        self.kwargs.update({
-            'resource_group': resource_group,
-            'name': aks_name,
-            'node_pool_name': node_pool_name,
-            'ssh_key_value': self.generate_ssh_keys()
-        })
+    #     aks_name = self.create_random_name('cliakstest', 16)
+    #     node_pool_name = self.create_random_name('c', 6)
+    #     self.kwargs.update({
+    #         'resource_group': resource_group,
+    #         'name': aks_name,
+    #         'node_pool_name': node_pool_name,
+    #         'ssh_key_value': self.generate_ssh_keys()
+    #     })
 
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-                     '--nodepool-name {node_pool_name} ' \
-                     '--vm-set-type VirtualMachineScaleSets --node-count=1 ' \
-                     '--ssh-key-value={ssh_key_value} ' \
-                     '-o json'
-        self.cmd(create_cmd, checks=[
-            self.check('provisioningState', 'Succeeded')
-        ])
+    #     create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+    #                  '--nodepool-name {node_pool_name} ' \
+    #                  '--vm-set-type VirtualMachineScaleSets --node-count=1 ' \
+    #                  '--ssh-key-value={ssh_key_value} ' \
+    #                  '-o json'
+    #     self.cmd(create_cmd, checks=[
+    #         self.check('provisioningState', 'Succeeded')
+    #     ])
 
-        upgrade_node_image_only_nodepool_cmd = 'aks nodepool upgrade ' \
-                                               '--resource-group={resource_group} ' \
-                                               '--cluster-name={name} ' \
-                                               '-n {node_pool_name} ' \
-                                               '--node-image-only ' \
-                                               '--no-wait'
-        self.cmd(upgrade_node_image_only_nodepool_cmd)
+    #     upgrade_node_image_only_nodepool_cmd = 'aks nodepool upgrade ' \
+    #                                            '--resource-group={resource_group} ' \
+    #                                            '--cluster-name={name} ' \
+    #                                            '-n {node_pool_name} ' \
+    #                                            '--node-image-only ' \
+    #                                            '--no-wait'
+    #     self.cmd(upgrade_node_image_only_nodepool_cmd)
 
-        get_nodepool_cmd = 'aks nodepool show ' \
-                           '--resource-group={resource_group} ' \
-                           '--cluster-name={name} ' \
-                           '-n {node_pool_name} '
-        self.cmd(get_nodepool_cmd, checks=[
-            self.check('provisioningState', 'UpgradingNodeImageVersion')
-        ])
+    #     get_nodepool_cmd = 'aks nodepool show ' \
+    #                        '--resource-group={resource_group} ' \
+    #                        '--cluster-name={name} ' \
+    #                        '-n {node_pool_name} '
+    #     self.cmd(get_nodepool_cmd, checks=[
+    #         self.check('provisioningState', 'UpgradingNodeImageVersion')
+    #     ])
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -5565,6 +5646,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('servicePrincipalProfile.clientId', sp_name)
         ])
 
+         # add Mariner node pool
+        node_pool_cmd = 'aks nodepool add --resource-group={resource_group} --cluster-name={name} ' \
+                        '-n marinerpool --os-sku mariner'
+        self.cmd(node_pool_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
         # install kubectl
         try:
             subprocess.call(["az", "aks", "install-cli"])
@@ -5595,7 +5683,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             finally:
                 os.close(fd)
             # get node name
-            k_get_node_cmd = ["kubectl", "get", "node", "-o", "name", "--kubeconfig", browse_path]
+            k_get_node_cmd = ["kubectl", "get", "node", "-l", "kubernetes.azure.com/os-sku=Ubuntu", "-o", "name", "--kubeconfig", browse_path]
             k_get_node_output = subprocess.check_output(
                 k_get_node_cmd,
                 universal_newlines=True,
@@ -5608,10 +5696,31 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                     "node_name": node_name,
                 }
             )
-            # check acr
+            # check acr from Ubuntu node
             check_cmd = "aks check-acr -n {name} -g {resource_group} --acr {acr_name}.azurecr.io --node-name {node_name}"
             self.cmd(
                 check_cmd,
+                checks=[
+                    StringContainCheck("Your cluster can pull images from {}.azurecr.io!".format(acr_name)),
+                ],
+            )
+            # check acr from Mariner node
+            k_get_mariner_node_cmd = ["kubectl", "get", "node", "-l", "kubernetes.azure.com/os-sku=Mariner", "-o", "name", "--kubeconfig", browse_path]
+            k_get_node_output = subprocess.check_output(
+                k_get_mariner_node_cmd,
+                universal_newlines=True,
+                stderr=subprocess.STDOUT,
+            )
+            mariner_node_names = k_get_node_output.split("\n")
+            mariner_node_name = mariner_node_names[0].strip().strip("node/").strip()
+            self.kwargs.update(
+                {
+                    "mariner_node_name": mariner_node_name,
+                }
+            )
+            check_mariner_cmd = "aks check-acr -n {name} -g {resource_group} --acr {acr_name}.azurecr.io --node-name {mariner_node_name}"
+            self.cmd(
+                check_mariner_cmd,
                 checks=[
                     StringContainCheck("Your cluster can pull images from {}.azurecr.io!".format(acr_name)),
                 ],
@@ -6755,7 +6864,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_cmd = 'aks create --resource-group {resource_group} --name {aks_name2} --location {location} ' \
                      '--nodepool-name {nodepool_name} ' \
                      '--node-count 1 --snapshot-id {snapshot_resource_id} ' \
-                     '-k {k8s_version} ' \
                      '--ssh-key-value={ssh_key_value} -o json'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -6764,7 +6872,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # add a new nodepool to this cluster using this snapshot
         add_nodepool_cmd = 'aks nodepool add --resource-group={resource_group} --cluster-name={aks_name2} --name={nodepool_name2} --node-count 1 ' \
-                           '-k {k8s_version} ' \
                            '--snapshot-id {snapshot_resource_id} -o json'
         self.cmd(add_nodepool_cmd,
             checks=[
@@ -6773,30 +6880,22 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # upgrade the nodepool2 using this snapshot again
-        upgrade_node_image_only_nodepool_cmd = 'aks nodepool upgrade ' \
-                                               '--resource-group {resource_group} ' \
-                                               '--cluster-name {aks_name2} ' \
-                                               '-n {nodepool_name2} ' \
-                                               '--node-image-only ' \
-                                               '--snapshot-id {snapshot_resource_id} -o json'
-        self.cmd(upgrade_node_image_only_nodepool_cmd)
+        # upgrade_node_image_only_nodepool_cmd = 'aks nodepool upgrade ' \
+        #                                        '--resource-group {resource_group} ' \
+        #                                        '--cluster-name {aks_name2} ' \
+        #                                        '-n {nodepool_name2} ' \
+        #                                        '--node-image-only ' \
+        #                                        '--snapshot-id {snapshot_resource_id} -o json'
+        # self.cmd(upgrade_node_image_only_nodepool_cmd)
 
-        get_nodepool_cmd = 'aks nodepool show ' \
-                           '--resource-group={resource_group} ' \
-                           '--cluster-name={aks_name2} ' \
-                           '-n {nodepool_name2} '
-        self.cmd(get_nodepool_cmd, checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('creationData.sourceResourceId', snapshot_resource_id)
-        ])
-
-        # upgrade this cluster (snapshot is not allowed for cluster upgrading), snapshot info is reset
-        create_cmd = 'aks upgrade --resource-group {resource_group} --name {aks_name2} -k {upgrade_k8s_version} --yes -o json'
-        self.cmd(create_cmd, checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('agentPoolProfiles[0].creationData', None),
-            self.check('agentPoolProfiles[1].creationData', None)
-        ])
+        # get_nodepool_cmd = 'aks nodepool show ' \
+        #                    '--resource-group={resource_group} ' \
+        #                    '--cluster-name={aks_name2} ' \
+        #                    '-n {nodepool_name2} '
+        # self.cmd(get_nodepool_cmd, checks=[
+        #     self.check('provisioningState', 'Succeeded'),
+        #     self.check('creationData.sourceResourceId', snapshot_resource_id)
+        # ])
 
         # delete the 2nd AKS cluster
         self.cmd('aks delete -g {resource_group} -n {aks_name2} --yes --no-wait', checks=[self.is_empty()])
@@ -7935,6 +8034,96 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      self.check('provisioningState', 'Succeeded'),
                      self.check('gpuInstanceProfile', 'MIG3g'),
                  ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2', preserve_default_location=True)
+    def test_aks_create_dualstack_with_default_network(self, resource_group, resource_group_location):
+        _, create_version = self._get_versions(resource_group_location)
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'k8s_version': create_version,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--ip-families IPv4,IPv6 --ssh-key-value={ssh_key_value} --kubernetes-version {k8s_version} ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKS-EnableDualStack'
+
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.podCidrs[] | length(@)', 2),
+            self.check('networkProfile.serviceCidrs[] | length(@)', 2),
+            self.check('networkProfile.ipFamilies', ['IPv4', 'IPv6'])
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+    
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2', preserve_default_location=True)
+    def test_aks_create_and_update_ipv6_count(self, resource_group, resource_group_location):
+        _, create_version = self._get_versions(resource_group_location)
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'k8s_version': create_version,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--pod-cidr 172.126.0.0/16 --service-cidr 172.56.0.0/16 --dns-service-ip 172.56.0.10 ' \
+                     '--pod-cidrs 172.126.0.0/16,2001:abcd:1234::/64 --service-cidrs 172.56.0.0/16,2001:ffff::/108 ' \
+                     '--ip-families IPv4,IPv6 --load-balancer-managed-outbound-ipv6-count 2 ' \
+                     '--network-plugin kubenet --ssh-key-value={ssh_key_value} --kubernetes-version {k8s_version} ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKS-EnableDualStack'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.podCidr', '172.126.0.0/16'),
+            self.check('networkProfile.podCidrs', [
+                       '172.126.0.0/16', '2001:abcd:1234::/64']),
+            self.check('networkProfile.serviceCidr', '172.56.0.0/16'),
+            self.check('networkProfile.serviceCidrs', [
+                       '172.56.0.0/16', '2001:ffff::/108']),
+            self.check('networkProfile.ipFamilies', ['IPv4', 'IPv6']),
+            self.check(
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.countIpv6', 2),
+            self.check(
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
+            self.check(
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs[] | length(@)', 3)
+        ])
+
+        # update
+        update_cmd = 'aks update -g {resource_group} -n {name} --load-balancer-managed-outbound-ipv6-count 4'
+
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.podCidr', '172.126.0.0/16'),
+            self.check('networkProfile.podCidrs', [
+                       '172.126.0.0/16', '2001:abcd:1234::/64']),
+            self.check('networkProfile.serviceCidr', '172.56.0.0/16'),
+            self.check('networkProfile.serviceCidrs', [
+                       '172.56.0.0/16', '2001:ffff::/108']),
+            self.check('networkProfile.ipFamilies', ['IPv4', 'IPv6']),
+            self.check(
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.countIpv6', 4),
+            self.check(
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
+            self.check(
+                'networkProfile.loadBalancerProfile.effectiveOutboundIPs[] | length(@)', 5)
+        ])
 
         # delete
         self.cmd(

@@ -47,9 +47,9 @@ def load_arguments(self, _):
     # PARAMETER REGISTRATION
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     sku_arg_type = CLIArgumentType(
-        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), P1V3(Premium V3 Small), P2V3(Premium V3 Medium), P3V3(Premium V3 Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large), I1v2 (Isolated V2 Small), I2v2 (Isolated V2 Medium), I3v2 (Isolated V2 Large), I4v2 (Isolated V2 I4v2), I5v2 (Isolated V2 I5v2), I6v2 (Isolated V2 I6v2), WS1 (Logic Apps Workflow Standard 1), WS2 (Logic Apps Workflow Standard 2), WS3 (Logic Apps Workflow Standard 3)',
+        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), P2V2(Premium V2 Medium), P3V2(Premium V2 Large), P0V3(Premium V3 Extra Small), P1V3(Premium V3 Small), P2V3(Premium V3 Medium), P3V3(Premium V3 Large), P1MV3(Premium Memory Optimized V3 Small), P2MV3(Premium Memory Optimized V3 Medium), P3MV3(Premium Memory Optimized V3 Large), P4MV3(Premium Memory Optimized V3 Extra Large), P5MV3(Premium Memory Optimized V3 Extra Extra Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large), I1v2 (Isolated V2 Small), I2v2 (Isolated V2 Medium), I3v2 (Isolated V2 Large), I4v2 (Isolated V2 I4v2), I5v2 (Isolated V2 I5v2), I6v2 (Isolated V2 I6v2), WS1 (Logic Apps Workflow Standard 1), WS2 (Logic Apps Workflow Standard 2), WS3 (Logic Apps Workflow Standard 3)',
         arg_type=get_enum_type(
-            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'P1V3', 'P2V3', 'P3V3', 'I1', 'I2', 'I3', 'I1v2', 'I2v2', 'I3v2', 'I4v2', 'I5v2', 'I6v2', 'WS1', 'WS2', 'WS3']))
+            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'P0V3', 'P1V3', 'P2V3', 'P3V3', 'P1MV3', 'P2MV3', 'P3MV3', 'P4MV3', 'P5MV3', 'I1', 'I2', 'I3', 'I1v2', 'I2v2', 'I3v2', 'I4v2', 'I5v2', 'I6v2', 'WS1', 'WS2', 'WS3']))
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'),
                                            id_part='name',
@@ -183,6 +183,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('slot', options_list=['--slot', '-s'], help='slot to restore the deleted content to')
         c.argument('restore_content_only', action='store_true',
                    help='restore only deleted files without web app settings')
+        c.argument('target_app_svc_plan', help='The app service plan for the new azure web app.')
 
     with self.argument_context('webapp traffic-routing') as c:
         c.argument('distribution', options_list=['--distribution', '-d'], nargs='+',
@@ -247,6 +248,9 @@ subscription than the app service environment, please use the resource ID for --
 
         with self.argument_context(scope + ' config ssl bind') as c:
             c.argument('ssl_type', help='The ssl cert type', arg_type=get_enum_type(['SNI', 'IP']))
+            c.argument('hostname', help='The custom domain name. If empty, hostnames will be selected automatically')
+        with self.argument_context(scope + ' config ssl unbind') as c:
+            c.argument('hostname', help='The custom domain name. If empty, hostnames will be selected automatically')
         with self.argument_context(scope + ' config ssl upload') as c:
             c.argument('certificate_password', help='The ssl cert password')
             c.argument('certificate_file', type=file_type, help='The filepath for the .pfx file')
@@ -254,6 +258,7 @@ subscription than the app service environment, please use the resource ID for --
                        help='The name of the slot. Default to the productions slot if not specified')
         with self.argument_context(scope + ' config ssl') as c:
             c.argument('certificate_thumbprint', help='The ssl cert thumbprint')
+            c.argument('certificate_name', help='The name of the certificate.')
         with self.argument_context(scope + ' config appsettings') as c:
             c.argument('settings', nargs='+', help="space-separated app settings in a format of `<name>=<value>`")
             c.argument('setting_names', nargs='+', help="space-separated app setting names")
@@ -264,8 +269,6 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('hostname', help='The custom domain name')
             c.argument('name', options_list=['--name', '-n'], help='Name of the web app.')
             c.argument('resource-group', options_list=['--resource-group', '-g'], help='Name of resource group.')
-        with self.argument_context(scope + ' config ssl show') as c:
-            c.argument('certificate_name', help='The name of the certificate')
         with self.argument_context(scope + ' config hostname') as c:
             c.argument('hostname', completer=get_hostname_completion_list,
                        help="hostname assigned to the site, such as custom domains", id_part='child_name_1')
@@ -323,6 +326,7 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('use32_bit_worker_process', options_list=['--use-32bit-worker-process'],
                        help='use 32 bits worker process or not', arg_type=get_three_state_flag(return_label=True))
             c.argument('php_version', help='The version used to run your web app if using PHP, e.g., 5.5, 5.6, 7.0')
+            c.argument('power_shell_version', help='The version used to run your function app if using PowerShell, e.g., 7.2', options_list=['--powershell-version'])
             c.argument('python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
             c.argument('net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")
             c.argument('linux_fx_version', help="The runtime stack used for your linux-based webapp, e.g., \"RUBY|2.5.5\", \"NODE|12LTS\", \"PHP|7.2\", \"DOTNETCORE|2.1\". See https://aka.ms/linux-stacks for more info.")
@@ -542,6 +546,10 @@ subscription than the app service environment, please use the resource ID for --
                    action='store_true')
         c.argument('ignore_hostname_conflict', help='Ignores custom hostnames stored in the backup',
                    action='store_true')
+
+    with self.argument_context('webapp config backup delete') as c:
+        c.argument('slot', options_list=['--slot', '-s'], help='The name of the slot.')
+        c.argument('backup_id', help='Id of the backup.')
 
     with self.argument_context('webapp config snapshot') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
@@ -898,6 +906,8 @@ subscription than the app service environment, please use the resource ID for --
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'),
                    help='Name of the function app')
         c.argument('function_name', help="Name of the Function")
+    with self.argument_context('functionapp function list', id_part=None) as c:
+        c.ignore('function_name')
     with self.argument_context('functionapp function keys', id_part=None) as c:
         c.argument('slot', options_list=['--slot', '-s'],
                    help="The name of the slot. Defaults to the productions slot if not specified")

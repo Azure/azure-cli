@@ -12,6 +12,8 @@ from typing import Dict, List, Optional, Tuple, TypeVar, Union
 from azure.cli.command_modules.acs._consts import (
     CONST_LOAD_BALANCER_SKU_BASIC,
     CONST_LOAD_BALANCER_SKU_STANDARD,
+    CONST_MANAGED_CLUSTER_SKU_TIER_FREE,
+    CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD,
     CONST_OUTBOUND_TYPE_LOAD_BALANCER,
     CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
@@ -1732,6 +1734,45 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return load_balancer_managed_outbound_ip_count
 
+    def get_load_balancer_managed_outbound_ipv6_count(self) -> Union[int, None]:
+        """Obtain the expected count of IPv6 managed outbound IPs.
+
+        Note: SDK provides default value 0 and performs the following validation {'maximum': 100, 'minimum': 0}.
+
+        :return: int or None
+        """
+        count_ipv6 = self.raw_param.get('load_balancer_managed_outbound_ipv6_count')
+
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.network_profile and
+                self.mc.network_profile.load_balancer_profile and
+                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps and
+                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count_ipv6 is not None
+            ):
+                count_ipv6 = (
+                    self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count_ipv6
+                )
+        elif self.decorator_mode == DecoratorMode.UPDATE:
+            if (
+                not self.get_load_balancer_outbound_ips() and
+                not self.get_load_balancer_outbound_ip_prefixes() and
+                count_ipv6 is None
+            ):
+                if (
+                    self.mc and
+                    self.mc.network_profile and
+                    self.mc.network_profile.load_balancer_profile and
+                    self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps and
+                    self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count_ipv6 is not None
+                ):
+                    count_ipv6 = (
+                        self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count_ipv6
+                    )
+
+        return count_ipv6
+
     def get_load_balancer_outbound_ips(self) -> Union[str, List[ResourceReference], None]:
         """Obtain the value of load_balancer_outbound_ips.
 
@@ -1891,6 +1932,64 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return nat_gateway_idle_timeout
 
+    def get_pod_cidrs_and_service_cidrs_and_ip_families(self) -> Tuple[
+        Union[List[str], None],
+        Union[List[str], None],
+        Union[List[str], None],
+    ]:
+        return self.get_pod_cidrs(), self.get_service_cidrs(), self.get_ip_families()
+
+    def get_pod_cidrs(self) -> Union[List[str], None]:
+        """Obtain the CIDR ranges used for pod subnets.
+
+        :return: List[str] or None
+        """
+        # read the original value passed by the command
+        pod_cidrs = self.raw_param.get("pod_cidrs")
+        # normalize
+        pod_cidrs = extract_comma_separated_string(pod_cidrs, keep_none=True, default_value=[])
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if self.mc and self.mc.network_profile and self.mc.network_profile.pod_cidrs is not None:
+            pod_cidrs = self.mc.network_profile.pod_cidrs
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return pod_cidrs
+
+    def get_service_cidrs(self) -> Union[List[str], None]:
+        """Obtain the CIDR ranges for the service subnet.
+
+        :return: List[str] or None
+        """
+        # read the original value passed by the command
+        service_cidrs = self.raw_param.get("service_cidrs")
+        # normalize
+        service_cidrs = extract_comma_separated_string(service_cidrs, keep_none=True, default_value=[])
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if self.mc and self.mc.network_profile and self.mc.network_profile.service_cidrs is not None:
+            service_cidrs = self.mc.network_profile.service_cidrs
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return service_cidrs
+
+    def get_ip_families(self) -> Union[List[str], None]:
+        """Obtain the value of ip_families.
+
+        :return: List[str] or None
+        """
+        # read the original value passed by the command
+        ip_families = self.raw_param.get("ip_families")
+        # normalize
+        ip_families = extract_comma_separated_string(ip_families, keep_none=True, default_value=[])
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if self.mc and self.mc.network_profile and self.mc.network_profile.ip_families is not None:
+            ip_families = self.mc.network_profile.ip_families
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return ip_families
+
     def _get_outbound_type(
         self,
         enable_validation: bool = False,
@@ -1979,6 +2078,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                     else:
                         if (
                             self.get_load_balancer_managed_outbound_ip_count() or
+                            self.get_load_balancer_managed_outbound_ipv6_count() or
                             self.get_load_balancer_outbound_ips() or
                             self.get_load_balancer_outbound_ip_prefixes()
                         ):
@@ -3915,6 +4015,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         # read the original value passed by the command
         uptime_sla = self.raw_param.get("uptime_sla")
+
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
@@ -3931,7 +4032,35 @@ class AKSManagedClusterContext(BaseAKSContext):
                 raise MutuallyExclusiveArgumentError(
                     'Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.'
                 )
+
+            if uptime_sla and self.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_FREE:
+                raise MutuallyExclusiveArgumentError(
+                    'Cannot specify "--uptime-sla" and "--tier free" at the same time.'
+                )
+
         return uptime_sla
+
+    def get_tier(self) -> str:
+        """Obtain the value of tier.
+
+        :return: str
+        """
+        tier = self.raw_param.get("tier")
+        if not tier:
+            return ""
+
+        tierStr = tier.lower()
+        if tierStr == CONST_MANAGED_CLUSTER_SKU_TIER_FREE and self._get_uptime_sla(enable_validation=False):
+            raise MutuallyExclusiveArgumentError(
+                'Cannot specify "--uptime-sla" and "--tier free" at the same time.'
+            )
+
+        if tierStr == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD and self._get_no_uptime_sla(enable_validation=False):
+            raise MutuallyExclusiveArgumentError(
+                'Cannot specify "--no-uptime-sla" and "--tier standard" at the same time.'
+            )
+
+        return tierStr
 
     def get_uptime_sla(self) -> bool:
         """Obtain the value of uptime_sla.
@@ -3962,6 +4091,12 @@ class AKSManagedClusterContext(BaseAKSContext):
                 raise MutuallyExclusiveArgumentError(
                     'Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.'
                 )
+
+            if no_uptime_sla and self.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
+                raise MutuallyExclusiveArgumentError(
+                    'Cannot specify "--no-uptime-sla" and "--tier standard" at the same time.'
+                )
+
         return no_uptime_sla
 
     def get_no_uptime_sla(self) -> bool:
@@ -4818,6 +4953,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         # build load balancer profile, which is part of the network profile
         load_balancer_profile = create_load_balancer_profile(
             self.context.get_load_balancer_managed_outbound_ip_count(),
+            self.context.get_load_balancer_managed_outbound_ipv6_count(),
             self.context.get_load_balancer_outbound_ips(),
             self.context.get_load_balancer_outbound_ip_prefixes(),
             self.context.get_load_balancer_outbound_ports(),
@@ -4847,11 +4983,23 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             self.context.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
         )
         network_profile = None
+        # set up pod_cidrs, service_cidrs and ip_families
+        (
+            pod_cidrs,
+            service_cidrs,
+            ip_families
+        ) = (
+            self.context.get_pod_cidrs_and_service_cidrs_and_ip_families()
+        )
+
         if any(
             [
                 network_plugin,
                 pod_cidr,
+                pod_cidrs,
                 service_cidr,
+                service_cidrs,
+                ip_families,
                 dns_service_ip,
                 docker_bridge_address,
                 network_policy,
@@ -4864,7 +5012,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             network_profile = self.models.ContainerServiceNetworkProfile(
                 network_plugin=network_plugin,
                 pod_cidr=pod_cidr,
+                pod_cidrs=pod_cidrs,
                 service_cidr=service_cidr,
+                service_cidrs=service_cidrs,
+                ip_families=ip_families,
                 dns_service_ip=dns_service_ip,
                 docker_bridge_cidr=docker_bridge_address,
                 network_policy=network_policy,
@@ -5369,7 +5520,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
-        if self.context.get_uptime_sla():
+        if self.context.get_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
             mc.sku = self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Paid"
@@ -5852,13 +6003,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
-        if self.context.get_uptime_sla():
+        if self.context.get_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
             mc.sku = self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Paid"
             )
 
-        if self.context.get_no_uptime_sla():
+        if self.context.get_no_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_FREE:
             mc.sku = self.models.ManagedClusterSKU(
                 name="Basic",
                 tier="Free"
@@ -5879,6 +6030,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             )
 
         load_balancer_managed_outbound_ip_count = self.context.get_load_balancer_managed_outbound_ip_count()
+        load_balancer_managed_outbound_ipv6_count = self.context.get_load_balancer_managed_outbound_ipv6_count()
         load_balancer_outbound_ips = self.context.get_load_balancer_outbound_ips()
         load_balancer_outbound_ip_prefixes = self.context.get_load_balancer_outbound_ip_prefixes()
         load_balancer_outbound_ports = self.context.get_load_balancer_outbound_ports()
@@ -5888,6 +6040,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         # remain unchanged.
         mc.network_profile.load_balancer_profile = _update_load_balancer_profile(
             managed_outbound_ip_count=load_balancer_managed_outbound_ip_count,
+            managed_outbound_ipv6_count=load_balancer_managed_outbound_ipv6_count,
             outbound_ips=load_balancer_outbound_ips,
             outbound_ip_prefixes=load_balancer_outbound_ip_prefixes,
             outbound_ports=load_balancer_outbound_ports,

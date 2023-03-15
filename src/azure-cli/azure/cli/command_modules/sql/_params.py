@@ -217,6 +217,43 @@ preferred_enclave_param_type = CLIArgumentType(
     help='Create a database configured with Default or VBS preferred enclave type. ',
     arg_type=get_enum_type(AlwaysEncryptedEnclaveType))
 
+database_assign_identity_param_type = CLIArgumentType(
+    options_list=['--assign-identity', '-i'],
+    help='Assign identity for database.',
+    arg_type=get_three_state_flag())
+
+database_expand_keys_param_type = CLIArgumentType(
+    options_list=['--expand-keys', '-e'],
+    help='Flag to use to expand all keys in the db show.',
+    arg_type=get_three_state_flag())
+
+database_encryption_protector_param_type = CLIArgumentType(
+    options_list=['--encryption-protector'],
+    help='Specifies the Azure key vault key to be used as database encryption protector key.')
+
+database_keys_param_type = CLIArgumentType(
+    options_list=['--keys'],
+    nargs='+',
+    help='The list of AKV keys for the SQL Database.')
+
+database_keys_to_remove_param_type = CLIArgumentType(
+    options_list=['--keys-to-remove'],
+    nargs='+',
+    help='The list of AKV keys to remove from the SQL Database.')
+
+database_user_assigned_identity_param_type = CLIArgumentType(
+    options_list=['--user-assigned-identity-id', '--umi'],
+    nargs='+',
+    help='The list of user assigned identity for the SQL Database.')
+
+database_federated_client_id_param_type = CLIArgumentType(
+    options_list=['--federated-client-id'],
+    help='The federated client id for the SQL Database. It is used for cross tenant CMK scenario.')
+
+database_availability_zone_param_type = CLIArgumentType(
+    options_list=['--availability-zone'],
+    help='Availability zone')
+
 managed_instance_param_type = CLIArgumentType(
     options_list=['--managed-instance', '--mi'],
     help='Name of the Azure SQL managed instance.')
@@ -244,7 +281,7 @@ storage_param_type = CLIArgumentType(
 backup_storage_redundancy_param_type = CLIArgumentType(
     options_list=['--backup-storage-redundancy', '--bsr'],
     type=get_internal_backup_storage_redundancy,
-    help='Backup storage redundancy used to store backups. Allowed values include: Local, Zone, Geo.',
+    help='Backup storage redundancy used to store backups. Allowed values include: Local, Zone, Geo, GeoZone.',
     validator=validate_backup_storage_redundancy)
 
 backup_storage_redundancy_param_type_mi = CLIArgumentType(
@@ -264,6 +301,10 @@ grace_period_param_type = CLIArgumentType(
 allow_data_loss_param_type = CLIArgumentType(
     help='Complete the failover even if doing so may result in data loss. '
     'This will allow the failover to proceed even if a primary database is unavailable.')
+
+secondary_type_param_type = CLIArgumentType(
+    help='Intended usage of the secondary instance in the Failover Group. '
+    'Standby indicates that the secondary instance will be used as a passive replica for disaster recovery only.')
 
 aad_admin_login_param_type = CLIArgumentType(
     options_list=['--display-name', '-u'],
@@ -409,6 +450,30 @@ def _configure_db_dw_params(arg_ctx):
     arg_ctx.argument('preferred_enclave_type',
                      arg_type=preferred_enclave_param_type)
 
+    arg_ctx.argument('assign_identity',
+                     arg_type=database_assign_identity_param_type)
+
+    arg_ctx.argument('encryption_protector',
+                     arg_type=database_encryption_protector_param_type)
+
+    arg_ctx.argument('keys',
+                     arg_type=database_keys_param_type)
+
+    arg_ctx.argument('keys_to_remove',
+                     arg_type=database_keys_to_remove_param_type)
+
+    arg_ctx.argument('user_assigned_identity_id',
+                     arg_type=database_user_assigned_identity_param_type)
+
+    arg_ctx.argument('federated_client_id',
+                     arg_type=database_federated_client_id_param_type)
+
+    arg_ctx.argument('expand_keys',
+                     arg_type=database_expand_keys_param_type)
+
+    arg_ctx.argument('availability_zone',
+                     arg_type=database_availability_zone_param_type)
+
 
 def _configure_db_dw_create_params(
         arg_ctx,
@@ -503,6 +568,12 @@ def _configure_db_dw_create_params(
             'maintenance_configuration_id',
             'is_ledger_on',
             'preferred_enclave_type',
+            'assign_identity',
+            'encryption_protector',
+            'keys',
+            'user_assigned_identity_id',
+            'federated_client_id',
+            'availability_zone',
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -517,7 +588,7 @@ def _configure_db_dw_create_params(
     # *** Step 2: Apply customizations specific to create (as opposed to update) ***
 
     arg_ctx.argument('name',  # Note: this is sku name, not database name
-                     options_list=['--service-objective'],
+                     options_list=['--service-objective', '--service-level-objective'],
                      arg_group=sku_arg_group,
                      required=False,
                      help='The service objective for the new database. For example: ' +
@@ -537,6 +608,21 @@ def _configure_db_dw_create_params(
 
     arg_ctx.argument('preferred_enclave_type',
                      arg_type=preferred_enclave_param_type)
+
+    arg_ctx.argument('assign_identity',
+                     arg_type=database_assign_identity_param_type)
+
+    arg_ctx.argument('encryption_protector',
+                     arg_type=database_encryption_protector_param_type)
+
+    arg_ctx.argument('keys',
+                     arg_type=database_keys_param_type)
+
+    arg_ctx.argument('user_assigned_identity_id',
+                     arg_type=database_user_assigned_identity_param_type)
+
+    arg_ctx.argument('federated_client_id',
+                     arg_type=database_federated_client_id_param_type)
 
     # *** Step 3: Ignore params that are not applicable (based on engine & create mode) ***
 
@@ -576,6 +662,21 @@ def _configure_db_dw_create_params(
 
         # Family is not applicable to DataWarehouse
         arg_ctx.ignore('family')
+
+        # Identity is not applicable to DataWarehouse
+        arg_ctx.ignore('assign_identity')
+
+        # Encryption Protector is not applicable to DataWarehouse
+        arg_ctx.ignore('encryption_protector')
+
+        # Keys is not applicable to DataWarehouse
+        arg_ctx.ignore('keys')
+
+        # User Assigned Identities is not applicable to DataWarehouse
+        arg_ctx.ignore('user_assigned_identity_id')
+
+        # Federated client id is not applicable to DataWarehouse
+        arg_ctx.ignore('federated_client_id')
 
         # Provisioning with capacity is not applicable to DataWarehouse
         arg_ctx.ignore('capacity')
@@ -695,7 +796,32 @@ def load_arguments(self, _):
     with self.argument_context('sql db show') as c:
         # Service tier advisors and transparent data encryption are not included in the first batch
         # of GA commands.
-        c.ignore('expand')
+        c.argument('expand_keys',
+                   options_list=['--expand-keys'],
+                   help='Expand the AKV keys for the database.')
+
+        c.argument('keys_filter',
+                   options_list=['--keys-filter'],
+                   help='Expand the AKV keys for the database.')
+
+    with self.argument_context('sql db show-deleted') as c:
+        c.argument('restorable_dropped_database_id',
+                   options_list=['--restorable-dropped-database-id', '-r'],
+                   help='Restorable dropped database id.')
+
+        c.argument('expand_keys',
+                   options_list=['--expand-keys'],
+                   arg_type=database_expand_keys_param_type,
+                   help='Expand the AKV keys for the database.')
+
+        c.argument('keys_filter',
+                   options_list=['--keys-filter'],
+                   help='Expand the AKV keys for the database.')
+
+    with self.argument_context('sql server show') as c:
+        c.argument('expand_ad_admin',
+                   options_list=['--expand-ad-admin'],
+                   help='Expand the Active Directory Administrator for the server.')
 
     with self.argument_context('sql db list') as c:
         c.argument('elastic_pool_name',
@@ -749,6 +875,9 @@ def load_arguments(self, _):
                    arg_type=backup_storage_redundancy_param_type)
 
         c.argument('maintenance_configuration_id', arg_type=maintenance_configuration_id_param_type)
+
+        c.argument('availability_zone',
+                   arg_type=database_availability_zone_param_type)
 
     with self.argument_context('sql db export') as c:
         # Create args that will be used to build up the ExportDatabaseDefinition object
@@ -1029,6 +1158,31 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(TransparentDataEncryptionState))
 
     #####
+    #           sql db level encryption protector
+    #####
+    with self.argument_context('sql db sql db tde key revert') as c:
+        c.argument('server_name',
+                   options_list=['--server', '-s'],
+                   required=True,
+                   help='Name of the Azure SQL Server.')
+
+        c.argument('database_name',
+                   options_list=['--database', '-d'],
+                   required=True,
+                   help='Name of the Azure SQL Database.')
+
+    with self.argument_context('sql db sql db tde key revalidate') as c:
+        c.argument('server_name',
+                   options_list=['--server', '-s'],
+                   required=True,
+                   help='Name of the Azure SQL Server.')
+
+        c.argument('database_name',
+                   options_list=['--database', '-d'],
+                   required=True,
+                   help='Name of the Azure SQL Database.')
+
+    #####
     #           sql db ledger-digest-uploads
     ######
     with self.argument_context('sql db ledger-digest-uploads enable') as c:
@@ -1125,6 +1279,128 @@ def load_arguments(self, _):
         c.argument('requested_backup_storage_redundancy',
                    required=False,
                    arg_type=backup_storage_redundancy_param_type)
+
+        c.argument('high_availability_replica_count',
+                   required=False,
+                   arg_type=read_replicas_param_type)
+
+        c.argument('zone_redundant',
+                   required=False,
+                   arg_type=zone_redundant_param_type)
+
+        c.argument('service_objective',
+                   options_list=['--service-objective', '--service-level-objective'],
+                   required=False,
+                   arg_group=sku_arg_group,
+                   help='The name of the service objective for the restored database.')
+
+        c.argument('assign_identity',
+                   arg_type=database_assign_identity_param_type)
+
+        c.argument('encryption_protector',
+                   arg_type=database_encryption_protector_param_type)
+
+        c.argument('keys',
+                   arg_type=database_keys_param_type)
+
+        c.argument('user_assigned_identity_id',
+                   arg_type=database_user_assigned_identity_param_type)
+
+        c.argument('federated_client_id',
+                   arg_type=database_federated_client_id_param_type)
+
+    ###############################################
+    #              sql db geo-backup              #
+    ###############################################
+    with self.argument_context('sql db geo-backup show') as c:
+        c.argument('database_name',
+                   options_list=['--database-name', '--database', '-d'],
+                   required=True,
+                   help='retrieves a requested geo-redundant backup under this database.')
+
+        c.argument('server_name',
+                   options_list=['--server-name', '--server', '-s'],
+                   required=True,
+                   help='Retrieves a requested geo-redundant backup under this server.')
+
+        c.argument('resource_group_name',
+                   options_list=['--resource-group', '-g'],
+                   required=True,
+                   help='Retrieves a requested geo-redundant backup under this resource group.')
+
+        c.argument('expand_keys',
+                   options_list=['--expand-keys'],
+                   help='Expand the AKV keys for the database.')
+
+        c.argument('keys_filter',
+                   options_list=['--keys-filter'],
+                   help='Expand the AKV keys for the database.')
+
+    with self.argument_context('sql db geo-backup list') as c:
+        c.argument('server_name',
+                   options_list=['--server-name', '--server', '-s'],
+                   required=True,
+                   help='Retrieves all requested geo-redundant backups under this server.')
+
+        c.argument('resource_group_name',
+                   options_list=['--resource-group', '-g'],
+                   required=True,
+                   help='Retrieves all requested geo-redundant backups under this resource group.')
+
+    with self.argument_context('sql db geo-backup restore') as c:
+        c.argument('target_database_name',
+                   options_list=['--dest-database'],
+                   required=True,
+                   help='Name of the database that will be created as the restore destination.')
+
+        c.argument('target_server_name',
+                   options_list=['--dest-server'],
+                   required=True,
+                   help='Name of the server to restore database to.')
+
+        c.argument('target_resource_group_name',
+                   options_list=['--resource-group'],
+                   required=True,
+                   help='Name of the target resource group of the server to restore database to.')
+
+        c.argument('geo_backup_id',
+                   options_list=['--geo-backup-id'],
+                   required=True,
+                   help='The resource id of the geo-redundant backup to be restored. '
+                   'Use \'az sql db geo-backup list\' or \'az sql db geo-backup show\' for backup id.')
+
+        c.argument('requested_backup_storage_redundancy',
+                   required=False,
+                   arg_type=backup_storage_redundancy_param_type)
+
+        c.argument('high_availability_replica_count',
+                   required=False,
+                   arg_type=read_replicas_param_type)
+
+        c.argument('zone_redundant',
+                   required=False,
+                   arg_type=zone_redundant_param_type)
+
+        c.argument('service_objective',
+                   options_list=['--service-objective', '--service-level-objective'],
+                   required=False,
+                   arg_group=sku_arg_group,
+                   help='The name of the service objective for the restored database.')
+
+        c.argument('assign_identity',
+                   arg_type=database_assign_identity_param_type)
+
+        c.argument('encryption_protector',
+                   arg_type=database_encryption_protector_param_type)
+
+        c.argument('keys',
+                   arg_type=database_keys_param_type)
+
+        c.argument('user_assigned_identity_id',
+                   arg_type=database_user_assigned_identity_param_type)
+
+        c.argument('federated_client_id',
+                   arg_type=database_federated_client_id_param_type)
 
     ###############################################
     #                sql db str                   #
@@ -1918,6 +2194,9 @@ def load_arguments(self, _):
         c.argument('requested_backup_storage_redundancy',
                    arg_type=backup_storage_redundancy_param_type_mi)
 
+        c.argument('zone_redundant',
+                   arg_type=zone_redundant_param_type)
+
     with self.argument_context('sql mi create') as c:
         c.argument('location',
                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
@@ -1941,7 +2220,8 @@ def load_arguments(self, _):
                 'yes',
                 'maintenance_configuration_id',
                 'primary_user_assigned_identity_id',
-                'key_id'
+                'key_id',
+                'zone_redundant'
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
@@ -2043,6 +2323,9 @@ def load_arguments(self, _):
         c.argument('maintenance_configuration_id',
                    options_list=['--maint-config-id', '-m'],
                    help='Change maintenance configuration for this managed instance.')
+
+        c.argument('zone_redundant',
+                   arg_type=zone_redundant_param_type)
 
         # Create args that will be used to build up the Managed Instance's Sku object
         create_args_for_complex_type(
@@ -2191,7 +2474,8 @@ def load_arguments(self, _):
                 'deleted_time',
                 'target_managed_database_name',
                 'target_managed_instance_name',
-                'restore_point_in_time'
+                'restore_point_in_time',
+                'tags'
             ])
 
         c.argument('deleted_time',
@@ -2215,6 +2499,11 @@ def load_arguments(self, _):
                    help='Name of the resource group of the managed instance to restore managed database to. '
                    'When not specified it defaults to source resource group.')
 
+        c.argument('source_subscription_id',
+                   options_list=['--source-sub', '-s'],
+                   help='Subscription id of the source database, the one restored from. '
+                   'This parameter should be used when doing cross subscription restore.')
+
         restore_point_arg_group = 'Restore Point'
 
         c.argument('restore_point_in_time',
@@ -2224,6 +2513,25 @@ def load_arguments(self, _):
                    help='The point in time of the source database that will be restored to create the'
                    ' new database. Must be greater than or equal to the source database\'s'
                    ' earliestRestoreDate value. ' + time_format_help)
+
+    with self.argument_context('sql midb recover') as c:
+        c.argument(
+            'recoverable_database_id',
+            options_list=['--recoverable-database-id', '-r'],
+            arg_group='Recover',
+            help='The id of recoverable database from geo-replicated instance')
+
+    with self.argument_context('sql recoverable-midb') as c:
+        c.argument(
+            'managed_instance_name',
+            options_list=['--mi', '--instance-name'])
+
+    with self.argument_context('sql recoverable-midb show') as c:
+        c.argument(
+            'recoverable_database_name',
+            options_list=['--database-name', '-n'],
+            required=True,
+            help='The id of recoverable database from geo-replicated instance')
 
     with self.argument_context('sql midb short-term-retention-policy set') as c:
         create_args_for_complex_type(
@@ -2443,6 +2751,20 @@ def load_arguments(self, _):
 
         c.argument('allow_data_loss',
                    arg_type=allow_data_loss_param_type)
+
+        c.argument('secondary_type',
+                   arg_type=secondary_type_param_type)
+
+        c.argument('resource_group_name_failover',
+                   options_list=['--resource-group', '-g'],
+                   help='Name of resource group of the secondary instance in the Instance Failover Group. '
+                   'You can configure the default group using `az configure --defaults group=<name>`')
+
+        c.argument('location_name_failover',
+                   options_list=['--location', '-l'],
+                   help='Location of the secondary instance in the Instance Failover Group. '
+                   'Values from: `az account list-locations`. You can configure the default location using '
+                   '`az configure --defaults location=<location>`')
 
     ###################################################
     #             sql sensitivity classification      #

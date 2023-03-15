@@ -49,6 +49,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_COMPUTE = ('azure.mgmt.compute', 'ComputeManagementClient')
     MGMT_NETWORK = ('azure.mgmt.network', 'NetworkManagementClient')
     MGMT_NETWORK_DNS = ('azure.mgmt.dns', 'DnsManagementClient')
+    MGMT_NETWORK_PRIVATEDNS = ('azure.mgmt.privatedns', 'PrivateDnsManagementClient')
     MGMT_AUTHORIZATION = ('azure.mgmt.authorization', 'AuthorizationManagementClient')
     MGMT_CONTAINERREGISTRY = ('azure.mgmt.containerregistry', 'ContainerRegistryManagementClient')
     MGMT_RESOURCE_FEATURES = ('azure.mgmt.resource.features', 'FeatureClient')
@@ -97,7 +98,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_CONSUMPTION = ('azure.mgmt.consumption', None)
     MGMT_CONTAINERINSTANCE = ('azure.mgmt.containerinstance', None)
     MGMT_COSMOSDB = ('azure.mgmt.cosmosdb', None)
-    MGMT_DEPLOYMENTMANAGER = ('azure.mgmt.deploymentmanager', None)
     MGMT_DATALAKE_ANALYTICS = ('azure.mgmt.datalake.analytics', None)
     MGMT_DATALAKE_STORE = ('azure.mgmt.datalake.store', None)
     MGMT_DATAMIGRATION = ('azure.mgmt.datamigration', None)
@@ -155,7 +155,7 @@ AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2022-09-01',
         ResourceType.MGMT_NETWORK: '2022-01-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2022-08-01', {
+        ResourceType.MGMT_COMPUTE: SDKProfile('2022-11-01', {
             'resource_skus': '2019-04-01',
             'disks': '2022-07-02',
             'disk_encryption_sets': '2022-03-02',
@@ -167,7 +167,7 @@ AZURE_API_PROFILES = {
             'gallery_applications': '2021-07-01',
             'gallery_application_versions': '2022-01-03',
             'shared_galleries': '2022-01-03',
-            'virtual_machine_scale_sets': '2022-08-01',
+            'virtual_machine_scale_sets': '2022-11-01',
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
@@ -180,10 +180,11 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS: '2022-08-01-preview',
         ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
+        ResourceType.MGMT_NETWORK_PRIVATEDNS: None,
         ResourceType.MGMT_KEYVAULT: '2022-07-01',
-        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2020-04-01-preview', {
+        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2022-04-01', {
             'classic_administrators': '2015-06-01',
-            'role_definitions': '2018-01-01-preview',
+            'role_definitions': '2022-04-01',
             'provider_operations_metadata': '2018-01-01-preview'
         }),
         ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2022-02-01-preview', {
@@ -191,7 +192,9 @@ AZURE_API_PROFILES = {
             'tasks': '2019-06-01-preview',
             'task_runs': '2019-06-01-preview',
             'runs': '2019-06-01-preview',
-            'network_rule': '2021-08-01-preview'
+            'network_rule': '2021-08-01-preview',
+            'cache_rules': '2023-01-01-preview',
+            'credential_sets': '2023-01-01-preview'
         }),
         # The order does make things different.
         # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
@@ -206,7 +209,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE_FILESHARE: '2021-06-08',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
-        ResourceType.MGMT_SERVICEBUS: '2022-01-01-preview',
+        ResourceType.MGMT_SERVICEBUS: '2022-10-01-preview',
         ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
         ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
             'action_groups': '2022-06-01',
@@ -241,15 +244,15 @@ AZURE_API_PROFILES = {
             'private_endpoint_connections': '2019-10-17-preview',
             'subscription_diagnostic_settings': '2017-05-01-preview'
         }),
-        ResourceType.MGMT_MSI: '2022-01-31-preview',
+        ResourceType.MGMT_MSI: '2023-01-31',
         ResourceType.MGMT_APPSERVICE: '2022-03-01',
         ResourceType.MGMT_IOTHUB: '2022-04-30-preview',
         ResourceType.MGMT_IOTDPS: '2021-10-15',
         ResourceType.MGMT_IOTCENTRAL: '2021-11-01-preview',
-        ResourceType.MGMT_ARO: '2022-04-01',
+        ResourceType.MGMT_ARO: '2022-09-04',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2022-11-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2023-01-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
         }),
@@ -299,7 +302,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
         ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
-        ResourceType.MGMT_SERVICEBUS: '2022-01-01-preview',
+        ResourceType.MGMT_SERVICEBUS: '2022-10-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-07-01-preview',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01',
         ResourceType.MGMT_CONTAINERREGISTRY: '2019-05-01',
@@ -346,7 +349,7 @@ AZURE_API_PROFILES = {
         # API versions
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
         ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
-        ResourceType.MGMT_SERVICEBUS: '2022-01-01-preview',
+        ResourceType.MGMT_SERVICEBUS: '2022-10-01-preview',
         ResourceType.MGMT_IOTHUB: '2019-03-22',
         ResourceType.MGMT_DATABOXEDGE: '2019-08-01'
     },
@@ -411,10 +414,6 @@ AZURE_API_PROFILES = {
 # We should avoid using ad hoc API versions,
 # use the version in a profile as much as possible.
 AD_HOC_API_VERSIONS = {
-    ResourceType.MGMT_NETWORK: {
-        'appservice_network': '2020-04-01',
-        'appservice_ensure_subnet': '2019-02-01'
-    },
     ResourceType.MGMT_CONTAINERREGISTRY: {
         # src/azure-cli/azure/cli/command_modules/acr/_client_factory.py:8
         'VERSION_2019_05_01_PREVIEW': "2019-05-01-preview",
@@ -426,6 +425,9 @@ AD_HOC_API_VERSIONS = {
     ResourceType.MGMT_CONTAINERSERVICE: {
         # src/azure-cli/azure/cli/command_modules/acs/tests/latest/test_custom.py:50
         'ManagedClusterAddonProfile': '2020-03-01',
+    },
+    ResourceType.MGMT_MSI: {
+        'user_assigned_identities': '2022-01-31-preview',
     }
 }
 
