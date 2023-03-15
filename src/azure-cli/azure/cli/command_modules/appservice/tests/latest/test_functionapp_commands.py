@@ -332,17 +332,6 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
             JMESPathCheck('linuxFxVersion', 'PowerShell|7.2')])
 
-    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer
-    def test_functionapp_quick_create(self, resource_group, storage_account):
-        functionapp_name = self.create_random_name('functionapp', 24)
-        plan = self.create_random_name('functionapp-plan', 24)
-
-        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-
-        r = self.cmd('functionapp create -g {} -n {} -p {} -s {}'.format(resource_group, functionapp_name, plan, storage)).get_output_in_json()
-        self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
-
 
 class FunctionUpdatePlan(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
@@ -540,6 +529,10 @@ class FunctionAppManagedEnvironment(LiveScenarioTest):
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        r = self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name))
+
+        self.assertTrue('ftpPublishingUrl' not in r)
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
