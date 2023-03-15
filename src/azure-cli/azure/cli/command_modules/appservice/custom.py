@@ -3628,7 +3628,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp_def.server_farm_id = plan
         functionapp_def.location = location
 
-    # TODO use managed-environment field on ASP model when we the latest SDK is avaliable.
     if environment is not None:
         if consumption_plan_location is not None:
             raise ArgumentUsageError(
@@ -3651,10 +3650,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp_def.location = location
         is_linux = True
 
-        functionapp_def.enable_additional_properties_sending()
-        existing_properties = functionapp_def.serialize()["properties"]
-        functionapp_def.additional_properties["properties"] = existing_properties
-        functionapp_def.additional_properties["properties"]["managedEnvironment"] = managed_environment.id
+        functionapp_def.managed_environment_id = managed_environment.id
 
     if functions_version == '2' and functionapp_def.location in FUNCTIONS_NO_V2_REGIONS:
         raise ValidationError("2.x functions are not supported in this region. To create a 3.x function, "
