@@ -8,8 +8,6 @@ import re
 import argparse
 from azure.cli.core.azclierror import ArgumentUsageError
 
-from azure.cli.core.azclierror import InvalidArgumentValueError
-from azure.cli.core.commands import parameters
 from knack.util import CLIError
 try:
     from urllib.parse import urlparse, urlsplit
@@ -45,6 +43,7 @@ def _validate_template_spec_out(namespace):
 
 def validate_deployment_stack_files(namespace):
     from azure.cli.core.commands.validators import validate_tags
+    from azure.cli.core.azclierror import InvalidArgumentValueError
     validate_tags(namespace)
     if namespace.template_file and not os.path.isfile(namespace.template_file):
         raise InvalidArgumentValueError('Please enter a valid template file path')

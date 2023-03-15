@@ -2816,21 +2816,21 @@ type: command
 short-summary: Create or update a deployment stack at management group scope
 examples:
   - name: Create a deployment stack using template file.
-    text: az stack mg create --name "StackName" --management-group-id myMg --template-file simpleTemplate.json --location "westus2" --description "description"
+    text: az stack mg create --name StackName --management-group-id myMg --template-file simpleTemplate.json --location westus2 --description description
   - name: Create a deployment stack with parameter file and delete resources.
-    text: az stack mg create --name "StackName" --management-group-id myMg --delete-resources --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location "westus2" --description "description"
+    text: az stack mg create --name StackName --management-group-id myMg --delete-resources --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location westus2 --description description
   - name: Create a deployment stack with template spec and delete resource groups
-    text: az stack mg create --name "StackName" --management-group-id myMg --delete-resource-groups --template-spec "TemplateSpecResourceIDWithVersion" --location "westus2" --description "description"
+    text: az stack mg create --name StackName --management-group-id myMg --delete-resource-groups --template-spec TemplateSpecResourceIDWithVersion --location westus2 --description description
   - name: Create a deployment stack using bicep file and delete all resources.
-    text: az stack mg create --name "StackName" --management-group-id myMg --delete-all --template-file simple.bicep --location "westus2" --description "description"
+    text: az stack mg create --name StackName --management-group-id myMg --delete-all --template-file simple.bicep --location westus2 --description description
   - name: Create a deployment stack using parameters from key/value pairs
-    text: az stack mg create --name "StackName" --management-group-id myMg --template-file simpleTemplate.json  --location "westus" --description "description" --parameters simpleTemplateParams.json value1=foo value2=bar
+    text: az stack mg create --name StackName --management-group-id myMg --template-file simpleTemplate.json  --location westus --description description --parameters simpleTemplateParams.json value1=foo value2=bar
   - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
-    text: az stack mg create --name rollout01 --management-group-id myMg --template-file azuredeploy.json  --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location "westus"
+    text: az stack mg create --name rollout01 --management-group-id myMg --template-file azuredeploy.json  --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus
   - name: Create a deployment stack from a local template, using deny settings.
-    text: az stack mg create --name rollout01 --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode "denyDelete" --deny-settings-excluded-actions "Microsoft.Compute/virtualMachines/write" --deny-settings-excluded-principals "test1 test2" --location "westus"
+    text: az stack mg create --name rollout01 --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals test1 test2 --location westus
   - name: Create a deployment stack from a local template, apply deny settings to child scope.
-    text: az stack mg create --name rollout01 --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode "denyDelete" --deny-settings-excluded-actions "Microsoft.Compute/virtualMachines/write" --deny-settings-apply-to-child-scopes --location "westus"
+    text: az stack mg create --name rollout01 --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --location westus
 """
 
 helps['stack mg list'] = """
@@ -2838,7 +2838,7 @@ type: command
 short-summary: List all deployment stacks in management group
 examples:
   - name: List all stacks 
-    text: az stack mg list ----management-group-id myMg
+    text: az stack mg list --management-group-id myMg
 """
 
 helps['stack mg show'] = """
@@ -2846,9 +2846,9 @@ type: command
 short-summary: Get specified deployment stack from management group scope
 examples:
   - name: Get stack by name.
-    text: az stack mg show --name "StackName" --management-group-id myMg
+    text: az stack mg show --name StackName --management-group-id myMg
   - name: Get stack by stack resource id.
-    text: az stack mg show --id "StackResourceID" --management-group-id myMg
+    text: az stack mg show --id StackResourceID --management-group-id myMg
 """
 
 helps['stack mg export'] = """
@@ -2856,9 +2856,9 @@ type: command
 short-summary: Exports the template used to create the deployment stack
 examples:
   - name: Export template by name.
-    text: az stack mg export --name "StackName" --management-group-id myMg
+    text: az stack mg export --name StackName --management-group-id myMg
   - name: Export template by stack resource id.
-    text: az stack mg export --id "StackResourceID" --management-group-id myMg
+    text: az stack mg export --id StackResourceID --management-group-id myMg
 """
 
 helps['stack mg delete'] = """
@@ -2866,9 +2866,9 @@ type: command
 short-summary: Delete specified deployment stack from management group scope
 examples:
   - name: Delete stack by name.
-    text: az stack mg delete --name "StackName" --management-group-id myMg
+    text: az stack mg delete --name StackName --management-group-id myMg
   - name: Delete stack by stack resource id.
-    text: az stack mg delete --id "StackResourceID" --management-group-id myMg
+    text: az stack mg delete --id StackResourceID --management-group-id myMg
 """
 
 helps['stack sub create'] = """
@@ -2876,25 +2876,25 @@ type: command
 short-summary: Create or update a deployment stack at subscription scope
 examples:
   - name: Create a deployment stack using template file.
-    text: az stack sub create --name "StackName" --template-file simpleTemplate.json --location "westus2" --description "description"
+    text: az stack sub create --name StackName --template-file simpleTemplate.json --location westus2 --description description
   - name: Create a deployment stack with parameter file and delete resources.
-    text: az stack sub create --name "StackName" --delete-resources --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location "westus2" --description "description"
+    text: az stack sub create --name StackName --delete-resources --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location westus2 --description description
   - name: Create a deployment stack with template spec and delete resource groups
-    text: az stack sub create --name "StackName" --delete-resource-groups --template-spec "TemplateSpecResourceIDWithVersion" --location "westus2" --description "description"
+    text: az stack sub create --name StackName --delete-resource-groups --template-spec TemplateSpecResourceIDWithVersion --location westus2 --description description
   - name: Create a deployment stack using bicep file and delete all resources.
-    text: az stack sub create --name "StackName" --delete-all --template-file simple.bicep --location "westus2" --description "description"
+    text: az stack sub create --name StackName --delete-all --template-file simple.bicep --location westus2 --description description
   - name: Create a deployment stack at a different subscription.
-    text: az stack sub create --name "StackName" --template-file simpleTemplate.json --location "westus2" --description "description --subscription "subscriptionId"
+    text: az stack sub create --name StackName --template-file simpleTemplate.json --location westus2 --description description --subscription subscriptionId
   - name: Create a deployment stack and deploy at the resource group scope.
-    text: az stack sub create --name "StackName" --template-file simpleTemplate.json  --location "westus" --deployment-resource-group "ResourceGroup" --description "description"
+    text: az stack sub create --name StackName --template-file simpleTemplate.json  --location westus --deployment-resource-group ResourceGroup --description description
   - name: Create a deployment stack using parameters from key/value pairs
-    text: az stack sub create --name "StackName" --template-file simpleTemplate.json  --location "westus" --description "description" --parameters simpleTemplateParams.json value1=foo value2=bar
+    text: az stack sub create --name StackName --template-file simpleTemplate.json  --location westus --description description --parameters simpleTemplateParams.json value1=foo value2=bar
   - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
-    text: az stack sub create --name rollout01 --template-file azuredeploy.json  --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location "westus"
+    text: az stack sub create --name rollout01 --template-file azuredeploy.json  --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus
   - name: Create a deployment stack from a local template, using deny settings.
-    text: az stack sub create --name rollout01 --template-file azuredeploy.json --deny-settings-mode "denyDelete" --deny-settings-excluded-actions "Microsoft.Compute/virtualMachines/write" --deny-settings-excluded-principals "test1 test2" --location "westus"
+    text: az stack sub create --name rollout01 --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals test1 test2 --location westus
   - name: Create a deployment stack from a local template, apply deny settings to child scopes.
-    text: az stack sub create --name rollout01 --template-file azuredeploy.json --deny-settings-mode "denyDelete" --deny-settings-excluded-actions "Microsoft.Compute/virtualMachines/write" --deny-settings-apply-to-child-scopes --location "westus"
+    text: az stack sub create --name rollout01 --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --location westus
 """
 
 helps['stack sub list'] = """
@@ -2910,9 +2910,9 @@ type: command
 short-summary: Get specified deployment stack from subscription scope
 examples:
   - name: Get stack by name.
-    text: az stack sub show --name "StackName"
+    text: az stack sub show --name StackName
   - name: Get stack by stack resource id.
-    text: az stack sub show --id "StackResourceID"
+    text: az stack sub show --id StackResourceID
 """
 
 helps['stack sub export'] = """
@@ -2920,9 +2920,9 @@ type: command
 short-summary: Exports the template used to create the deployment stack
 examples:
   - name: Export template by name.
-    text: az stack sub export --name "StackName"
+    text: az stack sub export --name StackName
   - name: Export template by stack resource id.
-    text: az stack sub export --id "StackResourceID"
+    text: az stack sub export --id StackResourceID
 """
 
 helps['stack sub delete'] = """
@@ -2930,9 +2930,9 @@ type: command
 short-summary: Delete specified deployment stack from subscription scope
 examples:
   - name: Delete stack by name.
-    text: az stack sub delete --name "StackName"
+    text: az stack sub delete --name StackName
   - name: Delete stack by stack resource id.
-    text: az stack sub delete --id "StackResourceID"
+    text: az stack sub delete --id StackResourceID
 """
 
 helps['stack group create'] = """
@@ -2940,23 +2940,23 @@ type: command
 short-summary: Create or update a deployment stack at resource group scope
 examples:
   - name: Create a deployment stack using template file and delete resources.
-    text: az stack group create --name "StackName" --resource-group "ResourceGroup" --delete-resources --template-file simpleTemplate.json --description "description"
+    text: az stack group create --name StackName --resource-group ResourceGroup --delete-resources --template-file simpleTemplate.json --description description
   - name: Create a deployment stack with parameter file and delete resource groups.
-    text: az stack group create --name "StackName" --resource-group "ResourceGroup" --delete-resource-groups --template-file simpleTemplate.json --parameters simpleTemplateParams.json --description "description"
+    text: az stack group create --name StackName --resource-group ResourceGroup --delete-resource-groups --template-file simpleTemplate.json --parameters simpleTemplateParams.json --description description
   - name: Create a deployment stack with template spec and delete all resources
-    text: az stack group create --name "StackName" --resource-group "ResourceGroup" --delete-all --template-spec "TemplateSpecResourceIDWithVersion" --description "description"
+    text: az stack group create --name StackName --resource-group ResourceGroup --delete-all --template-spec TemplateSpecResourceIDWithVersion --description description
   - name: Create a deployment stack using bicep file.
-    text: az stack group create --name "StackName" --resource-group "ResourceGroup" --template-file simple.bicep --description "description"
+    text: az stack group create --name StackName --resource-group ResourceGroup --template-file simple.bicep --description description
   - name: Create a deployment stack at a different subscription
-    text: az stack group create --name "StackName" --resource-group "ResourceGroup" --template-file simpleTemplate.json --description "description --subscription "subscriptionId"
+    text: az stack group create --name StackName --resource-group ResourceGroup --template-file simpleTemplate.json --description description --subscription subscriptionId
   - name: Create a deployment stack using parameters from key/value pairs
-    text: az stack group create --name "StackName" --template-file simpleTemplate.json  --resource-group "ResourceGroup" --description "description" --parameters simpleTemplateParams.json value1=foo value2=bar
+    text: az stack group create --name StackName --template-file simpleTemplate.json  --resource-group ResourceGroup --description description --parameters simpleTemplateParams.json value1=foo value2=bar
   - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
-    text: az stack group create --name rollout01 --template-file azuredeploy.json  --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --resource-group "ResourceGroup"
+    text: az stack group create --name rollout01 --template-file azuredeploy.json  --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --resource-group ResourceGroup
   - name: Create a deployment stack from a local template, using deny settings.
-    text: az stack group create --name rollout01 --resource-group "ResourceGroup" --template-file azuredeploy.json --deny-settings-mode "denyDelete" --deny-settings-excluded-actions "Microsoft.Compute/virtualMachines/write" --deny-settings-excluded-principals "test1 test2"
+    text: az stack group create --name rollout01 --resource-group ResourceGroup --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals test1 test2
   - name: Create a deployment stack from a local template, apply deny setting to child scopes.
-    text: az stack group create --name rollout01 --resource-group "ResourceGroup" --template-file azuredeploy.json --deny-settings-mode "denyDelete" --deny-settings-excluded-actions "Microsoft.Compute/virtualMachines/write" --deny-settings-apply-to-child-scopes
+    text: az stack group create --name rollout01 --resource-group ResourceGroup --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes
 """
 
 helps['stack group list'] = """
@@ -2964,7 +2964,7 @@ type: command
 short-summary: List all deployment stacks in resource group
 examples:
   - name: List all stacks in resource group
-    text: az stack group list --resource-group "ResourceGroup"
+    text: az stack group list --resource-group ResourceGroup
 """
 
 helps['stack group show'] = """
@@ -2972,9 +2972,9 @@ type: command
 short-summary: Get specified deployment stack from resource group scope
 examples:
   - name: Get stack by name.
-    text: az stack group show --name "StackName" --resource-group "ResourceGroup"
+    text: az stack group show --name StackName --resource-group ResourceGroup
   - name: Get stack by stack resource id.
-    text: az stack group show --id "StackResourceID"
+    text: az stack group show --id StackResourceID
 """
 
 helps['stack group export'] = """
@@ -2982,9 +2982,9 @@ type: command
 short-summary: Exports the template used to create the deployment stack from resource group scope
 examples:
   - name: Export template by name.
-    text: az stack group export --name "StackName" --resource-group "ResourceGroup"
+    text: az stack group export --name StackName --resource-group ResourceGroup
   - name: Export template by stack resource id.
-    text: az stack group export --id "StackResourceID"
+    text: az stack group export --id StackResourceID
 """
 
 helps['stack group delete'] = """
@@ -2992,70 +2992,11 @@ type: command
 short-summary: Delete specified deployment stack from resource group scope
 examples:
   - name: Delete stack by name.
-    text: az stack group delete --name "StackName" --resource-group "ResourceGroup"
+    text: az stack group delete --name StackName --resource-group ResourceGroup
   - name: Delete stack by stack resource id.
-    text: az stack group delete --id "StackResourceID"
+    text: az stack group delete --id StackResourceID
 """
 
-helps['stack snapshot sub list'] = """
-type: command
-short-summary: List all snapshots in specified deployment stack at subscription scope
-examples:
-  - name: List all snapshots using stack name
-    text: az stack snapshot sub list --stack-name "StackName"
-  - name: List all snapshots using stack id
-    text: az stack snapshot sub list --stack "StackResourceID"
-"""
-
-helps['stack snapshot sub show'] = """
-type: command
-short-summary: Get specified snapshot in deployment stack at subscription scope
-examples:
-  - name: Get snapshot with stack name and snapshot name.
-    text: az stack snapshot sub show --name "SnapshotName" --stack-name "StackName"
-  - name: Get snapshot by snapshot resource id.
-    text: az stack snapshot sub show --id "SnapshotResourceID"
-"""
-
-helps['stack snapshot sub delete'] = """
-type: command
-short-summary: Delete specified snapshot in deployment stack at subscription scope
-examples:
-  - name: Delete snapshot with stack name and snapshot name.
-    text: az stack snapshot sub delete --name "SnapshotName" --stack-name "StackName"
-  - name: Delete snapshot by snapshot resource id.
-    text: az stack snapshot sub delete --id "SnapshotResourceID"
-"""
-
-helps['stack snapshot group list'] = """
-type: command
-short-summary: List all snapshots in specified deployment stack at resource group scope
-examples:
-  - name: List all snapshots using stack name
-    text: az stack snapshot group list --stack-name "StackName" --resource-group "ResourceGroup"
-  - name: List all snapshots using stack id
-    text: az stack snapshot group list --stack "StackResourceID"
-"""
-
-helps['stack snapshot group show'] = """
-type: command
-short-summary: Get specified snapshot in deployment stack at resource group scope
-examples:
-  - name: Get snapshot with stack name and snapshot name.
-    text: az stack snapshot group show --name "SnapshotName" --stack-name "StackName" "StackName" --resource-group "ResourceGroup"
-  - name: Get snapshot by snapshot resource id.
-    text: az stack snapshot group show --id "SnapshotResourceID"
-"""
-
-helps['stack snapshot group delete'] = """
-type: command
-short-summary: Delete specified snapshot in deployment stack at resource group scope
-examples:
-  - name: Delete snapshot with stack name and snapshot name.
-    text: az stack snapshot group delete --name "SnapshotName" --stack-name "StackName" "StackName" --resource-group "ResourceGroup"
-  - name: Delete snapshot by snapshot resource id.
-    text: az stack snapshot group delete --id "SnapshotResourceID"
-"""
 helps['bicep generate-params'] = """
 type: command
 short-summary: Generate parameters file for a Bicep file.
