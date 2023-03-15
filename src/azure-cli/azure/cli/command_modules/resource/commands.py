@@ -100,26 +100,16 @@ def transform_stacks(result):
                         ('Last Modified', result['systemData']['lastModifiedAt']),
                         ('Deployment Id', result['deploymentId'])])
 
-def transform_stacks_show(result):
-    resources = ""
-    for res in result['resources']: 
-        resources += res['id'] + ","
-    
-    return OrderedDict([('Name', result['name']),
-                        ('State', result['provisioningState']),
-                        ('Last Modified', result['systemData']['lastModifiedAt']),
-                        ('Resource IDs', resources[:-1])])
-
 def transform_stacks_list(result):
     transformed = []
     for r in result:
         resources = ""
-        for reslist in r['resources']:
-            resources += reslist['id'] + ","
+        if r['resources']:
+            for reslist in r['resources']:
+                resources += reslist['id'] + ","
 
-        res = OrderedDict([('Name', r['name']),('State', r['provisioningState']), ('Last Modified', r['systemData']['lastModifiedAt']), ('Resource IDs', resources[:-1])])
-
-        transformed.append(res)
+            res = OrderedDict([('Name', r['name']),('State', r['provisioningState']), ('Last Modified', r['systemData']['lastModifiedAt']), ('Resource IDs', resources[:-1])])
+            transformed.append(res)
     return transformed
 
 def transform_stacks_export(result):
@@ -414,7 +404,7 @@ def load_command_table(self, _):
         g.custom_command('export', 'export_template_deployment_stack_at_management_group', table_transformer=transform_stacks_export)
     
     with self.command_group('stack sub', resource_deploymentstacks_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
-        g.custom_command('show', 'show_deployment_stack_at_subscription', table_transformer=transform_stacks_show)
+        g.custom_command('show', 'show_deployment_stack_at_subscription', table_transformer=transform_stacks)
         g.custom_command('list', 'list_deployment_stack_at_subscription', table_transformer=transform_stacks_list)
         g.custom_command('delete', 'delete_deployment_stack_at_subscription')
         g.custom_command('create', 'create_deployment_stack_at_subscription', validator=validate_deployment_stack_files, table_transformer=transform_stacks)
