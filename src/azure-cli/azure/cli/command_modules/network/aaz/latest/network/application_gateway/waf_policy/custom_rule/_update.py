@@ -83,7 +83,6 @@ class Update(AAZCommand):
         _args_schema.state = AAZStrArg(
             options=["--state"],
             help="Describe if the custom rule is in enabled or disabled state.",
-            default="Enabled",
             nullable=True,
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
