@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "sql mi",
+    "sql mi server-configuration-option",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Managed Instance
+    """Server configuration option management commands.
     """
     pass
 
