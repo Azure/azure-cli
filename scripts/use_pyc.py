@@ -47,7 +47,7 @@ def main(folder, version=None):
     # define pyc suffix to skip it
     pyc_suffix = f'cpython-{version.replace(".", "")}.pyc'
     _LOGGER.info(f'pyc suffix: {pyc_suffix}')
-    for file in glob.glob(f'{folder}/**/__pycache__/*{pyc_suffix}.pyc', recursive=True):
+    for file in glob.glob(f'{folder}/**/__pycache__/*{pyc_suffix}', recursive=True):
         # file is /opt/az/lib/python3.10/site-packages/websocket/__pycache__/_app.cpython-310.pyc
         # py_filename is _app.py
         py_filename = Path(file).name[:-len('cpython-310.pyc')] + 'py'
