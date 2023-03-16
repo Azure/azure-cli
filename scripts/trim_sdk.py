@@ -17,7 +17,6 @@ import re
 import shutil
 
 import azure.mgmt
-import azure.mgmt.network
 
 from azure.cli.core.profiles import AD_HOC_API_VERSIONS, AZURE_API_PROFILES, ResourceType
 
@@ -120,8 +119,6 @@ def _get_biggest_sdks_to_trim():
     # Return top biggest SDKs. This list was retrieved by running
     # ncdu /opt/az/lib/python3.10/site-packages/azure/mgmt
     resource_types = [
-        # /network
-        ResourceType.MGMT_NETWORK,
         # /web
         ResourceType.MGMT_APPSERVICE,
         # /compute

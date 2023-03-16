@@ -18,7 +18,7 @@ class Update(AAZCommand):
     """Update a route server.
 
     :example: Update a route server.
-        az network routeserver update --name myrouteserver --resource-group myresourcegroup --tags super_secure no_80 no_22
+        az network routeserver update --name myrouteserver --resource-group myresourcegroup --allow-b2b-traffic
     """
 
     _aaz_info = {
@@ -52,14 +52,20 @@ class Update(AAZCommand):
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="The name of the Route Server.",
+            help="Name of the route server.",
             required=True,
             id_part="name",
         )
         _args_schema.allow_b2b_traffic = AAZBoolArg(
             options=["--allow-b2b-traffic"],
-            help="Allow branch to branch traffic.",
+            help="Whether to allow branch to branch traffic.",
             nullable=True,
+        )
+        _args_schema.hub_routing_preference = AAZStrArg(
+            options=["--hub-routing-preference"],
+            help="Routing preference of the route server.",
+            nullable=True,
+            enum={"ASPath": "ASPath", "ExpressRoute": "ExpressRoute", "VpnGateway": "VpnGateway"},
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
@@ -339,6 +345,7 @@ class Update(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("allowBranchToBranchTraffic", AAZBoolType, ".allow_b2b_traffic")
+                properties.set_prop("hubRoutingPreference", AAZStrType, ".hub_routing_preference")
 
             tags = _builder.get(".tags")
             if tags is not None:

@@ -5159,8 +5159,6 @@ class NetworkVirtualRouter(ScenarioTest):
 
 
 class NetworkVirtualHubRouter(ScenarioTest):
-
-    # @unittest.skip('CannotDeleteVirtualHubWhenItIsInUse')
     @ResourceGroupPreparer(name_prefix='cli_test_virtual_hub_router', location='centraluseuap')
     def test_network_virtual_hub_router_scenario(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -5189,15 +5187,17 @@ class NetworkVirtualHubRouter(ScenarioTest):
         })
 
         self.cmd('network routeserver create -g {rg} -l {location} -n {vrouter} '
-                 '--hosted-subnet {subnet1_id} --public-ip-address {vhr_ip1}',
+                 '--hosted-subnet {subnet1_id} --public-ip-address {vhr_ip1} --hub-routing-preference aspath',
                  checks=[
                      self.check('type', 'Microsoft.Network/virtualHubs'),
                      self.check('ipConfigurations', None),
-                     self.check('provisioningState', 'Succeeded')
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check("hubRoutingPreference", "ASPath")
                  ])
 
-        self.cmd('network routeserver update -g {rg} --name {vrouter}  --allow-b2b-traffic', checks=[
-            self.check('allowBranchToBranchTraffic', True)
+        self.cmd('network routeserver update -g {rg} --name {vrouter}  --allow-b2b-traffic --hub-routing-preference expressroute', checks=[
+            self.check('allowBranchToBranchTraffic', True),
+            self.check("hubRoutingPreference", "ExpressRoute")
         ])
 
         self.cmd('network routeserver list -g {rg}')
