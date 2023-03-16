@@ -7,8 +7,6 @@ ARG PYTHON_VERSION="3.10"
 
 FROM python:${PYTHON_VERSION}-alpine
 
-ARG PYTHON_VERSION="3.10"
-
 ARG CLI_VERSION
 
 # Metadata as defined at http://label-schema.org
@@ -54,8 +52,11 @@ COPY . /azure-cli
 
 # 1. Build packages and store in tmp dir
 # 2. Install the cli and the other command modules that weren't included
+
+# Python image has build-in env $PYTHON_VERSION=3.10.10.
+# `ARG PYTHON_VERSION="3.10"` works on ARM64, but it can't override the default value on AMD64.
 RUN ./scripts/install_full.sh && python ./scripts/trim_sdk.py \
- && python ./scripts/use_pyc.py /usr/local/lib/python$PYTHON_VERSION/site-packages/ \
+ && python ./scripts/use_pyc.py /usr/local/lib/python${PYTHON_VERSION:0:4}/site-packages/ \
  && cat /azure-cli/az.completion > ~/.bashrc \
  && runDeps="$( \
     scanelf --needed --nobanner --recursive /usr/local \
