@@ -169,55 +169,11 @@ def get_postgres_tiers(sku_info):
     return list(sku_info.keys())
 
 
-def get_postgres_list_skus_info(cmd, location, server_name=None):
-    list_skus_client = cf_postgres_flexible_location_capabilities(cmd.cli_ctx, '_')
-    params = {'serverName': server_name} if server_name else None
-    list_skus_result = list_skus_client.execute(location, params=params)
-    return _postgres_parse_list_skus(list_skus_result)
-
-
 def get_mysql_list_skus_info(cmd, location, server_name=None):
     list_skus_client = cf_mysql_flexible_location_capabilities(cmd.cli_ctx, '_')
     params = {'serverName': server_name} if server_name else None
     list_skus_result = list_skus_client.list(location, params=params)
     return _mysql_parse_list_skus(list_skus_result)
-
-
-def _postgres_parse_list_skus(result):
-    result = _get_list_from_paged_response(result)
-
-    if not result:
-        raise InvalidArgumentValueError("No available SKUs in this location")
-
-    single_az = 'ZoneRedundant' not in result[0].supported_ha_mode
-    geo_backup_supported = result[0].geo_backup_supported
-
-    tiers = result[0].supported_flexible_server_editions
-    tiers_dict = {}
-    for tier_info in tiers:
-        tier_name = tier_info.name
-        tier_dict = {}
-
-        skus = set()
-        versions = set()
-        for version in tier_info.supported_server_versions:
-            versions.add(version.name)
-            for vcores in version.supported_vcores:
-                skus.add(vcores.name)
-        tier_dict["skus"] = skus
-        tier_dict["versions"] = versions
-
-        storage_info = tier_info.supported_storage_editions[0]
-        storage_sizes = set()
-        for size in storage_info.supported_storage_mb:
-            storage_sizes.add(int(size.storage_size_mb // 1024))
-        tier_dict["storage_sizes"] = storage_sizes
-
-        tiers_dict[tier_name] = tier_dict
-
-    return {'sku_info': tiers_dict,
-            'single_az': single_az,
-            'geo_backup_supported': geo_backup_supported}
 
 
 def _mysql_parse_list_skus(result):
