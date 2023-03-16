@@ -27,7 +27,8 @@ steps:
       # This helps detect issues in CI if a used SDK API version is deleted by the below script.
       python $CLI_REPO_PATH/scripts/trim_sdk.py
       # This helps detect issues in CI if aaz compacted
-      if [ "$EnableCompactAAZ" = true ]; then
+      echo EnableCompactAAZ: ${{ parameters.EnableCompactAAZ }}
+      if [ "${{ parameters.EnableCompactAAZ }}" == 'True' ]; then
         python $CLI_REPO_PATH/scripts/compact_aaz.py
       fi
     displayName: 'azdev setup'
