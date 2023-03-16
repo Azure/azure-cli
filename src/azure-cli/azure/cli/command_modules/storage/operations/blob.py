@@ -350,6 +350,10 @@ def set_service_properties_track2(client, parameters, delete_retention=None, del
     if not parameters.minute_metrics.enabled:
         parameters.minute_metrics.include_apis = None
 
+    if not parameters.static_website.enabled:
+        parameters.static_website.index_document = None
+        parameters.static_website.error_document404_path = None
+
     # checks
     policy = kwargs.get('delete_retention_policy', None)
     if policy and policy.enabled and not policy.days:
