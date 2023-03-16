@@ -1209,10 +1209,6 @@ helps['aks nodepool start'] = """
 helps['aks nodepool operation-abort'] = """
     type: command
     short-summary: Abort last running operation on nodepool.
-    parameters:
-        - name: --nodepool-name
-          type: string
-          short-summary: Agent pool name
     examples:
         - name: Abort operation on agent pool
           text: az aks nodepool operation-abort -g myResourceGroup --nodepool-name nodepool1 --cluster-name myAKSCluster
