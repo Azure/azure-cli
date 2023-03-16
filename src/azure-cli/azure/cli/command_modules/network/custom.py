@@ -910,7 +910,7 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
                 child_name_1=http_settings
             )
 
-        from .aaz.latest.network.application_gateway._health_on_demand import HealthOnDemand
+        from .aaz.latest.network.application_gateway import HealthOnDemand
         return LongRunningOperation(cmd.cli_ctx)(
             HealthOnDemand(cli_ctx=cmd.cli_ctx)(command_args={
                 "name": application_gateway_name,
@@ -928,7 +928,7 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
             })
         )
 
-    from .aaz.latest.network.application_gateway._health import Health
+    from .aaz.latest.network.application_gateway import Health
     return LongRunningOperation(cmd.cli_ctx)(
         Health(cli_ctx=cmd.cli_ctx)(command_args={
             "name": application_gateway_name,
@@ -6418,6 +6418,7 @@ def create_virtual_hub(cmd,
                        virtual_hub_name,
                        hosted_subnet,
                        public_ip_address,
+                       hub_routing_preference=None,
                        location=None,
                        tags=None):
     from azure.core.exceptions import HttpResponseError
@@ -6437,6 +6438,7 @@ def create_virtual_hub(cmd,
         'location': location,
         'tags': tags,
         'sku': 'Standard',
+        "hub_routing_preference": hub_routing_preference
     }
     from .aaz.latest.network.routeserver import Create
     vhub_poller = Create(cli_ctx=cmd.cli_ctx)(command_args=args)
