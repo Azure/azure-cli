@@ -42,7 +42,7 @@ def main(folder, version=None):
         version = re.search(r'python(\d\.\d+)', folder).group(1)
     else:
         # 3.10.10
-        version = version.split('.')[:2].join('.')
+        version = '.'.join(version.split('.')[:2])
     # invoke==1.2.0 has a weird file: invoke/completion/__pycache__/__init__.cpython-36.pyc
     # define pyc suffix to skip it
     pyc_suffix = f'cpython-{version.replace(".", "")}.pyc'
