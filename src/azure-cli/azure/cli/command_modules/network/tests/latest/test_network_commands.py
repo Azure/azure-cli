@@ -2352,7 +2352,8 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('priority', 50),
                      self.check('ruleType', 'MatchRule'),
                      self.check('action', 'Log'),
-                     self.check('matchConditions | length(@)', 0)
+                     self.check('matchConditions | length(@)', 0),
+                     self.check("state", "Enabled")
                  ])
         self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
             self.check('customRules | length(@)', 1)
@@ -2386,10 +2387,13 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  ])
 
         # update one of properties
-        self.cmd('network application-gateway waf-policy custom-rule update -g {rg} '
+        self.cmd('network application-gateway waf-policy custom-rule update -g {rg} --state disabled '
                  '--policy-name {waf} -n {rule} '
                  '--priority 75',
-                 checks=self.check('priority', 75))
+                 checks=[
+                     self.check('priority', 75),
+                     self.check("state", "Disabled")
+                 ])
 
         # add another match condition to the same custom rule
         self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
