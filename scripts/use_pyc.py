@@ -16,6 +16,9 @@ def main(folder, version=None):
     _LOGGER.info(f'Replace .py with .pyc, base folder: {folder}')
     if version is None:
         version = re.search(r'python(\d\.\d+)', folder).group(1)
+    else:
+        # 3.10.10
+        version = version.split('.')[:2].join('.')
     # invoke==1.2.0 has a weird file: invoke/completion/__pycache__/__init__.cpython-36.pyc
     # define pyc suffix to skip it
     pyc_suffix = f'cpython-{version.replace(".", "")}.pyc'
@@ -36,4 +39,7 @@ def main(folder, version=None):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    main(sys.argv[1])
+    if len(sys.argv) == 2:
+        main(sys.argv[1])
+    else:
+        main(sys.argv[1], sys.argv[2])
