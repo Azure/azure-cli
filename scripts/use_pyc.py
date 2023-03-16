@@ -57,8 +57,8 @@ def main(folder, version=None):
             py_path.unlink()
             shutil.move(file, py_path.with_suffix('.pyc'))
 
-    for folder in glob.glob(f'{folder}/**/__pycache__', recursive=True):
-        shutil.rmtree(folder)
+    for f in glob.glob(f'{folder}/**/__pycache__', recursive=True):
+        shutil.rmtree(f)
 
     _LOGGER.info('Finish processing')
     _print_folder_size(folder)
