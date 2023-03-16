@@ -183,6 +183,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('slot', options_list=['--slot', '-s'], help='slot to restore the deleted content to')
         c.argument('restore_content_only', action='store_true',
                    help='restore only deleted files without web app settings')
+        c.argument('target_app_svc_plan', help='The app service plan for the new azure web app.')
 
     with self.argument_context('webapp traffic-routing') as c:
         c.argument('distribution', options_list=['--distribution', '-d'], nargs='+',
@@ -247,6 +248,9 @@ subscription than the app service environment, please use the resource ID for --
 
         with self.argument_context(scope + ' config ssl bind') as c:
             c.argument('ssl_type', help='The ssl cert type', arg_type=get_enum_type(['SNI', 'IP']))
+            c.argument('hostname', help='The custom domain name. If empty, hostnames will be selected automatically')
+        with self.argument_context(scope + ' config ssl unbind') as c:
+            c.argument('hostname', help='The custom domain name. If empty, hostnames will be selected automatically')
         with self.argument_context(scope + ' config ssl upload') as c:
             c.argument('certificate_password', help='The ssl cert password')
             c.argument('certificate_file', type=file_type, help='The filepath for the .pfx file')
@@ -254,6 +258,7 @@ subscription than the app service environment, please use the resource ID for --
                        help='The name of the slot. Default to the productions slot if not specified')
         with self.argument_context(scope + ' config ssl') as c:
             c.argument('certificate_thumbprint', help='The ssl cert thumbprint')
+            c.argument('certificate_name', help='The name of the certificate.')
         with self.argument_context(scope + ' config appsettings') as c:
             c.argument('settings', nargs='+', help="space-separated app settings in a format of `<name>=<value>`")
             c.argument('setting_names', nargs='+', help="space-separated app setting names")
@@ -264,8 +269,6 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('hostname', help='The custom domain name')
             c.argument('name', options_list=['--name', '-n'], help='Name of the web app.')
             c.argument('resource-group', options_list=['--resource-group', '-g'], help='Name of resource group.')
-        with self.argument_context(scope + ' config ssl show') as c:
-            c.argument('certificate_name', help='The name of the certificate')
         with self.argument_context(scope + ' config hostname') as c:
             c.argument('hostname', completer=get_hostname_completion_list,
                        help="hostname assigned to the site, such as custom domains", id_part='child_name_1')

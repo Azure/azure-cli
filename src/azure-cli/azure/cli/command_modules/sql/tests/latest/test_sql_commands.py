@@ -264,43 +264,6 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         # test list sql server should be 0
         self.cmd('sql server list -g {}'.format(resource_group_1), checks=[NoneCheck()])
 
-        # test create third sql server, with identity and federated client id
-        self.cmd('sql server create -g {} --name {} -l {} -i '
-                 '--admin-user {} --admin-password {} --federated-client-id {}'
-                 .format(resource_group_1, server_name_3, resource_group_location, admin_login, admin_passwords[0], federated_client_id_1),
-                 checks=[
-                     JMESPathCheck('name', server_name_3),
-                     JMESPathCheck('location', resource_group_location),
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', admin_login),
-                     JMESPathCheck('identity.type', 'SystemAssigned'),
-                     JMESPathCheck('federatedClientId', federated_client_id_1)])
-
-        self.cmd('sql server show -g {} --name {}'
-                 .format(resource_group_1, server_name_3),
-                 checks=[
-                     JMESPathCheck('name', server_name_3),
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('federatedClientId', federated_client_id_1)])
-
-        # test update sql server's federated client id
-        self.cmd('sql server update -g {} --name {} --admin-password {} --federated-client-id {} -i'
-                 .format(resource_group_1, server_name_3, admin_passwords[2], federated_client_id_2),
-                 checks=[
-                     JMESPathCheck('name', server_name_3),
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', admin_login),
-                     JMESPathCheck('federatedClientId', federated_client_id_2)])
-
-        # test update sql server's federated client id to empty guid
-        self.cmd('sql server update -g {} --name {} --admin-password {} --federated-client-id {} -i'
-                 .format(resource_group_1, server_name_3, admin_passwords[2], federated_client_id_3),
-                 checks=[
-                     JMESPathCheck('name', server_name_3),
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', admin_login),
-                     JMESPathCheck('federatedClientId', None)])
-
         # delete sql server
         self.cmd('sql server delete -g {} --name {} --yes'
                  .format(resource_group_1, server_name_3), checks=NoneCheck())
@@ -880,8 +843,8 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('readScale', 'Enabled'),
                      JMESPathCheck('highAvailabilityReplicaCount', '2')])
 
-    @ResourceGroupPreparer(location='westcentralus')
-    @SqlServerPreparer(location='westcentralus')
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
     def test_sql_db_ledger(self, resource_group, resource_group_location, server):
         database_name_one = "cliautomationdb01"
         database_name_two = "cliautomationdb02"
@@ -920,6 +883,45 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('ledgerOn', True)])
 
+    def test_sql_per_db_cmk(self):
+        server = "pstestsvr"
+        resource_group = "pstest"
+        database_name_one = "cliautomationdb04"
+        database_name_two = "cliautomationdb05"
+        encryption_protector = "https://pstestkv.vault.azure.net/keys/testkey4/6638b3667e384aefa31364f94d230361"
+        encryption_protector2 = "https://pstestkv.vault.azure.net/keys/testkey5/fd021f84a0d94d43b8ef33154bcab86f"
+        umi = "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
+
+        # test sql db is created with db level encryption protector and umi
+
+        # az sql db create -g pstest -ai --server pstestsvr --name clidbwithcmk --encryption-protector "https://pstestkv.vault.azure.net/keys/testkey/f62d937858464f329ab4a8c2dc7e0fa4"  
+        # --user-assigned-identity-id "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi" --yes
+        self.cmd('sql db create -g {} --server {} --name {} -i --encryption-protector {} --user-assigned-identity-id {} --yes'
+                 .format(resource_group, server, database_name_one, encryption_protector, umi),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one)])
+
+        self.cmd('sql db show -g {} -s {} --name {}'
+                 .format(resource_group, server, database_name_one),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one),
+                     JMESPathCheck('encryptionProtector', encryption_protector)])
+
+        self.cmd('sql db update -g {} --server {} --name {} -i --encryption-protector {}'
+                 .format(resource_group, server, database_name_one, encryption_protector2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one)])
+
+        self.cmd('sql db show -g {} -s {} --name {}'
+                 .format(resource_group, server, database_name_one),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one),
+                     JMESPathCheck('encryptionProtector', encryption_protector2)])
+
     @ResourceGroupPreparer(location='eastus2euap')
     @SqlServerPreparer(location='eastus2euap')
     def test_sql_db_preferred_enclave_type(self, resource_group, resource_group_location, server):
@@ -927,6 +929,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
         database_name_two = "cliautomationdb02"
         preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default
         preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs
+
 
         # test sql db is created with default enclave type
         self.cmd('sql db create -g {} --server {} --name {} --preferred-enclave-type {} --yes'
@@ -1134,17 +1137,21 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
 
 
 class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
+    @live_only()
     def test_sql_db_long_term_retention(
             self):
         self.kwargs.update({
-            'rg': 'CustomerExperienceTeam_RG',
-            'loc': 'westcentralus',
-            'server_name': 'mi-tooling-server',
-            'database_name': 'a-reneamoso-qpi-testing',
+            'rg': 'strehan-donotdelete-canaryeuap',
+            'loc': 'centraluseuap',
+            'server_name': 'testsvr-strehan-donotdelete1',
+            'database_name': 'basicdb2',
             'weekly_retention': 'P1W',
             'monthly_retention': 'P1M',
             'yearly_retention': 'P2M',
-            'week_of_year': 12
+            'week_of_year': 12,
+            'encryption_protector' : 'https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1',
+            'keys' : '"https://test123343strehan.vault.azure.net/keys/k2/66f51a6e70f04067af8eaf77805e88b1" "https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1" "https://test123343strehan.vault.azure.net/keys/testk1/96151496df864e32aa62a3c1857b2931"',
+            'umi' : '/subscriptions/e1775f9f-a286-474d-b6f0-29c42ac74554/resourcegroups/ArmTemplate/providers/Microsoft.ManagedIdentity/userAssignedIdentities/shobhittest'
         })
 
         # test update long term retention on live database
@@ -1225,14 +1232,15 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
 
         # test restore managed database from LTR backup
         self.kwargs.update({
-            'dest_database_name': 'cli-restore-ltr'
+            'dest_database_name': 'cli-restore-ltr3'
         })
 
         self.cmd('sql db delete -g {rg} -s {server_name} -n {dest_database_name} --yes')
 
         self.cmd(
             'sql db ltr-backup restore --backup-id \'{backup_id}\' --dest-database {dest_database_name}'
-            ' --dest-server {server_name} --dest-resource-group {rg}',
+            ' --dest-server {server_name} --dest-resource-group {rg} -i --encryption-protector {encryption_protector}'
+            ' --keys {keys} --umi {umi}',
             checks=[
                 self.check('name', '{dest_database_name}')])
 
@@ -1249,10 +1257,10 @@ class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
     def test_sql_db_geo_restore(
             self):
         self.kwargs.update({
-            'rg': 'rebeccaxu-test',
-            'loc': 'eastus',
-            'server_name': 'rebeccaxu-eastus-svr',
-            'database_name': 'cli-test-hs',
+            'rg': 'sejagada-AlwaysEncrypted',
+            'loc': 'eastus2euap',
+            'server_name': 'sejagada-ae-sqlserver-canary-donotdelete',
+            'database_name': 'sejagada-ae-sqldb-canary-donotdelete'
         })
 
         # test list geo backups for database
@@ -1269,7 +1277,7 @@ class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'backup_id': backup_id,
-            'dest_database_name': "cli-georestore"
+            'dest_database_name': "cli-georestore1"
         })
 
         self.cmd(
@@ -1476,6 +1484,47 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_copy_name),
                      JMESPathCheck('elasticPoolName', pool_name)
                  ])
+
+        
+
+    @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
+    @ResourceGroupPreparer(parameter_name='resource_group_2', location='westeurope')
+    @SqlServerPreparer(parameter_name='server1', resource_group_parameter_name='resource_group_1',
+                       location='eastus2euap')
+    @SqlServerPreparer(parameter_name='server2', resource_group_parameter_name='resource_group_2',
+                       location='eastus2euap')
+    @AllowLargeResponse()
+    def test_sql_db_copy_with_perdb_cmk(self, resource_group_1, resource_group_2,
+                         resource_group_location,
+                         server1, server2):
+        database_name = "perdbcmkdb"
+        database_copy_name = "perdbcmkdb_copy"
+        service_objective = 'GP_Gen5_8'
+
+        # copy db with per db cmk Enabled
+        encryption_protector = "https://pstestkv.vault.azure.net/keys/testkey/f62d937858464f329ab4a8c2dc7e0fa4"
+        umi = "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
+
+        # create db with db level encryption protector and umi
+
+        # az sql db create -g pstest -ai --server pstestsvr --name clidbwithcmk --encryption-protector "https://pstestkv.vault.azure.net/keys/testkey/f62d937858464f329ab4a8c2dc7e0fa4"  
+        # --user-assigned-identity-id "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi" --yes
+        self.cmd('sql db create -g {} --server {} --name {} -i --encryption-protector {} --user-assigned-identity-id {} --yes'
+                 .format(resource_group_1, server1, database_name, encryption_protector, umi),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('name', database_name)])
+
+        self.cmd('sql db copy -g {} --server {} --name {} '
+                 '--dest-name {} --dest-resource-group {} --dest-server {} '
+                 '-i --encryption-protector {} --user-assigned-identity-id {}'
+                 .format(resource_group_1, server1, database_name, database_copy_name,
+                         resource_group_2, server2, encryption_protector, umi),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group_2),
+                     JMESPathCheck('encryptionProtector', encryption_protector)
+                 ])
+
 
 
 def _get_earliest_restore_date(db):
@@ -2670,7 +2719,7 @@ class SqlServerDnsAliasMgmtScenarioTest(ScenarioTest):
         s2 = ServerInfo(server_name_2, resource_group_1, resource_group_location_1)
         s3 = ServerInfo(server_name_3, resource_group_2, resource_group_location_2)
 
-        alias_name = 'alias1'
+        alias_name = 'alias4'
 
         # verify setup
         for s in (s1, s2, s3):
@@ -3780,19 +3829,19 @@ class SqlServerConnectionStringScenarioTest(ScenarioTest):
         # ADO.NET, username/password
         conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c ado.net').get_output_in_json()
         self.assertEqual(conn_str,
-                         'Server=tcp:myserver.database.windows.net,1433;Database=mydb;User ID=<username>;Password=<password>;Encrypt=true;Connection Timeout=30;')
+                         'Server=tcp:myserver.database.windows.net,1433;Initial Catalog=mydb;Persist Security Info=False;User ID=<username>;Password=<password>;MultipleActiveResultSets=False;Encrypt=true;TrustServerCertificate=False;Connection Timeout=30;')
 
         # ADO.NET, ADPassword
         conn_str = self.cmd(
             'sql db show-connection-string -s myserver -n mydb -c ado.net -a ADPassword').get_output_in_json()
         self.assertEqual(conn_str,
-                         'Server=tcp:myserver.database.windows.net,1433;Database=mydb;User ID=<username>;Password=<password>;Encrypt=true;Connection Timeout=30;Authentication="Active Directory Password"')
+                         'Server=tcp:myserver.database.windows.net,1433;Initial Catalog=mydb;Persist Security Info=False;User ID=<username>;Password=<password>;MultipleActiveResultSets=False;Encrypt=true;TrustServerCertificate=False;Authentication="Active Directory Password"')
 
         # ADO.NET, ADIntegrated
         conn_str = self.cmd(
             'sql db show-connection-string -s myserver -n mydb -c ado.net -a ADIntegrated').get_output_in_json()
         self.assertEqual(conn_str,
-                         'Server=tcp:myserver.database.windows.net,1433;Database=mydb;Encrypt=true;Connection Timeout=30;Authentication="Active Directory Integrated"')
+                         'Server=tcp:myserver.database.windows.net,1433;Initial Catalog=mydb;Persist Security Info=False;User ID=<username>;MultipleActiveResultSets=False;Encrypt=true;TrustServerCertificate=False;Authentication="Active Directory Integrated"')
 
         # SqlCmd, username/password
         conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c sqlcmd').get_output_in_json()
@@ -4021,12 +4070,12 @@ class SqlServerIdentityTest(ScenarioTest):
         v_cores = 4
         storage_size_in_gb = '32'
         edition = 'GeneralPurpose'
-        resource_group_1 = "alswansotest3-rg"
+        resource_group_1 = "pstest"
         collation = "SQL_Latin1_General_CP1_CI_AS"
         proxy_override = "Proxy"
 
-        test_umi = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourceGroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'
-        umi_list = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourceGroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'
+        test_umi = '/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi'
+        umi_list = '/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi'
 
         identity_type = ResourceIdType.system_assigned_user_assigned.value
         user = admin_login
@@ -4039,7 +4088,7 @@ class SqlServerIdentityTest(ScenarioTest):
                      JMESPathCheck('name', server_name),
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', user),
-                     JMESPathCheck('identity.type', 'SystemAssigned, UserAssigned')])
+                     JMESPathCheck('identity.type', 'SystemAssigned,UserAssigned')])
 
         # test show sql server
         self.cmd('sql server show -g {} --name {}'
@@ -4794,6 +4843,7 @@ class SqlDBMaintenanceScenarioTest(ScenarioTest):
 
 class SqlServerTrustGroupsScenarioTest(ScenarioTest):
 
+    @live_only()
     @AllowLargeResponse()
     @ManagedInstancePreparer(parameter_name="mi1")
     @ManagedInstancePreparer(parameter_name="mi2")
@@ -6034,16 +6084,22 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
         primary_location = ManagedInstancePreparer.location
         secondary_location = ManagedInstancePreparer.sec_location
 
+        secondary_type = "Standby"
+        self.kwargs.update({
+            'secondary_type': secondary_type
+        })
+
         # Create Failover Group
         self.cmd(
-            'sql instance-failover-group create -n {} -g {} --mi {} --partner-resource-group {} --partner-mi {} --failover-policy Automatic --grace-period 2'
+            'sql instance-failover-group create -n {} -g {} --mi {} --partner-resource-group {} --partner-mi {} --failover-policy Automatic --grace-period 2 --secondary-type {}'
                 .format(failover_group_name, resource_group_name, primary_name, secondary_group,
-                        secondary_name),
+                        secondary_name, secondary_type),
             checks=[
                 JMESPathCheck('name', failover_group_name),
                 JMESPathCheck('resourceGroup', resource_group_name),
                 JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
-                JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120)
+                JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120),
+                JMESPathCheck('secondaryType', secondary_type)
             ])
 
         # Get Instance Failover Group on a partner managed instance and check if role is secondary
@@ -6054,16 +6110,23 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
                      JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120),
                      JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
-                     JMESPathCheck('replicationRole', 'Secondary')
+                     JMESPathCheck('replicationRole', 'Secondary'),
+                     JMESPathCheck('secondaryType', secondary_type)
                  ])
 
+        secondary_type = "Geo"
+        self.kwargs.update({
+            'secondary_type': secondary_type
+        })
+
         # Update Failover Group
-        self.cmd('sql instance-failover-group update -g {} -n {} -l {} --grace-period 3 '
-                 .format(resource_group_name, failover_group_name, primary_location),
+        self.cmd('sql instance-failover-group update -g {} -n {} -l {} --grace-period 3 --secondary-type {}'
+                 .format(resource_group_name, failover_group_name, primary_location, secondary_type),
                  checks=[
                      JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
                      JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
-                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled')
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('secondaryType', secondary_type)
                  ])
 
         # Check if properties got propagated to secondary server
@@ -6074,7 +6137,8 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
                      JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
                      JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
-                     JMESPathCheck('replicationRole', 'Secondary')
+                     JMESPathCheck('replicationRole', 'Secondary'),
+                     JMESPathCheck('secondaryType', secondary_type)
                  ])
 
         # Update Failover Group failover policy to Manual
@@ -6164,6 +6228,7 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
         return self.cmd('storage account keys list -g {} -n {} --query [0].value'
                         .format(resource_group, storage_account)).get_output_in_json()
 
+    @live_only()
     @ResourceGroupPreparer(location='eastus2')
     @SqlServerPreparer(location='eastus2')
     @StorageAccountPreparer(location='eastus2')
@@ -6644,7 +6709,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
                         JMESPathCheck('type', 'Microsoft.Sql/managedInstances/distributedAvailabilityGroups'),
                         JMESPathCheck('targetDatabase', target_database),
                         JMESPathCheck('sourceEndpoint', source_endpoint),
-                        JMESPathCheck('linkState', 'Copying'),
+                        JMESPathCheck('linkState', 'WaitForHybridConnectionToEstablish'),
                         ]).get_output_in_json()
 
         link_id = link['id']
@@ -6660,7 +6725,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
                         JMESPathCheck('type', 'Microsoft.Sql/managedInstances/distributedAvailabilityGroups'),
                         JMESPathCheck('targetDatabase', target_database),
                         JMESPathCheck('sourceEndpoint', source_endpoint),
-                        JMESPathCheck('linkState', 'Copying'),
+                        JMESPathCheck('linkState', 'WaitForHybridConnectionToEstablish'),
                         ]).get_output_in_json()
 
         # delete instance link
@@ -6672,6 +6737,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceRestoreCrossSubscriptionScenarioTest(ScenarioTest):
+    @live_only()
     @ManagedInstancePreparer()
     def test_sql_managed_deleted_cross_subscription_restore(self, mi, rg):
         from datetime import datetime, timezone, timedelta
@@ -6757,6 +6823,77 @@ class SqlManagedInstanceDatabaseRecoverTest(ScenarioTest):
         self.kwargs.update({
             'recoverable_db': recoverable_db['id']
         })
-        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db -r {recoverable_db}',
+        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db3 -r {recoverable_db}',
                 checks=[
-                    JMESPathCheck('name', "recovered_db")])
+                    JMESPathCheck('name', "recovered_db3")])
+
+
+class SqlManagedInstanceZoneRedundancyScenarioTest(ScenarioTest):
+    @live_only()
+    @AllowLargeResponse()
+    def test_sql_mi_zone_redundancy(self):
+
+        subscription_id = ManagedInstancePreparer.subscription_id
+        group = ManagedInstancePreparer.group
+        vnet_name = 'vnet-skrivokapic-multiaz-paasv2'
+        subnet_name = ManagedInstancePreparer.subnet_name
+        subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
+
+        self.kwargs.update({
+            'rg': group,
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix,
+                                                             managed_instance_name_max_length),
+            'loc': 'southafricanorth',
+            'username': 'admin123',
+            'admin_password': 'SecretPassword123SecretPassword',
+            'subnet': subnet,
+            'license_type': 'BasePrice',
+            'v_cores': 4,
+            'storage_size_in_gb': '128',
+            'edition': 'BusinessCritical',
+            'family': 'Gen5',
+            'collation': ManagedInstancePreparer.collation,
+            'proxy_override': "Proxy",
+            'zone_redundant': 'True'
+        })
+
+        # Create a zone - redundant managed instance
+        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                                    '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
+                                    '--storage {storage_size_in_gb} --edition {edition} --family {family} --collation {collation} '
+                                    '--proxy-override {proxy_override} --zone-redundant {zone_redundant}',
+                                    checks=[
+                                        self.check('name', '{managed_instance_name}'),
+                                        self.check('resourceGroup', '{rg}'),
+                                        self.check('administratorLogin', '{username}'),
+                                        self.check('vCores', '{v_cores}'),
+                                        self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                                        self.check('licenseType', '{license_type}'),
+                                        self.check('sku.tier', '{edition}'),
+                                        self.check('sku.family', '{family}'),
+                                        self.check('sku.capacity', '{v_cores}'),
+                                        self.check('identity', None),
+                                        self.check('collation', '{collation}'),
+                                        self.check('proxyOverride', '{proxy_override}'),
+                                        self.check('zoneRedundant', '{zone_redundant}')])
+
+        # Get the managed instance and check zone redundancy
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+        self.assertEqual(managed_instance['zoneRedundant'], True)
+
+        # Disable zone redundancy
+        self.kwargs.update({
+            'zone_redundant': 'False'
+        })
+
+        self.cmd('sql mi update -g {rg} -n {managed_instance_name} --zone-redundant {zone_redundant}',
+                 checks= [self.check('zoneRedundant', '{zone_redundant}')])
+
+        # Get the managed instance and check zone redundancy
+
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+        self.assertEqual(managed_instance['zoneRedundant'], False)
+
+        # Delete the managed instance
+        self.cmd('sql mi delete --ids {} --yes'
+                 .format(managed_instance['id']), checks=NoneCheck())
