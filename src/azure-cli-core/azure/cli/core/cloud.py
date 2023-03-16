@@ -521,7 +521,10 @@ def get_clouds(cli_ctx):
             if option == 'profile':
                 c.profile = config.get(section, option)
             if option.startswith('endpoint_'):
-                setattr(c.endpoints, option.replace('endpoint_', ''), config.get(section, option))
+                raw_value = config.get(section, option)
+                # endpoint_dataplane_endpoints is a JSON. It should be deserialized to a dict.
+                value = json.loads(raw_value) if len(raw_value) >= 1 and raw_value[0] == '{' else raw_value
+                setattr(c.endpoints, option.replace('endpoint_', ''), value)
             elif option.startswith('suffix_'):
                 setattr(c.suffixes, option.replace('suffix_', ''), config.get(section, option))
         if c.profile is None:
@@ -638,7 +641,9 @@ def _config_add_cloud(config, cloud, overwrite=False):
         config.set(cloud.name, 'profile', cloud.profile)
     for k, v in cloud.endpoints.__dict__.items():
         if v is not None:
-            config.set(cloud.name, 'endpoint_{}'.format(k), v)
+            # dataplaneEndpoints is a dict. It should be serialized before saving to config.
+            config.set(cloud.name, 'endpoint_{}'.format(k),
+                       v if isinstance(v, str) else json.dumps(v, separators=(',', ':')))
     for k, v in cloud.suffixes.__dict__.items():
         if v is not None:
             config.set(cloud.name, 'suffix_{}'.format(k), v)

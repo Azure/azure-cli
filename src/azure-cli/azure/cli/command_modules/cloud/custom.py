@@ -35,7 +35,6 @@ def show_cloud(cmd, cloud_name=None):
 
 
 def _build_cloud(cli_ctx, cloud_name, cloud_config=None, cloud_args=None):
-    from msrestazure.azure_cloud import _populate_from_metadata_endpoint, MetadataEndpointError
     from azure.cli.core.cloud import CloudEndpointNotSetException
     if cloud_config:
         # Using JSON format so convert the keys to snake case
@@ -163,3 +162,63 @@ def list_profiles(cmd, cloud_name=None, show_all=False):
     if not cloud_name:
         cloud_name = get_active_cloud_name(cmd.cli_ctx.cloud)
     return list(API_PROFILES)
+
+
+# Below code is derived from msrestazure.azure_cloud
+
+class MetadataEndpointError(Exception):
+    pass
+
+
+# The exact API version doesn't matter too much right now. It just has to be YYYY-MM-DD format.
+METADATA_ENDPOINT_SUFFIX = '/metadata/endpoints?api-version=2022-09-01'
+
+
+# CLI cloud object attribute to ARM metadata key mapping
+METADATA_MAPPING = {
+    'active_directory_graph_resource_id': 'graph',
+    'microsoft_graph_resource_id': 'microsoftGraphResourceId'
+}
+
+
+def _populate_from_metadata_endpoint(cloud, arm_endpoint, session=None):
+    endpoints_in_metadata = ['active_directory_graph_resource_id',
+                             'microsoft_graph_resource_id',
+                             'active_directory_resource_id',
+                             'active_directory']
+    if not arm_endpoint or all([cloud.endpoints.has_endpoint_set(n) for n in endpoints_in_metadata]):
+        return
+    try:
+        error_msg_fmt = "Unable to get endpoints from the cloud.\n{}"
+        import requests
+        session = requests.Session() if session is None else session
+        # https://management.azure.com/metadata/endpoints?api-version=2022-09-01
+        metadata_endpoint = arm_endpoint + METADATA_ENDPOINT_SUFFIX
+        response = session.get(metadata_endpoint)
+        if response.status_code == 200:
+            metadata = response.json()
+            import json
+            with open(r'D:\cloud\metadata-2022-09-01-dataplaneEndpoint.json') as f:
+                metadata = json.load(f)
+            # TODO: gallery is missing in 2022-09-01 API
+            for attr, key in METADATA_MAPPING.items():
+                if not cloud.endpoints.has_endpoint_set(attr):
+                    setattr(cloud.endpoints, attr, metadata.get(key))
+
+            if not cloud.endpoints.has_endpoint_set('active_directory'):
+                setattr(cloud.endpoints, 'active_directory', metadata['authentication'].get('loginEndpoint'))
+            if not cloud.endpoints.has_endpoint_set('active_directory_resource_id'):
+                setattr(cloud.endpoints, 'active_directory_resource_id', metadata['authentication']['audiences'][0])
+
+            # TODO: Get a real metadata JSON
+            if not cloud.endpoints.has_endpoint_set('dataplane_endpoints') and 'dataplaneEndpoints' in metadata:
+                setattr(cloud.endpoints, 'dataplane_endpoints', metadata['dataplaneEndpoints'])
+        else:
+            msg = 'Server returned status code {} for {}'.format(response.status_code, metadata_endpoint)
+            raise MetadataEndpointError(error_msg_fmt.format(msg))
+    except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
+        msg = 'Please ensure you have network connection. Error detail: {}'.format(str(err))
+        raise MetadataEndpointError(error_msg_fmt.format(msg))
+    except ValueError as err:
+        msg = 'Response body does not contain valid json. Error detail: {}'.format(str(err))
+        raise MetadataEndpointError(error_msg_fmt.format(msg))
