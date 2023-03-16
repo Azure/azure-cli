@@ -90,12 +90,6 @@ jobs:
           git remote add ${CUSTOM_CLI_REPO} https://github.com/${CUSTOM_CLI_REPO}/azure-cli.git
           git fetch ${CUSTOM_CLI_REPO} $(CUSTOM_CLI_BRANCH)
           git checkout -b ${CUSTOM_CLI_BRANCH} ${CUSTOM_CLI_REPO}/${CUSTOM_CLI_BRANCH}
-
-          cli_repo_path=$pwd/azure-cli
-          echo "##vso[task.setvariable variable=cli_repo_path]$cli_repo_path"
-        else
-          cli_repo_path=$pwd
-          echo "##vso[task.setvariable variable=cli_repo_path]$cli_repo_path"
         fi
 
         git clone https://github.com/Azure/azure-cli-extensions.git
@@ -109,13 +103,9 @@ jobs:
 
         git fetch azclibot
         git checkout -b regression_test_$(Build.BuildId) azclibot/regression_test_$(Build.BuildId)
-
-        cli_extension_repo_path=$pwd
-        echo "##vso[task.setvariable variable=cli_extension_repo_path]$cli_extension_repo_path"
   - template: ../../.azure-pipelines/templates/azdev_setup.yml
     parameters:
-      CLIRepoPath: ${{ variables.cli_repo_path }}
-      CLIExtensionRepoPath: ${{ variables.cli_extension_repo_path }}
+      CLIExtensionRepoPath: ./azure-cli-extensions
   - bash: |
       set -ev
 

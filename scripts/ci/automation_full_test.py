@@ -607,9 +607,7 @@ class AutomaticScheduling(object):
             remove_extension(module)
             logger.info(f"Finish removing extension {module}, error_flag: {error_flag}")
             if error_flag:
-                cli_repo_path = os.getenv('CLI_REPO_PATH', None) or os.getenv('BUILD_SOURCESDIRECTORY', None)
-                extension_repo_path = os.getenv('CLI_EXTENSION_REPO_PATH', None) or working_directory
-                rerun_setup(cli_repo_path=cli_repo_path, extension_repo_path=extension_repo_path)
+                rerun_setup(cli_repo_path=os.getenv('BUILD_SOURCESDIRECTORY'), extension_repo_path=working_directory)
             global_error_flag = global_error_flag or error_flag
         return global_error_flag
 
