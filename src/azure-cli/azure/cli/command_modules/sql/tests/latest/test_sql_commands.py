@@ -1257,10 +1257,10 @@ class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
     def test_sql_db_geo_restore(
             self):
         self.kwargs.update({
-            'rg': 'sejagada-AlwaysEncrypted',
-            'loc': 'eastus2euap',
-            'server_name': 'sejagada-ae-sqlserver-canary-donotdelete',
-            'database_name': 'sejagada-ae-sqldb-canary-donotdelete'
+            'rg': 'rebeccaxu-test',
+            'loc': 'eastus',
+            'server_name': 'rebeccaxu-eastus-svr',
+            'database_name': 'cli-test-hs',
         })
 
         # test list geo backups for database
@@ -1282,7 +1282,7 @@ class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
 
         self.cmd(
             'sql db geo-backup restore --geo-backup-id {backup_id} --dest-database {dest_database_name}'
-            ' --dest-server {server_name} --resource-group {rg}',
+            ' --dest-server {server_name} --resource-group {rg} --edition Hyperscale',
             checks=[
                 self.check('name', '{dest_database_name}')])
                 
