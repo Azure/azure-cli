@@ -1251,7 +1251,8 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
 
 
 class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
-    @record_only()
+    #@record_only()
+    @AllowLargeResponse()
     # using fixed resources because of long time preperation for geo-redundant backup
     # need to change resources for others who want to rerecord this test
     def test_sql_db_geo_restore(
