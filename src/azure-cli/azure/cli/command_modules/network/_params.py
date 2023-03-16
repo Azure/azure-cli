@@ -780,13 +780,14 @@ def load_arguments(self, _):
 
     with self.argument_context('network routeserver') as c:
         c.argument('virtual_hub_name', options_list=['--name', '-n'], id_part='name',
-                   help='The name of the Route Server.')
-        c.argument('hosted_subnet', help='The ID of a subnet where Route Server would be deployed')
+                   help='Name of the route server.')
+        c.argument('hosted_subnet', help='ID of a subnet where route server would be deployed')
         c.argument('allow_branch_to_branch_traffic', options_list=['--allow-b2b-traffic'],
-                   arg_type=get_three_state_flag(), help='Allow branch to branch traffic.')
+                   arg_type=get_three_state_flag(), help='Whether to allow branch to branch traffic.')
         c.argument('public_ip_address', validator=get_public_ip_validator(),
-                   help='The name or ID of the public IP address.',
+                   help='Name or ID of the public IP address.',
                    completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
+        c.argument("hub_routing_preference", help="Routing preference of the route server.", arg_type=get_enum_type(["ASPath", "ExpressRoute", "VpnGateway"]))
 
     with self.argument_context('network routeserver create') as c:
         c.argument('virtual_hub_name', id_part=None)
