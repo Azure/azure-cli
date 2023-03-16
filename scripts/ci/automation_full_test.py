@@ -597,14 +597,19 @@ class AutomaticScheduling(object):
         for module, path in instance_modules.items():
             run_command(["git", "checkout", f"regression_test_{os.getenv('BUILD_BUILDID')}"], check_return_code=True)
             error_flag = install_extension(module)
+            logger.info(f"Finish installing extension {module}, error_flag: {error_flag}")
             if not error_flag:
                 azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{module}.xml")
                 cmd = ['azdev', 'test', module, '--discover', '--no-exitfirst', '--verbose',
                        '--xml-path', azdev_test_result_fp, '--pytest-args', '"--durations=10"']
                 error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests, modules=[module])
+                logger.info(f"Finish testing extension {module}, error_flag: {error_flag}")
             remove_extension(module)
+            logger.info(f"Finish removing extension {module}, error_flag: {error_flag}")
             if error_flag:
-                rerun_setup(cli_repo_path=os.getenv('BUILD_SOURCESDIRECTORY'), extension_repo_path=working_directory)
+                cli_repo_path = os.getenv('CLI_REPO_PATH', None) or os.getenv('BUILD_SOURCESDIRECTORY', None)
+                extension_repo_path = os.getenv('CLI_EXTENSION_REPO_PATH', None) or working_directory
+                rerun_setup(cli_repo_path=cli_repo_path, extension_repo_path=extension_repo_path)
             global_error_flag = global_error_flag or error_flag
         return global_error_flag
 
