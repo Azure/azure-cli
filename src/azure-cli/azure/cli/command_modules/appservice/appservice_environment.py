@@ -444,7 +444,6 @@ def _ensure_route_table(cli_ctx, resource_group_name, ase_name, location, subnet
 
 
 def _ensure_network_security_group(cli_ctx, resource_group_name, ase_name, location, subnet_id, force):
-    from azure.mgmt.network.models import NetworkSecurityGroup
     subnet_id_parts = parse_resource_id(subnet_id)
     vnet_resource_group = subnet_id_parts['resource_group']
     vnet_name = subnet_id_parts['name']
