@@ -13,18 +13,31 @@ import shutil
 _LOGGER = logging.getLogger(__name__)
 
 
-def get_folder_size(folder):
+def calculate_folder_size(start_path):
+    """Calculate total size of a folder and file count."""
+    # https://stackoverflow.com/questions/1392413/calculating-a-directorys-size-using-python
     total_size = 0
-    for path, dirs, files in os.walk(folder):
-        for f in files:
-            fp = os.path.join(path, f)
-            total_size += os.path.getsize(fp)
-    return total_size
+    total_count = 0
+    for dirpath, dirnames, filenames in os.walk(start_path):
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            # skip if it is symbolic link
+            if not os.path.islink(fp):
+                total_count += 1
+                total_size += os.path.getsize(fp)
+
+    return total_size, total_count
+
+
+def _print_folder_size(folder):
+    size, count = calculate_folder_size(folder)
+    size_in_mb = size / 1048576  # 1 MB = 1024 * 1024 B = 1048576 B
+    _LOGGER.info(f"{size_in_mb:.2f} MB, {count} files")
 
 
 def main(folder, version=None):
     _LOGGER.info(f'Replace .py with .pyc, base folder: {folder}')
-    _LOGGER.info(f'Base folder size: {get_folder_size(folder)}')
+    _print_folder_size(folder)
     if version is None:
         version = re.search(r'python(\d\.\d+)', folder).group(1)
     else:
@@ -48,7 +61,7 @@ def main(folder, version=None):
         shutil.rmtree(folder)
 
     _LOGGER.info('Finish processing')
-    _LOGGER.info(f'Base folder size: {get_folder_size(folder)}')
+    _print_folder_size(folder)
 
 
 if __name__ == '__main__':
