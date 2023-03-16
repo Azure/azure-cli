@@ -4910,7 +4910,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     def test_aks_nodepool_abort(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         node_pool_name = self.create_random_name('c', 6)
-        node_vm_size = 'standard_d4darm_v3'
+        node_vm_size = 'Standard_DS2_v2'
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,

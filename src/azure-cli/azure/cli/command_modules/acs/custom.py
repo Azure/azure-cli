@@ -2248,7 +2248,7 @@ def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
     return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, cluster_name, nodepool_name)
 
 
-def aks_agentpool_operation_abort(cmd,   # pylint: disable=unused-argument
+def aks_agentpool_operation_abort(cmd,
                                   client,
                                   resource_group_name,
                                   cluster_name,
@@ -2256,6 +2256,7 @@ def aks_agentpool_operation_abort(cmd,   # pylint: disable=unused-argument
                                   no_wait=False):
     PowerState = cmd.get_models(
         "PowerState",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         operation_group="agent_pools",
     )
 
