@@ -457,7 +457,7 @@ class MainModuleCompactor:
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    for module in ["network"]:
+    for module in ["network", "vm"]:
         compactor = MainModuleCompactor(module)
         compactor.compact()
         compactor.replace()
