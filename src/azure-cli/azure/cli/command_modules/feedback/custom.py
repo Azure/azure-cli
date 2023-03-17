@@ -70,6 +70,9 @@ _ISSUES_TEMPLATE = """
 ```
 Paste here the error message you have received. Make sure to remove all sensitive information,
 such as user name, password, credential, subscription ID, etc.
+
+The command failed with an unexpected error. Here is the traceback:
+{The rest of the error message}
 ```
 
 ## To Reproduce:
