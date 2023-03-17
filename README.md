@@ -166,7 +166,7 @@ You can easily install the latest Homebrew edge build with the following command
 brew install $(curl -Ls -o /dev/null -w %{url_effective} https://aka.ms/InstallAzureCliHomebrewEdge)
 ```
 
-You can install the edge build on Ubuntu Xenial with the following command:
+You can install the edge build on Ubuntu Jammy with the following command:
 
 ```bash
 curl --location --silent --output azure-cli_jammy.deb https://aka.ms/InstallAzureCliJammyEdge && dpkg -i azure-cli_jammy.deb
