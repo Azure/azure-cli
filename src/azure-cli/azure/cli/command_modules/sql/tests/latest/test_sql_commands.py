@@ -895,8 +895,8 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('ledgerOn', True)])
 
     def test_sql_per_db_cmk(self):
-        server = "extgov-pstest"
-        resource_group = "extgov-pstest-svr"
+        server = "pstestsvr"
+        resource_group = "pstest"
         database_name_one = "cliautomationdb04"
         database_name_two = "cliautomationdb05"
         encryption_protector = "https://pstestkv.vault.azure.net/keys/testkey4/6638b3667e384aefa31364f94d230361"
