@@ -1643,6 +1643,15 @@ examples:
     text: az sql server outbound-firewall-rule delete -g mygroup -s myserver --outbound-rule-fqdn allowedFQDN
 """
 
+helps['sql server refresh-external-governance-status'] = """
+type: command
+short-summary: Refreshes external governance status.
+
+examples:
+  - name:  Refreshes external governance status.
+    text: az sql server refresh-external-governance-status --resource_group_name MyResourceGroup --server_name MyServer
+"""
+
 helps['sql server key'] = """
 type: group
 short-summary: Manage a server's keys.
