@@ -40,6 +40,29 @@ def load_command_table(self, _):
 
     # endregion
 
+    # region NetworkInterfaces
+    from .._format import transform_effective_nsg, transform_effective_route_table
+    operations_tmpl = self.get_module_name_by_profile("operations.nic#{}")
+    nic = import_aaz_by_profile("network.nic")
+
+    from .operations.nic import NICCreate, NICUpdate
+    self.command_table["network nic create"] = NICCreate(loader=self)
+    self.command_table["network nic update"] = NICUpdate(loader=self)
+    self.command_table["network nic list-effective-nsg"] = nic.ListEffectiveNsg(loader=self, table_transformer=transform_effective_nsg)
+    self.command_table["network nic show-effective-route-table"] = nic.ShowEffectiveRouteTable(loader=self, table_transformer=transform_effective_route_table)
+
+    from .operations.nic import NICIPConfigCreate, NICIPConfigUpdate, NICIPConfigNATAdd, NICIPConfigNATRemove
+    self.command_table["network nic ip-config create"] = NICIPConfigCreate(loader=self)
+    self.command_table["network nic ip-config update"] = NICIPConfigUpdate(loader=self)
+    self.command_table["network nic ip-config inbound-nat-rule add"] = NICIPConfigNATAdd(loader=self)
+    self.command_table["network nic ip-config inbound-nat-rule remove"] = NICIPConfigNATRemove(loader=self)
+
+    with self.command_group("network nic ip-config address-pool", operations_tmpl=operations_tmpl) as g:
+        g.custom_command("add", "add_nic_ip_config_address_pool")
+        g.custom_command("remove", "remove_nic_ip_config_address_pool")
+
+    # endregion
+
     # region VirtualNetworkGatewayConnections
     from .operations.vpn_connection import VpnConnectionUpdate, VpnConnectionDeviceConfigScriptShow
     self.command_table['network vpn-connection update'] = VpnConnectionUpdate(loader=self)
@@ -129,4 +152,19 @@ def load_command_table(self, _):
     self.command_table['network public-ip list'] = public_ip.List(loader=self, table_transformer='[].' + public_ip_show_table_transform)
     self.command_table['network public-ip show'] = public_ip.Show(loader=self, table_transformer=public_ip_show_table_transform)
 
+    # endregion
+
+    # region NetworkSecurityGroups
+    from .operations.nsg import NSGCreate, NSGRuleCreate, NSGRuleUpdate
+    from .._format import transform_nsg_rule_table_output
+    operations_tmpl = self.get_module_name_by_profile("operations.nsg#{}")
+    nsgRule = import_aaz_by_profile("network.nsg.rule")
+    self.command_table["network nsg create"] = NSGCreate(loader=self)
+
+    self.command_table["network nsg rule create"] = NSGRuleCreate(loader=self)
+    self.command_table["network nsg rule update"] = NSGRuleUpdate(loader=self)
+
+    self.command_table["network nsg rule show"] = nsgRule.Show(loader=self, table_transformer=transform_nsg_rule_table_output)
+    with self.command_group("network nsg rule", operations_tmpl=operations_tmpl) as g:
+        g.custom_command("list", "list_nsg_rules", table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
     # endregion

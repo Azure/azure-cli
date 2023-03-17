@@ -10,6 +10,10 @@ import re
 from ipaddress import ip_network
 from math import isclose, isnan
 
+from azure.cli.command_modules.acs._consts import (
+    CONST_MANAGED_CLUSTER_SKU_TIER_FREE,
+    CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD,
+)
 from azure.cli.core import keys
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
@@ -17,9 +21,11 @@ from azure.cli.core.azclierror import (
     MutuallyExclusiveArgumentError,
     RequiredArgumentMissingError,
 )
+
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
 from knack.log import get_logger
+
 
 logger = get_logger(__name__)
 
@@ -185,6 +191,15 @@ def validate_load_balancer_sku(namespace):
             return
         if namespace.load_balancer_sku.lower() != "basic" and namespace.load_balancer_sku.lower() != "standard":
             raise CLIError("--load-balancer-sku can only be standard or basic")
+
+
+def validate_sku_tier(namespace):
+    """Validates the sku tier string."""
+    if namespace.tier is not None:
+        if namespace.tier == '':
+            return
+        if namespace.tier.lower() not in (CONST_MANAGED_CLUSTER_SKU_TIER_FREE, CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD):
+            raise InvalidArgumentValueError("--tier can only be free or standard")
 
 
 def validate_load_balancer_outbound_ips(namespace):

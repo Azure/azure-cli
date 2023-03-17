@@ -40,6 +40,25 @@ def load_command_table(self, _):
 
     # endregion
 
+    # region NetworkInterfaces
+    operations_tmpl = self.get_module_name_by_profile("operations.nic#{}")
+
+    from .operations.nic import NICCreate, NICUpdate
+    self.command_table["network nic create"] = NICCreate(loader=self)
+    self.command_table["network nic update"] = NICUpdate(loader=self)
+
+    from .operations.nic import NICIPConfigCreate, NICIPConfigUpdate, NICIPConfigNATAdd, NICIPConfigNATRemove
+    self.command_table["network nic ip-config create"] = NICIPConfigCreate(loader=self)
+    self.command_table["network nic ip-config update"] = NICIPConfigUpdate(loader=self)
+    self.command_table["network nic ip-config inbound-nat-rule add"] = NICIPConfigNATAdd(loader=self)
+    self.command_table["network nic ip-config inbound-nat-rule remove"] = NICIPConfigNATRemove(loader=self)
+
+    with self.command_group("network nic ip-config address-pool", operations_tmpl=operations_tmpl) as g:
+        g.custom_command("add", "add_nic_ip_config_address_pool")
+        g.custom_command("remove", "remove_nic_ip_config_address_pool")
+
+    # endregion
+
     # region VirtualNetworkGatewayConnections
     from .operations.vpn_connection import VpnConnSharedKeyUpdate
     self.command_table['network vpn-connection shared-key update'] = VpnConnSharedKeyUpdate(loader=self)
@@ -94,4 +113,17 @@ def load_command_table(self, _):
     self.command_table['network public-ip show'] = public_ip.Show(loader=self,
                                                                   table_transformer=public_ip_show_table_transform)
 
+    # endregion
+
+    # region NetworkSecurityGroups
+    from .operations.nsg import NSGCreate, NSGRuleCreate
+    from .._format import transform_nsg_rule_table_output
+    operations_tmpl = self.get_module_name_by_profile("operations.nsg#{}")
+    nsgRule = import_aaz_by_profile("network.nsg.rule")
+    self.command_table["network nsg create"] = NSGCreate(loader=self)
+
+    self.command_table["network nsg rule create"] = NSGRuleCreate(loader=self)
+    self.command_table["network nsg rule show"] = nsgRule.Show(loader=self, table_transformer=transform_nsg_rule_table_output)
+    with self.command_group("network nsg rule", operations_tmpl=operations_tmpl) as g:
+        g.custom_command("list", "list_nsg_rules", table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
     # endregion

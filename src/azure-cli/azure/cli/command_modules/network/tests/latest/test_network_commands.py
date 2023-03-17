@@ -12,7 +12,6 @@ import tempfile
 from azure.cli.testsdk.constants import AUX_SUBSCRIPTION
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.cli.core.profiles import supported_api_version, ResourceType
 from azure.core.exceptions import HttpResponseError
 from .recording_processors import StorageAccountSASReplacer
 
@@ -2353,7 +2352,8 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('priority', 50),
                      self.check('ruleType', 'MatchRule'),
                      self.check('action', 'Log'),
-                     self.check('matchConditions | length(@)', 0)
+                     self.check('matchConditions | length(@)', 0),
+                     self.check("state", "Enabled")
                  ])
         self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}', checks=[
             self.check('customRules | length(@)', 1)
@@ -2387,10 +2387,13 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  ])
 
         # update one of properties
-        self.cmd('network application-gateway waf-policy custom-rule update -g {rg} '
+        self.cmd('network application-gateway waf-policy custom-rule update -g {rg} --state disabled '
                  '--policy-name {waf} -n {rule} '
                  '--priority 75',
-                 checks=self.check('priority', 75))
+                 checks=[
+                     self.check('priority', 75),
+                     self.check("state", "Disabled")
+                 ])
 
         # add another match condition to the same custom rule
         self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
@@ -5160,8 +5163,6 @@ class NetworkVirtualRouter(ScenarioTest):
 
 
 class NetworkVirtualHubRouter(ScenarioTest):
-
-    # @unittest.skip('CannotDeleteVirtualHubWhenItIsInUse')
     @ResourceGroupPreparer(name_prefix='cli_test_virtual_hub_router', location='centraluseuap')
     def test_network_virtual_hub_router_scenario(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -5190,15 +5191,17 @@ class NetworkVirtualHubRouter(ScenarioTest):
         })
 
         self.cmd('network routeserver create -g {rg} -l {location} -n {vrouter} '
-                 '--hosted-subnet {subnet1_id} --public-ip-address {vhr_ip1}',
+                 '--hosted-subnet {subnet1_id} --public-ip-address {vhr_ip1} --hub-routing-preference aspath',
                  checks=[
                      self.check('type', 'Microsoft.Network/virtualHubs'),
                      self.check('ipConfigurations', None),
-                     self.check('provisioningState', 'Succeeded')
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check("hubRoutingPreference", "ASPath")
                  ])
 
-        self.cmd('network routeserver update -g {rg} --name {vrouter}  --allow-b2b-traffic', checks=[
-            self.check('allowBranchToBranchTraffic', True)
+        self.cmd('network routeserver update -g {rg} --name {vrouter}  --allow-b2b-traffic --hub-routing-preference expressroute', checks=[
+            self.check('allowBranchToBranchTraffic', True),
+            self.check("hubRoutingPreference", "ExpressRoute")
         ])
 
         self.cmd('network routeserver list -g {rg}')

@@ -64,13 +64,10 @@ class Update(AAZCommand):
                 resource_group_arg="resource_group",
             ),
         )
-        _args_schema.vhub = AAZResourceIdArg(
+        _args_schema.vhub = AAZStrArg(
             options=["--vhub"],
             help="Name or ID of the virtual hub to which the Security Partner Provider belongs.",
             nullable=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
-            ),
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
@@ -151,10 +148,30 @@ class Update(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         self.NetworkVirtualAppliancesGet(ctx=self.ctx)()
+        self.pre_instance_update(self.ctx.vars.instance)
         self.InstanceUpdateByJson(ctx=self.ctx)()
         self.InstanceUpdateByGeneric(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.vars.instance)
         yield self.NetworkVirtualAppliancesCreateOrUpdate(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
+
+    @register_callback
+    def pre_instance_update(self, instance):
+        pass
+
+    @register_callback
+    def post_instance_update(self, instance):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -239,7 +256,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_network_virtual_appliance_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_network_virtual_appliance_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -350,7 +367,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _build_schema_network_virtual_appliance_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_network_virtual_appliance_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -411,182 +428,182 @@ class Update(AAZCommand):
             )
 
 
-_schema_network_virtual_appliance_read = None
+class _UpdateHelper:
+    """Helper class for Update"""
 
+    _schema_network_virtual_appliance_read = None
 
-def _build_schema_network_virtual_appliance_read(_schema):
-    global _schema_network_virtual_appliance_read
-    if _schema_network_virtual_appliance_read is not None:
-        _schema.etag = _schema_network_virtual_appliance_read.etag
-        _schema.id = _schema_network_virtual_appliance_read.id
-        _schema.identity = _schema_network_virtual_appliance_read.identity
-        _schema.location = _schema_network_virtual_appliance_read.location
-        _schema.name = _schema_network_virtual_appliance_read.name
-        _schema.properties = _schema_network_virtual_appliance_read.properties
-        _schema.tags = _schema_network_virtual_appliance_read.tags
-        _schema.type = _schema_network_virtual_appliance_read.type
-        return
+    @classmethod
+    def _build_schema_network_virtual_appliance_read(cls, _schema):
+        if cls._schema_network_virtual_appliance_read is not None:
+            _schema.etag = cls._schema_network_virtual_appliance_read.etag
+            _schema.id = cls._schema_network_virtual_appliance_read.id
+            _schema.identity = cls._schema_network_virtual_appliance_read.identity
+            _schema.location = cls._schema_network_virtual_appliance_read.location
+            _schema.name = cls._schema_network_virtual_appliance_read.name
+            _schema.properties = cls._schema_network_virtual_appliance_read.properties
+            _schema.tags = cls._schema_network_virtual_appliance_read.tags
+            _schema.type = cls._schema_network_virtual_appliance_read.type
+            return
 
-    _schema_network_virtual_appliance_read = AAZObjectType()
+        cls._schema_network_virtual_appliance_read = _schema_network_virtual_appliance_read = AAZObjectType()
 
-    network_virtual_appliance_read = _schema_network_virtual_appliance_read
-    network_virtual_appliance_read.etag = AAZStrType(
-        flags={"read_only": True},
-    )
-    network_virtual_appliance_read.id = AAZStrType()
-    network_virtual_appliance_read.identity = AAZObjectType()
-    network_virtual_appliance_read.location = AAZStrType()
-    network_virtual_appliance_read.name = AAZStrType(
-        flags={"read_only": True},
-    )
-    network_virtual_appliance_read.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
-    network_virtual_appliance_read.tags = AAZDictType()
-    network_virtual_appliance_read.type = AAZStrType(
-        flags={"read_only": True},
-    )
+        network_virtual_appliance_read = _schema_network_virtual_appliance_read
+        network_virtual_appliance_read.etag = AAZStrType(
+            flags={"read_only": True},
+        )
+        network_virtual_appliance_read.id = AAZStrType()
+        network_virtual_appliance_read.identity = AAZObjectType()
+        network_virtual_appliance_read.location = AAZStrType()
+        network_virtual_appliance_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        network_virtual_appliance_read.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        network_virtual_appliance_read.tags = AAZDictType()
+        network_virtual_appliance_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
-    identity = _schema_network_virtual_appliance_read.identity
-    identity.principal_id = AAZStrType(
-        serialized_name="principalId",
-        flags={"read_only": True},
-    )
-    identity.tenant_id = AAZStrType(
-        serialized_name="tenantId",
-        flags={"read_only": True},
-    )
-    identity.type = AAZStrType()
-    identity.user_assigned_identities = AAZDictType(
-        serialized_name="userAssignedIdentities",
-    )
+        identity = _schema_network_virtual_appliance_read.identity
+        identity.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+        identity.tenant_id = AAZStrType(
+            serialized_name="tenantId",
+            flags={"read_only": True},
+        )
+        identity.type = AAZStrType()
+        identity.user_assigned_identities = AAZDictType(
+            serialized_name="userAssignedIdentities",
+        )
 
-    user_assigned_identities = _schema_network_virtual_appliance_read.identity.user_assigned_identities
-    user_assigned_identities.Element = AAZObjectType()
+        user_assigned_identities = _schema_network_virtual_appliance_read.identity.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectType()
 
-    _element = _schema_network_virtual_appliance_read.identity.user_assigned_identities.Element
-    _element.client_id = AAZStrType(
-        serialized_name="clientId",
-        flags={"read_only": True},
-    )
-    _element.principal_id = AAZStrType(
-        serialized_name="principalId",
-        flags={"read_only": True},
-    )
+        _element = _schema_network_virtual_appliance_read.identity.user_assigned_identities.Element
+        _element.client_id = AAZStrType(
+            serialized_name="clientId",
+            flags={"read_only": True},
+        )
+        _element.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
 
-    properties = _schema_network_virtual_appliance_read.properties
-    properties.address_prefix = AAZStrType(
-        serialized_name="addressPrefix",
-        flags={"read_only": True},
-    )
-    properties.boot_strap_configuration_blobs = AAZListType(
-        serialized_name="bootStrapConfigurationBlobs",
-    )
-    properties.cloud_init_configuration = AAZStrType(
-        serialized_name="cloudInitConfiguration",
-    )
-    properties.cloud_init_configuration_blobs = AAZListType(
-        serialized_name="cloudInitConfigurationBlobs",
-    )
-    properties.inbound_security_rules = AAZListType(
-        serialized_name="inboundSecurityRules",
-        flags={"read_only": True},
-    )
-    properties.nva_sku = AAZObjectType(
-        serialized_name="nvaSku",
-    )
-    properties.provisioning_state = AAZStrType(
-        serialized_name="provisioningState",
-        flags={"read_only": True},
-    )
-    properties.ssh_public_key = AAZStrType(
-        serialized_name="sshPublicKey",
-    )
-    properties.virtual_appliance_asn = AAZIntType(
-        serialized_name="virtualApplianceAsn",
-    )
-    properties.virtual_appliance_nics = AAZListType(
-        serialized_name="virtualApplianceNics",
-        flags={"read_only": True},
-    )
-    properties.virtual_appliance_sites = AAZListType(
-        serialized_name="virtualApplianceSites",
-        flags={"read_only": True},
-    )
-    properties.virtual_hub = AAZObjectType(
-        serialized_name="virtualHub",
-    )
-    _build_schema_sub_resource_read(properties.virtual_hub)
+        properties = _schema_network_virtual_appliance_read.properties
+        properties.address_prefix = AAZStrType(
+            serialized_name="addressPrefix",
+            flags={"read_only": True},
+        )
+        properties.boot_strap_configuration_blobs = AAZListType(
+            serialized_name="bootStrapConfigurationBlobs",
+        )
+        properties.cloud_init_configuration = AAZStrType(
+            serialized_name="cloudInitConfiguration",
+        )
+        properties.cloud_init_configuration_blobs = AAZListType(
+            serialized_name="cloudInitConfigurationBlobs",
+        )
+        properties.inbound_security_rules = AAZListType(
+            serialized_name="inboundSecurityRules",
+            flags={"read_only": True},
+        )
+        properties.nva_sku = AAZObjectType(
+            serialized_name="nvaSku",
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.ssh_public_key = AAZStrType(
+            serialized_name="sshPublicKey",
+        )
+        properties.virtual_appliance_asn = AAZIntType(
+            serialized_name="virtualApplianceAsn",
+        )
+        properties.virtual_appliance_nics = AAZListType(
+            serialized_name="virtualApplianceNics",
+            flags={"read_only": True},
+        )
+        properties.virtual_appliance_sites = AAZListType(
+            serialized_name="virtualApplianceSites",
+            flags={"read_only": True},
+        )
+        properties.virtual_hub = AAZObjectType(
+            serialized_name="virtualHub",
+        )
+        cls._build_schema_sub_resource_read(properties.virtual_hub)
 
-    boot_strap_configuration_blobs = _schema_network_virtual_appliance_read.properties.boot_strap_configuration_blobs
-    boot_strap_configuration_blobs.Element = AAZStrType()
+        boot_strap_configuration_blobs = _schema_network_virtual_appliance_read.properties.boot_strap_configuration_blobs
+        boot_strap_configuration_blobs.Element = AAZStrType()
 
-    cloud_init_configuration_blobs = _schema_network_virtual_appliance_read.properties.cloud_init_configuration_blobs
-    cloud_init_configuration_blobs.Element = AAZStrType()
+        cloud_init_configuration_blobs = _schema_network_virtual_appliance_read.properties.cloud_init_configuration_blobs
+        cloud_init_configuration_blobs.Element = AAZStrType()
 
-    inbound_security_rules = _schema_network_virtual_appliance_read.properties.inbound_security_rules
-    inbound_security_rules.Element = AAZObjectType()
-    _build_schema_sub_resource_read(inbound_security_rules.Element)
+        inbound_security_rules = _schema_network_virtual_appliance_read.properties.inbound_security_rules
+        inbound_security_rules.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(inbound_security_rules.Element)
 
-    nva_sku = _schema_network_virtual_appliance_read.properties.nva_sku
-    nva_sku.bundled_scale_unit = AAZStrType(
-        serialized_name="bundledScaleUnit",
-    )
-    nva_sku.market_place_version = AAZStrType(
-        serialized_name="marketPlaceVersion",
-    )
-    nva_sku.vendor = AAZStrType()
+        nva_sku = _schema_network_virtual_appliance_read.properties.nva_sku
+        nva_sku.bundled_scale_unit = AAZStrType(
+            serialized_name="bundledScaleUnit",
+        )
+        nva_sku.market_place_version = AAZStrType(
+            serialized_name="marketPlaceVersion",
+        )
+        nva_sku.vendor = AAZStrType()
 
-    virtual_appliance_nics = _schema_network_virtual_appliance_read.properties.virtual_appliance_nics
-    virtual_appliance_nics.Element = AAZObjectType(
-        flags={"read_only": True},
-    )
+        virtual_appliance_nics = _schema_network_virtual_appliance_read.properties.virtual_appliance_nics
+        virtual_appliance_nics.Element = AAZObjectType(
+            flags={"read_only": True},
+        )
 
-    _element = _schema_network_virtual_appliance_read.properties.virtual_appliance_nics.Element
-    _element.name = AAZStrType(
-        flags={"read_only": True},
-    )
-    _element.private_ip_address = AAZStrType(
-        serialized_name="privateIpAddress",
-        flags={"read_only": True},
-    )
-    _element.public_ip_address = AAZStrType(
-        serialized_name="publicIpAddress",
-        flags={"read_only": True},
-    )
+        _element = _schema_network_virtual_appliance_read.properties.virtual_appliance_nics.Element
+        _element.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        _element.private_ip_address = AAZStrType(
+            serialized_name="privateIpAddress",
+            flags={"read_only": True},
+        )
+        _element.public_ip_address = AAZStrType(
+            serialized_name="publicIpAddress",
+            flags={"read_only": True},
+        )
 
-    virtual_appliance_sites = _schema_network_virtual_appliance_read.properties.virtual_appliance_sites
-    virtual_appliance_sites.Element = AAZObjectType()
-    _build_schema_sub_resource_read(virtual_appliance_sites.Element)
+        virtual_appliance_sites = _schema_network_virtual_appliance_read.properties.virtual_appliance_sites
+        virtual_appliance_sites.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(virtual_appliance_sites.Element)
 
-    tags = _schema_network_virtual_appliance_read.tags
-    tags.Element = AAZStrType()
+        tags = _schema_network_virtual_appliance_read.tags
+        tags.Element = AAZStrType()
 
-    _schema.etag = _schema_network_virtual_appliance_read.etag
-    _schema.id = _schema_network_virtual_appliance_read.id
-    _schema.identity = _schema_network_virtual_appliance_read.identity
-    _schema.location = _schema_network_virtual_appliance_read.location
-    _schema.name = _schema_network_virtual_appliance_read.name
-    _schema.properties = _schema_network_virtual_appliance_read.properties
-    _schema.tags = _schema_network_virtual_appliance_read.tags
-    _schema.type = _schema_network_virtual_appliance_read.type
+        _schema.etag = cls._schema_network_virtual_appliance_read.etag
+        _schema.id = cls._schema_network_virtual_appliance_read.id
+        _schema.identity = cls._schema_network_virtual_appliance_read.identity
+        _schema.location = cls._schema_network_virtual_appliance_read.location
+        _schema.name = cls._schema_network_virtual_appliance_read.name
+        _schema.properties = cls._schema_network_virtual_appliance_read.properties
+        _schema.tags = cls._schema_network_virtual_appliance_read.tags
+        _schema.type = cls._schema_network_virtual_appliance_read.type
 
+    _schema_sub_resource_read = None
 
-_schema_sub_resource_read = None
+    @classmethod
+    def _build_schema_sub_resource_read(cls, _schema):
+        if cls._schema_sub_resource_read is not None:
+            _schema.id = cls._schema_sub_resource_read.id
+            return
 
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
 
-def _build_schema_sub_resource_read(_schema):
-    global _schema_sub_resource_read
-    if _schema_sub_resource_read is not None:
-        _schema.id = _schema_sub_resource_read.id
-        return
+        sub_resource_read = _schema_sub_resource_read
+        sub_resource_read.id = AAZStrType()
 
-    _schema_sub_resource_read = AAZObjectType()
-
-    sub_resource_read = _schema_sub_resource_read
-    sub_resource_read.id = AAZStrType()
-
-    _schema.id = _schema_sub_resource_read.id
+        _schema.id = cls._schema_sub_resource_read.id
 
 
 __all__ = ["Update"]

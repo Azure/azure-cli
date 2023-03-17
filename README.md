@@ -163,7 +163,9 @@ On Windows, you need to uninstall the official version before installing the edg
 You can easily install the latest Homebrew edge build with the following command:
 
 ```bash
-brew install $(curl -Ls -o /dev/null -w %{url_effective} https://aka.ms/InstallAzureCliHomebrewEdge)
+# You need to uninstall the stable version with `brew uninstall azure-cli` first
+curl --location --silent --output azure-cli.rb https://aka.ms/InstallAzureCliHomebrewEdge
+brew install --build-from-source azure-cli.rb
 ```
 
 You can install the edge build on Ubuntu Jammy with the following command:

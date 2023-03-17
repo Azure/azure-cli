@@ -85,6 +85,7 @@ def load_command_table(self, _):
         g.wait_command('wait')
         g.custom_command('use-dev-spaces', 'aks_use_dev_spaces', deprecate_info=g.deprecate())
         g.custom_command('remove-dev-spaces', 'aks_remove_dev_spaces', deprecate_info=g.deprecate())
+        g.custom_command('operation-abort', 'aks_operation_abort', supports_no_wait=True)
 
     with self.command_group('aks', container_services_sdk, client_factory=cf_container_services) as g:
         g.custom_command('get-versions', 'aks_get_versions',
@@ -105,6 +106,7 @@ def load_command_table(self, _):
         g.custom_command('stop', 'aks_agentpool_stop', supports_no_wait=True)
         g.custom_command('start', 'aks_agentpool_start', supports_no_wait=True)
         g.wait_command('wait')
+        g.custom_command('operation-abort', 'aks_agentpool_operation_abort', supports_no_wait=True)
 
     with self.command_group('aks command', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
         g.custom_command('invoke', 'aks_runcommand', supports_no_wait=True,

@@ -789,6 +789,184 @@ class NetworkUsageListScenarioTest(ScenarioTest):
         self.cmd('network list-usages --location westus', checks=self.check('type(@)', 'array'))
 
 
+class NetworkNicScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_nic_scenario')
+    def test_network_nic(self, resource_group):
+
+        self.kwargs.update({
+            'nic': 'cli-test-nic',
+            'rt': 'Microsoft.Network/networkInterfaces',
+            'subnet': 'mysubnet',
+            'vnet': 'myvnet',
+            'nsg1': 'mynsg',
+            'nsg2': 'myothernsg',
+            'lb': 'mylb',
+            'pri_ip': '10.0.0.15',
+            'pub_ip': 'publicip1'
+        })
+
+        self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}').get_output_in_json()['newVNet']['subnets'][0]['id']
+        self.cmd('network nsg create -g {rg} -n {nsg1}')
+        self.kwargs['nsg_id'] = self.cmd('network nsg show -g {rg} -n {nsg1}').get_output_in_json()['id']
+        self.cmd('network nsg create -g {rg} -n {nsg2}')
+        self.cmd('network public-ip create -g {rg} -n {pub_ip}')
+        self.kwargs['pub_ip_id'] = self.cmd('network public-ip show -g {rg} -n {pub_ip}').get_output_in_json()['id']
+        self.cmd('network lb create -g {rg} -n {lb}')
+        self.cmd('network lb inbound-nat-rule create -g {rg} --lb-name {lb} -n rule1 --protocol tcp --frontend-port 100 --backend-port 100 --frontend-ip-name LoadBalancerFrontEnd')
+        self.cmd('network lb inbound-nat-rule create -g {rg} --lb-name {lb} -n rule2 --protocol tcp --frontend-port 200 --backend-port 200 --frontend-ip-name LoadBalancerFrontEnd')
+        self.kwargs['rule_ids'] = ' '.join(self.cmd('network lb inbound-nat-rule list -g {rg} --lb-name {lb} --query "[].id"').get_output_in_json())
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1')
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap2')
+        self.kwargs['address_pool_ids'] = ' '.join(self.cmd('network lb address-pool list -g {rg} --lb-name {lb} --query "[].id"').get_output_in_json())
+
+        # create with minimum parameters
+        self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet} --vnet-name {vnet}', checks=[
+            self.check('NewNIC.ipConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
+            self.check('NewNIC.provisioningState', 'Succeeded')
+        ])
+        # exercise optional parameters
+        self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet_id} --ip-forwarding --private-ip-address {pri_ip} --public-ip-address {pub_ip} --internal-dns-name test --dns-servers 100.1.2.3 --lb-address-pools {address_pool_ids} --lb-inbound-nat-rules {rule_ids} --accelerated-networking --tags foo=doo', checks=[
+            self.check('NewNIC.ipConfigurations[0].privateIPAllocationMethod', 'Static'),
+            self.check('NewNIC.ipConfigurations[0].privateIPAddress', '{pri_ip}'),
+            self.check('NewNIC.enableIPForwarding', True),
+            self.check('NewNIC.enableAcceleratedNetworking', True),
+            self.check('NewNIC.provisioningState', 'Succeeded'),
+            self.check('NewNIC.dnsSettings.internalDnsNameLabel', 'test'),
+            self.check('length(NewNIC.dnsSettings.dnsServers)', 1)
+        ])
+        # exercise creating with NSG
+        self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet} --vnet-name {vnet} --network-security-group {nsg1}', checks=[
+            self.check('NewNIC.ipConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
+            self.check('NewNIC.enableIPForwarding', False),
+            self.check("NewNIC.networkSecurityGroup.contains(id, '{nsg1}')", True),
+            self.check('NewNIC.provisioningState', 'Succeeded')
+        ])
+        # exercise creating with NSG and Public IP
+        self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet} --vnet-name {vnet} --network-security-group {nsg_id} --public-ip-address {pub_ip_id}', checks=[
+            self.check('NewNIC.ipConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
+            self.check('NewNIC.enableIPForwarding', False),
+            self.check("NewNIC.networkSecurityGroup.contains(id, '{nsg1}')", True),
+            self.check('NewNIC.provisioningState', 'Succeeded')
+        ])
+        self.cmd('network nic list', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?contains(id, 'networkInterfaces')]) == length(@)", True)
+        ])
+        self.cmd('network nic list --resource-group {rg}', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?type == '{rt}']) == length(@)", True),
+            self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
+        ])
+        self.cmd('network nic show --resource-group {rg} --name {nic}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('type', '{rt}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('name', '{nic}')
+        ])
+        self.cmd('network nic update -g {rg} -n {nic} --internal-dns-name noodle --ip-forwarding true --accelerated-networking false --dns-servers "" --network-security-group {nsg2}', checks=[
+            self.check('enableIPForwarding', True),
+            self.check('enableAcceleratedNetworking', False),
+            self.check('dnsSettings.internalDnsNameLabel', 'noodle'),
+            self.check('length(dnsSettings.dnsServers)', 0),
+            self.check("networkSecurityGroup.contains(id, '{nsg2}')", True)
+        ])
+        # test generic update
+        self.cmd('network nic update -g {rg} -n {nic} --set dnsSettings.internalDnsNameLabel=doodle --set enableIPForwarding=false', checks=[
+            self.check('enableIPForwarding', False),
+            self.check('dnsSettings.internalDnsNameLabel', 'doodle')
+        ])
+
+        self.cmd('network nic delete --resource-group {rg} --name {nic}')
+        self.cmd('network nic list -g {rg}', checks=self.is_empty())
+
+
+class NetworkNicSubresourceScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_nic_subresource')
+    def test_network_nic_subresources(self, resource_group):
+
+        self.kwargs['nic'] = 'nic1'
+
+        self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1')
+        self.cmd('network nic create -g {rg} -n {nic} --subnet subnet1 --vnet-name vnet1')
+        self.cmd('network nic ip-config list -g {rg} --nic-name {nic}',
+                 checks=self.check('length(@)', 1))
+        self.cmd('network nic ip-config show -g {rg} --nic-name {nic} -n ipconfig1', checks=[
+            self.check('name', 'ipconfig1'),
+            self.check('privateIPAllocationMethod', 'Dynamic')
+        ])
+        self.cmd('network nic ip-config create -g {rg} --nic-name {nic} -n ipconfig2 --make-primary',
+                 checks=self.check('primary', True))
+        self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n ipconfig1 --make-primary',
+                 checks=self.check('primary', True))
+        self.cmd('network nic ip-config delete -g {rg} --nic-name {nic} -n ipconfig2')
+
+        # test various sets
+        self.kwargs.update({
+            'vnet': 'vnet2',
+            'subnet': 'subnet2',
+            'ip': 'publicip2',
+            'lb': 'lb1',
+            'config': 'ipconfig1'
+        })
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
+        self.cmd('network public-ip create -g {rg} -n {ip}')
+        self.kwargs['ip_id'] = self.cmd('network public-ip show -g {rg} -n {ip}').get_output_in_json()['id']
+        self.cmd('network lb create -g {rg} -n {lb}')
+        self.cmd('network lb inbound-nat-rule create -g {rg} --lb-name {lb} -n rule1 --protocol tcp --frontend-port 100 --backend-port 100 --frontend-ip-name LoadBalancerFrontEnd')
+        self.cmd('network lb inbound-nat-rule create -g {rg} --lb-name {lb} -n rule2 --protocol tcp --frontend-port 200 --backend-port 200 --frontend-ip-name LoadBalancerFrontEnd')
+        self.kwargs['rule1_id'] = self.cmd('network lb inbound-nat-rule show -g {rg} --lb-name {lb} -n rule1').get_output_in_json()['id']
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1')
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap2')
+        self.kwargs['bap1_id'] = self.cmd('network lb address-pool show -g {rg} --lb-name {lb} -n bap1').get_output_in_json()['id']
+
+        self.kwargs['private_ip'] = '10.0.0.15'
+        # test ability to set load balancer IDs
+        # includes the default backend pool
+        self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --lb-name {lb} --lb-address-pools {bap1_id} bap2 --lb-inbound-nat-rules {rule1_id} rule2 --private-ip-address {private_ip}', checks=[
+            self.check('length(loadBalancerBackendAddressPools)', 2),
+            self.check('length(loadBalancerInboundNatRules)', 2),
+            self.check('privateIPAddress', '{private_ip}'),
+            self.check('privateIPAllocationMethod', 'Static')])
+        # test generic update
+        self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --set privateIPAddress=10.0.0.50',
+                 checks=self.check('privateIPAddress', '10.0.0.50'))
+
+        # test ability to add and remove IDs one at a time with subcommands
+        self.cmd('network nic ip-config inbound-nat-rule remove -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --inbound-nat-rule rule1',
+                 checks=self.check('length(loadBalancerInboundNatRules)', 1))
+        self.cmd('network nic ip-config inbound-nat-rule add -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --inbound-nat-rule rule1',
+                 checks=self.check('length(loadBalancerInboundNatRules)', 2))
+
+        self.cmd('network nic ip-config address-pool remove -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --address-pool bap1',
+                 checks=self.check('length(loadBalancerBackendAddressPools)', 1))
+        self.cmd('network nic ip-config address-pool add -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --address-pool bap1',
+                 checks=self.check('length(loadBalancerBackendAddressPools)', 2))
+
+        self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --private-ip-address "" --public-ip-address {ip_id}', checks=[
+            self.check('privateIPAllocationMethod', 'Dynamic'),
+            self.check("publicIPAddress.contains(id, '{ip_id}')", True)
+        ])
+
+        self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --subnet {subnet} --vnet-name {vnet}',
+                 checks=self.check("subnet.contains(id, '{subnet}')", True))
+
+
+class NetworkNicConvenienceCommandsScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_nic_convenience_test', location='eastus')
+    def test_network_nic_convenience_commands(self, resource_group):
+
+        self.kwargs['vm'] = 'conveniencevm1'
+        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --admin-username myusername --admin-password aBcD1234!@#$ --authentication-type password')
+        self.kwargs['nic_id'] = self.cmd('vm show -g {rg} -n {vm} --query "networkProfile.networkInterfaces[0].id"').get_output_in_json()
+        self.cmd('network nic list-effective-nsg --ids {nic_id}',
+                 checks=self.greater_than('length(@)', 0))
+        self.cmd('network nic show-effective-route-table --ids {nic_id}',
+                 checks=self.greater_than('length(@)', 0))
+
+
 class NetworkPublicIpWithSku(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_network_lb_sku')
@@ -896,3 +1074,103 @@ class NetworkPublicIpScenarioTest(ScenarioTest):
         self.cmd('network public-ip create -g {rg} -n ip --sku Standard -z 1', checks=[
             self.check('length(publicIp.zones)', 1)
         ])
+
+
+class NetworkExtendedNSGScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_extended_nsg')
+    def test_network_extended_nsg(self, resource_group):
+
+        self.kwargs.update({
+            'nsg': 'nsg1',
+            'rule': 'rule1'
+        })
+        self.cmd('network nsg create --name {nsg} -g {rg}')
+        self.cmd('network nsg rule create --access allow --destination-address-prefixes 10.0.0.0/24 11.0.0.0/24 --direction inbound --nsg-name {nsg} -g {rg} --source-address-prefixes * -n {rule} --source-port-ranges 700-900 1000-1100 --priority 1000', checks=[
+            self.check('length(destinationAddressPrefixes)', 2),
+            self.check('destinationAddressPrefix', None),
+            self.check('length(sourceAddressPrefixes)', 0),
+            self.check('sourceAddressPrefix', '*'),
+            self.check('length(sourcePortRanges)', 2),
+            self.check('sourcePortRange', None),
+            self.check('length(destinationPortRanges)', 0),
+            self.check('destinationPortRange', '80')
+        ])
+        self.cmd('network nsg rule update --destination-address-prefixes Internet --nsg-name {nsg} -g {rg} --source-address-prefixes 10.0.0.0/24 11.0.0.0/24 -n {rule} --source-port-ranges * --destination-port-ranges 500-1000 2000 3000', checks=[
+            self.check('length(destinationAddressPrefixes)', 0),
+            self.check('destinationAddressPrefix', 'Internet'),
+            self.check('length(sourceAddressPrefixes)', 2),
+            self.check('sourceAddressPrefix', None),
+            self.check('length(sourcePortRanges)', 0),
+            self.check('sourcePortRange', '*'),
+            self.check('length(destinationPortRanges)', 3),
+            self.check('destinationPortRange', None)
+        ])
+
+
+class NetworkSecurityGroupScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_nsg')
+    def test_network_nsg(self, resource_group):
+
+        self.kwargs.update({
+            'nsg': 'test-nsg1',
+            'rule': 'web',
+            'rt': 'Microsoft.Network/networkSecurityGroups'
+        })
+
+        self.cmd('network nsg create --name {nsg} -g {rg} --tags foo=doo')
+        self.cmd('network nsg rule create --access allow --destination-address-prefixes 1234 --direction inbound --nsg-name {nsg} --protocol * -g {rg} --source-address-prefixes 789 -n {rule} --source-port-ranges * --destination-port-ranges 4444 --priority 1000')
+
+        self.cmd('network nsg list', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?type == '{rt}']) == length(@)", True)
+        ])
+        self.cmd('network nsg list --resource-group {rg}', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?type == '{rt}']) == length(@)", True),
+            self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
+        ])
+        self.cmd('network nsg show --resource-group {rg} --name {nsg}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('type', '{rt}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('name', '{nsg}')
+        ])
+        # Test for the manually added nsg rule
+        self.cmd('network nsg rule list --resource-group {rg} --nsg-name {nsg}', checks=[
+            self.check('type(@)', 'array'),
+            self.check('length(@)', 1),
+            self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
+        ])
+        self.cmd('network nsg rule list --resource-group {rg} --nsg-name {nsg} -o table')
+        self.cmd('network nsg rule show --resource-group {rg} --nsg-name {nsg} --name {rule}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('name', '{rule}')
+        ])
+
+        self.kwargs.update({
+            'access': 'DENY',
+            'prefix': '111',
+            'dir': 'Outbound',
+            'protocol': 'Tcp',
+            'ports': '1234-1235',
+            'desc': 'greatrule',
+            'priority': 888
+        })
+        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg} -n {rule} --direction {dir} --access {access} --destination-address-prefixes {prefix} --protocol {protocol} --source-address-prefixes {prefix} --source-port-ranges {ports} --destination-port-ranges {ports} --priority {priority} --description {desc}', checks=[
+            self.check('access', 'Deny'),
+            self.check('direction', '{dir}'),
+            self.check('destinationAddressPrefix', '{prefix}'),
+            self.check('protocol', '{protocol}'),
+            self.check('sourceAddressPrefix', '{prefix}'),
+            self.check('sourcePortRange', '{ports}'),
+            self.check('priority', '{priority}'),
+            self.check('description', '{desc}')
+        ])
+
+        # test generic update
+        self.cmd('network nsg rule update -g {rg} --nsg-name {nsg} -n {rule} --set description="cool"',
+                 checks=self.check('description', 'cool'))
