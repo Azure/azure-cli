@@ -158,7 +158,7 @@ You can download the latest builds by following the links below:
 | Ubuntu Jammy Deb  | https://aka.ms/InstallAzureCliJammyEdge    |
 |      RPM el8      | https://aka.ms/InstallAzureCliRpmEl8Edge   |
 
-On Windows, you need to uninstall the official version before installing the edge build. (see: https://github.com/Azure/azure-cli/issues/25607#issuecomment-1452855212)
+On Windows, you need to uninstall the official version before installing the edge build. (See https://github.com/Azure/azure-cli/issues/25607#issuecomment-1452855212)
 
 You can easily install the latest Homebrew edge build with the following command:
 
