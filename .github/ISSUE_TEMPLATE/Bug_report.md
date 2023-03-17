@@ -11,20 +11,28 @@ assignees: ''
 
 > ### `az feedback` auto-generates most of the information requested below, as of CLI version 2.0.62
 
-**Related command**
-<!--- Please provide the related command with az {command} if you can, so that we can quickly route to the related team for help. --->
-
-**Describe the bug**
+## Describe the bug
 <!--- A clear and concise description of what the bug is. --->
 
-**To Reproduce**
+**Command Name**
+<!--- Please provide the related command if you can, so that we can quickly route to the related team for help. --->
+`az {command}`
+
+**Errors:**
+<!--- If the issue is specific to a command, please provide the error message."--->
+```
+The command failed with an unexpected error. Here is the traceback:
+{The rest of the error message}
+```
+
+## To Reproduce:
 <!--- Steps to reproduce the behavior. --->
 
-**Expected behavior**
+## Expected behavior
 <!--- A clear and concise description of what you expected to happen. --->
 
-**Environment summary**
+## Environment summary
 <!--- Install Method (e.g. pip, interactive script, apt-get, Docker, MSI, edge build) / CLI version (`az --version`) / OS version / Shell Type (e.g. bash, cmd.exe, Bash on Windows)  --->
 
-**Additional context**
+## Additional context
 <!--- Add any other context about the problem here. --->
