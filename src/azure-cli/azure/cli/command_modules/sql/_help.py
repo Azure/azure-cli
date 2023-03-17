@@ -1649,7 +1649,7 @@ short-summary: Refreshes external governance status.
 
 examples:
   - name:  Refreshes external governance status.
-    text: az sql server refresh-external-governance-status --resource_group_name MyResourceGroup --server_name MyServer
+    text: az sql server refresh-external-governance-status  --resource-group MyResourceGroup --server MyServer
 """
 
 helps['sql server key'] = """
