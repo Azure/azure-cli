@@ -126,6 +126,13 @@ def validate_private_endpoint_connection_id(cmd, namespace):
     del namespace.connection_id
 
 
+def mysql_restore_tier_validator(target_tier, source_tier, sku_info):
+    _mysql_tier_validator(target_tier, sku_info)
+    sku_list = list(sku_info.keys())
+    if sku_list.index(target_tier) < sku_list.index(source_tier):
+        raise CLIError("Incorrect value: --tier. Restored server must not go to below the source server compute tier.")
+
+
 # pylint: disable=too-many-locals
 def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, backup_retention=None,
                               server_name=None, zone=None, standby_availability_zone=None, high_availability=None,
@@ -144,22 +151,22 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
     _mysql_tier_validator(tier, sku_info)  # need to be validated first
     if geo_redundant_backup is None and instance is not None:
         geo_redundant_backup = instance.backup.geo_redundant_backup
-    _mysql_georedundant_backup_validator(geo_redundant_backup, geo_paired_regions)
+    mysql_georedundant_backup_validator(geo_redundant_backup, geo_paired_regions)
     if tier is None and instance is not None:
         tier = instance.sku.tier
-    _mysql_retention_validator(backup_retention, sku_info, tier)
-    _mysql_storage_validator(storage_gb, sku_info, tier, instance)
-    _mysql_sku_name_validator(sku_name, sku_info, tier, instance)
+    mysql_retention_validator(backup_retention, sku_info, tier)
+    mysql_storage_validator(storage_gb, sku_info, tier, instance)
+    mysql_sku_name_validator(sku_name, sku_info, tier, instance)
     _mysql_high_availability_validator(high_availability, standby_availability_zone, zone, tier,
                                        single_az, auto_grow, instance)
     _mysql_version_validator(version, sku_info, tier, instance)
-    _mysql_auto_grow_validator(auto_grow, replication_role, high_availability, instance)
+    mysql_auto_grow_validator(auto_grow, replication_role, high_availability, instance)
     _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_byok_key,
                           disable_data_encryption, geo_redundant_backup, instance)
     _mysql_iops_validator(iops, auto_io_scaling, instance)
 
 
-def _mysql_retention_validator(backup_retention, sku_info, tier):
+def mysql_retention_validator(backup_retention, sku_info, tier):
     if backup_retention is not None:
         backup_retention_range = get_mysql_backup_retention(sku_info, tier)
         if not 1 <= int(backup_retention) <= backup_retention_range[1]:
@@ -167,7 +174,7 @@ def _mysql_retention_validator(backup_retention, sku_info, tier):
                            .format(1, backup_retention_range[1]))
 
 
-def _mysql_storage_validator(storage_gb, sku_info, tier, instance):
+def mysql_storage_validator(storage_gb, sku_info, tier, instance):
     if storage_gb is not None:
         if instance:
             original_size = instance.storage.storage_size_gb
@@ -181,7 +188,7 @@ def _mysql_storage_validator(storage_gb, sku_info, tier, instance):
                            .format(max(min_mysql_storage, storage_sizes[0]), storage_sizes[1]))
 
 
-def _mysql_georedundant_backup_validator(geo_redundant_backup, geo_paired_regions):
+def mysql_georedundant_backup_validator(geo_redundant_backup, geo_paired_regions):
     if geo_redundant_backup and geo_redundant_backup.lower() == 'enabled' and len(geo_paired_regions) == 0:
         raise ArgumentUsageError("The region of the server does not support geo-restore feature.")
 
@@ -193,7 +200,7 @@ def _mysql_tier_validator(tier, sku_info):
             raise CLIError('Incorrect value for --tier. Allowed values : {}'.format(tiers))
 
 
-def _mysql_sku_name_validator(sku_name, sku_info, tier, instance):
+def mysql_sku_name_validator(sku_name, sku_info, tier, instance):
     if instance is not None:
         tier = instance.sku.tier if tier is None else tier
     if sku_name:
@@ -214,7 +221,7 @@ def _mysql_version_validator(version, sku_info, tier, instance):
             raise CLIError('Incorrect value for --version. Allowed values : {}'.format(versions))
 
 
-def _mysql_auto_grow_validator(auto_grow, replication_role, high_availability, instance):
+def mysql_auto_grow_validator(auto_grow, replication_role, high_availability, instance):
     if auto_grow is None:
         return
     if instance is not None:
