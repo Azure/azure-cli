@@ -171,6 +171,16 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
             except ResourceNotFoundError:
                 pass
 
+class SqlServerExternalGovernanceTests(ScenarioTest):
+    
+    @ResourceGroupPreparer(location='eastus2euap')
+    @SqlServerPreparer(location='eastus2euap')
+    def test_sql_refresh_external_governance_status(self, resource_group, resource_group_location, server):
+        
+        self.cmd('sql server refresh-external-governance-status -g {} --server {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('serverName', server)])
 
 class SqlServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
@@ -884,8 +894,8 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('ledgerOn', True)])
 
     def test_sql_per_db_cmk(self):
-        server = "pstestsvr"
-        resource_group = "pstest"
+        server = "extgov-pstest"
+        resource_group = "extgov-pstest-svr"
         database_name_one = "cliautomationdb04"
         database_name_two = "cliautomationdb05"
         encryption_protector = "https://pstestkv.vault.azure.net/keys/testkey4/6638b3667e384aefa31364f94d230361"
