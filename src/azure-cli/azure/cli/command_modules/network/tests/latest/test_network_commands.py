@@ -5868,7 +5868,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         return 1
 
     @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
-    @ResourceGroupPreparer(name_prefix='cli_test_nw_vm', location='westus')
+    @ResourceGroupPreparer(name_prefix='cli_test_nw_vm', location='westcentralus')
     @AllowLargeResponse()
     def test_network_watcher_vm(self, resource_group, resource_group_location):
 
@@ -5893,7 +5893,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         self.cmd('network watcher show-next-hop -g {rg} --vm {vm} --source-ip 10.0.0.9 --dest-ip 10.0.0.6')
 
     @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
-    @ResourceGroupPreparer(name_prefix='cli_test_nw_packet_capture', location='eastus')
+    @ResourceGroupPreparer(name_prefix='cli_test_nw_packet_capture', location='westus2')
     @AllowLargeResponse()
     def test_network_watcher_packet_capture(self, resource_group, resource_group_location):
 
@@ -5962,10 +5962,9 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         self.kwargs['storage_path'] = sa['primaryEndpoints']['blob'] + 'troubleshooting'
         self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name GatewaySubnet')
         self.cmd('network public-ip create -g {rg} -n vgw1-pip')
-        self.cmd('network vnet-gateway create -g {rg} -n vgw1 --vnet vnet1 --public-ip-address vgw1-pip --no-wait')
+        self.cmd('network vnet-gateway create -g {rg} -n vgw1 --vnet vnet1 --public-ip-address vgw1-pip')
 
         # test troubleshooting
-        self.cmd('network vnet-gateway wait -g {rg} -n vgw1 --created')
         self.cmd('network watcher troubleshooting start --resource vgw1 -t vnetGateway -g {rg} --storage-account {sa} --storage-path {storage_path}')
         self.cmd('network watcher troubleshooting show --resource vgw1 -t vnetGateway -g {rg}')
 

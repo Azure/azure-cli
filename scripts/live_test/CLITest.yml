@@ -372,6 +372,9 @@ jobs:
           azdev extension add ${FinalTarget}
         fi
         echo ${FinalTarget}
+        
+        # Compact aaz folders of modules
+        python /mnt/vss/_work/1/s/scripts/compact_aaz.py
 
         az -v
         # az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
