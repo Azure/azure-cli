@@ -290,8 +290,10 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
                            version=None, geo_redundant_backup=None, byok_identity=None, byok_key=None, instance=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
-    list_location_capability_info = get_postgres_location_capability_info(db_context.cmd, location,
-                                                 server_name=instance.name if instance else None)
+    list_location_capability_info = get_postgres_location_capability_info(
+        db_context.cmd,
+        location,
+        server_name=instance.name if instance else None)
     sku_info = list_location_capability_info['sku_info']
     single_az = list_location_capability_info['single_az']
     geo_backup_supported = list_location_capability_info['geo_backup_supported']
@@ -389,6 +391,7 @@ def pg_byok_validator(byok_identity, byok_key, geo_redundant_backup=None, instan
 
     if byok_key and (geo_redundant_backup and geo_redundant_backup.lower() == 'enabled'):
         raise ArgumentUsageError("Data encryption is not supported for geo-redundant backup.")
+
 
 def _network_arg_validator(subnet, public_access):
     if subnet is not None and public_access is not None:
@@ -549,7 +552,7 @@ def validate_mysql_replica(server):
                               "Scale up the source server to General Purpose or Memory Optimized. ")
 
 
-def validate_postgres_replica(cmd, tier, location, list_location_capability_info = None):
+def validate_postgres_replica(cmd, tier, location, list_location_capability_info=None):
     # Tier validation
     if tier == 'Burstable':
         raise ValidationError("Read replica is not supported for the Burstable pricing tier. "

@@ -439,11 +439,11 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     location = ''.join(location.lower().split())
 
     list_location_capability_info = get_postgres_location_capability_info(cmd, location)
-    
+
     validate_postgres_replica(cmd, source_server_object.sku.tier, location, list_location_capability_info)
 
     if not zone:
-        zone = _get_pg_replica_zone(list_location_capability_info['zones'], 
+        zone = _get_pg_replica_zone(list_location_capability_info['zones'],
                                     source_server_object.availability_zone,
                                     zone)
 
@@ -861,13 +861,14 @@ def _update_local_contexts(cmd, server_name, resource_group_name, database_name,
                                       location)  # Setting the location in the local context
         cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)
 
+
 def _get_pg_replica_zone(availabilityZones, sourceServerZone, replicaZone):
     preferredZone = 'none'
     for _index, zone in enumerate(availabilityZones):
         if zone != sourceServerZone and zone != 'none':
             preferredZone = zone
 
-    if not zone:
+    if not preferredZone:
         preferredZone = 'none'
 
     selectZone = preferredZone if not replicaZone else replicaZone
@@ -877,18 +878,20 @@ def _get_pg_replica_zone(availabilityZones, sourceServerZone, replicaZone):
         if zone == selectZone:
             selectZoneSupported = True
 
+    pg_replica_zone = None
     if len(availabilityZones) > 1 and selectZone and selectZoneSupported:
-        return selectZone if selectZone != 'none' else None
+        pg_replica_zone = selectZone if selectZone != 'none' else None
     else:
         sourceZoneSupported = False
         for _index, zone in enumerate(availabilityZones):
             if zone == sourceServerZone:
                 sourceZoneSupported = True
         if sourceZoneSupported:
-            return sourceServerZone
+            pg_replica_zone = sourceServerZone
         else:
-            return None
+            pg_replica_zone = None
 
+    return pg_replica_zone
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance

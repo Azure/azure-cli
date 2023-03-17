@@ -8,11 +8,13 @@ from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.core.paging import ItemPaged
 from ._client_factory import cf_postgres_flexible_location_capabilities
 
+
 def get_postgres_location_capability_info(cmd, location, server_name=None):
     list_location_capability_client = cf_postgres_flexible_location_capabilities(cmd.cli_ctx, '_')
     params = {'serverName': server_name} if server_name else None
     list_location_capability_result = list_location_capability_client.execute(location, params=params)
     return _postgres_parse_list_location_capability(list_location_capability_result)
+
 
 def _postgres_parse_list_location_capability(result):
     result = _get_list_from_paged_response(result)
@@ -47,17 +49,15 @@ def _postgres_parse_list_location_capability(result):
         tiers_dict[tier_name] = tier_dict
 
     zones = set()
-    #zones.add('none')
     for zoneInfo in result:
         zone = zoneInfo.zone
         zones.add(zone)
 
-    return {
-        'sku_info': tiers_dict,
-        'single_az': single_az,
-        'geo_backup_supported': geo_backup_supported,
-        'zones': zones
-            }
+    return {'sku_info': tiers_dict,
+            'single_az': single_az,
+            'geo_backup_supported': geo_backup_supported,
+            'zones': zones}
+
 
 def _get_list_from_paged_response(obj_list):
     return list(obj_list) if isinstance(obj_list, ItemPaged) else obj_list
