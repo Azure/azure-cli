@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update managed instance server configuration option.
+
+    :example: Update server configuration option on ManagedInstance_1 in ResourceGroup_1
+        az sql mi server-configuration-option update -g 'ResourceGroup_1' --mi 'ManagedInstance_1' --name allowPolybaseExport --value 0
     """
 
     _aaz_info = {

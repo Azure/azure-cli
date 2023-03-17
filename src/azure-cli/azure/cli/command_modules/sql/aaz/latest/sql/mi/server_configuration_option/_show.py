@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get managed instance server configuration option.
+
+    :example: Show server configuration option allowPolybaseExport on ManagedInstance_1 in ResourceGroup_1
+        az sql mi server-configuration-option show -g 'ResourceGroup_1' --mi 'ManagedInstance_1' --name allowPolybaseExport
     """
 
     _aaz_info = {

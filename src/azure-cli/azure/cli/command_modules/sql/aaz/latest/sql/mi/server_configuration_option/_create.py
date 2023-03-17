@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create managed instance server configuration option.
+
+    :example: Create server configuration option on ManagedInstance_1 in ResourceGroup_1
+        az mi server-configuration-option create -g 'ResourceGroup_1' --mi 'ManagedInstance_1' --name 'allowPolybaseExport' --value '1'
     """
 
     _aaz_info = {

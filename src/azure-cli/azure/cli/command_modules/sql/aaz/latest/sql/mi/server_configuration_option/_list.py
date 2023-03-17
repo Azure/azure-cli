@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List a list of managed instance server configuration options.
+
+    :example: List server configuration options on ManagedInstance_1 in ResourceGroup_1
+        az sql mi server-configuration-option list -g 'ResourceGroup_1' --mi 'ManagedInstance_1'
     """
 
     _aaz_info = {
