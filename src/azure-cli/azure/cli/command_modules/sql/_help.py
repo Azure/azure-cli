@@ -1648,7 +1648,7 @@ type: command
 short-summary: Refreshes external governance status.
 
 examples:
-  - name:  Refreshes external governance status.
+  - name:  Refresh external governance status for server
     text: az sql server refresh-external-governance-status  --resource-group MyResourceGroup --server MyServer
 """
 
