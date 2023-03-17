@@ -180,7 +180,8 @@ class SqlServerExternalGovernanceTests(ScenarioTest):
         self.cmd('sql server refresh-external-governance-status -g {} --server {}'
                  .format(resource_group, server),
                  checks=[
-                     JMESPathCheck('serverName', server)])
+                     JMESPathCheck('serverName', server),
+                     JMESPathCheck('status', 'Succeeded')])
 
 class SqlServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
