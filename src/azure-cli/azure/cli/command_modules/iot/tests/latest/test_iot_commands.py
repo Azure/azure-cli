@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-statements
 import json
-from unittest import mock
+from unittest import mock, skip
 from knack.util import CLIError
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
@@ -22,6 +22,7 @@ class IoTHubTest(ScenarioTest):
             method_name, recording_processors=[KeyReplacer()]
         )
 
+    @skip('Live run succeeded, recording test: DecodeError')
     @AllowLargeResponse(size_kb=4096)
     @ResourceGroupPreparer(location='westus2')
     @StorageAccountPreparer()
