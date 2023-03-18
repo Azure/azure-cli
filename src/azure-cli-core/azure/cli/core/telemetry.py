@@ -47,6 +47,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.extension_name = None
         self.extension_version = None
         self.event_id = str(uuid.uuid4())
+        self.recommendation_properties = None
         self.feedback = None
         self.extension_management_detail = None
         self.raw_command = None
@@ -199,6 +200,8 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'PythonVersion', platform.python_version())
         set_custom_properties(result, 'ModuleCorrelation', self.module_correlation)
         set_custom_properties(result, 'ExtensionName', ext_info)
+        # TODO: add new properties such as recommendation
+        set_custom_properties(result, 'Recommendation', self.recommendation_properties)
         set_custom_properties(result, 'Feedback', self.feedback)
         set_custom_properties(result, 'ExtensionManagementDetail', self.extension_management_detail)
         set_custom_properties(result, 'Mode', self.mode)
@@ -398,6 +401,9 @@ def set_feedback(feedback):
     will be truncated at 512 characters to avoid abusing the telemetry."""
     _session.feedback = feedback[:512]
 
+@decorators.suppress_all_exceptions()
+def set_recommendation_properties(api_version, recommendation_properties):
+    _session.recommendation_properties = {"api_version": api_version, "recommendation_properties":recommendation_properties}
 
 @decorators.suppress_all_exceptions()
 def set_extension_management_detail(ext_name, ext_version):
