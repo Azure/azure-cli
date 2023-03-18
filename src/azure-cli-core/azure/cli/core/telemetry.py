@@ -400,10 +400,12 @@ def set_feedback(feedback):
     will be truncated at 512 characters to avoid abusing the telemetry."""
     _session.feedback = feedback[:512]
 
+
 @decorators.suppress_all_exceptions()
 def set_recommendation_properties(api_version, recommendation_properties):
     _session.recommendation_properties = {"api_version": api_version,
                                           "recommendation_properties": recommendation_properties}
+
 
 @decorators.suppress_all_exceptions()
 def set_extension_management_detail(ext_name, ext_version):
