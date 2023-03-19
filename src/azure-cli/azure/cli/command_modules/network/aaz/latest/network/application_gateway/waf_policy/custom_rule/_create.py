@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-05-01",
+        "version": "2022-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies/{}", "2022-05-01", "properties.customRules[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies/{}", "2022-09-01", "properties.customRules[]"],
         ]
     }
 
@@ -81,6 +81,12 @@ class Create(AAZCommand):
             required=True,
             enum={"Invalid": "Invalid", "MatchRule": "MatchRule"},
         )
+        _args_schema.state = AAZStrArg(
+            options=["--state"],
+            help="Describe if the custom rule is in enabled or disabled state.",
+            default="Enabled",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
 
         # define Arg Group "Properties"
 
@@ -100,6 +106,7 @@ class Create(AAZCommand):
         _element.values = AAZListArg(
             options=["values"],
             help="Space-separated list of values to match.",
+            required=True,
         )
         _element.variables = AAZListArg(
             options=["variables"],
@@ -247,7 +254,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-05-01",
+                    "api-version", "2022-09-01",
                     required=True,
                 ),
             }
@@ -330,7 +337,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-05-01",
+                    "api-version", "2022-09-01",
                     required=True,
                 ),
             }
@@ -392,6 +399,7 @@ class Create(AAZCommand):
             _builder.set_prop("name", AAZStrType, ".name")
             _builder.set_prop("priority", AAZIntType, ".priority", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("ruleType", AAZStrType, ".rule_type", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("state", AAZStrType, ".state")
 
             match_conditions = _builder.get(".matchConditions")
             if match_conditions is not None:
@@ -399,7 +407,7 @@ class Create(AAZCommand):
 
             _elements = _builder.get(".matchConditions[]")
             if _elements is not None:
-                _elements.set_prop("matchValues", AAZListType, ".values")
+                _elements.set_prop("matchValues", AAZListType, ".values", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("matchVariables", AAZListType, ".variables", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("negationConditon", AAZBoolType, ".negate")
                 _elements.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
@@ -961,6 +969,10 @@ class _CreateHelper:
         properties.tunnel_interfaces = AAZListType(
             serialized_name="tunnelInterfaces",
         )
+        properties.virtual_network = AAZObjectType(
+            serialized_name="virtualNetwork",
+        )
+        cls._build_schema_sub_resource_read(properties.virtual_network)
 
         backend_ip_configurations = _schema_network_interface_ip_configuration_read.properties.load_balancer_backend_address_pools.Element.properties.backend_ip_configurations
         backend_ip_configurations.Element = AAZObjectType()
@@ -2105,7 +2117,9 @@ class _CreateHelper:
         properties.direction = AAZStrType(
             flags={"required": True},
         )
-        properties.priority = AAZIntType()
+        properties.priority = AAZIntType(
+            flags={"required": True},
+        )
         properties.protocol = AAZStrType(
             flags={"required": True},
         )
@@ -2203,7 +2217,7 @@ class _CreateHelper:
             serialized_name="addressPrefixes",
         )
         properties.application_gateway_ip_configurations = AAZListType(
-            serialized_name="applicationGatewayIpConfigurations",
+            serialized_name="applicationGatewayIPConfigurations",
         )
         properties.delegations = AAZListType()
         properties.ip_allocations = AAZListType(
@@ -3925,6 +3939,7 @@ class _CreateHelper:
             serialized_name="ruleType",
             flags={"required": True},
         )
+        _element.state = AAZStrType()
 
         match_conditions = _schema_web_application_firewall_policy_read.properties.custom_rules.Element.match_conditions
         match_conditions.Element = AAZObjectType()
@@ -3932,6 +3947,7 @@ class _CreateHelper:
         _element = _schema_web_application_firewall_policy_read.properties.custom_rules.Element.match_conditions.Element
         _element.match_values = AAZListType(
             serialized_name="matchValues",
+            flags={"required": True},
         )
         _element.match_variables = AAZListType(
             serialized_name="matchVariables",
@@ -4068,6 +4084,12 @@ class _CreateHelper:
         cls._build_schema_sub_resource_read(path_based_rules.Element)
 
         policy_settings = _schema_web_application_firewall_policy_read.properties.policy_settings
+        policy_settings.custom_block_response_body = AAZStrType(
+            serialized_name="customBlockResponseBody",
+        )
+        policy_settings.custom_block_response_status_code = AAZIntType(
+            serialized_name="customBlockResponseStatusCode",
+        )
         policy_settings.file_upload_limit_in_mb = AAZIntType(
             serialized_name="fileUploadLimitInMb",
         )

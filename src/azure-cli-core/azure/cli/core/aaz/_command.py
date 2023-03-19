@@ -392,6 +392,24 @@ def _get_profile_pkg(aaz_module_name, cloud):
         return None
 
 
+def _link_helper(pkg, name, mod, helper_cls_name="_Helper"):
+    helper_mod = importlib.import_module(mod, pkg)
+    helper = getattr(helper_mod, helper_cls_name)
+    return getattr(helper, name)
+
+
+def link_helper(pkg, *links):
+    def _wrapper(cls):
+        for link in links:
+            if isinstance(link[1], str):
+                func = _link_helper(pkg, *link)
+            else:
+                func = getattr(link[1], link[0])
+            setattr(cls, link[0], partial(func, cls))
+        return cls
+    return _wrapper
+
+
 def _load_aaz_pkg(loader, pkg, parent_command_table, command_group_table, arg_str, fully_load):
     """ Load aaz commands and aaz command groups under a package folder.
     """

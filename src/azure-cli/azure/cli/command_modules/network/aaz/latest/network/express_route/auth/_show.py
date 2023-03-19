@@ -190,4 +190,8 @@ class Show(AAZCommand):
             return cls._schema_on_200
 
 
+class _ShowHelper:
+    """Helper class for Show"""
+
+
 __all__ = ["Show"]
