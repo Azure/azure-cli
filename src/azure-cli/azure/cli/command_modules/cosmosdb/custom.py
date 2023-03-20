@@ -1520,12 +1520,7 @@ def cli_cosmosdb_identity_assign(client,
 
     only_enabling_system = enable_system and len(new_user_identities) == 0
     system_already_added = existing.identity.type == ResourceIdentityType.system_assigned or existing.identity.type == ResourceIdentityType.system_assigned_user_assigned
-    all_new_users_already_added = new_user_identities and existing.identity and existing.identity.user_assigned_identities and all(x in existing.identity.user_assigned_identities for x in new_user_identities)
     if only_enabling_system and system_already_added:
-        return existing.identity
-    if (not enable_system) and all_new_users_already_added:
-        return existing.identity
-    if enable_system and system_already_added and all_new_users_already_added:
         return existing.identity
 
     if existing.identity and existing.identity.type == ResourceIdentityType.system_assigned_user_assigned:

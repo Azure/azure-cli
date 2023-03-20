@@ -2017,6 +2017,13 @@ def load_arguments(self, _):
         c.argument('kid',
                    arg_type=kid_param_type,
                    required=True)
+    #####
+    #           sql server refresh-external-governance-status
+    #####
+    with self.argument_context('sql server refresh-external-governance-status') as c:
+        c.argument('server_name',
+                   arg_type=server_param_type)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
 
     #####
     #           sql server tde-key
