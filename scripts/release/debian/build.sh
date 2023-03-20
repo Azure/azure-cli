@@ -56,7 +56,7 @@ $WORKDIR/python_env/bin/python3 ${WORKDIR}/scripts/trim_sdk.py
 
 # replace .py with .pyc and remove __pycache__ dir to save space
 site_packages_dir=$(cd $WORKDIR/python_env/lib/python3.*/site-packages/ ; pwd)
-#$WORKDIR/python_env/bin/python3 ${WORKDIR}/scripts/use_pyc.py $site_packages_dir
+$WORKDIR/python_env/bin/python3 ${WORKDIR}/scripts/use_pyc.py $site_packages_dir
 
 # Create create directory for debian build
 mkdir -p $WORKDIR/debian
