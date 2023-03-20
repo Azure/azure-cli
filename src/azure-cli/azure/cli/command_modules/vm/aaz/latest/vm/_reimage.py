@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Reimage(AAZCommand):
     """Reimages (upgrade the operating system) a virtual machine which don't have a ephemeral OS disk, for virtual machines who have a ephemeral OS disk the virtual machine is reset to initial state. NOTE: The retaining of old OS disk depends on the value of deleteOption of OS disk. If deleteOption is detach, the old OS disk will be preserved after reimage. If deleteOption is delete, the old OS disk will be deleted after reimage. The deleteOption of the OS disk should be updated accordingly before performing the reimage.
+
+    :example: Reimage a virtual machine.
+        az vm reimage --name MyVm --resource-group MyResourceGroup --admin-password MyPassword --custom-data "dGVzdA==" --temp-disk false --exact-version 0.1
     """
 
     _aaz_info = {
@@ -43,7 +46,6 @@ class Reimage(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
         _args_schema.vm_name = AAZStrArg(
