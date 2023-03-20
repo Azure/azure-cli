@@ -49,7 +49,7 @@ def main(folder, version=None):
     pyc_suffix = f'cpython-{version.replace(".", "")}.pyc'
     _LOGGER.info(f'pyc suffix: {pyc_suffix}')
     for file in glob.glob(f'{folder}/**/__pycache__/*{pyc_suffix}', recursive=True):
-        # If pip's py files are also removed, some error is raised when installing some packages.
+        # If pip's py files are also removed, the error is raised when installing some packages.
         # See https://github.com/Azure/azure-cli/pull/25801 for details.
         if 'site-packages/pip' in file:
             continue
