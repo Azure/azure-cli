@@ -957,6 +957,19 @@ class VMOSDiskSize(ScenarioTest):
                  checks=self.check('storageProfile.osDisk.diskSizeGb', 75))
 
 
+class VmReimageTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_reimage_')
+    def test_vm_reimage(self, resource_group):
+
+        self.kwargs.update({
+            'vm': 'vm'
+        })
+
+        self.cmd('vm create -g {rg}  -n {vm} --admin-username admin123 --admin-password testPassword0 --image debian --os-disk-delete-option Delete')
+        self.cmd('vm show -g {rg}')
+
+
 class VMManagedDiskScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_managed_disk')
