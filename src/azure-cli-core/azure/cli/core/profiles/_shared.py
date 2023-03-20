@@ -179,7 +179,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
         ResourceType.MGMT_NETWORK_PRIVATEDNS: None,
-        ResourceType.MGMT_KEYVAULT: '2022-07-01',
+        ResourceType.MGMT_KEYVAULT: '2023-02-01',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2022-04-01', {
             'classic_administrators': '2015-06-01',
             'role_definitions': '2022-04-01',
