@@ -33,13 +33,13 @@ from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
 from azure.core.exceptions import HttpResponseError
-from ..._client_factory import cf_mysql_flexible_private_dns_zone_suffix_operations, cf_postgres_flexible_private_dns_zone_suffix_operations
-from ...flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network, DEFAULT_VNET_ADDRESS_PREFIX, DEFAULT_SUBNET_ADDRESS_PREFIX
-from ...flexible_server_custom_postgres import DbContext as PostgresDbContext
-from ...flexible_server_custom_mysql import DbContext as MysqlDbContext
-from ...flexible_server_custom_mysql import _determine_iops
-from ..._flexible_server_util import get_mysql_list_skus_info
-from ..._util import retryable_method
+from azure.cli.command_modules.rdbms._client_factory import cf_mysql_flexible_private_dns_zone_suffix_operations, cf_postgres_flexible_private_dns_zone_suffix_operations
+from azure.cli.command_modules.rdbms.flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network, DEFAULT_VNET_ADDRESS_PREFIX, DEFAULT_SUBNET_ADDRESS_PREFIX
+from azure.cli.command_modules.rdbms.flexible_server_custom_postgres import DbContext as PostgresDbContext
+from azure.cli.command_modules.rdbms.flexible_server_custom_mysql import DbContext as MysqlDbContext
+from azure.cli.command_modules.rdbms.flexible_server_custom_mysql import _determine_iops
+from azure.cli.command_modules.rdbms._flexible_server_util import get_mysql_list_skus_info
+from azure.cli.command_modules.rdbms._util import retryable_method
 # Constants
 SERVER_NAME_PREFIX = 'azuredbclitest-'
 SERVER_NAME_MAX_LENGTH = 20
