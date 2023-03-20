@@ -1377,7 +1377,7 @@ def create_application(cmd, resource_group_name,
     :param str plan_version:the managed application package plan version
     :param str tags:tags in 'a=b c' format
     """
-    from azure.mgmt.resource.managedapplications.models import Application, Plan
+    Application, Plan = cmd.get_models('Application', 'Plan')
     racf = _resource_managedapps_client_factory(cmd.cli_ctx)
     rcf = _resource_client_factory(cmd.cli_ctx)
     if not location:
@@ -1448,7 +1448,8 @@ def create_or_update_applicationdefinition(cmd, resource_group_name,
     :param str main_template:the managed application definition main template
     :param str tags:tags in 'a=b c' format
     """
-    from azure.mgmt.resource.managedapplications.models import ApplicationDefinition, ApplicationProviderAuthorization
+    ApplicationDefinition, ApplicationProviderAuthorization = cmd.get_models('ApplicationDefinition',
+                                                                             'ApplicationProviderAuthorization')
     if not package_file_uri and not create_ui_definition and not main_template:
         raise CLIError('usage error: --package-file-uri <url> | --create-ui-definition --main-template')
     if package_file_uri:
