@@ -3722,14 +3722,20 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     else:
         functionapp_def.kind = 'functionapp'
 
-    if environment is not None:
-        site_config_dict.use32_bit_worker_process = None
-        site_config_dict.function_app_scale_limit = None
-
     # set site configs
     for prop, value in site_config_dict.as_dict().items():
         snake_case_prop = _convert_camel_to_snake_case(prop)
         setattr(site_config, snake_case_prop, value)
+
+    if environment is not None:
+        functionapp_def.kind = 'functionapp'
+        functionapp_def.reserved = None
+        functionapp_def.name = name
+
+        site_config.net_framework_version = None
+        site_config.java_version = None
+        site_config.use32_bit_worker_process = None
+        site_config.power_shell_version = None
 
     # temporary workaround for dotnet-isolated linux consumption apps
     if is_linux and consumption_plan_location is not None and runtime == 'dotnet-isolated':
