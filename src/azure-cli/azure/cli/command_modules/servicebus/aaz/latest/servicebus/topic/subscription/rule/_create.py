@@ -88,10 +88,11 @@ class Create(AAZCommand):
             arg_group="Action",
             help="This property is reserved for future use. An integer value showing the compatibility level, currently hard-coded to 20.",
         )
-        _args_schema.enable_action_preprocessing = AAZBoolArg(
-            options=["--action-preprocessing", "--enable-action-preprocessing"],
+        _args_schema.action_requires_preprocessing = AAZBoolArg(
+            options=["--action-requires-preprocessing"],
             arg_group="Action",
             help="Value that indicates whether the rule action requires preprocessing.",
+            default=True,
         )
         _args_schema.action_sql_expression = AAZStrArg(
             options=["--action-sql-expression"],
@@ -107,6 +108,11 @@ class Create(AAZCommand):
             arg_group="CorrelationFilter",
             help="Content type of the message.",
         )
+        _args_schema.correlation_filter_property = AAZDictArg(
+            options=["--correlation-filter", "--correlation-filter-property"],
+            arg_group="CorrelationFilter",
+            help="dictionary object for custom filters",
+        )
         _args_schema.correlation_id = AAZStrArg(
             options=["--correlation-id"],
             arg_group="CorrelationFilter",
@@ -121,11 +127,6 @@ class Create(AAZCommand):
             options=["--message-id"],
             arg_group="CorrelationFilter",
             help="Identifier of the message.",
-        )
-        _args_schema.properties = AAZDictArg(
-            options=["--properties"],
-            arg_group="CorrelationFilter",
-            help="dictionary object for custom filters",
         )
         _args_schema.reply_to = AAZStrArg(
             options=["--reply-to"],
@@ -153,8 +154,8 @@ class Create(AAZCommand):
             help="Address to send to.",
         )
 
-        properties = cls._args_schema.properties
-        properties.Element = AAZStrArg()
+        correlation_filter_property = cls._args_schema.correlation_filter_property
+        correlation_filter_property.Element = AAZStrArg()
 
         # define Arg Group "Properties"
 
@@ -175,12 +176,12 @@ class Create(AAZCommand):
             help="This property is reserved for future use. An integer value showing the compatibility level, currently hard-coded to 20.",
         )
         _args_schema.enable_sql_preprocessing = AAZBoolArg(
-            options=["-f", "--enable-sql-preprocessing"],
+            options=["--enable-sql-preprocessing"],
             arg_group="SqlFilter",
             help="Value that indicates whether the rule action requires preprocessing.",
         )
         _args_schema.filter_sql_expression = AAZStrArg(
-            options=["--sql-expression", "--filter-sql-expression"],
+            options=["--filter-sql-expression"],
             arg_group="SqlFilter",
             help="The SQL expression. e.g. MyProperty='ABC'",
         )
@@ -300,25 +301,25 @@ class Create(AAZCommand):
             action = _builder.get(".properties.action")
             if action is not None:
                 action.set_prop("compatibilityLevel", AAZIntType, ".action_compatibility_level")
-                action.set_prop("requiresPreprocessing", AAZBoolType, ".enable_action_preprocessing")
+                action.set_prop("requiresPreprocessing", AAZBoolType, ".action_requires_preprocessing")
                 action.set_prop("sqlExpression", AAZStrType, ".action_sql_expression")
 
             correlation_filter = _builder.get(".properties.correlationFilter")
             if correlation_filter is not None:
                 correlation_filter.set_prop("contentType", AAZStrType, ".content_type")
+                correlation_filter.set_prop("correlationFilterProperty", AAZDictType, ".correlation_filter_property")
                 correlation_filter.set_prop("correlationId", AAZStrType, ".correlation_id")
                 correlation_filter.set_prop("label", AAZStrType, ".label")
                 correlation_filter.set_prop("messageId", AAZStrType, ".message_id")
-                correlation_filter.set_prop("properties", AAZDictType, ".properties")
                 correlation_filter.set_prop("replyTo", AAZStrType, ".reply_to")
                 correlation_filter.set_prop("replyToSessionId", AAZStrType, ".reply_to_session_id")
                 correlation_filter.set_prop("requiresPreprocessing", AAZBoolType, ".enable_correlation_preprocessing")
                 correlation_filter.set_prop("sessionId", AAZStrType, ".session_id")
                 correlation_filter.set_prop("to", AAZStrType, ".to")
 
-            properties = _builder.get(".properties.correlationFilter.properties")
-            if properties is not None:
-                properties.set_elements(AAZStrType, ".")
+            correlation_filter_property = _builder.get(".properties.correlationFilter.correlationFilterProperty")
+            if correlation_filter_property is not None:
+                correlation_filter_property.set_elements(AAZStrType, ".")
 
             sql_filter = _builder.get(".properties.sqlFilter")
             if sql_filter is not None:
@@ -393,6 +394,9 @@ class Create(AAZCommand):
             correlation_filter.content_type = AAZStrType(
                 serialized_name="contentType",
             )
+            correlation_filter.correlation_filter_property = AAZDictType(
+                serialized_name="correlationFilterProperty",
+            )
             correlation_filter.correlation_id = AAZStrType(
                 serialized_name="correlationId",
             )
@@ -400,7 +404,6 @@ class Create(AAZCommand):
             correlation_filter.message_id = AAZStrType(
                 serialized_name="messageId",
             )
-            correlation_filter.properties = AAZDictType()
             correlation_filter.reply_to = AAZStrType(
                 serialized_name="replyTo",
             )
@@ -415,8 +418,8 @@ class Create(AAZCommand):
             )
             correlation_filter.to = AAZStrType()
 
-            properties = cls._schema_on_200.properties.correlation_filter.properties
-            properties.Element = AAZStrType()
+            correlation_filter_property = cls._schema_on_200.properties.correlation_filter.correlation_filter_property
+            correlation_filter_property.Element = AAZStrType()
 
             sql_filter = cls._schema_on_200.properties.sql_filter
             sql_filter.compatibility_level = AAZIntType(

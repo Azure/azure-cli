@@ -233,7 +233,6 @@ def cli_remove_identity(cmd, resource_group_name, namespace_name, system_assigne
         })
     return Update(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
-
 def sb_rule_create(cmd, resource_group_name, namespace_name, topic_name, subscription_name, rule_name,
                    action_sql_expression=None, action_compatibility_level=None, correlation_id=None,
                    action_requires_preprocessing=None, reply_to=None, label=None, session_id=None,
@@ -262,15 +261,17 @@ def sb_rule_create(cmd, resource_group_name, namespace_name, topic_name, subscri
 
     if filter_type == 'CorrelationFilter':
         command_arg_dict.update({
+            'correlation_filter_property': tags,
             'correlation_id': correlation_id,
             'to': to,
             'message_id': message_id,
             'reply_to': reply_to,
-            'properties': tags,
+            'correlation_filter_property': tags,
             'session_id': session_id,
             'reply_to_session_id': reply_to_session_id,
             'content_type': content_type,
             'requires_preprocessing': requires_preprocessing,
             'label': label
         })
+    print(command_arg_dict)
     return Create(cli_ctx=cmd.cli_ctx)(command_args=command_arg_dict)

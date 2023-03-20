@@ -242,6 +242,9 @@ class Show(AAZCommand):
             correlation_filter.content_type = AAZStrType(
                 serialized_name="contentType",
             )
+            correlation_filter.correlation_filter_property = AAZDictType(
+                serialized_name="correlationFilterProperty",
+            )
             correlation_filter.correlation_id = AAZStrType(
                 serialized_name="correlationId",
             )
@@ -249,7 +252,6 @@ class Show(AAZCommand):
             correlation_filter.message_id = AAZStrType(
                 serialized_name="messageId",
             )
-            correlation_filter.properties = AAZDictType()
             correlation_filter.reply_to = AAZStrType(
                 serialized_name="replyTo",
             )
@@ -264,8 +266,8 @@ class Show(AAZCommand):
             )
             correlation_filter.to = AAZStrType()
 
-            properties = cls._schema_on_200.properties.correlation_filter.properties
-            properties.Element = AAZStrType()
+            correlation_filter_property = cls._schema_on_200.properties.correlation_filter.correlation_filter_property
+            correlation_filter_property.Element = AAZStrType()
 
             sql_filter = cls._schema_on_200.properties.sql_filter
             sql_filter.compatibility_level = AAZIntType(
