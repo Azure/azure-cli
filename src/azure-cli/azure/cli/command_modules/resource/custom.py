@@ -1377,7 +1377,7 @@ def create_application(cmd, resource_group_name,
     :param str plan_version:the managed application package plan version
     :param str tags:tags in 'a=b c' format
     """
-    from azure.mgmt.resource.managedapplications.models import Application, Plan
+    Application, Plan = cmd.get_models('Application', 'Plan')
     racf = _resource_managedapps_client_factory(cmd.cli_ctx)
     rcf = _resource_client_factory(cmd.cli_ctx)
     if not location:
@@ -1448,7 +1448,8 @@ def create_or_update_applicationdefinition(cmd, resource_group_name,
     :param str main_template:the managed application definition main template
     :param str tags:tags in 'a=b c' format
     """
-    from azure.mgmt.resource.managedapplications.models import ApplicationDefinition, ApplicationProviderAuthorization
+    ApplicationDefinition, ApplicationProviderAuthorization = cmd.get_models('ApplicationDefinition',
+                                                                             'ApplicationProviderAuthorization')
     if not package_file_uri and not create_ui_definition and not main_template:
         raise CLIError('usage error: --package-file-uri <url> | --create-ui-definition --main-template')
     if package_file_uri:
@@ -3322,7 +3323,7 @@ def create_or_update_tag_at_scope(cmd, resource_id=None, tags=None, tag_name=Non
         tag_obj = Tags(tags=tags)
         TagsResource = cmd.get_models('TagsResource')
         tags_resource = TagsResource(properties=tag_obj)
-        return rcf.tags.create_or_update_at_scope(scope=resource_id, parameters=tags_resource)
+        return rcf.tags.begin_create_or_update_at_scope(scope=resource_id, parameters=tags_resource)
 
     return rcf.tags.create_or_update(tag_name=tag_name)
 
@@ -3330,7 +3331,7 @@ def create_or_update_tag_at_scope(cmd, resource_id=None, tags=None, tag_name=Non
 def delete_tag_at_scope(cmd, resource_id=None, tag_name=None):
     rcf = _resource_client_factory(cmd.cli_ctx)
     if resource_id is not None:
-        return rcf.tags.delete_at_scope(scope=resource_id)
+        return rcf.tags.begin_delete_at_scope(scope=resource_id)
 
     return rcf.tags.delete(tag_name=tag_name)
 
@@ -3343,7 +3344,7 @@ def update_tag_at_scope(cmd, resource_id, tags, operation):
     tag_obj = Tags(tags=tags)
     TagsPatchResource = cmd.get_models('TagsPatchResource')
     tags_resource = TagsPatchResource(properties=tag_obj, operation=operation)
-    return rcf.tags.update_at_scope(scope=resource_id, parameters=tags_resource)
+    return rcf.tags.begin_update_at_scope(scope=resource_id, parameters=tags_resource)
 # endregion
 
 
