@@ -22,7 +22,6 @@ class IoTHubTest(ScenarioTest):
             method_name, recording_processors=[KeyReplacer()]
         )
 
-    @skip('Live run succeeded, recording test: DecodeError')
     @AllowLargeResponse(size_kb=4096)
     @ResourceGroupPreparer(location='westus2')
     @StorageAccountPreparer()
