@@ -49,22 +49,14 @@ def main(folder, version=None):
     pyc_suffix = f'cpython-{version.replace(".", "")}.pyc'
     _LOGGER.info(f'pyc suffix: {pyc_suffix}')
     for file in glob.glob(f'{folder}/**/__pycache__/*{pyc_suffix}', recursive=True):
-        # If pip's py files are also removed, the following error will occur when use pip install.
-        # For example: /opt/az/bin/python3 -m pip install --no-cache  pgcli==3.4.1
-        #   × pip subprocess to install build dependencies did not run successfully.
-        #   │ exit code: 2
-        #   ╰─> [1 lines of output]
-        #       /opt/az/bin/python3: can't open file '/opt/az/lib/python3.10/site-packages/pip/__pip-runner__.py': [Errno 2] No such file or directory
-        #       [end of output]
-        #
-        #   note: This error originates from a subprocess, and is likely not a problem with pip.
-        # error: subprocess-exited-with-error
+        # If pip's py files are also removed, some error is raised when installing some packages.
+        # See https://github.com/Azure/azure-cli/pull/25801 for details.
         if 'site-packages/pip' in file:
             continue
 
         # file is /opt/az/lib/python3.10/site-packages/websocket/__pycache__/_app.cpython-310.pyc
         # py_filename is _app.py
-        py_filename = Path(file).name[:-len('cpython-310.pyc')] + 'py'
+        py_filename = Path(file).name[:-len(pyc_suffix)] + 'py'
         # py_path is /opt/az/lib/python3.10/site-packages/websocket/_app.py
         py_path = Path(file).parent.parent / py_filename
         if py_path.exists():
