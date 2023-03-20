@@ -71,12 +71,22 @@ class VmReimageTest(ScenarioTest):
         self.kwargs.update({
             'vm': 'vm'
         })
-        
-        self.cmd('vm create -g {rg} -n {vm} --admin-username ubuntu --image UbuntuLTS --admin-password testPassword0 '
-                 '--authentication-type password --use-unmanaged-disk --nsg-rule NONE')
 
-        self.cmd('vm reimage --name {vm} --resource-group {rg} --temp-disk true')
+        self.cmd('vm create -g {rg} -n {vm} --image centos --admin-username centosadmin --admin-password testPassword0 '
+                 '--authentication-type password --os-disk-delete-option Delete --nsg-rule NONE')
+        vm_json_before_reimage = self.cmd('vm show -n {vm} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'os_disk_before_reimage': vm_json_before_reimage['storageProfile']['osDisk']['name']
+        })
 
+        self.cmd('vm reimage --name {vm} --resource-group {rg} --temp-disk false '
+                 '--admin-password password --custom-data "dGVzdA==" --exact-version 0.1')
+        vm_json_after_reimage = self.cmd('vm show -n {vm} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'os_disk_after_reimage': vm_json_after_reimage['storageProfile']['osDisk']['name']
+        })
+
+        self.assertNotEqual('{os_disk_before_reimage}', '{os_disk_after_reimage}')
 
 
 class VMUsageScenarioTest(ScenarioTest):
@@ -955,19 +965,6 @@ class VMOSDiskSize(ScenarioTest):
         self.cmd('vm create -g {rg} -n vm1 --image centos --admin-username centosadmin --admin-password testPassword0 --authentication-type password --os-disk-size-gb 75 --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n vm1',
                  checks=self.check('storageProfile.osDisk.diskSizeGb', 75))
-
-
-class VmReimageTest(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_reimage_')
-    def test_vm_reimage(self, resource_group):
-
-        self.kwargs.update({
-            'vm': 'vm'
-        })
-
-        self.cmd('vm create -g {rg}  -n {vm} --admin-username admin123 --admin-password testPassword0 --image debian --os-disk-delete-option Delete')
-        self.cmd('vm show -g {rg}')
 
 
 class VMManagedDiskScenarioTest(ScenarioTest):
