@@ -149,7 +149,9 @@ class Add(AAZCommand):
     def _execute_operations(self):
         self.pre_operations()
         self.ApplicationGatewaysGet(ctx=self.ctx)()
+        self.pre_instance_create()
         self.InstanceCreateByJson(ctx=self.ctx)()
+        self.post_instance_create(self.ctx.selectors.subresource.required())
         yield self.ApplicationGatewaysCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -159,6 +161,14 @@ class Add(AAZCommand):
 
     @register_callback
     def post_operations(self):
+        pass
+
+    @register_callback
+    def pre_instance_create(self):
+        pass
+
+    @register_callback
+    def post_instance_create(self, instance):
         pass
 
     def _output(self, *args, **kwargs):

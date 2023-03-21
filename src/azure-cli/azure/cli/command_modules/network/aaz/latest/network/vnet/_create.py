@@ -77,13 +77,9 @@ class Create(AAZCommand):
             options=["--bgp-community"],
             help="The BGP community associated with the virtual network.",
         )
-        _args_schema.ddos_protection_plan = AAZResourceIdArg(
+        _args_schema.ddos_protection_plan = AAZStrArg(
             options=["--ddos-protection-plan"],
             help="Name or ID of a DDoS protection plan to associate with the VNet.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/ddosProtectionPlans/{}",
-            ),
         )
         _args_schema.dns_servers = AAZListArg(
             options=["--dns-servers"],

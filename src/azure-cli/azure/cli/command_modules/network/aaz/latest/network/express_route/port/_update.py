@@ -181,7 +181,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_express_route_port_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_express_route_port_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -292,7 +292,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _build_schema_express_route_port_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_express_route_port_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -325,179 +325,181 @@ class Update(AAZCommand):
             )
 
 
-_schema_express_route_port_read = None
+class _UpdateHelper:
+    """Helper class for Update"""
 
+    _schema_express_route_port_read = None
 
-def _build_schema_express_route_port_read(_schema):
-    global _schema_express_route_port_read
-    if _schema_express_route_port_read is not None:
-        _schema.etag = _schema_express_route_port_read.etag
-        _schema.id = _schema_express_route_port_read.id
-        _schema.identity = _schema_express_route_port_read.identity
-        _schema.location = _schema_express_route_port_read.location
-        _schema.name = _schema_express_route_port_read.name
-        _schema.properties = _schema_express_route_port_read.properties
-        _schema.tags = _schema_express_route_port_read.tags
-        _schema.type = _schema_express_route_port_read.type
-        return
+    @classmethod
+    def _build_schema_express_route_port_read(cls, _schema):
+        if cls._schema_express_route_port_read is not None:
+            _schema.etag = cls._schema_express_route_port_read.etag
+            _schema.id = cls._schema_express_route_port_read.id
+            _schema.identity = cls._schema_express_route_port_read.identity
+            _schema.location = cls._schema_express_route_port_read.location
+            _schema.name = cls._schema_express_route_port_read.name
+            _schema.properties = cls._schema_express_route_port_read.properties
+            _schema.tags = cls._schema_express_route_port_read.tags
+            _schema.type = cls._schema_express_route_port_read.type
+            return
 
-    _schema_express_route_port_read = AAZObjectType()
+        cls._schema_express_route_port_read = _schema_express_route_port_read = AAZObjectType()
 
-    express_route_port_read = _schema_express_route_port_read
-    express_route_port_read.etag = AAZStrType(
-        flags={"read_only": True},
-    )
-    express_route_port_read.id = AAZStrType()
-    express_route_port_read.identity = AAZObjectType()
-    express_route_port_read.location = AAZStrType()
-    express_route_port_read.name = AAZStrType(
-        flags={"read_only": True},
-    )
-    express_route_port_read.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
-    express_route_port_read.tags = AAZDictType()
-    express_route_port_read.type = AAZStrType(
-        flags={"read_only": True},
-    )
+        express_route_port_read = _schema_express_route_port_read
+        express_route_port_read.etag = AAZStrType(
+            flags={"read_only": True},
+        )
+        express_route_port_read.id = AAZStrType()
+        express_route_port_read.identity = AAZObjectType()
+        express_route_port_read.location = AAZStrType()
+        express_route_port_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        express_route_port_read.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        express_route_port_read.tags = AAZDictType()
+        express_route_port_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
-    identity = _schema_express_route_port_read.identity
-    identity.principal_id = AAZStrType(
-        serialized_name="principalId",
-        flags={"read_only": True},
-    )
-    identity.tenant_id = AAZStrType(
-        serialized_name="tenantId",
-        flags={"read_only": True},
-    )
-    identity.type = AAZStrType()
-    identity.user_assigned_identities = AAZDictType(
-        serialized_name="userAssignedIdentities",
-    )
+        identity = _schema_express_route_port_read.identity
+        identity.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+        identity.tenant_id = AAZStrType(
+            serialized_name="tenantId",
+            flags={"read_only": True},
+        )
+        identity.type = AAZStrType()
+        identity.user_assigned_identities = AAZDictType(
+            serialized_name="userAssignedIdentities",
+        )
 
-    user_assigned_identities = _schema_express_route_port_read.identity.user_assigned_identities
-    user_assigned_identities.Element = AAZObjectType()
+        user_assigned_identities = _schema_express_route_port_read.identity.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectType()
 
-    _element = _schema_express_route_port_read.identity.user_assigned_identities.Element
-    _element.client_id = AAZStrType(
-        serialized_name="clientId",
-        flags={"read_only": True},
-    )
-    _element.principal_id = AAZStrType(
-        serialized_name="principalId",
-        flags={"read_only": True},
-    )
+        _element = _schema_express_route_port_read.identity.user_assigned_identities.Element
+        _element.client_id = AAZStrType(
+            serialized_name="clientId",
+            flags={"read_only": True},
+        )
+        _element.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
 
-    properties = _schema_express_route_port_read.properties
-    properties.allocation_date = AAZStrType(
-        serialized_name="allocationDate",
-        flags={"read_only": True},
-    )
-    properties.bandwidth_in_gbps = AAZIntType(
-        serialized_name="bandwidthInGbps",
-    )
-    properties.circuits = AAZListType(
-        flags={"read_only": True},
-    )
-    properties.encapsulation = AAZStrType()
-    properties.ether_type = AAZStrType(
-        serialized_name="etherType",
-        flags={"read_only": True},
-    )
-    properties.links = AAZListType()
-    properties.mtu = AAZStrType(
-        flags={"read_only": True},
-    )
-    properties.peering_location = AAZStrType(
-        serialized_name="peeringLocation",
-    )
-    properties.provisioned_bandwidth_in_gbps = AAZFloatType(
-        serialized_name="provisionedBandwidthInGbps",
-        flags={"read_only": True},
-    )
-    properties.provisioning_state = AAZStrType(
-        serialized_name="provisioningState",
-        flags={"read_only": True},
-    )
-    properties.resource_guid = AAZStrType(
-        serialized_name="resourceGuid",
-        flags={"read_only": True},
-    )
+        properties = _schema_express_route_port_read.properties
+        properties.allocation_date = AAZStrType(
+            serialized_name="allocationDate",
+            flags={"read_only": True},
+        )
+        properties.bandwidth_in_gbps = AAZIntType(
+            serialized_name="bandwidthInGbps",
+        )
+        properties.circuits = AAZListType(
+            flags={"read_only": True},
+        )
+        properties.encapsulation = AAZStrType()
+        properties.ether_type = AAZStrType(
+            serialized_name="etherType",
+            flags={"read_only": True},
+        )
+        properties.links = AAZListType()
+        properties.mtu = AAZStrType(
+            flags={"read_only": True},
+        )
+        properties.peering_location = AAZStrType(
+            serialized_name="peeringLocation",
+        )
+        properties.provisioned_bandwidth_in_gbps = AAZFloatType(
+            serialized_name="provisionedBandwidthInGbps",
+            flags={"read_only": True},
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.resource_guid = AAZStrType(
+            serialized_name="resourceGuid",
+            flags={"read_only": True},
+        )
 
-    circuits = _schema_express_route_port_read.properties.circuits
-    circuits.Element = AAZObjectType()
+        circuits = _schema_express_route_port_read.properties.circuits
+        circuits.Element = AAZObjectType()
 
-    _element = _schema_express_route_port_read.properties.circuits.Element
-    _element.id = AAZStrType()
+        _element = _schema_express_route_port_read.properties.circuits.Element
+        _element.id = AAZStrType()
 
-    links = _schema_express_route_port_read.properties.links
-    links.Element = AAZObjectType()
+        links = _schema_express_route_port_read.properties.links
+        links.Element = AAZObjectType()
 
-    _element = _schema_express_route_port_read.properties.links.Element
-    _element.etag = AAZStrType(
-        flags={"read_only": True},
-    )
-    _element.id = AAZStrType()
-    _element.name = AAZStrType()
-    _element.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
+        _element = _schema_express_route_port_read.properties.links.Element
+        _element.etag = AAZStrType(
+            flags={"read_only": True},
+        )
+        _element.id = AAZStrType()
+        _element.name = AAZStrType()
+        _element.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
 
-    properties = _schema_express_route_port_read.properties.links.Element.properties
-    properties.admin_state = AAZStrType(
-        serialized_name="adminState",
-    )
-    properties.connector_type = AAZStrType(
-        serialized_name="connectorType",
-        flags={"read_only": True},
-    )
-    properties.interface_name = AAZStrType(
-        serialized_name="interfaceName",
-        flags={"read_only": True},
-    )
-    properties.mac_sec_config = AAZObjectType(
-        serialized_name="macSecConfig",
-    )
-    properties.patch_panel_id = AAZStrType(
-        serialized_name="patchPanelId",
-        flags={"read_only": True},
-    )
-    properties.provisioning_state = AAZStrType(
-        serialized_name="provisioningState",
-        flags={"read_only": True},
-    )
-    properties.rack_id = AAZStrType(
-        serialized_name="rackId",
-        flags={"read_only": True},
-    )
-    properties.router_name = AAZStrType(
-        serialized_name="routerName",
-        flags={"read_only": True},
-    )
+        properties = _schema_express_route_port_read.properties.links.Element.properties
+        properties.admin_state = AAZStrType(
+            serialized_name="adminState",
+        )
+        properties.connector_type = AAZStrType(
+            serialized_name="connectorType",
+            flags={"read_only": True},
+        )
+        properties.interface_name = AAZStrType(
+            serialized_name="interfaceName",
+            flags={"read_only": True},
+        )
+        properties.mac_sec_config = AAZObjectType(
+            serialized_name="macSecConfig",
+        )
+        properties.patch_panel_id = AAZStrType(
+            serialized_name="patchPanelId",
+            flags={"read_only": True},
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.rack_id = AAZStrType(
+            serialized_name="rackId",
+            flags={"read_only": True},
+        )
+        properties.router_name = AAZStrType(
+            serialized_name="routerName",
+            flags={"read_only": True},
+        )
 
-    mac_sec_config = _schema_express_route_port_read.properties.links.Element.properties.mac_sec_config
-    mac_sec_config.cak_secret_identifier = AAZStrType(
-        serialized_name="cakSecretIdentifier",
-    )
-    mac_sec_config.cipher = AAZStrType()
-    mac_sec_config.ckn_secret_identifier = AAZStrType(
-        serialized_name="cknSecretIdentifier",
-    )
-    mac_sec_config.sci_state = AAZStrType(
-        serialized_name="sciState",
-    )
+        mac_sec_config = _schema_express_route_port_read.properties.links.Element.properties.mac_sec_config
+        mac_sec_config.cak_secret_identifier = AAZStrType(
+            serialized_name="cakSecretIdentifier",
+        )
+        mac_sec_config.cipher = AAZStrType()
+        mac_sec_config.ckn_secret_identifier = AAZStrType(
+            serialized_name="cknSecretIdentifier",
+        )
+        mac_sec_config.sci_state = AAZStrType(
+            serialized_name="sciState",
+        )
 
-    tags = _schema_express_route_port_read.tags
-    tags.Element = AAZStrType()
+        tags = _schema_express_route_port_read.tags
+        tags.Element = AAZStrType()
 
-    _schema.etag = _schema_express_route_port_read.etag
-    _schema.id = _schema_express_route_port_read.id
-    _schema.identity = _schema_express_route_port_read.identity
-    _schema.location = _schema_express_route_port_read.location
-    _schema.name = _schema_express_route_port_read.name
-    _schema.properties = _schema_express_route_port_read.properties
-    _schema.tags = _schema_express_route_port_read.tags
-    _schema.type = _schema_express_route_port_read.type
+        _schema.etag = cls._schema_express_route_port_read.etag
+        _schema.id = cls._schema_express_route_port_read.id
+        _schema.identity = cls._schema_express_route_port_read.identity
+        _schema.location = cls._schema_express_route_port_read.location
+        _schema.name = cls._schema_express_route_port_read.name
+        _schema.properties = cls._schema_express_route_port_read.properties
+        _schema.tags = cls._schema_express_route_port_read.tags
+        _schema.type = cls._schema_express_route_port_read.type
 
 
 __all__ = ["Update"]

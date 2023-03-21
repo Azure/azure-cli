@@ -775,7 +775,8 @@ parameters:
     short-summary: Supply deployment parameter values.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Also note if you are providing a bicepparam file with a bicep template then you can use this
+        argument only once.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -811,6 +812,9 @@ examples:
   - name: Create a deployment at resource group scope from a template-spec
     text: >
         az deployment group create --resource-group testrg --template-spec "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Resources/templateSpecs/myTemplateSpec/versions/1.0"
+  - name: Create a deployment at resource group scope from a bicep template and a bicepparam parameter file
+    text: >
+        az deployment group create --resource-group testrg --template-file azuredeploy.bicep --parameters parameters.bicepparam
 """
 
 helps['deployment group what-if'] = """
@@ -2766,19 +2770,19 @@ helps['bicep format'] = """
 type: command
 short-summary: Format a Bicep file.
 examples:
-  - name: Foramt a Bicep file.
+  - name: Format a Bicep file.
     text: az bicep format --file {bicep_file}
-  - name: Foramt a Bicep file and print all output to stdout.
+  - name: Format a Bicep file and print all output to stdout.
     text: az bicep format --file {bicep_file} --stdout
-  - name: Foramt a Bicep file and save the result to the specified directory.
+  - name: Format a Bicep file and save the result to the specified directory.
     text: az bicep format --file {bicep_file} --outdir {out_dir}
-  - name: Foramt a Bicep file and save the result to the specified file.
+  - name: Format a Bicep file and save the result to the specified file.
     text: az bicep format --file {bicep_file} --outfile {out_file}
-  - name: Foramt a Bicep file insert a final newline.
+  - name: Format a Bicep file insert a final newline.
     text: az bicep format --file {bicep_file} --insert-final-newline
-  - name: Foramt a Bicep file set indentation kind. Valid values are ( Space | Tab ).
+  - name: Format a Bicep file set indentation kind. Valid values are ( Space | Tab ).
     text: az bicep format --file {bicep_file} --indent-kind {indent_kind}
-  - name: Foramt a Bicep file set number of spaces to indent with (Only valid with --indent-kind set to Space).
+  - name: Format a Bicep file set number of spaces to indent with (Only valid with --indent-kind set to Space).
     text: az bicep format --file {bicep_file} --indent-size {indent_size}
 """
 

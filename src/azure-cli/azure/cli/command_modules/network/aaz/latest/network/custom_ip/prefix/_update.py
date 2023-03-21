@@ -65,7 +65,7 @@ class Update(AAZCommand):
             options=["--state"],
             help="Commissioned State of the custom ip prefix.",
             nullable=True,
-            enum={"commission": "Commissioning", "decommission": "Decommissioning", "deprovision": "Deprovisioning", "provision": "Provisioning"},
+            enum={"Commissioned": "Commissioned", "CommissionedNoInternetAdvertise": "CommissionedNoInternetAdvertise", "Commissioning": "Commissioning", "Decommissioning": "Decommissioning", "Deprovisioned": "Deprovisioned", "Deprovisioning": "Deprovisioning", "Provisioned": "Provisioned", "Provisioning": "Provisioning"},
         )
         _args_schema.no_internet_advertise = AAZBoolArg(
             options=["--no-internet-advertise"],
@@ -202,7 +202,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_custom_ip_prefix_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_custom_ip_prefix_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -313,7 +313,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _build_schema_custom_ip_prefix_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_custom_ip_prefix_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -353,137 +353,137 @@ class Update(AAZCommand):
             )
 
 
-_schema_custom_ip_prefix_read = None
+class _UpdateHelper:
+    """Helper class for Update"""
 
+    _schema_custom_ip_prefix_read = None
 
-def _build_schema_custom_ip_prefix_read(_schema):
-    global _schema_custom_ip_prefix_read
-    if _schema_custom_ip_prefix_read is not None:
-        _schema.etag = _schema_custom_ip_prefix_read.etag
-        _schema.extended_location = _schema_custom_ip_prefix_read.extended_location
-        _schema.id = _schema_custom_ip_prefix_read.id
-        _schema.location = _schema_custom_ip_prefix_read.location
-        _schema.name = _schema_custom_ip_prefix_read.name
-        _schema.properties = _schema_custom_ip_prefix_read.properties
-        _schema.tags = _schema_custom_ip_prefix_read.tags
-        _schema.type = _schema_custom_ip_prefix_read.type
-        _schema.zones = _schema_custom_ip_prefix_read.zones
-        return
+    @classmethod
+    def _build_schema_custom_ip_prefix_read(cls, _schema):
+        if cls._schema_custom_ip_prefix_read is not None:
+            _schema.etag = cls._schema_custom_ip_prefix_read.etag
+            _schema.extended_location = cls._schema_custom_ip_prefix_read.extended_location
+            _schema.id = cls._schema_custom_ip_prefix_read.id
+            _schema.location = cls._schema_custom_ip_prefix_read.location
+            _schema.name = cls._schema_custom_ip_prefix_read.name
+            _schema.properties = cls._schema_custom_ip_prefix_read.properties
+            _schema.tags = cls._schema_custom_ip_prefix_read.tags
+            _schema.type = cls._schema_custom_ip_prefix_read.type
+            _schema.zones = cls._schema_custom_ip_prefix_read.zones
+            return
 
-    _schema_custom_ip_prefix_read = AAZObjectType()
+        cls._schema_custom_ip_prefix_read = _schema_custom_ip_prefix_read = AAZObjectType()
 
-    custom_ip_prefix_read = _schema_custom_ip_prefix_read
-    custom_ip_prefix_read.etag = AAZStrType(
-        flags={"read_only": True},
-    )
-    custom_ip_prefix_read.extended_location = AAZObjectType(
-        serialized_name="extendedLocation",
-    )
-    custom_ip_prefix_read.id = AAZStrType()
-    custom_ip_prefix_read.location = AAZStrType()
-    custom_ip_prefix_read.name = AAZStrType(
-        flags={"read_only": True},
-    )
-    custom_ip_prefix_read.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
-    custom_ip_prefix_read.tags = AAZDictType()
-    custom_ip_prefix_read.type = AAZStrType(
-        flags={"read_only": True},
-    )
-    custom_ip_prefix_read.zones = AAZListType()
+        custom_ip_prefix_read = _schema_custom_ip_prefix_read
+        custom_ip_prefix_read.etag = AAZStrType(
+            flags={"read_only": True},
+        )
+        custom_ip_prefix_read.extended_location = AAZObjectType(
+            serialized_name="extendedLocation",
+        )
+        custom_ip_prefix_read.id = AAZStrType()
+        custom_ip_prefix_read.location = AAZStrType()
+        custom_ip_prefix_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        custom_ip_prefix_read.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        custom_ip_prefix_read.tags = AAZDictType()
+        custom_ip_prefix_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
+        custom_ip_prefix_read.zones = AAZListType()
 
-    extended_location = _schema_custom_ip_prefix_read.extended_location
-    extended_location.name = AAZStrType()
-    extended_location.type = AAZStrType()
+        extended_location = _schema_custom_ip_prefix_read.extended_location
+        extended_location.name = AAZStrType()
+        extended_location.type = AAZStrType()
 
-    properties = _schema_custom_ip_prefix_read.properties
-    properties.asn = AAZStrType()
-    properties.authorization_message = AAZStrType(
-        serialized_name="authorizationMessage",
-    )
-    properties.child_custom_ip_prefixes = AAZListType(
-        serialized_name="childCustomIpPrefixes",
-        flags={"read_only": True},
-    )
-    properties.cidr = AAZStrType()
-    properties.commissioned_state = AAZStrType(
-        serialized_name="commissionedState",
-    )
-    properties.custom_ip_prefix_parent = AAZObjectType(
-        serialized_name="customIpPrefixParent",
-    )
-    _build_schema_sub_resource_read(properties.custom_ip_prefix_parent)
-    properties.express_route_advertise = AAZBoolType(
-        serialized_name="expressRouteAdvertise",
-    )
-    properties.failed_reason = AAZStrType(
-        serialized_name="failedReason",
-        flags={"read_only": True},
-    )
-    properties.geo = AAZStrType()
-    properties.no_internet_advertise = AAZBoolType(
-        serialized_name="noInternetAdvertise",
-    )
-    properties.prefix_type = AAZStrType(
-        serialized_name="prefixType",
-    )
-    properties.provisioning_state = AAZStrType(
-        serialized_name="provisioningState",
-        flags={"read_only": True},
-    )
-    properties.public_ip_prefixes = AAZListType(
-        serialized_name="publicIpPrefixes",
-        flags={"read_only": True},
-    )
-    properties.resource_guid = AAZStrType(
-        serialized_name="resourceGuid",
-        flags={"read_only": True},
-    )
-    properties.signed_message = AAZStrType(
-        serialized_name="signedMessage",
-    )
+        properties = _schema_custom_ip_prefix_read.properties
+        properties.asn = AAZStrType()
+        properties.authorization_message = AAZStrType(
+            serialized_name="authorizationMessage",
+        )
+        properties.child_custom_ip_prefixes = AAZListType(
+            serialized_name="childCustomIpPrefixes",
+            flags={"read_only": True},
+        )
+        properties.cidr = AAZStrType()
+        properties.commissioned_state = AAZStrType(
+            serialized_name="commissionedState",
+        )
+        properties.custom_ip_prefix_parent = AAZObjectType(
+            serialized_name="customIpPrefixParent",
+        )
+        cls._build_schema_sub_resource_read(properties.custom_ip_prefix_parent)
+        properties.express_route_advertise = AAZBoolType(
+            serialized_name="expressRouteAdvertise",
+        )
+        properties.failed_reason = AAZStrType(
+            serialized_name="failedReason",
+            flags={"read_only": True},
+        )
+        properties.geo = AAZStrType()
+        properties.no_internet_advertise = AAZBoolType(
+            serialized_name="noInternetAdvertise",
+        )
+        properties.prefix_type = AAZStrType(
+            serialized_name="prefixType",
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.public_ip_prefixes = AAZListType(
+            serialized_name="publicIpPrefixes",
+            flags={"read_only": True},
+        )
+        properties.resource_guid = AAZStrType(
+            serialized_name="resourceGuid",
+            flags={"read_only": True},
+        )
+        properties.signed_message = AAZStrType(
+            serialized_name="signedMessage",
+        )
 
-    child_custom_ip_prefixes = _schema_custom_ip_prefix_read.properties.child_custom_ip_prefixes
-    child_custom_ip_prefixes.Element = AAZObjectType()
-    _build_schema_sub_resource_read(child_custom_ip_prefixes.Element)
+        child_custom_ip_prefixes = _schema_custom_ip_prefix_read.properties.child_custom_ip_prefixes
+        child_custom_ip_prefixes.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(child_custom_ip_prefixes.Element)
 
-    public_ip_prefixes = _schema_custom_ip_prefix_read.properties.public_ip_prefixes
-    public_ip_prefixes.Element = AAZObjectType()
-    _build_schema_sub_resource_read(public_ip_prefixes.Element)
+        public_ip_prefixes = _schema_custom_ip_prefix_read.properties.public_ip_prefixes
+        public_ip_prefixes.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(public_ip_prefixes.Element)
 
-    tags = _schema_custom_ip_prefix_read.tags
-    tags.Element = AAZStrType()
+        tags = _schema_custom_ip_prefix_read.tags
+        tags.Element = AAZStrType()
 
-    zones = _schema_custom_ip_prefix_read.zones
-    zones.Element = AAZStrType()
+        zones = _schema_custom_ip_prefix_read.zones
+        zones.Element = AAZStrType()
 
-    _schema.etag = _schema_custom_ip_prefix_read.etag
-    _schema.extended_location = _schema_custom_ip_prefix_read.extended_location
-    _schema.id = _schema_custom_ip_prefix_read.id
-    _schema.location = _schema_custom_ip_prefix_read.location
-    _schema.name = _schema_custom_ip_prefix_read.name
-    _schema.properties = _schema_custom_ip_prefix_read.properties
-    _schema.tags = _schema_custom_ip_prefix_read.tags
-    _schema.type = _schema_custom_ip_prefix_read.type
-    _schema.zones = _schema_custom_ip_prefix_read.zones
+        _schema.etag = cls._schema_custom_ip_prefix_read.etag
+        _schema.extended_location = cls._schema_custom_ip_prefix_read.extended_location
+        _schema.id = cls._schema_custom_ip_prefix_read.id
+        _schema.location = cls._schema_custom_ip_prefix_read.location
+        _schema.name = cls._schema_custom_ip_prefix_read.name
+        _schema.properties = cls._schema_custom_ip_prefix_read.properties
+        _schema.tags = cls._schema_custom_ip_prefix_read.tags
+        _schema.type = cls._schema_custom_ip_prefix_read.type
+        _schema.zones = cls._schema_custom_ip_prefix_read.zones
 
+    _schema_sub_resource_read = None
 
-_schema_sub_resource_read = None
+    @classmethod
+    def _build_schema_sub_resource_read(cls, _schema):
+        if cls._schema_sub_resource_read is not None:
+            _schema.id = cls._schema_sub_resource_read.id
+            return
 
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
 
-def _build_schema_sub_resource_read(_schema):
-    global _schema_sub_resource_read
-    if _schema_sub_resource_read is not None:
-        _schema.id = _schema_sub_resource_read.id
-        return
+        sub_resource_read = _schema_sub_resource_read
+        sub_resource_read.id = AAZStrType()
 
-    _schema_sub_resource_read = AAZObjectType()
-
-    sub_resource_read = _schema_sub_resource_read
-    sub_resource_read.id = AAZStrType()
-
-    _schema.id = _schema_sub_resource_read.id
+        _schema.id = cls._schema_sub_resource_read.id
 
 
 __all__ = ["Update"]

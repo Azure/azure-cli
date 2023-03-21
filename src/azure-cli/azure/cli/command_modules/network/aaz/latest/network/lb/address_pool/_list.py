@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "network lb address-pool list",
 )
 class List(AAZCommand):
-    """List all the load balancer backed address pools.
+    """List address pools.
 
     :example: List address pools.
         az network lb address-pool list -g MyResourceGroup --lb-name MyLb -o table

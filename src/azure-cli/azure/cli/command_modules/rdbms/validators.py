@@ -20,9 +20,10 @@ from azure.mgmt.rdbms.mysql_flexibleservers.operations._firewall_rules_operation
 from ._client_factory import cf_mysql_flexible_servers, cf_postgres_flexible_servers
 from ._flexible_server_util import (get_mysql_versions, get_mysql_skus, get_mysql_storage_size,
                                     get_mysql_backup_retention, get_mysql_tiers, get_mysql_list_skus_info,
-                                    get_postgres_list_skus_info, get_postgres_versions,
+                                    get_postgres_versions,
                                     get_postgres_skus, get_postgres_storage_sizes, get_postgres_tiers,
                                     _is_resource_name)
+from ._flexible_server_location_capabilities_util import (get_postgres_location_capability_info)
 
 logger = get_logger(__name__)
 
@@ -289,11 +290,13 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
                            version=None, geo_redundant_backup=None, byok_identity=None, byok_key=None, instance=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
-    list_skus_info = get_postgres_list_skus_info(db_context.cmd, location,
-                                                 server_name=instance.name if instance else None)
-    sku_info = list_skus_info['sku_info']
-    single_az = list_skus_info['single_az']
-    geo_backup_supported = list_skus_info['geo_backup_supported']
+    list_location_capability_info = get_postgres_location_capability_info(
+        db_context.cmd,
+        location,
+        server_name=instance.name if instance else None)
+    sku_info = list_location_capability_info['sku_info']
+    single_az = list_location_capability_info['single_az']
+    geo_backup_supported = list_location_capability_info['geo_backup_supported']
     _network_arg_validator(subnet, public_access)
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
@@ -538,7 +541,7 @@ def validate_mysql_ha_enabled(server):
 
 
 def validate_vnet_location(vnet, location):
-    if vnet.location != location:
+    if vnet["location"] != location:
         raise ValidationError("The location of Vnet should be same as the location of the server")
 
 
@@ -549,18 +552,14 @@ def validate_mysql_replica(server):
                               "Scale up the source server to General Purpose or Memory Optimized. ")
 
 
-def validate_postgres_replica(cmd, server):
+def validate_postgres_replica(cmd, tier, location, list_location_capability_info=None):
     # Tier validation
-    if server.sku.tier == 'Burstable':
+    if tier == 'Burstable':
         raise ValidationError("Read replica is not supported for the Burstable pricing tier. "
                               "Scale up the source server to General Purpose or Memory Optimized. ")
 
-    # single az validation
-    list_skus_info = get_postgres_list_skus_info(cmd, server.location)
-    single_az = list_skus_info['single_az']
-    if single_az:
-        raise ValidationError("Replica can only be created for multi-availability zone regions. "
-                              "The location of the source server is in a single availability zone region.")
+    if not list_location_capability_info:
+        list_location_capability_info = get_postgres_location_capability_info(cmd, location)
 
 
 def validate_mysql_tier_update(instance, tier):
