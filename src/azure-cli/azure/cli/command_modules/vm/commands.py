@@ -407,9 +407,6 @@ def load_command_table(self, _):
         g.wait_command('wait')
 
     with self.command_group('vm extension image', compute_vm_extension_image_sdk) as g:
-        g.show_command('show', 'get')
-        g.command('list-names', 'list_types')
-        g.command('list-versions', 'list_versions')
         g.custom_command('list', 'list_vm_extension_images')
 
     with self.command_group('vm image', compute_vm_image_sdk) as g:
