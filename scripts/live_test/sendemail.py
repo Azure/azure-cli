@@ -7,8 +7,6 @@ import datetime
 import generate_index
 import logging
 import os
-import random
-import string
 import sys
 import test_data
 import traceback
@@ -86,9 +84,10 @@ def get_container_name():
     :return:
     """
     logger.warning('Enter get_container_name()')
-    time = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
-    random_id = ''.join(random.choice(string.digits) for _ in range(6))
-    name = time + '-' + random_id
+    if USER_TARGET:
+        name = USER_TARGET + '-' + BUILD_ID
+    else:
+        name = 'all-' + BUILD_ID
     logger.warning('Exit get_container_name()')
     return name
 
@@ -171,9 +170,8 @@ def write_db(container, testdata):
     rate = testdata.total[3]
     detail = str(testdata.modules)
     container_url = 'https://clitestresultstac.blob.core.windows.net/{}/index.html'.format(container)
-    terms = container.split('-')
-    date = terms[0]
-    time = terms[1]
+    upload_time = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+    date, time = upload_time.split('-')[0], upload_time.split('-')[1]
     data = (repr, repo, branch, commit, target, live, user, pass0, fail, rate, detail, container_url, date, time)
     logger.warning(data)
     cursor.execute(sql, data)
