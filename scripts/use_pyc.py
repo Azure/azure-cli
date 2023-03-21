@@ -51,7 +51,7 @@ def main(folder, version=None):
     for file in glob.glob(f'{folder}/**/__pycache__/*{pyc_suffix}', recursive=True):
         # If pip's py files are also removed, the error is raised when installing some packages.
         # See https://github.com/Azure/azure-cli/pull/25801 for details.
-        if 'site-packages/pip' in file:
+        if 'site-packages/pip' in file or 'site-packages\\pip' in file:
             continue
 
         # file is /opt/az/lib/python3.10/site-packages/websocket/__pycache__/_app.cpython-310.pyc
