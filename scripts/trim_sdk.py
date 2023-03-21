@@ -70,6 +70,9 @@ def remove_unused_api_versions(resource_type):
         if resource_type in profile:
             # value is str like '2022-01-01' or SDKProfile
             value = profile[resource_type]
+            if value is None:
+                _LOGGER.info(f'{resource_type}\'s API version is None, skip')
+                return
             if isinstance(value, str):
                 used_api_versions.add(value)
             else:
@@ -108,7 +111,9 @@ def _print_folder_size(folder):
 
 
 def _get_all_sdks_to_trim():
-    resource_types = [k for k, v in AZURE_API_PROFILES['latest'].items() if k.import_prefix.startswith('azure.mgmt')]
+    # azure.mgmt.network has been removed in https://github.com/Azure/azure-cli/pull/25451
+    resource_types = [k for k, v in AZURE_API_PROFILES['latest'].items() if k.import_prefix.startswith('azure.mgmt')
+                      and k.import_prefix != 'azure.mgmt.network']
     return resource_types
 
 
@@ -155,7 +160,7 @@ def main():
     _print_folder_size(mgmt_sdk_dir)
 
     # Removed unused API versions
-    resource_types = _get_biggest_sdks_to_trim()
+    resource_types = _get_all_sdks_to_trim()
 
     for r in resource_types:
         remove_unused_api_versions(r)
