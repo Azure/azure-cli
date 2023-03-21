@@ -186,6 +186,9 @@ class TestBicep(unittest.TestCase):
                 except:
                     self.fail("Encountered an unexpected exception.")
 
+
     def _remove_bicep_version_check_file(self):
         with contextlib.suppress(FileNotFoundError):
             os.remove(_bicep_version_check_file_path)
+
+    
