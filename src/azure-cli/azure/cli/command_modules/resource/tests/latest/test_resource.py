@@ -254,7 +254,8 @@ class ResourcePatchTest(ScenarioTest):
         })
         self.kwargs['vm_id'] = self.cmd(
             'vm create -g {rg} -n {vm} --image UbuntuLTS --size Standard_D2s_v3 --v-cpus-available 1 '
-            '--v-cpus-per-core 1 --admin-username vmtest').get_output_in_json()['id']
+            '--v-cpus-per-core 1 --admin-username vmtest --generate-ssh-keys --nsg-rule NONE'
+        ).get_output_in_json()['id']
 
         self.cmd('resource patch --id {vm_id}', checks=[
             self.check('id', '{vm_id}'),
