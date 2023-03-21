@@ -528,11 +528,11 @@ def load_command_table(self, _):
         g.custom_command('update', 'vmss_run_command_update', supports_no_wait=True)
         g.custom_command('delete', 'vmss_run_command_delete', supports_no_wait=True, confirmation=True)
 
-    with self.command_group('vmss rolling-upgrade', compute_vmss_rolling_upgrade_sdk, min_api='2017-03-30') as g:
-        g.command('cancel', 'begin_cancel')
-        g.command('get-latest', 'get_latest')
-        g.command('start', 'begin_start_os_upgrade')
-
+    # with self.command_group('vmss rolling-upgrade', compute_vmss_rolling_upgrade_sdk, min_api='2017-03-30') as g:
+    #     g.command('cancel', 'begin_cancel')
+    #     g.command('get-latest', 'get_latest')
+    #     g.command('start', 'begin_start_os_upgrade')
+    #
     with self.command_group('sig', compute_galleries_sdk, operation_group='galleries', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_image_gallery')
         g.custom_show_command('show', 'show_image_gallery')

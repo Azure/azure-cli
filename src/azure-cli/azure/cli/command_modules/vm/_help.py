@@ -3331,11 +3331,6 @@ examples:
     crafted: true
 """
 
-helps['vmss rolling-upgrade'] = """
-type: group
-short-summary: Manage rolling upgrades.
-"""
-
 helps['vmss run-command'] = """
 type: group
 short-summary: Manage run commands on a Virtual Machine Scale Set.
