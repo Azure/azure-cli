@@ -45,11 +45,13 @@ def load_command_table(self, _):
 
     if not is_azure_stack_profile(self):
         mgmt_hsms_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
+        mgmt_hsms_regions_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.mhsm_regions)
         private_data_entity = get_client(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT)
         data_backup_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)
         data_access_control_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL)
     else:
-        mgmt_hsms_entity = private_data_entity = data_backup_entity = data_access_control_entity = None
+        mgmt_hsms_entity = mgmt_hsms_regions_entity = private_data_entity = data_backup_entity = \
+            data_access_control_entity = None
 
     kv_vaults_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
@@ -342,3 +344,13 @@ def load_command_table(self, _):
             g.keyvault_command('list-deleted', 'get_deleted_sas_definitions', transform=keep_max_results)
             g.keyvault_command('show-deleted', 'get_deleted_sas_definition')
             g.keyvault_command('recover', 'recover_deleted_sas_definition')
+
+    with self.command_group('keyvault region', mgmt_hsms_regions_entity.command_type,
+                            client_factory=mgmt_hsms_regions_entity.client_factory, min_api='2023-02-01') as g:
+        g.command('list', 'list_by_resource', client_factory=mgmt_hsms_regions_entity.client_factory)
+
+    with self.command_group('keyvault region', mgmt_hsms_entity.command_type,
+                            client_factory=mgmt_hsms_entity.client_factory, min_api='2023-02-01') as g:
+        g.custom_command('add', 'add_hsm_region', supports_no_wait=True)
+        g.custom_command('remove', 'remove_hsm_region', supports_no_wait=True)
+        g.wait_command('wait')

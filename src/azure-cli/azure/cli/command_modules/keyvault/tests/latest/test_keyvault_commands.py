@@ -372,6 +372,14 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault show --hsm-name {hsm_name}', checks=show_checks)
         time.sleep(120)
 
+        self.cmd('keyvault region add -g {rg} --hsm-name {hsm_name} -r westus2',
+                 checks=[self.check('properties.regions', ['westus2'])])
+        self.cmd('keyvault region add -g {rg} --hsm-name {hsm_name} -r eastus2')
+        self.cmd('keyvault region list -g {rg} --hsm-name {hsm_name}',
+                 checks=[self.check('properties.regions', ['westus2', 'eastus2'])])
+        self.cmd('keyvault region remove -g {rg} --hsm-name {hsm_name} -r westus2',
+                 checks=[self.check('properties.regions', ['eastus2'])])
+
         self.cmd('keyvault delete --hsm-name {hsm_name}')
         self.cmd('keyvault purge --hsm-name {hsm_name}')
 

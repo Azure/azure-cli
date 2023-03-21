@@ -860,3 +860,8 @@ def load_arguments(self, _):
         c.argument('assignee_principal_type', options_list=['--assignee-principal-type', '-t'],
                    arg_type=get_enum_type(PrincipalType), help='The principal type of assignee.')
     # endregion
+
+    with self.argument_context('keyvault region') as c:
+        c.argument('name', hsm_name_type)
+        c.argument('region_name', options_list=['--region-name', '--region', '-r'],
+                   help='The region name.')
