@@ -73,6 +73,7 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
     AzureInternalError,
+    ClientRequestError,
     CLIInternalError,
     FileOperationError,
     InvalidArgumentValueError,
@@ -494,6 +495,20 @@ def aks_create(
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
+
+    # validation for existing cluster
+    existing_mc = None
+    try:
+        existing_mc = client.get(resource_group_name, name)
+    # pylint: disable=broad-except
+    except Exception as ex:
+        logger.debug("failed to get cluster, error: %s", ex)
+    if existing_mc:
+        raise ClientRequestError(
+            f"The cluster '{name}' under resource group '{resource_group_name}' already exists. "
+            "Please use command 'az aks update' to update the existing cluster, "
+            "or select a different cluster name to create a new cluster."
+        )
 
     # decorator pattern
     from azure.cli.command_modules.acs.managed_cluster_decorator import AKSManagedClusterCreateDecorator
