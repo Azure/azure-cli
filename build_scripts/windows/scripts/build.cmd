@@ -126,6 +126,9 @@ pushd %BUILDING_DIR%
 %BUILDING_DIR%\python.exe %REPO_ROOT%\scripts\trim_sdk.py
 popd
 
+REM Remove pywin32 help file to reduce size.
+del %BUILDING_DIR%\Lib\site-packages\PyWin32.chm
+
 echo Creating the wbin (Windows binaries) folder that will be added to the path...
 mkdir %BUILDING_DIR%\wbin
 copy %REPO_ROOT%\build_scripts\windows\scripts\az.cmd %BUILDING_DIR%\wbin\

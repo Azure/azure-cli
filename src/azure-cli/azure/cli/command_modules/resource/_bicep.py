@@ -168,6 +168,10 @@ def is_bicep_file(file_path):
     return file_path.lower().endswith(".bicep")
 
 
+def is_bicepparam_file(file_path):
+    return file_path.lower().endswith(".bicepparam")
+
+
 def get_bicep_available_release_tags():
     try:
         os.environ.setdefault("CURL_CA_BUNDLE", certifi.where())
