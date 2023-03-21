@@ -78,7 +78,7 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
                          WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
-                         WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH)
+                         WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, DEFAULT_CENTAURI_IMAGE)
 from ._github_oauth import (get_github_access_token, cache_github_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
@@ -3580,7 +3580,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                              "--plan NAME_OR_ID | --consumption-plan-location LOCATION")
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair = cmd.get_models('SiteConfig', 'NameValuePair')
-    docker_registry_server_url = parse_docker_image_name(image)
     disable_app_insights = (disable_app_insights == "true")
 
     site_config = SiteConfig(app_settings=[])
@@ -3674,6 +3673,11 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
         functionapp_def.managed_environment_id = managed_environment.id
 
+        if image is None:
+            image = DEFAULT_CENTAURI_IMAGE
+
+    docker_registry_server_url = parse_docker_image_name(image)
+
     if functions_version == '2' and functionapp_def.location in FUNCTIONS_NO_V2_REGIONS:
         raise ValidationError("2.x functions are not supported in this region. To create a 3.x function, "
                               "pass in the flag '--functions-version 3'")
@@ -3736,6 +3740,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         site_config.java_version = None
         site_config.use32_bit_worker_process = None
         site_config.power_shell_version = None
+        site_config.linux_fx_version = '{}|{}'.format('DOCKER', image)
 
     # temporary workaround for dotnet-isolated linux consumption apps
     if is_linux and consumption_plan_location is not None and runtime == 'dotnet-isolated':
