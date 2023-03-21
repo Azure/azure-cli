@@ -56,8 +56,8 @@ source %{repo_path}/scripts/install_full.sh
 %{python_cmd} %{repo_path}/scripts/trim_sdk.py
 
 # replace .py with .pyc and remove __pycache__ dir to save space
-# site_packages_dir=$(cd %{buildroot}%{cli_lib_dir}/lib/python3.*/site-packages/ ; pwd)
-# %{python_cmd} %{repo_path}/scripts/use_pyc.py $site_packages_dir
+site_packages_dir=$(cd %{buildroot}%{cli_lib_dir}/lib/python3.*/site-packages/ ; pwd)
+%{python_cmd} %{repo_path}/scripts/use_pyc.py $site_packages_dir
 
 deactivate
 
