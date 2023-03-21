@@ -112,12 +112,8 @@ DEPENDENCIES = [
     'azure-mgmt-redhatopenshift~=1.2.0',
     'azure-mgmt-redis~=14.1.0',
     'azure-mgmt-relay~=0.1.0',
-<<<<<<< HEAD
     'azure-mgmt-reservations==2.0.0',  # TODO: Use requirements.txt instead of '==' #9781
     'azure-mgmt-resource==21.2.0',
-=======
-    'azure-mgmt-resource==22.0.0',
->>>>>>> origin/dev
     'azure-mgmt-search~=9.0',
     'azure-mgmt-security==3.0.0',
     'azure-mgmt-servicebus~=8.2.0',
