@@ -1815,7 +1815,7 @@ def update_resource(cmd, parameters, resource_ids=None,
 
 def patch_resource(cmd, properties=None, resource_ids=None, resource_group_name=None,
                    resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
-                   resource_name=None, api_version=None, latest_include_preview=False):
+                   resource_name=None, api_version=None, latest_include_preview=False, is_full_object=False):
     parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(cmd.cli_ctx,
                                                                               resource_group_name,
                                                                               resource_provider_namespace,
@@ -1830,10 +1830,12 @@ def patch_resource(cmd, properties=None, resource_ids=None, resource_group_name=
         except json.decoder.JSONDecodeError as ex:
             raise CLIError('Error parsing JSON.\n{}\n{}'.format(properties, ex))
 
-    parameters = {'properties': res}
+    if not is_full_object:
+        res = GenericResource(properties=res)
+
     return _single_or_collection(
         [_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version, latest_include_preview)
-         .patch(parameters) for id_dict in parsed_ids]
+         .patch(res) for id_dict in parsed_ids]
     )
 
 

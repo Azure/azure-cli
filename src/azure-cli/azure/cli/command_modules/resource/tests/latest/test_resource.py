@@ -214,8 +214,7 @@ class ResourceIDScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'vnet': 'cli_test_resource_id_vnet',
-            'subnet': 'cli_test_resource_id_subnet',
-            'vm': 'vm'
+            'subnet': 'cli_test_resource_id_subnet'
         })
 
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
@@ -245,9 +244,18 @@ class ResourceIDScenarioTest(ScenarioTest):
         self.cmd('resource delete --id {subnet_id}', checks=self.is_empty())
         self.cmd('resource delete --id {vnet_id}', checks=self.is_empty())
 
+
+class ResourcePatchTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_patch_')
+    def test_resource_patch(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm'
+        })
         self.kwargs['vm_id'] = self.cmd(
             'vm create -g {rg} -n {vm} --image UbuntuLTS --size Standard_D2s_v3 --v-cpus-available 1 '
-            '--v-cpus-per-core 1 --admin-username vmtest').get_output_in_json()['id']
+            '--v-cpus-per-core 1 --admin-username vmtest --generate-ssh-keys --nsg-rule NONE'
+        ).get_output_in_json()['id']
 
         self.cmd('resource patch --id {vm_id}', checks=[
             self.check('id', '{vm_id}'),
