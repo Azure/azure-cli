@@ -144,6 +144,9 @@ def load_arguments(self, _):
         c.argument('properties', options_list=['--properties', '-p'], help='a JSON-formatted string containing resource properties')
         c.argument('is_full_object', action='store_true', help='Indicate that the properties object includes other options such as location, tags, sku, and/or plan.')
 
+    with self.argument_context('resource patch') as c:
+        c.argument('properties', options_list=['--properties', '-p'], help='a JSON-formatted string containing resource properties')
+
     with self.argument_context('resource link') as c:
         c.argument('target_id', options_list=['--target', c.deprecate(target='--target-id', redirect='--target', hide=True)], help='Fully-qualified resource ID of the resource link target.')
         c.argument('link_id', options_list=['--link', c.deprecate(target='--link-id', redirect='--link', hide=True)], help='Fully-qualified resource ID of the resource link.')
