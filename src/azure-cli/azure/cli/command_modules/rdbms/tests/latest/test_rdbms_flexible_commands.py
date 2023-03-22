@@ -363,6 +363,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         target_server_diff_vnet = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         target_server_diff_vnet_2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         target_server_public_access = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        target_server_config = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
         source_vnet = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
         source_subnet = self.create_random_name('SUBNET', SERVER_NAME_MAX_LENGTH)
@@ -441,6 +442,18 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             self.assertEqual(restore_result['network'][private_dns_param],
                             '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
                                 self.get_subscription_id(), resource_group, private_dns_zone))
+            
+        # take params tier, storage-size, sku-name, storage-auto-grow, backup-retention and geo-redundant-backup
+        if database_engine == 'mysql':
+            restore_result = self.cmd('{} flexible-server restore -g {} -n {} --source-server {} --storage-size 64 --tier GeneralPurpose --storage-auto-grow Enabled --sku-name Standard_D2ds_v4 --backup-retention 9  --geo-redundant-backup Enabled'.format(
+                                    database_engine, resource_group, target_server_config, source_server)).get_output_in_json()
+            
+            self.assertEqual(restore_result['backup']['backupRetentionDays'], 9)
+            self.assertEqual(restore_result['backup']['geoRedundantBackup'], "Enabled")
+            self.assertEqual(restore_result['sku']['name'], "Standard_D2ds_v4")
+            self.assertEqual(restore_result['sku']['tier'], "GeneralPurpose")
+            self.assertEqual(restore_result['storage']['storageSizeGb'], 64)
+            self.assertEqual(restore_result['storage']['autoGrow'], "Enabled")
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
                  database_engine, resource_group, source_server), checks=NoneCheck())
@@ -456,6 +469,9 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
                  database_engine, resource_group, target_server_public_access), checks=NoneCheck())
+        
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, target_server_config), checks=NoneCheck())
 
     def _test_flexible_server_georestore_mgmt(self, database_engine, resource_group):
 
@@ -476,6 +492,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         target_server_diff_vnet_2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         target_server_public_access = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         target_server_public_access_2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        target_server_config = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
         source_vnet = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
         source_subnet = self.create_random_name('SUBNET', SERVER_NAME_MAX_LENGTH)
@@ -560,6 +577,18 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.assertEqual(restore_result['network']['publicNetworkAccess'], 'Enabled')
         self.assertEqual(restore_result['location'], target_location_full_name)
 
+        # 6. take params tier, storage-size, sku-name, storage-auto-grow, backup-retention and geo-redundant-backup
+        if database_engine == 'mysql':
+            restore_result = self.cmd('{} flexible-server geo-restore -g {} -l {} -n {} --source-server {} --public-access enabled --storage-size 64 --tier GeneralPurpose --storage-auto-grow Enabled --sku-name Standard_D2ds_v4 --backup-retention 9  --geo-redundant-backup Enabled'.format(
+                                    database_engine, resource_group, target_location, target_server_config, source_server)).get_output_in_json()
+            
+            self.assertEqual(restore_result['backup']['backupRetentionDays'], 9)
+            self.assertEqual(restore_result['backup']['geoRedundantBackup'], "Enabled")
+            self.assertEqual(restore_result['sku']['name'], "Standard_D2ds_v4")
+            self.assertEqual(restore_result['sku']['tier'], "GeneralPurpose")
+            self.assertEqual(restore_result['storage']['storageSizeGb'], 64)
+            self.assertEqual(restore_result['storage']['autoGrow'], "Enabled")
+
         # Delete servers
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
                  database_engine, resource_group, source_server), checks=NoneCheck())
@@ -574,7 +603,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  database_engine, resource_group, target_server_public_access), checks=NoneCheck())
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
-                 database_engine, resource_group, target_server_public_access_2), checks=NoneCheck())
+                 database_engine, resource_group, target_server_config), checks=NoneCheck())
 
     def _test_flexible_server_georestore_update_mgmt(self, database_engine, resource_group):
         if database_engine == 'postgres':
