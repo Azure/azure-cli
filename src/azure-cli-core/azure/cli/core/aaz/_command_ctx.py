@@ -30,6 +30,11 @@ class AAZCommandCtx:
                     cmd_arg.apply(self.args, dest)
                 elif cmd_arg != AAZUndefined:
                     self.args[dest] = cmd_arg
+            elif dest == "subscription":
+                # support to specify the command's subscription when call AAZCommand directly in code
+                if isinstance(cmd_arg, str):
+                    self._subscription_id = cmd_arg
+
         self._clients = {}
         self._vars_schema = AAZObjectType()
         self.vars = AAZObject(schema=self._vars_schema, data={})

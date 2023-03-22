@@ -142,9 +142,10 @@ def load_arguments(self, _):
     with self.argument_context('synapse spark pool create') as c:
         # Node
         c.argument('node_count', type=int, arg_group='Node', help='The number of node.')
-        c.argument('node_size_family', arg_group='Node', help='The node size family.')
-        c.argument('node_size', arg_group='Node', arg_type=get_enum_type(['Small', 'Medium', 'Large']),
-                   help='The node size.')
+        c.argument('node_size_family', arg_group='Node', arg_type=get_enum_type(['None', 'MemoryOptimized', 'HardwareAcceleratedFPGA', 'HardwareAcceleratedGPU']),
+                   help='The kind of nodes that the Big Data pool provides')
+        c.argument('node_size', arg_group='Node', arg_type=get_enum_type(['None', 'Small', 'Medium', 'Large', 'XLarge', 'XXLarge', 'XXXLarge']),
+                   help='The level of compute power that each node in the Big Data pool has..')
 
         # AutoScale
         c.argument('enable_auto_scale', arg_type=get_three_state_flag(), arg_group='AutoScale',
@@ -183,10 +184,11 @@ def load_arguments(self, _):
         c.argument('tags', arg_type=tags_type)
         # Node
         c.argument('node_count', type=int, arg_group='Node', help='The number of node.')
-        c.argument('node_size_family', arg_group='Node', help='The node size family.')
+        c.argument('node_size_family', arg_group='Node', arg_type=get_enum_type(['None', 'MemoryOptimized', 'HardwareAcceleratedFPGA', 'HardwareAcceleratedGPU']),
+                   help='The kind of nodes that the Big Data pool provides')
 
-        c.argument('node_size', arg_group='Node', arg_type=get_enum_type(['Small', 'Medium', 'Large']),
-                   help='The node size.')
+        c.argument('node_size', arg_group='Node', arg_type=get_enum_type(['None', 'Small', 'Medium', 'Large', 'XLarge', 'XXLarge', 'XXXLarge']),
+                   help='The level of compute power that each node in the Big Data pool has..')
         # AutoScale
         c.argument('enable_auto_scale', arg_type=get_three_state_flag(), arg_group='AutoScale',
                    help='The flag of enabling auto scale.')
