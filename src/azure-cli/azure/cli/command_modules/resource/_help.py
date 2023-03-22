@@ -2485,10 +2485,18 @@ long-summary: It is recommended to use 'az resource update' to update a resource
 examples:
   - name: Update a webapp by using the latest api-version whether this version is a preview version.
     text: >
-        az resource patch --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp} --latest-include-preview
-  - name: Update a resource.
+        az resource patch --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp} \\
+          --latest-include-preview
+  - name: Update a resource by using JSON configuration from a file.
+    text: >
+        az resource patch --name MyResource --resource-group MyResourceGroup --resource-type Microsoft.web/sites \\
+          --is-full-object --properties @jsonConfigFile
+  - name: Update an API app by providing a JSON configuration.
     text: |
-        az resource patch --name MyResource --resource-group MyResourceGroup --resource-type subnets
+        az resource patch --name MyApiApp --resource-group MyResourceGroup --resource-type Microsoft.web/sites \\
+            --is-full-object --properties "{ \\"kind\\": \\"api\\", \\"properties\\": { \\"serverFarmId\\": \\
+                    \\"/subscriptions/{SubID}/resourcegroups/{ResourceGroup} \\
+                        /providers/Microsoft.Web/serverfarms/{ServicePlan}\\" } }"
 """
 
 helps['resource wait'] = """
