@@ -257,13 +257,16 @@ class ResourcePatchTest(ScenarioTest):
             '--v-cpus-per-core 1 --admin-username vmtest --generate-ssh-keys --nsg-rule NONE'
         ).get_output_in_json()['id']
 
-        self.cmd('resource patch --id {vm_id}', checks=[
-            self.check('id', '{vm_id}'),
-            self.check('properties.hardwareProfile.vmSize', 'Standard_D2s_v3'),
-            self.check('properties.hardwareProfile.vmSizeProperties.vCPUsAvailable', '1'),
-            self.check('properties.hardwareProfile.vmSizeProperties.vCPUsPerCore', '1'),
-            self.check('properties.osProfile.adminUsername', 'vmtest'),
-        ])
+        self.cmd(
+            'resource patch --id {vm_id} --is-full-object --properties "{{\\"identity\\":{{\\"type\\":\\"SystemAssigned\\"}}}}"',
+            checks=[
+                self.check('id', '{vm_id}'),
+                self.check('properties.hardwareProfile.vmSize', 'Standard_D2s_v3'),
+                self.check('properties.hardwareProfile.vmSizeProperties.vCPUsAvailable', '1'),
+                self.check('properties.hardwareProfile.vmSizeProperties.vCPUsPerCore', '1'),
+                self.check('properties.osProfile.adminUsername', 'vmtest'),
+                self.check('identity.type', 'SystemAssigned'),
+            ])
 
 
 class ResourceGenericUpdate(LiveScenarioTest):
