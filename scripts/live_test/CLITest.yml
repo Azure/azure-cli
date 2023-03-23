@@ -483,7 +483,10 @@ jobs:
           azdev extension add ${FinalTarget}
         fi
         echo ${FinalTarget}
-        
+
+        # This helps detect issues in CI if a used SDK API version is deleted by the below script.
+        python $CLI_REPO_PATH/scripts/trim_sdk.py
+
         # Compact aaz folders of modules
         python /mnt/vss/_work/1/s/scripts/compact_aaz.py
 
