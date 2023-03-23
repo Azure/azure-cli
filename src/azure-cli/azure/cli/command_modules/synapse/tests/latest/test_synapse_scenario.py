@@ -3127,25 +3127,48 @@ class SynapseScenarioTests(ScenarioTest):
         # test workspace with managed virtual network
         self.cmd('az identity create --name {uami_name1} --resource-group {rg}')
         self.cmd('az identity create --name {uami_name2} --resource-group {rg}')
-        uamis = self.cmd('az identity list --resource-group {rg}').get_output_in_json()
-        print(uamis)
+        uami1 = self.cmd('az identity show --name {uami_name1} --resource-group {rg}').get_output_in_json()
+        uami2 = self.cmd('az identity show --name {uami_name2} --resource-group {rg}').get_output_in_json()
+        self.kwargs['uami_id1'] = uami1['id']
+        self.kwargs['uami_id2'] = uami2['id']
         
         # create synapse workspace
         self.cmd(
             'az synapse workspace create --name {workspace} --resource-group {rg} --storage-account {storage-account} '
             '--file-system {file-system} --sql-admin-login-user {login-user} '
             '--sql-admin-login-password {login-password} '
-            '--location {location} --user_assigned_identity_id', checks=[
+            '--location {location} --uami-id "{uami_id1}" "{uami_id2}"', checks=[
                 self.check('name', self.kwargs['workspace']),
                 self.check('type', 'Microsoft.Synapse/workspaces'),
-                self.check('provisioningState', 'Succeeded')
+                self.check('provisioningState', 'Succeeded'),
+                self.check('identity.type','SystemAssigned,UserAssigned'),
+                #self.check('identity.userAssignedIdentities[0]')
+                self.check('keys(identity.userAssignedIdentities)[0]', '{uami_id1}'),
+                self.check('keys(identity.userAssignedIdentities)[1]', '{uami_id2}')
             ])
 
-        self.cmd('az synapse workspace show --name {workspace} --resource-group {rg}', checks=[
+        self.cmd('az synapse workspace update --name {workspace} --resource-group {rg} '
+                 '--uami-action Remove --uami-id "{uami_id2}"', checks=[
             self.check('name', self.kwargs['workspace']),
             self.check('type', 'Microsoft.Synapse/workspaces'),
-            self.check('provisioningState', 'Succeeded')
+            self.check('provisioningState', 'Succeeded'),
+            self.not_exists('identity.userAssignedIdentities[1]')
         ])
-        ws = self.cmd('az synapse workspace show --name {workspace} --resource-group {rg}').get_output_in_json()
-        print(ws)
+
+        self.cmd('az synapse workspace update --name {workspace} --resource-group {rg} '
+                 '--uami-action Add --uami-id "{uami_id2}"', checks=[
+            self.check('name', self.kwargs['workspace']),
+            self.check('type', 'Microsoft.Synapse/workspaces'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('keys(identity.userAssignedIdentities)[1]', '{uami_id2}')
+        ])
+
+        self.cmd('az synapse workspace update --name {workspace} --resource-group {rg} '
+                 '--uami-action Set --uami-id "{uami_id1}"', checks=[
+            self.check('name', self.kwargs['workspace']),
+            self.check('type', 'Microsoft.Synapse/workspaces'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('keys(identity.userAssignedIdentities)[0]', '{uami_id1}'),
+            self.not_exists('identity.userAssignedIdentities[1]')
+        ])
 
