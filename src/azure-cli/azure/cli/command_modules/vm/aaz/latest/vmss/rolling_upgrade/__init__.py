@@ -9,8 +9,6 @@
 # flake8: noqa
 
 from .__cmd_group import *
-from ._delete import *
-from ._list import *
-from ._restart import *
-from ._show import *
-from ._wait import *
+from ._cancel import *
+from ._get_latest import *
+from ._start import *

@@ -8,9 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
-from .__cmd_group import *
-from ._delete import *
-from ._list import *
-from ._restart import *
-from ._show import *
-from ._wait import *
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "vm extension image",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Find the available VM extensions for a subscription and region.
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]
