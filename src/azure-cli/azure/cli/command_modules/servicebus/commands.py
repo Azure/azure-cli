@@ -84,12 +84,9 @@ def load_command_table(self, _):
                        transform=gen_dict_to_list_transform(key="value"))
 
 # Rules Region
-    with self.command_group('servicebus topic subscription rule', sb_rule_util, client_factory=rules_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
-        g.custom_command('create', 'cli_rules_create')
-        g.show_command('show', 'get')
-        g.command('list', 'list_by_subscriptions')
-        g.command('delete', 'delete')
-        g.generic_update_command('update', custom_func_name='cli_rules_update')
+    with self.command_group('servicebus topic subscription rule', custom_command_type=sb_namespace_custom,
+                            is_preview=True) as g:
+        g.custom_command('create', 'sb_rule_create', supports_no_wait=True)
 
 # DisasterRecoveryConfigs Region
     with self.command_group('servicebus georecovery-alias', sb_geodr_util, client_factory=disaster_recovery_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
