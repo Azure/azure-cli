@@ -362,6 +362,17 @@ def validate_staticsite_link_function(cmd, namespace):
 # TODO consider combining with validate_add_vnet
 def validate_vnet_integration(cmd, namespace):
     validate_tags(namespace)
+    if _get_environment(namespace):
+        if namespace.vnet:
+            raise ArgumentUsageError(
+                "Invalid input. '--vnet' is not a supported property for function apps deployed to Azure Container "
+                "Apps.",
+                "Please try again without '--vnet' and configure vnet from Azure Container Apps environment.")
+        if namespace.subnet:
+            raise ArgumentUsageError(
+                "Invalid input. '--subnet' is not a supported property for function apps deployed to Azure Container "
+                "Apps.",
+                "Please try again without '--subnet' and configure subnet from Azure Container Apps environment.")
     if namespace.subnet or namespace.vnet:
         if not namespace.subnet:
             raise ArgumentUsageError("Cannot use --vnet without --subnet")
@@ -438,6 +449,12 @@ def _get_app_name(namespace):
         return namespace.name
     if hasattr(namespace, "webapp"):
         return namespace.webapp
+    return None
+
+
+def _get_environment(namespace):
+    if hasattr(namespace, "environment"):
+        return namespace.environment
     return None
 
 

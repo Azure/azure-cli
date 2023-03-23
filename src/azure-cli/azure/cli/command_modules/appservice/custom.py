@@ -3586,10 +3586,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     client = web_client_factory(cmd.cli_ctx)
 
     if vnet or subnet:
-        if environment is not None:
-            raise ArgumentUsageError(
-                "Unsupported operation on function app.",
-                "Please set virtual network configuration for the function app at Container app environment level.")
         if plan:
             if is_valid_resource_id(plan):
                 parse_result = parse_resource_id(plan)
