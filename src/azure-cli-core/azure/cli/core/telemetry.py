@@ -401,6 +401,8 @@ def set_feedback(feedback):
     _session.feedback = feedback[:512]
 
 
+# This function returns the user's selection and feedback on the cli-recommendation results
+# Please refer to https://github.com/hackathon-cli-recommendation/cli-recommendation/blob/master/Docs/feedback_design.md for detailed information
 @decorators.suppress_all_exceptions()
 def set_recommendation_properties(api_version, recommendation_properties):
     _session.recommendation_properties = {"api_version": api_version,
