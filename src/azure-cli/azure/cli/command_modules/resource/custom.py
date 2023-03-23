@@ -2193,7 +2193,7 @@ def create_deployment_stack_at_subscription(cmd, name, location, delete_resource
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     else:
         template_content = (
-            run_bicep_command(["build", "--stdout", template_file])
+            run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
             if is_bicep_file(template_file)
             else read_file_content(template_file)
         )
@@ -2371,7 +2371,7 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, delete_
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     else:
         template_content = (
-            run_bicep_command(["build", "--stdout", template_file])
+            run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
             if is_bicep_file(template_file)
             else read_file_content(template_file)
         )
@@ -2566,7 +2566,7 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     else:
         template_content = (
-            run_bicep_command(["build", "--stdout", template_file])
+            run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
             if is_bicep_file(template_file)
             else read_file_content(template_file)
         )
