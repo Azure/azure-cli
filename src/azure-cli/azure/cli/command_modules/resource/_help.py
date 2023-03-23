@@ -2481,6 +2481,7 @@ helps['resource patch'] = """
 type: command
 short-summary: Update a resource by PATCH request.
 long-summary: It supports updating resources with JSON-formatted string.
+              If the patch operation fails, please try run 'az resource update' instead.
 examples:
   - name: Update a webapp by using the latest api-version whether this version is a preview version.
     text: >
