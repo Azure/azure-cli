@@ -22,9 +22,10 @@ from ._flexible_server_util import resolve_poller, generate_missing_parameters, 
     generate_password, parse_maintenance_window, replace_memory_optimized_tier, build_identity_and_data_encryption, \
     get_identity_and_data_encryption, get_tenant_id
 from .flexible_server_custom_common import create_firewall_rule
-from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
-from .validators import mysql_arguments_validator, validate_mysql_replica, validate_server_name, validate_georestore_location, \
-    validate_georestore_network, validate_mysql_tier_update, validate_and_format_restore_point_in_time
+from .flexible_server_virtual_network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, \
+    prepare_private_network, prepare_private_dns_zone, prepare_public_network
+from .validators import mysql_arguments_validator, validate_mysql_replica, validate_replica_location, validate_server_name, \
+    validate_georestore_location, validate_georestore_network, validate_mysql_tier_update, validate_and_format_restore_point_in_time
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -549,6 +550,24 @@ def flexible_server_provision_network_resource(cmd, resource_group_name, server_
     return network, start_ip, end_ip
 
 
+def flexible_server_exist_network_resource(cmd, resource_group_name, server_name, location, private_dns_zone_arguments=None, vnet=None, subnet=None):
+    network = mysql_flexibleservers.models.Network()
+    if private_dns_zone_arguments is None:
+        raise RequiredArgumentMissingError("Missing Private DNS Zone. If you want to use private access, --private-dns-zone is requried.")
+
+    if subnet is not None or vnet is not None:
+        subnet_id = prepare_mysql_exist_private_network(cmd, resource_group_name, server_name, vnet, subnet, location, DELEGATION_SERVICE_NAME)
+
+        private_dns_zone_id = prepare_mysql_exist_private_dns_zone(cmd, resource_group_name, private_dns_zone_arguments, subnet_id)
+
+        network.delegated_subnet_resource_id = subnet_id
+        network.private_dns_zone_resource_id = private_dns_zone_id
+    else:
+        raise RequiredArgumentMissingError("Private DNS zone can only be used with private access setting. Use vnet or/and subnet parameters.")
+
+    return network
+
+
 # Parameter update command
 def flexible_parameter_update(client, server_name, configuration_name, resource_group_name, source=None, value=None):
     if source is None and value is None:
@@ -573,7 +592,8 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
 
 # Replica commands
 # Custom functions for server replica, will add MySQL part after backend ready in future
-def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, location=None, zone=None, no_wait=False):
+def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, location=None,
+                            private_dns_zone_arguments=None, vnet=None, subnet=None, zone=None, no_wait=False):
     provider = 'Microsoft.DBforMySQL'
     replica_name = replica_name.lower()
 
@@ -600,6 +620,8 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     if not location:
         location = source_server_object.location
 
+    validate_replica_location(cmd, source_server_object.location, location)
+
     sku_name = source_server_object.sku.name
     tier = source_server_object.sku.tier
     if not zone:
@@ -615,6 +637,15 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
         identity=identity,
         data_encryption=data_encryption,
         create_mode="Replica")
+
+    if location != source_server_object.location and any((vnet, subnet, private_dns_zone_arguments)):
+        parameters.network = flexible_server_exist_network_resource(cmd,
+                                                                    resource_group_name,
+                                                                    replica_name,
+                                                                    location,
+                                                                    private_dns_zone_arguments,
+                                                                    vnet,
+                                                                    subnet)
 
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, replica_name, parameters)
 

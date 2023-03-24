@@ -578,6 +578,15 @@ def validate_georestore_location(db_context, location):
         raise ValidationError("The region is not paired with the region of the source server. ")
 
 
+def validate_replica_location(cmd, source_server_location, replica_location):
+    if source_server_location != replica_location:
+        list_skus_info = get_mysql_list_skus_info(cmd, source_server_location)
+        geo_paired_regions = list_skus_info['geo_paired_regions']
+
+        if replica_location not in geo_paired_regions:
+            raise ValidationError("The region is not paired with the region of the source server. ")
+
+
 def validate_georestore_network(source_server_object, public_access, vnet, subnet, db_engine):
     if source_server_object.network.public_network_access == 'Disabled' and not any((public_access, vnet, subnet)):
         raise ValidationError("Please specify network parameters if you are geo-restoring a private access server. "
