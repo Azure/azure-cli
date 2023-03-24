@@ -17,7 +17,7 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
 from .utils import (_normalize_sku, get_sku_tier, _normalize_location, get_resource_name_and_group,
-                    get_resource_if_exists, is_functionapp, is_logicapp, is_webapp)
+                    get_resource_if_exists, is_functionapp, is_logicapp, is_webapp, show_raw_functionapp)
 
 from .aaz.latest.network import ListServiceTags
 from .aaz.latest.network.vnet import List as VNetList, Show as VNetShow
@@ -162,8 +162,9 @@ def validate_functionapp_on_containerapp_vnet(cmd, namespace):
     resource_group_name = namespace.resource_group_name
     name = namespace.name
     slot = namespace.slot
-    function_app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
-    if function_app.managed_environment_id is not None:
+    function_app = show_raw_functionapp(cmd, resource_group_name, name)
+
+    if function_app["properties"]["managedEnvironmentId"] is not None:
         raise ValidationError(
             'Unsupported operation on function app.',
             'Please set virtual network configuration for the function app at Container app environment level.')
