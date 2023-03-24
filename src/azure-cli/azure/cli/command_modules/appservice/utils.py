@@ -172,6 +172,11 @@ def show_raw_functionapp(cmd, resource_group_name, name):
     return response.json()
 
 
+def is_centauri_functionapp(cmd, resource_group, name):
+    function_app = show_raw_functionapp(cmd, resource_group, name)
+    return function_app["properties"]["managedEnvironmentId"] is not None
+
+
 def _list_app(cli_ctx, resource_group_name=None):
     client = web_client_factory(cli_ctx)
     if resource_group_name:

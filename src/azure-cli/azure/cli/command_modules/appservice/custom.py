@@ -68,7 +68,7 @@ from .utils import (_normalize_sku,
                     _normalize_location,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
                     get_resource_if_exists, repo_url_to_name, get_token,
-                    app_service_plan_exists)
+                    app_service_plan_exists, is_centauri_functionapp)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -953,8 +953,8 @@ def show_functionapp(cmd, resource_group_name, name, slot=None):
                                                                                                  resource_group_name))
     app.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration',
                                               slot)
-    _rename_server_farm_props(app)
-    if app.managed_environment_id is None:
+    if not is_centauri_functionapp(cmd, resource_group_name, name):
+        _rename_server_farm_props(app)
         _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
     return app
 
@@ -1261,7 +1261,7 @@ def get_app_settings(cmd, resource_group_name, name, slot=None):
     result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory(cmd.cli_ctx)
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
-    slot_app_setting_names = [] if app.managed_environment_id is not None \
+    slot_app_setting_names = [] if is_centauri_functionapp(cmd, resource_group_name, name) \
         else client.web_apps.list_slot_configuration_names(resource_group_name, name) \
         .app_setting_names
     return _build_app_settings_output(result.properties, slot_app_setting_names)
@@ -1487,7 +1487,7 @@ def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory(cmd.cli_ctx)
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
-    slot_cfg_names = {} if app.managed_environment_id is not None \
+    slot_cfg_names = {} if is_centauri_functionapp(cmd, resource_group_name, name) \
         else client.web_apps.list_slot_configuration_names(resource_group_name, name)
     is_slot_settings = False
 
@@ -3906,7 +3906,7 @@ def try_create_application_insights(cmd, functionapp):
                    'You can visit https://portal.azure.com/#resource%s/overview to view your '
                    'Application Insights component', appinsights.name, appinsights.id)
 
-    if functionapp.managed_environment_id is None:
+    if not is_centauri_functionapp(cmd, ai_resource_group_name, ai_name):
         update_app_settings(cmd, functionapp.resource_group, functionapp.name,
                         ['APPINSIGHTS_INSTRUMENTATIONKEY={}'.format(appinsights.instrumentation_key)])
     else:
