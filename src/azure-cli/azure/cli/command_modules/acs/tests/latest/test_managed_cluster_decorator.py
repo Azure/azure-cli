@@ -1691,6 +1691,8 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_6.get_outbound_type()
 
+    # todo put network_plugin_mode overlay tests here
+    
     def test_get_network_plugin(self):
         # default
         ctx_1 = AKSManagedClusterContext(
