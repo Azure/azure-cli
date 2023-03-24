@@ -920,8 +920,15 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             'Please note that the default public IP used for VM creation will be changed from Basic to Standard '
             'in the future.')
 
-    subscription_id = get_subscription_id(cmd.cli_ctx)
+    # Breaking Change Warning--
+    if image:
+        if image == "Win2008R2SP1":
+            logger.warning(
+                '[Breaking Change] On April 04, 2023, the image deployed using "Win2008R2SP1" will reach its end of life.')
+        if image in ["RHEL", "Debian", "CentOS", "Flatcar"]:
+            logger.warning('Consider using the image alias including the version of the distribution you want to use.')
 
+    subscription_id = get_subscription_id(cmd.cli_ctx)
     if os_disk_encryption_set is not None and not is_valid_resource_id(os_disk_encryption_set):
         os_disk_encryption_set = resource_id(
             subscription=subscription_id, resource_group=resource_group_name,
