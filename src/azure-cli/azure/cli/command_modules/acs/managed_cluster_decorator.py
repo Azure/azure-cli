@@ -5035,7 +5035,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             # and outbound_type, and they might be overwritten to None.
             network_profile = self.models.ContainerServiceNetworkProfile(
                 network_plugin=network_plugin,
-                network_plugin_mode=network_plugin_mode,
+                network_plugin_mode=network_plugin_mode, # todo(tyler-lloyd) I think this is where we need the python sdk to be published
                 pod_cidr=pod_cidr,
                 pod_cidrs=pod_cidrs,
                 service_cidr=service_cidr,
