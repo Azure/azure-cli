@@ -252,9 +252,7 @@ AZURE_API_PROFILES = {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
         }),
-        ResourceType.MGMT_APPCONFIGURATION: SDKProfile('2022-05-01', {
-            'replicas': '2022-03-01-preview'
-        }),
+        ResourceType.MGMT_APPCONFIGURATION: '2023-03-01',
     },
     '2020-09-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2019-06-01',
