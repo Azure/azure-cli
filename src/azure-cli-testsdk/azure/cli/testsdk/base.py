@@ -140,8 +140,8 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
         for processor in self._processors_to_reset:
             processor.reset()
         if self.random_config_dir:
-            import shutil
-            shutil.rmtree(self.cli_ctx.config.config_dir, ignore_errors=True)
+            from azure.cli.core.util import rmtree_with_retry
+            rmtree_with_retry(self.cli_ctx.config.config_dir)
         super(ScenarioTest, self).tearDown()
 
     def create_random_name(self, prefix, length):
