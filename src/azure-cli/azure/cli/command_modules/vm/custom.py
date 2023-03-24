@@ -920,7 +920,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             'Please note that the default public IP used for VM creation will be changed from Basic to Standard '
             'in the future.')
 
-    # Breaking Change Warning--
+    # Breaking Change Warning, change image alias
     if image:
         if image == "Win2008R2SP1":
             logger.warning(
@@ -3094,7 +3094,6 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 os_disk_delete_option=None, data_disk_delete_option=None, regular_priority_count=None,
                 regular_priority_percentage=None, disk_controller_type=None, nat_rule_name=None,
                 enable_osimage_notification=None, max_surge=None):
-
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3105,6 +3104,14 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                                                                 build_application_gateway_resource,
                                                                 build_msi_role_assignment, build_nsg_resource,
                                                                 build_nat_rule_v2)
+
+    # Breaking Change Warning, change image alias
+    if image:
+        if image == "Win2008R2SP1":
+            logger.warning('[Breaking Change] On April 04, 2023,'
+                           'the image deployed using "Win2008R2SP1" will reach its end of life.')
+        if image in ["RHEL", "Debian", "CentOS", "Flatcar"]:
+            logger.warning('Consider using the image alias including the version of the distribution you want to use.')
 
     # The default load balancer will be expected to be changed from Basic to Standard.
     # In order to avoid breaking change which has a big impact to users,

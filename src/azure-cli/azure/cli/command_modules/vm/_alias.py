@@ -59,7 +59,7 @@ alias_json = """
              "sku":  "stable-gen2",
              "version":  "latest",
             "architecture": "x64"
-          }
+          },
           "openSUSE-Leap": {
             "publisher": "SUSE",
             "offer": "opensuse-leap-15-3",
