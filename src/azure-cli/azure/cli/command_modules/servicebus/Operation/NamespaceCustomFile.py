@@ -261,7 +261,7 @@ def sb_rule_create(cmd, resource_group_name, namespace_name, topic_name, subscri
 
     if filter_type == 'CorrelationFilter':
         command_arg_dict.update({
-            'correlation_filter_property': tags,
+            'properties': tags,
             'correlation_id': correlation_id,
             'to': to,
             'message_id': message_id,
@@ -273,5 +273,4 @@ def sb_rule_create(cmd, resource_group_name, namespace_name, topic_name, subscri
             'requires_preprocessing': requires_preprocessing,
             'label': label
         })
-    print(command_arg_dict)
     return Create(cli_ctx=cmd.cli_ctx)(command_args=command_arg_dict)
