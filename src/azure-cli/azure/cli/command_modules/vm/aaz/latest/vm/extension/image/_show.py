@@ -22,7 +22,7 @@ class Show(AAZCommand):
 
     :example: Show the latest version of the Docker extension.
         az vm extension image list-versions --publisher Microsoft.Azure.Extensions -l westus -n DockerExtension --query "[].name" -o tsv | sort | tail -n 1
-        az vm extension image show -l westus \\ --publisher Microsoft.Azure.Extensions -n DockerExtension --version LatestVersion
+        az vm extension image show -l westus --publisher Microsoft.Azure.Extensions -n DockerExtension --version LatestVersion
     """
 
     _aaz_info = {
