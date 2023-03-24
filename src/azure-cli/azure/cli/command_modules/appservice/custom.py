@@ -3661,13 +3661,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 '--os-type is not a valid input for Azure Functions on Azure Container App environments. '
                 'Please try again without the --os-type parameter.')
 
-        managed_environment = get_managed_environment(cmd, resource_group_name, environment)
-
-        location = managed_environment.location
-        functionapp_def.location = location
         is_linux = True
-
-        functionapp_def.managed_environment_id = managed_environment.id
 
         if image is None:
             image = DEFAULT_CENTAURI_IMAGE
@@ -3767,10 +3761,15 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         site_config.http20_enabled = None
         site_config.local_my_sql_enabled = None
 
+        managed_environment = get_managed_environment(cmd, resource_group_name, environment)
+        location = managed_environment.location
+        functionapp_def.location = location
+
         functionapp_def.enable_additional_properties_sending()
         existing_properties = functionapp_def.serialize()["properties"]
         functionapp_def.additional_properties["properties"] = existing_properties
         functionapp_def.additional_properties["properties"]["name"] = name
+        functionapp_def.additional_properties["properties"]["managedEnvironmentId"] =  managed_environment.id
 
     # temporary workaround for dotnet-isolated linux consumption apps
     if is_linux and consumption_plan_location is not None and runtime == 'dotnet-isolated':
