@@ -315,7 +315,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage account create', resource_type=ResourceType.MGMT_STORAGE) as c:
         t_account_type, t_sku_name, t_kind, t_tls_version, t_dns_endpoint_type = \
-            self.get_models('AccountType', 'SkuName', 'Kind', 'MinimumTlsVersion','DnsEndpointType',
+            self.get_models('AccountType', 'SkuName', 'Kind', 'MinimumTlsVersion', 'DnsEndpointType',
                             resource_type=ResourceType.MGMT_STORAGE)
         t_identity_type = self.get_models('IdentityType', resource_type=ResourceType.MGMT_STORAGE)
         c.register_common_storage_account_options()
