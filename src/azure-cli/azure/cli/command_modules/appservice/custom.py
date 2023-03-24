@@ -3694,7 +3694,29 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
-    if is_linux:
+    if environment is not None:
+        site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
+        if docker_registry_server_url is not None:
+            site_config.app_settings.append(NameValuePair(name='DOCKER_REGISTRY_SERVER_URL', value=docker_registry_server_url))
+
+        if (not registry_username and not registry_password and
+                docker_registry_server_url and '.azurecr.io' in docker_registry_server_url):
+            logger.warning('No credential was provided to access Azure Container Registry. Trying to look up...')
+            parsed = urlparse(docker_registry_server_url)
+            registry_name = (parsed.netloc if parsed.scheme else parsed.path).split('.')[0]
+            try:
+                registry_username, registry_password = _get_acr_cred(cmd.cli_ctx, registry_name)
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.warning("Retrieving credentials failed with an exception:'%s'", ex)  # consider throw if needed
+
+        if registry_username is not None:
+            site_config.app_settings.append(NameValuePair(name='DOCKER_REGISTRY_SERVER_USERNAME', value=registry_username))
+        if registry_password is not None:
+            site_config.app_settings.append(NameValuePair(name='DOCKER_REGISTRY_SERVER_PASSWORD', value=registry_password))
+
+        app_settings_dict = {}
+        matched_runtime.app_insights = True
+    elif is_linux:
         functionapp_def.kind = 'functionapp,linux'
         functionapp_def.reserved = True
         is_consumption = consumption_plan_location is not None
@@ -3731,12 +3753,24 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp_def.kind = 'functionapp'
         functionapp_def.reserved = None
         functionapp_def.name = name
+        functionapp_def.https_only = None
+        functionapp_def.scm_site_also_stopped = None
+        functionapp_def.hyper_v = None
+        functionapp_def.is_xenon = None
+        functionapp_def.type = 'Microsoft.Web/sites'
 
         site_config.net_framework_version = None
         site_config.java_version = None
         site_config.use32_bit_worker_process = None
         site_config.power_shell_version = None
         site_config.linux_fx_version = '{}|{}'.format('DOCKER', image)
+        site_config.http20_enabled = None
+        site_config.local_my_sql_enabled = None
+
+        functionapp_def.enable_additional_properties_sending()
+        existing_properties = functionapp_def.serialize()["properties"]
+        functionapp_def.additional_properties["properties"] = existing_properties
+        functionapp_def.additional_properties["properties"]["name"] = name
 
     # temporary workaround for dotnet-isolated linux consumption apps
     if is_linux and consumption_plan_location is not None and runtime == 'dotnet-isolated':
@@ -3795,7 +3829,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             update_app_settings(cmd, functionapp.resource_group, functionapp.name,
                                 ['AzureWebJobsDashboard={}'.format(con_string)])
 
-    if image:
+    if image and environment is None:
         update_container_settings_functionapp(cmd, resource_group_name, name, docker_registry_server_url,
                                               image, registry_username,
                                               registry_password)
@@ -3873,8 +3907,12 @@ def try_create_application_insights(cmd, functionapp):
                    'You can visit https://portal.azure.com/#resource%s/overview to view your '
                    'Application Insights component', appinsights.name, appinsights.id)
 
-    update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+    if functionapp.managed_environment_id is None:
+        update_app_settings(cmd, functionapp.resource_group, functionapp.name,
                         ['APPINSIGHTS_INSTRUMENTATIONKEY={}'.format(appinsights.instrumentation_key)])
+    else:
+        update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+                        ['APPLICATIONINSIGHTS_CONNECTION_STRING={}'.format(appinsights.connection_string)])
 
 
 def _set_remote_or_local_git(cmd, webapp, resource_group_name, name, deployment_source_url=None,
