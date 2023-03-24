@@ -47,7 +47,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.extension_name = None
         self.extension_version = None
         self.event_id = str(uuid.uuid4())
-        self.recommendation_properties = None
+        self.cli_recommendation_feedback = None
         self.feedback = None
         self.extension_management_detail = None
         self.raw_command = None
@@ -200,7 +200,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'PythonVersion', platform.python_version())
         set_custom_properties(result, 'ModuleCorrelation', self.module_correlation)
         set_custom_properties(result, 'ExtensionName', ext_info)
-        set_custom_properties(result, 'Recommendation', self.recommendation_properties)
+        set_custom_properties(result, 'Recommendation', self.cli_recommendation_feedback)
         set_custom_properties(result, 'Feedback', self.feedback)
         set_custom_properties(result, 'ExtensionManagementDetail', self.extension_management_detail)
         set_custom_properties(result, 'Mode', self.mode)
@@ -402,11 +402,11 @@ def set_feedback(feedback):
 
 
 # This function returns the user's selection and feedback on the cli-recommendation results
-# Please refer to https://github.com/hackathon-cli-recommendation/cli-recommendation/blob/master/Docs/feedback_design.md for detailed information
+# Please refer to feedback_design.md of cli-recommendation for detailed information
 @decorators.suppress_all_exceptions()
-def set_recommendation_properties(api_version, recommendation_properties):
-    _session.recommendation_properties = {"api_version": api_version,
-                                          "recommendation_properties": recommendation_properties}
+def set_cli_recommendation_feedback(api_version, cli_recommendation_feedback):
+    _session.cli_recommendation_feedback = {"api_version": api_version,
+                                            "cli_recommendation_feedback": cli_recommendation_feedback}
 
 
 @decorators.suppress_all_exceptions()
