@@ -2116,6 +2116,27 @@ class AKSManagedClusterContext(BaseAKSContext):
             enable_validation=True, load_balancer_profile=load_balancer_profile
         )
 
+    def _get_network_plugin_mode(self, enable_validation: bool = False) -> Union[str, None]:
+        # read the original value passed by the command
+        network_plugin_mode = self.raw_param.get("network_plugin_mode")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.network_plugin_mode is not None
+        ):
+            network_plugin_mode = self.mc.network_profile.network_plugin_mode
+        
+        if enable_validation:
+            # todo(tyler-lloyd) do we need any validation?
+            pass
+            
+        return network_plugin_mode
+
+    def get_network_plugin_mode(self, enable_validation: bool = False) -> Union[str, None]:
+        return self._get_network_plugin_mode(enable_validation=True)
+
+
     def _get_network_plugin(self, enable_validation: bool = False) -> Union[str, None]:
         """Internal function to obtain the value of network_plugin.
 
@@ -4973,6 +4994,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         # verify network_plugin, pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy
         network_plugin = self.context.get_network_plugin()
+        network_plugin_mode = self.context.get_network_plugin_mode()
         (
             pod_cidr,
             service_cidr,
@@ -4995,6 +5017,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         if any(
             [
                 network_plugin,
+                network_plugin_mode,
                 pod_cidr,
                 pod_cidrs,
                 service_cidr,
@@ -5011,6 +5034,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             # and outbound_type, and they might be overwritten to None.
             network_profile = self.models.ContainerServiceNetworkProfile(
                 network_plugin=network_plugin,
+                network_plugin_mode=network_plugin_mode,
                 pod_cidr=pod_cidr,
                 pod_cidrs=pod_cidrs,
                 service_cidr=service_cidr,
