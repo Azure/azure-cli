@@ -231,9 +231,6 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_dns_zone', client_factory=cf_dns_mgmt_zones)
         g.generic_update_command('update', custom_func_name='update_dns_zone')
 
-    with self.command_group('network dns record-set') as g:
-        g.custom_command('list', 'list_dns_record_set', client_factory=cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output)
-
     api_version = str(get_api_version(self.cli_ctx, ResourceType.MGMT_NETWORK_DNS))
     api_version = api_version.replace('-', '_')
     dns_doc_string = 'azure.mgmt.dns.v' + api_version + '.operations#RecordSetsOperations.create_or_update'

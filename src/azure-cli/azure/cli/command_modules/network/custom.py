@@ -2490,18 +2490,23 @@ def list_dns_zones(cmd, resource_group_name=None):
 
 def create_dns_record_set(cmd, resource_group_name, zone_name, record_set_name, record_set_type,
                           metadata=None, if_match=None, if_none_match=None, ttl=3600, target_resource=None):
+    from .aaz.latest.network.dns.record_set import Create
 
-    RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS).record_sets
-    record_set = RecordSet(
-        ttl=ttl,
-        metadata=metadata,
-        target_resource=SubResource(id=target_resource) if target_resource else None
-    )
-    return client.create_or_update(resource_group_name, zone_name, record_set_name,
-                                   record_set_type, record_set, if_match=if_match,
-                                   if_none_match='*' if if_none_match else None)
+    record_set = {
+        "ttl": ttl,
+        "metadata": metadata,
+        "target_resource": {"id": target_resource} if target_resource else None
+    }
+
+    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": record_set_name,
+        "zone_name": zone_name,
+        "resource_group": resource_group_name,
+        "record_type": record_set_type,
+        "if_match": if_match,
+        "if_none_match": "*" if if_none_match else None,
+        **record_set
+    })
 
 
 def list_dns_record_set(client, resource_group_name, zone_name, record_type=None):
@@ -2524,18 +2529,19 @@ def update_dns_record_set(instance, cmd, metadata=None, target_resource=None):
 
 def _type_to_property_name(key):
     type_dict = {
-        'a': 'a_records',
-        'aaaa': 'aaaa_records',
-        'caa': 'caa_records',
-        'cname': 'cname_record',
-        'mx': 'mx_records',
-        'ns': 'ns_records',
-        'ptr': 'ptr_records',
-        'soa': 'soa_record',
-        'spf': 'txt_records',
-        'srv': 'srv_records',
-        'txt': 'txt_records',
-        'alias': 'target_resource',
+        # `record_type`: (`snake_case`, `camel_case`)
+        'a': ('a_records', "ARecords"),
+        'aaaa': ('aaaa_records', "AAAARecords"),
+        'caa': ('caa_records', "caaRecords"),
+        'cname': ('cname_record', "CNAMERecord"),
+        'mx': ('mx_records', "MXRecords"),
+        'ns': ('ns_records', "NSRecords"),
+        'ptr': ('ptr_records', "PTRRecords"),
+        'soa': ('soa_record', "SOARecord"),
+        'spf': ('txt_records', "TXTRecords"),
+        'srv': ('srv_records', "SRVRecords"),
+        'txt': ('txt_records', "TXTRecords"),
+        'alias': ('target_resource', "targetResource"),
     }
     return type_dict[key.lower()]
 
@@ -2556,7 +2562,7 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
     for record_set in record_sets:
         record_type = record_set.type.rsplit('/', 1)[1].lower()
         record_set_name = record_set.name
-        record_data = getattr(record_set, _type_to_property_name(record_type), None)
+        record_data = getattr(record_set, _type_to_property_name(record_type)[0], None)
 
         if not record_data:
             record_data = []
@@ -2761,7 +2767,7 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
         rs_name, rs_type = key.lower().rsplit('.', 1)
         rs_name = rs_name[:-(len(origin) + 1)] if rs_name != origin else '@'
         try:
-            record_count = len(getattr(rs, _type_to_property_name(rs_type)))
+            record_count = len(getattr(rs, _type_to_property_name(rs_type)[0]))
         except TypeError:
             record_count = 1
         total_records += record_count
@@ -2780,7 +2786,7 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
             rs_name = rs_name[:-(len(origin) + 1)]
 
         try:
-            record_count = len(getattr(rs, _type_to_property_name(rs_type)))
+            record_count = len(getattr(rs, _type_to_property_name(rs_type)[0]))
         except TypeError:
             record_count = 1
         if rs_name == '@' and rs_type == 'soa':
@@ -2806,8 +2812,7 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
 
 def add_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name, ipv6_address,
                         ttl=3600, if_none_match=None):
-    AaaaRecord = cmd.get_models('AaaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = AaaaRecord(ipv6_address=ipv6_address)
+    record = {"ipv6_address": ipv6_address}
     record_type = 'aaaa'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             ttl=ttl, if_none_match=if_none_match)
@@ -2815,8 +2820,7 @@ def add_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name, ip
 
 def add_dns_a_record(cmd, resource_group_name, zone_name, record_set_name, ipv4_address,
                      ttl=3600, if_none_match=None):
-    ARecord = cmd.get_models('ARecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = ARecord(ipv4_address=ipv4_address)
+    record = {"ipv4_address": ipv4_address}
     record_type = 'a'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name, 'arecords',
                             ttl=ttl, if_none_match=if_none_match)
@@ -2824,16 +2828,14 @@ def add_dns_a_record(cmd, resource_group_name, zone_name, record_set_name, ipv4_
 
 def add_dns_caa_record(cmd, resource_group_name, zone_name, record_set_name, value, flags, tag,
                        ttl=3600, if_none_match=None):
-    CaaRecord = cmd.get_models('CaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = CaaRecord(flags=flags, tag=tag, value=value)
+    record = {"flags": flags, "tag": tag, "value": value}
     record_type = 'caa'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             ttl=ttl, if_none_match=if_none_match)
 
 
 def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, cname, ttl=3600, if_none_match=None):
-    CnameRecord = cmd.get_models('CnameRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = CnameRecord(cname=cname)
+    record = {"cname": cname}
     record_type = 'cname'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             is_list=False, ttl=ttl, if_none_match=if_none_match)
@@ -2841,8 +2843,7 @@ def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, c
 
 def add_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, preference, exchange,
                       ttl=3600, if_none_match=None):
-    MxRecord = cmd.get_models('MxRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = MxRecord(preference=int(preference), exchange=exchange)
+    record = {"preference": int(preference), "exchange": exchange}
     record_type = 'mx'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             ttl=ttl, if_none_match=if_none_match)
@@ -2850,16 +2851,14 @@ def add_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, pref
 
 def add_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dname,
                       subscription_id=None, ttl=3600, if_none_match=None):
-    NsRecord = cmd.get_models('NsRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = NsRecord(nsdname=dname)
+    record = {"nsdname": dname}
     record_type = 'ns'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             subscription_id=subscription_id, ttl=ttl, if_none_match=if_none_match)
 
 
 def add_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dname, ttl=3600, if_none_match=None):
-    PtrRecord = cmd.get_models('PtrRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = PtrRecord(ptrdname=dname)
+    record = {"ptrdname": dname}
     record_type = 'ptr'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             ttl=ttl, if_none_match=if_none_match)
@@ -2871,17 +2870,23 @@ def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=
     record_set_name = '@'
     record_type = 'soa'
 
-    ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS).record_sets
-    record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
-    record = record_set.soa_record
+    from .aaz.latest.network.dns.record_set import Show
+    record_set = Show(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": record_set_name,
+        "zone_name": zone_name,
+        "resource_group": resource_group_name,
+        "record_type": record_type
+    })
 
-    record.host = host or record.host
-    record.email = email or record.email
-    record.serial_number = serial_number or record.serial_number
-    record.refresh_time = refresh_time or record.refresh_time
-    record.retry_time = retry_time or record.retry_time
-    record.expire_time = expire_time or record.expire_time
-    record.minimum_ttl = minimum_ttl or record.minimum_ttl
+    record_camal = record_set["SOARecord"]
+    record = dict()
+    record["host"] = host or record_camal.get("host", None)
+    record["email"] = email or record_camal.get("email", None)
+    record["serial_number"] = serial_number or record_camal.get("serialNumber", None)
+    record["refresh_time"] = refresh_time or record_camal.get("refreshTime", None)
+    record["retry_time"] = retry_time or record_camal.get("retryTime", None)
+    record["expire_time"] = expire_time or record_camal.get("expireTime", None)
+    record["minimum_ttl"] = minimum_ttl or record_camal.get("minimumTTL", None)
 
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             is_list=False, if_none_match=if_none_match)
@@ -2889,25 +2894,23 @@ def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=
 
 def add_dns_srv_record(cmd, resource_group_name, zone_name, record_set_name, priority, weight,
                        port, target, if_none_match=None):
-    SrvRecord = cmd.get_models('SrvRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = SrvRecord(priority=priority, weight=weight, port=port, target=target)
+    record = {"priority": priority, "weight": weight, "port": port, "target": target}
     record_type = 'srv'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             if_none_match=if_none_match)
 
 
 def add_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, value, if_none_match=None):
-    TxtRecord = cmd.get_models('TxtRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    record = TxtRecord(value=value)
+    record = {"value": value}
     record_type = 'txt'
-    long_text = ''.join(x for x in record.value)
+    long_text = ''.join(x for x in record["value"])
     original_len = len(long_text)
-    record.value = []
+    record["value"] = []
     while len(long_text) > 255:
-        record.value.append(long_text[:255])
+        record["value"].append(long_text[:255])
         long_text = long_text[255:]
-    record.value.append(long_text)
-    final_str = ''.join(record.value)
+    record["value"].append(long_text)
+    final_str = ''.join(record["value"])
     final_len = len(final_str)
     assert original_len == final_len
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
@@ -2997,69 +3000,63 @@ def remove_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, 
 
 def _check_a_record_exist(record, exist_list):
     for r in exist_list:
-        if r.ipv4_address == record.ipv4_address:
+        if r["ipv4Address"] == record["ipv4_address"]:
             return True
     return False
 
 
 def _check_aaaa_record_exist(record, exist_list):
     for r in exist_list:
-        if r.ipv6_address == record.ipv6_address:
+        if r["ipv6Address"] == record["ipv6_address"]:
             return True
     return False
 
 
 def _check_caa_record_exist(record, exist_list):
     for r in exist_list:
-        if (r.flags == record.flags and
-                r.tag == record.tag and
-                r.value == record.value):
+        if (r["flags"], r["tag"], r["value"]) == (record["flags"], record["tag"], record["value"]):
             return True
     return False
 
 
 def _check_cname_record_exist(record, exist_list):
     for r in exist_list:
-        if r.cname == record.cname:
+        if r["cname"] == record["cname"]:
             return True
     return False
 
 
 def _check_mx_record_exist(record, exist_list):
     for r in exist_list:
-        if (r.preference == record.preference and
-                r.exchange == record.exchange):
+        if (r["preference"], r["exchange"]) == (record["preference"], record["exchange"]):
             return True
     return False
 
 
 def _check_ns_record_exist(record, exist_list):
     for r in exist_list:
-        if r.nsdname == record.nsdname:
+        if r["nsdname"] == record["nsdname"]:
             return True
     return False
 
 
 def _check_ptr_record_exist(record, exist_list):
     for r in exist_list:
-        if r.ptrdname == record.ptrdname:
+        if r["ptrdname"] == record["ptrdname"]:
             return True
     return False
 
 
 def _check_srv_record_exist(record, exist_list):
     for r in exist_list:
-        if (r.priority == record.priority and
-                r.weight == record.weight and
-                r.port == record.port and
-                r.target == record.target):
+        if (r["priority"], r["weight"], r["port"], r["target"]) == (record["priority"], record["weight"], record["port"], record["target"]):
             return True
     return False
 
 
 def _check_txt_record_exist(record, exist_list):
     for r in exist_list:
-        if r.value == record.value:
+        if r["value"] == record["value"]:
             return True
     return False
 
@@ -3069,48 +3066,63 @@ def _record_exist_func(record_type):
 
 
 def _add_record(record_set, record, record_type, is_list=False):
-    record_property = _type_to_property_name(record_type)
+    record_property, _ = _type_to_property_name(record_type)
 
     if is_list:
-        record_list = getattr(record_set, record_property)
+        record_list = record_set.get(record_property, None)
         if record_list is None:
-            setattr(record_set, record_property, [])
-            record_list = getattr(record_set, record_property)
+            record_set[record_property] = []
+            record_list = []
 
         _record_exist = _record_exist_func(record_type)
         if not _record_exist(record, record_list):
-            record_list.append(record)
+            record_set[record_property].append(record)
     else:
-        setattr(record_set, record_property, record)
+        record_set[record_property] = record
 
 
 def _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                      is_list=True, subscription_id=None, ttl=None, if_none_match=None):
     from azure.core.exceptions import HttpResponseError
-    ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS,
-                                  subscription_id=subscription_id).record_sets
+    from .aaz.latest.network.dns.record_set import Create, Show
 
+    record_snake, record_camel = _type_to_property_name(record_type)
     try:
-        record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
+        ret = Show(cli_ctx=cmd.cli_ctx)(command_args={
+            "name": record_set_name,
+            "zone_name": zone_name,
+            "subscription": subscription_id,
+            "resource_group": resource_group_name,
+            "record_type": record_type
+        })
+        record_set = dict()
+        record_set["ttl"] = ret.get("TTL", None)
+        record_set[record_snake] = ret.get(record_camel, None)
     except HttpResponseError:
-        RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
-        record_set = RecordSet(ttl=3600)
+        record_set = {"ttl": 3600}
 
     if ttl is not None:
-        record_set.ttl = ttl
+        record_set["ttl"] = ttl
 
     _add_record(record_set, record, record_type, is_list)
 
-    return ncf.create_or_update(resource_group_name, zone_name, record_set_name,
-                                record_type, record_set,
-                                if_none_match='*' if if_none_match else None)
+    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+            "name": record_set_name,
+            "zone_name": zone_name,
+            "subscription": subscription_id,
+            "resource_group": resource_group_name,
+            "record_type": record_type,
+            "if_none_match": "*" if if_none_match else None,
+            "ttl": record_set.get("ttl", None),
+            record_snake: record_set.get(record_snake, None)
+        })
 
 
 def _remove_record(cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                    keep_empty_record_set, is_list=True):
     ncf = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK_DNS).record_sets
     record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
-    record_property = _type_to_property_name(record_type)
+    record_property, _ = _type_to_property_name(record_type)
 
     if is_list:
         record_list = getattr(record_set, record_property)
