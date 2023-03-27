@@ -926,7 +926,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             logger.warning(
                 '[Breaking Change] On April 04, 2023, the image deployed using "Win2008R2SP1" will reach its end of life.')
         if image in ["RHEL", "Debian", "CentOS", "Flatcar"]:
-            logger.warning('Consider using the image alias including the version of the distribution you want to use.')
+            logger.warning('Consider using the image alias including the version of the distribution you want to use. For example: please use Debian11 instead of Debian')
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if os_disk_encryption_set is not None and not is_valid_resource_id(os_disk_encryption_set):
