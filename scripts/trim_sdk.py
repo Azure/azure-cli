@@ -115,7 +115,6 @@ def _print_folder_size(folder):
 
 
 def _get_all_sdks_to_trim():
-    # azure.mgmt.network has been removed in https://github.com/Azure/azure-cli/pull/25451
     resource_types = [k for k, v in AZURE_API_PROFILES['latest'].items() if k.import_prefix.startswith('azure.mgmt')]
     return resource_types
 
