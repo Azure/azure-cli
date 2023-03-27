@@ -1691,7 +1691,52 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_6.get_outbound_type()
 
-    # todo put network_plugin_mode overlay tests here
+    def test_get_network_plugin_mode(self):
+        # default
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "network_plugin_mode": None,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_network_plugin_mode(), None)
+        network_profile_1 = self.models.ContainerServiceNetworkProfile(network_plugin_mode="test_network_plugin_mode")
+        mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile_1)
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_network_plugin_mode(), "test_network_plugin_mode")
+
+        # invalid parameter
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "pod_cidr": "test_pod_cidr",
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        # empty on network_plugin not specified
+        self.assertEqual(ctx_2.get_network_plugin_mode(), None)
+
+        # custom
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "pod_cidr": "test_pod_cidr",
+                    "network_plugin": "azure",
+                    "network_plugin_mode": "overlay",
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_3.get_network_plugin_mode(), "overlay")
     
     def test_get_network_plugin(self):
         # default
@@ -1739,7 +1784,8 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         # overwrite warning
-        self.assertEqual(ctx_3.get_network_plugin(), "azure")
+        with self.assertRaises(InvalidArgumentValueError):
+            self.assertEqual(ctx_3.get_network_plugin(), "azure")
 
     def test_get_pod_cidrs(self):
         # default
