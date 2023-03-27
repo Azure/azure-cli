@@ -2212,6 +2212,13 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         return self._get_network_plugin(enable_validation=True)
 
+    def get_network_dataplane(self) -> Union[str, None]:
+        """Get the value of network_dataplane.
+
+        :return: str or None
+        """
+        return self.raw_param.get("network_dataplane")
+
     def _get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
         self, enable_validation: bool = False
     ) -> Tuple[
@@ -5124,6 +5131,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             self.context.get_pod_cidrs_and_service_cidrs_and_ip_families()
         )
 
+        network_dataplane = self.context.get_network_dataplane()
+
         if any(
             [
                 network_plugin,
@@ -5136,6 +5145,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 dns_service_ip,
                 docker_bridge_address,
                 network_policy,
+                network_dataplane,
             ]
         ):
             # Attention: RP would return UnexpectedLoadBalancerSkuForCurrentOutboundConfiguration internal server error
@@ -5153,6 +5163,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 dns_service_ip=dns_service_ip,
                 docker_bridge_cidr=docker_bridge_address,
                 network_policy=network_policy,
+                network_dataplane=network_dataplane,
                 load_balancer_sku=load_balancer_sku,
                 load_balancer_profile=load_balancer_profile,
                 outbound_type=outbound_type,

@@ -252,6 +252,12 @@ parameters:
         Using together with "azure" network plugin.
         Specify "azure" for Azure network policy manager and "calico" for calico network policy controller.
         Defaults to "" (network policy disabled).
+  - name: --network-dataplane
+    type: string
+    short-summary: The network dataplane to use.
+    long-summary: |
+        Network dataplane used in the Kubernetes cluster.
+        Specify "azure" to use the Azure dataplane (default) or "cilium" to enable Cilium dataplane.
   - name: --no-ssh-key -x
     type: string
     short-summary: Do not use or create a local SSH key.

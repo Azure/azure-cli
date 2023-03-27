@@ -1786,6 +1786,42 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # overwrite warning
         self.assertEqual(ctx_3.get_network_plugin(), "azure")
 
+    def test_mc_get_network_dataplane(self):
+        # Default, not set.
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_network_dataplane(), None)
+
+        # Set to cilium.
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "network_dataplane": "cilium",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_2.get_network_dataplane(), "cilium")
+
+        # Set to azure.
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "network_dataplane": "azure",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_3.get_network_dataplane(), "azure")
+
     def test_get_pod_cidrs(self):
         # default
         ctx_1 = AKSManagedClusterContext(
