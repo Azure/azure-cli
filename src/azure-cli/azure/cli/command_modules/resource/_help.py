@@ -2812,7 +2812,8 @@ short-summary: List out all available versions of Bicep CLI.
 
 helps['stack'] = """
 type: group
-short-summary: A deployment stack is a native Azure resource type that enables you to perform operations on a resource collection as an atomic unit. Deployment stacks are defined in ARM as the type Microsoft.Resources/deploymentStacks. (Version 1.9)
+short-summary: A deployment stack is a native Azure resource type that enables you to perform operations on a resource collection as an atomic unit.
+long-summary: Deployment stacks are defined in ARM as the type Microsoft.Resources/deploymentStacks. (Version 1.9)
 """
 
 helps['stack mg create'] = """
@@ -2828,9 +2829,9 @@ examples:
   - name: Create a deployment stack using bicep file and delete all resources.
     text: az stack mg create --name StackName --management-group-id myMg --delete-all --template-file simple.bicep --location westus2 --description description
   - name: Create a deployment stack using parameters from key/value pairs
-    text: az stack mg create --name StackName --management-group-id myMg --template-file simpleTemplate.json  --location westus --description description --parameters simpleTemplateParams.json value1=foo value2=bar
+    text: az stack mg create --name StackName --management-group-id myMg --template-file simpleTemplate.json --location westus --description description --parameters simpleTemplateParams.json value1=foo value2=bar
   - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
-    text: az stack mg create --name rollout01 --management-group-id myMg --template-file azuredeploy.json  --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus
+    text: az stack mg create --name rollout01 --management-group-id myMg --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus
   - name: Create a deployment stack from a local template, using deny settings.
     text: az stack mg create --name rollout01 --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals test1 test2 --location westus
   - name: Create a deployment stack from a local template, apply deny settings to child scope.
@@ -2857,7 +2858,7 @@ examples:
 
 helps['stack mg export'] = """
 type: command
-short-summary: Exports the template used to create the deployment stack
+short-summary: Export the template used to create the deployment stack
 examples:
   - name: Export template by name.
     text: az stack mg export --name StackName --management-group-id myMg
@@ -2890,11 +2891,11 @@ examples:
   - name: Create a deployment stack at a different subscription.
     text: az stack sub create --name StackName --template-file simpleTemplate.json --location westus2 --description description --subscription subscriptionId
   - name: Create a deployment stack and deploy at the resource group scope.
-    text: az stack sub create --name StackName --template-file simpleTemplate.json  --location westus --deployment-resource-group ResourceGroup --description description
+    text: az stack sub create --name StackName --template-file simpleTemplate.json --location westus --deployment-resource-group ResourceGroup --description description
   - name: Create a deployment stack using parameters from key/value pairs
-    text: az stack sub create --name StackName --template-file simpleTemplate.json  --location westus --description description --parameters simpleTemplateParams.json value1=foo value2=bar
+    text: az stack sub create --name StackName --template-file simpleTemplate.json --location westus --description description --parameters simpleTemplateParams.json value1=foo value2=bar
   - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
-    text: az stack sub create --name rollout01 --template-file azuredeploy.json  --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus
+    text: az stack sub create --name rollout01 --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus
   - name: Create a deployment stack from a local template, using deny settings.
     text: az stack sub create --name rollout01 --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals test1 test2 --location westus
   - name: Create a deployment stack from a local template, apply deny settings to child scopes.
@@ -2921,7 +2922,7 @@ examples:
 
 helps['stack sub export'] = """
 type: command
-short-summary: Exports the template used to create the deployment stack
+short-summary: Export the template used to create the deployment stack
 examples:
   - name: Export template by name.
     text: az stack sub export --name StackName
@@ -2954,9 +2955,9 @@ examples:
   - name: Create a deployment stack at a different subscription
     text: az stack group create --name StackName --resource-group ResourceGroup --template-file simpleTemplate.json --description description --subscription subscriptionId
   - name: Create a deployment stack using parameters from key/value pairs
-    text: az stack group create --name StackName --template-file simpleTemplate.json  --resource-group ResourceGroup --description description --parameters simpleTemplateParams.json value1=foo value2=bar
+    text: az stack group create --name StackName --template-file simpleTemplate.json --resource-group ResourceGroup --description description --parameters simpleTemplateParams.json value1=foo value2=bar
   - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
-    text: az stack group create --name rollout01 --template-file azuredeploy.json  --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --resource-group ResourceGroup
+    text: az stack group create --name rollout01 --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --resource-group ResourceGroup
   - name: Create a deployment stack from a local template, using deny settings.
     text: az stack group create --name rollout01 --resource-group ResourceGroup --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals test1 test2
   - name: Create a deployment stack from a local template, apply deny setting to child scopes.
