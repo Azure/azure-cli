@@ -571,6 +571,8 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
 
                 self.assertGreaterEqual(len(local_defaults_config), 1)
                 actual = set([(x['name'], x['source'], x['value']) for x in local_defaults_config if x['name'] == 'group'])
+                # If global config_dir is ~/.azure/dummy_cli_config_dir/0azXbKR9OdJuZPFS/config,
+                # local config file is  ./0azXbKR9OdJuZPFS/config
                 expected = set([('group', os.path.join(temp_dir, os.path.basename(self.cli_ctx.config.config_dir), 'config'), self.kwargs['rg'])])
                 self.assertEqual(actual, expected)
 
