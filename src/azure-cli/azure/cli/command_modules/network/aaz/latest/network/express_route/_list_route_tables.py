@@ -213,4 +213,8 @@ class ListRouteTables(AAZCommand):
             return cls._schema_on_200
 
 
+class _ListRouteTablesHelper:
+    """Helper class for ListRouteTables"""
+
+
 __all__ = ["ListRouteTables"]

@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 class Create(AAZCommand):
-    """Create load balancer backend address pool.
+    """Create an address pool.
 
     :example: Create an address pool.
         az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool
@@ -53,7 +53,7 @@ class Create(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.address_pool_name = AAZStrArg(
             options=["-n", "--name", "--address-pool-name"],
-            help="The name of the backend address pool. If only one exists, omit to use as default.",
+            help="The name of the backend address pool.",
             required=True,
         )
         _args_schema.lb_name = AAZStrArg(

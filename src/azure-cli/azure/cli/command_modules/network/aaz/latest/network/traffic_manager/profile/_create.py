@@ -51,7 +51,6 @@ class Create(AAZCommand):
             options=["-n", "--name"],
             help="Traffic manager profile name.",
             required=True,
-            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -502,6 +501,10 @@ class Create(AAZCommand):
             tags.Element = AAZStrType()
 
             return cls._schema_on_200_201
+
+
+class _CreateHelper:
+    """Helper class for Create"""
 
 
 __all__ = ["Create"]

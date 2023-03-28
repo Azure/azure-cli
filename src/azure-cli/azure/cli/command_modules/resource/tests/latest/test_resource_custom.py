@@ -19,6 +19,7 @@ from azure.cli.command_modules.resource.custom import (
     _process_parameters,
     _find_missing_parameters,
     _prompt_for_parameters,
+    _is_bicepparam_file_provided,
     _load_file_string_or_uri,
     _what_if_deploy_arm_template_core,
     deploy_arm_template_at_resource_group,
@@ -353,6 +354,13 @@ class TestCustom(unittest.TestCase):
                              "['arrayParam', 'boolParam', 'enumParam', 'objectParam', 'secureParam']"]
         results = _prompt_for_parameters(dict(missing_parameters), fail_on_no_tty=False)
         self.assertTrue(str(list(results.keys())) in param_alpha_order)
+
+    def test_deployment_bicepparam_file_input_check(self):
+        self.assertEqual(_is_bicepparam_file_provided(None), False)
+        self.assertEqual(_is_bicepparam_file_provided([]), False)
+        self.assertEqual(_is_bicepparam_file_provided([['test.json']]), False)
+        self.assertEqual(_is_bicepparam_file_provided([['test.bicepparam']]), True)
+        self.assertEqual(_is_bicepparam_file_provided([['test.bicepparam'], ['test.json'],  ['{ \"foo\": { \"value\": \"bar\" } }']]), True)
 
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
     @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_resource_group_core", autospec=True)
