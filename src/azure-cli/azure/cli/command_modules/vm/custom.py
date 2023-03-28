@@ -923,10 +923,12 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     # Breaking Change Warning, change image alias
     if image:
         if image == "UbuntuLTS":
-            logger.warning(
-                'Since on April 04, 2023, the image deployed using "UbuntuLTS" will reach its end of life, we will remove the image alias "UbuntuLTS" in the next Build Event release. So please use the new image alias "Ubuntu2204" instead.')
+            logger.warning('Since on April 04, 2023, the image deployed using "UbuntuLTS" will reach its end of life,'
+                           'we will remove the image alias "UbuntuLTS" in the next Build Event release. '
+                           'So please use the new image alias "Ubuntu2204" instead.')
         if image in ["RHEL", "Debian", "CentOS", "Flatcar"]:
-            logger.warning('Consider using the image alias including the version of the distribution you want to use. For example: please use Debian11 instead of Debian')
+            logger.warning('Consider using the image alias including the version of the distribution you want to use. '
+                           'For example: please use Debian11 instead of Debian')
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if os_disk_encryption_set is not None and not is_valid_resource_id(os_disk_encryption_set):
@@ -3108,10 +3110,12 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
     # Breaking Change Warning, change image alias
     if image:
         if image == "UbuntuLTS":
-            logger.warning(
-                'Since on April 04, 2023, the image deployed using "UbuntuLTS" will reach its end of life, we will remove the image alias "UbuntuLTS" in the next Build Event release. So please use the new image alias "Ubuntu2204" instead.')
+            logger.warning('Since on April 04, 2023, the image deployed using "UbuntuLTS" will reach its end of life,'
+                           'we will remove the image alias "UbuntuLTS" in the next Build Event release. '
+                           'So please use the new image alias "Ubuntu2204" instead.')
         if image in ["RHEL", "Debian", "CentOS", "Flatcar"]:
-            logger.warning('Consider using the image alias including the version of the distribution you want to use.')
+            logger.warning('Consider using the image alias including the version of the distribution you want to use. '
+                           'For example: please use Debian11 instead of Debian')
 
     # The default load balancer will be expected to be changed from Basic to Standard.
     # In order to avoid breaking change which has a big impact to users,
