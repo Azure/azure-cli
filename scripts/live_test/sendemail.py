@@ -53,6 +53,7 @@ def main():
     try:
         logger.warning('Uploading test results to storage account...')
         container = get_container_name()
+        upload_files(container)
     except Exception:
         logger.exception(traceback.format_exc())
 
@@ -67,7 +68,6 @@ def main():
         html_content = generate_index.generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_TARGET)
         # Send email
         send_email(html_content)
-        upload_files(container)
     except Exception:
         logger.exception(traceback.format_exc())
 

@@ -1212,6 +1212,22 @@ helps['aks nodepool start'] = """
           text: az aks nodepool start --nodepool-name nodepool1 -g MyResourceGroup --cluster-name MyManagedCluster
 """
 
+helps['aks nodepool operation-abort'] = """
+    type: command
+    short-summary: Abort last running operation on nodepool.
+    examples:
+        - name: Abort operation on agent pool
+          text: az aks nodepool operation-abort -g myResourceGroup --nodepool-name nodepool1 --cluster-name myAKSCluster
+"""
+
+helps['aks operation-abort'] = """
+    type: command
+    short-summary: Abort last running operation on managed cluster.
+    examples:
+        - name: Abort operation on managed cluster
+          text: az aks operation-abort -g myResourceGroup -n myAKSCluster
+"""
+
 helps['aks remove-dev-spaces'] = """
 type: command
 short-summary: Remove Azure Dev Spaces from a managed Kubernetes cluster.

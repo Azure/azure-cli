@@ -180,13 +180,13 @@ def load_command_table(self, _):
     resource_managedapp_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.resource.managedapplications.operations#ApplicationsOperations.{}',
         client_factory=cf_resource_managedapplications,
-        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
+        resource_type=ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS
     )
 
     resource_managedapp_def_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.resource.managedapplications.operations#ApplicationDefinitionsOperations.{}',
         client_factory=cf_resource_managedappdefinitions,
-        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
+        resource_type=ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS
     )
 
     resource_managementgroups_mixin_sdk = CliCommandType(
@@ -253,6 +253,7 @@ def load_command_table(self, _):
         g.custom_command('invoke-action', 'invoke_resource_action', transform=DeploymentOutputLongRunningOperation(self.cli_ctx))
         g.generic_update_command('update', getter_name='show_resource', setter_name='update_resource',
                                  client_factory=None)
+        g.custom_command('patch', 'patch_resource')
         g.wait_command('wait', getter_name='show_resource')
 
     with self.command_group('resource lock', resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
@@ -477,13 +478,13 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_resource_links')
         g.custom_command('update', 'update_resource_link')
 
-    with self.command_group('managedapp', resource_managedapp_sdk, min_api='2017-05-10', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+    with self.command_group('managedapp', resource_managedapp_sdk, min_api='2017-05-10', resource_type=ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS) as g:
         g.custom_command('create', 'create_application')
         g.command('delete', 'begin_delete')
         g.custom_show_command('show', 'show_application')
         g.custom_command('list', 'list_applications')
 
-    with self.command_group('managedapp definition', resource_managedapp_def_sdk, min_api='2017-05-10', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+    with self.command_group('managedapp definition', resource_managedapp_def_sdk, min_api='2017-05-10', resource_type=ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS) as g:
         g.custom_command('create', 'create_or_update_applicationdefinition')
         g.custom_command('update', 'create_or_update_applicationdefinition')
         g.command('delete', 'begin_delete')
