@@ -4557,6 +4557,192 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(ArgumentUsageError):
             ctx_9.get_azure_keyvault_kms_key_vault_resource_id()
 
+    def test_get_enable_image_cleaner(self):
+        ctx_0 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_0.get_enable_image_cleaner(), None)
+
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_image_cleaner": False,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_enable_image_cleaner(), False)
+
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_image_cleaner": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_2.get_enable_image_cleaner(), True)
+
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_image_cleaner": False,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_3.get_enable_image_cleaner(), False)
+
+        ctx_4 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_image_cleaner": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_4.get_enable_image_cleaner(), True)
+
+    def test_get_disable_image_cleaner(self):
+        ctx_0 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_0.get_disable_image_cleaner(), None)
+
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_image_cleaner": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_1.get_disable_image_cleaner(), True)
+
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_image_cleaner": False,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_2.get_disable_image_cleaner(), False)
+
+    def test_get_image_cleaner_interval_hours(self):
+        ctx_0 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertIsNone(ctx_0.get_image_cleaner_interval_hours())
+
+
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_image_cleaner": True,
+                    "image_cleaner_interval_hours": 24,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_image_cleaner_interval_hours(), 24)
+
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "image_cleaner_interval_hours": 24,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_2.get_image_cleaner_interval_hours()
+
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "image_cleaner_interval_hours": 24,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        security_profile = self.models.ManagedClusterSecurityProfile()
+        security_profile.image_cleaner = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=True,
+            interval_hours=25,
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=security_profile,
+        )
+        ctx_3.attach_mc(mc)
+        self.assertEqual(ctx_3.get_image_cleaner_interval_hours(), 24)
+
+        ctx_4 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "image_cleaner_interval_hours": 24,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        security_profile = self.models.ManagedClusterSecurityProfile()
+        security_profile.image_cleaner = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=False,
+            interval_hours=25,
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=security_profile,
+        )
+        ctx_4.attach_mc(mc)
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_4.get_image_cleaner_interval_hours()
+
+        ctx_5 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_image_cleaner": True,
+                    "disable_image_cleaner": True,
+                    "image_cleaner_interval_hours": 24,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_5.get_image_cleaner_interval_hours()
+
     def test_get_blob_driver(self):
         # create with blob driver enabled
         ctx_1 = AKSManagedClusterContext(
@@ -6974,6 +7160,69 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         ground_truth_mc_1
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
+    def test_set_up_image_cleaner(self):
+        dec_0 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_0 = self.models.ManagedCluster(location="test_location")
+        dec_0.context.attach_mc(mc_0)
+        dec_mc_0 = dec_0.set_up_image_cleaner(mc_0)
+        ground_truth_mc_0 = self.models.ManagedCluster(location="test_location")
+        self.assertEqual(dec_mc_0, ground_truth_mc_0)
+
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_image_cleaner": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_image_cleaner(mc_1)
+
+        ground_truth_image_cleaner_profile_1 = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=True,
+            interval_hours=7*24,
+        )
+        ground_truth_security_profile_1 = self.models.ManagedClusterSecurityProfile(
+            image_cleaner=ground_truth_image_cleaner_profile_1,
+        )
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=ground_truth_security_profile_1,
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        dec_2 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_image_cleaner": True,
+                "image_cleaner_interval_hours": 24
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.set_up_image_cleaner(mc_2)
+
+        ground_truth_image_cleaner_profile_2 = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=True,
+            interval_hours=24,
+        )
+        ground_truth_security_profile_2 = self.models.ManagedClusterSecurityProfile(
+            image_cleaner=ground_truth_image_cleaner_profile_2,
+        )
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=ground_truth_security_profile_2,
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
 
 class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
@@ -8521,6 +8770,183 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             dec_azure_keyvault_secrets_provider_addon_profile_5,
             ground_truth_azure_keyvault_secrets_provider_addon_profile_5,
         )
+
+    def test_update_image_cleaner(self):
+        dec_0 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_0 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_0.context.attach_mc(mc_0)
+        dec_mc_0 = dec_0.update_image_cleaner(mc_0)
+        ground_truth_mc_0 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_0, ground_truth_mc_0)
+
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_image_cleaner": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_image_cleaner(mc_1)
+
+        ground_truth_image_cleaner_profile_1 = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=True,
+            interval_hours=7*24,
+        )
+        ground_truth_security_profile_1 = self.models.ManagedClusterSecurityProfile(
+            image_cleaner=ground_truth_image_cleaner_profile_1,
+        )
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=ground_truth_security_profile_1,
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "image_cleaner_interval_hours": 24
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        security_profile = self.models.ManagedClusterSecurityProfile()
+        security_profile.image_cleaner = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=True,
+            interval_hours=25,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=security_profile,
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.update_image_cleaner(mc_2)
+
+        ground_truth_image_cleaner_profile_2 = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=True,
+            interval_hours=24,
+        )
+        ground_truth_security_profile_2 = self.models.ManagedClusterSecurityProfile(
+            image_cleaner=ground_truth_image_cleaner_profile_2,
+        )
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=ground_truth_security_profile_2,
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        dec_3 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_image_cleaner": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        security_profile = self.models.ManagedClusterSecurityProfile()
+        security_profile.image_cleaner = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=False,
+            interval_hours=25,
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=security_profile,
+        )
+        dec_3.context.attach_mc(mc_3)
+        dec_mc_3 = dec_3.update_image_cleaner(mc_3)
+
+        ground_truth_image_cleaner_profile_3 = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=True,
+            interval_hours=25,
+        )
+        ground_truth_security_profile_3 = self.models.ManagedClusterSecurityProfile(
+            image_cleaner=ground_truth_image_cleaner_profile_3,
+        )
+        ground_truth_mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=ground_truth_security_profile_3,
+        )
+        self.assertEqual(dec_mc_3, ground_truth_mc_3)
+
+        dec_4 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_image_cleaner": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        security_profile = self.models.ManagedClusterSecurityProfile()
+        security_profile.image_cleaner = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=True,
+            interval_hours=25,
+        )
+        mc_4 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=security_profile,
+        )
+        dec_4.context.attach_mc(mc_4)
+        dec_mc_4 = dec_4.update_image_cleaner(mc_4)
+
+        ground_truth_image_cleaner_profile_4 = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=False,
+            interval_hours=25,
+        )
+        ground_truth_security_profile_4 = self.models.ManagedClusterSecurityProfile(
+            image_cleaner=ground_truth_image_cleaner_profile_4,
+        )
+        ground_truth_mc_4 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=ground_truth_security_profile_4,
+        )
+        self.assertEqual(dec_mc_4, ground_truth_mc_4)
+
+        dec_5 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_image_cleaner": True,
+                "image_cleaner_interval_hours": 24,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        security_profile = self.models.ManagedClusterSecurityProfile()
+        security_profile.image_cleaner = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=False,
+            interval_hours=25,
+        )
+        mc_5 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=security_profile,
+        )
+        dec_5.context.attach_mc(mc_5)
+        dec_mc_5 = dec_5.update_image_cleaner(mc_5)
+
+        ground_truth_image_cleaner_profile_5 = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=True,
+            interval_hours=24,
+        )
+        ground_truth_security_profile_5 = self.models.ManagedClusterSecurityProfile(
+            image_cleaner=ground_truth_image_cleaner_profile_5,
+        )
+        ground_truth_mc_5 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=ground_truth_security_profile_5,
+        )
+        self.assertEqual(dec_mc_5, ground_truth_mc_5)
 
     def test_update_addon_profiles(self):
         # default value in `aks_update`
