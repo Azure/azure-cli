@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "vmss rolling-upgrade start",
 )
 class Start(AAZCommand):
-    """Starts a rolling upgrade to move all virtual machine scale set instances to the latest available Platform Image OS version. Instances which are already running the latest available OS version are not affected.
+    """Start a rolling upgrade to move all virtual machine scale set instances to the latest available Platform Image OS version. Instances which are already running the latest available OS version are not affected.
     """
 
     _aaz_info = {

@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "vmss rolling-upgrade cancel",
 )
 class Cancel(AAZCommand):
-    """Cancels the current virtual machine scale set rolling upgrade.
+    """Cancel the current virtual machine scale set rolling upgrade.
     """
 
     _aaz_info = {
