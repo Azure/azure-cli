@@ -171,6 +171,17 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
             except ResourceNotFoundError:
                 pass
 
+class SqlServerExternalGovernanceTests(ScenarioTest):
+    
+    @ResourceGroupPreparer(location='eastus2euap')
+    @SqlServerPreparer(location='eastus2euap')
+    def test_sql_refresh_external_governance_status(self, resource_group, resource_group_location, server):
+        
+        self.cmd('sql server refresh-external-governance-status -g {} --server {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('serverName', server),
+                     JMESPathCheck('status', 'Succeeded')])
 
 class SqlServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
@@ -1240,7 +1251,8 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
         self.cmd(
             'sql db ltr-backup restore --backup-id \'{backup_id}\' --dest-database {dest_database_name}'
             ' --dest-server {server_name} --dest-resource-group {rg} -i --encryption-protector {encryption_protector}'
-            ' --keys {keys} --umi {umi}',
+            ' --keys {keys} --umi {umi} --edition Hyperscale'
+            ' --service-level-objective SQLDB_HS_Gen5_2 --bsr Zone --ha-replicas 1 -z true',
             checks=[
                 self.check('name', '{dest_database_name}')])
 
@@ -1252,15 +1264,16 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
 
 class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
     @record_only()
+    @AllowLargeResponse()
     # using fixed resources because of long time preperation for geo-redundant backup
     # need to change resources for others who want to rerecord this test
     def test_sql_db_geo_restore(
             self):
         self.kwargs.update({
-            'rg': 'sejagada-AlwaysEncrypted',
-            'loc': 'eastus2euap',
-            'server_name': 'sejagada-ae-sqlserver-canary-donotdelete',
-            'database_name': 'sejagada-ae-sqldb-canary-donotdelete'
+            'rg': 'rebeccaxu-test',
+            'loc': 'eastus',
+            'server_name': 'rebeccaxu-eastus-svr',
+            'database_name': 'cli-test-hs',
         })
 
         # test list geo backups for database
@@ -1282,7 +1295,8 @@ class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
 
         self.cmd(
             'sql db geo-backup restore --geo-backup-id {backup_id} --dest-database {dest_database_name}'
-            ' --dest-server {server_name} --resource-group {rg}',
+            ' --dest-server {server_name} --resource-group {rg} --edition Hyperscale'
+            ' --service-level-objective SQLDB_HS_Gen5_2 --bsr Zone --ha-replicas 1 -z true',
             checks=[
                 self.check('name', '{dest_database_name}')])
                 
@@ -6897,3 +6911,61 @@ class SqlManagedInstanceZoneRedundancyScenarioTest(ScenarioTest):
         # Delete the managed instance
         self.cmd('sql mi delete --ids {} --yes'
                  .format(managed_instance['id']), checks=NoneCheck())
+
+class SqlManagedInstanceServerConfigurationOptionTest(ScenarioTest):
+    @AllowLargeResponse()
+    @ManagedInstancePreparer(parameter_name="mi")
+    def test_sql_mi_server_configuration_options(self, mi, rg):
+        option_name = 'allowPolybaseExport'
+        option_value = 1
+        self.kwargs.update({
+            'rg': rg,
+            'mi': mi,
+            'option_name' : option_name,
+            'option_value': option_value,
+        })
+
+        # Create sql managed_instance
+        self.cmd('sql mi show -g {rg} -n {mi}',
+                    checks=[
+                        JMESPathCheck('name', mi),
+                        JMESPathCheck('resourceGroup', rg)]).get_output_in_json()
+
+        # no config options on the instance
+        self.cmd('sql mi server-configuration-option list -g {rg} --instance-name {mi}',
+                    checks=[JMESPathCheck('length(@)', 0)])
+
+        # upsert config option
+        self.cmd('sql mi server-configuration-option create -g {rg} --instance-name {mi} --name {option_name} --value {option_value}')
+
+        # show config option
+        opt = self.cmd('sql mi server-configuration-option show -g {rg} --instance-name {mi} --name {option_name}',
+                    checks=[
+                        JMESPathCheck('name', option_name),
+                        JMESPathCheck('resourceGroup', rg),
+                        JMESPathCheck('type', 'Microsoft.Sql/managedInstances/serverConfigurationOptions'),
+                        JMESPathCheck('serverConfigurationOptionValue', option_value),
+                        JMESPathCheck('provisioningState', 'Succeeded'),
+                        ]).get_output_in_json()
+
+        opt_id = opt['id']
+        self.kwargs.update({
+            'opt_id': opt_id
+        })
+
+        # show command with --ids parameter
+        self.cmd('sql mi server-configuration-option show --ids {opt_id}',
+                    checks=[
+                        JMESPathCheck('name', option_name),
+                        JMESPathCheck('resourceGroup', rg),
+                        JMESPathCheck('type', 'Microsoft.Sql/managedInstances/serverConfigurationOptions'),
+                        JMESPathCheck('serverConfigurationOptionValue', option_value),
+                        JMESPathCheck('provisioningState', 'Succeeded'),
+                        ]).get_output_in_json()
+
+        # delete config option
+        self.cmd('sql mi server-configuration-option update -g {rg} --instance-name {mi} -n {option_name} --value 0')
+
+        # list 0 config options
+        self.cmd('sql mi server-configuration-option list -g {rg} --instance-name {mi}',
+                    checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json

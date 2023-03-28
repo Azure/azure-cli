@@ -53,6 +53,7 @@ def main():
     try:
         logger.warning('Uploading test results to storage account...')
         container = get_container_name()
+        upload_files(container)
     except Exception:
         logger.exception(traceback.format_exc())
 
@@ -67,7 +68,6 @@ def main():
         html_content = generate_index.generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_TARGET)
         # Send email
         send_email(html_content)
-        upload_files(container)
     except Exception:
         logger.exception(traceback.format_exc())
 
@@ -244,39 +244,45 @@ def write_db(container, testdata):
 
 def send_email(html_content):
     logger.warning('Sending email...')
-    from azure.communication.email import EmailClient, EmailAddress, EmailContent, EmailMessage, EmailRecipients
+    from azure.communication.email import EmailClient
 
     client = EmailClient.from_connection_string(SENDGRID_KEY);
-    content = EmailContent(
-        subject="Test results of Azure CLI",
-        html=html_content,
-    )
+    content = {
+        "subject": "Test results of Azure CLI",
+        "html": html_content,
+    }
 
     recipients = ''
 
     if REQUESTED_FOR_EMAIL != '':
-        recipients = EmailRecipients(
-            to=[
-                EmailAddress(email=REQUESTED_FOR_EMAIL),
+        recipients = {
+            "to": [
+                {
+                    "address": REQUESTED_FOR_EMAIL
+                },
             ]
-        )
+        }
     # TODO: USER_TARGET == 'all'
     elif USER_TARGET == '' and USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_LIVE == '--live' and REQUESTED_FOR_EMAIL == '':
-        recipients = EmailRecipients(
-            to=[
-                EmailAddress(email="AzPyCLI@microsoft.com"),
-                EmailAddress(email="antcliTest@microsoft.com"),
+        recipients = {
+            "to": [
+                {
+                    "address": "AzPyCLI@microsoft.com"
+                },
+                {
+                    "address": "antcliTest@microsoft.com"
+                }
             ]
-        )
+        }
 
     if recipients:
-        message = EmailMessage(sender="DoNotReply@561634e2-1674-4377-9975-10a9197437d7.azurecomm.net",
-                               content=content,
-                               recipients=recipients)
+        message = {
+            "content": content,
+            "senderAddress": "DoNotReply@561634e2-1674-4377-9975-10a9197437d7.azurecomm.net",
+            "recipients": recipients
+        }
 
-        response = client.send(message)
-        status = client.get_send_status(response.message_id)
-        print(status)
+        client.begin_send(message)
         logger.warning('Finish sending email')
     else:
         logger.warning('No recipients, skip sending email')

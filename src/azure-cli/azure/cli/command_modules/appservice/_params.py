@@ -138,7 +138,7 @@ subscription than the app service environment, please use the resource ID for --
                    configured_default='appserviceplan', id_part='name', local_context_attribute=None)
 
     with self.argument_context('webapp create') as c:
-        c.argument('name', options_list=['--name', '-n'], help='name of the new web app',
+        c.argument('name', options_list=['--name', '-n'], help='Name of the new web app. Web app name can contain only allow alphanumeric characters and hyphens, it cannot start or end in a hyphen, and must be less than 64 characters.',
                    validator=validate_site_create,
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.SET],
                                                                  scopes=['webapp', 'cupertino']))
@@ -662,7 +662,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it",
                    default=False, action='store_true')
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
-        c.argument('launch_browser', help="Launch the created app using the default browser", default=False,
+        c.argument('launch_browser', help="Launch the created app using the default browser. This is not supported in Azure Cloud Shell.", default=False,
                    action='store_true', options_list=['--launch-browser', '-b'])
         c.argument('logs',
                    help="Configure default logging required to enable viewing log stream immediately after launching the webapp",
