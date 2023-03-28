@@ -2133,7 +2133,11 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         return network_plugin_mode
 
-    def get_network_plugin_mode(self, enable_validation: bool = False) -> Union[str, None]:
+    def get_network_plugin_mode(self) -> Union[str, None]:
+        """Obtain the value of network_plugin_mode.
+
+        :return: string or None
+        """
         return self._get_network_plugin_mode(enable_validation=True)
 
     def _get_network_plugin(self, enable_validation: bool = False) -> Union[str, None]:
