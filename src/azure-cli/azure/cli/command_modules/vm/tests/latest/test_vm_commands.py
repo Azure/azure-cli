@@ -63,6 +63,32 @@ class VMImageListByAliasesScenarioTest(ScenarioTest):
         self.assertEqual(result[0]['architecture'], 'x64')
 
 
+class VmReimageTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_reimage_')
+    def test_vm_reimage(self, resource_group):
+
+        self.kwargs.update({
+            'vm': 'vm'
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image centos --admin-username centosadmin --admin-password testPassword0 '
+                 '--authentication-type password --os-disk-delete-option Delete --nsg-rule NONE')
+        vm_json_before_reimage = self.cmd('vm show -n {vm} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'os_disk_before_reimage': vm_json_before_reimage['storageProfile']['osDisk']['name']
+        })
+
+        self.cmd('vm reimage --name {vm} --resource-group {rg} --temp-disk false '
+                 '--admin-password password --custom-data "dGVzdA==" --exact-version 0.1')
+        vm_json_after_reimage = self.cmd('vm show -n {vm} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'os_disk_after_reimage': vm_json_after_reimage['storageProfile']['osDisk']['name']
+        })
+
+        self.assertNotEqual('{os_disk_before_reimage}', '{os_disk_after_reimage}')
+
+
 class VMUsageScenarioTest(ScenarioTest):
 
     def test_vm_usage(self):

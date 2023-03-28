@@ -910,7 +910,7 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
                 child_name_1=http_settings
             )
 
-        from .aaz.latest.network.application_gateway._health_on_demand import HealthOnDemand
+        from .aaz.latest.network.application_gateway import HealthOnDemand
         return LongRunningOperation(cmd.cli_ctx)(
             HealthOnDemand(cli_ctx=cmd.cli_ctx)(command_args={
                 "name": application_gateway_name,
@@ -928,7 +928,7 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
             })
         )
 
-    from .aaz.latest.network.application_gateway._health import Health
+    from .aaz.latest.network.application_gateway import Health
     return LongRunningOperation(cmd.cli_ctx)(
         Health(cli_ctx=cmd.cli_ctx)(command_args={
             "name": application_gateway_name,
@@ -3864,11 +3864,12 @@ class PrivateLinkServiceUpdate(_PrivateLinkServiceUpdate):
         from azure.cli.core.aaz import AAZStrArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.lb_name = AAZStrArg(options=['--lb-name'], help="Name of the load balancer to retrieve frontend IP configs from. Ignored if a frontend IP configuration ID is supplied.")
-        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.")
+        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.", nullable=True)
         args_schema.lb_frontend_ip_configs.Element = AAZResourceIdArg(
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIpConfigurations/{}"
-            )
+            ),
+            nullable=True
         )
         args_schema.load_balancer_frontend_ip_configurations._registered = False
         return args_schema
@@ -6418,6 +6419,7 @@ def create_virtual_hub(cmd,
                        virtual_hub_name,
                        hosted_subnet,
                        public_ip_address,
+                       hub_routing_preference=None,
                        location=None,
                        tags=None):
     from azure.core.exceptions import HttpResponseError
@@ -6437,6 +6439,7 @@ def create_virtual_hub(cmd,
         'location': location,
         'tags': tags,
         'sku': 'Standard',
+        "hub_routing_preference": hub_routing_preference
     }
     from .aaz.latest.network.routeserver import Create
     vhub_poller = Create(cli_ctx=cmd.cli_ctx)(command_args=args)
