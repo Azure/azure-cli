@@ -535,19 +535,18 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
 
 
 class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
-    @record_only()
     @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_mhsm_sd')
     def test_keyvault_hsm_security_domain(self):
         sdtest_dir = tempfile.mkdtemp()
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        logged_in_user = logged_in_user["id"] if logged_in_user is not None else "a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e"
         self.kwargs.update({
-            'hsm_url': SD_ACTIVE_HSM_NAME,
-            'hsm_name': SD_ACTIVE_HSM_NAME,
-            'next_hsm_url': SD_NEXT_ACTIVE_HSM_URL,
-            'next_hsm_name': SD_NEXT_ACTIVE_HSM_NAME,
-            'loc': 'eastus2',
-            'init_admin': '9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa',
+            'hsm_name': self.create_random_name('test-mhsm-sd1', 24),
+            'next_hsm_name': self.create_random_name('test-mhsm-sd2', 24),
+            'loc': 'uksouth',
+            'init_admin': logged_in_user,
             'key_name': self.create_random_name('key', 10),
-            'rg': 'bim-rg',
             'sdtest_dir': sdtest_dir
         })
         self.kwargs.update({
@@ -560,13 +559,22 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
             self.kwargs['cer{}_path'.format(i)] = os.path.join(KEYS_DIR, 'sd{}.cer'.format(i))
             self.kwargs['key{}_path'.format(i)] = os.path.join(KEYS_DIR, 'sd{}.pem'.format(i))
 
-        # create a new key and backup it
-        self.cmd('az keyvault key create --hsm-name {hsm_name} -n {key_name}')
-        self.cmd('az keyvault key backup --hsm-name {hsm_name} -n {key_name} -f "{key_backup}"')
+        self.cmd('az keyvault create --hsm-name {hsm_name} -l {loc} -g {rg} --administrators {init_admin} '
+                 '--retention-days 7')
+
+        self.cmd('az keyvault wait-hsm --hsm-name {hsm_name} --created')
 
         # download SD
         self.cmd('az keyvault security-domain download --hsm-name {hsm_name} --security-domain-file "{sdfile}" '
-                 '--sd-quorum 2 --sd-wrapping-keys "{cer1_path}" "{cer2_path}" "{cer3_path}" --no-wait')
+                 '--sd-quorum 2 --sd-wrapping-keys "{cer1_path}" "{cer2_path}" "{cer3_path}"')
+        time.sleep(180)
+        with mock.patch('azure.cli.command_modules.keyvault.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('az keyvault role assignment create --assignee {init_admin} --hsm-name {hsm_name} '
+                     '--role "Managed HSM Crypto User" --scope "/"')
+
+        # create a new key and backup it
+        self.cmd('az keyvault key create --hsm-name {hsm_name} -n {key_name}')
+        self.cmd('az keyvault key backup --hsm-name {hsm_name} -n {key_name} -f "{key_backup}"')
 
         # delete the HSM
         self.cmd('az keyvault delete --hsm-name {hsm_name}')
@@ -587,6 +595,10 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
                  '--sd-exchange-key "{exchange_key}" '
                  '--sd-wrapping-keys "{key1_path}" "{key2_path}"')
 
+        with mock.patch('azure.cli.command_modules.keyvault.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('az keyvault role assignment create --assignee {init_admin} --hsm-name {next_hsm_name} '
+                     '--role "Managed HSM Crypto User" --scope "/"')
+
         # restore the key
         self.cmd('az keyvault key restore --hsm-name {next_hsm_name} -f "{key_backup}"')
 
@@ -594,6 +606,10 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
         for f in files:
             if os.path.exists(self.kwargs[f]):
                 os.remove(self.kwargs[f])
+
+        self.cmd('az keyvault purge --hsm-name {hsm_name}')
+        self.cmd('az keyvault delete --hsm-name {next_hsm_name}')
+        self.cmd('az keyvault purge --hsm-name {next_hsm_name}')
 
 
 class KeyVaultHSMSelectiveKeyRestoreScenarioTest(ScenarioTest):

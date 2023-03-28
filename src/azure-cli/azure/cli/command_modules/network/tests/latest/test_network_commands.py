@@ -415,7 +415,7 @@ class NetworkPrivateLinkService(ScenarioTest):
             self.check('enableProxyProtocol', True)
         ])
 
-        self.cmd('network private-link-service update -g {rg} -n {lks1} --visibility {sub1} {sub1} --auto-approval {sub1} {sub1} --enable-proxy-protocol False', checks=[
+        self.cmd('network private-link-service update -g {rg} -n {lks1} --visibility {sub1} {sub1} --auto-approval {sub1} {sub1} --enable-proxy-protocol False --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd', checks=[
             self.check('length(visibility.subscriptions)', 2),
             self.check('length(autoApproval.subscriptions)', 2),
             self.check('enableProxyProtocol', False)

@@ -1251,7 +1251,8 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
         self.cmd(
             'sql db ltr-backup restore --backup-id \'{backup_id}\' --dest-database {dest_database_name}'
             ' --dest-server {server_name} --dest-resource-group {rg} -i --encryption-protector {encryption_protector}'
-            ' --keys {keys} --umi {umi}',
+            ' --keys {keys} --umi {umi} --edition Hyperscale'
+            ' --service-level-objective SQLDB_HS_Gen5_2 --bsr Zone --ha-replicas 1 -z true',
             checks=[
                 self.check('name', '{dest_database_name}')])
 
@@ -1263,15 +1264,16 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
 
 class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
     @record_only()
+    @AllowLargeResponse()
     # using fixed resources because of long time preperation for geo-redundant backup
     # need to change resources for others who want to rerecord this test
     def test_sql_db_geo_restore(
             self):
         self.kwargs.update({
-            'rg': 'sejagada-AlwaysEncrypted',
-            'loc': 'eastus2euap',
-            'server_name': 'sejagada-ae-sqlserver-canary-donotdelete',
-            'database_name': 'sejagada-ae-sqldb-canary-donotdelete'
+            'rg': 'rebeccaxu-test',
+            'loc': 'eastus',
+            'server_name': 'rebeccaxu-eastus-svr',
+            'database_name': 'cli-test-hs',
         })
 
         # test list geo backups for database
@@ -1293,7 +1295,8 @@ class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
 
         self.cmd(
             'sql db geo-backup restore --geo-backup-id {backup_id} --dest-database {dest_database_name}'
-            ' --dest-server {server_name} --resource-group {rg}',
+            ' --dest-server {server_name} --resource-group {rg} --edition Hyperscale'
+            ' --service-level-objective SQLDB_HS_Gen5_2 --bsr Zone --ha-replicas 1 -z true',
             checks=[
                 self.check('name', '{dest_database_name}')])
                 

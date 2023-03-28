@@ -18,11 +18,10 @@ from azure.cli.command_modules.acs.tests.latest.custom_preparers import (
     AKSCustomVirtualNetworkPreparer,
 )
 from azure.cli.command_modules.acs.tests.latest.recording_processors import KeyReplacer
-from azure.cli.core.azclierror import CLIInternalError
+from azure.cli.core.azclierror import ClientRequestError, CLIInternalError
 from azure.cli.testsdk import ScenarioTest, live_only
 from azure.cli.testsdk.checkers import StringCheck, StringContainCheck, StringContainCheckIgnoreCase
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.acs.tests.latest.mocks import MockCLI, MockCmd
 from azure.cli.command_modules.acs.tests.latest.utils import get_test_data_file_path
 from knack.util import CLIError
 # flake8: noqa
@@ -8220,8 +8219,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.is_empty(),
         ])
 
-    # The fix on the rp side has not been released yet
-    @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_update_with_keda(self, resource_group, resource_group_location):
@@ -8262,3 +8259,80 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(cmd, checks=[
             self.is_empty(),
         ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_again_should_fail(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--location={location} --ssh-key-value={ssh_key_value} --output=json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # create again should fail
+        create_again_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                           '--location={location} --ssh-key-value={ssh_key_value} --output=json'
+        try:
+            self.cmd(create_again_cmd, checks=[
+                self.check('provisioningState', 'Succeeded'),
+            ])
+        except ClientRequestError as ex:
+            if "already exists" not in str(ex):
+                raise AssertionError(
+                    "Actual error '{}' does not contain '{}'".format(
+                        ex, "already exists"
+                    )
+                )
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    # live only due to dependency `_add_role_assignment` is not mocked
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_update_attach_acr(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        acr_name = self.create_random_name('cliaksacr', 16)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'acr_name': acr_name
+        })
+
+        # create acr
+        create_acr_cmd = 'acr create -g {resource_group} -n {acr_name} --sku basic'
+        self.cmd(create_acr_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} -c 1 ' \
+                     '--ssh-key-value={ssh_key_value} --attach-acr={acr_name}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # update
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--attach-acr={acr_name}'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
