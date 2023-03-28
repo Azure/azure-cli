@@ -252,7 +252,7 @@ def approve_private_endpoint_connection(cmd, resource_group_name, namespace_name
         "namespace_name": namespace_name,
         "private_endpoint_connection_name": private_endpoint_connection_name
     })
-    if private_endpoint_connection["privateLinkServiceConnectionState"]["status"]!="Approved":
+    if private_endpoint_connection["privateLinkServiceConnectionState"]["status"] != "Approved":
         command_args_dict = {
             "resource_group": resource_group_name,
             "namespace_name": namespace_name,
@@ -261,12 +261,12 @@ def approve_private_endpoint_connection(cmd, resource_group_name, namespace_name
             "status": "Approved"
         }
         return Update(cli_ctx=cmd.cli_ctx)(command_args=command_args_dict)
-    else:
-        return Show(cli_ctx=cmd.cli_ctx)(command_args={
-            "resource_group": resource_group_name,
-            "namespace_name": namespace_name,
-            "private_endpoint_connection_name": private_endpoint_connection_name,
-        })
+
+    return Show(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "namespace_name": namespace_name,
+        "private_endpoint_connection_name": private_endpoint_connection_name,
+    })
 
 
 def reject_private_endpoint_connection(cmd, resource_group_name, namespace_name, private_endpoint_connection_name,
