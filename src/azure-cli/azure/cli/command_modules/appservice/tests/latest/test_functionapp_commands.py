@@ -1799,7 +1799,7 @@ class FunctionappIdentityTest(ScenarioTest):
         self.cmd(
             'functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
         self.cmd(
-            'functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp_name, plan_name, storage_account))
+            'functionapp create -g {} -n {} --plan {} -s {} --functions-version 4'.format(resource_group, functionapp_name, plan_name, storage_account))
 
         self.cmd('functionapp identity assign -g {} -n {}'.format(resource_group, functionapp_name))
         result = self.cmd('functionapp identity assign -g {} -n {} --identities {}'.format(
@@ -1832,7 +1832,7 @@ class FunctionappIdentityTest(ScenarioTest):
         self.cmd(
             'functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
         self.cmd(
-            'functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp_name, plan_name, storage_account))
+            'functionapp create -g {} -n {} --plan {} -s {} --functions-version 4'.format(resource_group, functionapp_name, plan_name, storage_account))
 
         self.cmd('functionapp identity assign -g {} -n {} --identities [system] {} {}'.format(
             resource_group, functionapp_name, msi_result['id'], msi2_result['id']))
