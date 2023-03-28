@@ -2126,16 +2126,15 @@ class AKSManagedClusterContext(BaseAKSContext):
             self.mc.network_profile.network_plugin_mode is not None
         ):
             network_plugin_mode = self.mc.network_profile.network_plugin_mode
-        
+
         if enable_validation:
             # todo(tyler-lloyd) do we need any validation?
             pass
-            
+
         return network_plugin_mode
 
     def get_network_plugin_mode(self, enable_validation: bool = False) -> Union[str, None]:
         return self._get_network_plugin_mode(enable_validation=True)
-
 
     def _get_network_plugin(self, enable_validation: bool = False) -> Union[str, None]:
         """Internal function to obtain the value of network_plugin.
@@ -2175,10 +2174,10 @@ class AKSManagedClusterContext(BaseAKSContext):
             if network_plugin:
                 if network_plugin == "azure" and pod_cidr and network_plugin_mode != "overlay":
                     raise InvalidArgumentValueError(
-                            "Please specify network plugin mode `overlay` when using pod_cidr or "
-                            "use network plugin `kubenet`. For more information about Azure CNI "
-                            "Overlay please see https://aka.ms/aks/azure-cni-overlay"
-                        )
+                        "Please specify network plugin mode `overlay` when using pod_cidr or "
+                        "use network plugin `kubenet`. For more information about Azure CNI "
+                        "Overlay please see https://aka.ms/aks/azure-cni-overlay"
+                    )
             else:
                 if (
                     pod_cidr or
