@@ -56,7 +56,11 @@ def remove_aio_folders():
 
 def remove_unused_api_versions(resource_type):
     _LOGGER.info(f"Removing unused api folders for {resource_type.import_prefix}:")
-    sdk_path = importlib.import_module(resource_type.import_prefix).__path__[0]
+    try:
+        sdk_path = importlib.import_module(resource_type.import_prefix).__path__[0]
+    except ImportError:
+        _LOGGER.info(f'{resource_type} is not installed, skip')
+        return
 
     used_api_versions = set()
 
@@ -111,42 +115,7 @@ def _print_folder_size(folder):
 
 
 def _get_all_sdks_to_trim():
-    # azure.mgmt.network has been removed in https://github.com/Azure/azure-cli/pull/25451
-    resource_types = [k for k, v in AZURE_API_PROFILES['latest'].items() if k.import_prefix.startswith('azure.mgmt')
-                      and k.import_prefix != 'azure.mgmt.network']
-    return resource_types
-
-
-def _get_biggest_sdks_to_trim():
-    # Return top biggest SDKs. This list was retrieved by running
-    # ncdu /opt/az/lib/python3.10/site-packages/azure/mgmt
-    resource_types = [
-        # /web
-        ResourceType.MGMT_APPSERVICE,
-        # /compute
-        ResourceType.MGMT_COMPUTE,
-        # /containerservice
-        ResourceType.MGMT_CONTAINERSERVICE,
-        # /resource
-        ResourceType.MGMT_RESOURCE_FEATURES,
-        ResourceType.MGMT_RESOURCE_LINKS,
-        ResourceType.MGMT_RESOURCE_LOCKS,
-        ResourceType.MGMT_RESOURCE_POLICY,
-        ResourceType.MGMT_RESOURCE_RESOURCES,
-        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS,
-        ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS,
-        ResourceType.MGMT_RESOURCE_TEMPLATESPECS,
-        ResourceType.MGMT_RESOURCE_PRIVATELINKS,
-        # /storage
-        ResourceType.MGMT_STORAGE,
-        # /databoxedge
-        ResourceType.MGMT_DATABOXEDGE,
-        # /containerregistry
-        ResourceType.MGMT_CONTAINERREGISTRY,
-        # /iothub
-        ResourceType.MGMT_IOTHUB,
-    ]
-
+    resource_types = [k for k, v in AZURE_API_PROFILES['latest'].items() if k.import_prefix.startswith('azure.mgmt')]
     return resource_types
 
 
