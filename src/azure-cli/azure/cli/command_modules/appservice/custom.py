@@ -2829,10 +2829,10 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     if not kv_secret_name:
         kv_secret_name = key_vault_certificate_name
 
-        if certificate_name:
-            cert_name = certificate_name
-        else:
-            cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
+    if certificate_name:
+        cert_name = certificate_name
+    else:
+        cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
 
     lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
     lnk_msg = 'Find more details here: {}'.format(lnk)
