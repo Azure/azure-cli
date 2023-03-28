@@ -1619,6 +1619,7 @@ parameters:
     type: string
     short-summary: >
         The name of the operating system image as a URN alias, URN, custom image name or ID, custom image version ID, or VHD blob URI. In addition, it also supports shared gallery image.
+        Please use the image alias including the version of the distribution you want to use. For example: please use Debian11 instead of Debian.'
         This parameter is required unless using `--attach-os-disk.` Valid URN format: "Publisher:Offer:Sku:Version". For more information, see https://docs.microsoft.com/azure/virtual-machines/linux/cli-ps-findimage
     populator-commands:
       - az vm image list
@@ -3015,7 +3016,8 @@ parameters:
     type: string
     short-summary: >
         The name of the operating system image as a URN alias, URN, custom image name or ID, or VHD blob URI. In addition, it also supports shared gallery image.
-        Valid URN format: "Publisher:Offer:Sku:Version".
+        Please use the image alias including the version of the distribution you want to use. For example: please use Debian11 instead of Debian.'
+        This parameter is required unless using `--attach-os-disk.` Valid URN format: "Publisher:Offer:Sku:Version". For more information, see https://docs.microsoft.com/azure/virtual-machines/linux/cli-ps-findimage
     populator-commands:
       - az vm image list
       - az vm image show
