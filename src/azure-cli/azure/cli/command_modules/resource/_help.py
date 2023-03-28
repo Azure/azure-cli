@@ -2984,7 +2984,7 @@ examples:
 
 helps['stack group export'] = """
 type: command
-short-summary: Exports the template used to create the deployment stack from resource group scope
+short-summary: Export the template used to create the deployment stack from resource group scope
 examples:
   - name: Export template by name.
     text: az stack group export --name StackName --resource-group ResourceGroup
