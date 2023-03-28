@@ -85,12 +85,9 @@ def load_command_table(self, _):
     with self.command_group('eventhubs namespace private-endpoint-connection', custom_command_type=eh_namespace_custom,
                             is_preview=True) as g:
         from ._validator import validate_private_endpoint_connection_id
-        g.custom_command('approve', 'approve_private_endpoint_connection',
-                        validator=validate_private_endpoint_connection_id)
-        g.custom_command('reject', 'reject_private_endpoint_connection',
-                        validator=validate_private_endpoint_connection_id)
-        g.custom_command('delete', 'delete_private_endpoint_connection', confirmation=True,
-                        validator=validate_private_endpoint_connection_id)
+        g.custom_command('approve', 'approve_private_endpoint_connection', validator=validate_private_endpoint_connection_id)
+        g.custom_command('reject', 'reject_private_endpoint_connection', validator=validate_private_endpoint_connection_id)
+        g.custom_command('delete', 'delete_private_endpoint_connection', confirmation=True, validator=validate_private_endpoint_connection_id)
 
 # Cluster Region
     with self.command_group('eventhubs cluster', eh_clusters_util, resource_type=ResourceType.MGMT_EVENTHUB,
