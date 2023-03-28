@@ -173,7 +173,7 @@ class FunctionAppReservedInstanceTest(ScenarioTest):
     def test_functionapp_reserved_instance(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwithreservedinstance', 40)
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -354,7 +354,7 @@ class FunctionUpdatePlan(ScenarioTest):
             JMESPathCheck('sku.name', 'S1')
         ])
 
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {}'
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 4'
                  .format(resource_group, functionapp_name, second_plan_name, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -407,7 +407,7 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionappconsumption', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {}'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --runtime dotnet --functions-version 4'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -435,7 +435,7 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionappconsumption', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {}'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -707,6 +707,34 @@ class FunctionAppManagedEnvironment(LiveScenarioTest):
             self.cmd('functionapp create -g {} -n {} -p {} -s {} --environment {} --runtime dotnet --functions-version 4'
                     .format(resource_group, functionapp_name, plan_name, storage_account, managed_environment_name))
 
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_config_with_appcontainer_managed_environment_error(self, resource_group, storage_account):
+
+        functionapp_name = self.create_random_name('functionapp', 40)
+        managed_environment_name = self.create_random_name('containerappmanagedenvironment', 40)
+
+        self.cmd('containerapp env create --name {} --resource-group {} --location {}'
+        .format(managed_environment_name, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).assert_with_checks([
+                     JMESPathCheck('name', managed_environment_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('location', WINDOWS_ASP_LOCATION_FUNCTIONAPP)])
+        self.cmd(
+            'functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet --functions-version 4'
+            .format(resource_group, functionapp_name, storage_account, managed_environment_name)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        with self.assertRaises(ValidationError):
+            self.cmd('functionapp config set -g {} -n {}'
+            .format(resource_group, functionapp_name))
+
+        with self.assertRaises(ValidationError):
+            self.cmd('functionapp config show -g {} -n {}'
+            .format(resource_group, functionapp_name))
+
+
 class FunctionAppOnWindowsWithRuntime(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -749,7 +777,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --runtime powershell'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --runtime powershell --functions-version 4'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -760,7 +788,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'powershell')])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('powerShellVersion', '~7')])
+            JMESPathCheck('powerShellVersion', '7.2')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -854,7 +882,7 @@ class FunctionAppWithAppInsightsKey(ScenarioTest):
             'functionappwithappinsights', 40)
         app_insights_key = '00000000-0000-0000-0000-123456789123'
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4'
                  ' --app-insights-key {}'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account, app_insights_key)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
@@ -902,7 +930,7 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionappwithappinsights', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -922,7 +950,7 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionappwithappinsights', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --disable-app-insights'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --disable-app-insights --functions-version 4'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -1094,17 +1122,17 @@ class FunctionAppOnLinux(ScenarioTest):
     def test_functionapp_on_linux_dotnet_consumption(self, resource_group, storage_account):
         functionapp = self.create_random_name(
             prefix='functionapp-linux', length=24)
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 3 --runtime dotnet --os-type linux'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4 --runtime dotnet --os-type linux'
                  .format(resource_group, functionapp, LINUX_ASP_LOCATION_FUNCTIONAPP, storage_account), checks=[
                      JMESPathCheck('name', functionapp)
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'dotnet|3.1')
+            JMESPathCheck('linuxFxVersion', 'DOTNET|6.0')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(
-                "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~3')
+                "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~4')
         ])
 
 
@@ -1322,7 +1350,7 @@ class FunctionAppKeysTests(ScenarioTest):
         key_name = "keyname1"
         key_value = "keyvalue1"
         key_type = "functionKeys"
-        self.cmd('functionapp create -g {} -n {} -c {} -s {}'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -1717,7 +1745,7 @@ class FunctionappLocalContextScenarioTest(LocalContextScenarioTest):
         with self.assertRaises(CLIError):
             self.cmd('functionapp plan delete')
 
-        self.cmd('functionapp create -n {functionapp_name} --storage-account {storage_account}')
+        self.cmd('functionapp create -n {functionapp_name} --storage-account {storage_account} --functions-version 4')
         self.cmd('functionapp show')
         with self.assertRaises(CLIError):
             self.cmd('functionapp delete')
@@ -1844,7 +1872,7 @@ class FunctionappCorsTest(ScenarioTest):
         self.assertEqual(result, False)
 
 
-class FunctionappNetworkConnectionTests(ScenarioTest):
+class FunctionappNetworkConnectionTests(LiveScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -2200,33 +2228,6 @@ class FunctionAppConfigTest(ScenarioTest):
                      JMESPathCheck('powerShellVersion', '7.0')])
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
-
-    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
-    def test_functionapp_config_with_appcontainer_managed_environment_error(self, resource_group, storage_account):
-
-        functionapp_name = self.create_random_name('functionapp', 40)
-        managed_environment_name = self.create_random_name('containerappmanagedenvironment', 40)
-
-        self.cmd('containerapp env create --name {} --resource-group {} --location {}'
-        .format(managed_environment_name, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).assert_with_checks([
-                     JMESPathCheck('name', managed_environment_name),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', WINDOWS_ASP_LOCATION_FUNCTIONAPP)])
-        self.cmd(
-            'functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet --functions-version 4'
-            .format(resource_group, functionapp_name, storage_account, managed_environment_name)).assert_with_checks([
-                     JMESPathCheck('state', 'Running'),
-                     JMESPathCheck('name', functionapp_name),
-                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
-
-        with self.assertRaises(ValidationError):
-            self.cmd('functionapp config set -g {} -n {}'
-            .format(resource_group, functionapp_name))
-
-        with self.assertRaises(ValidationError):
-            self.cmd('functionapp config show -g {} -n {}'
-            .format(resource_group, functionapp_name))
 
 
 if __name__ == '__main__':

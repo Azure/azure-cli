@@ -162,7 +162,6 @@ def _get_location_from_resource_group(cli_ctx, resource_group_name):
 
 
 def show_raw_functionapp(cmd, resource_group_name, name):
-    from azure.cli.core.commands.client_factory import get_subscription_id
     client = web_client_factory(cmd.cli_ctx)
     site_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -174,7 +173,7 @@ def show_raw_functionapp(cmd, resource_group_name, name):
 
 def is_centauri_functionapp(cmd, resource_group, name):
     function_app = show_raw_functionapp(cmd, resource_group, name)
-    return function_app["properties"]["managedEnvironmentId"] is not None
+    return function_app.get("properties", {}).get("managedEnvironmentId", None) is not None
 
 
 def _list_app(cli_ctx, resource_group_name=None):

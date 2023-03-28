@@ -1260,7 +1260,6 @@ def get_site_configs(cmd, resource_group_name, name, slot=None):
 def get_app_settings(cmd, resource_group_name, name, slot=None):
     result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory(cmd.cli_ctx)
-    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     slot_app_setting_names = [] if is_centauri_functionapp(cmd, resource_group_name, name) \
         else client.web_apps.list_slot_configuration_names(resource_group_name, name) \
         .app_setting_names
@@ -1486,7 +1485,6 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
 def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None):
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory(cmd.cli_ctx)
-    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     slot_cfg_names = {} if is_centauri_functionapp(cmd, resource_group_name, name) \
         else client.web_apps.list_slot_configuration_names(resource_group_name, name)
     is_slot_settings = False
@@ -3691,10 +3689,12 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if environment is not None:
         site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
         if docker_registry_server_url is not None:
-            site_config.app_settings.append(NameValuePair(name='DOCKER_REGISTRY_SERVER_URL', value=docker_registry_server_url))
+            site_config.app_settings.append(
+                NameValuePair(name='DOCKER_REGISTRY_SERVER_URL', value=docker_registry_server_url)
+            )
 
         if (not registry_username and not registry_password and
-                docker_registry_server_url and '.azurecr.io' in docker_registry_server_url):
+                docker_registry_server_url and '.azurecr.io' in str(docker_registry_server_url)):
             logger.warning('No credential was provided to access Azure Container Registry. Trying to look up...')
             parsed = urlparse(docker_registry_server_url)
             registry_name = (parsed.netloc if parsed.scheme else parsed.path).split('.')[0]
@@ -3704,9 +3704,13 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 logger.warning("Retrieving credentials failed with an exception:'%s'", ex)  # consider throw if needed
 
         if registry_username is not None:
-            site_config.app_settings.append(NameValuePair(name='DOCKER_REGISTRY_SERVER_USERNAME', value=registry_username))
+            site_config.app_settings.append(
+                NameValuePair(name='DOCKER_REGISTRY_SERVER_USERNAME', value=registry_username)
+            )
         if registry_password is not None:
-            site_config.app_settings.append(NameValuePair(name='DOCKER_REGISTRY_SERVER_PASSWORD', value=registry_password))
+            site_config.app_settings.append(
+                NameValuePair(name='DOCKER_REGISTRY_SERVER_PASSWORD', value=registry_password)
+            )
 
         app_settings_dict = {}
         matched_runtime.app_insights = True
@@ -3757,7 +3761,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         site_config.java_version = None
         site_config.use32_bit_worker_process = None
         site_config.power_shell_version = None
-        site_config.linux_fx_version = '{}|{}'.format('DOCKER', image)
+        site_config.linux_fx_version = _format_fx_version(image)
         site_config.http20_enabled = None
         site_config.local_my_sql_enabled = None
 
@@ -3769,7 +3773,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         existing_properties = functionapp_def.serialize()["properties"]
         functionapp_def.additional_properties["properties"] = existing_properties
         functionapp_def.additional_properties["properties"]["name"] = name
-        functionapp_def.additional_properties["properties"]["managedEnvironmentId"] =  managed_environment.id
+        functionapp_def.additional_properties["properties"]["managedEnvironmentId"] = managed_environment.id
 
     # temporary workaround for dotnet-isolated linux consumption apps
     if is_linux and consumption_plan_location is not None and runtime == 'dotnet-isolated':
@@ -3908,10 +3912,10 @@ def try_create_application_insights(cmd, functionapp):
 
     if not is_centauri_functionapp(cmd, ai_resource_group_name, ai_name):
         update_app_settings(cmd, functionapp.resource_group, functionapp.name,
-                        ['APPINSIGHTS_INSTRUMENTATIONKEY={}'.format(appinsights.instrumentation_key)])
+                            ['APPINSIGHTS_INSTRUMENTATIONKEY={}'.format(appinsights.instrumentation_key)])
     else:
         update_app_settings(cmd, functionapp.resource_group, functionapp.name,
-                        ['APPLICATIONINSIGHTS_CONNECTION_STRING={}'.format(appinsights.connection_string)])
+                            ['APPLICATIONINSIGHTS_CONNECTION_STRING={}'.format(appinsights.connection_string)])
 
 
 def _set_remote_or_local_git(cmd, webapp, resource_group_name, name, deployment_source_url=None,
