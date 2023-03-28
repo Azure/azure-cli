@@ -8298,3 +8298,41 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(cmd, checks=[
             self.is_empty(),
         ])
+
+    # live only due to dependency `_add_role_assignment` is not mocked
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_update_attach_acr(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        acr_name = self.create_random_name('cliaksacr', 16)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'acr_name': acr_name
+        })
+
+        # create acr
+        create_acr_cmd = 'acr create -g {resource_group} -n {acr_name} --sku basic'
+        self.cmd(create_acr_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} -c 1 ' \
+                     '--ssh-key-value={ssh_key_value} --attach-acr={acr_name}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # update
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--attach-acr={acr_name}'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
