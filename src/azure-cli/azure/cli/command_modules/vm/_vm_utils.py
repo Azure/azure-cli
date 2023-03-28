@@ -6,6 +6,7 @@
 import json
 import os
 import re
+import importlib
 
 from azure.cli.core.commands.arm import ArmTemplateBuilder
 
@@ -450,6 +451,25 @@ def is_valid_image_version_id(image_version_id):
     return False
 
 
+def parse_gallery_image_id(image_reference):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+
+    if not image_reference:
+        raise InvalidArgumentValueError(
+            'Please pass in the gallery image id through the parameter --image')
+
+    image_info = re.search(r'^/subscriptions/([^/]*)/resourceGroups/([^/]*)/providers/Microsoft.Compute/'
+                           r'galleries/([^/]*)/images/([^/]*)/versions/.*$', image_reference, re.IGNORECASE)
+    if not image_info or len(image_info.groups()) < 2:
+        raise InvalidArgumentValueError(
+            'The gallery image id is invalid. The valid format should be "/subscriptions/{sub_id}'
+            '/resourceGroups/{rg}/providers/Microsoft.Compute/galleries/{gallery_name}'
+            '/Images/{gallery_image_name}/Versions/{image_version}"')
+
+    # Return the gallery subscription id, resource group name, gallery name and gallery image name.
+    return image_info.group(1), image_info.group(2), image_info.group(3), image_info.group(4)
+
+
 def parse_shared_gallery_image_id(image_reference):
     from azure.cli.core.azclierror import InvalidArgumentValueError
 
@@ -519,3 +539,54 @@ def raise_unsupported_error_for_flex_vmss(vmss, error_message):
             and vmss.orchestration_mode.lower() == 'flexible':
         from azure.cli.core.azclierror import ArgumentUsageError
         raise ArgumentUsageError(error_message)
+
+
+def is_trusted_launch_supported(supported_features):
+    if not supported_features:
+        return False
+
+    trusted_launch = {'TrustedLaunchSupported', 'TrustedLaunch', 'TrustedLaunchAndConfidentialVmSupported'}
+
+    return bool(trusted_launch.intersection({feature.value for feature in supported_features}))
+
+
+def trusted_launch_warning_log(namespace, generation_version, features):
+    if not generation_version:
+        return
+
+    log_message = 'Starting Build 2023 event, "az vm/vmss create" command will deploy Trusted Launch VM by default.' \
+                  ' To know more about Trusted Launch, please visit' \
+                  ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch'
+
+    if generation_version == 'V1':
+        logger.warning(log_message)
+
+    if generation_version == 'V2':
+        if is_trusted_launch_supported(features) and not namespace.security_type:
+            logger.warning(log_message)
+
+
+def display_region_recommendation(cmd, namespace):
+
+    identified_region_maps = {
+        'westeurope': 'uksouth',
+        'francecentral': 'northeurope',
+        'germanywestcentral': 'northeurope'
+    }
+
+    identified_region = identified_region_maps.get(namespace.location)
+
+    if identified_region and cmd.cli_ctx.config.getboolean('core', 'display_region_identified', True):
+        logger.warning('Selecting "%s" may reduce your costs. '
+                       'The region you\'ve selected may cost more for the same services. '
+                       'You can disable this message in the future with the command'
+                       ' "az config set core.display_region_identified=false". '
+                       'Learn more at https://go.microsoft.com/fwlink/?linkid=222571 ',
+                       identified_region)
+        from azure.cli.core import telemetry
+        telemetry.set_region_identified(namespace.location, identified_region)
+
+
+def import_aaz_by_profile(profile, module_name):
+    profile_module_name = profile.lower().replace('-', '_')
+    return importlib.import_module(f"azure.cli.command_modules.vm.aaz.{profile_module_name}.{module_name}")

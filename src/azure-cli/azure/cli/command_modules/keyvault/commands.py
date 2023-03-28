@@ -97,6 +97,9 @@ def load_command_table(self, _):
                 custom_func_name='update_hsm', supports_no_wait=True,
                 doc_string_source=mgmt_hsms_entity.models_docs_tmpl.format('ManagedHsmProperties'))
             g.custom_wait_command('wait-hsm', 'wait_hsm')
+            g.custom_command('check-name', 'check_name_availability',
+                             doc_string_source=mgmt_hsms_entity.operations_docs_tmpl.
+                             format('check_mhsm_name_availability'))
 
     with self.command_group('keyvault network-rule',
                             mgmt_vaults_entity.command_type,
@@ -142,6 +145,7 @@ def load_command_table(self, _):
 
         with self.command_group('keyvault security-domain', private_data_entity.command_type) as g:
             g.keyvault_custom('init-recovery', 'security_domain_init_recovery')
+            g.keyvault_custom('restore-blob', 'security_domain_restore_blob')
             g.keyvault_custom('upload', 'security_domain_upload', supports_no_wait=True)
             g.keyvault_custom('download', 'security_domain_download', supports_no_wait=True)
             g.keyvault_custom('wait', '_wait_security_domain_operation')

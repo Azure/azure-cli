@@ -3,7 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-statements
+import json
 from unittest import mock
+from knack.util import CLIError
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
@@ -24,6 +26,7 @@ class IoTHubTest(ScenarioTest):
     @ResourceGroupPreparer(location='westus2')
     @StorageAccountPreparer()
     def test_iot_hub(self, resource_group, resource_group_location, storage_account):
+        # for some reason the recording is missing a ] and a } after the routing.endpoints.eventHubs
         hub = self.create_random_name(prefix='iot-hub-for-test-11', length=32)
         rg = resource_group
         location = resource_group_location
@@ -341,6 +344,12 @@ class IoTHubTest(ScenarioTest):
 
         # Test 'az iot hub route test'
         self.cmd('iot hub route test --hub-name {0} -g {1} -n {2}'.format(hub, rg, route_name),
+                 checks=[self.check('result', 'true')])
+
+        # Test 'az iot hub route test'
+        self.kwargs["route_properties"] = json.dumps({"body": 4})
+        props = "--sp '{route_properties}' --ap '{route_properties}'"
+        self.cmd('iot hub route test --hub-name {0} -g {1} -n {2} {3}'.format(hub, rg, route_name, props),
                  checks=[self.check('result', 'true')])
 
         # Test 'az iot hub route test'
@@ -830,6 +839,30 @@ class IoTHubTest(ScenarioTest):
         assert updated_hub['properties']['storageEndpoints']['$default']['authenticationType'] == key_based_auth
         assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
         assert updated_hub['properties']['storageEndpoints']['$default']['containerName'] == containerName
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='westus2')
+    def test_hub_wait(self, resource_group, resource_group_location):
+        hub = self.create_random_name(prefix='iot-hub-for-test-11', length=32)
+        rg = resource_group
+
+        # Create hub with no wait
+        self.cmd('iot hub create -n {0} -g {1} --no-wait'.format(hub, rg))
+
+        # Poll till hub is active
+        self.cmd('iot hub wait -n {0} -g {1} --created'.format(hub, rg))
+
+        # Delete hub with no wait
+        self.cmd('iot hub delete -n {0} -g {1} --no-wait'.format(hub, rg))
+
+        # Poll to make sure hub is deleted.
+        try:
+            self.cmd('iot hub wait -n {0} -g {1} --deleted'.format(hub, rg))
+        except CLIError:
+            pass
+
+        # Final check and sleep to make sure lro poller thread is done
+        self.cmd('iot hub show -n {0} -g {1}'.format(hub, rg), expect_failure=True)
 
     def _get_eventhub_connectionstring(self, rg):
         ehNamespace = self.create_random_name(prefix='ehNamespaceiothubfortest1', length=32)

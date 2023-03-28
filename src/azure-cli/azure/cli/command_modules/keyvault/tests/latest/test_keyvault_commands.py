@@ -61,7 +61,7 @@ def _create_keyvault(test, kwargs, additional_args=None):
 
 def _create_hsm(test):
     # There's no generic way to get the object id of signed in user/sp, just use a fixed one
-    return test.cmd('keyvault create --hsm-name {hsm} -g {rg} -l {loc} '
+    return test.cmd('keyvault create --hsm-name {hsm} -g {rg} -l {loc} --retention-days 7 '
                     '--administrators "3707fb2f-ac10-4591-a04f-8b0d786ea37d"')
 
 
@@ -121,7 +121,7 @@ class KeyVaultMHSMPrivateLinkResourceScenarioTest(ScenarioTest):
     def test_mhsm_private_link_resource(self, resource_group):
         self.kwargs.update({
             'hsm': self.create_random_name('cli-test-hsm-plr-', 24),
-            'loc': 'centraluseuap'
+            'loc': 'eastus2euap'
         })
         _create_hsm(self)
         self.cmd('keyvault private-link-resource list --hsm-name {hsm}',
@@ -281,10 +281,12 @@ class KeyVaultHSMPrivateEndpointConnectionScenarioTest(ScenarioTest):
 class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='clitest-mhsm-rg', location='uksouth')
     def test_keyvault_hsm_mgmt(self, resource_group):
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        logged_in_user = logged_in_user["id"] if logged_in_user is not None else "a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e"
         self.kwargs.update({
             'hsm_name': self.create_random_name('clitest-mhsm-', 24),
             'loc': 'uksouth',
-            'init_admin': '3707fb2f-ac10-4591-a04f-8b0d786ea37d'
+            'init_admin': logged_in_user
         })
 
         show_checks = [
@@ -295,7 +297,10 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
             self.check('type', 'Microsoft.KeyVault/managedHSMs'),
             self.check('length(properties.initialAdminObjectIds)', 1),
             self.check('properties.initialAdminObjectIds[0]', '{init_admin}'),
-            self.exists('properties.hsmUri')
+            self.exists('properties.hsmUri'),
+            self.exists('properties.securityDomainProperties'),
+            self.exists('properties.securityDomainProperties.activationStatus'),
+            self.exists('properties.securityDomainProperties.activationStatusMessage'),
         ]
 
         show_deleted_checks = [
@@ -314,6 +319,7 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
             self.check('length([0].properties.initialAdminObjectIds)', 1),
             self.check('[0].properties.initialAdminObjectIds[0]', '{init_admin}'),
             self.check('[0].properties.networkAcls.bypass', 'None'),
+            self.check('[0].properties.publicNetworkAccess', 'Disabled'),
             self.exists('[0].properties.hsmUri')
         ]
 
@@ -322,7 +328,19 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
             self.exists('[?name==\'{hsm_name}\'&&properties.location==\'{loc}\'&&properties.deletionDate]'),
         ]
 
-        self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --administrators {init_admin} --retention-days 7')
+        self.cmd('keyvault check-name -n {hsm_name}', checks=[
+            self.check('nameAvailable', True)
+        ])
+
+        self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --administrators {init_admin} '
+                 '--retention-days 7 --public-network-access Enabled', checks=[
+            self.check('properties.publicNetworkAccess', 'Enabled')
+        ])
+
+        self.cmd('keyvault check-name -n {hsm_name}', checks=[
+            self.check('nameAvailable', False),
+            self.check('reason', 'AlreadyExists')
+        ])
 
         cert_dir = os.path.join(TEST_DIR, 'certs')
         tmp_dir = self.create_temp_dir()
@@ -340,7 +358,7 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault show --hsm-name {hsm_name}', checks=show_checks)
         self.cmd('keyvault show --hsm-name {hsm_name} -g {rg}', checks=show_checks)
 
-        self.cmd('keyvault update-hsm --hsm-name {hsm_name} --bypass None')
+        self.cmd('keyvault update-hsm --hsm-name {hsm_name} --bypass None --public-network-access Disabled --default-action Deny')
 
         self.cmd(r"keyvault list --resource-type hsm --query [?name==\'{hsm_name}\']", checks=list_checks)
         self.cmd('keyvault list --resource-type hsm -g {rg}', checks=list_checks)
@@ -1146,16 +1164,14 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
 
 
 class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
-    # @record_only()
-    @unittest.skip('cannot run')
-    def test_keyvault_hsm_key_using_hsm_name(self):
+    @ResourceGroupPreparer(name_prefix='cli_test_hsm_key')
+    @ManagedHSMPreparer(name_prefix='clitesthsmkey', certs_path=CERTS_DIR, roles=['Managed HSM Crypto Officer', 'Managed HSM Crypto User'])
+    def test_keyvault_hsm_key_using_hsm_name(self, resource_group, managed_hsm):
         self.kwargs.update({
-            'hsm_name': ACTIVE_HSM_NAME,
-            'hsm_url': ACTIVE_HSM_URL,
-            'key': self.create_random_name('key2-', 24)
+            'hsm_url': f'https://{managed_hsm}.managedhsm.azure.net',
+            'hsm_name': managed_hsm,
+            'key': self.create_random_name('key1-', 24)
         })
-
-        _clear_hsm(self, hsm_url=self.kwargs['hsm_url'])
 
         # create a key
         hsm_key = self.cmd('keyvault key create --hsm-name {hsm_name} -n {key}',
@@ -1284,6 +1300,10 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
         self.cmd('keyvault key create --hsm-name {hsm_name} -n key2 --kty RSA-HSM --size 4096 --ops import',
                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
+
+        # create OKP key
+        self.cmd('keyvault key create --hsm-name {hsm_name} -n okpkey --kty OKP-HSM --curve Ed25519',
+                 checks=[self.check('key.kty', 'OKP-HSM'), self.check('key.crv', 'Ed25519')])
 
     # Since the MHSM has to be activated manually so we use fixed hsm resource and mark the test as record_only
     @record_only()

@@ -247,7 +247,7 @@ examples:
   - name: Create a rule to distribute requests with "/test1" in its URL path to origin group with name "origingroup1".
     text: >
         az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 1
-        --rule-name "origin-groupo-verride" --match-variable UrlPath --operator Contains --match-values /test1
+        --rule-name "origin-group-override" --match-variable UrlPath --operator Contains --match-values /test1
         --action-name "OriginGroupOverride" --origin-group origingroup1
 """
 
@@ -265,9 +265,9 @@ examples:
 
 helps['cdn endpoint rule show'] = """
 type: command
-short-summary: Show delivery rules asscociate with the endpoint.
+short-summary: Show delivery rules associate with the endpoint.
 examples:
-  - name: show delivery rules asscociate with the endpoint.
+  - name: show delivery rules associate with the endpoint.
     text: >
         az cdn endpoint rule show -g group -n endpoint --profile-name profile
 """
@@ -299,9 +299,9 @@ examples:
 
 helps['cdn endpoint rule condition show'] = """
 type: command
-short-summary: show delivery rules asscociate with the endpoint.
+short-summary: show delivery rules associate with the endpoint.
 examples:
-  - name: show delivery rules asscociate with the endpoint.
+  - name: show delivery rules associate with the endpoint.
     text: >
         az cdn endpoint rule condition show -g group -n endpoint --profile-name profile-name
 """
@@ -1208,11 +1208,11 @@ long-summary: >
     The validation token will expire after 7 days and your domain's validation state will become "Timeout" if no correct TXT record detected in that period.
     You could use 'az afd custom-domain regenerate-validation-token' to regenerate the validation token to restart the validation process.
 examples:
-  - name: Create a custom domain that uses AFD managed cerficate for SSL/TLS encryption.
+  - name: Create a custom domain that uses AFD managed certificate for SSL/TLS encryption.
     text: >
         az afd custom-domain create -g group --custom-domain-name customDomain --profile-name profile --host-name www.contoso.com
         --minimum-tls-version TLS12 --certificate-type ManagedCertificate
-  - name: Create a custom domain that uses your own cerficate for SSL/TLS encryption, the certificate is stored in Azure Key Vault and referenced by an AFD secret.
+  - name: Create a custom domain that uses your own certificate for SSL/TLS encryption, the certificate is stored in Azure Key Vault and referenced by an AFD secret.
     text: >
         az afd custom-domain create -g group --custom-domain-name customDomain --profile-name profile --host-name www.contoso.com
         --minimum-tls-version TLS12 --certificate-type CustomerCertificate --secret secretName
@@ -1333,7 +1333,7 @@ helps['afd endpoint purge'] = """
 type: command
 short-summary: Removes cached contents from Azure Front Door.
 examples:
-  - name: Remove all cached cotents under directory "/script" for domain www.contoso.com
+  - name: Remove all cached contents under directory "/script" for domain www.contoso.com
     text: >
         az afd endpoint purge -g group --profile-name profile --domains www.contoso.com --content-paths '/scripts/*'
 """
@@ -1349,15 +1349,15 @@ helps['afd route create'] = """
 type: command
 short-summary: Creates a new route within the specified endpoint.
 examples:
-  - name: Creates a route to assoicate the endpoint's default domain with an origin group for all HTTPS requests.
+  - name: Creates a route to associate the endpoint's default domain with an origin group for all HTTPS requests.
     text: >
         az afd route create -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --https-redirect Disabled
         --origin-group og001 --supported-protocols Https --link-to-default-domain Enabled --forwarding-protocol MatchRequest
-  - name: Creates a route to assoicate the endpoint's default domain with an origin group for all requests and use the specified rule sets to customize the route behavior.
+  - name: Creates a route to associate the endpoint's default domain with an origin group for all requests and use the specified rule sets to customize the route behavior.
     text: >
         az afd route create -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --rule-sets ruleset1 rulseset2
         --origin-group og001 --supported-protocols Http Https --link-to-default-domain Enabled --forwarding-protocol MatchRequest --https-redirect Disabled
-  - name: Creates a route to assoicate the endpoint's default domain and a custom domain with an origin group for all requests with the specified path patterns and redirect all trafic to use Https.
+  - name: Creates a route to associate the endpoint's default domain and a custom domain with an origin group for all requests with the specified path patterns and redirect all trafic to use Https.
     text: >
         az afd route create -g group --endpoint-name endpoint1 --profile-name profile --route-name route1 --patterns-to-match /test1/* /tes2/*
         --origin-group og001 --supported-protocols Http Https --custom-domains cd001 --forwarding-protocol MatchRequest --https-redirect Enabled --link-to-default-domain Enabled
@@ -1511,7 +1511,7 @@ examples:
   - name: Create a rule to append a response header for requests from Thailand.
     text: >
         az afd rule create -g group --rule-set-name ruleset1 --profile-name profile --order 2 --match-variable RemoteAddress --operator GeoMatch --match-values TH
-        --rule-name disablecahing --action-name ModifyResponseHeader --header-action Append --header-name X-CDN --header-value AFDX
+        --rule-name disablecaching --action-name ModifyResponseHeader --header-action Append --header-name X-CDN --header-value AFDX
   - name: Create a rule for http to https redirect
     text: >
         az afd rule create -g group --rule-set-name ruleset1 --profile-name profile --order 1
@@ -1564,9 +1564,9 @@ examples:
 
 helps['afd rule condition list'] = """
 type: command
-short-summary: show condtions asscociated with the rule.
+short-summary: show condtions associated with the rule.
 examples:
-  - name: show condtions asscociated with the rule.
+  - name: show condtions associated with the rule.
     text: >
         az afd rule condition list -g group --rule-set-name ruleSetName --profile-name profile --rule-name name
 """
@@ -1602,9 +1602,9 @@ examples:
 
 helps['afd rule action list'] = """
 type: command
-short-summary: show actions asscociated with the rule.
+short-summary: show actions associated with the rule.
 examples:
-  - name: show actions asscociated with the rule.
+  - name: show actions associated with the rule.
     text: >
         az afd rule action list -g group --rule-set-name ruleSetName --profile-name profile --rule-name name
 """

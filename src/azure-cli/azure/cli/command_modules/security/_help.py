@@ -57,6 +57,18 @@ examples:
   - name: Activate a security alert on a resource group scope.
     text: >
         az security alert update -g "myRg" --location "centralus" -n "alertName" --status "activate"
+  - name: Resolve a security alert on a subscritpion scope.
+    text: >
+        az security alert update --location "centralus" -n "alertName" --status "resolve"
+  - name: Resolve a security alert on a resource group scope.
+    text: >
+        az security alert update -g "myRg" --location "centralus" -n "alertName" --status "resolve"
+  - name: Change security alert status to "InProgress" on a subscritpion scope.
+    text: >
+        az security alert update --location "centralus" -n "alertName" --status "inprogress"
+  - name: Change security alert status to "InProgress" on a resource group scope.
+    text: >
+        az security alert update -g "myRg" --location "centralus" -n "alertName" --status "inprogress"
 """
 
 helps['security alerts-suppression-rule'] = """
@@ -777,7 +789,7 @@ short-summary: Adaptive Application Controls - Get
 examples:
   - name: Get a single application control VM/server group.
     text: >
-        az security adaptive-application-controls show --group-name GROUP1
+        az security adaptive-application-controls show --group-name GROUP1 --location centralsus
 """
 
 helps['security allowed_connections'] = """

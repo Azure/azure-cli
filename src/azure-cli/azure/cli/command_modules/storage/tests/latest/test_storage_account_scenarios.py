@@ -26,7 +26,10 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'rg': resource_group,
             'acc': self.create_random_name(prefix='cli', length=24),
             'vnet': 'vnet1',
-            'subnet': 'subnet1'
+            'subnet': 'subnet1',
+            'ip1': '25.1.2.3',
+            'ip2': '25.2.0.0/24',
+            'ip3': '25.1.2.3/32'
         }
         self.cmd('storage account create -g {rg} -n {acc} --bypass Metrics --default-action Deny --https-only'.format(**kwargs),
                  checks=[
@@ -46,11 +49,14 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints Microsoft.Storage'.format(
                 **kwargs))
 
-        self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address 25.1.2.3'.format(**kwargs))
+        self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip1}'.format(**kwargs))
         # test network-rule add idempotent
-        self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address 25.1.2.3'.format(**kwargs))
+        self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip1}'.format(**kwargs))
         self.cmd(
-            'storage account network-rule add -g {rg} --account-name {acc} --ip-address 25.2.0.0/24'.format(**kwargs))
+            'storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip2}'.format(**kwargs))
+        # test add multiple ip addresses
+        self.cmd(
+            'storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip1} {ip2}'.format(**kwargs))
         self.cmd(
             'storage account network-rule add -g {rg} --account-name {acc} --vnet-name {vnet} --subnet {subnet}'.format(
                 **kwargs))
@@ -66,13 +72,30 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('length(ipRules)', 2),
             JMESPathCheck('length(virtualNetworkRules)', 1)
         ])
+        # test add multiple ip addresses with overlaps between them
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd(
+                'storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip1} {ip3}'.format(
+                    **kwargs))
+        # test add multiple ip addresses with some overlaps with the server
         self.cmd(
-            'storage account network-rule remove -g {rg} --account-name {acc} --ip-address 25.1.2.3'.format(**kwargs))
+            'storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip2} {ip3}'.format(
+                **kwargs))
+        self.cmd('storage account network-rule list -g {rg} --account-name {acc}'.format(**kwargs), checks=[
+            JMESPathCheck('length(ipRules)', 2),
+            JMESPathCheck('length(virtualNetworkRules)', 1)
+        ])
+        self.cmd(
+            'storage account network-rule remove -g {rg} --account-name {acc} --ip-address {ip1}'.format(**kwargs))
+        # test remove multiple ip addresses
+        self.cmd(
+            'storage account network-rule remove -g {rg} --account-name {acc} --ip-address {ip1} {ip2}'.format(**kwargs))
         self.cmd(
             'storage account network-rule remove -g {rg} --account-name {acc} --vnet-name {vnet} --subnet {subnet}'.format(
                 **kwargs))
         self.cmd('storage account network-rule list -g {rg} --account-name {acc}'.format(**kwargs), checks=[
-            JMESPathCheck('length(ipRules)', 1),
+            JMESPathCheck('length(ipRules)', 0),
             JMESPathCheck('length(virtualNetworkRules)', 0)
         ])
 
@@ -186,6 +209,21 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         self.assertIn('publicNetworkAccess', result)
         self.assertTrue(result['publicNetworkAccess'] == 'Disabled')
+
+    @AllowLargeResponse()
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-09-01')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_dns')
+    def test_create_storage_account_with_dns_endpoint_type(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'sa1': self.create_random_name(prefix='cli', length=24),
+            'sa2': self.create_random_name(prefix='cli', length=24),
+            'loc': 'eastus'
+        })
+        self.cmd('storage account create -n {sa1} -g {rg} -l {loc} --hns true --dns-endpoint-type Standard',
+                 checks=[JMESPathCheck('dnsEndpointType', 'Standard')])
+        self.cmd('storage account create -n {sa2} -g {rg} -l {loc} --hns true --dns-endpoint-type AzureDnsZone',
+                 checks=[JMESPathCheck('dnsEndpointType', 'AzureDnsZone')])
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -2230,7 +2268,7 @@ class StorageAccountSkuScenarioTest(ScenarioTest):
 
 
 class StorageAccountFailoverScenarioTest(ScenarioTest):
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2022-09-01')
     @ResourceGroupPreparer(name_prefix='clistorage', location='westus2')
     def test_storage_account_failover(self, resource_group):
         self.kwargs = {
@@ -2254,7 +2292,7 @@ class StorageAccountFailoverScenarioTest(ScenarioTest):
         ])
 
         time.sleep(900)
-        self.cmd('storage account failover -n {sa} -g {rg} --no-wait -y')
+        self.cmd('storage account failover -n {sa} -g {rg} --failover-type Planned --no-wait -y')
 
         self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[
             self.check('name', '{sa}'),

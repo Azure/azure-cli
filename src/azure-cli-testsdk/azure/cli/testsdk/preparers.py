@@ -100,7 +100,8 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 
 # pylint: disable=too-many-instance-attributes
 class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest', sku='Standard_LRS', location='westus', kind='Storage', hns=False, length=24,
+    def __init__(self, name_prefix='clitest', sku='Standard_LRS', location='westus', kind='Storage',
+                 allow_blob_public_access=False, hns=False, length=24,
                  parameter_name='storage_account', resource_group_parameter_name='resource_group', skip_delete=True,
                  dev_setting_name='AZURE_CLI_TEST_DEV_STORAGE_ACCOUNT_NAME', key='sa'):
         super(StorageAccountPreparer, self).__init__(name_prefix, length)
@@ -108,6 +109,7 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         self.location = location
         self.sku = sku
         self.kind = kind
+        self.allow_blob_public_access = allow_blob_public_access
         self.hns = hns
         self.resource_group_parameter_name = resource_group_parameter_name
         self.skip_delete = skip_delete
@@ -119,10 +121,11 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         group = self._get_resource_group(**kwargs)
 
         if not self.dev_setting_name:
-            template = 'az storage account create -n {} -g {} -l {} --sku {} --kind {} ' \
-                       '--https-only --allow-blob-public-access false'
+            template = 'az storage account create -n {} -g {} -l {} --sku {} --kind {} --https-only'
+            if not self.allow_blob_public_access:
+                template += ' --allow-blob-public-access false'
             if self.hns:
-                template += '--hns'
+                template += ' --hns'
             self.live_only_execute(self.cli_ctx, template.format(
                 name, group, self.location, self.sku, self.kind, self.hns))
         else:
@@ -178,7 +181,7 @@ class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             if self.additional_params:
                 template += self.additional_params
             if '--retention-days' not in template:
-                template += '--retention-days 7'
+                template += ' --retention-days 7'
             self.live_only_execute(self.cli_ctx, template.format(name, group, self.location, self.sku))
             self.test_class_instance.kwargs[self.key] = name
             return {self.parameter_name: name}
@@ -212,7 +215,7 @@ class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 class ManagedHSMPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def __init__(self, certs_path, name_prefix='clitest', location='uksouth', key='hsm', name_len=24,
                  parameter_name='managed_hsm', resource_group_parameter_name='resource_group',
-                 administrators=None, additional_params=None):
+                 administrators=None, roles=[], additional_params=None):
         super(ManagedHSMPreparer, self).__init__(name_prefix, name_len)
         self.cli_ctx = get_dummy_cli()
         self.location = location
@@ -221,6 +224,7 @@ class ManagedHSMPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         self.key = key
         self.certs_path = certs_path
         self.administrators = administrators
+        self.roles = roles
         self.additional_params = additional_params
 
     def create_resource(self, name, **kwargs):
@@ -240,6 +244,10 @@ class ManagedHSMPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             security_domain = os.path.join(self.certs_path, f'{name}-SD.json').replace('\\', '\\\\')
             activate_template = f'az keyvault security-domain download --hsm-name {name} --sd-wrapping-keys {cert0} {cert1} {cert2} --sd-quorum 2 --security-domain-file {security_domain}'
             self.live_only_execute(self.cli_ctx, activate_template)
+        if self.roles:
+            for role in self.roles:
+                role_assignment_template = f'az keyvault role assignment create --hsm-name {name} --role "{role}" --assignee {administrators} --scope "/"'
+                self.live_only_execute(self.cli_ctx, role_assignment_template)
         self.test_class_instance.kwargs[self.key] = name
         return {self.parameter_name: name}
 

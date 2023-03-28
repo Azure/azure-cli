@@ -77,3 +77,7 @@ class AAZInvalidArgValueError(ValueError):
                 idx += i
             return f"InvalidArgumentValue: {idx}: {self.msg}"
         return f"InvalidArgumentValue: {self.msg}"
+
+
+class AAZUnregisteredArg(NotImplementedError):
+    pass

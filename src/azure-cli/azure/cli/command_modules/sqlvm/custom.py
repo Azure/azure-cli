@@ -33,7 +33,8 @@ from azure.mgmt.sqlvirtualmachine.models import (
     ServerConfigurationsManagementSettings,
     Schedule,
     AssessmentSettings,
-    SqlVirtualMachine
+    SqlVirtualMachine,
+    AADAuthenticationSettings
 )
 
 from ._util import (
@@ -75,8 +76,8 @@ def sqlvm_group_list(
 # pylint: disable= line-too-long, too-many-arguments
 def sqlvm_group_create(client, cmd, sql_virtual_machine_group_name, resource_group_name, sql_image_offer,
                        sql_image_sku, domain_fqdn, cluster_operator_account, sql_service_account,
-                       storage_account_url, storage_account_key=None, location=None, cluster_bootstrap_account=None,
-                       file_share_witness_path=None, ou_path=None, tags=None):
+                       storage_account_url, cluster_subnet_type="SingleSubnet", storage_account_key=None, location=None,
+                       cluster_bootstrap_account=None, file_share_witness_path=None, ou_path=None, tags=None):
     '''
     Creates a SQL virtual machine group.
     '''
@@ -93,12 +94,14 @@ def sqlvm_group_create(client, cmd, sql_virtual_machine_group_name, resource_gro
                                                    sql_service_account=sql_service_account,
                                                    file_share_witness_path=file_share_witness_path,
                                                    storage_account_url=storage_account_url,
-                                                   storage_account_primary_key=storage_account_key)
+                                                   storage_account_primary_key=storage_account_key,
+                                                   cluster_subnet_type=cluster_subnet_type)
 
     sqlvm_group_object = SqlVirtualMachineGroup(sql_image_offer=sql_image_offer,
                                                 sql_image_sku=sql_image_sku,
                                                 wsfc_domain_profile=wsfc_domain_profile_object,
                                                 location=location,
+                                                cluster_subnet_type=cluster_subnet_type,
                                                 tags=tags)
 
     # Since it's a running operation, we will do the put and then the get to display the instance.
@@ -111,7 +114,7 @@ def sqlvm_group_create(client, cmd, sql_virtual_machine_group_name, resource_gro
 # pylint: disable=line-too-long, too-many-arguments
 def sqlvm_group_update(instance, domain_fqdn=None, cluster_operator_account=None, sql_service_account=None,
                        storage_account_url=None, storage_account_key=None, cluster_bootstrap_account=None,
-                       file_share_witness_path=None, ou_path=None, tags=None):
+                       file_share_witness_path=None, ou_path=None, tags=None, cluster_subnet_type=None):
     '''
     Updates a SQL virtual machine group.
     '''
@@ -133,6 +136,8 @@ def sqlvm_group_update(instance, domain_fqdn=None, cluster_operator_account=None
         instance.wsfc_domain_profile.file_share_witness_path = file_share_witness_path
     if ou_path is not None:
         instance.wsfc_domain_profile.ou_path = ou_path
+    if cluster_subnet_type is not None:
+        instance.wsfc_domain_profile.cluster_subnet_type = cluster_subnet_type
     if tags is not None:
         instance.tags = tags
 
@@ -185,7 +190,7 @@ def aglistener_update(instance, sql_virtual_machine_instances=None):
 # pylint: disable=too-many-arguments, too-many-locals, line-too-long, too-many-boolean-expressions
 def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql_server_license_type=None,
                  location=None, sql_image_sku=None, enable_auto_patching=None, sql_management_mode="LightWeight",
-                 day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
+                 least_privilege_mode=None, day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
                  enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None,
                  storage_access_key=None, backup_password=None, backup_system_dbs=False, backup_schedule_type=None,
                  full_backup_frequency=None, full_backup_start_time=None, full_backup_window_hours=None, log_backup_frequency=None,
@@ -265,6 +270,7 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
     sqlvm_object = SqlVirtualMachine(location=location,
                                      virtual_machine_resource_id=virtual_machine_resource_id,
                                      sql_server_license_type=sql_server_license_type,
+                                     least_privilege_mode=least_privilege_mode,
                                      sql_image_sku=sql_image_sku,
                                      sql_management=sql_management_mode,
                                      sql_image_offer=sql_image_offer,
@@ -281,8 +287,9 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
     return client.get(resource_group_name, sql_virtual_machine_name)
 
 
-# pylint: disable=too-many-statements, line-too-long, too-many-boolean-expressions
-def sqlvm_update(cmd, instance, sql_virtual_machine_name, resource_group_name, sql_server_license_type=None, sql_image_sku=None, enable_auto_patching=None,
+# pylint: disable=too-many-statements, line-too-long, too-many-boolean-expressions, unused-argument
+def sqlvm_update(cmd, instance, sql_virtual_machine_name, resource_group_name, sql_server_license_type=None,
+                 sql_image_sku=None, least_privilege_mode=None, enable_auto_patching=None,
                  day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
                  enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None, prompt=True,
                  storage_access_key=None, backup_password=None, backup_system_dbs=False, backup_schedule_type=None, sql_management_mode=None,
@@ -301,14 +308,10 @@ def sqlvm_update(cmd, instance, sql_virtual_machine_name, resource_group_name, s
         instance.sql_server_license_type = sql_server_license_type
     if sql_image_sku is not None:
         instance.sql_image_sku = sql_image_sku
-    if sql_management_mode is not None and instance.sql_management != "Full":
-        from knack.prompting import prompt_y_n
-        if not prompt:
-            instance.sql_management = sql_management_mode
-        else:
-            confirmation = prompt_y_n("Upgrading SQL manageability mode to Full will restart the SQL Server. Proceed?")
-            if confirmation:
-                instance.sql_management = sql_management_mode
+    if sql_management_mode is not None:
+        instance.sql_management = sql_management_mode
+    if least_privilege_mode is not None:
+        instance.least_privilege_mode = least_privilege_mode
 
     if (enable_auto_patching is not None or day_of_week is not None or maintenance_window_starting_hour is not None or maintenance_window_duration is not None):
 
@@ -388,6 +391,64 @@ def sqlvm_update(cmd, instance, sql_virtual_machine_name, resource_group_name, s
                               workspace_name)
 
     return instance
+
+
+# pylint: disable=unused-argument
+def sqlvm_enable_azure_ad_auth(client, cmd, sql_virtual_machine_name, resource_group_name, msi_client_id=None, skip_client_validation=None):
+    ''' Enable Azure AD authentication on a SQL virtual machine.
+
+        :param cmd: The CLI command.
+        :type cmd: AzCliCommand.
+        :param instance: The Sql Virtual Machine instance.
+        :type instance: SqlVirtualMachine.
+        :param resource_group_name: The resource group name
+        :type resource_group_name: str.
+        :param msi_client_id: The clientId of the managed identity used in Azure AD authentication.
+                              None means system-assigned managed identity
+        :type: str.
+        :param skip_client_validation: Whether to skip the client side validation. The server side validation always happens.
+                                       This parameter is used in the validation and ignored here.
+        :type: bool.
+
+        :return: The updated Sql Virtual Machine instance.
+        :rtype: SqlVirtualMachine.
+    '''
+
+    sqlvm_object = client.get(resource_group_name, sql_virtual_machine_name)
+
+    if sqlvm_object.server_configurations_management_settings is None:
+        sqlvm_object.server_configurations_management_settings = ServerConfigurationsManagementSettings()
+
+    sqlvm_object.server_configurations_management_settings.azure_ad_authentication_settings = AADAuthenticationSettings(client_id=msi_client_id if msi_client_id else '')
+
+    # Since it's a running operation, we will do the put and then the get to display the instance.
+    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(False, client.begin_create_or_update,
+                                                  resource_group_name, sql_virtual_machine_name, sqlvm_object))
+
+    return client.get(resource_group_name, sql_virtual_machine_name)
+
+
+# pylint: disable=unused-argument
+def validate_azure_ad_auth(cmd, sql_virtual_machine_name, resource_group_name, msi_client_id=None):
+    ''' Valida if Azure AD authentication is ready on a SQL virtual machine.
+        The logic of validation is in the validator method. If the SQL virtual machine passes the validator,
+        it means this SQL virtual machine is valid for Azure AD authentication
+
+        :param cmd: The CLI command.
+        :type cmd: AzCliCommand.
+        :param resource_group_name: The resource group name
+        :type resource_group_name: str.
+        :param msi_client_id: The clientId of the managed identity used in Azure AD authentication.
+                              None means system-assigned managed identity
+        :type: str.
+
+        :return: The updated Sql Virtual Machine instance.
+        :rtype: SqlVirtualMachine.
+    '''
+
+    passing_validation_message = "Sql virtual machine {} is valid for Azure AD authentication.".format(sql_virtual_machine_name)
+
+    return passing_validation_message
 
 
 def sqlvm_add_to_group(client, cmd, sql_virtual_machine_name, resource_group_name,

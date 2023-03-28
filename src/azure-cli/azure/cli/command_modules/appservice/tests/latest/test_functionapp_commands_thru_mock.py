@@ -92,11 +92,13 @@ class TestFunctionappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.parse_resource_id')
+    @mock.patch('azure.cli.command_modules.appservice.custom.validate_zip_deploy_app_setting_exists')
     @mock.patch('azure.cli.command_modules.appservice.custom.upload_zip_to_storage')
     @mock.patch('azure.cli.command_modules.appservice.custom.is_plan_consumption', return_value=True)
     def test_functionapp_linux_consumption_non_remote_build(self,
                                                             is_plan_consumption_mock,
                                                             upload_zip_to_storage_mock,
+                                                            validate_zip_deploy_app_setting_exists_mock,
                                                             parse_resource_id_mock,
                                                             web_client_factory_mock):
         # prepare
@@ -122,11 +124,13 @@ class TestFunctionappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.parse_resource_id')
+    @mock.patch('azure.cli.command_modules.appservice.custom.validate_zip_deploy_app_setting_exists')
     @mock.patch('azure.cli.command_modules.appservice.custom.upload_zip_to_storage')
     @mock.patch('azure.cli.command_modules.appservice.custom.is_plan_consumption', return_value=True)
     def test_functionapp_linux_consumption_non_remote_build_with_slot(self,
                                                             is_plan_consumption_mock,
                                                             upload_zip_to_storage_mock,
+                                                            validate_zip_deploy_app_setting_exists_mock,
                                                             parse_resource_id_mock,
                                                             web_client_factory_mock):
         # prepare
