@@ -47,7 +47,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.extension_name = None
         self.extension_version = None
         self.event_id = str(uuid.uuid4())
-        self.cli_recommendation_feedback = None
+        self.cli_recommendation = None
         self.feedback = None
         self.extension_management_detail = None
         self.raw_command = None
@@ -200,7 +200,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'PythonVersion', platform.python_version())
         set_custom_properties(result, 'ModuleCorrelation', self.module_correlation)
         set_custom_properties(result, 'ExtensionName', ext_info)
-        set_custom_properties(result, 'Recommendation', self.cli_recommendation_feedback)
+        set_custom_properties(result, 'CLI_Recommendation', self.cli_recommendation)
         set_custom_properties(result, 'Feedback', self.feedback)
         set_custom_properties(result, 'ExtensionManagementDetail', self.extension_management_detail)
         set_custom_properties(result, 'Mode', self.mode)
@@ -404,9 +404,9 @@ def set_feedback(feedback):
 # This function returns the user's selection and feedback on the cli-recommendation results
 # Please refer to feedback_design.md of cli-recommendation for detailed information
 @decorators.suppress_all_exceptions()
-def set_cli_recommendation_feedback(api_version, cli_recommendation_feedback):
-    _session.cli_recommendation_feedback = {"api_version": api_version,
-                                            "cli_recommendation_feedback": cli_recommendation_feedback}
+def set_cli_recommendation(api_version, cli_recommendation_feedback):
+    _session.cli_recommendation = {"api_version": api_version,
+                                   "cli_recommendation_feedback": cli_recommendation_feedback}
 
 
 @decorators.suppress_all_exceptions()
