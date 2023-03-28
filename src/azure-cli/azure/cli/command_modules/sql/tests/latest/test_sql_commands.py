@@ -1240,7 +1240,8 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
         self.cmd(
             'sql db ltr-backup restore --backup-id \'{backup_id}\' --dest-database {dest_database_name}'
             ' --dest-server {server_name} --dest-resource-group {rg} -i --encryption-protector {encryption_protector}'
-            ' --keys {keys} --umi {umi}',
+            ' --keys {keys} --umi {umi} --edition Hyperscale'
+            ' --service-level-objective SQLDB_HS_Gen5_2 --bsr Zone --ha-replicas 1 -z true',
             checks=[
                 self.check('name', '{dest_database_name}')])
 
@@ -1251,7 +1252,7 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
 
 
 class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
-    #@record_only()
+    @record_only()
     @AllowLargeResponse()
     # using fixed resources because of long time preperation for geo-redundant backup
     # need to change resources for others who want to rerecord this test
@@ -1283,7 +1284,8 @@ class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
 
         self.cmd(
             'sql db geo-backup restore --geo-backup-id {backup_id} --dest-database {dest_database_name}'
-            ' --dest-server {server_name} --resource-group {rg} --edition Hyperscale',
+            ' --dest-server {server_name} --resource-group {rg} --edition Hyperscale'
+            ' --service-level-objective SQLDB_HS_Gen5_2 --bsr Zone --ha-replicas 1 -z true',
             checks=[
                 self.check('name', '{dest_database_name}')])
                 
