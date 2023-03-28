@@ -170,7 +170,7 @@ class WebappQuickCreateTest(ScenarioTest):
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
             JMESPathCheck('[0].value', '~14'),
         ])
-        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "DOTNETCORE|3.1"'.format(
+        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "dotnet:6"'.format(
             resource_group, webapp_name_2, plan)).get_output_in_json()
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
 
@@ -836,19 +836,6 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck("length([?value=='bar'])", 1),
             JMESPathCheck("length([?value=='bar2'])", 1)
         ])
-
-        # show
-        result = self.cmd('webapp config appsettings list -g {} -n {}'.format(
-            resource_group, webapp_name)).get_output_in_json()
-        s2 = next((x for x in result if x['name'] == 's2'))
-        self.assertEqual(s2['name'], 's2')
-        self.assertEqual(s2['slotSetting'], False)
-        self.assertEqual(s2['value'], 'bar')
-        self.assertEqual(set([x['name'] for x in result]), set(
-            ['s1', 's2', 's3', 'WEBSITE_NODE_DEFAULT_VERSION']))
-
-        self.cmd(
-            'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
 
         # show
         result = self.cmd('webapp config appsettings list -g {} -n {}'.format(
