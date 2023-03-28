@@ -575,6 +575,8 @@ def display_region_recommendation(cmd, namespace):
     }
 
     identified_region = identified_region_maps.get(namespace.location)
+    from azure.cli.core import telemetry
+    telemetry.set_region_identified(namespace.location, identified_region)
 
     if identified_region and cmd.cli_ctx.config.getboolean('core', 'display_region_identified', True):
         logger.warning('Selecting "%s" may reduce your costs. '
@@ -583,8 +585,6 @@ def display_region_recommendation(cmd, namespace):
                        ' "az config set core.display_region_identified=false". '
                        'Learn more at https://go.microsoft.com/fwlink/?linkid=222571 ',
                        identified_region)
-        from azure.cli.core import telemetry
-        telemetry.set_region_identified(namespace.location, identified_region)
 
 
 def import_aaz_by_profile(profile, module_name):
