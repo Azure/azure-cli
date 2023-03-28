@@ -2032,7 +2032,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
             self.check('provisioningState', 'Succeeded'),
-            self.check('sku.tier', 'Paid')
+            self.check('sku.name', 'Base'),
+            self.check('sku.tier', 'Standard')
         ])
 
         # delete
@@ -2066,7 +2067,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
             self.check('provisioningState', 'Succeeded'),
-            self.check('sku.tier', 'Paid')
+            self.check('sku.name', 'Base'),
+            self.check('sku.tier', 'Standard')
         ])
         # delete
         self.cmd(
@@ -4553,11 +4555,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
             self.check('provisioningState', 'Succeeded'),
-            self.check('sku.tier', 'Paid')
+            self.check('sku.name', 'Base'),
+            self.check('sku.tier', 'Standard')
         ])
         # update to no uptime sla
         no_uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --no-uptime-sla'
         self.cmd(no_uptime_sla_cmd, checks=[
+            self.check('sku.name', 'Base'),
             self.check('sku.tier', 'Free')
         ])
         # update to uptime sla again
