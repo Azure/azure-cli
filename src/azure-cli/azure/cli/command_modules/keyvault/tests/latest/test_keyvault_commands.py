@@ -535,7 +535,6 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
 
 
 class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
-    @record_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_mhsm_sd')
     def test_keyvault_hsm_security_domain(self):
@@ -569,9 +568,9 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
         self.cmd('az keyvault security-domain download --hsm-name {hsm_name} --security-domain-file "{sdfile}" '
                  '--sd-quorum 2 --sd-wrapping-keys "{cer1_path}" "{cer2_path}" "{cer3_path}"')
         time.sleep(180)
-
-        self.cmd('az keyvault role assignment create --assignee {init_admin} --hsm-name {hsm_name} '
-                 '--role "Managed HSM Crypto User" --scope "/"')
+        with mock.patch('azure.cli.command_modules.keyvault.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('az keyvault role assignment create --assignee {init_admin} --hsm-name {hsm_name} '
+                     '--role "Managed HSM Crypto User" --scope "/"')
 
         # create a new key and backup it
         self.cmd('az keyvault key create --hsm-name {hsm_name} -n {key_name}')
@@ -596,8 +595,9 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
                  '--sd-exchange-key "{exchange_key}" '
                  '--sd-wrapping-keys "{key1_path}" "{key2_path}"')
 
-        self.cmd('az keyvault role assignment create --assignee {init_admin} --hsm-name {next_hsm_name} '
-                 '--role "Managed HSM Crypto User" --scope "/"')
+        with mock.patch('azure.cli.command_modules.keyvault.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('az keyvault role assignment create --assignee {init_admin} --hsm-name {next_hsm_name} '
+                     '--role "Managed HSM Crypto User" --scope "/"')
 
         # restore the key
         self.cmd('az keyvault key restore --hsm-name {next_hsm_name} -f "{key_backup}"')
