@@ -4432,7 +4432,7 @@ class AKSManagedClusterContext(BaseAKSContext):
           1. In Create mode
             a. if image_cleaner_interval_hours is specified but enable_image_cleaner is missed, raise a RequiredArgumentMissingError.
           2. In update mode
-            b. if image_cleaner_interval_hours is specified and image cleaner wat not enabled, raise a RequiredArgumentMissingError.
+            b. if image_cleaner_interval_hours is specified and image cleaner was not enabled, raise a RequiredArgumentMissingError.
             c. if image_cleaner_interval_hours is specified and disable_image_cleaner is specified, raise a MutuallyExclusiveArgumentError.
         :return: int or None
         """
@@ -4471,7 +4471,7 @@ class AKSManagedClusterContext(BaseAKSContext):
           1. In Create mode
             a. if image_cleaner_interval_hours is specified but enable_image_cleaner is missed, raise a RequiredArgumentMissingError.
           2. In update mode
-            b. if image_cleaner_interval_hours is specified and image cleaner wat not enabled, raise a RequiredArgumentMissingError.
+            b. if image_cleaner_interval_hours is specified and image cleaner was not enabled, raise a RequiredArgumentMissingError.
             c. if image_cleaner_interval_hours is specified and disable_image_cleaner is specified, raise a MutuallyExclusiveArgumentError.
         :return: int or None
         """
@@ -6615,7 +6615,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         if interval_hours is not None:
             image_cleaner_profile.interval_hours = interval_hours
 
-        return mc  
+        return mc
 
     def update_identity_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Update identity profile for the ManagedCluster object.
