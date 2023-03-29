@@ -4171,7 +4171,11 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         profile = self.models.ManagedClusterSecurityProfileWorkloadIdentity()
         if self.decorator_mode == DecoratorMode.UPDATE:
-            if self.mc.security_profile is not None and self.mc.security_profile.workload_identity is not None:
+            if (
+                hasattr(self.mc, "security_profile") and
+                self.mc.security_profile is not None and
+                self.mc.security_profile.workload_identity is not None
+            ):
                 # reuse previous profile is has been set
                 profile = self.mc.security_profile.workload_identity
 
