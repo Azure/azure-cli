@@ -1506,7 +1506,29 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
     if not updating_ip_security_restrictions:
         setattr(configs, 'ip_security_restrictions', None)
         setattr(configs, 'scm_ip_security_restrictions', None)
+
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        return update_configuration_polling(cmd, resource_group_name, name, slot, configs)
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+
+
+def update_configuration_polling(cmd, resource_group_name, name, slot, configs):
+    try:
+        return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    except Exception as ex:  # pylint: disable=broad-except
+        poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
+        if ex.response.status_code == 202 and poll_url:
+            r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+            poll_timeout = time.time() + 60 * 2  # 2 minute timeout
+
+            while r.status_code != 200 and time.time() < poll_timeout:
+                time.sleep(5)
+                r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+
+            if r.status_code == 200:
+                return r.json()
+        else:
+            raise CLIError(ex)
 
 
 def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None):
