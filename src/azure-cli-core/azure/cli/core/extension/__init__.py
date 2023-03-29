@@ -55,7 +55,7 @@ class ExtensionNotInstalledException(Exception):
         self.extension_name = extension_name
 
     def __str__(self):
-        return "The extension {} is not installed.".format(self.extension_name)
+        return f"The extension {self.extension_name} is not installed. Please install the extension via `az extension add -n {self.extension_name}`."
 
 
 class Extension:
