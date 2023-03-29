@@ -8907,7 +8907,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.cmd,
             self.client,
             {
-                "enable_workload_identity": False,
+                "disable_workload_identity": True,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
