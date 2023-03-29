@@ -43,7 +43,6 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_servicebus_namespace', supports_no_wait=True)
 
     custom_tmpl = 'azure.cli.command_modules.servicebus.custom#{}'
-    servicebus_custom = CliCommandType(operations_tmpl=custom_tmpl)
     with self.command_group('servicebus namespace', sb_namespace_util, client_factory=namespaces_mgmt_client_factory, min_api='2021-06-01-preview') as g:
         g.custom_command('exists', 'cli_namespace_exists')
 
@@ -53,23 +52,6 @@ def load_command_table(self, _):
         g.custom_command('approve', 'approve_private_endpoint_connection', validator=validate_private_endpoint_connection_id)
         g.custom_command('reject', 'reject_private_endpoint_connection', validator=validate_private_endpoint_connection_id)
         g.custom_command('delete', 'delete_private_endpoint_connection', confirmation=True, validator=validate_private_endpoint_connection_id)
-    '''with self.command_group('servicebus namespace private-endpoint-connection', sb_private_endpoints_util, resource_type=ResourceType.MGMT_SERVICEBUS,
-                            custom_command_type=servicebus_custom, is_preview=True,
-                            client_factory=private_endpoint_connections_mgmt_client_factory) as g:
-        from ._validators import validate_private_endpoint_connection_id
-        g.command('delete', 'begin_delete', confirmation=True, validator=validate_private_endpoint_connection_id)
-        g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
-        g.command('list', 'list', validator=validate_private_endpoint_connection_id)
-        g.custom_command('approve', 'approve_private_endpoint_connection',
-                         validator=validate_private_endpoint_connection_id)
-        g.custom_command('reject', 'reject_private_endpoint_connection',
-                         validator=validate_private_endpoint_connection_id)
-
-    with self.command_group('servicebus namespace private-link-resource', sb_private_links_util,
-                            resource_type=ResourceType.MGMT_SERVICEBUS) as g:
-        from azure.cli.core.commands.transform import gen_dict_to_list_transform
-        g.show_command('show', 'get', is_preview=True, min_api='2021-06-01-preview',
-                       transform=gen_dict_to_list_transform(key="value"))'''
 
 # Rules Region
     with self.command_group('servicebus topic subscription rule', custom_command_type=sb_namespace_custom,
