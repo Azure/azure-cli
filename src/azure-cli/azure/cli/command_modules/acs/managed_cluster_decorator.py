@@ -6269,7 +6269,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 )
             mc.identity = identity
         # current and goal are both userassigned, but the identity is different, update user assigned identity
-        if current_identity_type == goal_identity_type and goal_identity_type == "userassigned" and current_user_assigned_identity != assign_identity:
+        if (
+            current_identity_type == goal_identity_type and
+            goal_identity_type == "userassigned" and
+            current_user_assigned_identity != assign_identity
+        ):
             msg = (
                 "Your cluster is already using userassigned managed identity, current control plane identity is {},"
                 "and you are going to update the cluster identity to {}.\n"
