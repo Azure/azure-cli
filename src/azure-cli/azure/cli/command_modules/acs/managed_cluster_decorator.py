@@ -4172,6 +4172,9 @@ class AKSManagedClusterContext(BaseAKSContext):
                 "--disable-workload-identity at the same time."
             )
 
+        if not hasattr(self.models, "ManagedClusterSecurityProfileWorkloadIdentity"):
+            return None
+
         profile = self.models.ManagedClusterSecurityProfileWorkloadIdentity()
 
         if self.decorator_mode == DecoratorMode.CREATE:
