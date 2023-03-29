@@ -131,6 +131,24 @@ def validate_functionapp_on_containerapp_site_config_set(cmd, namespace):
             "Please use the following command instead: az functionapp config container set")
 
 
+def validate_functionapp_on_containerapp_container_settings_delete(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        raise ValidationError(
+            "Invalid command. This is not supported for Azure Functions on Azure Container app environments.",
+            "Please use the following command instead: az functionapp config appsettings set")
+
+
+def validate_functionapp_on_containerapp_update(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        raise ValidationError(
+            "Invalid command. This is not supported for Azure Functions on Azure Container app environments.",
+            "Please use either 'az functionapp config appsettings set' or 'az functionapp config container set'")
+
+
 def validate_functionapp_on_containerapp_site_config_show(cmd, namespace):
     resource_group_name = namespace.resource_group_name
     name = namespace.name
