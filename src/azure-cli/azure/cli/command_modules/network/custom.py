@@ -62,6 +62,8 @@ from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condit
     Add as _WAFCustomRuleMatchConditionAdd
 from .aaz.latest.network.application_gateway.waf_policy.policy_setting import Update as _WAFPolicySettingUpdate
 from .aaz.latest.network.custom_ip.prefix import Update as _CustomIpPrefixUpdate
+from .aaz.latest.network.dns.record_set import Create as _DNSRecordSetCreate, Delete as _DNSRecordSetDelete, \
+    Show as _DNSRecordSetShow, Update as _DNSRecordSetUpdate
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
 from .aaz.latest.network.express_route.gateway import Create as _ExpressRouteGatewayCreate, \
     Update as _ExpressRouteGatewayUpdate
@@ -2509,15 +2511,13 @@ def list_dns_zones(cmd, resource_group_name=None):
 
 def create_dns_record_set(cmd, resource_group_name, zone_name, record_set_name, record_set_type,
                           metadata=None, if_match=None, if_none_match=None, ttl=3600, target_resource=None):
-    from .aaz.latest.network.dns.record_set import Create
-
     record_set = {
         "ttl": ttl,
         "metadata": metadata,
         "target_resource": {"id": target_resource} if target_resource else None
     }
 
-    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+    return _DNSRecordSetCreate(cli_ctx=cmd.cli_ctx)(command_args={
         "name": record_set_name,
         "zone_name": zone_name,
         "resource_group": resource_group_name,
@@ -3094,11 +3094,10 @@ def _add_record(record_set, record, record_type, is_list=False):
 def _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                      is_list=True, subscription_id=None, ttl=None, if_none_match=None):
     from azure.core.exceptions import HttpResponseError
-    from .aaz.latest.network.dns.record_set import Create, Show
 
     record_snake, record_camel = _type_to_property_name(record_type)
     try:
-        ret = Show(cli_ctx=cmd.cli_ctx)(command_args={
+        ret = _DNSRecordSetShow(cli_ctx=cmd.cli_ctx)(command_args={
             "name": record_set_name,
             "zone_name": zone_name,
             "subscription": subscription_id,
@@ -3117,24 +3116,21 @@ def _add_save_record(cmd, record, record_type, record_set_name, resource_group_n
 
     _add_record(record_set, record, record_type, is_list)
 
-    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+    return _DNSRecordSetCreate(cli_ctx=cmd.cli_ctx)(command_args={
             "name": record_set_name,
             "zone_name": zone_name,
             "subscription": subscription_id,
             "resource_group": resource_group_name,
             "record_type": record_type,
             "if_none_match": "*" if if_none_match else None,
-            "ttl": record_set.get("ttl", None),
-            record_snake: record_set.get(record_snake, None)
+            **record_set
         })
 
 
 def _remove_record(cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                    keep_empty_record_set, is_list=True):
-    from .aaz.latest.network.dns.record_set import Delete, Show, Update
-
     record_snake, record_camel = _type_to_property_name(record_type)
-    ret = Show(cli_ctx=cli_ctx)(command_args={
+    ret = _DNSRecordSetShow(cli_ctx=cli_ctx)(command_args={
         "name": record_set_name,
         "zone_name": zone_name,
         "resource_group": resource_group_name,
@@ -3163,14 +3159,14 @@ def _remove_record(cli_ctx, record, record_type, record_set_name, resource_group
 
     if not records_remaining and not keep_empty_record_set:
         logger.info('Removing empty %s record set: %s', record_type, record_set_name)
-        return Delete(cli_ctx=cli_ctx)(command_args={
+        return _DNSRecordSetDelete(cli_ctx=cli_ctx)(command_args={
             "name": record_set_name,
             "zone_name": zone_name,
             "resource_group": resource_group_name,
             "record_type": record_type
         })
 
-    return Update(cli_ctx=cli_ctx)(command_args={
+    return _DNSRecordSetUpdate(cli_ctx=cli_ctx)(command_args={
         "name": record_set_name,
         "zone_name": zone_name,
         "resource_group": resource_group_name,

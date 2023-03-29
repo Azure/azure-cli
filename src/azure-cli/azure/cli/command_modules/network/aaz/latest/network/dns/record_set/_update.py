@@ -42,22 +42,22 @@ class Update(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.if_match = AAZStrArg(
             options=["--if-match"],
-            help="The etag of the record set. Omit this value to always overwrite the current record set. Specify the last-seen etag value to prevent accidentally overwriting any concurrent changes.",
+            help="Etag of the record set. Omit this value to always overwrite the current record set. Specify the last-seen etag value to prevent accidentally overwriting any concurrent changes.",
         )
         _args_schema.if_none_match = AAZStrArg(
             options=["--if-none-match"],
-            help="Set to '*' to allow a new record set to be created, but to prevent updating an existing record set. Other values will be ignored.",
+            help="Set to `*` to allow a new record set to be created, but to prevent updating an existing record set. Other values will be ignored.",
         )
         _args_schema.record_type = AAZStrArg(
             options=["--record-type"],
-            help="The type of DNS record in this record set.",
+            help="Type of DNS record in this record set.",
             required=True,
             id_part="child_type_1",
             enum={"A": "A", "AAAA": "AAAA", "CAA": "CAA", "CNAME": "CNAME", "MX": "MX", "NS": "NS", "PTR": "PTR", "SOA": "SOA", "SRV": "SRV", "TXT": "TXT"},
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="The name of the record set, relative to the name of the zone.",
+            help="Name of the record set, relative to the name of the zone.",
             required=True,
             id_part="child_name_1",
         )
@@ -65,10 +65,30 @@ class Update(AAZCommand):
             required=True,
         )
         _args_schema.zone_name = AAZStrArg(
-            options=["--zone-name"],
-            help="The name of the DNS zone (without a terminating dot).",
+            options=["-z", "--zone-name"],
+            help="Name of the DNS zone.",
             required=True,
             id_part="name",
+        )
+        _args_schema.ttl = AAZIntArg(
+            options=["--ttl"],
+            help="TTL of the records in the record set.",
+            nullable=True,
+        )
+        _args_schema.metadata = AAZDictArg(
+            options=["--metadata"],
+            help="Metadata in space-separated key=value pairs. This overwrites any existing metadata.",
+            nullable=True,
+        )
+        _args_schema.target_resource = AAZStrArg(
+            options=["--target-resource"],
+            help="ID of an Azure resource from which the DNS resource value is taken.",
+            nullable=True,
+        )
+
+        metadata = cls._args_schema.metadata
+        metadata.Element = AAZStrArg(
+            nullable=True,
         )
 
         # define Arg Group "Parameters"
@@ -124,12 +144,6 @@ class Update(AAZCommand):
             help="The list of SRV records in the record set.",
             nullable=True,
         )
-        _args_schema.ttl = AAZIntArg(
-            options=["--ttl"],
-            arg_group="Properties",
-            help="The TTL (time-to-live) of the records in the record set.",
-            nullable=True,
-        )
         _args_schema.txt_records = AAZListArg(
             options=["--txt-records"],
             arg_group="Properties",
@@ -140,18 +154,6 @@ class Update(AAZCommand):
             options=["--caa-records"],
             arg_group="Properties",
             help="The list of CAA records in the record set.",
-            nullable=True,
-        )
-        _args_schema.metadata = AAZDictArg(
-            options=["--metadata"],
-            arg_group="Properties",
-            help="The metadata attached to the record set.",
-            nullable=True,
-        )
-        _args_schema.target_resource = AAZObjectArg(
-            options=["--target-resource"],
-            arg_group="Properties",
-            help="A reference to an azure resource from where the dns resource value is taken.",
             nullable=True,
         )
 
@@ -327,18 +329,6 @@ class Update(AAZCommand):
         _element.value = AAZStrArg(
             options=["value"],
             help="The value for this CAA record.",
-            nullable=True,
-        )
-
-        metadata = cls._args_schema.metadata
-        metadata.Element = AAZStrArg(
-            nullable=True,
-        )
-
-        target_resource = cls._args_schema.target_resource
-        target_resource.id = AAZStrArg(
-            options=["id"],
-            help="Resource Id.",
             nullable=True,
         )
         return cls._args_schema
@@ -602,7 +592,7 @@ class Update(AAZCommand):
                 properties.set_prop("TXTRecords", AAZListType, ".txt_records")
                 properties.set_prop("caaRecords", AAZListType, ".caa_records")
                 properties.set_prop("metadata", AAZDictType, ".metadata")
-                properties.set_prop("targetResource", AAZObjectType, ".target_resource")
+                properties.set_prop("targetResource", AAZObjectType)
 
             aaaa_records = _builder.get(".properties.AAAARecords")
             if aaaa_records is not None:
@@ -698,7 +688,7 @@ class Update(AAZCommand):
 
             target_resource = _builder.get(".properties.targetResource")
             if target_resource is not None:
-                target_resource.set_prop("id", AAZStrType, ".id")
+                target_resource.set_prop("id", AAZStrType, ".target_resource")
 
             return _instance_value
 
