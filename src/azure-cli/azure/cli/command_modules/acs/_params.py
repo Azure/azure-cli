@@ -36,6 +36,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_acr, validate_agent_pool_name, validate_assign_identity,
     validate_assign_kubelet_identity, validate_azure_keyvault_kms_key_id,
     validate_azure_keyvault_kms_key_vault_resource_id,
+    validate_image_cleaner_enable_disable_mutually_exclusive,
     validate_create_parameters, validate_credential_format,
     validate_defender_config_parameter,
     validate_defender_disable_and_enable_parameters, validate_eviction_policy,
@@ -224,6 +225,8 @@ def load_arguments(self, _):
         c.argument('azure_keyvault_kms_key_id', validator=validate_azure_keyvault_kms_key_id)
         c.argument('azure_keyvault_kms_key_vault_network_access', arg_type=get_enum_type(keyvault_network_access_types))
         c.argument('azure_keyvault_kms_key_vault_resource_id', validator=validate_azure_keyvault_kms_key_vault_resource_id)
+        c.argument('enable_image_cleaner', action='store_true')
+        c.argument('image_cleaner_interval_hours', type=int)
         c.argument('http_proxy_config')
         c.argument('enable_keda', action='store_true')
         # addons
@@ -328,6 +331,9 @@ def load_arguments(self, _):
         c.argument('azure_keyvault_kms_key_id', validator=validate_azure_keyvault_kms_key_id)
         c.argument('azure_keyvault_kms_key_vault_network_access', arg_type=get_enum_type(keyvault_network_access_types))
         c.argument('azure_keyvault_kms_key_vault_resource_id', validator=validate_azure_keyvault_kms_key_vault_resource_id)
+        c.argument('enable_image_cleaner', action='store_true')
+        c.argument('disable_image_cleaner', action='store_true', validator=validate_image_cleaner_enable_disable_mutually_exclusive)
+        c.argument('image_cleaner_interval_hours', type=int)
         c.argument('http_proxy_config')
         c.argument('enable_keda', action='store_true')
         c.argument('disable_keda', action='store_true')
