@@ -4162,8 +4162,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         enable_workload_identity = self.raw_param.get("enable_workload_identity")
         disable_workload_identity = self.raw_param.get("disable_workload_identity")
 
-        if enable_workload_identity is None and disable_workload_identity is None:
-            # no flags have been set, return None; server side will backfill the default/existing value
+        if not enable_workload_identity and not disable_workload_identity:
             return None
 
         if enable_workload_identity and disable_workload_identity:
