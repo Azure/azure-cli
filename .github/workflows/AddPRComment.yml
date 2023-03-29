@@ -1,5 +1,5 @@
 on:
-  pull_request:
+  pull_request_target:
     types: [opened]
 
 permissions:
@@ -18,10 +18,7 @@ jobs:
               echo "message=$(echo 'Thank you for your contribution! We will review the pull request and get back to you soon.')" >> $GITHUB_ENV
           fi
       - name: comment on the pull request
-        uses: hasura/comment-progress@v2.2.0
+        uses: mshick/add-pr-comment@v2
         with:
-          github-token: ${{ secrets.CLI_BOT }}
-          repository: 'Azure/azure-cli'
-          number: ${{ github.event.number }}
-          id: thank-you-comment
+          repo-token: ${{ secrets.CLI_BOT }}
           message: "${{ env.message }}"
