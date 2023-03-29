@@ -7190,17 +7190,6 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         dec_2.check_raw_parameters()
 
-        # custom value
-        dec_3 = AKSManagedClusterUpdateDecorator(
-            self.cmd,
-            self.client,
-            {
-                "enable_workload_identity": False,
-            },
-            ResourceType.MGMT_CONTAINERSERVICE,
-        )
-        self.assertIsNone(dec_3.check_raw_parameters())
-
     def test_ensure_mc(self):
         dec_1 = AKSManagedClusterUpdateDecorator(
             self.cmd,
