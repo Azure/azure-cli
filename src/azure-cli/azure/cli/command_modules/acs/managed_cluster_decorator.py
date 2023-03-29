@@ -2181,7 +2181,8 @@ class AKSManagedClusterContext(BaseAKSContext):
                         'The provided pod CIDR "%s" will be overwritten with the node subnet CIDR. '
                         'To use a pod CIDR, please specify network plugin mode `overlay` or '
                         'use network plugin `kubenet`. For more information about Azure CNI '
-                        'Overlay please see https://aka.ms/aks/azure-cni-overlay', pod_cidr
+                        'Overlay please see https://aka.ms/aks/azure-cni-overlay. This warning '
+                        'will become an error in a future CLI release.', pod_cidr
                     )
             else:
                 if (
