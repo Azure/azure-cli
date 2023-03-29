@@ -3720,7 +3720,7 @@ def install_bicep_cli(cmd, version=None, target_platform=None):
 
 
 def uninstall_bicep_cli(cmd):
-    remove_bicep_installation()
+    remove_bicep_installation(cmd.cli_ctx)
 
 
 def upgrade_bicep_cli(cmd, target_platform=None):
