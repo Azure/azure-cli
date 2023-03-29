@@ -206,7 +206,7 @@ class WheelExtension(Extension):
                     if ext not in exts:
                         exts.append(ext)
         # https://docs.python.org/3/library/os.html#os.listdir, listdir is in arbitrary order.
-        # Sort the extensions by name to support https://github.com/Azure/azure-cli/issues/25782.
+        # Sort the extensions by name to support overwrite extension feature: https://github.com/Azure/azure-cli/issues/25782.
         exts.sort(key=lambda ext: ext.name)
         return exts
 
@@ -276,7 +276,7 @@ class DevExtension(Extension):
         for source in DEV_EXTENSION_SOURCES:
             _collect(source)
         # https://docs.python.org/3/library/os.html#os.listdir, listdir is in arbitrary order.
-        # Sort the extensions by name to support https://github.com/Azure/azure-cli/issues/25782.
+        # Sort the extensions by name to support overwrite extension feature: https://github.com/Azure/azure-cli/issues/25782.
         exts.sort(key=lambda ext: ext.name)
         return exts
 
