@@ -181,7 +181,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2018-06-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
         ResourceType.MGMT_NETWORK_PRIVATEDNS: None,
-        ResourceType.MGMT_KEYVAULT: '2022-07-01',
+        ResourceType.MGMT_KEYVAULT: '2023-02-01',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2022-04-01', {
             'classic_administrators': '2015-06-01',
             'role_definitions': '2022-04-01',
@@ -252,7 +252,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2022-09-04',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2023-01-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2023-02-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
         }),

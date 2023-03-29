@@ -12,19 +12,23 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "sql mi server-configuration-option show",
+    "vm extension image show",
 )
 class Show(AAZCommand):
-    """Get managed instance server configuration option.
+    """Display information for an extension.
 
-    :example: Show server configuration option allowPolybaseExport on ManagedInstance_1 in ResourceGroup_1
-        az sql mi server-configuration-option show -g 'ResourceGroup_1' --mi 'ManagedInstance_1' --name allowPolybaseExport
+    :example: Show the CustomScript extension version 2.0.2.
+        az vm extension image show -l westus -n CustomScript --publisher Microsoft.Azure.Extensions --version 2.0.2
+
+    :example: Show the latest version of the Docker extension.
+        az vm extension image list-versions --publisher Microsoft.Azure.Extensions -l westus -n DockerExtension --query "[].name" -o tsv | sort | tail -n 1
+        az vm extension image show -l westus --publisher Microsoft.Azure.Extensions -n DockerExtension --version LatestVersion
     """
 
     _aaz_info = {
-        "version": "2022-08-01-preview",
+        "version": "2022-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/serverconfigurationoptions/{}", "2022-08-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmextension/types/{}/versions/{}", "2022-11-01"],
         ]
     }
 
@@ -44,27 +48,34 @@ class Show(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.managed_instance_name = AAZStrArg(
-            options=["--mi", "--instance-name", "--managed-instance", "--managed-instance-name"],
-            help="Name of the managed instance.",
+        _args_schema.location = AAZResourceLocationArg(
+            help="Location. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`.",
             required=True,
             id_part="name",
         )
-        _args_schema.resource_group = AAZResourceGroupNameArg(
-            required=True,
-        )
-        _args_schema.server_configuration_option_name = AAZStrArg(
-            options=["-n", "--name", "--server-configuration-option-name"],
-            help="Name of the server configuration option.",
+        _args_schema.publisher_name = AAZStrArg(
+            options=["-p", "--publisher", "--publisher-name"],
+            help="Image publisher name.",
             required=True,
             id_part="child_name_1",
-            enum={"allowPolybaseExport": "allowPolybaseExport"},
+        )
+        _args_schema.name = AAZStrArg(
+            options=["-n", "--name", "--type"],
+            help="Name of the extension.",
+            required=True,
+            id_part="child_name_3",
+        )
+        _args_schema.version = AAZStrArg(
+            options=["--version"],
+            help="Extension version.",
+            required=True,
+            id_part="child_name_4",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.ServerConfigurationOptionsGet(ctx=self.ctx)()
+        self.VirtualMachineExtensionImagesGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -79,7 +90,7 @@ class Show(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class ServerConfigurationOptionsGet(AAZHttpOperation):
+    class VirtualMachineExtensionImagesGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -93,7 +104,7 @@ class Show(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/serverConfigurationOptions/{serverConfigurationOptionName}",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/publishers/{publisherName}/artifacttypes/vmextension/types/{type}/versions/{version}",
                 **self.url_parameters
             )
 
@@ -109,19 +120,23 @@ class Show(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "managedInstanceName", self.ctx.args.managed_instance_name,
+                    "location", self.ctx.args.location,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "serverConfigurationOptionName", self.ctx.args.server_configuration_option_name,
+                    "publisherName", self.ctx.args.publisher_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "type", self.ctx.args.name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "version", self.ctx.args.version,
                     required=True,
                 ),
             }
@@ -131,7 +146,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-08-01-preview",
+                    "api-version", "2022-11-01",
                     required=True,
                 ),
             }
@@ -167,25 +182,42 @@ class Show(AAZCommand):
             _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
+            _schema_on_200.location = AAZStrType(
+                flags={"required": True},
+            )
             _schema_on_200.name = AAZStrType(
-                flags={"read_only": True},
+                flags={"required": True, "read_only": True},
             )
             _schema_on_200.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
+            _schema_on_200.tags = AAZDictType()
             _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
             )
 
             properties = cls._schema_on_200.properties
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.server_configuration_option_value = AAZIntType(
-                serialized_name="serverConfigurationOptionValue",
+            properties.compute_role = AAZStrType(
+                serialized_name="computeRole",
                 flags={"required": True},
             )
+            properties.handler_schema = AAZStrType(
+                serialized_name="handlerSchema",
+                flags={"required": True},
+            )
+            properties.operating_system = AAZStrType(
+                serialized_name="operatingSystem",
+                flags={"required": True},
+            )
+            properties.supports_multiple_extensions = AAZBoolType(
+                serialized_name="supportsMultipleExtensions",
+            )
+            properties.vm_scale_set_enabled = AAZBoolType(
+                serialized_name="vmScaleSetEnabled",
+            )
+
+            tags = cls._schema_on_200.tags
+            tags.Element = AAZStrType()
 
             return cls._schema_on_200
 

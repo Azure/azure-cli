@@ -12,19 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "sql mi server-configuration-option list",
+    "vm host list",
 )
 class List(AAZCommand):
-    """List a list of managed instance server configuration options.
+    """List dedicated hosts.
 
-    :example: List server configuration options on ManagedInstance_1 in ResourceGroup_1
-        az sql mi server-configuration-option list -g 'ResourceGroup_1' --mi 'ManagedInstance_1'
+    :example: List dedicated hosts.
+        az vm host list --host-group MyHostGroup --resource-group MyResourceGroup
     """
 
     _aaz_info = {
-        "version": "2022-08-01-preview",
+        "version": "2022-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/serverconfigurationoptions", "2022-08-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/hostgroups/{}/hosts", "2022-11-01"],
         ]
     }
 
@@ -43,19 +43,20 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.managed_instance_name = AAZStrArg(
-            options=["--mi", "--instance-name", "--managed-instance", "--managed-instance-name"],
-            help="Name of the managed instance.",
+        _args_schema.host_group_name = AAZStrArg(
+            options=["--host-group", "--host-group-name"],
+            help="The name of the dedicated host group.",
             required=True,
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
+            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.ServerConfigurationOptionsListByManagedInstance(ctx=self.ctx)()
+        self.DedicatedHostsListByHostGroup(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -71,7 +72,7 @@ class List(AAZCommand):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class ServerConfigurationOptionsListByManagedInstance(AAZHttpOperation):
+    class DedicatedHostsListByHostGroup(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -85,7 +86,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/serverConfigurationOptions",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/hostGroups/{hostGroupName}/hosts",
                 **self.url_parameters
             )
 
@@ -101,7 +102,7 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "managedInstanceName", self.ctx.args.managed_instance_name,
+                    "hostGroupName", self.ctx.args.host_group_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -119,7 +120,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-08-01-preview",
+                    "api-version", "2022-11-01",
                     required=True,
                 ),
             }
@@ -154,10 +155,9 @@ class List(AAZCommand):
             _schema_on_200 = cls._schema_on_200
             _schema_on_200.next_link = AAZStrType(
                 serialized_name="nextLink",
-                flags={"read_only": True},
             )
             _schema_on_200.value = AAZListType(
-                flags={"read_only": True},
+                flags={"required": True},
             )
 
             value = cls._schema_on_200.value
@@ -167,25 +167,108 @@ class List(AAZCommand):
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
+            _element.location = AAZStrType(
+                flags={"required": True},
+            )
             _element.name = AAZStrType(
                 flags={"read_only": True},
             )
             _element.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
+            _element.sku = AAZObjectType(
+                flags={"required": True},
+            )
+            _element.tags = AAZDictType()
             _element.type = AAZStrType(
                 flags={"read_only": True},
             )
 
             properties = cls._schema_on_200.value.Element.properties
+            properties.auto_replace_on_failure = AAZBoolType(
+                serialized_name="autoReplaceOnFailure",
+            )
+            properties.host_id = AAZStrType(
+                serialized_name="hostId",
+                flags={"read_only": True},
+            )
+            properties.instance_view = AAZObjectType(
+                serialized_name="instanceView",
+            )
+            properties.license_type = AAZStrType(
+                serialized_name="licenseType",
+            )
+            properties.platform_fault_domain = AAZIntType(
+                serialized_name="platformFaultDomain",
+            )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
             )
-            properties.server_configuration_option_value = AAZIntType(
-                serialized_name="serverConfigurationOptionValue",
-                flags={"required": True},
+            properties.provisioning_time = AAZStrType(
+                serialized_name="provisioningTime",
+                flags={"read_only": True},
             )
+            properties.time_created = AAZStrType(
+                serialized_name="timeCreated",
+                flags={"read_only": True},
+            )
+            properties.virtual_machines = AAZListType(
+                serialized_name="virtualMachines",
+                flags={"read_only": True},
+            )
+
+            instance_view = cls._schema_on_200.value.Element.properties.instance_view
+            instance_view.asset_id = AAZStrType(
+                serialized_name="assetId",
+                flags={"read_only": True},
+            )
+            instance_view.available_capacity = AAZObjectType(
+                serialized_name="availableCapacity",
+            )
+            instance_view.statuses = AAZListType()
+
+            available_capacity = cls._schema_on_200.value.Element.properties.instance_view.available_capacity
+            available_capacity.allocatable_v_ms = AAZListType(
+                serialized_name="allocatableVMs",
+            )
+
+            allocatable_v_ms = cls._schema_on_200.value.Element.properties.instance_view.available_capacity.allocatable_v_ms
+            allocatable_v_ms.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.instance_view.available_capacity.allocatable_v_ms.Element
+            _element.count = AAZFloatType()
+            _element.vm_size = AAZStrType(
+                serialized_name="vmSize",
+            )
+
+            statuses = cls._schema_on_200.value.Element.properties.instance_view.statuses
+            statuses.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.instance_view.statuses.Element
+            _element.code = AAZStrType()
+            _element.display_status = AAZStrType(
+                serialized_name="displayStatus",
+            )
+            _element.level = AAZStrType()
+            _element.message = AAZStrType()
+            _element.time = AAZStrType()
+
+            virtual_machines = cls._schema_on_200.value.Element.properties.virtual_machines
+            virtual_machines.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.virtual_machines.Element
+            _element.id = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            sku = cls._schema_on_200.value.Element.sku
+            sku.capacity = AAZIntType()
+            sku.name = AAZStrType()
+            sku.tier = AAZStrType()
+
+            tags = cls._schema_on_200.value.Element.tags
+            tags.Element = AAZStrType()
 
             return cls._schema_on_200
 
