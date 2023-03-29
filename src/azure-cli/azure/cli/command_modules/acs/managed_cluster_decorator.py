@@ -4159,18 +4159,28 @@ class AKSManagedClusterContext(BaseAKSContext):
         """Obtrain the value of security_profile.workload_identity.
         :return: Optional[ManagedClusterSecurityProfileWorkloadIdentity]
         """
-        # NOTE: enable_workload_identity can be one of:
-        #
-        # - True: sets by user, to enable the workload identity feature
-        # - False: sets by user, to disable the workload identity feature
-        # - None: user unspecified, don't set the profile and let server side to backfill
         enable_workload_identity = self.raw_param.get("enable_workload_identity")
+        disable_workload_identity = self.raw_param.get("disable_workload_identity")
 
-        if enable_workload_identity is None:
+        if self.decorator_mode == DecoratorMode.CREATE:
+            # CREATE mode has no --disable-workload-identity flag
+            disable_workload_identity = None
+
+        if enable_workload_identity is None and disable_workload_identity is None:
+            # no flags have been set, return None; server side will backfill the default/existing value
             return None
 
+        if enable_workload_identity and disable_workload_identity:
+            raise MutuallyExclusiveArgumentError(
+                "Cannot specify --enable-workload-identity and "
+                "--disable-workload-identity at the same time."
+            )
+
         profile = self.models.ManagedClusterSecurityProfileWorkloadIdentity()
-        if self.decorator_mode == DecoratorMode.UPDATE:
+
+        if self.decorator_mode == DecoratorMode.CREATE:
+            profile.enabled = bool(enable_workload_identity)
+        elif self.decorator_mode == DecoratorMode.UPDATE:
             if (
                 hasattr(self.mc, "security_profile") and
                 self.mc.security_profile is not None and
@@ -4179,7 +4189,10 @@ class AKSManagedClusterContext(BaseAKSContext):
                 # reuse previous profile is has been set
                 profile = self.mc.security_profile.workload_identity
 
-        profile.enabled = bool(enable_workload_identity)
+            if enable_workload_identity:
+                profile.enabled = True
+            elif disable_workload_identity:
+                profile.enabled = False
 
         if profile.enabled:
             # in enable case, we need to check if OIDC issuer has been enabled
@@ -4728,7 +4741,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 mc.security_profile.workload_identity = None
             return mc
 
-        if mc.security_profile is None:
+        if hasattr(mc, "security_profile") and mc.security_profile is None:
             mc.security_profile = self.models.ManagedClusterSecurityProfile()
         mc.security_profile.workload_identity = profile
 
@@ -6513,7 +6526,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 mc.security_profile.workload_identity = None
             return mc
 
-        if mc.security_profile is None:
+        if hasattr(mc, "security_profile") and mc.security_profile is None:
             mc.security_profile = self.models.ManagedClusterSecurityProfile()
         mc.security_profile.workload_identity = profile
 

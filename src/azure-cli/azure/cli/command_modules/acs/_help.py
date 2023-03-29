@@ -670,6 +670,9 @@ parameters:
   - name: --enable-workload-identity
     type: bool
     short-summary: Enable workload identity addon.
+  - name: --disbable-workload-identity
+    type: bool
+    short-summary: Disable workload identity addon.
   - name: --enable-secret-rotation
     type: bool
     short-summary: Enable secret rotation. Use with azure-keyvault-secrets-provider addon.
