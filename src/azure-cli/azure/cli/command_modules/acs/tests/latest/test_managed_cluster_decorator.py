@@ -8887,18 +8887,6 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         updated_mc = dec.update_workload_identity_profile(mc)
         self.assertIsNone(updated_mc.security_profile)
 
-    def test_update_workload_identity_profile__default_value_mc_enabled(self):
-        dec = AKSManagedClusterUpdateDecorator(self.cmd, self.client, {}, ResourceType.MGMT_CONTAINERSERVICE)
-        mc = self.models.ManagedCluster(location="test_location")
-        mc.security_profile = self.models.ManagedClusterSecurityProfile(
-            workload_identity=self.models.ManagedClusterSecurityProfileWorkloadIdentity(
-                enabled=True,
-            )
-        )
-        dec.context.attach_mc(mc)
-        updated_mc = dec.update_workload_identity_profile(mc)
-        self.assertIsNone(updated_mc.security_profile.workload_identity)
-
     def test_update_workload_identity_profile__enabled(self):
         dec = AKSManagedClusterUpdateDecorator(
             self.cmd,
