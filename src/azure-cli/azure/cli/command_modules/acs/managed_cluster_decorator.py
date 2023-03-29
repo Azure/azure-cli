@@ -4050,7 +4050,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                 self.mc.sku and
                 self.mc.sku.tier is not None
             ):
-                uptime_sla = self.mc.sku.tier == "Paid"
+                uptime_sla = self.mc.sku.tier == "Standard"
 
         # this parameter does not need dynamic completion
         # validation
@@ -5656,8 +5656,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         if self.context.get_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
             mc.sku = self.models.ManagedClusterSKU(
-                name="Basic",
-                tier="Paid"
+                name="Base",
+                tier="Standard"
             )
         return mc
 
@@ -6141,13 +6141,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         if self.context.get_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
             mc.sku = self.models.ManagedClusterSKU(
-                name="Basic",
-                tier="Paid"
+                name="Base",
+                tier="Standard"
             )
 
         if self.context.get_no_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_FREE:
             mc.sku = self.models.ManagedClusterSKU(
-                name="Basic",
+                name="Base",
                 tier="Free"
             )
         return mc

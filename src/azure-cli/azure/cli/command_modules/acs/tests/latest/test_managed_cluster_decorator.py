@@ -3857,8 +3857,8 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_1.get_uptime_sla(), False)
         sku = self.models.ManagedClusterSKU(
-            name="Basic",
-            tier="Paid",
+            name="Base",
+            tier="Standard",
         )
         mc = self.models.ManagedCluster(
             location="test_location",
@@ -3879,8 +3879,8 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.UPDATE,
         )
         sku_2 = self.models.ManagedClusterSKU(
-            name="Basic",
-            tier="Paid",
+            name="Base",
+            tier="Standard",
         )
         mc_2 = self.models.ManagedCluster(
             location="test_location",
@@ -3902,7 +3902,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         sku_3 = self.models.ManagedClusterSKU(
-            name="Basic",
+            name="Base",
             tier="Free",
         )
         mc_3 = self.models.ManagedCluster(
@@ -3926,8 +3926,8 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_1.get_no_uptime_sla(), False)
         sku = self.models.ManagedClusterSKU(
-            name="Basic",
-            tier="Paid",
+            name="Base",
+            tier="Standard",
         )
         mc = self.models.ManagedCluster(
             location="test_location",
@@ -3949,7 +3949,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.UPDATE,
         )
         sku_2 = self.models.ManagedClusterSKU(
-            name="Basic",
+            name="Base",
             tier="Free",
         )
         mc_2 = self.models.ManagedCluster(
@@ -6747,8 +6747,8 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         dec_2.context.attach_mc(mc_2)
         dec_mc_2 = dec_2.set_up_sku(mc_2)
         sku = self.models.ManagedClusterSKU(
-            name="Basic",
-            tier="Paid",
+            name="Base",
+            tier="Standard",
         )
         ground_truth_mc_2 = self.models.ManagedCluster(
             location="test_location",
@@ -7202,9 +7202,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "trustedCa": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZHekNDQXdPZ0F3SUJBZ0lVT1FvajhDTFpkc2Vscjk3cnZJd3g1T0xEc3V3d0RRWUpLb1pJaHZjTkFRRUwKQlFBd0Z6RVZNQk1HQTFVRUF3d01ZMnhwTFhCeWIzaDVMWFp0TUI0WERUSXlNRE13T0RFMk5EUTBOMW9YRFRNeQpNRE13TlRFMk5EUTBOMW93RnpFVk1CTUdBMVVFQXd3TVkyeHBMWEJ5YjNoNUxYWnRNSUlDSWpBTkJna3Foa2lHCjl3MEJBUUVGQUFPQ0FnOEFNSUlDQ2dLQ0FnRUEvTVB0VjVCVFB0NmNxaTRSZE1sbXIzeUlzYTJ1anpjaHh2NGgKanNDMUR0blJnb3M1UzQxUEgwcmkrM3RUU1ZYMzJ5cndzWStyRDFZUnVwbTZsbUU3R2hVNUkwR2k5b3prU0YwWgpLS2FKaTJveXBVL0ZCK1FQcXpvQ1JzTUV3R0NibUtGVmw4VnVoeW5kWEs0YjRrYmxyOWJsL2V1d2Q3TThTYnZ6CldVam5lRHJRc2lJc3J6UFQ0S0FaTHFjdHpEZTRsbFBUN1lLYTMzaGlFUE9mdldpWitkcWthUUE5UDY0eFhTeW4KZkhYOHVWQUozdUJWSmVHeEQwcGtOSjdqT3J5YVV1SEh1Y1U4UzltSWpuS2pBQjVhUGpMSDV4QXM2bG1iMzEyMgp5KzF0bkVBbVhNNTBEK1VvRWpmUzZIT2I1cmRpcVhHdmMxS2JvS2p6a1BDUnh4MmE3MmN2ZWdVajZtZ0FKTHpnClRoRTFsbGNtVTRpemd4b0lNa1ZwR1RWT0xMbjFWRkt1TmhNWkN2RnZLZ25Lb0F2M0cwRlVuZldFYVJSalNObUQKTFlhTURUNUg5WnQycERJVWpVR1N0Q2w3Z1J6TUVuWXdKTzN5aURwZzQzbzVkUnlzVXlMOUpmRS9OaDdUZzYxOApuOGNKL1c3K1FZYllsanVyYXA4cjdRRlNyb2wzVkNoRkIrT29yNW5pK3ZvaFNBd0pmMFVsTXBHM3hXbXkxVUk0ClRGS2ZGR1JSVHpyUCs3Yk53WDVoSXZJeTVWdGd5YU9xSndUeGhpL0pkeHRPcjJ0QTVyQ1c3K0N0Z1N2emtxTkUKWHlyN3ZrWWdwNlk1TFpneTR0VWpLMEswT1VnVmRqQk9oRHBFenkvRkY4dzFGRVZnSjBxWS9yV2NMa0JIRFQ4Ugp2SmtoaW84Q0F3RUFBYU5mTUYwd0Z3WURWUjBSQkJBd0RvSU1ZMnhwTFhCeWIzaDVMWFp0TUJJR0ExVWRFd0VCCi93UUlNQVlCQWY4Q0FRQXdEd1lEVlIwUEFRSC9CQVVEQXdmbmdEQWRCZ05WSFNVRUZqQVVCZ2dyQmdFRkJRY0QKQWdZSUt3WUJCUVVIQXdFd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dJQkFBb21qQ3lYdmFRT3hnWUs1MHNYTEIyKwp3QWZkc3g1bm5HZGd5Zmc0dXJXMlZtMTVEaEd2STdDL250cTBkWXkyNE4vVWJHN1VEWHZseUxJSkZxMVhQN25mCnBaRzBWQ2paNjlibXhLbTNaOG0wL0F3TXZpOGU5ZWR5OHY5a05CQ3dMR2tIYkE4WW85Q0lpUWdlbGZwcDF2VWgKYm5OQmhhRCtpdTZDZmlDTHdnSmIvaXc3ZW8vQ3lvWnF4K3RqWGFPMnpYdm00cC8rUUlmQU9ndEdRTEZVOGNmWgovZ1VyVHE1Z0ZxMCtQOUd5V3NBVEpGNnE3TDZXWlpqME91VHNlN2Y0Q1NpajZNbk9NTXhBK0pvYWhKejdsc1NpClRKSEl3RXA1ci9SeWhweWVwUXhGWWNVSDVKSmY5cmFoWExXWmkrOVRqeFNNMll5aHhmUlBzaVVFdUdEb2s3OFEKbS9RUGlDaTlKSmIxb2NtVGpBVjh4RFNob2NpdlhPRnlobjZMbjc3dkxqWStBYXZ0V0RoUXRocHVQeHNMdFZ6bQplMFNIMTFkRUxSdGI3NG1xWE9yTzdmdS8rSUJzM0pxTEUvVSt4dXhRdHZHOHZHMXlES0hIU1pxUzJoL1dzNGw0Ck5pQXNoSGdlaFFEUEJjWTl3WVl6ZkJnWnBPVU16ZERmNTB4K0ZTbFk0M1dPSkp6U3VRaDR5WjArM2t5Z3VDRjgKcm5NTFNjZXlTNGNpNExtSi9LQ1N1R2RmNlhWWXo4QkU5Z2pqanBDUDZxeTBVbFJlZldzL2lnL3djSysyYkYxVApuL1l2KzZnWGVDVEhKNzVxRElQbHA3RFJVVWswZmJNajRiSWthb2dXV2s0emYydThteFpMYTBsZVBLTktaTi9tCkdDdkZ3cjNlaSt1LzhjenA1RjdUCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K",
             },
         )
-        print(dec_mc_1.http_proxy_config)
-        print(ground_truth_mc_1.http_proxy_config)
-        ground_truth_mc_1
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
     def test_set_up_image_cleaner(self):
@@ -7693,7 +7690,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         mc_1 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
-                name="Basic",
+                name="Base",
                 tier="Free",
             ),
         )
@@ -7705,7 +7702,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
-                name="Basic",
+                name="Base",
                 tier="Free",
             ),
         )
@@ -7724,7 +7721,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         mc_2 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
-                name="Basic",
+                name="Base",
                 tier="Free",
             ),
         )
@@ -7746,8 +7743,8 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         mc_3 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
-                name="Basic",
-                tier="Paid",
+                name="Base",
+                tier="Standard",
             ),
         )
         dec_3.context.attach_mc(mc_3)
@@ -7755,7 +7752,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         ground_truth_mc_3 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
-                name="Basic",
+                name="Base",
                 tier="Free",
             ),
         )
@@ -7774,7 +7771,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         mc_4 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
-                name="Basic",
+                name="Base",
                 tier="Free",
             ),
         )
@@ -7783,8 +7780,8 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         ground_truth_mc_4 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
-                name="Basic",
-                tier="Paid",
+                name="Base",
+                tier="Standard",
             ),
         )
         self.assertEqual(dec_mc_4, ground_truth_mc_4)
