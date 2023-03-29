@@ -196,13 +196,13 @@ class FunctionAppHttpsOnlyTest(ScenarioTest):
         self.cmd(f'appservice plan create -n {linux_plan} -g {resource_group} --is-linux')
         self.cmd(f'appservice plan create -n {windows_plan} -g {resource_group}')
 
-        self.cmd(f'functionapp create -g {resource_group} -n {functionapp_name} --plan {windows_plan} --os-type windows -s {storage_account} --https-only').assert_with_checks([JMESPathCheck('httpsOnly', True)])
+        self.cmd(f'functionapp create -g {resource_group} -n {functionapp_name} --plan {windows_plan} --os-type windows -s {storage_account} --https-only --functions-version 4').assert_with_checks([JMESPathCheck('httpsOnly', True)])
         functionapp_name = self.create_random_name('function', 40)
-        self.cmd(f'functionapp create -g {resource_group} -n {functionapp_name} --plan {linux_plan} --os-type linux --runtime python -s {storage_account} --https-only true').assert_with_checks([JMESPathCheck('httpsOnly', True)])
+        self.cmd(f'functionapp create -g {resource_group} -n {functionapp_name} --plan {linux_plan} --os-type linux --runtime python -s {storage_account} --https-only true --functions-version 4').assert_with_checks([JMESPathCheck('httpsOnly', True)])
         functionapp_name = self.create_random_name('function', 40)
-        self.cmd(f'functionapp create -g {resource_group} -n {functionapp_name} --plan {windows_plan} --os-type windows -s {storage_account}').assert_with_checks([JMESPathCheck('httpsOnly', False)])
+        self.cmd(f'functionapp create -g {resource_group} -n {functionapp_name} --plan {windows_plan} --os-type windows -s {storage_account} --functions-version 4').assert_with_checks([JMESPathCheck('httpsOnly', False)])
         functionapp_name = self.create_random_name('function', 40)
-        self.cmd(f'functionapp create -g {resource_group} -n {functionapp_name} --plan {linux_plan} --os-type linux --runtime python -s {storage_account} --https-only false').assert_with_checks([JMESPathCheck('httpsOnly', False)])
+        self.cmd(f'functionapp create -g {resource_group} -n {functionapp_name} --plan {linux_plan} --os-type linux --runtime python -s {storage_account} --https-only false --functions-version 4').assert_with_checks([JMESPathCheck('httpsOnly', False)])
 
 
 class FunctionAppWithPlanE2ETest(ScenarioTest):
@@ -221,13 +221,13 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         storage_account_id2 = self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(
             storage2, resource_group2, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()['id']
 
-        self.cmd('functionapp create -g {} -n {} -p {} -s {}'.format(resource_group, functionapp_name, plan, storage), checks=[
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --functions-version 4'.format(resource_group, functionapp_name, plan, storage), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', functionapp_name),
             JMESPathCheck('hostNames[0]',
                           functionapp_name + '.azurewebsites.net')
         ])
-        self.cmd('functionapp create -g {} -n {} -p {} -s {}'.format(resource_group2,
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --functions-version 4'.format(resource_group2,
                                                                      functionapp_name2, plan_id, storage_account_id2))
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
@@ -863,7 +863,7 @@ class FunctionAppOnWindowsWithoutRuntime(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionappwindowswithoutruntime', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -1275,7 +1275,7 @@ class FunctionAppKeysTests(ScenarioTest):
         key_name = "keyname1"
         key_value = "keyvalue1"
         key_type = "functionKeys"
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 3'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -1300,7 +1300,7 @@ class FunctionAppKeysTests(ScenarioTest):
         key_name = "keyname1"
         key_value = "keyvalue1"
         key_type = "functionKeys"
-        self.cmd('functionapp create -g {} -n {} -c {} -s {}'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -1323,7 +1323,7 @@ class FunctionAppKeysTests(ScenarioTest):
         key_name = "keyname1"
         key_value = "keyvalue1"
         key_type = "functionKeys"
-        self.cmd('functionapp create -g {} -n {} -c {} -s {}'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
