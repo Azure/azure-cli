@@ -89,7 +89,7 @@ def list_skus(cmd, kind=None, location=None, resource_group_name=None, account_n
 def create(
         client, resource_group_name, account_name, sku_name, kind, location, custom_domain=None,
         tags=None, api_properties=None, assign_identity=False, storage=None, encryption=None,
-        yes=None): # pylint: disable=unused-argument
+        yes=None):  # pylint: disable=unused-argument
     """
     Create an Azure Cognitive Services account.
     """
