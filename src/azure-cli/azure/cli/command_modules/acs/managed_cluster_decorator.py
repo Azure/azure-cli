@@ -4162,10 +4162,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         enable_workload_identity = self.raw_param.get("enable_workload_identity")
         disable_workload_identity = self.raw_param.get("disable_workload_identity")
 
-        if self.decorator_mode == DecoratorMode.CREATE:
-            # CREATE mode has no --disable-workload-identity flag
-            disable_workload_identity = None
-
         if enable_workload_identity is None and disable_workload_identity is None:
             # no flags have been set, return None; server side will backfill the default/existing value
             return None
