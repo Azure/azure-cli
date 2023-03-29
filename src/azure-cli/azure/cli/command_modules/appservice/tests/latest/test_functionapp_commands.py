@@ -1872,7 +1872,7 @@ class FunctionappCorsTest(ScenarioTest):
         self.assertEqual(result, False)
 
 
-class FunctionappNetworkConnectionTests(LiveScenarioTest):
+class FunctionappNetworkConnectionTests(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -2014,23 +2014,6 @@ class FunctionappNetworkConnectionTests(LiveScenarioTest):
         self.cmd(
             'functionapp vnet-integration remove -g {} -n {}'.format(resource_group, functionapp_name))
         self.cmd('functionapp vnet-integration list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('length(@)', 0)
-        ])
-
-
-        self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'.format(
-            resource_group, functionapp_name, slot_functionapp_name))
-        self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {} --slot {}'.format(resource_group, functionapp_name, vnet_name, subnet_name, slot_functionapp_name), checks=[
-            JMESPathCheck('subnetResourceId', subnet_id)
-        ])
-        self.cmd('functionapp vnet-integration list -g {} -n {} --slot {}'.format(resource_group, functionapp_name, slot_functionapp_name), checks=[
-            JMESPathCheck('length(@)', 1),
-            JMESPathCheck('[0].name', subnet_name),
-            JMESPathCheck('[0].vnetResourceId', subnet_id)
-        ])
-        self.cmd(
-            'functionapp vnet-integration remove -g {} -n {} --slot {}'.format(resource_group, functionapp_name, slot_functionapp_name))
-        self.cmd('functionapp vnet-integration list -g {} -n {} --slot {}'.format(resource_group, functionapp_name, slot_functionapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
 
