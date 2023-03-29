@@ -4734,15 +4734,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         self._ensure_mc(mc)
 
         profile = self.context.get_workload_identity_profile()
-        if profile is None:
-            if mc.security_profile is not None:
-                # set the value to None to let server side to fill in the default value
-                mc.security_profile.workload_identity = None
-            return mc
-
-        if hasattr(mc, "security_profile") and mc.security_profile is None:
-            mc.security_profile = self.models.ManagedClusterSecurityProfile()
-        mc.security_profile.workload_identity = profile
+        if profile:
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()
+            mc.security_profile.workload_identity = profile
 
         return mc
 
@@ -6518,15 +6513,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         self._ensure_mc(mc)
 
         profile = self.context.get_workload_identity_profile()
-        if profile is None:
-            if mc.security_profile is not None:
-                # set the value to None to let server side to fill in the default value
-                mc.security_profile.workload_identity = None
-            return mc
-
-        if hasattr(mc, "security_profile") and mc.security_profile is None:
-            mc.security_profile = self.models.ManagedClusterSecurityProfile()
-        mc.security_profile.workload_identity = profile
+        if profile:
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()
+            mc.security_profile.workload_identity = profile
 
         return mc
 
