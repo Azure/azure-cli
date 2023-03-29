@@ -1470,7 +1470,7 @@ class AppServiceCors(ScenarioTest):
         self.cmd(
             'storage account create --name {storage} -g {rg} --sku Standard_LRS')
         self.cmd(
-            'functionapp create -g {rg} -n {function} --plan {plan} -s {storage}')
+            'functionapp create -g {rg} -n {function} --plan {plan} -s {storage} --functions-version 4')
         self.cmd(
             'functionapp cors add -g {rg} -n {function} --allowed-origins https://msdn.com https://msn.com')
         result = self.cmd(
