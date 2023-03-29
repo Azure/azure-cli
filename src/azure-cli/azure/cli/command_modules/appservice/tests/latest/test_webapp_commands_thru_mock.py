@@ -202,22 +202,16 @@ class TestWebappMocked(unittest.TestCase):
         # assert, we return the virtual ip from the ip based ssl binding
         resolve_hostname_mock.assert_called_with('myweb.com')
 
-    @mock.patch.dict('os.environ')
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
-    @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
-    @mock.patch('requests.Session.send', autospec=True)
-    def test_update_site_config(self, send_mock, get_raw_token_mock, site_op_mock):
-        if 'AZURE_HTTP_USER_AGENT' in os.environ:
-            del os.environ['AZURE_HTTP_USER_AGENT']  # Clear env var possibly added by DevOps
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp', autospec=True)
+    def test_update_site_config(self, is_centauri_functionapp_mock, site_op_mock):
 
         cmd_mock = _get_test_cmd()
         SiteConfig = cmd_mock.get_models('SiteConfig')
         site_config = SiteConfig(name='antarctica')
         site_op_mock.return_value = site_config
-        return_val = mock.MagicMock()
-        return_val.is_ok = True
-        send_mock.return_value = return_val
-        get_raw_token_mock.return_value = ("Bearer", "eyJ0eXAiOiJKV1", None), None, None
+
+        is_centauri_functionapp_mock.return_value = False
         # action
         update_site_configs(cmd_mock, 'myRG', 'myweb', java_version='1.8')
         # assert
