@@ -4460,7 +4460,8 @@ class AKSManagedClusterContext(BaseAKSContext):
                     not self.mc.security_profile.image_cleaner.enabled
                 ):
                     raise RequiredArgumentMissingError(
-                        'Update "--image-cleaner-interval-hours" requires specifying "--enable-image-cleaner" or ImageCleaner enabled on managed cluster.')
+                        'Update "--image-cleaner-interval-hours" requires specifying "--enable-image-cleaner" \
+                            or ImageCleaner enabled on managed cluster.')
 
                 if disable_image_cleaner:
                     raise MutuallyExclusiveArgumentError(
