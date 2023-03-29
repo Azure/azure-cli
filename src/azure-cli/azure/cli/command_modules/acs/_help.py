@@ -434,6 +434,12 @@ parameters:
   - name: --azure-keyvault-kms-key-vault-resource-id
     type: string
     short-summary: Resource ID of Azure Key Vault.
+  - name: --enable-image-cleaner
+    type: bool
+    short-summary: Enable ImageCleaner Service.
+  - name: --image-cleaner-interval-hours
+    type: int
+    short-summary: ImageCleaner scanning interval.
   - name: --disable-disk-driver
     type: bool
     short-summary: Disable AzureDisk CSI Driver.
@@ -713,6 +719,15 @@ parameters:
   - name: --azure-keyvault-kms-key-vault-resource-id
     type: string
     short-summary: Resource ID of Azure Key Vault.
+  - name: --enable-image-cleaner
+    type: bool
+    short-summary: Enable ImageCleaner Service.
+  - name: --disable-image-cleaner
+    type: bool
+    short-summary: Disable ImageCleaner Service.
+  - name: --image-cleaner-interval-hours
+    type: int
+    short-summary: ImageCleaner scanning interval.
   - name: --enable-disk-driver
     type: bool
     short-summary: Enable AzureDisk CSI Driver.

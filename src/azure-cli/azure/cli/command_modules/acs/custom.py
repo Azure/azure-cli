@@ -443,6 +443,8 @@ def aks_create(
     azure_keyvault_kms_key_id=None,
     azure_keyvault_kms_key_vault_network_access=None,
     azure_keyvault_kms_key_vault_resource_id=None,
+    enable_image_cleaner=False,
+    image_cleaner_interval_hours=None,
     enable_keda=False,
     # addons
     enable_addons=None,
@@ -585,6 +587,9 @@ def aks_update(
     azure_keyvault_kms_key_id=None,
     azure_keyvault_kms_key_vault_network_access=None,
     azure_keyvault_kms_key_vault_resource_id=None,
+    enable_image_cleaner=False,
+    disable_image_cleaner=False,
+    image_cleaner_interval_hours=None,
     http_proxy_config=None,
     enable_keda=False,
     disable_keda=False,
