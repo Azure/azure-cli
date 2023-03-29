@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "eventhubs",
+    "servicebus namespace private-endpoint-connection",
 )
 class __CMDGroup(AAZCommandGroup):
-    """sss
+    """servicebus namespace private-endpoint-connection
     """
     pass
 

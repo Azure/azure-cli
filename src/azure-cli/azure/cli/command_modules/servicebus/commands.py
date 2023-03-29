@@ -15,9 +15,7 @@ def load_command_table(self, _):
     from azure.cli.command_modules.servicebus._client_factory import (namespaces_mgmt_client_factory,
                                                                       rules_mgmt_client_factory,
                                                                       disaster_recovery_mgmt_client_factory,
-                                                                      migration_mgmt_client_factory,
-                                                                      private_endpoint_connections_mgmt_client_factory,
-                                                                      private_link_mgmt_client_factory)
+                                                                      migration_mgmt_client_factory)
 
     sb_namespace_util = CliCommandType(
         operations_tmpl='azure.mgmt.servicebus.operations#NamespacesOperations.{}',
@@ -41,16 +39,6 @@ def load_command_table(self, _):
     sb_migration_util = CliCommandType(
         operations_tmpl='azure.mgmt.servicebus.operations#MigrationConfigsOperations.{}',
         client_factory=migration_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_SERVICEBUS)
-
-    sb_private_endpoints_util = CliCommandType(
-        operations_tmpl='azure.mgmt.servicebus.operations#PrivateEndpointConnectionsOperations.{}',
-        client_factory=private_endpoint_connections_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_SERVICEBUS)
-
-    sb_private_links_util = CliCommandType(
-        operations_tmpl='azure.mgmt.servicebus.operations#PrivateLinkResourcesOperations.{}',
-        client_factory=private_link_mgmt_client_factory,
         resource_type=ResourceType.MGMT_SERVICEBUS)
 
     from ._validators import validate_subnet
