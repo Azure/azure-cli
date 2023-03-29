@@ -458,7 +458,7 @@ def update_application_settings_polling(cmd, resource_group_name, name, app_sett
         _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
                                     'update_application_settings',
                                     app_settings, slot, client)
-    except Exception as ex:
+    except Exception as ex:  # pylint: disable=broad-except
         poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
         if ex.response.status_code == 202 and poll_url:
             r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
