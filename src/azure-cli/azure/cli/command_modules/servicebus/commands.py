@@ -42,7 +42,6 @@ def load_command_table(self, _):
                             is_preview=True) as g:
         g.custom_command('create', 'create_servicebus_namespace', supports_no_wait=True)
 
-    custom_tmpl = 'azure.cli.command_modules.servicebus.custom#{}'
     with self.command_group('servicebus namespace', sb_namespace_util, client_factory=namespaces_mgmt_client_factory, min_api='2021-06-01-preview') as g:
         g.custom_command('exists', 'cli_namespace_exists')
 
