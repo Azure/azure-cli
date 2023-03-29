@@ -4162,8 +4162,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         enable_workload_identity = self.raw_param.get("enable_workload_identity")
         disable_workload_identity = self.raw_param.get("disable_workload_identity")
 
-        if enable_workload_identity is None and disable_workload_identity is None:
-            # no flags have been set, return None; server side will backfill the default/existing value
+        if not enable_workload_identity and not disable_workload_identity:
             return None
 
         if enable_workload_identity and disable_workload_identity:
@@ -4171,6 +4170,9 @@ class AKSManagedClusterContext(BaseAKSContext):
                 "Cannot specify --enable-workload-identity and "
                 "--disable-workload-identity at the same time."
             )
+
+        if not hasattr(self.models, "ManagedClusterSecurityProfileWorkloadIdentity"):
+            return None
 
         profile = self.models.ManagedClusterSecurityProfileWorkloadIdentity()
 
@@ -4731,15 +4733,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         self._ensure_mc(mc)
 
         profile = self.context.get_workload_identity_profile()
-        if profile is None:
-            if mc.security_profile is not None:
-                # set the value to None to let server side to fill in the default value
-                mc.security_profile.workload_identity = None
-            return mc
-
-        if hasattr(mc, "security_profile") and mc.security_profile is None:
-            mc.security_profile = self.models.ManagedClusterSecurityProfile()
-        mc.security_profile.workload_identity = profile
+        if profile:
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()
+            mc.security_profile.workload_identity = profile
 
         return mc
 
@@ -5941,8 +5938,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         is_default = (
             self.context.get_cluster_autoscaler_profile() is None and
             self.context.get_api_server_authorized_ip_ranges() is None and
-            self.context.get_nodepool_labels() is None and
-            self.context.raw_param.get("enable_workload_identity") is None
+            self.context.get_nodepool_labels() is None
         )
 
         if not is_changed and is_default:
@@ -6516,15 +6512,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         self._ensure_mc(mc)
 
         profile = self.context.get_workload_identity_profile()
-        if profile is None:
-            if mc.security_profile is not None:
-                # set the value to None to let server side to fill in the default value
-                mc.security_profile.workload_identity = None
-            return mc
-
-        if hasattr(mc, "security_profile") and mc.security_profile is None:
-            mc.security_profile = self.models.ManagedClusterSecurityProfile()
-        mc.security_profile.workload_identity = profile
+        if profile:
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()
+            mc.security_profile.workload_identity = profile
 
         return mc
 

@@ -4131,10 +4131,12 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
     def test_get_workload_identity_profile__update_with_enable_and_disable(self):
         ctx = AKSManagedClusterContext(
             self.cmd,
-            {
-                "enable_workload_identity": True,
-                "disable_workload_identity": True,
-            },
+            AKSManagedClusterParamDict(
+                {
+                    "enable_workload_identity": True,
+                    "disable_workload_identity": True,
+                }
+            ),
             self.models, decorator_mode=DecoratorMode.UPDATE
         )
         ctx.attach_mc(self.models.ManagedCluster(location="test_location"))
@@ -7188,17 +7190,6 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         dec_2.check_raw_parameters()
 
-        # custom value
-        dec_3 = AKSManagedClusterUpdateDecorator(
-            self.cmd,
-            self.client,
-            {
-                "enable_workload_identity": False,
-            },
-            ResourceType.MGMT_CONTAINERSERVICE,
-        )
-        self.assertIsNone(dec_3.check_raw_parameters())
-
     def test_ensure_mc(self):
         dec_1 = AKSManagedClusterUpdateDecorator(
             self.cmd,
@@ -8896,18 +8887,6 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         updated_mc = dec.update_workload_identity_profile(mc)
         self.assertIsNone(updated_mc.security_profile)
 
-    def test_update_workload_identity_profile__default_value_mc_enabled(self):
-        dec = AKSManagedClusterUpdateDecorator(self.cmd, self.client, {}, ResourceType.MGMT_CONTAINERSERVICE)
-        mc = self.models.ManagedCluster(location="test_location")
-        mc.security_profile = self.models.ManagedClusterSecurityProfile(
-            workload_identity=self.models.ManagedClusterSecurityProfileWorkloadIdentity(
-                enabled=True,
-            )
-        )
-        dec.context.attach_mc(mc)
-        updated_mc = dec.update_workload_identity_profile(mc)
-        self.assertIsNone(updated_mc.security_profile.workload_identity)
-
     def test_update_workload_identity_profile__enabled(self):
         dec = AKSManagedClusterUpdateDecorator(
             self.cmd,
@@ -8928,7 +8907,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.cmd,
             self.client,
             {
-                "enable_workload_identity": False,
+                "disable_workload_identity": True,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
