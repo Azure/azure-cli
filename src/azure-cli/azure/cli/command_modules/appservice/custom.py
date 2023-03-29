@@ -426,9 +426,15 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
         app_settings.properties[setting_name] = value
     client = web_client_factory(cmd.cli_ctx)
 
-    result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
-                                         'update_application_settings',
-                                         app_settings, slot, client)
+
+# TODO: Centauri currently return wrong payload for update appsettings, remove this once backend has the fix.
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client)
+        result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
+    else:
+        result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
+                                             'update_application_settings',
+                                             app_settings, slot, client)
 
     app_settings_slot_cfg_names = []
     if slot_result:
@@ -444,6 +450,25 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
     return _build_app_settings_output(result.properties, app_settings_slot_cfg_names)
+
+
+# TODO: Update manual polling to use LongRunningOperation once backend API & new SDK supports polling
+def update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client):
+    try:
+        _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
+                                    'update_application_settings',
+                                    app_settings, slot, client)
+    except Exception as ex:
+        poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
+        if ex.response.status_code == 202 and poll_url:
+            r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+            poll_timeout = time.time() + 60 * 2  # 2 minute timeout
+
+            while r.status_code != 200 and time.time() < poll_timeout:
+                time.sleep(5)
+                r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+        else:
+            raise CLIError(ex)
 
 
 def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage_type, account_name,
@@ -1485,7 +1510,8 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
 def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None):
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory(cmd.cli_ctx)
-    slot_cfg_names = {} if is_centauri_functionapp(cmd, resource_group_name, name) \
+    centauri_functionapp = is_centauri_functionapp(cmd, resource_group_name, name)
+    slot_cfg_names = {} if centauri_functionapp \
         else client.web_apps.list_slot_configuration_names(resource_group_name, name)
     is_slot_settings = False
 
@@ -1498,10 +1524,14 @@ def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None
     if is_slot_settings:
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
-                                         'update_application_settings',
-                                         app_settings, slot, client)
-
+# TODO: Centauri currently return wrong payload for update appsettings, remove this once backend has the fix.
+    if centauri_functionapp:
+        update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client)
+        result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
+    else:
+        result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
+                                             'update_application_settings',
+                                             app_settings, slot, client)
     return _build_app_settings_output(result.properties, slot_cfg_names.app_setting_names if slot_cfg_names else [])
 
 
