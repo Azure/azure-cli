@@ -63,13 +63,10 @@ class Update(AAZCommand):
                 resource_group_arg="resource_group",
             ),
         )
-        _args_schema.virtual_hub = AAZResourceIdArg(
+        _args_schema.virtual_hub = AAZStrArg(
             options=["--virtual-hub"],
             help="Name or ID of the virtual hub to associate with the gateway.",
             nullable=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}"
-            )
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
@@ -233,7 +230,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_express_route_gateway_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_express_route_gateway_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -344,7 +341,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _build_schema_express_route_gateway_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_express_route_gateway_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -396,190 +393,190 @@ class Update(AAZCommand):
             )
 
 
-def _build_schema_sub_resource_update(_builder):
-    if _builder is None:
-        return
-    _builder.set_prop("id", AAZStrType, ".id")
+class _UpdateHelper:
+    """Helper class for Update"""
 
+    @classmethod
+    def _build_schema_sub_resource_update(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("id", AAZStrType, ".id")
 
-_schema_express_route_gateway_read = None
+    _schema_express_route_gateway_read = None
 
+    @classmethod
+    def _build_schema_express_route_gateway_read(cls, _schema):
+        if cls._schema_express_route_gateway_read is not None:
+            _schema.etag = cls._schema_express_route_gateway_read.etag
+            _schema.id = cls._schema_express_route_gateway_read.id
+            _schema.location = cls._schema_express_route_gateway_read.location
+            _schema.name = cls._schema_express_route_gateway_read.name
+            _schema.properties = cls._schema_express_route_gateway_read.properties
+            _schema.tags = cls._schema_express_route_gateway_read.tags
+            _schema.type = cls._schema_express_route_gateway_read.type
+            return
 
-def _build_schema_express_route_gateway_read(_schema):
-    global _schema_express_route_gateway_read
-    if _schema_express_route_gateway_read is not None:
-        _schema.etag = _schema_express_route_gateway_read.etag
-        _schema.id = _schema_express_route_gateway_read.id
-        _schema.location = _schema_express_route_gateway_read.location
-        _schema.name = _schema_express_route_gateway_read.name
-        _schema.properties = _schema_express_route_gateway_read.properties
-        _schema.tags = _schema_express_route_gateway_read.tags
-        _schema.type = _schema_express_route_gateway_read.type
-        return
+        cls._schema_express_route_gateway_read = _schema_express_route_gateway_read = AAZObjectType()
 
-    _schema_express_route_gateway_read = AAZObjectType()
+        express_route_gateway_read = _schema_express_route_gateway_read
+        express_route_gateway_read.etag = AAZStrType(
+            flags={"read_only": True},
+        )
+        express_route_gateway_read.id = AAZStrType()
+        express_route_gateway_read.location = AAZStrType()
+        express_route_gateway_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        express_route_gateway_read.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        express_route_gateway_read.tags = AAZDictType()
+        express_route_gateway_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
-    express_route_gateway_read = _schema_express_route_gateway_read
-    express_route_gateway_read.etag = AAZStrType(
-        flags={"read_only": True},
-    )
-    express_route_gateway_read.id = AAZStrType()
-    express_route_gateway_read.location = AAZStrType()
-    express_route_gateway_read.name = AAZStrType(
-        flags={"read_only": True},
-    )
-    express_route_gateway_read.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
-    express_route_gateway_read.tags = AAZDictType()
-    express_route_gateway_read.type = AAZStrType(
-        flags={"read_only": True},
-    )
+        properties = _schema_express_route_gateway_read.properties
+        properties.auto_scale_configuration = AAZObjectType(
+            serialized_name="autoScaleConfiguration",
+        )
+        properties.express_route_connections = AAZListType(
+            serialized_name="expressRouteConnections",
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.virtual_hub = AAZObjectType(
+            serialized_name="virtualHub",
+            flags={"required": True},
+        )
 
-    properties = _schema_express_route_gateway_read.properties
-    properties.auto_scale_configuration = AAZObjectType(
-        serialized_name="autoScaleConfiguration",
-    )
-    properties.express_route_connections = AAZListType(
-        serialized_name="expressRouteConnections",
-    )
-    properties.provisioning_state = AAZStrType(
-        serialized_name="provisioningState",
-        flags={"read_only": True},
-    )
-    properties.virtual_hub = AAZObjectType(
-        serialized_name="virtualHub",
-        flags={"required": True},
-    )
+        auto_scale_configuration = _schema_express_route_gateway_read.properties.auto_scale_configuration
+        auto_scale_configuration.bounds = AAZObjectType()
 
-    auto_scale_configuration = _schema_express_route_gateway_read.properties.auto_scale_configuration
-    auto_scale_configuration.bounds = AAZObjectType()
+        bounds = _schema_express_route_gateway_read.properties.auto_scale_configuration.bounds
+        bounds.max = AAZIntType()
+        bounds.min = AAZIntType()
 
-    bounds = _schema_express_route_gateway_read.properties.auto_scale_configuration.bounds
-    bounds.max = AAZIntType()
-    bounds.min = AAZIntType()
+        express_route_connections = _schema_express_route_gateway_read.properties.express_route_connections
+        express_route_connections.Element = AAZObjectType()
 
-    express_route_connections = _schema_express_route_gateway_read.properties.express_route_connections
-    express_route_connections.Element = AAZObjectType()
+        _element = _schema_express_route_gateway_read.properties.express_route_connections.Element
+        _element.id = AAZStrType()
+        _element.name = AAZStrType(
+            flags={"required": True},
+        )
+        _element.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
 
-    _element = _schema_express_route_gateway_read.properties.express_route_connections.Element
-    _element.id = AAZStrType()
-    _element.name = AAZStrType(
-        flags={"required": True},
-    )
-    _element.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
+        properties = _schema_express_route_gateway_read.properties.express_route_connections.Element.properties
+        properties.authorization_key = AAZStrType(
+            serialized_name="authorizationKey",
+        )
+        properties.enable_internet_security = AAZBoolType(
+            serialized_name="enableInternetSecurity",
+        )
+        properties.express_route_circuit_peering = AAZObjectType(
+            serialized_name="expressRouteCircuitPeering",
+            flags={"required": True},
+        )
+        properties.express_route_gateway_bypass = AAZBoolType(
+            serialized_name="expressRouteGatewayBypass",
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.routing_configuration = AAZObjectType(
+            serialized_name="routingConfiguration",
+        )
+        properties.routing_weight = AAZIntType(
+            serialized_name="routingWeight",
+        )
 
-    properties = _schema_express_route_gateway_read.properties.express_route_connections.Element.properties
-    properties.authorization_key = AAZStrType(
-        serialized_name="authorizationKey",
-    )
-    properties.enable_internet_security = AAZBoolType(
-        serialized_name="enableInternetSecurity",
-    )
-    properties.express_route_circuit_peering = AAZObjectType(
-        serialized_name="expressRouteCircuitPeering",
-        flags={"required": True},
-    )
-    properties.express_route_gateway_bypass = AAZBoolType(
-        serialized_name="expressRouteGatewayBypass",
-    )
-    properties.provisioning_state = AAZStrType(
-        serialized_name="provisioningState",
-        flags={"read_only": True},
-    )
-    properties.routing_configuration = AAZObjectType(
-        serialized_name="routingConfiguration",
-    )
-    properties.routing_weight = AAZIntType(
-        serialized_name="routingWeight",
-    )
+        express_route_circuit_peering = _schema_express_route_gateway_read.properties.express_route_connections.Element.properties.express_route_circuit_peering
+        express_route_circuit_peering.id = AAZStrType()
 
-    express_route_circuit_peering = _schema_express_route_gateway_read.properties.express_route_connections.Element.properties.express_route_circuit_peering
-    express_route_circuit_peering.id = AAZStrType()
+        routing_configuration = _schema_express_route_gateway_read.properties.express_route_connections.Element.properties.routing_configuration
+        routing_configuration.associated_route_table = AAZObjectType(
+            serialized_name="associatedRouteTable",
+        )
+        cls._build_schema_sub_resource_read(routing_configuration.associated_route_table)
+        routing_configuration.propagated_route_tables = AAZObjectType(
+            serialized_name="propagatedRouteTables",
+        )
+        routing_configuration.vnet_routes = AAZObjectType(
+            serialized_name="vnetRoutes",
+        )
 
-    routing_configuration = _schema_express_route_gateway_read.properties.express_route_connections.Element.properties.routing_configuration
-    routing_configuration.associated_route_table = AAZObjectType(
-        serialized_name="associatedRouteTable",
-    )
-    _build_schema_sub_resource_read(routing_configuration.associated_route_table)
-    routing_configuration.propagated_route_tables = AAZObjectType(
-        serialized_name="propagatedRouteTables",
-    )
-    routing_configuration.vnet_routes = AAZObjectType(
-        serialized_name="vnetRoutes",
-    )
+        propagated_route_tables = _schema_express_route_gateway_read.properties.express_route_connections.Element.properties.routing_configuration.propagated_route_tables
+        propagated_route_tables.ids = AAZListType()
+        propagated_route_tables.labels = AAZListType()
 
-    propagated_route_tables = _schema_express_route_gateway_read.properties.express_route_connections.Element.properties.routing_configuration.propagated_route_tables
-    propagated_route_tables.ids = AAZListType()
-    propagated_route_tables.labels = AAZListType()
+        ids = _schema_express_route_gateway_read.properties.express_route_connections.Element.properties.routing_configuration.propagated_route_tables.ids
+        ids.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(ids.Element)
 
-    ids = _schema_express_route_gateway_read.properties.express_route_connections.Element.properties.routing_configuration.propagated_route_tables.ids
-    ids.Element = AAZObjectType()
-    _build_schema_sub_resource_read(ids.Element)
+        labels = _schema_express_route_gateway_read.properties.express_route_connections.Element.properties.routing_configuration.propagated_route_tables.labels
+        labels.Element = AAZStrType()
 
-    labels = _schema_express_route_gateway_read.properties.express_route_connections.Element.properties.routing_configuration.propagated_route_tables.labels
-    labels.Element = AAZStrType()
+        vnet_routes = _schema_express_route_gateway_read.properties.express_route_connections.Element.properties.routing_configuration.vnet_routes
+        vnet_routes.bgp_connections = AAZListType(
+            serialized_name="bgpConnections",
+            flags={"read_only": True},
+        )
+        vnet_routes.static_routes = AAZListType(
+            serialized_name="staticRoutes",
+        )
 
-    vnet_routes = _schema_express_route_gateway_read.properties.express_route_connections.Element.properties.routing_configuration.vnet_routes
-    vnet_routes.bgp_connections = AAZListType(
-        serialized_name="bgpConnections",
-        flags={"read_only": True},
-    )
-    vnet_routes.static_routes = AAZListType(
-        serialized_name="staticRoutes",
-    )
+        bgp_connections = _schema_express_route_gateway_read.properties.express_route_connections.Element.properties.routing_configuration.vnet_routes.bgp_connections
+        bgp_connections.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(bgp_connections.Element)
 
-    bgp_connections = _schema_express_route_gateway_read.properties.express_route_connections.Element.properties.routing_configuration.vnet_routes.bgp_connections
-    bgp_connections.Element = AAZObjectType()
-    _build_schema_sub_resource_read(bgp_connections.Element)
+        static_routes = _schema_express_route_gateway_read.properties.express_route_connections.Element.properties.routing_configuration.vnet_routes.static_routes
+        static_routes.Element = AAZObjectType()
 
-    static_routes = _schema_express_route_gateway_read.properties.express_route_connections.Element.properties.routing_configuration.vnet_routes.static_routes
-    static_routes.Element = AAZObjectType()
+        _element = _schema_express_route_gateway_read.properties.express_route_connections.Element.properties.routing_configuration.vnet_routes.static_routes.Element
+        _element.address_prefixes = AAZListType(
+            serialized_name="addressPrefixes",
+        )
+        _element.name = AAZStrType()
+        _element.next_hop_ip_address = AAZStrType(
+            serialized_name="nextHopIpAddress",
+        )
 
-    _element = _schema_express_route_gateway_read.properties.express_route_connections.Element.properties.routing_configuration.vnet_routes.static_routes.Element
-    _element.address_prefixes = AAZListType(
-        serialized_name="addressPrefixes",
-    )
-    _element.name = AAZStrType()
-    _element.next_hop_ip_address = AAZStrType(
-        serialized_name="nextHopIpAddress",
-    )
+        address_prefixes = _schema_express_route_gateway_read.properties.express_route_connections.Element.properties.routing_configuration.vnet_routes.static_routes.Element.address_prefixes
+        address_prefixes.Element = AAZStrType()
 
-    address_prefixes = _schema_express_route_gateway_read.properties.express_route_connections.Element.properties.routing_configuration.vnet_routes.static_routes.Element.address_prefixes
-    address_prefixes.Element = AAZStrType()
+        virtual_hub = _schema_express_route_gateway_read.properties.virtual_hub
+        virtual_hub.id = AAZStrType()
 
-    virtual_hub = _schema_express_route_gateway_read.properties.virtual_hub
-    virtual_hub.id = AAZStrType()
+        tags = _schema_express_route_gateway_read.tags
+        tags.Element = AAZStrType()
 
-    tags = _schema_express_route_gateway_read.tags
-    tags.Element = AAZStrType()
+        _schema.etag = cls._schema_express_route_gateway_read.etag
+        _schema.id = cls._schema_express_route_gateway_read.id
+        _schema.location = cls._schema_express_route_gateway_read.location
+        _schema.name = cls._schema_express_route_gateway_read.name
+        _schema.properties = cls._schema_express_route_gateway_read.properties
+        _schema.tags = cls._schema_express_route_gateway_read.tags
+        _schema.type = cls._schema_express_route_gateway_read.type
 
-    _schema.etag = _schema_express_route_gateway_read.etag
-    _schema.id = _schema_express_route_gateway_read.id
-    _schema.location = _schema_express_route_gateway_read.location
-    _schema.name = _schema_express_route_gateway_read.name
-    _schema.properties = _schema_express_route_gateway_read.properties
-    _schema.tags = _schema_express_route_gateway_read.tags
-    _schema.type = _schema_express_route_gateway_read.type
+    _schema_sub_resource_read = None
 
+    @classmethod
+    def _build_schema_sub_resource_read(cls, _schema):
+        if cls._schema_sub_resource_read is not None:
+            _schema.id = cls._schema_sub_resource_read.id
+            return
 
-_schema_sub_resource_read = None
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
 
+        sub_resource_read = _schema_sub_resource_read
+        sub_resource_read.id = AAZStrType()
 
-def _build_schema_sub_resource_read(_schema):
-    global _schema_sub_resource_read
-    if _schema_sub_resource_read is not None:
-        _schema.id = _schema_sub_resource_read.id
-        return
-
-    _schema_sub_resource_read = AAZObjectType()
-
-    sub_resource_read = _schema_sub_resource_read
-    sub_resource_read.id = AAZStrType()
-
-    _schema.id = _schema_sub_resource_read.id
+        _schema.id = cls._schema_sub_resource_read.id
 
 
 __all__ = ["Update"]

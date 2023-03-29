@@ -12,6 +12,8 @@ from typing import Dict, List, Optional, Tuple, TypeVar, Union
 from azure.cli.command_modules.acs._consts import (
     CONST_LOAD_BALANCER_SKU_BASIC,
     CONST_LOAD_BALANCER_SKU_STANDARD,
+    CONST_MANAGED_CLUSTER_SKU_TIER_FREE,
+    CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD,
     CONST_OUTBOUND_TYPE_LOAD_BALANCER,
     CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
@@ -2114,6 +2116,30 @@ class AKSManagedClusterContext(BaseAKSContext):
             enable_validation=True, load_balancer_profile=load_balancer_profile
         )
 
+    def _get_network_plugin_mode(self, enable_validation: bool = False) -> Union[str, None]:
+        # read the original value passed by the command
+        network_plugin_mode = self.raw_param.get("network_plugin_mode")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.network_plugin_mode is not None
+        ):
+            network_plugin_mode = self.mc.network_profile.network_plugin_mode
+
+        if enable_validation:
+            # todo(tyler-lloyd) do we need any validation?
+            pass
+
+        return network_plugin_mode
+
+    def get_network_plugin_mode(self) -> Union[str, None]:
+        """Obtain the value of network_plugin_mode.
+
+        :return: string or None
+        """
+        return self._get_network_plugin_mode(enable_validation=True)
+
     def _get_network_plugin(self, enable_validation: bool = False) -> Union[str, None]:
         """Internal function to obtain the value of network_plugin.
 
@@ -2148,12 +2174,15 @@ class AKSManagedClusterContext(BaseAKSContext):
             ) = self._get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
                 enable_validation=False
             )
+            network_plugin_mode = self._get_network_plugin_mode(enable_validation=False)
             if network_plugin:
-                if network_plugin == "azure" and pod_cidr:
+                if network_plugin == "azure" and pod_cidr and network_plugin_mode != "overlay":
                     logger.warning(
-                        'When using `--network-plugin azure` without the preview feature '
-                        '`--network-plugin-mode overlay` the provided pod CIDR "%s" will be '
-                        'overwritten with the subnet CIDR.', pod_cidr
+                        'The provided pod CIDR "%s" will be overwritten with the node subnet CIDR. '
+                        'To use a pod CIDR, please specify network plugin mode `overlay` or '
+                        'use network plugin `kubenet`. For more information about Azure CNI '
+                        'Overlay please see https://aka.ms/aks/azure-cni-overlay. This warning '
+                        'will become an error in the Build sprint release.', pod_cidr
                     )
             else:
                 if (
@@ -4013,6 +4042,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         # read the original value passed by the command
         uptime_sla = self.raw_param.get("uptime_sla")
+
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
@@ -4020,7 +4050,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                 self.mc.sku and
                 self.mc.sku.tier is not None
             ):
-                uptime_sla = self.mc.sku.tier == "Paid"
+                uptime_sla = self.mc.sku.tier == "Standard"
 
         # this parameter does not need dynamic completion
         # validation
@@ -4029,7 +4059,35 @@ class AKSManagedClusterContext(BaseAKSContext):
                 raise MutuallyExclusiveArgumentError(
                     'Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.'
                 )
+
+            if uptime_sla and self.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_FREE:
+                raise MutuallyExclusiveArgumentError(
+                    'Cannot specify "--uptime-sla" and "--tier free" at the same time.'
+                )
+
         return uptime_sla
+
+    def get_tier(self) -> str:
+        """Obtain the value of tier.
+
+        :return: str
+        """
+        tier = self.raw_param.get("tier")
+        if not tier:
+            return ""
+
+        tierStr = tier.lower()
+        if tierStr == CONST_MANAGED_CLUSTER_SKU_TIER_FREE and self._get_uptime_sla(enable_validation=False):
+            raise MutuallyExclusiveArgumentError(
+                'Cannot specify "--uptime-sla" and "--tier free" at the same time.'
+            )
+
+        if tierStr == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD and self._get_no_uptime_sla(enable_validation=False):
+            raise MutuallyExclusiveArgumentError(
+                'Cannot specify "--no-uptime-sla" and "--tier standard" at the same time.'
+            )
+
+        return tierStr
 
     def get_uptime_sla(self) -> bool:
         """Obtain the value of uptime_sla.
@@ -4060,6 +4118,12 @@ class AKSManagedClusterContext(BaseAKSContext):
                 raise MutuallyExclusiveArgumentError(
                     'Cannot specify "--uptime-sla" and "--no-uptime-sla" at the same time.'
                 )
+
+            if no_uptime_sla and self.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
+                raise MutuallyExclusiveArgumentError(
+                    'Cannot specify "--no-uptime-sla" and "--tier standard" at the same time.'
+                )
+
         return no_uptime_sla
 
     def get_no_uptime_sla(self) -> bool:
@@ -4369,6 +4433,86 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self._get_azure_keyvault_kms_key_vault_resource_id(enable_validation=True)
 
+    def get_enable_image_cleaner(self) -> bool:
+        """Obtain the value of enable_image_cleaner.
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_image_cleaner = self.raw_param.get("enable_image_cleaner")
+
+        return enable_image_cleaner
+
+    def get_disable_image_cleaner(self) -> bool:
+        """Obtain the value of disable_image_cleaner.
+        This function supports the option of enable_validation. When enabled, if both enable_image_cleaner and
+        disable_image_cleaner are specified, raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        # read the original value passed by the command
+        disable_image_cleaner = self.raw_param.get("disable_image_cleaner")
+
+        return disable_image_cleaner
+
+    def _get_image_cleaner_interval_hours(self, enable_validation: bool = False) -> Union[int, None]:
+        """Internal function to obtain the value of image_cleaner_interval_hours according to the context.
+        This function supports the option of enable_validation. When enabled
+          1. In Create mode
+            a. if image_cleaner_interval_hours is specified but enable_image_cleaner is missed,
+                 raise a RequiredArgumentMissingError.
+          2. In update mode
+            b. if image_cleaner_interval_hours is specified and image cleaner was not enabled,
+                 raise a RequiredArgumentMissingError.
+            c. if image_cleaner_interval_hours is specified and disable_image_cleaner is specified,
+                  raise a MutuallyExclusiveArgumentError.
+        :return: int or None
+        """
+        # read the original value passed by the command
+        image_cleaner_interval_hours = self.raw_param.get("image_cleaner_interval_hours")
+
+        if image_cleaner_interval_hours is not None and enable_validation:
+
+            enable_image_cleaner = self.get_enable_image_cleaner()
+            disable_image_cleaner = self.get_disable_image_cleaner()
+
+            if self.decorator_mode == DecoratorMode.CREATE:
+                if not enable_image_cleaner:
+                    raise RequiredArgumentMissingError(
+                        '"--image-cleaner-interval-hours" requires "--enable-image-cleaner" in create mode.')
+
+            elif self.decorator_mode == DecoratorMode.UPDATE:
+                if not enable_image_cleaner and (
+                    not self.mc or
+                    not self.mc.security_profile or
+                    not self.mc.security_profile.image_cleaner or
+                    not self.mc.security_profile.image_cleaner.enabled
+                ):
+                    raise RequiredArgumentMissingError(
+                        'Update "--image-cleaner-interval-hours" requires specifying "--enable-image-cleaner" \
+                            or ImageCleaner enabled on managed cluster.')
+
+                if disable_image_cleaner:
+                    raise MutuallyExclusiveArgumentError(
+                        'Cannot specify --image-cleaner-interval-hours and --disable-image-cleaner at the same time.')
+
+        return image_cleaner_interval_hours
+
+    def get_image_cleaner_interval_hours(self) -> Union[int, None]:
+        """Obtain the value of image_cleaner_interval_hours.
+        This function supports the option of enable_validation. When enabled
+          1. In Create mode
+            a. if image_cleaner_interval_hours is specified but enable_image_cleaner is missed,
+                 raise a RequiredArgumentMissingError.
+          2. In update mode
+            b. if image_cleaner_interval_hours is specified and image cleaner was not enabled,
+                 raise a RequiredArgumentMissingError.
+            c. if image_cleaner_interval_hours is specified and disable_image_cleaner is specified,
+                raise a MutuallyExclusiveArgumentError.
+        :return: int or None
+        """
+        interval_hours = self._get_image_cleaner_interval_hours(enable_validation=True)
+
+        return interval_hours
+
     def _get_disable_local_accounts(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of disable_local_accounts.
 
@@ -4673,6 +4817,30 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def set_up_image_cleaner(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up security profile imageCleaner for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        interval_hours = self.context.get_image_cleaner_interval_hours()
+
+        if self.context.get_enable_image_cleaner():
+
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()
+
+            if not interval_hours:
+                # default value for intervalHours - one week
+                interval_hours = 24 * 7
+
+            mc.security_profile.image_cleaner = self.models.ManagedClusterSecurityProfileImageCleaner(
+                enabled=True,
+                interval_hours=interval_hours,
+            )
+
+        return mc
+
     def init_mc(self) -> ManagedCluster:
         """Initialize a ManagedCluster object with required parameter location and attach it to internal context.
 
@@ -4936,6 +5104,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         # verify network_plugin, pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy
         network_plugin = self.context.get_network_plugin()
+        network_plugin_mode = self.context.get_network_plugin_mode()
         (
             pod_cidr,
             service_cidr,
@@ -4958,6 +5127,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         if any(
             [
                 network_plugin,
+                network_plugin_mode,
                 pod_cidr,
                 pod_cidrs,
                 service_cidr,
@@ -4974,6 +5144,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             # and outbound_type, and they might be overwritten to None.
             network_profile = self.models.ContainerServiceNetworkProfile(
                 network_plugin=network_plugin,
+                network_plugin_mode=network_plugin_mode,
                 pod_cidr=pod_cidr,
                 pod_cidrs=pod_cidrs,
                 service_cidr=service_cidr,
@@ -5483,10 +5654,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
-        if self.context.get_uptime_sla():
+        if self.context.get_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
             mc.sku = self.models.ManagedClusterSKU(
-                name="Basic",
-                tier="Paid"
+                name="Base",
+                tier="Standard"
             )
         return mc
 
@@ -5572,6 +5743,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_storage_profile(mc)
         # set up azure keyvalut kms
         mc = self.set_up_azure_keyvault_kms(mc)
+        # set up image cleaner
+        mc = self.set_up_image_cleaner(mc)
         # set up http proxy config
         mc = self.set_up_http_proxy_config(mc)
         # set up workload autoscaler profile
@@ -5966,15 +6139,15 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
-        if self.context.get_uptime_sla():
+        if self.context.get_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
             mc.sku = self.models.ManagedClusterSKU(
-                name="Basic",
-                tier="Paid"
+                name="Base",
+                tier="Standard"
             )
 
-        if self.context.get_no_uptime_sla():
+        if self.context.get_no_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_FREE:
             mc.sku = self.models.ManagedClusterSKU(
-                name="Basic",
+                name="Base",
                 tier="Free"
             )
         return mc
@@ -6443,6 +6616,44 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def update_image_cleaner(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update security profile imageCleaner for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        enable_image_cleaner = self.context.get_enable_image_cleaner()
+        disable_image_cleaner = self.context.get_disable_image_cleaner()
+        interval_hours = self.context.get_image_cleaner_interval_hours()
+
+        # no image cleaner related changes
+        if not enable_image_cleaner and not disable_image_cleaner and interval_hours is None:
+            return mc
+
+        if mc.security_profile is None:
+            mc.security_profile = self.models.ManagedClusterSecurityProfile()
+
+        image_cleaner_profile = mc.security_profile.image_cleaner
+
+        if image_cleaner_profile is None:
+            image_cleaner_profile = self.models.ManagedClusterSecurityProfileImageCleaner()
+            mc.security_profile.image_cleaner = image_cleaner_profile
+
+            # init the image cleaner profile
+            image_cleaner_profile.enabled = False
+            image_cleaner_profile.interval_hours = 7 * 24
+
+        if enable_image_cleaner:
+            image_cleaner_profile.enabled = True
+
+        if disable_image_cleaner:
+            image_cleaner_profile.enabled = False
+
+        if interval_hours is not None:
+            image_cleaner_profile.interval_hours = interval_hours
+
+        return mc
+
     def update_identity_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Update identity profile for the ManagedCluster object.
 
@@ -6539,6 +6750,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_storage_profile(mc)
         # update azure keyvalut kms
         mc = self.update_azure_keyvault_kms(mc)
+        # update image cleaner
+        mc = self.update_image_cleaner(mc)
         # update identity
         mc = self.update_identity_profile(mc)
         # set up http proxy config

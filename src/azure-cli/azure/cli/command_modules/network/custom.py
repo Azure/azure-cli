@@ -61,11 +61,15 @@ from .aaz.latest.network.application_gateway.waf_policy import Create as _WAFCre
 from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condition import \
     Add as _WAFCustomRuleMatchConditionAdd
 from .aaz.latest.network.application_gateway.waf_policy.policy_setting import Update as _WAFPolicySettingUpdate
+from .aaz.latest.network.custom_ip.prefix import Update as _CustomIpPrefixUpdate
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
+from .aaz.latest.network.express_route.gateway import Create as _ExpressRouteGatewayCreate, \
+    Update as _ExpressRouteGatewayUpdate
 from .aaz.latest.network.express_route.gateway.connection import Create as _ExpressRouteConnectionCreate, \
     Update as _ExpressRouteConnectionUpdate
 from .aaz.latest.network.express_route.peering import Create as _ExpressRoutePeeringCreate, \
     Update as _ExpressRoutePeeringUpdate
+from .aaz.latest.network.express_route.peering.connection import Create as _ExpressRoutePeeringConnectionCreate
 from .aaz.latest.network.express_route.port import Create as _ExpressRoutePortCreate
 from .aaz.latest.network.express_route.port.identity import Assign as _ExpressRoutePortIdentityAssign
 from .aaz.latest.network.express_route.port.link import Update as _ExpressRoutePortLinkUpdate
@@ -86,6 +90,9 @@ from .aaz.latest.network.private_link_service import Create as _PrivateLinkServi
     Update as _PrivateLinkServiceUpdate
 from .aaz.latest.network.private_link_service.connection import Update as _PrivateEndpointConnectionUpdate
 from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
+from .aaz.latest.network.security_partner_provider import Create as _SecurityPartnerProviderCreate, \
+    Update as _SecurityPartnerProviderUpdate
+from .aaz.latest.network.virtual_appliance import Create as _VirtualApplianceCreate, Update as _VirtualApplianceUpdate
 from .aaz.latest.network.vnet import Create as _VNetCreate, Update as _VNetUpdate
 from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
 from .aaz.latest.network.vnet.subnet import Create as _VNetSubnetCreate, Update as _VNetSubnetUpdate
@@ -903,7 +910,7 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
                 child_name_1=http_settings
             )
 
-        from .aaz.latest.network.application_gateway._health_on_demand import HealthOnDemand
+        from .aaz.latest.network.application_gateway import HealthOnDemand
         return LongRunningOperation(cmd.cli_ctx)(
             HealthOnDemand(cli_ctx=cmd.cli_ctx)(command_args={
                 "name": application_gateway_name,
@@ -921,7 +928,7 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
             })
         )
 
-    from .aaz.latest.network.application_gateway._health import Health
+    from .aaz.latest.network.application_gateway import Health
     return LongRunningOperation(cmd.cli_ctx)(
         Health(cli_ctx=cmd.cli_ctx)(command_args={
             "name": application_gateway_name,
@@ -3149,7 +3156,7 @@ class ExpressRouteCreate(_ExpressRouteCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.bandwidth = AAZListArg(
             options=["--bandwidth"],
@@ -3159,6 +3166,9 @@ class ExpressRouteCreate(_ExpressRouteCreate):
         args_schema.bandwidth_in_mbps._registered = False
         args_schema.bandwidth_in_gbps._registered = False
         args_schema.sku_name._registered = False
+        args_schema.express_route_port._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRoutePorts/{}",
+        )
         return args_schema
 
     def pre_operations(self):
@@ -3179,7 +3189,7 @@ class ExpressRouteUpdate(_ExpressRouteUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.bandwidth = AAZListArg(
             options=["--bandwidth"],
@@ -3190,6 +3200,9 @@ class ExpressRouteUpdate(_ExpressRouteUpdate):
         args_schema.bandwidth_in_mbps._registered = False
         args_schema.bandwidth_in_gbps._registered = False
         args_schema.sku_name._registered = False
+        args_schema.express_route_port._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRoutePorts/{}",
+        )
         return args_schema
 
     def pre_operations(self):
@@ -3230,7 +3243,7 @@ def _validate_ipv6_address_prefixes(prefixes):
 class ExpressRoutePeeringCreate(_ExpressRoutePeeringCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat, AAZArgEnum
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.ip_version = AAZStrArg(
             options=['--ip-version'],
@@ -3238,7 +3251,13 @@ class ExpressRoutePeeringCreate(_ExpressRoutePeeringCreate):
             help="The IP version to update Microsoft Peering settings for. Allowed values: IPv4, IPv6. Default: IPv4.",
             default='IPv4'
         )
+        args_schema.route_filter._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/routeFilters/{}",
+        )
+        # taken from Xplat. No enums in SDK
+        args_schema.routing_registry_name.enum = AAZArgEnum({"ARIN": "ARIN", "APNIC": "APNIC", "AFRINIC": "AFRINIC", "LACNIC": "LACNIC", "RIPENCC": "RIPENCC", "RADB": "RADB", "ALTDB": "ALTDB", "LEVEL3": "LEVEL3"})
         args_schema.ipv6_peering_config._registered = False
+        args_schema.peering_name._required = False
         args_schema.peering_name._registered = False
 
         return args_schema
@@ -3278,7 +3297,7 @@ class ExpressRoutePeeringUpdate(_ExpressRoutePeeringUpdate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg
+        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat, AAZArgEnum
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.ip_version = AAZStrArg(
             options=['--ip-version'],
@@ -3286,6 +3305,11 @@ class ExpressRoutePeeringUpdate(_ExpressRoutePeeringUpdate):
             help="The IP version to update Microsoft Peering settings for. Allowed values: IPv4, IPv6. Default: IPv4.",
             default='IPv4'
         )
+        args_schema.route_filter._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/routeFilters/{}",
+        )
+        # taken from Xplat. No enums in SDK
+        args_schema.routing_registry_name.enum = AAZArgEnum({"ARIN": "ARIN", "APNIC": "APNIC", "AFRINIC": "AFRINIC", "LACNIC": "LACNIC", "RIPENCC": "RIPENCC", "RADB": "RADB", "ALTDB": "ALTDB", "LEVEL3": "LEVEL3"})
         args_schema.ipv6_peering_config._registered = False
         args_schema.peering_type._registered = False
         return args_schema
@@ -3315,11 +3339,50 @@ class ExpressRoutePeeringUpdate(_ExpressRoutePeeringUpdate):
                 args.route_filter = None
             if microsoft_config is not None:
                 args.ipv6_peering_config['microsoft_peering_config'] = microsoft_config
+
+
+class ExpressRoutePeeringConnectionCreate(_ExpressRoutePeeringConnectionCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.peer_circuit._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{}/peerings/{peering_name}",
+        )
+        args_schema.source_circuit._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{circuit_name}/peerings/{peering_name}",
+        )
+
+        return args_schema
 # endregion
 
 
 # region ExpressRoute Connection
 # pylint: disable=unused-argument
+class ExpressRouteGatewayCreate(_ExpressRouteGatewayCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.virtual_hub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
+class ExpressRouteGatewayUpdate(_ExpressRouteGatewayUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.virtual_hub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
 class ExpressRouteConnectionCreate(_ExpressRouteConnectionCreate):
 
     @classmethod
@@ -3668,6 +3731,7 @@ class PrivateEndpointPrivateDnsZoneAdd(_PrivateEndpointPrivateDnsZoneAdd):
             )
         )
         args_schema.private_dns_zone_id._registered = False
+        args_schema.name._required = False
 
         return args_schema
 
@@ -3712,6 +3776,13 @@ class PrivateEndpointIpConfigRemove(_PrivateEndpointIpConfigRemove):
 
 
 class PrivateEndpointAsgAdd(_PrivateEndpointAsgAdd):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.asg_id._required = False
+
+        return args_schema
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -3793,11 +3864,12 @@ class PrivateLinkServiceUpdate(_PrivateLinkServiceUpdate):
         from azure.cli.core.aaz import AAZStrArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.lb_name = AAZStrArg(options=['--lb-name'], help="Name of the load balancer to retrieve frontend IP configs from. Ignored if a frontend IP configuration ID is supplied.")
-        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.")
+        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.", nullable=True)
         args_schema.lb_frontend_ip_configs.Element = AAZResourceIdArg(
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIpConfigurations/{}"
-            )
+            ),
+            nullable=True
         )
         args_schema.load_balancer_frontend_ip_configurations._registered = False
         return args_schema
@@ -5418,6 +5490,9 @@ class VNetCreate(_VNetCreate):
                          "/networkSecurityGroups/{}",
             ),
         )
+        args_schema.ddos_protection_plan._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/ddosProtectionPlans/{}",
+        )
         # filter arguments
         args_schema.extended_location._registered = False
         return args_schema
@@ -5528,6 +5603,18 @@ class VNetSubnetCreate(_VNetSubnetCreate):
                 "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
             },
             blank="Disabled",
+        )
+        args_schema.nat_gateway._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/natGateways/{}",
+        )
+        args_schema.network_security_group._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/networkSecurityGroups/{}",
+        )
+        args_schema.route_table._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/routeTables/{}",
         )
         # filter arguments
         args_schema.policies._registered = False
@@ -5716,8 +5803,12 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
 class VNetPeeringCreate(_VNetPeeringCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.sync_remote._registered = False
+        args_schema.remote_vnet._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}",
+        )
         return args_schema
 
 
@@ -6328,6 +6419,7 @@ def create_virtual_hub(cmd,
                        virtual_hub_name,
                        hosted_subnet,
                        public_ip_address,
+                       hub_routing_preference=None,
                        location=None,
                        tags=None):
     from azure.core.exceptions import HttpResponseError
@@ -6347,6 +6439,7 @@ def create_virtual_hub(cmd,
         'location': location,
         'tags': tags,
         'sku': 'Standard',
+        "hub_routing_preference": hub_routing_preference
     }
     from .aaz.latest.network.routeserver import Create
     vhub_poller = Create(cli_ctx=cmd.cli_ctx)(command_args=args)
@@ -6445,3 +6538,66 @@ def remove_nw_connection_monitor_test_group(cmd, connection_monitor_name, locati
     }
     from .operations.watcher import WatcherConnectionMonitorTestGroupRemove
     return WatcherConnectionMonitorTestGroupRemove(cli_ctx=cmd.cli_ctx)(command_args=update_args)
+
+
+class SecurityPartnerProviderCreate(_SecurityPartnerProviderCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vhub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
+class SecurityPartnerProviderUpdate(_SecurityPartnerProviderUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vhub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
+class VirtualApplianceCreate(_VirtualApplianceCreate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vhub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
+class VirtualApplianceUpdate(_VirtualApplianceUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vhub._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
+        )
+
+        return args_schema
+
+
+class CustomIpPrefixUpdate(_CustomIpPrefixUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZArgEnum
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.state.enum = AAZArgEnum({"commission": "Commissioning", "decommission": "Decommissioning", "deprovision": "Deprovisioning", "provision": "Provisioning"})
+
+        return args_schema
