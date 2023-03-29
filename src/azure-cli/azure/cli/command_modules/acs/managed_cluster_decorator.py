@@ -2116,6 +2116,30 @@ class AKSManagedClusterContext(BaseAKSContext):
             enable_validation=True, load_balancer_profile=load_balancer_profile
         )
 
+    def _get_network_plugin_mode(self, enable_validation: bool = False) -> Union[str, None]:
+        # read the original value passed by the command
+        network_plugin_mode = self.raw_param.get("network_plugin_mode")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.network_profile and
+            self.mc.network_profile.network_plugin_mode is not None
+        ):
+            network_plugin_mode = self.mc.network_profile.network_plugin_mode
+
+        if enable_validation:
+            # todo(tyler-lloyd) do we need any validation?
+            pass
+
+        return network_plugin_mode
+
+    def get_network_plugin_mode(self) -> Union[str, None]:
+        """Obtain the value of network_plugin_mode.
+
+        :return: string or None
+        """
+        return self._get_network_plugin_mode(enable_validation=True)
+
     def _get_network_plugin(self, enable_validation: bool = False) -> Union[str, None]:
         """Internal function to obtain the value of network_plugin.
 
@@ -2150,12 +2174,15 @@ class AKSManagedClusterContext(BaseAKSContext):
             ) = self._get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
                 enable_validation=False
             )
+            network_plugin_mode = self._get_network_plugin_mode(enable_validation=False)
             if network_plugin:
-                if network_plugin == "azure" and pod_cidr:
+                if network_plugin == "azure" and pod_cidr and network_plugin_mode != "overlay":
                     logger.warning(
-                        'When using `--network-plugin azure` without the preview feature '
-                        '`--network-plugin-mode overlay` the provided pod CIDR "%s" will be '
-                        'overwritten with the subnet CIDR.', pod_cidr
+                        'The provided pod CIDR "%s" will be overwritten with the node subnet CIDR. '
+                        'To use a pod CIDR, please specify network plugin mode `overlay` or '
+                        'use network plugin `kubenet`. For more information about Azure CNI '
+                        'Overlay please see https://aka.ms/aks/azure-cni-overlay. This warning '
+                        'will become an error in the Build sprint release.', pod_cidr
                     )
             else:
                 if (
@@ -5077,6 +5104,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         # verify network_plugin, pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy
         network_plugin = self.context.get_network_plugin()
+        network_plugin_mode = self.context.get_network_plugin_mode()
         (
             pod_cidr,
             service_cidr,
@@ -5099,6 +5127,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         if any(
             [
                 network_plugin,
+                network_plugin_mode,
                 pod_cidr,
                 pod_cidrs,
                 service_cidr,
@@ -5115,6 +5144,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             # and outbound_type, and they might be overwritten to None.
             network_profile = self.models.ContainerServiceNetworkProfile(
                 network_plugin=network_plugin,
+                network_plugin_mode=network_plugin_mode,
                 pod_cidr=pod_cidr,
                 pod_cidrs=pod_cidrs,
                 service_cidr=service_cidr,

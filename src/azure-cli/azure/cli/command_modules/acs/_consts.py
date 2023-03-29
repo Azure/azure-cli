@@ -89,6 +89,9 @@ CONST_NETWORK_PLUGIN_KUBENET = "kubenet"
 CONST_NETWORK_PLUGIN_AZURE = "azure"
 CONST_NETWORK_PLUGIN_NONE = "none"
 
+# network plugin mode
+CONST_NETWORK_PLUGIN_MODE_OVERLAY = "overlay"
+
 # consts for addons
 # http application routing
 CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME = "httpApplicationRouting"
