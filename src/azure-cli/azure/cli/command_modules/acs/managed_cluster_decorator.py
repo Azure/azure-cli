@@ -4430,10 +4430,13 @@ class AKSManagedClusterContext(BaseAKSContext):
         """Internal function to obtain the value of image_cleaner_interval_hours according to the context.
         This function supports the option of enable_validation. When enabled
           1. In Create mode
-            a. if image_cleaner_interval_hours is specified but enable_image_cleaner is missed, raise a RequiredArgumentMissingError.
+            a. if image_cleaner_interval_hours is specified but enable_image_cleaner is missed,
+                 raise a RequiredArgumentMissingError.
           2. In update mode
-            b. if image_cleaner_interval_hours is specified and image cleaner was not enabled, raise a RequiredArgumentMissingError.
-            c. if image_cleaner_interval_hours is specified and disable_image_cleaner is specified, raise a MutuallyExclusiveArgumentError.
+            b. if image_cleaner_interval_hours is specified and image cleaner was not enabled,
+                 raise a RequiredArgumentMissingError.
+            c. if image_cleaner_interval_hours is specified and disable_image_cleaner is specified,
+                  raise a MutuallyExclusiveArgumentError.
         :return: int or None
         """
         # read the original value passed by the command
@@ -4469,10 +4472,13 @@ class AKSManagedClusterContext(BaseAKSContext):
         """Obtain the value of image_cleaner_interval_hours.
         This function supports the option of enable_validation. When enabled
           1. In Create mode
-            a. if image_cleaner_interval_hours is specified but enable_image_cleaner is missed, raise a RequiredArgumentMissingError.
+            a. if image_cleaner_interval_hours is specified but enable_image_cleaner is missed,
+                 raise a RequiredArgumentMissingError.
           2. In update mode
-            b. if image_cleaner_interval_hours is specified and image cleaner was not enabled, raise a RequiredArgumentMissingError.
-            c. if image_cleaner_interval_hours is specified and disable_image_cleaner is specified, raise a MutuallyExclusiveArgumentError.
+            b. if image_cleaner_interval_hours is specified and image cleaner was not enabled,
+                 raise a RequiredArgumentMissingError.
+            c. if image_cleaner_interval_hours is specified and disable_image_cleaner is specified,
+                raise a MutuallyExclusiveArgumentError.
         :return: int or None
         """
         interval_hours = self._get_image_cleaner_interval_hours(enable_validation=True)

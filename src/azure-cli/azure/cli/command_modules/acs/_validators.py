@@ -598,6 +598,7 @@ def validate_image_cleaner_enable_disable_mutually_exclusive(namespace):
             "Cannot specify --enable-image-cleaner and --disable-image-cleaner at the same time."
         )
 
+
 def validate_registry_name(cmd, namespace):
     """Append login server endpoint suffix."""
     registry = namespace.acr
