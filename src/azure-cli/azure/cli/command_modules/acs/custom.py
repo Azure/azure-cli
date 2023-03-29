@@ -401,6 +401,7 @@ def aks_create(
     nat_gateway_idle_timeout=None,
     outbound_type=None,
     network_plugin=None,
+    network_plugin_mode=None,
     network_policy=None,
     auto_upgrade_channel=None,
     cluster_autoscaler_profile=None,
