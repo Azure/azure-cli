@@ -1784,8 +1784,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         # overwrite warning
-        with self.assertRaises(InvalidArgumentValueError):
-            self.assertEqual(ctx_3.get_network_plugin(), "azure")
+        self.assertEqual(ctx_3.get_network_plugin(), "azure")
 
     def test_get_pod_cidrs(self):
         # default

@@ -2177,10 +2177,11 @@ class AKSManagedClusterContext(BaseAKSContext):
             network_plugin_mode = self._get_network_plugin_mode(enable_validation=False)
             if network_plugin:
                 if network_plugin == "azure" and pod_cidr and network_plugin_mode != "overlay":
-                    raise InvalidArgumentValueError(
-                        "Please specify network plugin mode `overlay` when using pod_cidr or "
-                        "use network plugin `kubenet`. For more information about Azure CNI "
-                        "Overlay please see https://aka.ms/aks/azure-cni-overlay"
+                    logger.warning(
+                        'The provided pod CIDR "%s" will be overwritten with the node subnet CIDR. '
+                        'To use a pod CIDR, please specify network plugin mode `overlay` or '
+                        'use network plugin `kubenet`. For more information about Azure CNI '
+                        'Overlay please see https://aka.ms/aks/azure-cni-overlay', pod_cidr
                     )
             else:
                 if (
