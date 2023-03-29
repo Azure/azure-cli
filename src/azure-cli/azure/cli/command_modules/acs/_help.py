@@ -239,6 +239,12 @@ parameters:
     type: string
     short-summary: The Kubernetes network plugin to use.
     long-summary: Specify "azure" for routable pod IPs from VNET, "kubenet" for non-routable pod IPs with an overlay network, or "none" for no networking configured. Defaults to "kubenet".
+  - name: --network-plugin-mode
+    type: string
+    short-summary: The network plugin mode to use.
+    long-summary: |
+        Used to control the mode the network plugin should operate in. For example, "overlay" used with
+        --network-plugin=azure will use an overlay network (non-VNET IPs) for pods in the cluster.
   - name: --network-policy
     type: string
     short-summary: The Kubernetes network policy to use.
@@ -434,6 +440,12 @@ parameters:
   - name: --azure-keyvault-kms-key-vault-resource-id
     type: string
     short-summary: Resource ID of Azure Key Vault.
+  - name: --enable-image-cleaner
+    type: bool
+    short-summary: Enable ImageCleaner Service.
+  - name: --image-cleaner-interval-hours
+    type: int
+    short-summary: ImageCleaner scanning interval.
   - name: --disable-disk-driver
     type: bool
     short-summary: Disable AzureDisk CSI Driver.
@@ -713,6 +725,15 @@ parameters:
   - name: --azure-keyvault-kms-key-vault-resource-id
     type: string
     short-summary: Resource ID of Azure Key Vault.
+  - name: --enable-image-cleaner
+    type: bool
+    short-summary: Enable ImageCleaner Service.
+  - name: --disable-image-cleaner
+    type: bool
+    short-summary: Disable ImageCleaner Service.
+  - name: --image-cleaner-interval-hours
+    type: int
+    short-summary: ImageCleaner scanning interval.
   - name: --enable-disk-driver
     type: bool
     short-summary: Enable AzureDisk CSI Driver.

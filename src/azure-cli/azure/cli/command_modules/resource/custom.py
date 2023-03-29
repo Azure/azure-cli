@@ -3746,7 +3746,7 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_resto
 
 
 def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline=None, indent_kind=None, indent_size=None, insert_final_newline=None):
-    ensure_bicep_installation()
+    ensure_bicep_installation(cmd.cli_ctx)
 
     minimum_supported_version = "0.12.1"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
@@ -3766,7 +3766,7 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
         if insert_final_newline:
             args += ["--insertFinalNewline", insert_final_newline]
 
-        output = run_bicep_command(args)
+        output = run_bicep_command(cmd.cli_ctx, args)
 
         if stdout:
             print(output)
