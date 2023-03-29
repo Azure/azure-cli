@@ -4131,10 +4131,12 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
     def test_get_workload_identity_profile__update_with_enable_and_disable(self):
         ctx = AKSManagedClusterContext(
             self.cmd,
-            {
-                "enable_workload_identity": True,
-                "disable_workload_identity": True,
-            },
+            AKSManagedClusterParamDict(
+                {
+                    "enable_workload_identity": True,
+                    "disable_workload_identity": True,
+                }
+            ),
             self.models, decorator_mode=DecoratorMode.UPDATE
         )
         ctx.attach_mc(self.models.ManagedCluster(location="test_location"))
