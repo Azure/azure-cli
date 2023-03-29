@@ -670,7 +670,7 @@ parameters:
   - name: --enable-workload-identity
     type: bool
     short-summary: Enable workload identity addon.
-  - name: --disbable-workload-identity
+  - name: --disable-workload-identity
     type: bool
     short-summary: Disable workload identity addon.
   - name: --enable-secret-rotation
