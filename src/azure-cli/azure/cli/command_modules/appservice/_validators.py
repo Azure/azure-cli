@@ -17,7 +17,7 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
 from .utils import (_normalize_sku, get_sku_tier, _normalize_location, get_resource_name_and_group,
-                    get_resource_if_exists, is_functionapp, is_logicapp, is_webapp)
+                    get_resource_if_exists, is_functionapp, is_logicapp, is_webapp, is_centauri_functionapp)
 
 from .aaz.latest.network import ListServiceTags
 from .aaz.latest.network.vnet import List as VNetList, Show as VNetShow
@@ -122,6 +122,24 @@ def validate_functionapp_asp_create(namespace):
             raise ArgumentUsageError("--max-burst is only supported for Elastic Premium (EP) plans")
 
 
+def validate_functionapp_on_containerapp_site_config_set(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        raise ValidationError(
+            "Invalid command. This is not supported for Azure Functions on Azure Container app environments.",
+            "Please use the following command instead: az functionapp config container set")
+
+
+def validate_functionapp_on_containerapp_site_config_show(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        raise ValidationError(
+            "Invalid command. This is not supported for Azure Functions on Azure Container app environments.",
+            "Please use the following command instead: az functionapp config container show")
+
+
 def validate_app_exists(cmd, namespace):
     app = namespace.name
     resource_group_name = namespace.resource_group_name
@@ -129,6 +147,20 @@ def validate_app_exists(cmd, namespace):
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, app, 'get', slot)
     if not app:
         raise ResourceNotFoundError("'{}' app not found in ResourceGroup '{}'".format(app, resource_group_name))
+
+
+def validate_functionapp_on_containerapp_vnet_add(cmd, namespace):
+    validate_functionapp_on_containerapp_vnet(cmd, namespace)
+    validate_add_vnet(cmd, namespace)
+
+
+def validate_functionapp_on_containerapp_vnet(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        raise ValidationError(
+            'Unsupported operation on function app.',
+            'Please set virtual network configuration for the function app at Container app environment level.')
 
 
 def validate_add_vnet(cmd, namespace):
@@ -324,6 +356,17 @@ def validate_staticsite_link_function(cmd, namespace):
 # TODO consider combining with validate_add_vnet
 def validate_vnet_integration(cmd, namespace):
     validate_tags(namespace)
+    if _get_environment(namespace):
+        if namespace.vnet:
+            raise ArgumentUsageError(
+                "Invalid input. '--vnet' is not a supported property for function apps deployed to Azure Container "
+                "Apps.",
+                "Please try again without '--vnet' and configure vnet from Azure Container Apps environment.")
+        if namespace.subnet:
+            raise ArgumentUsageError(
+                "Invalid input. '--subnet' is not a supported property for function apps deployed to Azure Container "
+                "Apps.",
+                "Please try again without '--subnet' and configure subnet from Azure Container Apps environment.")
     if namespace.subnet or namespace.vnet:
         if not namespace.subnet:
             raise ArgumentUsageError("Cannot use --vnet without --subnet")
@@ -403,6 +446,12 @@ def _get_app_name(namespace):
     return None
 
 
+def _get_environment(namespace):
+    if hasattr(namespace, "environment"):
+        return namespace.environment
+    return None
+
+
 def validate_app_is_webapp(cmd, namespace):
     client = web_client_factory(cmd.cli_ctx)
     name = _get_app_name(namespace)
@@ -423,3 +472,12 @@ def validate_app_is_functionapp(cmd, namespace):
         raise ValidationError(f"App '{name}' in group '{rg}' is a logic app.")
     if is_webapp(app):
         raise ValidationError(f"App '{name}' in group '{rg}' is a web app.")
+
+
+def validate_centauri_delete_function(cmd, namespace):
+    resource_group_name = namespace.resource_group_name
+    name = namespace.name
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        raise ValidationError(
+            "Invalid Operation. This function is currently present in your image",
+            "Please modify your image to remove the function and provide an updated image.")
