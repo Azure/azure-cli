@@ -12,6 +12,7 @@ from functools import partial
 from knack.commands import CLICommand, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
 from knack.deprecation import Deprecated
 from knack.experimental import ExperimentalItem
+from knack.log import get_logger
 from knack.preview import PreviewItem
 
 from azure.cli.core.azclierror import CLIInternalError
@@ -23,6 +24,9 @@ from ._paging import AAZPaged
 from ._poller import AAZLROPoller
 from ._command_ctx import AAZCommandCtx
 from .exceptions import AAZUnknownFieldError, AAZUnregisteredArg
+
+
+logger = get_logger(__name__)
 
 
 class AAZCommandGroup:
@@ -392,6 +396,24 @@ def _get_profile_pkg(aaz_module_name, cloud):
         return None
 
 
+def _link_helper(pkg, name, mod, helper_cls_name="_Helper"):
+    helper_mod = importlib.import_module(mod, pkg)
+    helper = getattr(helper_mod, helper_cls_name)
+    return getattr(helper, name)
+
+
+def link_helper(pkg, *links):
+    def _wrapper(cls):
+        for link in links:
+            if isinstance(link[1], str):
+                func = _link_helper(pkg, *link)
+            else:
+                func = getattr(link[1], link[0])
+            setattr(cls, link[0], partial(func, cls))
+        return cls
+    return _wrapper
+
+
 def _load_aaz_pkg(loader, pkg, parent_command_table, command_group_table, arg_str, fully_load):
     """ Load aaz commands and aaz command groups under a package folder.
     """
@@ -429,7 +451,13 @@ def _load_aaz_pkg(loader, pkg, parent_command_table, command_group_table, arg_st
         try:
             sub_pkg = importlib.import_module(f'.{sub_path}', pkg.__name__)
         except ModuleNotFoundError:
+            logger.debug('Failed to load package folder in aaz: %s.', os.path.join(pkg_path, sub_path))
             continue
+
+        if not sub_pkg.__file__:
+            logger.debug('Ignore invalid package folder in aaz: %s.', os.path.join(pkg_path, sub_path))
+            continue
+
         # recursively load sub package
         _load_aaz_pkg(loader, sub_pkg, command_table, command_group_table, arg_str, fully_load)
 

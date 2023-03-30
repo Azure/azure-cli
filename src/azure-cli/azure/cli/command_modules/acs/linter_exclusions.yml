@@ -7,6 +7,9 @@ aks create:
       enable_sgxquotehelper:
           rule_exclusions:
           - option_length_too_long
+      load_balancer_managed_outbound_ipv6_count:
+          rule_exclusions:
+          - option_length_too_long
       nat_gateway_idle_timeout:
           rule_exclusions:
           - option_length_too_long
@@ -16,6 +19,9 @@ aks create:
       disable_snapshot_controller:
           rule_exclusions:
           - option_length_too_long
+      image_cleaner_interval_hours:
+          rule_exclusions:
+          - option_length_too_long    
 
 aks enable-addons:
   parameters:
@@ -33,6 +39,9 @@ aks update:
       disable_secret_rotation:
           rule_exclusions:
           - option_length_too_long
+      load_balancer_managed_outbound_ipv6_count:
+          rule_exclusions:
+          - option_length_too_long
       nat_gateway_idle_timeout:
           rule_exclusions:
           - option_length_too_long
@@ -48,4 +57,7 @@ aks update:
       disable_snapshot_controller:
           rule_exclusions:
           - option_length_too_long
+      image_cleaner_interval_hours:
+          rule_exclusions:
+          - option_length_too_long    
 ...

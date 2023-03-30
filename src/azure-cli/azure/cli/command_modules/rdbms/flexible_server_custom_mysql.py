@@ -22,9 +22,12 @@ from ._flexible_server_util import resolve_poller, generate_missing_parameters, 
     generate_password, parse_maintenance_window, replace_memory_optimized_tier, build_identity_and_data_encryption, \
     get_identity_and_data_encryption, get_tenant_id
 from .flexible_server_custom_common import create_firewall_rule
-from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
-from .validators import mysql_arguments_validator, validate_mysql_replica, validate_server_name, validate_georestore_location, \
-    validate_georestore_network, validate_mysql_tier_update, validate_and_format_restore_point_in_time
+from .flexible_server_virtual_network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, \
+    prepare_private_network, prepare_private_dns_zone, prepare_public_network
+from .validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, \
+    mysql_restore_tier_validator, mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, \
+    validate_mysql_replica, validate_server_name, validate_georestore_location, validate_georestore_network, \
+    validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_replica_location
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -82,7 +85,9 @@ def flexible_server_create(cmd, client,
                               byok_identity=byok_identity,
                               backup_byok_identity=backup_byok_identity,
                               byok_key=byok_key,
-                              backup_byok_key=backup_byok_key)
+                              backup_byok_key=backup_byok_key,
+                              auto_io_scaling=auto_scale_iops,
+                              iops=iops)
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location)
     iops_info = list_skus_info['iops_info']
 
@@ -180,7 +185,8 @@ def flexible_server_restore(cmd, client,
                             resource_group_name, server_name,
                             source_server, restore_point_in_time=None, zone=None, no_wait=False,
                             subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
-                            private_dns_zone_arguments=None, public_access=None, yes=False):
+                            private_dns_zone_arguments=None, public_access=None, yes=False, sku_name=None, tier=None,
+                            storage_gb=None, auto_grow=None, backup_retention=None, geo_redundant_backup=None):
     provider = 'Microsoft.DBforMySQL'
     server_name = server_name.lower()
 
@@ -202,9 +208,41 @@ def flexible_server_restore(cmd, client,
     try:
         id_parts = parse_resource_id(source_server_id)
         source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
+        location = ''.join(source_server_object.location.lower().split())
+        list_skus_info = get_mysql_list_skus_info(cmd, location)
+
         if not zone:
             zone = source_server_object.availability_zone
-        location = ''.join(source_server_object.location.lower().split())
+
+        if not tier:
+            tier = source_server_object.sku.tier
+        else:
+            mysql_restore_tier_validator(tier, source_server_object.sku.tier, list_skus_info['sku_info'])
+
+        if not sku_name:
+            sku_name = source_server_object.sku.name
+        else:
+            mysql_sku_name_validator(sku_name, list_skus_info['sku_info'], tier, None)
+
+        if not storage_gb:
+            storage_gb = source_server_object.storage.storage_size_gb
+        else:
+            mysql_storage_validator(storage_gb, list_skus_info['sku_info'], tier, source_server_object)
+
+        if not auto_grow:
+            auto_grow = source_server_object.storage.auto_grow
+        else:
+            mysql_auto_grow_validator(auto_grow, None, None, source_server_object)
+
+        if not backup_retention:
+            backup_retention = source_server_object.backup.backup_retention_days
+        else:
+            mysql_retention_validator(backup_retention, list_skus_info['sku_info'], tier)
+
+        if not geo_redundant_backup:
+            geo_redundant_backup = source_server_object.backup.geo_redundant_backup
+        else:
+            mysql_georedundant_backup_validator(geo_redundant_backup, list_skus_info['geo_paired_regions'])
 
         db_context = DbContext(
             cmd=cmd, cf_availability=cf_mysql_check_resource_availability,
@@ -214,6 +252,17 @@ def flexible_server_restore(cmd, client,
 
         identity, data_encryption = get_identity_and_data_encryption(source_server_object)
 
+        iops = _determine_iops(storage_gb=storage_gb, iops_info=list_skus_info['iops_info'],
+                               iops_input=source_server_object.storage.iops, tier=tier, sku_name=sku_name)
+
+        storage = mysql_flexibleservers.models.Storage(storage_size_gb=storage_gb, iops=iops, auto_grow=auto_grow,
+                                                       auto_io_scaling=source_server_object.storage.auto_io_scaling)
+
+        backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
+                                                     geo_redundant_backup=geo_redundant_backup)
+
+        sku = mysql_flexibleservers.models.Sku(name=sku_name, tier=tier)
+
         parameters = mysql_flexibleservers.models.Server(
             location=location,
             identity=identity,
@@ -221,7 +270,10 @@ def flexible_server_restore(cmd, client,
             source_server_resource_id=source_server_id,  # this should be the source server name, not id
             create_mode="PointInTimeRestore",
             availability_zone=zone,
-            data_encryption=data_encryption
+            data_encryption=data_encryption,
+            sku=sku,
+            storage=storage,
+            backup=backup
         )
 
         if any((public_access, vnet, subnet)):
@@ -257,7 +309,8 @@ def flexible_server_georestore(cmd, client,
                                resource_group_name, server_name,
                                source_server, location, zone=None, no_wait=False,
                                subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
-                               private_dns_zone_arguments=None, public_access=None, yes=False):
+                               private_dns_zone_arguments=None, public_access=None, yes=False, sku_name=None, tier=None,
+                               storage_gb=None, auto_grow=None, backup_retention=None, geo_redundant_backup=None):
     provider = 'Microsoft.DBforMySQL'
     server_name = server_name.lower()
 
@@ -277,6 +330,37 @@ def flexible_server_georestore(cmd, client,
     try:
         id_parts = parse_resource_id(source_server_id)
         source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
+        list_skus_info = get_mysql_list_skus_info(cmd, location)
+
+        if not tier:
+            tier = source_server_object.sku.tier
+        else:
+            mysql_restore_tier_validator(tier, source_server_object.sku.tier, list_skus_info['sku_info'])
+
+        if not sku_name:
+            sku_name = source_server_object.sku.name
+        else:
+            mysql_sku_name_validator(sku_name, list_skus_info['sku_info'], tier, None)
+
+        if not storage_gb:
+            storage_gb = source_server_object.storage.storage_size_gb
+        else:
+            mysql_storage_validator(storage_gb, list_skus_info['sku_info'], tier, source_server_object)
+
+        if not auto_grow:
+            auto_grow = source_server_object.storage.auto_grow
+        else:
+            mysql_auto_grow_validator(auto_grow, None, None, source_server_object)
+
+        if not backup_retention:
+            backup_retention = source_server_object.backup.backup_retention_days
+        else:
+            mysql_retention_validator(backup_retention, list_skus_info['sku_info'], tier)
+
+        if not geo_redundant_backup:
+            geo_redundant_backup = source_server_object.backup.geo_redundant_backup
+        else:
+            mysql_georedundant_backup_validator(geo_redundant_backup, list_skus_info['geo_paired_regions'])
 
         db_context = DbContext(
             cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
@@ -291,13 +375,27 @@ def flexible_server_georestore(cmd, client,
 
         identity, data_encryption = get_identity_and_data_encryption(source_server_object)
 
+        iops = _determine_iops(storage_gb=storage_gb, iops_info=list_skus_info['iops_info'],
+                               iops_input=source_server_object.storage.iops, tier=tier, sku_name=sku_name)
+
+        storage = mysql_flexibleservers.models.Storage(storage_size_gb=storage_gb, iops=iops, auto_grow=auto_grow,
+                                                       auto_io_scaling=source_server_object.storage.auto_io_scaling)
+
+        backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
+                                                     geo_redundant_backup=geo_redundant_backup)
+
+        sku = mysql_flexibleservers.models.Sku(name=sku_name, tier=tier)
+
         parameters = mysql_flexibleservers.models.Server(
             location=location,
             source_server_resource_id=source_server_id,  # this should be the source server name, not id
             create_mode="GeoRestore",
             availability_zone=zone,
             identity=identity,
-            data_encryption=data_encryption
+            data_encryption=data_encryption,
+            sku=sku,
+            storage=storage,
+            backup=backup
         )
 
         db_context.location = location
@@ -369,7 +467,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
                               backup_byok_identity=backup_byok_identity,
                               byok_key=byok_key,
                               backup_byok_key=backup_byok_key,
-                              disable_data_encryption=disable_data_encryption)
+                              disable_data_encryption=disable_data_encryption,
+                              auto_io_scaling=auto_scale_iops,
+                              iops=iops)
 
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location, server_name=instance.name if instance else None)
     iops_info = list_skus_info['iops_info']
@@ -458,7 +558,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                             sku_name=instance.sku.name)
 
     if auto_grow:
-        instance.storage.storage_autogrow = auto_grow
+        instance.storage.auto_grow = auto_grow
 
     params = ServerForUpdate(sku=instance.sku,
                              storage=instance.storage,
@@ -545,6 +645,24 @@ def flexible_server_provision_network_resource(cmd, resource_group_name, server_
     return network, start_ip, end_ip
 
 
+def flexible_server_exist_network_resource(cmd, resource_group_name, server_name, location, private_dns_zone_arguments=None, vnet=None, subnet=None):
+    network = mysql_flexibleservers.models.Network()
+    if private_dns_zone_arguments is None:
+        raise RequiredArgumentMissingError("Missing Private DNS Zone. If you want to use private access, --private-dns-zone is requried.")
+
+    if subnet is not None or vnet is not None:
+        subnet_id = prepare_mysql_exist_private_network(cmd, resource_group_name, server_name, vnet, subnet, location, DELEGATION_SERVICE_NAME)
+
+        private_dns_zone_id = prepare_mysql_exist_private_dns_zone(cmd, resource_group_name, private_dns_zone_arguments, subnet_id)
+
+        network.delegated_subnet_resource_id = subnet_id
+        network.private_dns_zone_resource_id = private_dns_zone_id
+    else:
+        raise RequiredArgumentMissingError("Private DNS zone can only be used with private access setting. Use vnet or/and subnet parameters.")
+
+    return network
+
+
 # Parameter update command
 def flexible_parameter_update(client, server_name, configuration_name, resource_group_name, source=None, value=None):
     if source is None and value is None:
@@ -569,7 +687,8 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
 
 # Replica commands
 # Custom functions for server replica, will add MySQL part after backend ready in future
-def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, zone=None, no_wait=False):
+def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, location=None,
+                            private_dns_zone_arguments=None, vnet=None, subnet=None, zone=None, no_wait=False):
     provider = 'Microsoft.DBforMySQL'
     replica_name = replica_name.lower()
 
@@ -589,11 +708,15 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     source_server_id_parts = parse_resource_id(source_server_id)
     try:
         source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
-        validate_mysql_replica(cmd, source_server_object)
+        validate_mysql_replica(source_server_object)
     except Exception as e:
         raise ResourceNotFoundError(e)
 
-    location = source_server_object.location
+    if not location:
+        location = source_server_object.location
+
+    validate_replica_location(cmd, source_server_object.location, location)
+
     sku_name = source_server_object.sku.name
     tier = source_server_object.sku.tier
     if not zone:
@@ -609,6 +732,15 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
         identity=identity,
         data_encryption=data_encryption,
         create_mode="Replica")
+
+    if location != source_server_object.location and any((vnet, subnet, private_dns_zone_arguments)):
+        parameters.network = flexible_server_exist_network_resource(cmd,
+                                                                    resource_group_name,
+                                                                    replica_name,
+                                                                    location,
+                                                                    private_dns_zone_arguments,
+                                                                    vnet,
+                                                                    subnet)
 
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, replica_name, parameters)
 

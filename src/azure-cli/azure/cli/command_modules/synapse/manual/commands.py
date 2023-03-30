@@ -562,9 +562,6 @@ def load_command_table(self, _):
         g.custom_show_command('export', 'export_sql_script')
         g.custom_command('import', 'create_sql_script', supports_no_wait=True)
 
-    with self.command_group('synapse', is_preview=True):
-        pass
-
     # synapse kusto pool Commands --Managed kusto pool Commands
     with self.command_group('synapse kusto pool',
                             command_type=synapse_kusto_pool_sdk,

@@ -32,37 +32,34 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
             'tier': 'Standard'
         })
 
-        # create Resource group
-        self.cmd('az group create --resource-group {rg} --location {loc1}')
-
         # Create Cluster
-        self.cmd('eventhubs cluster create --resource-group {rg} --name {clustername} --location eastus --tags tag1=value1',
+        self.cmd('eventhubs cluster create --resource-group test-migration --name {clustername} --location eastus --tags tag1=value1',
                  checks=[self.check('name', self.kwargs['clustername'])])
 
         # Get Cluster
-        getresponse = self.cmd('eventhubs cluster show --resource-group {rg} --name {clustername}',
+        getresponse = self.cmd('eventhubs cluster show --resource-group test-migration --name {clustername}',
                                checks=[self.check('sku.capacity', self.kwargs['capacity'])]).get_output_in_json()
 
         self.kwargs.update({'clusterid': getresponse['id']})
 
         # Create Namespace in cluster
-        self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename} --location eastus --tags {tags} --sku {sku} --cluster-arm-id {clusterid}')
+        self.cmd('eventhubs namespace create --resource-group test-migration --name {namespacename} --location eastus --tags {tags} --sku {sku} --cluster-arm-id {clusterid}')
 
         # Get namespaces created in the cluster
-        listnsclusterresult = self.cmd('eventhubs cluster namespace list --resource-group {rg} --name {clustername}').output
+        listnsclusterresult = self.cmd('eventhubs cluster namespace list --resource-group test-migration --name {clustername}').output
         self.assertGreater(len(listnsclusterresult), 0)
 
         # update cluster
-        self.cmd('eventhubs cluster update --resource-group {rg} --name {clustername} --tags tag2=value2',
+        self.cmd('eventhubs cluster update --resource-group test-migration --name {clustername} --tags tag2=value2',
                  checks=[self.check('tags', {'tag2': 'value2'})])
 
         # Get cluster created in the resourcegroup
-        listclusterresult = self.cmd('eventhubs cluster list --resource-group {rg}').output
+        listclusterresult = self.cmd('eventhubs cluster list --resource-group test-migration').output
         self.assertGreater(len(listclusterresult), 0)
 
         # Delete cluster
         # commented as the cluster can be deleted only after 4 hours
-        # self.cmd('eventhubs cluster delete --resource-group {rg} --name {clustername}')
+        # self.cmd('eventhubs cluster delete --resource-group test-migration --name {clustername}')
 
     @AllowLargeResponse()
     def test_eh_self_serve_cluster(self):
@@ -77,14 +74,14 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         })
 
         # create Resource group
-        self.cmd('az group create --resource-group {rg} --location {loc}')
+        self.cmd('az group create --resource-group test-migration --location {loc}')
 
         # Create Cluster
         self.cmd(
-            'eventhubs cluster create --resource-group {rg} --name {clustername} --location {loc} --supports-scaling --capacity 2')
+            'eventhubs cluster create --resource-group test-migration --name {clustername} --location {loc} --supports-scaling --capacity 2')
 
         # Get Cluster
-        getresponse = self.cmd('eventhubs cluster show --resource-group {rg} --name {clustername}').get_output_in_json()
+        getresponse = self.cmd('eventhubs cluster show --resource-group test-migration --name {clustername}').get_output_in_json()
 
         self.assertEqual(getresponse['sku']['capacity'], 2)
         self.assertEqual(getresponse['sku']['name'], 'Dedicated')
@@ -95,13 +92,13 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
 
         # Create Namespace in cluster
         namespace = self.cmd(
-                'eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --sku {sku} --cluster-arm-id {clusterid}').get_output_in_json()
+                'eventhubs namespace create --resource-group test-migration --name {namespacename} --location {loc} --sku {sku} --cluster-arm-id {clusterid}').get_output_in_json()
 
         self.assertIsNotNone(namespace)
 
-        self.cmd('eventhubs cluster update --resource-group {rg} --name {clustername} --capacity 1')
+        self.cmd('eventhubs cluster update --resource-group test-migration --name {clustername} --capacity 1')
 
-        getresponse = self.cmd('eventhubs cluster show --resource-group {rg} --name {clustername}').get_output_in_json()
+        getresponse = self.cmd('eventhubs cluster show --resource-group test-migration --name {clustername}').get_output_in_json()
 
         self.assertEqual(getresponse['sku']['capacity'], 1)
         self.assertEqual(getresponse['sku']['name'], 'Dedicated')
@@ -110,13 +107,13 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
 
         # Get namespaces created in the cluster
         listnsclusterresult = self.cmd(
-            'eventhubs cluster namespace list --resource-group {rg} --name {clustername}').output
+            'eventhubs cluster namespace list --resource-group test-migration --name {clustername}').output
         self.assertGreater(len(listnsclusterresult), 0)
 
         # Get cluster created in the resourcegroup
-        listclusterresult = self.cmd('eventhubs cluster list --resource-group {rg}').output
+        listclusterresult = self.cmd('eventhubs cluster list --resource-group test-migration').output
         self.assertGreater(len(listclusterresult), 0)
 
         # Delete cluster
         # commented as the cluster can be deleted only after 4 hours
-        # self.cmd('eventhubs cluster delete --resource-group {rg} --name {clustername}')
+        # self.cmd('eventhubs cluster delete --resource-group test-migration --name {clustername}')

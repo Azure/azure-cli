@@ -16,7 +16,7 @@ from azure.cli.core.aaz import *
     is_preview=True,
 )
 class List(AAZCommand):
-    """List all global reach peer connections associated with a private peering in an express route circuit.
+    """Gets all global reach peer connections associated with a private peering in an express route circuit.
 
     :example: List ExpressRouteCircuit PeerConnection
         az network express-route peering connection list --circuit-name MyCircuit --peering-name MyPeering --resource-group MyResourceGroup
@@ -200,11 +200,11 @@ class List(AAZCommand):
             properties.express_route_circuit_peering = AAZObjectType(
                 serialized_name="expressRouteCircuitPeering",
             )
-            _build_schema_sub_resource_read(properties.express_route_circuit_peering)
+            _ListHelper._build_schema_sub_resource_read(properties.express_route_circuit_peering)
             properties.peer_express_route_circuit_peering = AAZObjectType(
                 serialized_name="peerExpressRouteCircuitPeering",
             )
-            _build_schema_sub_resource_read(properties.peer_express_route_circuit_peering)
+            _ListHelper._build_schema_sub_resource_read(properties.peer_express_route_circuit_peering)
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -213,21 +213,23 @@ class List(AAZCommand):
             return cls._schema_on_200
 
 
-_schema_sub_resource_read = None
+class _ListHelper:
+    """Helper class for List"""
 
+    _schema_sub_resource_read = None
 
-def _build_schema_sub_resource_read(_schema):
-    global _schema_sub_resource_read
-    if _schema_sub_resource_read is not None:
-        _schema.id = _schema_sub_resource_read.id
-        return
+    @classmethod
+    def _build_schema_sub_resource_read(cls, _schema):
+        if cls._schema_sub_resource_read is not None:
+            _schema.id = cls._schema_sub_resource_read.id
+            return
 
-    _schema_sub_resource_read = AAZObjectType()
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
 
-    sub_resource_read = _schema_sub_resource_read
-    sub_resource_read.id = AAZStrType()
+        sub_resource_read = _schema_sub_resource_read
+        sub_resource_read.id = AAZStrType()
 
-    _schema.id = _schema_sub_resource_read.id
+        _schema.id = cls._schema_sub_resource_read.id
 
 
 __all__ = ["List"]

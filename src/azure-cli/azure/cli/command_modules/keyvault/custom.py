@@ -583,6 +583,7 @@ def create_hsm(cmd, client,
                resource_group_name, hsm_name, administrators, location=None, sku=None,
                enable_purge_protection=None,
                retention_days=None,
+               public_network_access=None,
                bypass=None,
                default_action=None,
                tags=None,
@@ -610,7 +611,8 @@ def create_hsm(cmd, client,
                                       enable_purge_protection=enable_purge_protection,
                                       soft_delete_retention_in_days=retention_days,
                                       initial_admin_object_ids=administrators,
-                                      network_acls=_create_network_rule_set(cmd, bypass, default_action))
+                                      network_acls=_create_network_rule_set(cmd, bypass, default_action),
+                                      public_network_access=public_network_access)
     parameters = ManagedHsm(location=location,
                             tags=tags,
                             sku=ManagedHsmSku(name=sku, family='B'),
@@ -696,7 +698,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
                                             KeyPermissions.delete,
                                             KeyPermissions.list,
                                             KeyPermissions.update,
-                                            KeyPermissions.import_enum,
+                                            KeyPermissions.IMPORT,
                                             KeyPermissions.backup,
                                             KeyPermissions.restore,
                                             KeyPermissions.recover],
@@ -713,7 +715,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
                                           CertificatePermissions.list,
                                           CertificatePermissions.delete,
                                           CertificatePermissions.create,
-                                          CertificatePermissions.import_enum,
+                                          CertificatePermissions.IMPORT,
                                           CertificatePermissions.update,
                                           CertificatePermissions.managecontacts,
                                           CertificatePermissions.getissuers,
@@ -849,13 +851,17 @@ def update_hsm(cmd, instance,
                enable_purge_protection=None,
                bypass=None,
                default_action=None,
-               secondary_locations=None):
+               secondary_locations=None,
+               public_network_access=None):
     if enable_purge_protection is not None:
         instance.properties.enable_purge_protection = enable_purge_protection
 
     if secondary_locations is not None:
         # service not ready
         raise InvalidArgumentValueError('--secondary-locations has not been supported yet for hsm')
+
+    if public_network_access is not None:
+        instance.properties.public_network_access = public_network_access
 
     if bypass or default_action and (hasattr(instance.properties, 'network_acls')):
         if instance.properties.network_acls is None:
@@ -2635,4 +2641,37 @@ def check_name_availability(cmd, client, name, resource_type='hsm'):
     CheckNameAvailabilityParameters = cmd.get_models('CheckMhsmNameAvailabilityParameters')
     check_name = CheckNameAvailabilityParameters(name=name)
     return client.check_mhsm_name_availability(check_name)
+# endregion
+
+
+# region mhsm regions
+def add_hsm_region(cmd, client, resource_group_name, name, region_name, no_wait=False):
+    MHSMGeoReplicatedRegion = cmd.get_models('MHSMGeoReplicatedRegion', resource_type=ResourceType.MGMT_KEYVAULT)
+
+    hsm = client.get(resource_group_name=resource_group_name, name=name)
+    existing_regions = hsm.properties.regions or []
+    for existing_region in existing_regions:
+        if region_name == existing_region.name:
+            logger.warning("%s has already existed", region_name)
+            return hsm
+    existing_regions.append(MHSMGeoReplicatedRegion(name=region_name))
+    hsm.properties.regions = existing_regions
+    return sdk_no_wait(no_wait, client.begin_update,
+                       resource_group_name=resource_group_name,
+                       name=name,
+                       parameters=hsm)
+
+
+def remove_hsm_region(client, resource_group_name, name, region_name, no_wait=False):
+    hsm = client.get(resource_group_name=resource_group_name, name=name)
+    existing_regions = hsm.properties.regions or []
+    for existing_region in existing_regions:
+        if region_name == existing_region.name:
+            existing_regions.remove(existing_region)
+            hsm.properties.regions = existing_regions
+            return sdk_no_wait(no_wait, client.begin_update,
+                               resource_group_name=resource_group_name,
+                               name=name, parameters=hsm)
+    logger.warning("%s doesn't exist", region_name)
+    return hsm
 # endregion

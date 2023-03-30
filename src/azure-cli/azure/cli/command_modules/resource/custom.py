@@ -47,6 +47,7 @@ from ._formatters import format_what_if_operation_result
 from ._bicep import (
     run_bicep_command,
     is_bicep_file,
+    is_bicepparam_file,
     ensure_bicep_installation,
     remove_bicep_installation,
     get_bicep_latest_release_tag,
@@ -267,6 +268,16 @@ def _get_missing_parameters(parameters, template, prompt_fn, no_prompt=False):
             except NoTTYException:
                 raise CLIError("Missing input parameters: {}".format(', '.join(sorted(missing.keys()))))
     return parameters
+
+
+def _is_bicepparam_file_provided(parameters):
+    if not parameters or len(parameters) < 1:
+        return False
+
+    for parameter in parameters:
+        if is_bicepparam_file(parameter[0]):
+            return True
+    return False
 
 
 def _ssl_context():
@@ -957,11 +968,29 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS)
         template_obj = show_resource(cmd=cmd, resource_ids=[template_spec], api_version=api_version).properties['mainTemplate']
     else:
-        template_content = (
-            run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
-            if is_bicep_file(template_file)
-            else read_file_content(template_file)
-        )
+        if _is_bicepparam_file_provided(parameters):
+            ensure_bicep_installation(cli_ctx)
+
+            minimum_supported_version = "0.14.85"
+            if not bicep_version_greater_than_or_equal_to(minimum_supported_version):
+                raise ArgumentUsageError(f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to {minimum_supported_version} or later.")
+            if len(parameters) > 1:
+                raise ArgumentUsageError("Can not use --parameters argument more than once when using a .bicepparam file")
+            bicepparam_file = parameters[0][0]
+            if not is_bicep_file(template_file):
+                raise ArgumentUsageError("Only a .bicep template is allowed with a .bicepparam parameter file")
+
+            build_bicepparam_output = run_bicep_command(cmd.cli_ctx, ["build-params", bicepparam_file, "--bicep-file", template_file, "--stdout"])
+            build_bicepparam_output_json = json.loads(build_bicepparam_output)
+            template_content = build_bicepparam_output_json["templateJson"]
+            bicepparam_json_content = build_bicepparam_output_json["parametersJson"]
+        else:
+            template_content = (
+                run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
+                if is_bicep_file(template_file)
+                else read_file_content(template_file)
+            )
+
         template_obj = _remove_comments_from_json(template_content, file_path=template_file)
 
         if is_bicep_file(template_file):
@@ -975,9 +1004,13 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
 
     template_param_defs = template_obj.get('parameters', {})
     template_obj['resources'] = template_obj.get('resources', [])
-    parameters = _process_parameters(template_param_defs, parameters) or {}
-    parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
-    parameters = json.loads(json.dumps(parameters))
+
+    if _is_bicepparam_file_provided(parameters):
+        parameters = json.loads(bicepparam_json_content).get('parameters', {})
+    else:
+        parameters = _process_parameters(template_param_defs, parameters) or {}
+        parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
+        parameters = json.loads(json.dumps(parameters))
 
     properties = DeploymentProperties(template=template_content, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
@@ -1377,7 +1410,7 @@ def create_application(cmd, resource_group_name,
     :param str plan_version:the managed application package plan version
     :param str tags:tags in 'a=b c' format
     """
-    from azure.mgmt.resource.managedapplications.models import Application, Plan
+    Application, Plan = cmd.get_models('Application', 'Plan')
     racf = _resource_managedapps_client_factory(cmd.cli_ctx)
     rcf = _resource_client_factory(cmd.cli_ctx)
     if not location:
@@ -1448,7 +1481,8 @@ def create_or_update_applicationdefinition(cmd, resource_group_name,
     :param str main_template:the managed application definition main template
     :param str tags:tags in 'a=b c' format
     """
-    from azure.mgmt.resource.managedapplications.models import ApplicationDefinition, ApplicationProviderAuthorization
+    ApplicationDefinition, ApplicationProviderAuthorization = cmd.get_models('ApplicationDefinition',
+                                                                             'ApplicationProviderAuthorization')
     if not package_file_uri and not create_ui_definition and not main_template:
         raise CLIError('usage error: --package-file-uri <url> | --create-ui-definition --main-template')
     if package_file_uri:
@@ -1777,6 +1811,30 @@ def update_resource(cmd, parameters, resource_ids=None,
     return _single_or_collection(
         [_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version, latest_include_preview).update(parameters)
          for id_dict in parsed_ids])
+
+
+def patch_resource(cmd, properties, resource_ids=None, resource_group_name=None,
+                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
+                   resource_name=None, api_version=None, latest_include_preview=False, is_full_object=False):
+    parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(cmd.cli_ctx,
+                                                                              resource_group_name,
+                                                                              resource_provider_namespace,
+                                                                              parent_resource_path,
+                                                                              resource_type,
+                                                                              resource_name)]
+
+    try:
+        res = json.loads(properties)
+    except json.decoder.JSONDecodeError as ex:
+        raise CLIError('Error parsing JSON.\n{}\n{}'.format(properties, ex))
+
+    if not is_full_object:
+        res = GenericResource(properties=res)
+
+    return _single_or_collection(
+        [_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version, latest_include_preview)
+         .patch(res) for id_dict in parsed_ids]
+    )
 
 
 def tag_resource(cmd, tags, resource_ids=None, resource_group_name=None, resource_provider_namespace=None,
@@ -2141,7 +2199,7 @@ def show_provider_operations(cmd, resource_provider_namespace):
     version = getattr(get_api_version(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION), 'provider_operations_metadata')
     auth_client = _authorization_management_client(cmd.cli_ctx)
     if version == '2015-07-01':
-        return auth_client.provider_operations_metadata.get(resource_provider_namespace, version)
+        return auth_client.provider_operations_metadata.get(resource_provider_namespace, api_version=version)
     return auth_client.provider_operations_metadata.get(resource_provider_namespace)
 
 
@@ -3322,7 +3380,7 @@ def create_or_update_tag_at_scope(cmd, resource_id=None, tags=None, tag_name=Non
         tag_obj = Tags(tags=tags)
         TagsResource = cmd.get_models('TagsResource')
         tags_resource = TagsResource(properties=tag_obj)
-        return rcf.tags.create_or_update_at_scope(scope=resource_id, parameters=tags_resource)
+        return rcf.tags.begin_create_or_update_at_scope(scope=resource_id, parameters=tags_resource)
 
     return rcf.tags.create_or_update(tag_name=tag_name)
 
@@ -3330,7 +3388,7 @@ def create_or_update_tag_at_scope(cmd, resource_id=None, tags=None, tag_name=Non
 def delete_tag_at_scope(cmd, resource_id=None, tag_name=None):
     rcf = _resource_client_factory(cmd.cli_ctx)
     if resource_id is not None:
-        return rcf.tags.delete_at_scope(scope=resource_id)
+        return rcf.tags.begin_delete_at_scope(scope=resource_id)
 
     return rcf.tags.delete(tag_name=tag_name)
 
@@ -3343,7 +3401,7 @@ def update_tag_at_scope(cmd, resource_id, tags, operation):
     tag_obj = Tags(tags=tags)
     TagsPatchResource = cmd.get_models('TagsPatchResource')
     tags_resource = TagsPatchResource(properties=tag_obj, operation=operation)
-    return rcf.tags.update_at_scope(scope=resource_id, parameters=tags_resource)
+    return rcf.tags.begin_update_at_scope(scope=resource_id, parameters=tags_resource)
 # endregion
 
 
@@ -3465,6 +3523,19 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
                                                          self.resource_name,
                                                          self.api_version,
                                                          parameters)
+
+    def patch(self, parameters):
+        if self.resource_id:
+            return self.rcf.resources.begin_update_by_id(self.resource_id,
+                                                         self.api_version,
+                                                         parameters)
+        return self.rcf.resources.begin_update(self.resource_group_name,
+                                               self.resource_provider_namespace,
+                                               self.parent_resource_path,
+                                               self.resource_type,
+                                               self.resource_name,
+                                               self.api_version,
+                                               parameters)
 
     def tag(self, tags, is_incremental=False):
         resource = self.get_resource()
@@ -3645,16 +3716,16 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
 
 def install_bicep_cli(cmd, version=None, target_platform=None):
     # The parameter version is actually a git tag here.
-    ensure_bicep_installation(release_tag=version, target_platform=target_platform)
+    ensure_bicep_installation(cmd.cli_ctx, release_tag=version, target_platform=target_platform)
 
 
 def uninstall_bicep_cli(cmd):
-    remove_bicep_installation()
+    remove_bicep_installation(cmd.cli_ctx)
 
 
 def upgrade_bicep_cli(cmd, target_platform=None):
     latest_release_tag = get_bicep_latest_release_tag()
-    ensure_bicep_installation(release_tag=latest_release_tag, target_platform=target_platform)
+    ensure_bicep_installation(cmd.cli_ctx, release_tag=latest_release_tag, target_platform=target_platform)
 
 
 def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_restore=None):
@@ -3674,19 +3745,51 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_resto
         print(output)
 
 
-def publish_bicep_file(cmd, file, target):
-    ensure_bicep_installation()
+def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline=None, indent_kind=None, indent_size=None, insert_final_newline=None):
+    ensure_bicep_installation(cmd.cli_ctx)
 
+    minimum_supported_version = "0.12.1"
+    if bicep_version_greater_than_or_equal_to(minimum_supported_version):
+        args = ["format", file]
+        if outdir:
+            args += ["--outdir", outdir]
+        if outfile:
+            args += ["--outfile", outfile]
+        if stdout:
+            args += ["--stdout"]
+        if newline:
+            args += ["--newline", newline]
+        if indent_kind:
+            args += ["--indentKind", indent_kind]
+        if indent_size:
+            args += ["--indentSize", indent_size]
+        if insert_final_newline:
+            args += ["--insertFinalNewline", insert_final_newline]
+
+        output = run_bicep_command(cmd.cli_ctx, args)
+
+        if stdout:
+            print(output)
+    else:
+        logger.error("az bicep format could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
+
+
+def publish_bicep_file(cmd, file, target, documentationUri=None):
     minimum_supported_version = "0.4.1008"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
-        run_bicep_command(cmd.cli_ctx, ["publish", file, "--target", target])
+        args = ["publish", file, "--target", target]
+        if documentationUri:
+            minimum_supported_version_for_documentationUri_parameter = "0.14.46"
+            if bicep_version_greater_than_or_equal_to(minimum_supported_version_for_documentationUri_parameter):
+                args += ["--documentationUri", documentationUri]
+            else:
+                logger.error("az bicep publish with --documentationUri/-d parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_documentationUri_parameter)
+        run_bicep_command(cmd.cli_ctx, args)
     else:
         logger.error("az bicep publish could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
 
 def restore_bicep_file(cmd, file, force=None):
-    ensure_bicep_installation()
-
     minimum_supported_version = "0.4.1008"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["restore", file]
@@ -3713,8 +3816,6 @@ def list_bicep_cli_versions(cmd):
 
 
 def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, stdout=None):
-    ensure_bicep_installation()
-
     minimum_supported_version = "0.7.4"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["generate-params", file]

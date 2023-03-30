@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "network express-route port location list",
 )
 class List(AAZCommand):
-    """List ExpressRoute port locations.
+    """Get the details of an ExpressRoute port location.
 
     :example: List ExpressRoute port location.
         az network express-route port location list --subscription 00000000-0000-0000-0000-000000000000
@@ -188,6 +188,10 @@ class List(AAZCommand):
             tags.Element = AAZStrType()
 
             return cls._schema_on_200
+
+
+class _ListHelper:
+    """Helper class for List"""
 
 
 __all__ = ["List"]

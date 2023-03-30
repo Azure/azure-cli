@@ -9,6 +9,9 @@
 # pylint: disable=too-many-locals
 
 from azure.cli.core.profiles import ResourceType
+from knack.log import get_logger
+
+logger = get_logger(__name__)
 
 
 # , resource_type = ResourceType.MGMT_EVENTHUB
@@ -173,6 +176,7 @@ def cli_eheventhub_create(cmd, client, resource_group_name, namespace_name, even
 
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
         if message_retention_in_days:
+            logger.warning('Parameter --message-retention would be deprecated in a future release and would be replaced by --retention-time-in-hours.')
             eventhubparameter1.message_retention_in_days = message_retention_in_days
 
         if partition_count:
@@ -208,7 +212,8 @@ def cli_eheventhub_update(cmd, instance, message_retention_in_days=None, partiti
     capturedescription, destination, encodingcapturedescription = cmd.get_models('CaptureDescription', 'Destination', 'EncodingCaptureDescription')
 
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
-        if message_retention_in_days:
+        if message_retention_in_days is not None:
+            logger.warning('Parameter --message-retention would be deprecated in a future release and would be replaced by --retention-time-in-hours.')
             instance.message_retention_in_days = message_retention_in_days
 
         if partition_count:

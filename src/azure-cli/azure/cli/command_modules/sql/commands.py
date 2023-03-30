@@ -77,7 +77,8 @@ from ._util import (
     get_sql_virtual_clusters_operations,
     get_sql_virtual_network_rules_operations,
     get_sql_instance_failover_groups_operations,
-    get_sql_database_ledger_digest_uploads_operations
+    get_sql_database_ledger_digest_uploads_operations,
+    get_sql_database_encryption_protector_operations
 )
 
 from ._validators import (
@@ -139,9 +140,9 @@ def load_command_table(self, _):
         g.custom_command('rename', 'db_rename',
                          transform=database_lro_transform,
                          table_transformer=db_table_format)
-        g.show_command('show', 'get',
-                       transform=db_transform,
-                       table_transformer=db_table_format)
+        g.custom_show_command('show', 'db_get',
+                              transform=db_transform,
+                              table_transformer=db_table_format)
         g.custom_command('list', 'db_list',
                          transform=db_list_transform,
                          table_transformer=db_table_format)
@@ -222,6 +223,17 @@ def load_command_table(self, _):
         g.custom_command('set', 'transparent_data_encryptions_set')
         g.custom_show_command('show', 'transparent_data_encryptions_get')
 
+    database_encryption_protector_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#DatabaseEncryptionProtectorOperations.{}',
+        client_factory=get_sql_database_encryption_protector_operations)
+
+    with self.command_group('sql db tde key',
+                            database_encryption_protector_operations,
+                            client_factory=get_sql_database_encryption_protector_operations) as g:
+
+        g.custom_command('revert', 'database_encryption_protector_revert')
+        g.custom_command('revalidate', 'database_encryption_protector_revalidate')
+
     replication_links_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ReplicationLinksOperations.{}',
         client_factory=get_sql_replication_links_operations)
@@ -239,9 +251,12 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations#RestorableDroppedDatabasesOperations.{}',
         client_factory=get_sql_restorable_dropped_databases_operations)
 
-    with self.command_group('sql db', restorable_dropped_databases_operations) as g:
+    with self.command_group('sql db',
+                            restorable_dropped_databases_operations,
+                            client_factory=get_sql_restorable_dropped_databases_operations) as g:
 
         g.command('list-deleted', 'list_by_server')
+        g.custom_show_command('show-deleted', 'restorable_databases_get')
 
     restorable_dropped_managed_databases_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#RestorableDroppedManagedDatabasesOperations.{}',
@@ -353,7 +368,7 @@ def load_command_table(self, _):
                             client_factory=get_sql_database_recoverable_databases_operations,
                             is_preview=True) as g:
 
-        g.show_command('show', 'get')
+        g.custom_show_command('show', 'recoverable_databases_get')
         g.custom_command('list', 'list_geo_backups')
 
     with self.command_group('sql db geo-backup',
@@ -565,6 +580,7 @@ def load_command_table(self, _):
                                  custom_func_name='server_update',
                                  setter_name='begin_create_or_update',
                                  supports_no_wait=True)
+        g.command('refresh-external-governance-status', 'begin_refresh_status')
         g.wait_command('wait')
 
     server_usages_operations = CliCommandType(
@@ -688,6 +704,7 @@ def load_command_table(self, _):
 
         g.custom_show_command('show', 'encryption_protector_get')
         g.custom_command('set', 'encryption_protector_update')
+        g.custom_command('revalidate', 'encryption_protector_revalidate')
 
     virtual_network_rules_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#VirtualNetworkRulesOperations.{}',

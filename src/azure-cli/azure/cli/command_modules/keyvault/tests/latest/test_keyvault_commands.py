@@ -17,7 +17,7 @@ from ipaddress import ip_network
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk.scenario_tests import RecordingProcessor
 from azure.cli.testsdk import ResourceGroupPreparer, StorageAccountPreparer, KeyVaultPreparer, ManagedHSMPreparer, ScenarioTest
-
+from azure.core.exceptions import HttpResponseError
 from knack.util import CLIError
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
@@ -319,6 +319,7 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
             self.check('length([0].properties.initialAdminObjectIds)', 1),
             self.check('[0].properties.initialAdminObjectIds[0]', '{init_admin}'),
             self.check('[0].properties.networkAcls.bypass', 'None'),
+            self.check('[0].properties.publicNetworkAccess', 'Disabled'),
             self.exists('[0].properties.hsmUri')
         ]
 
@@ -331,7 +332,10 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
             self.check('nameAvailable', True)
         ])
 
-        self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --administrators {init_admin} --retention-days 7')
+        self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --administrators {init_admin} '
+                 '--retention-days 7 --public-network-access Enabled', checks=[
+            self.check('properties.publicNetworkAccess', 'Enabled')
+        ])
 
         self.cmd('keyvault check-name -n {hsm_name}', checks=[
             self.check('nameAvailable', False),
@@ -354,7 +358,7 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault show --hsm-name {hsm_name}', checks=show_checks)
         self.cmd('keyvault show --hsm-name {hsm_name} -g {rg}', checks=show_checks)
 
-        self.cmd('keyvault update-hsm --hsm-name {hsm_name} --bypass None')
+        self.cmd('keyvault update-hsm --hsm-name {hsm_name} --bypass None --public-network-access Disabled --default-action Deny')
 
         self.cmd(r"keyvault list --resource-type hsm --query [?name==\'{hsm_name}\']", checks=list_checks)
         self.cmd('keyvault list --resource-type hsm -g {rg}', checks=list_checks)
@@ -531,19 +535,18 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
 
 
 class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
-    @record_only()
     @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_mhsm_sd')
     def test_keyvault_hsm_security_domain(self):
         sdtest_dir = tempfile.mkdtemp()
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        logged_in_user = logged_in_user["id"] if logged_in_user is not None else "a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e"
         self.kwargs.update({
-            'hsm_url': SD_ACTIVE_HSM_NAME,
-            'hsm_name': SD_ACTIVE_HSM_NAME,
-            'next_hsm_url': SD_NEXT_ACTIVE_HSM_URL,
-            'next_hsm_name': SD_NEXT_ACTIVE_HSM_NAME,
-            'loc': 'eastus2',
-            'init_admin': '9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa',
+            'hsm_name': self.create_random_name('test-mhsm-sd1', 24),
+            'next_hsm_name': self.create_random_name('test-mhsm-sd2', 24),
+            'loc': 'uksouth',
+            'init_admin': logged_in_user,
             'key_name': self.create_random_name('key', 10),
-            'rg': 'bim-rg',
             'sdtest_dir': sdtest_dir
         })
         self.kwargs.update({
@@ -556,13 +559,22 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
             self.kwargs['cer{}_path'.format(i)] = os.path.join(KEYS_DIR, 'sd{}.cer'.format(i))
             self.kwargs['key{}_path'.format(i)] = os.path.join(KEYS_DIR, 'sd{}.pem'.format(i))
 
-        # create a new key and backup it
-        self.cmd('az keyvault key create --hsm-name {hsm_name} -n {key_name}')
-        self.cmd('az keyvault key backup --hsm-name {hsm_name} -n {key_name} -f "{key_backup}"')
+        self.cmd('az keyvault create --hsm-name {hsm_name} -l {loc} -g {rg} --administrators {init_admin} '
+                 '--retention-days 7')
+
+        self.cmd('az keyvault wait-hsm --hsm-name {hsm_name} --created')
 
         # download SD
         self.cmd('az keyvault security-domain download --hsm-name {hsm_name} --security-domain-file "{sdfile}" '
-                 '--sd-quorum 2 --sd-wrapping-keys "{cer1_path}" "{cer2_path}" "{cer3_path}" --no-wait')
+                 '--sd-quorum 2 --sd-wrapping-keys "{cer1_path}" "{cer2_path}" "{cer3_path}"')
+        time.sleep(180)
+        with mock.patch('azure.cli.command_modules.keyvault.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('az keyvault role assignment create --assignee {init_admin} --hsm-name {hsm_name} '
+                     '--role "Managed HSM Crypto User" --scope "/"')
+
+        # create a new key and backup it
+        self.cmd('az keyvault key create --hsm-name {hsm_name} -n {key_name}')
+        self.cmd('az keyvault key backup --hsm-name {hsm_name} -n {key_name} -f "{key_backup}"')
 
         # delete the HSM
         self.cmd('az keyvault delete --hsm-name {hsm_name}')
@@ -583,6 +595,10 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
                  '--sd-exchange-key "{exchange_key}" '
                  '--sd-wrapping-keys "{key1_path}" "{key2_path}"')
 
+        with mock.patch('azure.cli.command_modules.keyvault.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('az keyvault role assignment create --assignee {init_admin} --hsm-name {next_hsm_name} '
+                     '--role "Managed HSM Crypto User" --scope "/"')
+
         # restore the key
         self.cmd('az keyvault key restore --hsm-name {next_hsm_name} -f "{key_backup}"')
 
@@ -590,6 +606,10 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
         for f in files:
             if os.path.exists(self.kwargs[f]):
                 os.remove(self.kwargs[f])
+
+        self.cmd('az keyvault purge --hsm-name {hsm_name}')
+        self.cmd('az keyvault delete --hsm-name {next_hsm_name}')
+        self.cmd('az keyvault purge --hsm-name {next_hsm_name}')
 
 
 class KeyVaultHSMSelectiveKeyRestoreScenarioTest(ScenarioTest):
@@ -2752,6 +2772,42 @@ class KeyVaultPublicNetworkAccessScenarioTest(ScenarioTest):
                  checks=[self.check('properties.publicNetworkAccess', 'Disabled')])
         self.cmd('keyvault update -g {rg} -n {kv3} --public-network-access Enabled',
                  checks=[self.check('properties.publicNetworkAccess', 'Enabled')])
+
+class KeyVaultMHSMRegionScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_mhsm_region', location='eastus2')
+    def test_keyvault_mhsm_region(self, resource_group):
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        logged_in_user = logged_in_user["id"] if logged_in_user is not None else "a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e"
+        self.kwargs.update({
+            'hsm_name': self.create_random_name('clitest-mhsm-', 24),
+            'loc': 'eastus2',
+            'init_admin': logged_in_user
+        })
+        self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --administrators {init_admin} '
+                 '--retention-days 7')
+        cert_dir = os.path.join(TEST_DIR, 'certs')
+        tmp_dir = self.create_temp_dir()
+
+        self.kwargs.update({
+            'cert0': os.path.join(cert_dir, 'cert_0.cer').replace('\\', '\\\\'),
+            'cert1': os.path.join(cert_dir, 'cert_1.cer').replace('\\', '\\\\'),
+            'cert2': os.path.join(cert_dir, 'cert_2.cer').replace('\\', '\\\\'),
+            'security_domain': os.path.join(tmp_dir, 'clitest-mhsm-SD.json').replace('\\', '\\\\')
+        })
+
+        self.cmd('keyvault security-domain download --hsm-name {hsm_name} --sd-wrapping-keys {cert0} {cert1} {cert2} '
+                 '--sd-quorum 2 --security-domain-file {security_domain}')
+        time.sleep(180)
+        with self.assertRaises(HttpResponseError):
+            self.cmd('keyvault region add -g {rg} --hsm-name {hsm_name} -r testregion')
+        self.cmd('keyvault region add -g {rg} --hsm-name {hsm_name} -r uksouth')
+        self.cmd('keyvault region list -g {rg} --hsm-name {hsm_name}',
+                 checks=[self.check('[0].name', 'uksouth')])
+        with self.assertRaises(HttpResponseError):
+            self.cmd('keyvault delete -g {rg} --hsm-name {hsm_name}')
+        self.cmd('keyvault region remove -g {rg} --hsm-name {hsm_name} -r uksouth')
+        self.cmd('keyvault delete -g {rg} --hsm-name {hsm_name}')
+        self.cmd('keyvault purge --hsm-name {hsm_name}')
 
 
 if __name__ == '__main__':

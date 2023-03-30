@@ -20,22 +20,22 @@ from azure.cli.core.azclierror import (ValidationError, ArgumentUsageError, Requ
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
-from azure.cli.command_modules.vm._vm_utils import (check_existence, get_storage_blob_uri, list_sku_info)
+from azure.cli.command_modules.vm._vm_utils import (check_existence, get_storage_blob_uri, list_sku_info,
+                                                    import_aaz_by_profile)
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 from azure.cli.core import keys
 from azure.core.exceptions import ResourceNotFoundError
 
 from ._client_factory import _compute_client_factory
 from ._actions import _get_latest_image_version
+
+
 logger = get_logger(__name__)
 
 
 def validate_asg_names_or_ids(cmd, namespace):
     from msrestazure.tools import resource_id, is_valid_resource_id
-    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_subscription_id
-    ApplicationSecurityGroup = cmd.get_models('ApplicationSecurityGroup',
-                                              resource_type=ResourceType.MGMT_NETWORK)
 
     resource_group = namespace.resource_group_name
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -53,7 +53,7 @@ def validate_asg_names_or_ids(cmd, namespace):
                 namespace='Microsoft.Network', type='applicationSecurityGroups',
                 name=val
             )
-        ids.append(ApplicationSecurityGroup(id=val))
+        ids.append({'id': val})
     setattr(namespace, 'application_security_groups', ids)
 
 
@@ -134,7 +134,11 @@ def _get_resource_group_from_vault_name(cli_ctx, vault_name):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from msrestazure.tools import parse_resource_id
     client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
-    for vault in client.list():
+    if cli_ctx.cloud.profile == 'latest':
+        vaults = client.list()
+    else:
+        vaults = client.list(filter="resourceType eq 'Microsoft.KeyVault/vaults'", api_version='2015-11-01')
+    for vault in vaults:
         id_comps = parse_resource_id(vault.id)
         if id_comps['name'] == vault_name:
             return id_comps['resource_group']
@@ -734,28 +738,31 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
         logger.debug('no subnet specified. Attempting to find an existing Vnet and subnet...')
 
         # if nothing specified, try to find an existing vnet and subnet in the target resource group
-        client = get_network_client(cmd.cli_ctx).virtual_networks
+        VnetList = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.vnet").List
+
+        vnet_list = VnetList(cli_ctx=cmd.cli_ctx)(command_args={
+            "resource_group": rg
+        })
 
         # find VNET in target resource group that matches the VM's location with a matching subnet
-        for vnet_match in (v for v in client.list(rg) if v.location == location and v.subnets):
-
+        for vnet_match in (v for v in vnet_list if bool(v['location'] == location and v['subnets'])):
             # 1 - find a suitable existing vnet/subnet
             result = None
             if not for_scale_set:
-                result = next((s for s in vnet_match.subnets if s.name.lower() != 'gatewaysubnet'), None)
+                result = next((s for s in vnet_match['subnets'] if s['name'].lower() != 'gatewaysubnet'), None)
             else:
                 def _check_subnet(s):
-                    if s.name.lower() == 'gatewaysubnet':
+                    if s['name'].lower() == 'gatewaysubnet':
                         return False
-                    subnet_mask = s.address_prefix.split('/')[-1]
+                    subnet_mask = s['addressPrefix'].split('/')[-1]
                     return _subnet_capacity_check(subnet_mask, namespace.instance_count,
                                                   not namespace.disable_overprovision)
 
-                result = next((s for s in vnet_match.subnets if _check_subnet(s)), None)
+                result = next((s for s in vnet_match['subnets'] if _check_subnet(s)), None)
             if not result:
                 continue
-            namespace.subnet = result.name
-            namespace.vnet_name = vnet_match.name
+            namespace.subnet = result['name']
+            namespace.vnet_name = vnet_match['name']
             namespace.vnet_type = 'existing'
             logger.debug("existing vnet '%s' and subnet '%s' found", namespace.vnet_name, namespace.subnet)
             return
@@ -981,18 +988,15 @@ def _validate_vm_vmss_create_public_ip(cmd, namespace):
         namespace.public_ip_address_type = 'new'
         logger.debug('new public IP address will be created')
 
-    from azure.cli.core.profiles import ResourceType
-    PublicIPAddressSkuName, IPAllocationMethod = cmd.get_models('PublicIPAddressSkuName', 'IPAllocationMethod',
-                                                                resource_type=ResourceType.MGMT_NETWORK)
     # Use standard public IP address automatically when using zones.
     if hasattr(namespace, 'zone') and namespace.zone is not None:
-        namespace.public_ip_sku = PublicIPAddressSkuName.standard.value
+        namespace.public_ip_sku = 'Standard'
 
     # Public-IP SKU is only exposed for VM. VMSS has no such needs so far
     if getattr(namespace, 'public_ip_sku', None):
-        if namespace.public_ip_sku == PublicIPAddressSkuName.standard.value:
+        if namespace.public_ip_sku == 'Standard':
             if not namespace.public_ip_address_allocation:
-                namespace.public_ip_address_allocation = IPAllocationMethod.static.value
+                namespace.public_ip_address_allocation = 'Static'
 
 
 def _validate_vmss_create_public_ip(cmd, namespace):
@@ -1269,6 +1273,12 @@ def _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=False):
         if not namespace.identity_scope and role_is_explicitly_specified:
             raise ArgumentUsageError(
                 "usage error: please specify --scope when assigning a role to the managed identity")
+        if not role_is_explicitly_specified and namespace.identity_scope:
+            logger.warning(
+                "Please note that the default value of '--role' will be removed in the breaking change release of the "
+                "fall. So specify '--role' and '--scope' at the same time when assigning a role to the managed "
+                "identity to avoid breaking your automation script when the default value of '--role' is removed."
+            )
 
     # Assign managed identity
     if is_identity_assign or namespace.assign_identity is not None:
@@ -1449,6 +1459,11 @@ def _resolve_role_id(cli_ctx, role, scope):
 def process_vm_create_namespace(cmd, namespace):
     validate_tags(namespace)
     _validate_location(cmd, namespace, namespace.zone, namespace.size)
+
+    # Currently, only `az vm create` supports this feature, so it is temporarily placed in process_vm_create_namespace()
+    from ._vm_utils import display_region_recommendation
+    display_region_recommendation(cmd, namespace)
+
     validate_edge_zone(cmd, namespace)
     if namespace.count is not None:
         _validate_count(namespace)
@@ -1494,12 +1509,19 @@ def process_vm_update_namespace(cmd, namespace):
 # region VMSS Create Validators
 def _get_default_address_pool(cli_ctx, resource_group, balancer_name, balancer_type):
     option_name = '--backend-pool-name'
-    client = getattr(get_network_client(cli_ctx), balancer_type, None)
-    if not client:
+
+    if balancer_type == 'application_gateways':
+        client = import_aaz_by_profile(cli_ctx.cloud.profile, "network.application_gateway")
+    elif balancer_type == 'load_balancers':
+        client = import_aaz_by_profile(cli_ctx.cloud.profile, "network.lb")
+    else:
         raise CLIError('unrecognized balancer type: {}'.format(balancer_type))
 
-    balancer = client.get(resource_group, balancer_name)
-    values = [x.name for x in balancer.backend_address_pools]
+    balancer = client.Show(cli_ctx=cli_ctx)(command_args={
+        'name': balancer_name,
+        'resource_group': resource_group
+    })
+    values = [x['name'] for x in balancer['backendAddressPools']]
     if len(values) > 1:
         raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' "
                        "explicitly.".format(option_name, ', '.join(values)))
@@ -1544,12 +1566,15 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
     if balancer_type == 'applicationGateway':
 
         if namespace.application_gateway:
-            client = get_network_client(cmd.cli_ctx).application_gateways
+            client = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.application_gateway")
             try:
                 rg = parse_resource_id(namespace.application_gateway).get(
                     'resource_group', namespace.resource_group_name)
                 ag_name = parse_resource_id(namespace.application_gateway)['name']
-                client.get(rg, ag_name)
+                client.Show(cli_ctx=cmd.cli_ctx)(command_args={
+                    'name': ag_name,
+                    'resource_group': rg
+                })
                 namespace.app_gateway_type = 'existing'
                 namespace.backend_pool_name = namespace.backend_pool_name or \
                     _get_default_address_pool(cmd.cli_ctx, rg, ag_name, 'application_gateways')
@@ -1592,11 +1617,11 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
                 namespace.backend_pool_name = namespace.backend_pool_name or \
                     _get_default_address_pool(cmd.cli_ctx, rg, lb_name, 'load_balancers')
                 if not namespace.nat_pool_name:
-                    if len(lb.inbound_nat_pools) > 1:
+                    if len(lb['inboundNatPools']) > 1:
                         raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' explicitly.".format(  # pylint: disable=line-too-long
-                            '--nat-pool-name', ', '.join([n.name for n in lb.inbound_nat_pools])))
-                    if lb.inbound_nat_pools:
-                        namespace.nat_pool_name = lb.inbound_nat_pools[0].name
+                            '--nat-pool-name', ', '.join([n['name'] for n in lb['inboundNatPools']])))
+                    if lb['inboundNatPools']:
+                        namespace.nat_pool_name = lb['inboundNatPools'][0]['name']
                 logger.debug("using specified existing load balancer '%s'", namespace.load_balancer)
             else:
                 namespace.load_balancer_type = 'new'
@@ -1609,11 +1634,10 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
             logger.debug('new load balancer will be created')
 
         if namespace.load_balancer_type == 'new' and namespace.single_placement_group is False and std_lb_is_available:
-            LBSkuName = cmd.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
             if namespace.load_balancer_sku is None:
-                namespace.load_balancer_sku = LBSkuName.standard.value
+                namespace.load_balancer_sku = 'Standard'
                 logger.debug("use Standard sku as single placement group is turned off")
-            elif namespace.load_balancer_sku == LBSkuName.basic.value:
+            elif namespace.load_balancer_sku == 'Basic':
                 if namespace.zones:
                     err = "'Standard' load balancer is required for zonal scale-sets"
                 elif namespace.instance_count > 100:
@@ -1624,17 +1648,14 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
                 raise CLIError('usage error:{}'.format(err))
 
 
-def get_network_client(cli_ctx):
-    from azure.cli.core.profiles import ResourceType
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)
-
-
 def get_network_lb(cli_ctx, resource_group_name, lb_name):
     from azure.core.exceptions import HttpResponseError
-    network_client = get_network_client(cli_ctx)
+    LBShow = import_aaz_by_profile(cli_ctx.cloud.profile, "network.lb").Show
     try:
-        return network_client.load_balancers.get(resource_group_name, lb_name)
+        return LBShow(cli_ctx=cli_ctx)({
+            "name": lb_name,
+            "resource_group": resource_group_name
+        })
     except HttpResponseError:
         return None
 

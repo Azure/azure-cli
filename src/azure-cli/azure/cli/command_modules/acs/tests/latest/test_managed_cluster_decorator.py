@@ -1665,6 +1665,79 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 load_balancer_profile=load_balancer_profile,
             )
 
+        # invalid parameter
+        ctx_6 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+                    "vnet_subnet_id": "test_vnet_subnet_id",
+                    "load_balancer_managed_outbound_ipv6_count": 10,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        agentpool_ctx_6 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"vnet_subnet_id": "test_vnet_subnet_id"}),
+            self.models,
+            DecoratorMode.CREATE,
+            AgentPoolDecoratorMode.MANAGED_CLUSTER,
+        )
+        ctx_6.attach_agentpool_context(agentpool_ctx_6)
+        # fail on mutually exclusive outbound_type and managed_outbound_ipv6_count on
+        # load balancer
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_6.get_outbound_type()
+
+    def test_get_network_plugin_mode(self):
+        # default
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "network_plugin_mode": None,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_network_plugin_mode(), None)
+        network_profile_1 = self.models.ContainerServiceNetworkProfile(network_plugin_mode="test_network_plugin_mode")
+        mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile_1)
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_network_plugin_mode(), "test_network_plugin_mode")
+
+        # invalid parameter
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "pod_cidr": "test_pod_cidr",
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        # empty on network_plugin not specified
+        self.assertEqual(ctx_2.get_network_plugin_mode(), None)
+
+        # custom
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "pod_cidr": "test_pod_cidr",
+                    "network_plugin": "azure",
+                    "network_plugin_mode": "overlay",
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_3.get_network_plugin_mode(), "overlay")
+    
     def test_get_network_plugin(self):
         # default
         ctx_1 = AKSManagedClusterContext(
@@ -1712,6 +1785,111 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
         # overwrite warning
         self.assertEqual(ctx_3.get_network_plugin(), "azure")
+
+    def test_get_pod_cidrs(self):
+        # default
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"pod_cidrs": None}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_pod_cidrs(), None)
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(pod_cidrs="test_pod_cidrs"),
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_pod_cidrs(),
+            "test_pod_cidrs",
+        )
+
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"pod_cidrs": ""}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_2.get_pod_cidrs(), [])
+
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"pod_cidrs": "10.244.0.0/16,2001:abcd::/64"}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_3.get_pod_cidrs(), ["10.244.0.0/16", "2001:abcd::/64"])
+
+    def test_get_service_cidrs(self):
+        # default
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"service_cidrs": None}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_service_cidrs(), None)
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(service_cidrs="test_service_cidrs"),
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_service_cidrs(),
+            "test_service_cidrs",
+        )
+
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"service_cidrs": ""}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_2.get_service_cidrs(), [])
+
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"service_cidrs": "10.244.0.0/16,2001:abcd::/64"}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_3.get_service_cidrs(), ["10.244.0.0/16", "2001:abcd::/64"])
+
+    def test_get_ip_families(self):
+        # default
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"ip_families": None}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_ip_families(), None)
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(ip_families="test_ip_families"),
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_ip_families(),
+            "test_ip_families",
+        )
+
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"ip_families": ""}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_2.get_ip_families(), [])
+
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"ip_families": "IPv4,IPv6"}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_3.get_ip_families(), ["IPv4", "IPv6"])
 
     def test_get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
         self,
@@ -3679,8 +3857,8 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_1.get_uptime_sla(), False)
         sku = self.models.ManagedClusterSKU(
-            name="Basic",
-            tier="Paid",
+            name="Base",
+            tier="Standard",
         )
         mc = self.models.ManagedCluster(
             location="test_location",
@@ -3701,8 +3879,8 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.UPDATE,
         )
         sku_2 = self.models.ManagedClusterSKU(
-            name="Basic",
-            tier="Paid",
+            name="Base",
+            tier="Standard",
         )
         mc_2 = self.models.ManagedCluster(
             location="test_location",
@@ -3724,7 +3902,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         sku_3 = self.models.ManagedClusterSKU(
-            name="Basic",
+            name="Base",
             tier="Free",
         )
         mc_3 = self.models.ManagedCluster(
@@ -3748,8 +3926,8 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_1.get_no_uptime_sla(), False)
         sku = self.models.ManagedClusterSKU(
-            name="Basic",
-            tier="Paid",
+            name="Base",
+            tier="Standard",
         )
         mc = self.models.ManagedCluster(
             location="test_location",
@@ -3771,7 +3949,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.UPDATE,
         )
         sku_2 = self.models.ManagedClusterSKU(
-            name="Basic",
+            name="Base",
             tier="Free",
         )
         mc_2 = self.models.ManagedCluster(
@@ -4425,6 +4603,192 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
         with self.assertRaises(ArgumentUsageError):
             ctx_9.get_azure_keyvault_kms_key_vault_resource_id()
+
+    def test_get_enable_image_cleaner(self):
+        ctx_0 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_0.get_enable_image_cleaner(), None)
+
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_image_cleaner": False,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_enable_image_cleaner(), False)
+
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_image_cleaner": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_2.get_enable_image_cleaner(), True)
+
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_image_cleaner": False,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_3.get_enable_image_cleaner(), False)
+
+        ctx_4 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_image_cleaner": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_4.get_enable_image_cleaner(), True)
+
+    def test_get_disable_image_cleaner(self):
+        ctx_0 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_0.get_disable_image_cleaner(), None)
+
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_image_cleaner": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_1.get_disable_image_cleaner(), True)
+
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_image_cleaner": False,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_2.get_disable_image_cleaner(), False)
+
+    def test_get_image_cleaner_interval_hours(self):
+        ctx_0 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertIsNone(ctx_0.get_image_cleaner_interval_hours())
+
+
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_image_cleaner": True,
+                    "image_cleaner_interval_hours": 24,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_image_cleaner_interval_hours(), 24)
+
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "image_cleaner_interval_hours": 24,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_2.get_image_cleaner_interval_hours()
+
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "image_cleaner_interval_hours": 24,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        security_profile = self.models.ManagedClusterSecurityProfile()
+        security_profile.image_cleaner = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=True,
+            interval_hours=25,
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=security_profile,
+        )
+        ctx_3.attach_mc(mc)
+        self.assertEqual(ctx_3.get_image_cleaner_interval_hours(), 24)
+
+        ctx_4 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "image_cleaner_interval_hours": 24,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        security_profile = self.models.ManagedClusterSecurityProfile()
+        security_profile.image_cleaner = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=False,
+            interval_hours=25,
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=security_profile,
+        )
+        ctx_4.attach_mc(mc)
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_4.get_image_cleaner_interval_hours()
+
+        ctx_5 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_image_cleaner": True,
+                    "disable_image_cleaner": True,
+                    "image_cleaner_interval_hours": 24,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_5.get_image_cleaner_interval_hours()
 
     def test_get_blob_driver(self):
         # create with blob driver enabled
@@ -5369,6 +5733,66 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         )
         ground_truth_mc_3 = self.models.ManagedCluster(location="test_location", network_profile=network_profile_3)
         self.assertEqual(dec_mc_3, ground_truth_mc_3)
+
+    def test_set_up_network_profile_ipv6(self):
+        # custom value
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "load_balancer_sku": None,
+                "load_balancer_managed_outbound_ip_count": 3,
+                "load_balancer_managed_outbound_ipv6_count": 3,
+                "load_balancer_outbound_ips": "test_ip_1,test_ip_2",
+                "load_balancer_outbound_ip_prefixes": None,
+                "load_balancer_outbound_ports": 5,
+                "load_balancer_idle_timeout": None,
+                "outbound_type": None,
+                "network_plugin": "kubenet",
+                "pod_cidr": None,
+                "service_cidr": None,
+                "pod_cidrs": "10.246.0.0/16,2002:ab12::/64",
+                "service_cidrs": "192.168.0.0/16,2001:abcd::/84",
+                "ip_families": "ipv4,ipv6",
+                "dns_service_ip": None,
+                "docker_bridge_cidr": None,
+                "network_policy": None,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_network_profile(mc_1)
+
+        load_balancer_profile_1 = self.models.load_balancer_models.ManagedClusterLoadBalancerProfile(
+            managed_outbound_i_ps=self.models.load_balancer_models.ManagedClusterLoadBalancerProfileManagedOutboundIPs(
+                count=3,
+                count_ipv6=3,
+            ),
+            outbound_i_ps=self.models.load_balancer_models.ManagedClusterLoadBalancerProfileOutboundIPs(
+                public_i_ps=[
+                    self.models.load_balancer_models.ResourceReference(id="test_ip_1"),
+                    self.models.load_balancer_models.ResourceReference(id="test_ip_2"),
+                ]
+            ),
+            allocated_outbound_ports=5,
+        )
+
+        network_profile_1 = self.models.ContainerServiceNetworkProfile(
+            network_plugin="kubenet",
+            pod_cidrs=["10.246.0.0/16", "2002:ab12::/64"],
+            service_cidrs=["192.168.0.0/16", "2001:abcd::/84"],
+            ip_families=["ipv4","ipv6"],
+            pod_cidr=None, # overwritten to None
+            service_cidr=None,  # overwritten to None
+            dns_service_ip=None,  # overwritten to None
+            docker_bridge_cidr=None,  # overwritten to None
+            load_balancer_sku="standard",
+            outbound_type="loadBalancer",
+            load_balancer_profile=load_balancer_profile_1,
+        )
+        ground_truth_mc_1 = self.models.ManagedCluster(location="test_location", network_profile=network_profile_1)
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
     def test_build_http_application_routing_addon_profile(self):
         # default
@@ -6323,8 +6747,8 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         dec_2.context.attach_mc(mc_2)
         dec_mc_2 = dec_2.set_up_sku(mc_2)
         sku = self.models.ManagedClusterSKU(
-            name="Basic",
-            tier="Paid",
+            name="Base",
+            tier="Standard",
         )
         ground_truth_mc_2 = self.models.ManagedCluster(
             location="test_location",
@@ -6778,11 +7202,71 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "trustedCa": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZHekNDQXdPZ0F3SUJBZ0lVT1FvajhDTFpkc2Vscjk3cnZJd3g1T0xEc3V3d0RRWUpLb1pJaHZjTkFRRUwKQlFBd0Z6RVZNQk1HQTFVRUF3d01ZMnhwTFhCeWIzaDVMWFp0TUI0WERUSXlNRE13T0RFMk5EUTBOMW9YRFRNeQpNRE13TlRFMk5EUTBOMW93RnpFVk1CTUdBMVVFQXd3TVkyeHBMWEJ5YjNoNUxYWnRNSUlDSWpBTkJna3Foa2lHCjl3MEJBUUVGQUFPQ0FnOEFNSUlDQ2dLQ0FnRUEvTVB0VjVCVFB0NmNxaTRSZE1sbXIzeUlzYTJ1anpjaHh2NGgKanNDMUR0blJnb3M1UzQxUEgwcmkrM3RUU1ZYMzJ5cndzWStyRDFZUnVwbTZsbUU3R2hVNUkwR2k5b3prU0YwWgpLS2FKaTJveXBVL0ZCK1FQcXpvQ1JzTUV3R0NibUtGVmw4VnVoeW5kWEs0YjRrYmxyOWJsL2V1d2Q3TThTYnZ6CldVam5lRHJRc2lJc3J6UFQ0S0FaTHFjdHpEZTRsbFBUN1lLYTMzaGlFUE9mdldpWitkcWthUUE5UDY0eFhTeW4KZkhYOHVWQUozdUJWSmVHeEQwcGtOSjdqT3J5YVV1SEh1Y1U4UzltSWpuS2pBQjVhUGpMSDV4QXM2bG1iMzEyMgp5KzF0bkVBbVhNNTBEK1VvRWpmUzZIT2I1cmRpcVhHdmMxS2JvS2p6a1BDUnh4MmE3MmN2ZWdVajZtZ0FKTHpnClRoRTFsbGNtVTRpemd4b0lNa1ZwR1RWT0xMbjFWRkt1TmhNWkN2RnZLZ25Lb0F2M0cwRlVuZldFYVJSalNObUQKTFlhTURUNUg5WnQycERJVWpVR1N0Q2w3Z1J6TUVuWXdKTzN5aURwZzQzbzVkUnlzVXlMOUpmRS9OaDdUZzYxOApuOGNKL1c3K1FZYllsanVyYXA4cjdRRlNyb2wzVkNoRkIrT29yNW5pK3ZvaFNBd0pmMFVsTXBHM3hXbXkxVUk0ClRGS2ZGR1JSVHpyUCs3Yk53WDVoSXZJeTVWdGd5YU9xSndUeGhpL0pkeHRPcjJ0QTVyQ1c3K0N0Z1N2emtxTkUKWHlyN3ZrWWdwNlk1TFpneTR0VWpLMEswT1VnVmRqQk9oRHBFenkvRkY4dzFGRVZnSjBxWS9yV2NMa0JIRFQ4Ugp2SmtoaW84Q0F3RUFBYU5mTUYwd0Z3WURWUjBSQkJBd0RvSU1ZMnhwTFhCeWIzaDVMWFp0TUJJR0ExVWRFd0VCCi93UUlNQVlCQWY4Q0FRQXdEd1lEVlIwUEFRSC9CQVVEQXdmbmdEQWRCZ05WSFNVRUZqQVVCZ2dyQmdFRkJRY0QKQWdZSUt3WUJCUVVIQXdFd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dJQkFBb21qQ3lYdmFRT3hnWUs1MHNYTEIyKwp3QWZkc3g1bm5HZGd5Zmc0dXJXMlZtMTVEaEd2STdDL250cTBkWXkyNE4vVWJHN1VEWHZseUxJSkZxMVhQN25mCnBaRzBWQ2paNjlibXhLbTNaOG0wL0F3TXZpOGU5ZWR5OHY5a05CQ3dMR2tIYkE4WW85Q0lpUWdlbGZwcDF2VWgKYm5OQmhhRCtpdTZDZmlDTHdnSmIvaXc3ZW8vQ3lvWnF4K3RqWGFPMnpYdm00cC8rUUlmQU9ndEdRTEZVOGNmWgovZ1VyVHE1Z0ZxMCtQOUd5V3NBVEpGNnE3TDZXWlpqME91VHNlN2Y0Q1NpajZNbk9NTXhBK0pvYWhKejdsc1NpClRKSEl3RXA1ci9SeWhweWVwUXhGWWNVSDVKSmY5cmFoWExXWmkrOVRqeFNNMll5aHhmUlBzaVVFdUdEb2s3OFEKbS9RUGlDaTlKSmIxb2NtVGpBVjh4RFNob2NpdlhPRnlobjZMbjc3dkxqWStBYXZ0V0RoUXRocHVQeHNMdFZ6bQplMFNIMTFkRUxSdGI3NG1xWE9yTzdmdS8rSUJzM0pxTEUvVSt4dXhRdHZHOHZHMXlES0hIU1pxUzJoL1dzNGw0Ck5pQXNoSGdlaFFEUEJjWTl3WVl6ZkJnWnBPVU16ZERmNTB4K0ZTbFk0M1dPSkp6U3VRaDR5WjArM2t5Z3VDRjgKcm5NTFNjZXlTNGNpNExtSi9LQ1N1R2RmNlhWWXo4QkU5Z2pqanBDUDZxeTBVbFJlZldzL2lnL3djSysyYkYxVApuL1l2KzZnWGVDVEhKNzVxRElQbHA3RFJVVWswZmJNajRiSWthb2dXV2s0emYydThteFpMYTBsZVBLTktaTi9tCkdDdkZ3cjNlaSt1LzhjenA1RjdUCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K",
             },
         )
-        print(dec_mc_1.http_proxy_config)
-        print(ground_truth_mc_1.http_proxy_config)
-        ground_truth_mc_1
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
+    def test_set_up_image_cleaner(self):
+        dec_0 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_0 = self.models.ManagedCluster(location="test_location")
+        dec_0.context.attach_mc(mc_0)
+        dec_mc_0 = dec_0.set_up_image_cleaner(mc_0)
+        ground_truth_mc_0 = self.models.ManagedCluster(location="test_location")
+        self.assertEqual(dec_mc_0, ground_truth_mc_0)
+
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_image_cleaner": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_image_cleaner(mc_1)
+
+        ground_truth_image_cleaner_profile_1 = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=True,
+            interval_hours=7*24,
+        )
+        ground_truth_security_profile_1 = self.models.ManagedClusterSecurityProfile(
+            image_cleaner=ground_truth_image_cleaner_profile_1,
+        )
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=ground_truth_security_profile_1,
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        dec_2 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_image_cleaner": True,
+                "image_cleaner_interval_hours": 24
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.set_up_image_cleaner(mc_2)
+
+        ground_truth_image_cleaner_profile_2 = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=True,
+            interval_hours=24,
+        )
+        ground_truth_security_profile_2 = self.models.ManagedClusterSecurityProfile(
+            image_cleaner=ground_truth_image_cleaner_profile_2,
+        )
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=ground_truth_security_profile_2,
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
 
 class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
@@ -7206,7 +7690,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         mc_1 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
-                name="Basic",
+                name="Base",
                 tier="Free",
             ),
         )
@@ -7218,7 +7702,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
-                name="Basic",
+                name="Base",
                 tier="Free",
             ),
         )
@@ -7237,7 +7721,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         mc_2 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
-                name="Basic",
+                name="Base",
                 tier="Free",
             ),
         )
@@ -7259,8 +7743,8 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         mc_3 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
-                name="Basic",
-                tier="Paid",
+                name="Base",
+                tier="Standard",
             ),
         )
         dec_3.context.attach_mc(mc_3)
@@ -7268,7 +7752,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         ground_truth_mc_3 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
-                name="Basic",
+                name="Base",
                 tier="Free",
             ),
         )
@@ -7287,7 +7771,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         mc_4 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
-                name="Basic",
+                name="Base",
                 tier="Free",
             ),
         )
@@ -7296,8 +7780,8 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         ground_truth_mc_4 = self.models.ManagedCluster(
             location="test_location",
             sku=self.models.ManagedClusterSKU(
-                name="Basic",
-                tier="Paid",
+                name="Base",
+                tier="Standard",
             ),
         )
         self.assertEqual(dec_mc_4, ground_truth_mc_4)
@@ -8330,6 +8814,183 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             dec_azure_keyvault_secrets_provider_addon_profile_5,
             ground_truth_azure_keyvault_secrets_provider_addon_profile_5,
         )
+
+    def test_update_image_cleaner(self):
+        dec_0 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_0 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_0.context.attach_mc(mc_0)
+        dec_mc_0 = dec_0.update_image_cleaner(mc_0)
+        ground_truth_mc_0 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_0, ground_truth_mc_0)
+
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_image_cleaner": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_image_cleaner(mc_1)
+
+        ground_truth_image_cleaner_profile_1 = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=True,
+            interval_hours=7*24,
+        )
+        ground_truth_security_profile_1 = self.models.ManagedClusterSecurityProfile(
+            image_cleaner=ground_truth_image_cleaner_profile_1,
+        )
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=ground_truth_security_profile_1,
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "image_cleaner_interval_hours": 24
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        security_profile = self.models.ManagedClusterSecurityProfile()
+        security_profile.image_cleaner = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=True,
+            interval_hours=25,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=security_profile,
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.update_image_cleaner(mc_2)
+
+        ground_truth_image_cleaner_profile_2 = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=True,
+            interval_hours=24,
+        )
+        ground_truth_security_profile_2 = self.models.ManagedClusterSecurityProfile(
+            image_cleaner=ground_truth_image_cleaner_profile_2,
+        )
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=ground_truth_security_profile_2,
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        dec_3 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_image_cleaner": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        security_profile = self.models.ManagedClusterSecurityProfile()
+        security_profile.image_cleaner = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=False,
+            interval_hours=25,
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=security_profile,
+        )
+        dec_3.context.attach_mc(mc_3)
+        dec_mc_3 = dec_3.update_image_cleaner(mc_3)
+
+        ground_truth_image_cleaner_profile_3 = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=True,
+            interval_hours=25,
+        )
+        ground_truth_security_profile_3 = self.models.ManagedClusterSecurityProfile(
+            image_cleaner=ground_truth_image_cleaner_profile_3,
+        )
+        ground_truth_mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=ground_truth_security_profile_3,
+        )
+        self.assertEqual(dec_mc_3, ground_truth_mc_3)
+
+        dec_4 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_image_cleaner": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        security_profile = self.models.ManagedClusterSecurityProfile()
+        security_profile.image_cleaner = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=True,
+            interval_hours=25,
+        )
+        mc_4 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=security_profile,
+        )
+        dec_4.context.attach_mc(mc_4)
+        dec_mc_4 = dec_4.update_image_cleaner(mc_4)
+
+        ground_truth_image_cleaner_profile_4 = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=False,
+            interval_hours=25,
+        )
+        ground_truth_security_profile_4 = self.models.ManagedClusterSecurityProfile(
+            image_cleaner=ground_truth_image_cleaner_profile_4,
+        )
+        ground_truth_mc_4 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=ground_truth_security_profile_4,
+        )
+        self.assertEqual(dec_mc_4, ground_truth_mc_4)
+
+        dec_5 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_image_cleaner": True,
+                "image_cleaner_interval_hours": 24,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        security_profile = self.models.ManagedClusterSecurityProfile()
+        security_profile.image_cleaner = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=False,
+            interval_hours=25,
+        )
+        mc_5 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=security_profile,
+        )
+        dec_5.context.attach_mc(mc_5)
+        dec_mc_5 = dec_5.update_image_cleaner(mc_5)
+
+        ground_truth_image_cleaner_profile_5 = self.models.ManagedClusterSecurityProfileImageCleaner(
+            enabled=True,
+            interval_hours=24,
+        )
+        ground_truth_security_profile_5 = self.models.ManagedClusterSecurityProfile(
+            image_cleaner=ground_truth_image_cleaner_profile_5,
+        )
+        ground_truth_mc_5 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=ground_truth_security_profile_5,
+        )
+        self.assertEqual(dec_mc_5, ground_truth_mc_5)
 
     def test_update_addon_profiles(self):
         # default value in `aks_update`

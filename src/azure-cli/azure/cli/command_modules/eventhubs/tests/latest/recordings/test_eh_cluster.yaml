@@ -1,51 +1,5 @@
 interactions:
 - request:
-    body: '{"location": "westcentralus"}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '29'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --resource-group --location
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.0 (Windows-10-10.0.19041-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001?api-version=2021-04-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001","name":"rg-cluster-000001","type":"Microsoft.Resources/resourceGroups","location":"westcentralus","properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '238'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 07 Feb 2023 09:18:15 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 201
-      message: Created
-- request:
     body: '{"location": "eastus", "tags": {"tag1": "value1"}, "sku": {"name": "Dedicated",
       "capacity": 1}}'
     headers:
@@ -64,27 +18,27 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --tags
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.0 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","tags":{"tag1":"value1"},"properties":{"createdAt":"2023-02-07T09:18:19.4640197Z","updatedAt":"2023-02-07T09:18:19.4640197Z","provisioningState":"Creating","status":"Creating","supportsScaling":true,"metricId":""},"sku":{"name":"Dedicated","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","tags":{"tag1":"value1"},"properties":{"createdAt":"2023-03-30T07:49:29.2404566Z","updatedAt":"2023-03-30T07:49:29.2404566Z","provisioningState":"Creating","status":"Creating","supportsScaling":true,"metricId":""},"sku":{"name":"Dedicated","capacity":1}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-rg-cluster-000001-eventhubs-clus1-000002?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-clus1-000002?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2022-01-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '497'
+      - '494'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 09:18:18 GMT
+      - Thu, 30 Mar 2023 07:49:28 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-rg-cluster-000001-eventhubs-clus1-000002?isAsyncHeader=false&resourceName=eventhubs-clus1-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-clus1-000002?isAsyncHeader=false&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2022-01-01-preview
       pragma:
       - no-cache
       server:
@@ -112,21 +66,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --tags
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.0 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-rg-cluster-000001-eventhubs-clus1-000002?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-clus1-000002?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2022-01-01-preview
   response:
     body:
-      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-rg-cluster-000001-eventhubs-clus1-000002","status":"Succeeded"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-test-migration-eventhubs-clus1-000002","status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '109'
+      - '106'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 09:18:49 GMT
+      - Thu, 30 Mar 2023 07:49:59 GMT
       expires:
       - '-1'
       pragma:
@@ -158,21 +112,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --tags
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.0 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","tags":{"tag1":"value1"},"properties":{"createdAt":"2023-02-07T09:18:19.5498198Z","updatedAt":"2023-02-07T09:18:20.0812382Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51034"},"sku":{"name":"Dedicated","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","tags":{"tag1":"value1"},"properties":{"createdAt":"2023-03-30T07:49:29.401219Z","updatedAt":"2023-03-30T07:49:30.3699935Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51041"},"sku":{"name":"Dedicated","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '510'
+      - '506'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 09:18:49 GMT
+      - Thu, 30 Mar 2023 07:49:59 GMT
       expires:
       - '-1'
       pragma:
@@ -204,21 +158,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.0 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","tags":{"tag1":"value1"},"properties":{"createdAt":"2023-02-07T09:18:19.5498198Z","updatedAt":"2023-02-07T09:18:20.0812382Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51034"},"sku":{"name":"Dedicated","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","tags":{"tag1":"value1"},"properties":{"createdAt":"2023-03-30T07:49:29.401219Z","updatedAt":"2023-03-30T07:49:30.3699935Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51041"},"sku":{"name":"Dedicated","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '510'
+      - '506'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 09:18:50 GMT
+      - Thu, 30 Mar 2023 07:49:59 GMT
       expires:
       - '-1'
       pragma:
@@ -237,9 +191,9 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus", "tags": {"{tag1": "value1}"}, "sku": {"name": "Standard",
-      "tier": "Standard"}, "properties": {"clusterArmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002",
-      "publicNetworkAccess": "Enabled"}}'
+    body: '{"identity": {"type": "None"}, "location": "eastus", "properties": {"clusterArmId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002"},
+      "sku": {"name": "Standard", "tier": "Standard"}, "tags": {"{tag1": "value1}"}}'
     headers:
       Accept:
       - application/json
@@ -250,37 +204,37 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '316'
+      - '309'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --location --tags --sku --cluster-arm-id
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003","name":"eventhubs-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"{tag1":"value1}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000003","createdAt":"2023-02-07T09:18:53.35Z","updatedAt":"2023-02-07T09:18:53.35Z","serviceBusEndpoint":"https://eventhubs-nscli000003.servicebus.windows.net:443/","status":"Activating"}}'
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003","name":"eventhubs-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{"{tag1":"value1}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000003","createdAt":"2023-03-30T07:50:03.607Z","updatedAt":"2023-03-30T07:50:03.607Z","serviceBusEndpoint":"https://eventhubs-nscli000003.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '970'
+      - '966'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 09:18:53 GMT
+      - Thu, 30 Mar 2023 07:50:04 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/DM2
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/DM2
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -308,22 +262,22 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --tags --sku --cluster-arm-id
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003","name":"eventhubs-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"{tag1":"value1}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000003","createdAt":"2023-02-07T09:18:53.35Z","updatedAt":"2023-02-07T09:18:53.35Z","serviceBusEndpoint":"https://eventhubs-nscli000003.servicebus.windows.net:443/","status":"Activating"}}'
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003","name":"eventhubs-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{"{tag1":"value1}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000003","createdAt":"2023-03-30T07:50:03.607Z","updatedAt":"2023-03-30T07:50:03.607Z","serviceBusEndpoint":"https://eventhubs-nscli000003.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '970'
+      - '966'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 09:19:23 GMT
+      - Thu, 30 Mar 2023 07:50:34 GMT
       expires:
       - '-1'
       pragma:
@@ -358,72 +312,22 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --tags --sku --cluster-arm-id
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003","name":"eventhubs-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"{tag1":"value1}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000003","createdAt":"2023-02-07T09:18:53.35Z","updatedAt":"2023-02-07T09:19:51.117Z","serviceBusEndpoint":"https://eventhubs-nscli000003.servicebus.windows.net:443/","status":"Active"}}'
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003","name":"eventhubs-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"East
+        US","tags":{"{tag1":"value1}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000003","createdAt":"2023-03-30T07:50:03.607Z","updatedAt":"2023-03-30T07:50:57.777Z","serviceBusEndpoint":"https://eventhubs-nscli000003.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '969'
+      - '964'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 09:19:53 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name --location --tags --sku --cluster-arm-id
-      User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003","name":"eventhubs-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"East
-        US","tags":{"{tag1":"value1}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000003","createdAt":"2023-02-07T09:18:53.35Z","updatedAt":"2023-02-07T09:19:51.117Z","serviceBusEndpoint":"https://eventhubs-nscli000003.servicebus.windows.net:443/","status":"Active"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '969'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 07 Feb 2023 09:19:54 GMT
+      - Thu, 30 Mar 2023 07:51:04 GMT
       expires:
       - '-1'
       pragma:
@@ -458,21 +362,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.0 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002/namespaces?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002/namespaces?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.Eventhub/namespaces/eventhubs-nscli000003"}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.Eventhub/namespaces/eventhubs-nscli000003"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '167'
+      - '164'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 09:19:55 GMT
+      - Thu, 30 Mar 2023 07:51:05 GMT
       expires:
       - '-1'
       pragma:
@@ -504,21 +408,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.0 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","tags":{"tag1":"value1"},"properties":{"createdAt":"2023-02-07T09:18:19.5498198Z","updatedAt":"2023-02-07T09:18:20.0812382Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51034"},"sku":{"name":"Dedicated","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","tags":{"tag1":"value1"},"properties":{"createdAt":"2023-03-30T07:49:29.401219Z","updatedAt":"2023-03-30T07:49:30.3699935Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51041"},"sku":{"name":"Dedicated","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '510'
+      - '506'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 09:19:55 GMT
+      - Thu, 30 Mar 2023 07:51:06 GMT
       expires:
       - '-1'
       pragma:
@@ -527,6 +431,10 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
@@ -551,27 +459,27 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.0 (Windows-10-10.0.19044-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","tags":{"tag2":"value2"},"properties":{"createdAt":"2023-02-07T09:18:19.5498198Z","updatedAt":"2023-02-07T09:18:20.0812382Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51034"},"sku":{"name":"Dedicated","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","tags":{"tag2":"value2"},"properties":{"createdAt":"2023-03-30T07:49:29.401219Z","updatedAt":"2023-03-30T07:49:30.3699935Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51041"},"sku":{"name":"Dedicated","capacity":1}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51034-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51041-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2022-01-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '510'
+      - '506'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 09:19:57 GMT
+      - Thu, 30 Mar 2023 07:51:07 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51034-DedicatedCluster?isAsyncHeader=false&resourceName=eventhubs-clus1-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51041-DedicatedCluster?isAsyncHeader=false&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2022-01-01-preview
       pragma:
       - no-cache
       server:
@@ -599,12 +507,12 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.0 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51034-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/eastus/clusterOperationResults/PROD-BL-V51041-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=test-migration&resourceType=cluster&api-version=2022-01-01-preview
   response:
     body:
-      string: '{"name":"PROD-BL-V51034-DedicatedCluster","status":"Succeeded"}'
+      string: '{"name":"PROD-BL-V51041-DedicatedCluster","status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
@@ -613,7 +521,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 09:20:26 GMT
+      - Thu, 30 Mar 2023 07:51:38 GMT
       expires:
       - '-1'
       pragma:
@@ -645,21 +553,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.0 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","tags":{"tag2":"value2"},"properties":{"createdAt":"2023-02-07T09:18:19.5498198Z","updatedAt":"2023-02-07T09:19:58.5356114Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51034"},"sku":{"name":"Dedicated","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","tags":{"tag2":"value2"},"properties":{"createdAt":"2023-03-30T07:49:29.401219Z","updatedAt":"2023-03-30T07:51:08.9105804Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51041"},"sku":{"name":"Dedicated","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '510'
+      - '506'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 09:20:27 GMT
+      - Thu, 30 Mar 2023 07:51:38 GMT
       expires:
       - '-1'
       pragma:
@@ -691,21 +599,21 @@ interactions:
       ParameterSetName:
       - --resource-group
       User-Agent:
-      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.0 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-migration/providers/Microsoft.EventHub/clusters?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","tags":{"tag2":"value2"},"properties":{"createdAt":"2023-02-07T09:18:19.5498198Z","updatedAt":"2023-02-07T09:19:58.5356114Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51034"},"sku":{"name":"Dedicated","capacity":1}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-gbpd","name":"eventhubs-selfserve-gbpd","type":"Microsoft.EventHub/Clusters","location":"eastus","properties":{"createdAt":"2023-03-30T06:25:53.1330538Z","updatedAt":"2023-03-30T07:34:54.1980592Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51034"},"sku":{"name":"Dedicated","capacity":1}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test-migration/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"eastus","tags":{"tag2":"value2"},"properties":{"createdAt":"2023-03-30T07:49:29.401219Z","updatedAt":"2023-03-30T07:51:08.9105804Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BL-V51041"},"sku":{"name":"Dedicated","capacity":1}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '522'
+      - '1005'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Feb 2023 09:20:28 GMT
+      - Thu, 30 Mar 2023 07:51:39 GMT
       expires:
       - '-1'
       pragma:

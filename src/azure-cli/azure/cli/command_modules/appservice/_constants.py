@@ -32,6 +32,7 @@ GITHUB_OAUTH_SCOPES = [
 ]
 LOGICAPP_KIND = "workflowapp"
 FUNCTIONAPP_KIND = "functionapp"
+DOTNET_REFERENCES_DIR_IN_ZIP = ".az-references"
 
 
 class FUNCTIONS_STACKS_API_KEYS():
@@ -93,3 +94,5 @@ WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
     'java': 'FunctionApp/windows-java-functionapp-on-azure.yml',
     'powershell': 'FunctionApp/windows-powershell-functionapp-on-azure.yml',
 }
+
+DEFAULT_CENTAURI_IMAGE = 'azurefunctionstest.azurecr.io/azure-functions/dotnet7-quickstart-demo:1.0'

@@ -35,11 +35,12 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequest, ContainerExecRequestTerminalSize,
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupSubnetId,
-                                                 ContainerGroupIpAddressType, ResourceIdentityType, ContainerGroupIdentity)
+                                                 ContainerGroupIpAddressType, ResourceIdentityType, ContainerGroupIdentity,
+                                                 ContainerGroupPriority, ContainerGroupSku, ConfidentialComputeProperties)
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import RequiredArgumentMissingError
 from ._client_factory import (cf_container_groups, cf_container, cf_log_analytics_workspace,
-                              cf_log_analytics_workspace_shared_keys, cf_resource, cf_network, cf_msi)
+                              cf_log_analytics_workspace_shared_keys, cf_resource, cf_msi)
 
 logger = get_logger(__name__)
 WINDOWS_NAME = 'Windows'
@@ -111,7 +112,10 @@ def create_container(cmd,
                      identity_role='Contributor',
                      no_wait=False,
                      acr_identity=None,
-                     zone=None):
+                     zone=None,
+                     priority=None,
+                     sku=None,
+                     cce_policy=None):
     """Create a container group. """
     if file:
         return _create_update_from_file(cmd.cli_ctx, resource_group_name, name, location, file, no_wait)
@@ -206,6 +210,18 @@ def create_container(cmd,
     if zone:
         zones = [zone]
 
+    # Set up Priority of the Container Group.
+    if priority == "Spot":
+        priority = ContainerGroupPriority.Spot
+    elif priority == "Regular":
+        priority = ContainerGroupPriority.Regular
+
+    # Set up Container Group Sku.
+    confidential_compute_properties = None
+    if sku == "Confidential":
+        sku = ContainerGroupSku.Confidential
+        confidential_compute_properties = ConfidentialComputeProperties(cce_policy=cce_policy)
+
     container = Container(name=name,
                           image=image,
                           resources=container_resource_requirements,
@@ -226,7 +242,10 @@ def create_container(cmd,
                             subnet_ids=cgroup_subnet,
                             diagnostics=diagnostics,
                             tags=tags,
-                            zones=zones)
+                            zones=zones,
+                            priority=priority,
+                            sku=sku,
+                            confidential_compute_properties=confidential_compute_properties)
 
     container_group_client = cf_container_groups(cmd.cli_ctx)
 
@@ -257,29 +276,18 @@ def _build_identities_info(identities):
     return identity
 
 
-def _get_resource(client, resource_group_name, *subresources):
-    from azure.core.exceptions import HttpResponseError
-    try:
-        resource = client.get(resource_group_name, *subresources)
-        return resource
-    except HttpResponseError as ex:
-        if ex.error.code == "NotFound" or ex.error.code == "ResourceNotFound":
-            return None
-        raise
-
-
 def _get_subnet_id(cmd, location, resource_group_name, vnet, vnet_address_prefix, subnet, subnet_address_prefix):
-    from azure.cli.core.profiles import ResourceType
     from msrestazure.tools import parse_resource_id, is_valid_resource_id
+    from azure.cli.core.commands import LongRunningOperation
+    from azure.core.exceptions import HttpResponseError
+    from .aaz.latest.network.vnet import Create as VNetCreate, Show as VNetShow
+    from .aaz.latest.network.vnet.subnet import Create as SubnetCreate, Show as SubnetShow, Update as SubnetUpdate
 
     aci_delegation_service_name = "Microsoft.ContainerInstance/containerGroups"
-    Delegation = cmd.get_models('Delegation', resource_type=ResourceType.MGMT_NETWORK)
-    aci_delegation = Delegation(
-        name=aci_delegation_service_name,
-        service_name=aci_delegation_service_name
-    )
-
-    ncf = cf_network(cmd.cli_ctx)
+    aci_delegation = {
+        "name": aci_delegation_service_name,
+        "service_name": aci_delegation_service_name
+    }
 
     vnet_name = vnet
     subnet_name = subnet
@@ -293,47 +301,72 @@ def _get_subnet_id(cmd, location, resource_group_name, vnet, vnet_address_prefix
         vnet_name = parsed_vnet_id['resource_name']
         resource_group_name = parsed_vnet_id['resource_group']
 
-    subnet = _get_resource(ncf.subnets, resource_group_name, vnet_name, subnet_name)
+    try:
+        subnet = SubnetShow(cli_ctx=cmd.cli_ctx)(command_args={
+            "name": subnet_name,
+            "vnet_name": vnet_name,
+            "resource_group": resource_group_name
+        })
+    except HttpResponseError as ex:
+        if ex.error.code == "NotFound" or ex.error.code == "ResourceNotFound":
+            subnet = None
+        else:
+            raise
     # For an existing subnet, validate and add delegation if needed
     if subnet:
-        logger.info('Using existing subnet "%s" in resource group "%s"', subnet.name, resource_group_name)
-        for sal in (subnet.service_association_links or []):
-            if sal.linked_resource_type != aci_delegation_service_name:
+        logger.info('Using existing subnet "%s" in resource group "%s"', subnet["name"], resource_group_name)
+        for sal in subnet.get("serviceAssociationLinks", []):
+            if sal.get("linkedResourceType", None) != aci_delegation_service_name:
                 raise CLIError("Can not use subnet with existing service association links other than {}.".format(aci_delegation_service_name))
 
-        if not subnet.delegations:
+        if not subnet.get("delegations", None):
             logger.info('Adding ACI delegation to the existing subnet.')
-            subnet.delegations = [aci_delegation]
-            subnet = ncf.subnets.begin_create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
+            poller = SubnetUpdate(cli_ctx=cmd.cli_ctx)(command_args={
+                "name": subnet_name,
+                "vnet_name": vnet_name,
+                "resource_group": resource_group_name,
+                "delegated_services": [aci_delegation]
+            })
+            subnet = LongRunningOperation(cmd.cli_ctx)(poller)
         else:
-            for delegation in subnet.delegations:
-                if delegation.service_name != aci_delegation_service_name:
+            for delegation in subnet["delegations"]:
+                if delegation.get("serviceName", None) != aci_delegation_service_name:
                     raise CLIError("Can not use subnet with existing delegations other than {}".format(aci_delegation_service_name))
 
     # Create new subnet and Vnet if not exists
     else:
-        Subnet, VirtualNetwork, AddressSpace = cmd.get_models('Subnet', 'VirtualNetwork',
-                                                              'AddressSpace', resource_type=ResourceType.MGMT_NETWORK)
+        try:
+            vnet = VNetShow(cli_ctx=cmd.cli_ctx)(command_args={
+                "name": vnet_name,
+                "resource_group": resource_group_name
+            })
+        except HttpResponseError as ex:
+            if ex.error.code == "NotFound" or ex.error.code == "ResourceNotFound":
+                vnet = None
+            else:
+                raise
 
-        vnet = _get_resource(ncf.virtual_networks, resource_group_name, vnet_name)
         if not vnet:
             logger.info('Creating new vnet "%s" in resource group "%s"', vnet_name, resource_group_name)
-            ncf.virtual_networks.begin_create_or_update(resource_group_name,
-                                                        vnet_name,
-                                                        VirtualNetwork(name=vnet_name,
-                                                                       location=location,
-                                                                       polling=False,
-                                                                       address_space=AddressSpace(address_prefixes=[vnet_address_prefix])))
-        subnet = Subnet(
-            name=subnet_name,
-            location=location,
-            address_prefix=subnet_address_prefix,
-            delegations=[aci_delegation])
+            poller = VNetCreate(cli_ctx=cmd.cli_ctx)(command_args={
+                "name": vnet_name,
+                "resource_group": resource_group_name,
+                "location": location,
+                "address_prefixes": [vnet_address_prefix]
+            })
+            LongRunningOperation(cmd.cli_ctx)(poller)
 
         logger.info('Creating new subnet "%s" in resource group "%s"', subnet_name, resource_group_name)
-        subnet = ncf.subnets.begin_create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
+        poller = SubnetCreate(cli_ctx=cmd.cli_ctx)(command_args={
+            "name": subnet_name,
+            "vnet_name": vnet_name,
+            "resource_group": resource_group_name,
+            "address_prefix": subnet_address_prefix,
+            "delegated_services": [aci_delegation]
+        })
+        subnet = LongRunningOperation(cmd.cli_ctx)(poller)
 
-    return subnet.id
+    return subnet["id"]
 
 
 def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):

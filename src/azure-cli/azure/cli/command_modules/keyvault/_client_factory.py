@@ -22,6 +22,7 @@ class Clients(str, Enum):
     managed_hsms = 'managed_hsms'
     mhsm_private_endpoint_connections = 'mhsm_private_endpoint_connections'
     mhsm_private_link_resources = 'mhsm_private_link_resources'
+    mhsm_regions = 'mhsm_regions'
 
 
 OPERATIONS_NAME = {
@@ -30,7 +31,8 @@ OPERATIONS_NAME = {
     Clients.private_link_resources: 'PrivateLinkResourcesOperations',
     Clients.managed_hsms: 'ManagedHsmsOperations',
     Clients.mhsm_private_endpoint_connections: 'MHSMPrivateEndpointConnectionsOperations',
-    Clients.mhsm_private_link_resources: 'MHSMPrivateLinkResourcesOperations'
+    Clients.mhsm_private_link_resources: 'MHSMPrivateLinkResourcesOperations',
+    Clients.mhsm_regions: 'MHSMRegionsOperations'
 }
 
 KEYVAULT_TEMPLATE_STRINGS = {

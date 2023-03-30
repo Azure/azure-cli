@@ -137,10 +137,8 @@ def load_arguments(self, _):
                         'irrecoverable deletion. The setting is effective only if soft delete is also enabled. '
                         'Enabling this functionality is irreversible.')
         c.argument('public_network_access', arg_type=get_enum_type(PublicNetworkAccess),
-                   help="Property to specify whether the vault will accept traffic from public internet. If set to "
-                        "'disabled' all traffic except private endpoint traffic and that originates from trusted "
-                        "services will be blocked. This will override the set firewall rules, meaning that even if the "
-                        "firewall rules are present we will not honor the rules.")
+                   help='Control permission for data plane traffic coming from public networks '
+                        'while private endpoint is enabled')
 
     with self.argument_context('keyvault', arg_group='Network Rule', min_api='2018-02-14') as c:
         c.argument('bypass', arg_type=get_enum_type(NetworkRuleBypassOptions),
@@ -862,3 +860,8 @@ def load_arguments(self, _):
         c.argument('assignee_principal_type', options_list=['--assignee-principal-type', '-t'],
                    arg_type=get_enum_type(PrincipalType), help='The principal type of assignee.')
     # endregion
+
+    with self.argument_context('keyvault region') as c:
+        c.argument('name', hsm_name_type)
+        c.argument('region_name', options_list=['--region-name', '--region', '-r'],
+                   help='The region name.')

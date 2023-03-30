@@ -13,7 +13,7 @@ from knack.log import get_logger
 
 from azure.cli.core.azclierror import (RequiredArgumentMissingError, ValidationError, ResourceNotFoundError)
 from azure.cli.core.commands.parameters import get_subscription_locations
-from azure.cli.core.util import should_disable_connection_verify
+from azure.cli.core.util import should_disable_connection_verify, send_raw_request
 from azure.cli.core.commands.client_factory import get_subscription_id
 
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
@@ -161,6 +161,21 @@ def _get_location_from_resource_group(cli_ctx, resource_group_name):
     return group.location
 
 
+def show_raw_functionapp(cmd, resource_group_name, name):
+    client = web_client_factory(cmd.cli_ctx)
+    site_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    site_url = site_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + site_url
+    response = send_raw_request(cmd.cli_ctx, "GET", request_url)
+    return response.json()
+
+
+def is_centauri_functionapp(cmd, resource_group, name):
+    function_app = show_raw_functionapp(cmd, resource_group, name)
+    return function_app.get("properties", {}).get("managedEnvironmentId", None) is not None
+
+
 def _list_app(cli_ctx, resource_group_name=None):
     client = web_client_factory(cli_ctx)
     if resource_group_name:
@@ -233,6 +248,17 @@ def get_app_service_plan_from_webapp(cmd, webapp, api_version=None):
     client = web_client_factory(cmd.cli_ctx, api_version=api_version)
     plan = parse_resource_id(webapp.server_farm_id)
     return client.app_service_plans.get(plan['resource_group'], plan['name'])
+
+
+def app_service_plan_exists(cmd, resource_group_name, plan, api_version=None):
+    from azure.core.exceptions import ResourceNotFoundError as RNFR
+    exists = True
+    try:
+        client = web_client_factory(cmd.cli_ctx, api_version=api_version)
+        client.app_service_plans.get(resource_group_name, plan)
+    except RNFR:
+        exists = False
+    return exists
 
 
 # Allows putting additional properties on an SDK model instance

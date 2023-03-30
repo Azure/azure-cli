@@ -361,7 +361,7 @@ def set_service_properties_track2(client, parameters, delete_retention=None, del
 
 def storage_blob_copy_batch(cmd, client, source_client, container_name=None, destination_path=None,
                             source_container=None, source_share=None, source_sas=None, pattern=None, dryrun=False,
-                            source_account_name=None, source_account_key=None):
+                            source_account_name=None, source_account_key=None, **kwargs):
     """Copy a group of blob or files to a blob container."""
     if dryrun:
         logger.warning('copy files or blobs to blob container')
@@ -384,7 +384,8 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None, des
                                                     destination_path=destination_path,
                                                     source_container=source_container,
                                                     source_blob_name=blob_name,
-                                                    source_sas=source_sas)
+                                                    source_sas=source_sas,
+                                                    **kwargs)
         return list(filter_none(action_blob_copy(blob) for blob in collect_blobs(source_client,
                                                                                  source_container,
                                                                                  pattern)))
@@ -889,7 +890,7 @@ def create_blob_url(client, container_name, blob_name, snapshot, protocol='https
 
 
 def _copy_blob_to_blob_container(cmd, blob_service, source_blob_service, destination_container, destination_path,
-                                 source_container, source_blob_name, source_sas):
+                                 source_container, source_blob_name, source_sas, **kwargs):
     t_blob_client = cmd.get_models('_blob_client#BlobClient')
     source_client = t_blob_client(account_url=source_blob_service.url, container_name=source_container,
                                   blob_name=source_blob_name, credential=source_sas)
@@ -898,7 +899,8 @@ def _copy_blob_to_blob_container(cmd, blob_service, source_blob_service, destina
     destination_blob_name = normalize_blob_file_path(destination_path, source_blob_name)
     try:
         blob_client = blob_service.get_blob_client(container=destination_container, blob=destination_blob_name)
-        blob_client.start_copy_from_url(source_url=source_blob_url, incremental_copy=False)
+        copy_blob(cmd, blob_client, source_blob_url, source_client=source_client, metadata=None, requires_sync=False,
+                  **kwargs)
         return blob_client.url
     except HttpResponseError as ex:
         if 'One of the request inputs is not valid' in str(ex):
@@ -997,16 +999,22 @@ def copy_blob(cmd, client, source_url, metadata=None, **kwargs):
     if not kwargs['requires_sync']:
         kwargs.pop('requires_sync')
     blob_type = kwargs.pop('destination_blob_type', None)
-    src_client = client.from_blob_url(source_url)
-    if src_client.account_name == client.account_name:
-        src_client = client.from_blob_url(source_url, credential=client.credential)
+    src_client = kwargs.pop('source_client', None)
+    if src_client is None:
+        src_client = client.from_blob_url(source_url)
+        if src_client.account_name == client.account_name:
+            src_client = client.from_blob_url(source_url, credential=client.credential)
     StandardBlobTier = cmd.get_models('_models#StandardBlobTier')
     if blob_type is not None and blob_type != 'Detect':
         blob_service_client = src_client._get_container_client()._get_blob_service_client()
         if blob_service_client.credential is not None:
+            as_user = True
+            if hasattr(blob_service_client.credential, 'account_key'):
+                as_user = False
+            expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
             source_url = generate_sas_blob_uri(cmd, blob_service_client, full_uri=True, blob_url=source_url,
-                                               blob_name=None, container_name=None,
-                                               expiry=datetime.utcnow() + timedelta(hours=1), permission='r')
+                                               blob_name=None, container_name=None, as_user=as_user,
+                                               expiry=expiry, permission='r')
 
         params = {"source_if_modified_since": kwargs.get("source_if_modified_since"),
                   "source_if_unmodified_since": kwargs.get("source_if_unmodified_since"),
@@ -1036,12 +1044,10 @@ def copy_blob(cmd, client, source_url, metadata=None, **kwargs):
                                                source_offset=0, **params)
             return transform_response_with_bytearray(res)
     if kwargs.get('tier') is not None:
-        src_properties = src_client.get_blob_properties()
-        BlobType = cmd.get_models('_models#BlobType')
         tier = kwargs.pop('tier')
-        if src_properties.blob_type == BlobType.BlockBlob:
+        try:
             kwargs["standard_blob_tier"] = getattr(StandardBlobTier, tier)
-        elif src_properties.blob_type == BlobType.PageBlob:
+        except AttributeError:
             PremiumPageBlobTier = cmd.get_models('_models#PremiumPageBlobTier')
             kwargs["premium_page_blob_tier"] = getattr(PremiumPageBlobTier, tier)
     return client.start_copy_from_url(source_url=source_url, metadata=metadata, incremental_copy=False, **kwargs)
