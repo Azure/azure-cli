@@ -56,9 +56,7 @@ class Create(AAZCommand):
             help="The name of the Network Watcher resource.",
             required=True,
         )
-        _args_schema.watcher_rg = AAZResourceGroupNameArg(
-            options=["-g", "--watcher-rg"],
-            help="Name of the resource group the watcher is in.",
+        _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
         _args_schema.location = AAZStrArg(
@@ -525,7 +523,7 @@ class Create(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.watcher_rg,
+                    "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
                 ),
                 **self.serialize_url_param(

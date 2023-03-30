@@ -50,12 +50,12 @@ class List(AAZCommand):
         )
         _args_schema.watcher_name = AAZStrArg(
             options=["--watcher-name"],
-            help="Name of the network watcher.",
+            help="The name of the Network Watcher resource.",
             required=True,
         )
         _args_schema.watcher_rg = AAZResourceGroupNameArg(
             options=["-g", "--watcher-rg"],
-            help="Name of the resource group the watcher is in.",
+            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
         return cls._args_schema
