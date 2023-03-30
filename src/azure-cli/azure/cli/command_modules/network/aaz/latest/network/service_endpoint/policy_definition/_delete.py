@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network service-endpoint policy-definition delete",
-    confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
     """Delete a service endpoint policy definition.
