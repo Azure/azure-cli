@@ -297,26 +297,6 @@ def cli_eventhub_keys_renew(client, resource_group_name, namespace_name, event_h
         parameters={'key_type': key_type, 'key': key}
     )
 
-
-# ConsumerGroup region
-def cli_consumergroup_create(client, resource_group_name, namespace_name, event_hub_name, name, user_metadata=None):
-    return client.create_or_update(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        event_hub_name=event_hub_name,
-        consumer_group_name=name,
-        parameters={'user_metadata': user_metadata}
-    )
-
-
-def cli_consumergroup_update(cmd, instance, user_metadata=None):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
-        if user_metadata:
-            instance.user_metadata = user_metadata
-
-    return instance
-
-
 # NetwrokRuleSet Region
 def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_name, subnet=None, ip_mask=None, ignore_missing_vnet_service_endpoint=False, action='Allow'):
     NWRuleSetVirtualNetworkRules = cmd.get_models('NWRuleSetVirtualNetworkRules', resource_type=ResourceType.MGMT_EVENTHUB)

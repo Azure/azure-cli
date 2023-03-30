@@ -143,21 +143,6 @@ def load_arguments_eh(self, _):
         c.argument('event_hub_name', id_part=None, arg_type=event_hub_name_arg_type)
         c.argument('authorization_rule_name', arg_type=name_type, id_part=None, help='Name of EventHub AuthorizationRule')
 
-
-# - ConsumerGroup Region
-    with self.argument_context('eventhubs eventhub consumer-group') as c:
-        c.argument('event_hub_name', arg_type=event_hub_name_arg_type, help='Name of EventHub')
-        c.argument('consumer_group_name', arg_type=name_type, id_part='child_name_2', completer=get_consumergroup_command_completion_list, help='Name of ConsumerGroup')
-
-    for scope in ['eventhubs eventhub consumer-group create', 'eventhubs eventhub consumer-group update']:
-        with self.argument_context(scope) as c:
-            c.argument('name', arg_type=name_type, help='Name of ConsumerGroup')
-            c.argument('user_metadata', help='Usermetadata is a placeholder to store user-defined string data with maximum length 1024. e.g. it can be used to store descriptive data, such as list of teams and their contact information also user-defined configuration settings can be stored.')
-
-    with self.argument_context('eventhubs eventhub consumer-group list') as c:
-        c.argument('event_hub_name', arg_type=event_hub_name_arg_type, id_part=None, help='Name of EventHub')
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-
 #   : Region Geo DR Configuration
     with self.argument_context('eventhubs georecovery-alias') as c:
         c.argument('alias', options_list=['--alias', '-a'], id_part='child_name_1', help='Name of Geo-Disaster Recovery Configuration Alias')

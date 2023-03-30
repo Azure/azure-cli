@@ -142,14 +142,6 @@ def load_command_table(self, _):
         g.command('delete', 'delete_authorization_rule')
         g.generic_update_command('update', getter_name='get_authorization_rule', setter_name='create_or_update_authorization_rule', custom_func_name='cli_autho_update')
 
-# ConsumerGroup Region
-    with self.command_group('eventhubs eventhub consumer-group', eh_consumer_groups_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=consumer_groups_mgmt_client_factory) as g:
-        g.custom_command('create', 'cli_consumergroup_create')
-        g.show_command('show', 'get')
-        g.command('list', 'list_by_event_hub')
-        g.command('delete', 'delete')
-        g.generic_update_command('update', custom_func_name='cli_consumergroup_update', custom_func_type=eventhubs_custom)
-
 # DisasterRecoveryConfigs Region
     with self.command_group('eventhubs georecovery-alias', eh_geodr_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=disaster_recovery_mgmt_client_factory) as g:
         g.custom_command('set', 'cli_geodr_create')
