@@ -128,10 +128,10 @@ def retryable_method(retries=3, interval_sec=5, excpt_type=Exception):
             while True:
                 try:
                     return func(*args, **kwargs)
-                except excpt_type as exception:  # pylint: disable=broad-except
+                except excpt_type:  # pylint: disable=broad-except
                     current_retry -= 1
                     if current_retry <= 0:
-                        raise exception
+                        raise
                 time.sleep(interval_sec)
         return call
     return decorate
