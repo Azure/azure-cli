@@ -152,6 +152,13 @@ alias_json = """
             "sku": "2012-Datacenter",
             "version": "latest",
             "architecture": "x64"
+          },
+          "Win2008R2SP1": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2008-R2-SP1",
+            "version": "latest",
+            "architecture": "x64"
           }
         }
       }
