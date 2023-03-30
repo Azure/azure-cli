@@ -282,6 +282,7 @@ def list_staticsite_app_settings(cmd, name, resource_group_name=None, environmen
 
     return client.list_static_site_build_app_settings(resource_group_name, name, environment_name)
 
+
 def set_staticsite_app_settings(cmd, name, setting_pairs, resource_group_name=None, environment_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
@@ -304,6 +305,7 @@ def set_staticsite_app_settings(cmd, name, setting_pairs, resource_group_name=No
     return client.create_or_update_static_site_build_app_settings(
         resource_group_name, name, environment_name, app_settings=app_settings)
 
+
 def delete_staticsite_app_settings(cmd, name, setting_names, resource_group_name=None, environment_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
@@ -323,6 +325,7 @@ def delete_staticsite_app_settings(cmd, name, setting_names, resource_group_name
 
     return client.create_or_update_static_site_build_app_settings(
         resource_group_name, name, environment_name, app_settings=app_settings)
+
 
 def list_staticsite_users(cmd, name, resource_group_name=None, authentication_provider='all'):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
