@@ -102,6 +102,7 @@ ManagedClusterAddonProfile = TypeVar("ManagedClusterAddonProfile")
 Snapshot = TypeVar("Snapshot")
 KubeletConfig = TypeVar("KubeletConfig")
 LinuxOSConfig = TypeVar("LinuxOSConfig")
+ManagedClusterSecurityProfileWorkloadIdentity = TypeVar("ManagedClusterSecurityProfileWorkloadIdentity")
 ManagedClusterOIDCIssuerProfile = TypeVar("ManagedClusterOIDCIssuerProfile")
 ManagedClusterSecurityProfileDefender = TypeVar("ManagedClusterSecurityProfileDefender")
 ManagedClusterStorageProfile = TypeVar('ManagedClusterStorageProfile')
@@ -4181,6 +4182,61 @@ class AKSManagedClusterContext(BaseAKSContext):
         )
         return azure_defender
 
+    def get_workload_identity_profile(self) -> Optional[ManagedClusterSecurityProfileWorkloadIdentity]:
+        """Obtrain the value of security_profile.workload_identity.
+        :return: Optional[ManagedClusterSecurityProfileWorkloadIdentity]
+        """
+        enable_workload_identity = self.raw_param.get("enable_workload_identity")
+        disable_workload_identity = self.raw_param.get("disable_workload_identity")
+
+        if not enable_workload_identity and not disable_workload_identity:
+            return None
+
+        if enable_workload_identity and disable_workload_identity:
+            raise MutuallyExclusiveArgumentError(
+                "Cannot specify --enable-workload-identity and "
+                "--disable-workload-identity at the same time."
+            )
+
+        if not hasattr(self.models, "ManagedClusterSecurityProfileWorkloadIdentity"):
+            return None
+
+        profile = self.models.ManagedClusterSecurityProfileWorkloadIdentity()
+
+        if self.decorator_mode == DecoratorMode.CREATE:
+            profile.enabled = bool(enable_workload_identity)
+        elif self.decorator_mode == DecoratorMode.UPDATE:
+            if (
+                hasattr(self.mc, "security_profile") and
+                self.mc.security_profile is not None and
+                self.mc.security_profile.workload_identity is not None
+            ):
+                # reuse previous profile is has been set
+                profile = self.mc.security_profile.workload_identity
+
+            if enable_workload_identity:
+                profile.enabled = True
+            elif disable_workload_identity:
+                profile.enabled = False
+
+        if profile.enabled:
+            # in enable case, we need to check if OIDC issuer has been enabled
+            oidc_issuer_profile = self.get_oidc_issuer_profile()
+            if self.decorator_mode == DecoratorMode.UPDATE and oidc_issuer_profile is None:
+                # if the cluster has enabled OIDC issuer before, in update call:
+                #
+                #    az aks update --enable-workload-identity
+                #
+                # we need to use previous OIDC issuer profile
+                oidc_issuer_profile = self.mc.oidc_issuer_profile
+            oidc_issuer_enabled = oidc_issuer_profile is not None and oidc_issuer_profile.enabled
+            if not oidc_issuer_enabled:
+                raise RequiredArgumentMissingError(
+                    "Enabling workload identity requires enabling OIDC issuer (--enable-oidc-issuer)."
+                )
+
+        return profile
+
     def _get_enable_azure_keyvault_kms(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of enable_azure_keyvault_kms.
 
@@ -4775,6 +4831,20 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         for key, value in defaults_in_mc.items():
             if getattr(mc, key, None) is None:
                 setattr(mc, key, value)
+        return mc
+
+    def set_up_workload_identity_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up workload identity for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        profile = self.context.get_workload_identity_profile()
+        if profile:
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()
+            mc.security_profile.workload_identity = profile
+
         return mc
 
     def set_up_defender(self, mc: ManagedCluster) -> ManagedCluster:
@@ -5739,6 +5809,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_node_resource_group(mc)
         # set up defender
         mc = self.set_up_defender(mc)
+        # set up workload identity profile
+        mc = self.set_up_workload_identity_profile(mc)
         # set up storage profile
         mc = self.set_up_storage_profile(mc)
         # set up azure keyvalut kms
@@ -6569,6 +6641,20 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def update_workload_identity_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update workload identity profile for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        profile = self.context.get_workload_identity_profile()
+        if profile:
+            if mc.security_profile is None:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile()
+            mc.security_profile.workload_identity = profile
+
+        return mc
+
     def update_azure_keyvault_kms(self, mc: ManagedCluster) -> ManagedCluster:
         """Update security profile azureKeyvaultKms for the ManagedCluster object.
 
@@ -6746,6 +6832,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_addon_profiles(mc)
         # update defender
         mc = self.update_defender(mc)
+        # update workload identity profile
+        mc = self.update_workload_identity_profile(mc)
         # update stroage profile
         mc = self.update_storage_profile(mc)
         # update azure keyvalut kms
