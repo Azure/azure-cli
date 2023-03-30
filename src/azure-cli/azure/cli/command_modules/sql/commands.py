@@ -580,6 +580,7 @@ def load_command_table(self, _):
                                  custom_func_name='server_update',
                                  setter_name='begin_create_or_update',
                                  supports_no_wait=True)
+        g.command('refresh-external-governance-status', 'begin_refresh_status')
         g.wait_command('wait')
 
     server_usages_operations = CliCommandType(

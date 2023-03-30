@@ -48,8 +48,8 @@ def _authorization_management_client(cli_ctx, **_):
 
 def _resource_managedapps_client_factory(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.resource.managedapplications import ApplicationClient
-    return get_mgmt_service_client(cli_ctx, ApplicationClient)
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS)
 
 
 def _resource_managementgroups_client_factory(cli_ctx, **_):
