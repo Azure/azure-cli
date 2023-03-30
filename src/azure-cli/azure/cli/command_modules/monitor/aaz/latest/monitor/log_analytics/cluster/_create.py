@@ -49,7 +49,6 @@ class Create(AAZCommand):
             options=["-n", "--name", "--cluster-name"],
             help="The name of the Log Analytics cluster.",
             required=True,
-            id_part="name",
             fmt=AAZStrArgFormat(
                 pattern="^[A-Za-z0-9][A-Za-z0-9-]+[A-Za-z0-9]$",
                 max_length=63,
@@ -152,11 +151,11 @@ class Create(AAZCommand):
         yield self.ClustersCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -446,6 +445,10 @@ class Create(AAZCommand):
             tags.Element = AAZStrType()
 
             return cls._schema_on_200_201
+
+
+class _CreateHelper:
+    """Helper class for Create"""
 
 
 __all__ = ["Create"]

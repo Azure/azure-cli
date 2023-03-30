@@ -49,13 +49,11 @@ class Create(AAZCommand):
             options=["-n", "--name", "--query-id"],
             help="The id name of a specific query defined in the log analytics query pack. It must be of type GUID.",
             required=True,
-            id_part="child_name_1",
         )
         _args_schema.query_pack_name = AAZStrArg(
             options=["--query-pack-name"],
             help="The name of the log analytics query pack.",
             required=True,
-            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -127,11 +125,11 @@ class Create(AAZCommand):
         self.QueriesPut(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -364,6 +362,10 @@ class Create(AAZCommand):
             )
 
             return cls._schema_on_200
+
+
+class _CreateHelper:
+    """Helper class for Create"""
 
 
 __all__ = ["Create"]

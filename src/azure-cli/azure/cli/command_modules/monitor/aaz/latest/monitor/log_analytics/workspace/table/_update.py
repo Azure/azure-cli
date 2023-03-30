@@ -13,9 +13,6 @@ from azure.cli.core.aaz import *
 
 class Update(AAZCommand):
     """Update a Log Analytics workspace table.
-
-    :example: Update the properties of a Log Analytics workspace table.
-        az monitor log-analytics workspace table update --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable --retention-time 30
     """
 
     _aaz_info = {
@@ -193,11 +190,11 @@ class Update(AAZCommand):
         yield self.TablesUpdate(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -396,7 +393,7 @@ class Update(AAZCommand):
             properties.restored_logs = AAZObjectType(
                 serialized_name="restoredLogs",
             )
-            _build_schema_restored_logs_read(properties.restored_logs)
+            _UpdateHelper._build_schema_restored_logs_read(properties.restored_logs)
             properties.result_statistics = AAZObjectType(
                 serialized_name="resultStatistics",
             )
@@ -407,7 +404,7 @@ class Update(AAZCommand):
             properties.search_results = AAZObjectType(
                 serialized_name="searchResults",
             )
-            _build_schema_search_results_read(properties.search_results)
+            _UpdateHelper._build_schema_search_results_read(properties.search_results)
             properties.total_retention_in_days = AAZIntType(
                 serialized_name="totalRetentionInDays",
             )
@@ -437,11 +434,11 @@ class Update(AAZCommand):
             schema.restored_logs = AAZObjectType(
                 serialized_name="restoredLogs",
             )
-            _build_schema_restored_logs_read(schema.restored_logs)
+            _UpdateHelper._build_schema_restored_logs_read(schema.restored_logs)
             schema.search_results = AAZObjectType(
                 serialized_name="searchResults",
             )
-            _build_schema_search_results_read(schema.search_results)
+            _UpdateHelper._build_schema_search_results_read(schema.search_results)
             schema.solutions = AAZListType(
                 flags={"read_only": True},
             )
@@ -468,7 +465,7 @@ class Update(AAZCommand):
 
             columns = cls._schema_on_200.properties.schema.columns
             columns.Element = AAZObjectType()
-            _build_schema_column_read(columns.Element)
+            _UpdateHelper._build_schema_column_read(columns.Element)
 
             labels = cls._schema_on_200.properties.schema.labels
             labels.Element = AAZStrType(
@@ -482,7 +479,7 @@ class Update(AAZCommand):
 
             standard_columns = cls._schema_on_200.properties.schema.standard_columns
             standard_columns.Element = AAZObjectType()
-            _build_schema_column_read(standard_columns.Element)
+            _UpdateHelper._build_schema_column_read(standard_columns.Element)
 
             system_data = cls._schema_on_200.system_data
             system_data.created_at = AAZStrType(
@@ -513,117 +510,115 @@ class Update(AAZCommand):
             return cls._schema_on_200
 
 
-_schema_column_read = None
+class _UpdateHelper:
+    """Helper class for Update"""
 
+    _schema_column_read = None
 
-def _build_schema_column_read(_schema):
-    global _schema_column_read
-    if _schema_column_read is not None:
-        _schema.data_type_hint = _schema_column_read.data_type_hint
-        _schema.description = _schema_column_read.description
-        _schema.display_name = _schema_column_read.display_name
-        _schema.is_default_display = _schema_column_read.is_default_display
-        _schema.is_hidden = _schema_column_read.is_hidden
-        _schema.name = _schema_column_read.name
-        _schema.type = _schema_column_read.type
-        return
+    @classmethod
+    def _build_schema_column_read(cls, _schema):
+        if cls._schema_column_read is not None:
+            _schema.data_type_hint = cls._schema_column_read.data_type_hint
+            _schema.description = cls._schema_column_read.description
+            _schema.display_name = cls._schema_column_read.display_name
+            _schema.is_default_display = cls._schema_column_read.is_default_display
+            _schema.is_hidden = cls._schema_column_read.is_hidden
+            _schema.name = cls._schema_column_read.name
+            _schema.type = cls._schema_column_read.type
+            return
 
-    _schema_column_read = AAZObjectType()
+        cls._schema_column_read = _schema_column_read = AAZObjectType()
 
-    column_read = _schema_column_read
-    column_read.data_type_hint = AAZStrType(
-        serialized_name="dataTypeHint",
-    )
-    column_read.description = AAZStrType()
-    column_read.display_name = AAZStrType(
-        serialized_name="displayName",
-    )
-    column_read.is_default_display = AAZBoolType(
-        serialized_name="isDefaultDisplay",
-        flags={"read_only": True},
-    )
-    column_read.is_hidden = AAZBoolType(
-        serialized_name="isHidden",
-        flags={"read_only": True},
-    )
-    column_read.name = AAZStrType()
-    column_read.type = AAZStrType()
+        column_read = _schema_column_read
+        column_read.data_type_hint = AAZStrType(
+            serialized_name="dataTypeHint",
+        )
+        column_read.description = AAZStrType()
+        column_read.display_name = AAZStrType(
+            serialized_name="displayName",
+        )
+        column_read.is_default_display = AAZBoolType(
+            serialized_name="isDefaultDisplay",
+            flags={"read_only": True},
+        )
+        column_read.is_hidden = AAZBoolType(
+            serialized_name="isHidden",
+            flags={"read_only": True},
+        )
+        column_read.name = AAZStrType()
+        column_read.type = AAZStrType()
 
-    _schema.data_type_hint = _schema_column_read.data_type_hint
-    _schema.description = _schema_column_read.description
-    _schema.display_name = _schema_column_read.display_name
-    _schema.is_default_display = _schema_column_read.is_default_display
-    _schema.is_hidden = _schema_column_read.is_hidden
-    _schema.name = _schema_column_read.name
-    _schema.type = _schema_column_read.type
+        _schema.data_type_hint = cls._schema_column_read.data_type_hint
+        _schema.description = cls._schema_column_read.description
+        _schema.display_name = cls._schema_column_read.display_name
+        _schema.is_default_display = cls._schema_column_read.is_default_display
+        _schema.is_hidden = cls._schema_column_read.is_hidden
+        _schema.name = cls._schema_column_read.name
+        _schema.type = cls._schema_column_read.type
 
+    _schema_restored_logs_read = None
 
-_schema_restored_logs_read = None
+    @classmethod
+    def _build_schema_restored_logs_read(cls, _schema):
+        if cls._schema_restored_logs_read is not None:
+            _schema.end_restore_time = cls._schema_restored_logs_read.end_restore_time
+            _schema.source_table = cls._schema_restored_logs_read.source_table
+            _schema.start_restore_time = cls._schema_restored_logs_read.start_restore_time
+            return
 
+        cls._schema_restored_logs_read = _schema_restored_logs_read = AAZObjectType()
 
-def _build_schema_restored_logs_read(_schema):
-    global _schema_restored_logs_read
-    if _schema_restored_logs_read is not None:
-        _schema.end_restore_time = _schema_restored_logs_read.end_restore_time
-        _schema.source_table = _schema_restored_logs_read.source_table
-        _schema.start_restore_time = _schema_restored_logs_read.start_restore_time
-        return
+        restored_logs_read = _schema_restored_logs_read
+        restored_logs_read.end_restore_time = AAZStrType(
+            serialized_name="endRestoreTime",
+        )
+        restored_logs_read.source_table = AAZStrType(
+            serialized_name="sourceTable",
+        )
+        restored_logs_read.start_restore_time = AAZStrType(
+            serialized_name="startRestoreTime",
+        )
 
-    _schema_restored_logs_read = AAZObjectType()
+        _schema.end_restore_time = cls._schema_restored_logs_read.end_restore_time
+        _schema.source_table = cls._schema_restored_logs_read.source_table
+        _schema.start_restore_time = cls._schema_restored_logs_read.start_restore_time
 
-    restored_logs_read = _schema_restored_logs_read
-    restored_logs_read.end_restore_time = AAZStrType(
-        serialized_name="endRestoreTime",
-    )
-    restored_logs_read.source_table = AAZStrType(
-        serialized_name="sourceTable",
-    )
-    restored_logs_read.start_restore_time = AAZStrType(
-        serialized_name="startRestoreTime",
-    )
+    _schema_search_results_read = None
 
-    _schema.end_restore_time = _schema_restored_logs_read.end_restore_time
-    _schema.source_table = _schema_restored_logs_read.source_table
-    _schema.start_restore_time = _schema_restored_logs_read.start_restore_time
+    @classmethod
+    def _build_schema_search_results_read(cls, _schema):
+        if cls._schema_search_results_read is not None:
+            _schema.description = cls._schema_search_results_read.description
+            _schema.end_search_time = cls._schema_search_results_read.end_search_time
+            _schema.limit = cls._schema_search_results_read.limit
+            _schema.query = cls._schema_search_results_read.query
+            _schema.source_table = cls._schema_search_results_read.source_table
+            _schema.start_search_time = cls._schema_search_results_read.start_search_time
+            return
 
+        cls._schema_search_results_read = _schema_search_results_read = AAZObjectType()
 
-_schema_search_results_read = None
+        search_results_read = _schema_search_results_read
+        search_results_read.description = AAZStrType()
+        search_results_read.end_search_time = AAZStrType(
+            serialized_name="endSearchTime",
+        )
+        search_results_read.limit = AAZIntType()
+        search_results_read.query = AAZStrType()
+        search_results_read.source_table = AAZStrType(
+            serialized_name="sourceTable",
+            flags={"read_only": True},
+        )
+        search_results_read.start_search_time = AAZStrType(
+            serialized_name="startSearchTime",
+        )
 
-
-def _build_schema_search_results_read(_schema):
-    global _schema_search_results_read
-    if _schema_search_results_read is not None:
-        _schema.description = _schema_search_results_read.description
-        _schema.end_search_time = _schema_search_results_read.end_search_time
-        _schema.limit = _schema_search_results_read.limit
-        _schema.query = _schema_search_results_read.query
-        _schema.source_table = _schema_search_results_read.source_table
-        _schema.start_search_time = _schema_search_results_read.start_search_time
-        return
-
-    _schema_search_results_read = AAZObjectType()
-
-    search_results_read = _schema_search_results_read
-    search_results_read.description = AAZStrType()
-    search_results_read.end_search_time = AAZStrType(
-        serialized_name="endSearchTime",
-    )
-    search_results_read.limit = AAZIntType()
-    search_results_read.query = AAZStrType()
-    search_results_read.source_table = AAZStrType(
-        serialized_name="sourceTable",
-        flags={"read_only": True},
-    )
-    search_results_read.start_search_time = AAZStrType(
-        serialized_name="startSearchTime",
-    )
-
-    _schema.description = _schema_search_results_read.description
-    _schema.end_search_time = _schema_search_results_read.end_search_time
-    _schema.limit = _schema_search_results_read.limit
-    _schema.query = _schema_search_results_read.query
-    _schema.source_table = _schema_search_results_read.source_table
-    _schema.start_search_time = _schema_search_results_read.start_search_time
+        _schema.description = cls._schema_search_results_read.description
+        _schema.end_search_time = cls._schema_search_results_read.end_search_time
+        _schema.limit = cls._schema_search_results_read.limit
+        _schema.query = cls._schema_search_results_read.query
+        _schema.source_table = cls._schema_search_results_read.source_table
+        _schema.start_search_time = cls._schema_search_results_read.start_search_time
 
 
 __all__ = ["Update"]

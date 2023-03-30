@@ -48,6 +48,11 @@ class Update(AAZCommand):
             help="The name of the diagnostic setting. Required.",
             required=True,
         )
+        _args_schema.resource = AAZStrArg(
+            options=["--resource"],
+            help="Name or ID of the target resource.",
+            required=True,
+        )
 
         # define Arg Group "Properties"
 
@@ -65,7 +70,7 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.log_analytics_destination_type = AAZStrArg(
-            options=["--log-ana-dtype", "--log-analytics-destination-type"],
+            options=["--log-analytics-destination-type"],
             arg_group="Properties",
             help="A string indicating whether the export to Log Analytics should use the default destination type, i.e. AzureDiagnostics, or use a destination type constructed as follows: <normalized service identity>_<normalized category name>. Possible values are: Dedicated and null (null is default.)",
             nullable=True,
@@ -159,16 +164,6 @@ class Update(AAZCommand):
             options=["time-grain"],
             help="the timegrain of the metric in ISO8601 format.",
             nullable=True,
-        )
-
-        # define Arg Group "Target Resource"
-
-        _args_schema = cls._args_schema
-        _args_schema.resource = AAZStrArg(
-            options=["--resource"],
-            arg_group="Target Resource",
-            help="Name or ID of the target resource.",
-            required=True,
         )
         return cls._args_schema
 

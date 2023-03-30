@@ -56,11 +56,11 @@ class Wait(AAZWaitCommand):
         self.ClustersGet(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -286,6 +286,10 @@ class Wait(AAZWaitCommand):
             tags.Element = AAZStrType()
 
             return cls._schema_on_200
+
+
+class _WaitHelper:
+    """Helper class for Wait"""
 
 
 __all__ = ["Wait"]

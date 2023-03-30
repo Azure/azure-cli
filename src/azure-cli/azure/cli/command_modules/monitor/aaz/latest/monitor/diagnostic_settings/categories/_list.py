@@ -172,4 +172,8 @@ class List(AAZCommand):
             return cls._schema_on_200
 
 
+class _ListHelper:
+    """Helper class for List"""
+
+
 __all__ = ["List"]

@@ -69,11 +69,11 @@ class Migrate(AAZCommand):
         self.TablesMigrate(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -137,6 +137,10 @@ class Migrate(AAZCommand):
 
         def on_200(self, session):
             pass
+
+
+class _MigrateHelper:
+    """Helper class for Migrate"""
 
 
 __all__ = ["Migrate"]

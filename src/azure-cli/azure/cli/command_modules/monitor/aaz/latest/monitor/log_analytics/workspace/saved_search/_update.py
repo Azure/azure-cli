@@ -135,19 +135,19 @@ class Update(AAZCommand):
         self.SavedSearchesCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def pre_instance_update(self, instance):
         pass
 
-    # @register_callback
+    @register_callback
     def post_instance_update(self, instance):
         pass
 
@@ -238,7 +238,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_saved_search_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_saved_search_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -337,7 +337,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_saved_search_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_saved_search_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -384,72 +384,74 @@ class Update(AAZCommand):
             )
 
 
-_schema_saved_search_read = None
+class _UpdateHelper:
+    """Helper class for Update"""
 
+    _schema_saved_search_read = None
 
-def _build_schema_saved_search_read(_schema):
-    global _schema_saved_search_read
-    if _schema_saved_search_read is not None:
-        _schema.etag = _schema_saved_search_read.etag
-        _schema.id = _schema_saved_search_read.id
-        _schema.name = _schema_saved_search_read.name
-        _schema.properties = _schema_saved_search_read.properties
-        _schema.type = _schema_saved_search_read.type
-        return
+    @classmethod
+    def _build_schema_saved_search_read(cls, _schema):
+        if cls._schema_saved_search_read is not None:
+            _schema.etag = cls._schema_saved_search_read.etag
+            _schema.id = cls._schema_saved_search_read.id
+            _schema.name = cls._schema_saved_search_read.name
+            _schema.properties = cls._schema_saved_search_read.properties
+            _schema.type = cls._schema_saved_search_read.type
+            return
 
-    _schema_saved_search_read = AAZObjectType()
+        cls._schema_saved_search_read = _schema_saved_search_read = AAZObjectType()
 
-    saved_search_read = _schema_saved_search_read
-    saved_search_read.etag = AAZStrType()
-    saved_search_read.id = AAZStrType(
-        flags={"read_only": True},
-    )
-    saved_search_read.name = AAZStrType(
-        flags={"read_only": True},
-    )
-    saved_search_read.properties = AAZObjectType(
-        flags={"required": True, "client_flatten": True},
-    )
-    saved_search_read.type = AAZStrType(
-        flags={"read_only": True},
-    )
+        saved_search_read = _schema_saved_search_read
+        saved_search_read.etag = AAZStrType()
+        saved_search_read.id = AAZStrType(
+            flags={"read_only": True},
+        )
+        saved_search_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        saved_search_read.properties = AAZObjectType(
+            flags={"required": True, "client_flatten": True},
+        )
+        saved_search_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
-    properties = _schema_saved_search_read.properties
-    properties.category = AAZStrType(
-        flags={"required": True},
-    )
-    properties.display_name = AAZStrType(
-        serialized_name="displayName",
-        flags={"required": True},
-    )
-    properties.function_alias = AAZStrType(
-        serialized_name="functionAlias",
-    )
-    properties.function_parameters = AAZStrType(
-        serialized_name="functionParameters",
-    )
-    properties.query = AAZStrType(
-        flags={"required": True},
-    )
-    properties.tags = AAZListType()
-    properties.version = AAZIntType()
+        properties = _schema_saved_search_read.properties
+        properties.category = AAZStrType(
+            flags={"required": True},
+        )
+        properties.display_name = AAZStrType(
+            serialized_name="displayName",
+            flags={"required": True},
+        )
+        properties.function_alias = AAZStrType(
+            serialized_name="functionAlias",
+        )
+        properties.function_parameters = AAZStrType(
+            serialized_name="functionParameters",
+        )
+        properties.query = AAZStrType(
+            flags={"required": True},
+        )
+        properties.tags = AAZListType()
+        properties.version = AAZIntType()
 
-    tags = _schema_saved_search_read.properties.tags
-    tags.Element = AAZObjectType()
+        tags = _schema_saved_search_read.properties.tags
+        tags.Element = AAZObjectType()
 
-    _element = _schema_saved_search_read.properties.tags.Element
-    _element.name = AAZStrType(
-        flags={"required": True},
-    )
-    _element.value = AAZStrType(
-        flags={"required": True},
-    )
+        _element = _schema_saved_search_read.properties.tags.Element
+        _element.name = AAZStrType(
+            flags={"required": True},
+        )
+        _element.value = AAZStrType(
+            flags={"required": True},
+        )
 
-    _schema.etag = _schema_saved_search_read.etag
-    _schema.id = _schema_saved_search_read.id
-    _schema.name = _schema_saved_search_read.name
-    _schema.properties = _schema_saved_search_read.properties
-    _schema.type = _schema_saved_search_read.type
+        _schema.etag = cls._schema_saved_search_read.etag
+        _schema.id = cls._schema_saved_search_read.id
+        _schema.name = cls._schema_saved_search_read.name
+        _schema.properties = cls._schema_saved_search_read.properties
+        _schema.type = cls._schema_saved_search_read.type
 
 
 __all__ = ["Update"]

@@ -105,19 +105,19 @@ class Update(AAZCommand):
         yield self.LinkedServicesCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def pre_instance_update(self, instance):
         pass
 
-    # @register_callback
+    @register_callback
     def post_instance_update(self, instance):
         pass
 
@@ -208,7 +208,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_linked_service_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_linked_service_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -323,7 +323,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _build_schema_linked_service_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_linked_service_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -361,55 +361,57 @@ class Update(AAZCommand):
             )
 
 
-_schema_linked_service_read = None
+class _UpdateHelper:
+    """Helper class for Update"""
 
+    _schema_linked_service_read = None
 
-def _build_schema_linked_service_read(_schema):
-    global _schema_linked_service_read
-    if _schema_linked_service_read is not None:
-        _schema.id = _schema_linked_service_read.id
-        _schema.name = _schema_linked_service_read.name
-        _schema.properties = _schema_linked_service_read.properties
-        _schema.tags = _schema_linked_service_read.tags
-        _schema.type = _schema_linked_service_read.type
-        return
+    @classmethod
+    def _build_schema_linked_service_read(cls, _schema):
+        if cls._schema_linked_service_read is not None:
+            _schema.id = cls._schema_linked_service_read.id
+            _schema.name = cls._schema_linked_service_read.name
+            _schema.properties = cls._schema_linked_service_read.properties
+            _schema.tags = cls._schema_linked_service_read.tags
+            _schema.type = cls._schema_linked_service_read.type
+            return
 
-    _schema_linked_service_read = AAZObjectType()
+        cls._schema_linked_service_read = _schema_linked_service_read = AAZObjectType()
 
-    linked_service_read = _schema_linked_service_read
-    linked_service_read.id = AAZStrType(
-        flags={"read_only": True},
-    )
-    linked_service_read.name = AAZStrType(
-        flags={"read_only": True},
-    )
-    linked_service_read.properties = AAZObjectType(
-        flags={"required": True, "client_flatten": True},
-    )
-    linked_service_read.tags = AAZDictType()
-    linked_service_read.type = AAZStrType(
-        flags={"read_only": True},
-    )
+        linked_service_read = _schema_linked_service_read
+        linked_service_read.id = AAZStrType(
+            flags={"read_only": True},
+        )
+        linked_service_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        linked_service_read.properties = AAZObjectType(
+            flags={"required": True, "client_flatten": True},
+        )
+        linked_service_read.tags = AAZDictType()
+        linked_service_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
-    properties = _schema_linked_service_read.properties
-    properties.provisioning_state = AAZStrType(
-        serialized_name="provisioningState",
-    )
-    properties.resource_id = AAZStrType(
-        serialized_name="resourceId",
-    )
-    properties.write_access_resource_id = AAZStrType(
-        serialized_name="writeAccessResourceId",
-    )
+        properties = _schema_linked_service_read.properties
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+        )
+        properties.resource_id = AAZStrType(
+            serialized_name="resourceId",
+        )
+        properties.write_access_resource_id = AAZStrType(
+            serialized_name="writeAccessResourceId",
+        )
 
-    tags = _schema_linked_service_read.tags
-    tags.Element = AAZStrType()
+        tags = _schema_linked_service_read.tags
+        tags.Element = AAZStrType()
 
-    _schema.id = _schema_linked_service_read.id
-    _schema.name = _schema_linked_service_read.name
-    _schema.properties = _schema_linked_service_read.properties
-    _schema.tags = _schema_linked_service_read.tags
-    _schema.type = _schema_linked_service_read.type
+        _schema.id = cls._schema_linked_service_read.id
+        _schema.name = cls._schema_linked_service_read.name
+        _schema.properties = cls._schema_linked_service_read.properties
+        _schema.tags = cls._schema_linked_service_read.tags
+        _schema.type = cls._schema_linked_service_read.type
 
 
 __all__ = ["Update"]

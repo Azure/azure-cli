@@ -81,11 +81,11 @@ class ShowPredictiveMetric(AAZCommand):
         self.PredictiveMetricGet(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -217,6 +217,10 @@ class ShowPredictiveMetric(AAZCommand):
             )
 
             return cls._schema_on_200
+
+
+class _ShowPredictiveMetricHelper:
+    """Helper class for ShowPredictiveMetric"""
 
 
 __all__ = ["ShowPredictiveMetric"]

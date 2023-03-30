@@ -10,6 +10,7 @@
 
 from azure.cli.core.aaz import *
 
+
 class Update(AAZCommand):
     """Update a subnet.
 

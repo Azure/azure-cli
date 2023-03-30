@@ -206,7 +206,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_subscription_diagnostic_settings_resource_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_subscription_diagnostic_settings_resource_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -297,7 +297,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_subscription_diagnostic_settings_resource_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_subscription_diagnostic_settings_resource_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -344,68 +344,70 @@ class Update(AAZCommand):
             )
 
 
-_schema_subscription_diagnostic_settings_resource_read = None
+class _UpdateHelper:
+    """Helper class for Update"""
 
+    _schema_subscription_diagnostic_settings_resource_read = None
 
-def _build_schema_subscription_diagnostic_settings_resource_read(_schema):
-    global _schema_subscription_diagnostic_settings_resource_read
-    if _schema_subscription_diagnostic_settings_resource_read is not None:
-        _schema.id = _schema_subscription_diagnostic_settings_resource_read.id
-        _schema.location = _schema_subscription_diagnostic_settings_resource_read.location
-        _schema.name = _schema_subscription_diagnostic_settings_resource_read.name
-        _schema.properties = _schema_subscription_diagnostic_settings_resource_read.properties
-        _schema.type = _schema_subscription_diagnostic_settings_resource_read.type
-        return
+    @classmethod
+    def _build_schema_subscription_diagnostic_settings_resource_read(cls, _schema):
+        if cls._schema_subscription_diagnostic_settings_resource_read is not None:
+            _schema.id = cls._schema_subscription_diagnostic_settings_resource_read.id
+            _schema.location = cls._schema_subscription_diagnostic_settings_resource_read.location
+            _schema.name = cls._schema_subscription_diagnostic_settings_resource_read.name
+            _schema.properties = cls._schema_subscription_diagnostic_settings_resource_read.properties
+            _schema.type = cls._schema_subscription_diagnostic_settings_resource_read.type
+            return
 
-    _schema_subscription_diagnostic_settings_resource_read = AAZObjectType()
+        cls._schema_subscription_diagnostic_settings_resource_read = _schema_subscription_diagnostic_settings_resource_read = AAZObjectType()
 
-    subscription_diagnostic_settings_resource_read = _schema_subscription_diagnostic_settings_resource_read
-    subscription_diagnostic_settings_resource_read.id = AAZStrType(
-        flags={"read_only": True},
-    )
-    subscription_diagnostic_settings_resource_read.location = AAZStrType()
-    subscription_diagnostic_settings_resource_read.name = AAZStrType(
-        flags={"read_only": True},
-    )
-    subscription_diagnostic_settings_resource_read.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
-    subscription_diagnostic_settings_resource_read.type = AAZStrType(
-        flags={"read_only": True},
-    )
+        subscription_diagnostic_settings_resource_read = _schema_subscription_diagnostic_settings_resource_read
+        subscription_diagnostic_settings_resource_read.id = AAZStrType(
+            flags={"read_only": True},
+        )
+        subscription_diagnostic_settings_resource_read.location = AAZStrType()
+        subscription_diagnostic_settings_resource_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        subscription_diagnostic_settings_resource_read.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        subscription_diagnostic_settings_resource_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
-    properties = _schema_subscription_diagnostic_settings_resource_read.properties
-    properties.event_hub_authorization_rule_id = AAZStrType(
-        serialized_name="eventHubAuthorizationRuleId",
-    )
-    properties.event_hub_name = AAZStrType(
-        serialized_name="eventHubName",
-    )
-    properties.logs = AAZListType()
-    properties.service_bus_rule_id = AAZStrType(
-        serialized_name="serviceBusRuleId",
-    )
-    properties.storage_account_id = AAZStrType(
-        serialized_name="storageAccountId",
-    )
-    properties.workspace_id = AAZStrType(
-        serialized_name="workspaceId",
-    )
+        properties = _schema_subscription_diagnostic_settings_resource_read.properties
+        properties.event_hub_authorization_rule_id = AAZStrType(
+            serialized_name="eventHubAuthorizationRuleId",
+        )
+        properties.event_hub_name = AAZStrType(
+            serialized_name="eventHubName",
+        )
+        properties.logs = AAZListType()
+        properties.service_bus_rule_id = AAZStrType(
+            serialized_name="serviceBusRuleId",
+        )
+        properties.storage_account_id = AAZStrType(
+            serialized_name="storageAccountId",
+        )
+        properties.workspace_id = AAZStrType(
+            serialized_name="workspaceId",
+        )
 
-    logs = _schema_subscription_diagnostic_settings_resource_read.properties.logs
-    logs.Element = AAZObjectType()
+        logs = _schema_subscription_diagnostic_settings_resource_read.properties.logs
+        logs.Element = AAZObjectType()
 
-    _element = _schema_subscription_diagnostic_settings_resource_read.properties.logs.Element
-    _element.category = AAZStrType()
-    _element.enabled = AAZBoolType(
-        flags={"required": True},
-    )
+        _element = _schema_subscription_diagnostic_settings_resource_read.properties.logs.Element
+        _element.category = AAZStrType()
+        _element.enabled = AAZBoolType(
+            flags={"required": True},
+        )
 
-    _schema.id = _schema_subscription_diagnostic_settings_resource_read.id
-    _schema.location = _schema_subscription_diagnostic_settings_resource_read.location
-    _schema.name = _schema_subscription_diagnostic_settings_resource_read.name
-    _schema.properties = _schema_subscription_diagnostic_settings_resource_read.properties
-    _schema.type = _schema_subscription_diagnostic_settings_resource_read.type
+        _schema.id = cls._schema_subscription_diagnostic_settings_resource_read.id
+        _schema.location = cls._schema_subscription_diagnostic_settings_resource_read.location
+        _schema.name = cls._schema_subscription_diagnostic_settings_resource_read.name
+        _schema.properties = cls._schema_subscription_diagnostic_settings_resource_read.properties
+        _schema.type = cls._schema_subscription_diagnostic_settings_resource_read.type
 
 
 __all__ = ["Update"]

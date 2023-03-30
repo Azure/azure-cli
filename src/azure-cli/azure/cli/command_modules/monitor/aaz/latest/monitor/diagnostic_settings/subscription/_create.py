@@ -48,7 +48,6 @@ class Create(AAZCommand):
             options=["-n", "--name"],
             help="The name of the diagnostic setting.",
             required=True,
-            id_part="name",
         )
         _args_schema.location = AAZResourceLocationArg(
             help="Location of the resource",
@@ -262,6 +261,10 @@ class Create(AAZCommand):
             )
 
             return cls._schema_on_200
+
+
+class _CreateHelper:
+    """Helper class for Create"""
 
 
 __all__ = ["Create"]
