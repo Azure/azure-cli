@@ -21,7 +21,7 @@ from azure.cli.command_modules.acs._graph import resolve_object_id
 from azure.cli.command_modules.acs._helpers import get_property_from_dict_or_object
 from azure.cli.core.azclierror import AzCLIError, UnauthorizedError
 from azure.cli.core.profiles import ResourceType, get_sdk
-from azure.core.exceptions import HttpResponseError
+from azure.core.exceptions import HttpResponseError, ResourceExistsError
 from knack.log import get_logger
 from knack.prompting import prompt_y_n
 from msrestazure.azure_exceptions import CloudError
@@ -128,7 +128,7 @@ def add_role_assignment(cmd, role, service_principal_msi_id, is_service_principa
             )
             break
         except (CloudError, HttpResponseError) as ex:
-            if ex.message == "The role assignment already exists.":
+            if isinstance(ex, ResourceExistsError) or "The role assignment already exists." in ex.message:
                 break
             logger.info(ex.message)
         except Exception as ex:  # pylint: disable=broad-except

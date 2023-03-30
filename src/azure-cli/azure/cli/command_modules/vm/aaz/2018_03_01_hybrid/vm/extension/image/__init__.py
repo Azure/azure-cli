@@ -8,16 +8,7 @@
 # pylint: skip-file
 # flake8: noqa
 
-from azure.cli.core.aaz import *
-
-
-@register_command_group(
-    "sql mi server-configuration-option",
-)
-class __CMDGroup(AAZCommandGroup):
-    """Server configuration option management commands.
-    """
-    pass
-
-
-__all__ = ["__CMDGroup"]
+from .__cmd_group import *
+from ._list_names import *
+from ._list_versions import *
+from ._show import *

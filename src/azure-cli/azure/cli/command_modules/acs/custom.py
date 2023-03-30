@@ -73,6 +73,7 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
     AzureInternalError,
+    ClientRequestError,
     CLIInternalError,
     FileOperationError,
     InvalidArgumentValueError,
@@ -400,7 +401,9 @@ def aks_create(
     nat_gateway_idle_timeout=None,
     outbound_type=None,
     network_plugin=None,
+    network_plugin_mode=None,
     network_policy=None,
+    network_dataplane=None,
     auto_upgrade_channel=None,
     cluster_autoscaler_profile=None,
     uptime_sla=False,
@@ -437,11 +440,14 @@ def aks_create(
     disable_disk_driver=False,
     disable_file_driver=False,
     enable_blob_driver=None,
+    enable_workload_identity=False,
     disable_snapshot_controller=False,
     enable_azure_keyvault_kms=False,
     azure_keyvault_kms_key_id=None,
     azure_keyvault_kms_key_vault_network_access=None,
     azure_keyvault_kms_key_vault_resource_id=None,
+    enable_image_cleaner=False,
+    image_cleaner_interval_hours=None,
     enable_keda=False,
     # addons
     enable_addons=None,
@@ -494,6 +500,20 @@ def aks_create(
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
+
+    # validation for existing cluster
+    existing_mc = None
+    try:
+        existing_mc = client.get(resource_group_name, name)
+    # pylint: disable=broad-except
+    except Exception as ex:
+        logger.debug("failed to get cluster, error: %s", ex)
+    if existing_mc:
+        raise ClientRequestError(
+            f"The cluster '{name}' under resource group '{resource_group_name}' already exists. "
+            "Please use command 'az aks update' to update the existing cluster, "
+            "or select a different cluster name to create a new cluster."
+        )
 
     # decorator pattern
     from azure.cli.command_modules.acs.managed_cluster_decorator import AKSManagedClusterCreateDecorator
@@ -563,6 +583,8 @@ def aks_update(
     disable_file_driver=False,
     enable_blob_driver=None,
     disable_blob_driver=None,
+    enable_workload_identity=False,
+    disable_workload_identity=False,
     enable_snapshot_controller=False,
     disable_snapshot_controller=False,
     enable_azure_keyvault_kms=False,
@@ -570,6 +592,9 @@ def aks_update(
     azure_keyvault_kms_key_id=None,
     azure_keyvault_kms_key_vault_network_access=None,
     azure_keyvault_kms_key_vault_resource_id=None,
+    enable_image_cleaner=False,
+    disable_image_cleaner=False,
+    image_cleaner_interval_hours=None,
     http_proxy_config=None,
     enable_keda=False,
     disable_keda=False,
