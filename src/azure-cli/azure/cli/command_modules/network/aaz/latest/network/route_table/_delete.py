@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network route-table delete",
-    confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
     """Delete a route table.
