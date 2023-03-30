@@ -49,13 +49,13 @@ class Update(AAZCommand):
         )
         _args_schema.watcher_name = AAZStrArg(
             options=["--watcher-name"],
-            help="The name of the Network Watcher resource.",
+            help="Name of the network watcher.",
             required=True,
             id_part="name",
         )
         _args_schema.watcher_rg = AAZResourceGroupNameArg(
             options=["-g", "--watcher-rg"],
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
+            help="Name of the resource group the watcher is in.",
             required=True,
         )
         _args_schema.migrate = AAZStrArg(

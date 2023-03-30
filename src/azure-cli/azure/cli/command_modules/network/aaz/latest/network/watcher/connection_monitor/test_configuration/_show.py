@@ -53,17 +53,16 @@ class Show(AAZCommand):
         )
         _args_schema.watcher_name = AAZStrArg(
             options=["--watcher-name"],
-            help="The name of the Network Watcher resource.",
+            help="Name of the network watcher.",
             required=True,
         )
         _args_schema.watcher_rg = AAZResourceGroupNameArg(
             options=["-g", "--watcher-rg"],
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
+            help="Name of the resource group the watcher is in.",
             required=True,
         )
-        _args_schema.test_configuration_name = AAZStrArg(
-            options=["-n", "--name", "--test-configuration-name"],
-            help="The name of the connection monitor test configuration.",
+        _args_schema.test_configuration_index = AAZIntArg(
+            options=["--test-configuration-index"],
             required=True,
         )
         return cls._args_schema
@@ -92,7 +91,7 @@ class Show(AAZCommand):
             result = result.properties.testConfigurations
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.test_configuration_name,
+                lambda e: e[0] == self.ctx.args.test_configuration_index,
                 filters
             )
             idx = next(filters)[0]
@@ -103,10 +102,11 @@ class Show(AAZCommand):
             result = result.properties.testConfigurations
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.test_configuration_name,
+                lambda e: e[0] == self.ctx.args.test_configuration_index,
                 filters
             )
             idx = next(filters, [len(result)])[0]
+            self.ctx.args.test_configuration_index = idx
             result[idx] = value
             return
 

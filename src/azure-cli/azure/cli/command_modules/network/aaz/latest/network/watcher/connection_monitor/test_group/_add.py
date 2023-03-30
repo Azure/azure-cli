@@ -60,13 +60,16 @@ class Add(AAZCommand):
         )
         _args_schema.watcher_name = AAZStrArg(
             options=["--watcher-name"],
-            help="The name of the Network Watcher resource.",
+            help="Name of the network watcher.",
             required=True,
         )
         _args_schema.watcher_rg = AAZResourceGroupNameArg(
             options=["-g", "--watcher-rg"],
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
+            help="Name of the resource group the watcher is in.",
             required=True,
+        )
+        _args_schema.test_group_index = AAZIntArg(
+            options=["--test-group-index"],
         )
         _args_schema.disable = AAZBoolArg(
             options=["--disable"],
@@ -150,7 +153,7 @@ class Add(AAZCommand):
             result = result.properties.testGroups
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.test_group_name,
+                lambda e: e[0] == self.ctx.args.test_group_index,
                 filters
             )
             idx = next(filters)[0]
@@ -161,10 +164,11 @@ class Add(AAZCommand):
             result = result.properties.testGroups
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.test_group_name,
+                lambda e: e[0] == self.ctx.args.test_group_index,
                 filters
             )
             idx = next(filters, [len(result)])[0]
+            self.ctx.args.test_group_index = idx
             result[idx] = value
             return
 

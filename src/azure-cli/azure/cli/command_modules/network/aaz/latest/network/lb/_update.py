@@ -109,7 +109,6 @@ class Update(AAZCommand):
         _element.probe_threshold = AAZIntArg(
             options=["probe-threshold"],
             help={"short-summary": "The number of consecutive successful or failed probes in order to allow or deny traffic from being delivered to this endpoint. It is currently in preview and is not recommended for production workloads. For most scenarios, we recommend maintaining the default value of 1 by not specifying the value of the property.", "long-summary": "After failing the number of consecutive probes equal to this value, the endpoint will be taken out of rotation and require the same number of successful consecutive probes to be placed back in rotation."},
-            is_preview=True,
             nullable=True,
         )
         _element.protocol = AAZStrArg(
@@ -851,8 +850,8 @@ class _UpdateHelper:
 
         _elements = _builder.get(".properties.ipTags[]")
         if _elements is not None:
-            _elements.set_prop("ipTagType", AAZStrType, "@PublicIPAddress_update.ip_tags.[].ip_tag_type")
-            _elements.set_prop("tag", AAZStrType, "@PublicIPAddress_update.ip_tags.[].tag")
+            _elements.set_prop("ipTagType", AAZStrType, ".ip_tag_type")
+            _elements.set_prop("tag", AAZStrType, ".tag")
 
         nat_gateway = _builder.get(".properties.natGateway")
         if nat_gateway is not None:

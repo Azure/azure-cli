@@ -69,7 +69,6 @@ class Create(AAZCommand):
             options=["--backend-port"],
             arg_group="Properties",
             help="The port used for internal connections on the endpoint. Acceptable values are between 1 and 65535.",
-            required=True,
         )
         _args_schema.enable_floating_ip = AAZBoolArg(
             options=["--floating-ip", "--enable-floating-ip"],
@@ -90,13 +89,11 @@ class Create(AAZCommand):
             options=["--frontend-port-range-end"],
             arg_group="Properties",
             help="The last port number in the range of external ports that will be used to provide Inbound Nat to NICs associated with a load balancer. Acceptable values range between 1 and 65535.",
-            required=True,
         )
         _args_schema.frontend_port_range_start = AAZIntArg(
             options=["--frontend-port-range-start"],
             arg_group="Properties",
             help="The first port number in the range of external ports that will be used to provide Inbound Nat to NICs associated with a load balancer. Acceptable values range between 1 and 65534.",
-            required=True,
         )
         _args_schema.idle_timeout_in_minutes = AAZIntArg(
             options=["--idle-timeout", "--idle-timeout-in-minutes"],
@@ -107,7 +104,6 @@ class Create(AAZCommand):
             options=["--protocol"],
             arg_group="Properties",
             help="The reference to the transport protocol used by the inbound NAT pool.",
-            required=True,
             enum={"All": "All", "Tcp": "Tcp", "Udp": "Udp"},
         )
         return cls._args_schema
@@ -371,7 +367,7 @@ class Create(AAZCommand):
                 typ=AAZObjectType
             )
             _builder.set_prop("name", AAZStrType, ".name")
-            _builder.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -915,7 +911,7 @@ class _CreateHelper:
         _element.id = AAZStrType()
         _element.name = AAZStrType()
         _element.properties = AAZObjectType(
-            flags={"required": True, "client_flatten": True},
+            flags={"client_flatten": True},
         )
         _element.type = AAZStrType(
             flags={"read_only": True},
