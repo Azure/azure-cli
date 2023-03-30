@@ -297,6 +297,7 @@ def cli_eventhub_keys_renew(client, resource_group_name, namespace_name, event_h
         parameters={'key_type': key_type, 'key': key}
     )
 
+
 # NetwrokRuleSet Region
 def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_name, subnet=None, ip_mask=None, ignore_missing_vnet_service_endpoint=False, action='Allow'):
     NWRuleSetVirtualNetworkRules = cmd.get_models('NWRuleSetVirtualNetworkRules', resource_type=ResourceType.MGMT_EVENTHUB)
