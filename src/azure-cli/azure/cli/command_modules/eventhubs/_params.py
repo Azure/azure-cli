@@ -12,8 +12,7 @@ def load_arguments_eh(self, _):
     from azure.cli.core.commands.parameters import tags_type, get_enum_type, resource_group_name_type, name_type, \
         get_location_type, get_three_state_flag, get_resource_name_completion_list
     from azure.cli.core.commands.validators import get_default_location_from_resource_group
-    from azure.cli.command_modules.eventhubs._completers import get_consumergroup_command_completion_list, \
-        get_eventhubs_command_completion_list
+    from azure.cli.command_modules.eventhubs._completers import get_eventhubs_command_completion_list
     from azure.cli.command_modules.eventhubs._validator import validate_storageaccount, validate_partner_namespace, validate_rights
     from knack.arguments import CLIArgumentType
     from azure.cli.core.profiles import ResourceType
