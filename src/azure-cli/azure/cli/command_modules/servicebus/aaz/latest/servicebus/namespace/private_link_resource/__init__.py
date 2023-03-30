@@ -8,16 +8,5 @@
 # pylint: skip-file
 # flake8: noqa
 
-from azure.cli.core.aaz import *
-
-
-@register_command_group(
-    "eventhubs",
-)
-class __CMDGroup(AAZCommandGroup):
-    """sss
-    """
-    pass
-
-
-__all__ = ["__CMDGroup"]
+from .__cmd_group import *
+from ._show import *
