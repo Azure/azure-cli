@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "servicebus namespace private-endpoint-connection",
 )
 class __CMDGroup(AAZCommandGroup):
-    """servicebus namespace private-endpoint-connection
+    """Manage servicebus namespace private endpoint connection.
     """
     pass
 
