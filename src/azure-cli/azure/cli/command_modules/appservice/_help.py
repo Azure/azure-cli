@@ -2556,6 +2556,8 @@ helps['staticwebapp appsettings list'] = """
     examples:
     - name: List app settings of the static app.
       text: az staticwebapp appsettings list -n MyStaticAppName
+    - name: List app settings of the static app environment.
+      text: az staticwebapp appsettings list -n MyStaticAppName --environment-name MyEnvironmentName
 """
 
 helps['staticwebapp appsettings set'] = """
@@ -2564,6 +2566,8 @@ helps['staticwebapp appsettings set'] = """
     examples:
     - name: Add to or change the app settings of the static app.
       text: az staticwebapp appsettings set -n MyStaticAppName --setting-names key1=val1 key2=val2
+    - name: Add to or change the app settings of the static app environment.
+      text: az staticwebapp appsettings set -n MyStaticAppName --setting-names key1=val1 key2=val2 --environment-name MyEnvironmentName
 """
 
 helps['staticwebapp appsettings delete'] = """
@@ -2572,6 +2576,8 @@ helps['staticwebapp appsettings delete'] = """
     examples:
     - name: Delete given app settings of the static app.
       text: az staticwebapp appsettings delete -n MyStaticAppName --setting-names key1 key2
+    - name: Delete given app settings of the static app.
+      text: az staticwebapp appsettings delete -n MyStaticAppName --setting-names key1 key2 --environment-name MyEnvironmentName
 """
 
 helps['staticwebapp identity'] = """
