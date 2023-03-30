@@ -12,8 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network ddos-protection delete",
-    confirmation="Are you sure you want to perform this operation?",
+    "network ddos-protection delete"
 )
 class Delete(AAZCommand):
     """Delete a DDoS protection plan.
