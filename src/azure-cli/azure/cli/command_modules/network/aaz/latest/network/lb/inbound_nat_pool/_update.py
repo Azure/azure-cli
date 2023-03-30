@@ -378,7 +378,7 @@ class Update(AAZCommand):
                 typ=AAZObjectType
             )
             _builder.set_prop("name", AAZStrType, ".name")
-            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+            _builder.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -930,7 +930,7 @@ class _UpdateHelper:
         _element.id = AAZStrType()
         _element.name = AAZStrType()
         _element.properties = AAZObjectType(
-            flags={"client_flatten": True},
+            flags={"required": True, "client_flatten": True},
         )
         _element.type = AAZStrType(
             flags={"read_only": True},
