@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import unittest
 from unittest import mock
+import os
 
 from msrestazure.azure_exceptions import CloudError
 
@@ -202,11 +203,15 @@ class TestWebappMocked(unittest.TestCase):
         resolve_hostname_mock.assert_called_with('myweb.com')
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
-    def test_update_site_config(self, site_op_mock):
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp', autospec=True)
+    def test_update_site_config(self, is_centauri_functionapp_mock, site_op_mock):
+
         cmd_mock = _get_test_cmd()
         SiteConfig = cmd_mock.get_models('SiteConfig')
         site_config = SiteConfig(name='antarctica')
         site_op_mock.return_value = site_config
+
+        is_centauri_functionapp_mock.return_value = False
         # action
         update_site_configs(cmd_mock, 'myRG', 'myweb', java_version='1.8')
         # assert

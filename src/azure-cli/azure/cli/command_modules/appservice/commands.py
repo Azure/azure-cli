@@ -14,7 +14,9 @@ from ._validators import (validate_onedeploy_params, validate_staticsite_link_fu
                           validate_app_is_webapp, validate_functionapp_on_containerapp_vnet,
                           validate_functionapp_on_containerapp_vnet_add, validate_centauri_delete_function,
                           validate_functionapp_on_containerapp_site_config_set,
-                          validate_functionapp_on_containerapp_site_config_show)
+                          validate_functionapp_on_containerapp_site_config_show,
+                          validate_functionapp_on_containerapp_container_settings_delete,
+                          validate_functionapp_on_containerapp_update)
 
 
 def output_slots_in_table(slots):
@@ -331,7 +333,8 @@ def load_command_table(self, _):
         g.custom_command('identity remove', 'remove_identity')
         g.custom_command('deploy', 'perform_onedeploy', validator=validate_onedeploy_params, is_preview=True)
         g.generic_update_command('update', getter_name="get_functionapp", setter_name='set_functionapp', exception_handler=update_function_ex_handler_factory(),
-                                 custom_func_name='update_functionapp', getter_type=appservice_custom, setter_type=appservice_custom, command_type=webapp_sdk)
+                                 custom_func_name='update_functionapp', getter_type=appservice_custom, setter_type=appservice_custom, command_type=webapp_sdk,
+                                 validator=validate_functionapp_on_containerapp_update)
 
     with self.command_group('functionapp config') as g:
         g.custom_command('set', 'update_site_configs', validator=validate_functionapp_on_containerapp_site_config_set, exception_handler=ex_handler_factory())
@@ -398,7 +401,7 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp config container') as g:
         g.custom_command('set', 'update_container_settings_functionapp')
-        g.custom_command('delete', 'delete_container_settings')
+        g.custom_command('delete', 'delete_container_settings', validator=validate_functionapp_on_containerapp_container_settings_delete)
         g.custom_show_command('show', 'show_container_settings_functionapp')
 
     with self.command_group('functionapp deployment slot') as g:
