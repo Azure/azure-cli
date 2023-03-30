@@ -200,7 +200,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'PythonVersion', platform.python_version())
         set_custom_properties(result, 'ModuleCorrelation', self.module_correlation)
         set_custom_properties(result, 'ExtensionName', ext_info)
-        set_custom_properties(result, 'CLI_Recommendation', self.cli_recommendation)
+        set_custom_properties(result, 'CLIRecommendation', self.cli_recommendation)
         set_custom_properties(result, 'Feedback', self.feedback)
         set_custom_properties(result, 'ExtensionManagementDetail', self.extension_management_detail)
         set_custom_properties(result, 'Mode', self.mode)
