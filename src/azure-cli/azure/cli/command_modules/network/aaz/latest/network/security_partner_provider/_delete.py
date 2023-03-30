@@ -13,7 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network security-partner-provider delete",
-    is_preview=True
+    is_preview=True,
 )
 class Delete(AAZCommand):
     """Delete an Azure security partner provider.
