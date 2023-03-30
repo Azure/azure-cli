@@ -1329,7 +1329,7 @@ def _get_app_settings_from_scm(cmd, resource_group_name, name, slot=None):
     }
 
     import requests
-    response = requests.get(settings_url, headers=headers, auth=(username, password), timeout=3)
+    response = requests.get(settings_url, headers=headers, auth=(username, password), timeout=30)
 
     return response.json() or {}
 
