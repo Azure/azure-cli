@@ -85,7 +85,7 @@ Release History
 
 **Service Bus**
 
-* `az servicebus namespace authorization-rule keys renew/list` `az servicebus topic authorization-rule keys renew/list` `az servicebus queue authorization-rule keys renew/list`: Parameter `-n` added to create auth_rule_name (#25728)
+* `az servicebus namespace/topic/queue authorization-rule keys renew/list`: Add `-n` option for `--authorization-rule-name` to create auth rule (#25728)
 
 **SQL**
 
