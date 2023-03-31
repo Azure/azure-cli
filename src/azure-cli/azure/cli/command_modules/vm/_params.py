@@ -631,9 +631,6 @@ def load_arguments(self, _):
                    help="The software license type that will be applied to the VMs deployed on the dedicated host.")
         c.argument('sku', help="SKU of the dedicated host. Available SKUs: https://azure.microsoft.com/pricing/details/virtual-machines/dedicated-host/")
 
-    with self.argument_context('vm host list') as c:
-        c.argument('host_group_name', id_part=None)
-
     with self.argument_context('vm host group') as c:
         c.argument('host_group_name', name_arg_type, id_part='name', help="Name of the Dedicated Host Group")
         c.argument('automatic_placement', arg_type=get_three_state_flag(), min_api='2020-06-01',

@@ -246,6 +246,37 @@ class ResourceIDScenarioTest(ScenarioTest):
         self.cmd('resource delete --id {vnet_id}', checks=self.is_empty())
 
 
+class ResourcePatchTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_patch_')
+    def test_resource_patch(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm'
+        })
+        self.kwargs['vm_id'] = self.cmd(
+            'vm create -g {rg} -n {vm} --image UbuntuLTS --size Standard_D2s_v3 --v-cpus-available 1 '
+            '--v-cpus-per-core 1 --admin-username vmtest --generate-ssh-keys --nsg-rule NONE',
+        ).get_output_in_json()['id']
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('hardwareProfile.vmSize', 'Standard_D2s_v3'),
+            self.check('hardwareProfile.vmSizeProperties.vCpusAvailable', '1'),
+            self.check('hardwareProfile.vmSizeProperties.vCpusPerCore', '1'),
+            self.check('osProfile.adminUsername', 'vmtest'),
+            self.check('osProfile.allowExtensionOperations', True),
+            self.check('identity', None),
+        ])
+
+        self.cmd(
+            'resource patch --id {vm_id} --is-full-object --properties "{{\\"identity\\":{{\\"type\\":\\"SystemAssigned\\"}},'
+            ' \\"properties\\":{{\\"osProfile\\":{{\\"allowExtensionOperations\\":\\"false\\"}}}}}}"',
+            checks=[
+                self.check('id', '{vm_id}'),
+                self.check('properties.osProfile.allowExtensionOperations', False),
+                self.check('identity.type', 'SystemAssigned'),
+            ])
+
+
 class ResourceGenericUpdate(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_generic_update')

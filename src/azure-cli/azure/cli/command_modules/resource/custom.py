@@ -1814,6 +1814,30 @@ def update_resource(cmd, parameters, resource_ids=None,
          for id_dict in parsed_ids])
 
 
+def patch_resource(cmd, properties, resource_ids=None, resource_group_name=None,
+                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
+                   resource_name=None, api_version=None, latest_include_preview=False, is_full_object=False):
+    parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(cmd.cli_ctx,
+                                                                              resource_group_name,
+                                                                              resource_provider_namespace,
+                                                                              parent_resource_path,
+                                                                              resource_type,
+                                                                              resource_name)]
+
+    try:
+        res = json.loads(properties)
+    except json.decoder.JSONDecodeError as ex:
+        raise CLIError('Error parsing JSON.\n{}\n{}'.format(properties, ex))
+
+    if not is_full_object:
+        res = GenericResource(properties=res)
+
+    return _single_or_collection(
+        [_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version, latest_include_preview)
+         .patch(res) for id_dict in parsed_ids]
+    )
+
+
 def tag_resource(cmd, tags, resource_ids=None, resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None, api_version=None,
                  is_incremental=None, latest_include_preview=False):
@@ -4142,6 +4166,19 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
                                                          self.api_version,
                                                          parameters)
 
+    def patch(self, parameters):
+        if self.resource_id:
+            return self.rcf.resources.begin_update_by_id(self.resource_id,
+                                                         self.api_version,
+                                                         parameters)
+        return self.rcf.resources.begin_update(self.resource_group_name,
+                                               self.resource_provider_namespace,
+                                               self.parent_resource_path,
+                                               self.resource_type,
+                                               self.resource_name,
+                                               self.api_version,
+                                               parameters)
+
     def tag(self, tags, is_incremental=False):
         resource = self.get_resource()
 
@@ -4325,7 +4362,7 @@ def install_bicep_cli(cmd, version=None, target_platform=None):
 
 
 def uninstall_bicep_cli(cmd):
-    remove_bicep_installation()
+    remove_bicep_installation(cmd.cli_ctx)
 
 
 def upgrade_bicep_cli(cmd, target_platform=None):
@@ -4351,7 +4388,7 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_resto
 
 
 def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline=None, indent_kind=None, indent_size=None, insert_final_newline=None):
-    ensure_bicep_installation()
+    ensure_bicep_installation(cmd.cli_ctx)
 
     minimum_supported_version = "0.12.1"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
@@ -4371,7 +4408,7 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
         if insert_final_newline:
             args += ["--insertFinalNewline", insert_final_newline]
 
-        output = run_bicep_command(args)
+        output = run_bicep_command(cmd.cli_ctx, args)
 
         if stdout:
             print(output)

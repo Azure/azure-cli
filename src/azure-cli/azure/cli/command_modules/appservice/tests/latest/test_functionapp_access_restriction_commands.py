@@ -32,7 +32,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             'loc': location
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa}', checks=[
+        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
@@ -55,7 +55,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             'loc': location
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa}', checks=[
+        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
@@ -71,7 +71,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             'loc': location
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa}', checks=[
+        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
@@ -92,7 +92,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             'loc': location
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa}', checks=[
+        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
@@ -112,7 +112,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             'loc': location
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa}', checks=[
+        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
@@ -167,7 +167,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             'loc': location
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa}', checks=[
+        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
@@ -193,7 +193,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             'loc': location
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa}', checks=[
+        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
@@ -213,7 +213,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             'loc': location
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa}', checks=[
+        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
