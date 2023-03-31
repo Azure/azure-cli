@@ -52,10 +52,6 @@ Release History
 
 * `az extension add`: Add actionable message for extension not found error (#25921)
 
-**FabricBot**
-
-* Update mentions for Azure Deployments team (#25976)
-
 **Key Vault**
 
 * `az keyvault region`: GA MHSM region commands (#25942)
