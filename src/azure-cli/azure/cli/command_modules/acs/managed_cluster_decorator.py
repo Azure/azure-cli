@@ -6235,7 +6235,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             else:
                 goal_identity_type = "userassigned"
 
-        if current_identity_type != goal_identity_type:
+        is_update_identity = ((current_identity_type != goal_identity_type) or
+            (current_identity_type == goal_identity_type and
+            current_identity_type == "userassigned" and
+            current_user_assigned_identity != assign_identity))
+        if is_update_identity:
             if current_identity_type == "spn":
                 msg = (
                     "Your cluster is using service principal, and you are going to update "
@@ -6245,12 +6249,18 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     "until you upgrade your agentpool.\n"
                     "Are you sure you want to perform this operation?"
                 ).format(goal_identity_type)
-            else:
+            elif current_identity_type != goal_identity_type:
                 msg = (
                     "Your cluster is already using {} managed identity, and you are going to "
                     "update the cluster to use {} managed identity.\n"
                     "Are you sure you want to perform this operation?"
                 ).format(current_identity_type, goal_identity_type)
+            else:
+                msg = (
+                    "Your cluster is already using userassigned managed identity, current control plane identity is {},"
+                    "and you are going to update the cluster identity to {}.\n"
+                    "Are you sure you want to perform this operation?"
+                ).format(current_user_assigned_identity, assign_identity)
             # gracefully exit if user does not confirm
             if not self.context.get_yes() and not prompt_y_n(msg, default="n"):
                 raise DecoratorEarlyExitException
@@ -6267,27 +6277,6 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     type="UserAssigned",
                     user_assigned_identities=user_assigned_identity
                 )
-            mc.identity = identity
-        # current and goal are both userassigned, but the identity is different, update user assigned identity
-        if (
-            current_identity_type == goal_identity_type and
-            goal_identity_type == "userassigned" and
-            current_user_assigned_identity != assign_identity
-        ):
-            msg = (
-                "Your cluster is already using userassigned managed identity, current control plane identity is {},"
-                "and you are going to update the cluster identity to {}.\n"
-                "Are you sure you want to perform this operation?"
-            ).format(current_user_assigned_identity, assign_identity)
-            if not self.context.get_yes() and not prompt_y_n(msg, default="n"):
-                raise DecoratorEarlyExitException
-            user_assigned_identity = {
-                assign_identity: self.models.ManagedServiceIdentityUserAssignedIdentitiesValue()
-            }
-            identity = self.models.ManagedClusterIdentity(
-                type="UserAssigned",
-                user_assigned_identities=user_assigned_identity
-            )
             mc.identity = identity
         return mc
 
