@@ -8,7 +8,7 @@ Release History
 
 **AKS**
 
-* `az aks create/update`: `--tier` argument will specify the sku tier that customer wants (#24940)
+* `az aks create/update`: Add `--tier` argument will specify the sku tier that customer wants (#24940)
 * `az aks nodepool operation-abort`: Add new command to support aborting last running operation on nodepool (#25661)
 * `az aks operation-abort`: Add new command to support aborting last running operation on managed cluster (#25661)
 * `az aks create`: Raise a ClientRequestError when creating the same cluster again (#25825)
