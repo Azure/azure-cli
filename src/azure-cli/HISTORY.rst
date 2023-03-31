@@ -9,8 +9,8 @@ Release History
 **AKS**
 
 * `az aks create/update`: `--tier` argument will specify the sku tier that customer wants (#24940)
-* `aks nodepool operation-abort`: Add new command to support aborting last running operation on nodepool (#25661)
-* `aks operation-abort`: Add new command to support aborting last running operation on managed cluster (#25661)
+* `az aks nodepool operation-abort`: Add new command to support aborting last running operation on nodepool (#25661)
+* `az aks operation-abort`: Add new command to support aborting last running operation on managed cluster (#25661)
 * `az aks create`: Raise a ClientRequestError when creating the same cluster again (#25825)
 * `az aks create/update`: Add new parameter `--enable-image-cleaner` to enable Image Cleaner service (#25957)
 * `az aks create/update`: Add new parameter `--image-cleaner-interval-hours` to set Image Cleaner scanning interval (#25957)
@@ -39,13 +39,10 @@ Release History
 * Fix #25706: `az bicep format`: Fix the TypeError `ensure_bicep_installation() missing 1 required positional argument 'cli_ctx'` (#25707)
 * Fix #25715: `az bicep install/upgrade`: Fix the `configparser.NoSectionError: No section: 'bicep'` (#25729)
 
-**BREAKING CHANGE**
-
-* Deprecate image alias `Win2008R2SP1`, `UbuntuLTS` (#25930)
-
 **Compute**
 
-* `vm reimage`: Add new command to support reimaging a virtual machine (#25884)
+* `az vm reimage`: Add new command to support reimaging a virtual machine (#25884)
+* `az vm/vmss create`: Deprecate image alias `UbuntuLTS` and `Win2008R2SP1`. Please use the image alias including the version of the distribution you want to use. For example: Please use `Ubuntu2204` instead of `UbuntuLTS`
 
 **Cosmos DB**
 
@@ -82,7 +79,7 @@ Release History
 **RDBMS**
 
 * [BREAKING CHANGE] `az postgres flexible-server replica create`: Fix the behavior of AZ selection in case zone is not passed as parameter (#25843)
-* `az postgres flexible-server replica create`: Fix zone selection during creation of replica (#25843)
+* Fix #368903181: Fix zone selection during creation of replica (#25843)
 * `az mysql flexible-server restore/geo-restore`: Add parameters to enhance PITR (#25867)
 * `az mysql flexible-server replica create`: Add parameters to support cross region paired vnet (#25926)
 
@@ -104,10 +101,6 @@ Release History
 **Synapse**
 
 * `az synapse spark pool create/update`: Update `--node-size-family` and `--node-size` allowed values (#25823)
-
-**Warning**
-
-* Please use the image alias including the version of the distribution you want to use. For example: Please use `Debian11` instead of `Debian`.' (#25930)
 
 2.46.0
 ++++++
