@@ -82,7 +82,7 @@ Release History
 **RDBMS**
 
 * [BREAKING CHANGE] `az postgres flexible-server replica create`: Fix the behavior of AZ selection in case zone is not passed as parameter (#25843)
-* Fix #368903181: Fix zone selection during creation of replica (#25843)
+* `az postgres flexible-server replica create`: Fix zone selection during creation of replica (#25843)
 * `az mysql flexible-server restore/geo-restore`: Add parameters to enhance PITR (#25867)
 * `az mysql flexible-server replica create`: Add parameters to support cross region paired vnet (#25926)
 
