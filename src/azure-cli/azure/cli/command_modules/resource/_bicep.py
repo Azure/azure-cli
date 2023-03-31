@@ -9,7 +9,6 @@ import stat
 import platform
 import subprocess
 import json
-import certifi
 
 from json.decoder import JSONDecodeError
 from contextlib import suppress
@@ -18,7 +17,6 @@ from datetime import datetime, timedelta
 import requests
 import semver
 
-from urllib.request import urlopen
 from knack.log import get_logger
 from azure.cli.core.api import get_config_dir
 from azure.cli.core.azclierror import (
@@ -131,10 +129,11 @@ def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, s
                 print(f"Installing Bicep CLI {release_tag}...")
             else:
                 print("Installing Bicep CLI...")
-        os.environ.setdefault("CURL_CA_BUNDLE", certifi.where())
-        request = urlopen(_get_bicep_download_url(system, release_tag, target_platform=target_platform))
+
+        download_url = _get_bicep_download_url(system, release_tag, target_platform=target_platform)
+        response = requests.get(download_url, verify=_requests_verify)
         with open(installation_path, "wb") as f:
-            f.write(request.read())
+            f.write(response.content)
 
         os.chmod(installation_path, os.stat(installation_path).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
@@ -179,7 +178,6 @@ def is_bicepparam_file(file_path):
 
 def get_bicep_available_release_tags():
     try:
-        os.environ.setdefault("CURL_CA_BUNDLE", certifi.where())
         response = requests.get("https://aka.ms/BicepReleases", verify=_requests_verify)
         return [release["tag_name"] for release in response.json()]
     except IOError as err:
@@ -188,7 +186,6 @@ def get_bicep_available_release_tags():
 
 def get_bicep_latest_release_tag():
     try:
-        os.environ.setdefault("CURL_CA_BUNDLE", certifi.where())
         response = requests.get("https://aka.ms/BicepLatestRelease", verify=_requests_verify)
         response.raise_for_status()
         return response.json()["tag_name"]
