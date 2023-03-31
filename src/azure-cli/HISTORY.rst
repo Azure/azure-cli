@@ -66,7 +66,7 @@ Release History
 
 **NetAppFiles**
 
-* Patch assign snapshotpolicyID (#25789)
+* `az netappfiles volume update`: Patch assign snapshotpolicyID (#25789)
 
 **Network**
 
