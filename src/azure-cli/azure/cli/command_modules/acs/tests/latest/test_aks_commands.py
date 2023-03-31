@@ -2788,7 +2788,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     def test_aks_control_plane_user_assigned_identity(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -2890,7 +2890,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # update identity
-        update_cmd = 'aks update --resource-group={resource_group} --name={name} --location={location} ' \
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
                 '--enable-managed-identity --assign-identity={another_identity_resource_id} ' \
                 '--yes'
         self.cmd(update_cmd, checks=[
