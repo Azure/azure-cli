@@ -4711,16 +4711,16 @@
               "operator": "or",
               "operands": [
                 {
-                  "name": "bodyContains",
+                  "name": "titleContains",
                   "parameters": {
-                    "bodyPattern": "[Aa]z \\b(resource|group|lock|tag|deployment|policy|managementapp|account management-group)\\b",
+                    "titlePattern": "[Aa]z \\\\b(account|group|resource|provider|feature|tag|deployment|ts|policy|lock|managedapp|bicep|resourcemanagement|private-link)\\\\b",
                     "isRegex": true
                   }
                 },
                 {
                   "name": "bodyContains",
                   "parameters": {
-                    "bodyPattern": "[Aa]z \\b(resource|group|lock|tag|deployment|policy|managementapp|account management-group)\\b",
+                    "bodyPattern": "[Aa]z \\\\b(account|group|resource|provider|feature|tag|deployment|ts|policy|lock|managedapp|bicep|resourcemanagement|private-link)\\\\b",
                     "isRegex": true
                   }
                 }
@@ -5147,6 +5147,83 @@
             "name": "addLabel",
             "parameters": {
               "label": "Functions"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "PullRequestResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isAction",
+              "parameters": {
+                "action": "opened"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "az functionapp",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "az functionapp",
+                    "isRegex": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "pull_request",
+        "eventNames": [
+          "pull_request",
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[functionapp] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "actions": [
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "yonzhan"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "zhoxing-ms"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Functions"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "zhoxing-ms"
             }
           }
         ]
@@ -6123,7 +6200,14 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "\\b(arm|Arm|ARM|resource|Resource|RESOURCE)\\b",
+                    "titlePattern": "[Aa]z \\\\b(account|group|resource|provider|feature|tag|deployment|ts|policy|lock|managedapp|bicep|resourcemanagement|private-link)\\\\b",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "[Aa]z \\\\b(account|group|resource|provider|feature|tag|deployment|ts|policy|lock|managedapp|bicep|resourcemanagement|private-link)\\\\b",
                     "isRegex": true
                   }
                 }
@@ -8316,6 +8400,12 @@
             "name": "addLabel",
             "parameters": {
               "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Event Hubs"
             }
           },
           {
