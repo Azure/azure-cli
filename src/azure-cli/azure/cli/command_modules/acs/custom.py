@@ -541,6 +541,8 @@ def aks_update(
     tags=None,
     disable_local_accounts=False,
     enable_local_accounts=False,
+    network_plugin_mode=None,
+    pod_cidr=None,
     load_balancer_managed_outbound_ip_count=None,
     load_balancer_managed_outbound_ipv6_count=None,
     load_balancer_outbound_ips=None,

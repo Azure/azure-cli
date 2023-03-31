@@ -2121,12 +2121,15 @@ class AKSManagedClusterContext(BaseAKSContext):
         # read the original value passed by the command
         network_plugin_mode = self.raw_param.get("network_plugin_mode")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.network_profile and
-            self.mc.network_profile.network_plugin_mode is not None
-        ):
-            network_plugin_mode = self.mc.network_profile.network_plugin_mode
+
+        # if create, try and read from the mc object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.network_profile and
+                self.mc.network_profile.network_plugin_mode is not None
+            ):
+                network_plugin_mode = self.mc.network_profile.network_plugin_mode
 
         if enable_validation:
             # todo(tyler-lloyd) do we need any validation?
@@ -2260,8 +2263,10 @@ class AKSManagedClusterContext(BaseAKSContext):
         # read the original value passed by the command
         pod_cidr = self.raw_param.get("pod_cidr")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if network_profile and network_profile.pod_cidr is not None:
-            pod_cidr = network_profile.pod_cidr
+        # pod_cidr is allowed to be updated so only read from mc object during creates
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if network_profile and network_profile.pod_cidr is not None:
+                pod_cidr = network_profile.pod_cidr
 
         # service_cidr
         # read the original value passed by the command
@@ -6422,6 +6427,28 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.auto_upgrade_profile.upgrade_channel = auto_upgrade_channel
         return mc
 
+    def update_network_plugin_settings(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update network plugin settings of network profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        network_plugin_mode = self.context.get_network_plugin_mode()
+        if network_plugin_mode:
+            mc.network_profile.network_plugin_mode = network_plugin_mode
+
+        (
+            pod_cidr,
+            _,
+            _,
+            _,
+            _
+        ) = self.context.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
+        if pod_cidr:
+            mc.network_profile.pod_cidr = pod_cidr
+        return mc
+
     def update_http_proxy_config(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up http proxy config for the ManagedCluster object.
 
@@ -6831,6 +6858,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_api_server_access_profile(mc)
         # update windows profile
         mc = self.update_windows_profile(mc)
+        # update network plugin settings
+        mc = self.update_network_plugin_settings(mc)
         # update aad profile
         mc = self.update_aad_profile(mc)
         # update oidc issuer profile

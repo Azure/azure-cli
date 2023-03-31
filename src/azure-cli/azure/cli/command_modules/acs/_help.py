@@ -579,6 +579,12 @@ parameters:
   - name: --tier
     type: string
     short-summary: Specify SKU tier for managed clusters. '--tier standard' enables a standard managed cluster service with a financially backed SLA. '--tier free' changes a standard managed cluster to a free one.
+  - name: --network-plugin-mode
+    type: string
+    short-summary: Update the mode of a network plugin to migrate to a different pod networking setup.
+  - name: --pod-cidr
+    type: string
+    short-summary: Update the pod CIDR for a cluster. Used when updating a cluster from Azure CNI to Azure CNI Overlay.
   - name: --load-balancer-managed-outbound-ip-count
     type: int
     short-summary: Load balancer managed outbound IP count.
