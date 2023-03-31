@@ -807,7 +807,7 @@ examples:
   - name: Disable KEDA workload autoscaler for an existing kubernetes cluster.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-keda
   - name: Update the SSH key on a AKS Cluster.
-    text: az aks update -g MyResourceGroup -n MyManagedCluster --ssh-key-value "<new SSH key value or SSH key file>"    
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
 """
 
 helps['aks delete'] = """
