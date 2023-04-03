@@ -79,7 +79,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_DATABOXEDGE = ('azure.mgmt.databoxedge', 'DataBoxEdgeManagementClient')
     MGMT_CUSTOMLOCATION = ('azure.mgmt.extendedlocation', 'CustomLocations')
     MGMT_CONTAINERSERVICE = ('azure.mgmt.containerservice', 'ContainerServiceClient')
-    MGMT_APPCONFIGURATION = ('azure.mgmt.appconfiguration', 'AppConfigurationManagementClient')
     MGMT_APPCONTAINERS = ('azure.mgmt.appcontainers', 'ContainerAppsAPIClient')
 
     # the "None" below will stay till a command module fills in the type so "get_mgmt_service_client"
@@ -256,9 +255,6 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2023-02-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
-        }),
-        ResourceType.MGMT_APPCONFIGURATION: SDKProfile('2022-05-01', {
-            'replicas': '2022-03-01-preview'
         }),
         ResourceType.MGMT_APPCONTAINERS: '2022-10-01',
     },
