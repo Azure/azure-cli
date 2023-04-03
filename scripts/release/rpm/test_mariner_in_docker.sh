@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-# This script should be run in a centos7 docker.
+# This script should be run in a Mariner 2.0 docker container.
 set -exv
 
 export USERNAME=azureuser
 
 tdnf --nogpgcheck install /mnt/rpm/$RPM_NAME -y
 
-tdnf install git gcc python3-devel python3-pip findutils -y
+tdnf install git gcc python3-devel python3-pip findutils ca-certificates -y
 
 ln -s -f /usr/bin/python3 /usr/bin/python
 time az self-test
