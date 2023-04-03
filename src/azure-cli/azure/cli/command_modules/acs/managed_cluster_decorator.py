@@ -252,6 +252,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             external_functions["add_monitoring_role_assignment"] = add_monitoring_role_assignment
             external_functions["add_virtual_node_role_assignment"] = add_virtual_node_role_assignment
             external_functions["ensure_container_insights_for_monitoring"] = ensure_container_insights_for_monitoring
+            external_functions["ensure_azure_monitor_profile_prerequisites"] = ensure_azure_monitor_profile_prerequisites
             external_functions[
                 "ensure_default_log_analytics_workspace_for_monitoring"
             ] = ensure_default_log_analytics_workspace_for_monitoring
@@ -5845,6 +5846,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             mc.azure_monitor_profile.metrics.kube_state_metrics = self.models.ManagedClusterAzureMonitorProfileKubeStateMetrics(
                 metric_labels_allowlist=str(ksm_metric_labels_allow_list),
                 metric_annotations_allow_list=str(ksm_metric_annotations_allow_list))
+            # set intermediate
+            self.context.set_intermediate("azuremonitormetrics_addon_enabled", True, overwrite_exists=True)
         return mc
 
     def construct_mc_profile_default(self, bypass_restore_defaults: bool = False) -> ManagedCluster:
@@ -5930,6 +5933,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         monitoring_addon_enabled = self.context.get_intermediate("monitoring_addon_enabled", default_value=False)
         ingress_appgw_addon_enabled = self.context.get_intermediate("ingress_appgw_addon_enabled", default_value=False)
         virtual_node_addon_enabled = self.context.get_intermediate("virtual_node_addon_enabled", default_value=False)
+        azuremonitormetrics_addon_enabled = self.context.get_intermediate("azuremonitormetrics_addon_enabled", default_value=False)
         enable_managed_identity = self.context.get_enable_managed_identity()
         attach_acr = self.context.get_attach_acr()
         need_grant_vnet_permission_to_cluster_identity = self.context.get_intermediate(
@@ -5940,6 +5944,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             monitoring_addon_enabled or
             ingress_appgw_addon_enabled or
             virtual_node_addon_enabled or
+            azuremonitormetrics_addon_enabled or
             (enable_managed_identity and attach_acr) or
             need_grant_vnet_permission_to_cluster_identity
         ):
@@ -6049,6 +6054,21 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     subscription_id=self.context.get_subscription_id(),
                     is_service_principal=False,
                 )
+
+        # azure monitor metrics addon (v2)
+        azuremonitormetrics_addon_enabled = self.context.get_intermediate("azuremonitormetrics_addon_enabled", default_value=False)
+        if azuremonitormetrics_addon_enabled:
+             # Create the DC* objects, AMW, recording rules and grafana link here
+             self.context.external_functions.ensure_azure_monitor_profile_prerequisites(
+                self.cmd,
+                self.client,
+                self.context.get_subscription_id(),
+                self.context.get_resource_group_name(),
+                self.context.get_name(),
+                self.context.get_location(),
+                self.__raw_parameters,
+                self.context.get_disable_azure_monitor_metrics(),
+                True)
 
     def put_mc(self, mc: ManagedCluster) -> ManagedCluster:
         if self.check_is_postprocessing_required(mc):
@@ -6909,7 +6929,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.azure_monitor_profile.metrics = self.models.ManagedClusterAzureMonitorProfileMetrics(enabled=False)
 
         if (self.context.raw_param.get("enable_azuremonitormetrics") or self.context.raw_param.get("disable_azuremonitormetrics")):
-            ensure_azure_monitor_profile_prerequisites(
+            self.context.external_functions.ensure_azure_monitor_profile_prerequisites(
                 self.cmd,
                 self.client,
                 self.context.get_subscription_id(),

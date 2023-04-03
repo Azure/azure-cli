@@ -632,19 +632,18 @@ def delete_dc_objects_if_prometheus_enabled(cmd, dc_objects_list, cluster_subscr
             r = send_raw_request(cmd.cli_ctx, "GET", association_url, headers=headers)
             data = json.loads(r.text)
             if 'microsoft-prometheusmetrics' in [stream.lower() for stream in data['properties']['dataFlows'][0]['streams']]:
-                # delete DCE
-                url = f"https://management.azure.com{item['dceId']}?api-version={DC_API}"
-                headers = ['User-Agent=azuremonitormetrics.delete_dce']
+                # delete DCRA
+                url = f"https://management.azure.com{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{item['name']}?api-version={DC_API}"
+                headers = ['User-Agent=azuremonitormetrics.delete_dcra']
                 send_raw_request(cmd.cli_ctx, "DELETE", url, headers=headers)
                 # delete DCR
                 url = f"https://management.azure.com{item['dataCollectionRuleId']}?api-version={DC_API}"
                 headers = ['User-Agent=azuremonitormetrics.delete_dcr']
                 send_raw_request(cmd.cli_ctx, "DELETE", url, headers=headers)
-                # delete DCRA
-                url = f"https://management.azure.com{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{item['name']}?api-version={DC_API}"
-                headers = ['User-Agent=azuremonitormetrics.delete_dcra']
+                # delete DCE
+                url = f"https://management.azure.com{item['dceId']}?api-version={DC_API}"
+                headers = ['User-Agent=azuremonitormetrics.delete_dce']
                 send_raw_request(cmd.cli_ctx, "DELETE", url, headers=headers)
-            error = None
         except CLIError as e:
             error = e
             raise CLIError(error)

@@ -538,21 +538,7 @@ def aks_create(
         # exit gracefully
         return None
     # send request to create a real managed cluster
-    cluster = aks_create_decorator.create_mc(mc)
-
-    if raw_parameters.get("enable_azuremonitormetrics"):
-        ensure_azure_monitor_profile_prerequisites(
-            cmd,
-            client,
-            get_subscription_id(cmd.cli_ctx),
-            resource_group_name,
-            name,
-            location,
-            raw_parameters,
-            False,
-            True)
-
-    return cluster
+    return aks_create_decorator.create_mc(mc)
 
 
 def aks_update(
