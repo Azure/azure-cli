@@ -6936,7 +6936,7 @@ class SqlManagedInstanceServerConfigurationOptionTest(ScenarioTest):
                     checks=[JMESPathCheck('length(@)', 0)])
 
         # upsert config option
-        self.cmd('sql mi server-configuration-option create -g {rg} --instance-name {mi} --name {option_name} --value {option_value}')
+        self.cmd('sql mi server-configuration-option set -g {rg} --instance-name {mi} --name {option_name} --value {option_value}')
 
         # show config option
         opt = self.cmd('sql mi server-configuration-option show -g {rg} --instance-name {mi} --name {option_name}',
@@ -6964,7 +6964,7 @@ class SqlManagedInstanceServerConfigurationOptionTest(ScenarioTest):
                         ]).get_output_in_json()
 
         # delete config option
-        self.cmd('sql mi server-configuration-option update -g {rg} --instance-name {mi} -n {option_name} --value 0')
+        self.cmd('sql mi server-configuration-option set -g {rg} --instance-name {mi} -n {option_name} --value 0')
 
         # list 0 config options
         self.cmd('sql mi server-configuration-option list -g {rg} --instance-name {mi}',
