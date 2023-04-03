@@ -12,13 +12,13 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "sql mi server-configuration-option create",
+    "sql mi server-configuration-option set",
 )
-class Create(AAZCommand):
-    """Create managed instance server configuration option.
+class Set(AAZCommand):
+    """Set managed instance server configuration option.
 
     :example: Create server configuration option on ManagedInstance_1 in ResourceGroup_1
-        az mi server-configuration-option create -g 'ResourceGroup_1' --mi 'ManagedInstance_1' --name 'allowPolybaseExport' --value '1'
+        az mi server-configuration-option set -g 'ResourceGroup_1' --mi 'ManagedInstance_1' --name 'allowPolybaseExport' --value '1'
     """
 
     _aaz_info = {
@@ -49,6 +49,7 @@ class Create(AAZCommand):
             options=["--mi", "--instance-name", "--managed-instance", "--managed-instance-name"],
             help="Name of the managed instance.",
             required=True,
+            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -57,6 +58,7 @@ class Create(AAZCommand):
             options=["-n", "--name", "--server-configuration-option-name"],
             help="Name of the server configuration option.",
             required=True,
+            id_part="child_name_1",
             enum={"allowPolybaseExport": "allowPolybaseExport"},
         )
 
@@ -232,8 +234,8 @@ class Create(AAZCommand):
             return cls._schema_on_200
 
 
-class _CreateHelper:
-    """Helper class for Create"""
+class _SetHelper:
+    """Helper class for Set"""
 
 
-__all__ = ["Create"]
+__all__ = ["Set"]
