@@ -403,7 +403,7 @@ def load_arguments(self, _):
         c.argument('enable_vtpm', enable_vtpm_type)
         c.argument('size', help='The new size of the virtual machine. See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.', is_preview=True)
         c.argument('ephemeral_os_disk_placement', arg_type=ephemeral_placement_type,
-                   help='Only applicable when used with `--size`. Allows you to choose the Ephemeral OS disk provisioning location.', is_preview=True)
+                   help='Only applicable when used with `--size`. Allows you to choose the Ephemeral OS disk provisioning location.')
         c.argument('enable_hibernation', arg_type=get_three_state_flag(), min_api='2021-03-01', help='The flag that enable or disable hibernation capability on the VM.')
 
     with self.argument_context('vm create') as c:
@@ -762,7 +762,7 @@ def load_arguments(self, _):
                    help='Timeout value expressed as an ISO 8601 time duration after which the platform will not try to restore the VMSS SPOT instances')
         c.argument('vm_sku', help='The new size of the virtual machine instances in the scale set. Default to "Standard_DS1_v2". See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.', is_preview=True)
         c.argument('ephemeral_os_disk_placement', arg_type=ephemeral_placement_type,
-                   help='Only applicable when used with `--vm-sku`. Allows you to choose the Ephemeral OS disk provisioning location.', is_preview=True)
+                   help='Only applicable when used with `--vm-sku`. Allows you to choose the Ephemeral OS disk provisioning location.')
         c.argument('enable_secure_boot', enable_secure_boot_type)
         c.argument('enable_vtpm', enable_vtpm_type)
 
@@ -1027,9 +1027,9 @@ def load_arguments(self, _):
                        help="storage caching type for data disk(s), including 'None', 'ReadOnly', 'ReadWrite', etc. Use a singular value to apply on all disks, or use `<lun>=<vaule1> <lun>=<value2>` to configure individual disk")
             c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
             c.argument('ephemeral_os_disk', arg_type=get_three_state_flag(), min_api='2018-06-01',
-                       help='Allows you to create an OS disk directly on the host node, providing local disk performance and faster VM/VMSS reimage time.', is_preview=True)
+                       help='Allows you to create an OS disk directly on the host node, providing local disk performance and faster VM/VMSS reimage time.')
             c.argument('ephemeral_os_disk_placement', arg_type=ephemeral_placement_type,
-                       help='Only applicable when used with `--ephemeral-os-disk`. Allows you to choose the Ephemeral OS disk provisioning location.', is_preview=True)
+                       help='Only applicable when used with `--ephemeral-os-disk`. Allows you to choose the Ephemeral OS disk provisioning location.')
             c.argument('os_disk_encryption_set', min_api='2019-07-01', help='Name or ID of disk encryption set for OS disk.')
             c.argument('data_disk_encryption_sets', nargs='+', min_api='2019-07-01',
                        help='Names or IDs (space delimited) of disk encryption sets for data disks.')
