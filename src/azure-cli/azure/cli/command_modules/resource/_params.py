@@ -101,8 +101,8 @@ def load_arguments(self, _):
     stacks_description_type = CLIArgumentType(options_list=['--description'], help='The description of deployment stack.')
     stacks_stack_type = CLIArgumentType(help='The deployment stack resource id.')
     stacks_stack_name_type = CLIArgumentType(help='The deployment stack name')
-    stacks_stack_deployment_resource_group = CLIArgumentType(help='[Optional] The scope at which the initial deployment should be created. If a scope is not specified, it will default to the scope of the deployment stack.')
-    stacks_stack_deployment_subscription = CLIArgumentType(help='[Optional] The scope at which the initial deployment should be created. If a scope is not specified, it will default to the scope of the deployment stack.')
+    stacks_stack_deployment_resource_group = CLIArgumentType(help='The scope at which the initial deployment should be created. If a scope is not specified, it will default to the scope of the deployment stack.')
+    stacks_stack_deployment_subscription = CLIArgumentType(help='The scope at which the initial deployment should be created. If a scope is not specified, it will default to the scope of the deployment stack.')
     stacks_delete_resources_type = CLIArgumentType(options_list=['--delete-resources'], help='Flag to indicate delete rather than detach for the resources.')
     stacks_delete_resource_groups_type = CLIArgumentType(options_list=['--delete-resource-groups'], help='Flag to indicate delete rather than detach for the resource groups.')
     stacks_delete_all_type = CLIArgumentType(options_list=['--delete-all'], help='Flag to indicate delete rather than detach for the resources and resource groups.')
@@ -110,8 +110,6 @@ def load_arguments(self, _):
     stacks_excluded_principals = CLIArgumentType(help='List of AAD principal IDs excluded from the lock. Up to 5 principals are permitted.')
     stacks_excluded_actions = CLIArgumentType(help="List of role-based management operations that are excluded from the denySettings. Up to 200 actions are permitted.")
     stacks_apply_to_child_scopes = CLIArgumentType(help='DenySettings will be applied to child scopes.')
-    stacks_snapshot_type = CLIArgumentType(options_list=['--id'], help='The deployment stack snapshot resource id.')
-    stacks_snapshot_name_type = CLIArgumentType(options_list=['--name', '-n'], help='The deployment stack snapshot name.')
 
     bicep_file_type = CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(), type=file_type)
     bicep_force_type = CLIArgumentType(options_list=['--force'], action='store_true')
@@ -789,37 +787,6 @@ def load_arguments(self, _):
         c.argument('delete_resource_groups', arg_type=stacks_delete_resource_groups_type)
         c.argument('delete_all', arg_type=stacks_delete_all_type)
     
-    with self.argument_context('stack snapshot sub show') as c:
-        c.argument('name', arg_type=stacks_snapshot_name_type)
-        c.argument('stack_name', arg_type=stacks_stack_name_type)
-        c.argument('id', arg_type=stacks_snapshot_type)
-    
-    with self.argument_context('stack snapshot sub list') as c:
-        c.argument('stack_name', arg_type=stacks_stack_name_type)
-        c.argument('stack', arg_type=stacks_stack_type)
-    
-    with self.argument_context('stack snapshot sub delete') as c:
-        c.argument('name', arg_type=stacks_snapshot_name_type)
-        c.argument('stack_name', arg_type=stacks_stack_name_type)
-        c.argument('id', arg_type=stacks_snapshot_type)
-    
-    with self.argument_context('stack snapshot group show') as c:
-        c.argument('name', arg_type=stacks_snapshot_name_type)
-        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
-        c.argument('stack_name', arg_type=stacks_stack_name_type)
-        c.argument('id', arg_type=stacks_snapshot_type)
-    
-    with self.argument_context('stack snapshot group list') as c:
-        c.argument('stack_name', arg_type=stacks_stack_name_type)
-        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
-        c.argument('stack', arg_type=stacks_stack_type)
-    
-    with self.argument_context('stack snapshot group delete') as c:
-        c.argument('name', arg_type=stacks_snapshot_name_type)
-        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
-        c.argument('stack_name', arg_type=stacks_stack_name_type)
-        c.argument('id', arg_type=stacks_snapshot_type)
-        
     with self.argument_context('bicep build') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep file to build in the file system.")
         c.argument('outdir', arg_type=bicep_outdir_type)
