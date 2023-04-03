@@ -211,6 +211,21 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertTrue(result['publicNetworkAccess'] == 'Disabled')
 
     @AllowLargeResponse()
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-09-01')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_dns')
+    def test_create_storage_account_with_dns_endpoint_type(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'sa1': self.create_random_name(prefix='cli', length=24),
+            'sa2': self.create_random_name(prefix='cli', length=24),
+            'loc': 'eastus'
+        })
+        self.cmd('storage account create -n {sa1} -g {rg} -l {loc} --hns true --dns-endpoint-type Standard',
+                 checks=[JMESPathCheck('dnsEndpointType', 'Standard')])
+        self.cmd('storage account create -n {sa2} -g {rg} -l {loc} --hns true --dns-endpoint-type AzureDnsZone',
+                 checks=[JMESPathCheck('dnsEndpointType', 'AzureDnsZone')])
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_create_storage_account(self, resource_group, location):
         name = self.create_random_name(prefix='cli', length=24)
