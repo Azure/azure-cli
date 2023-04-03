@@ -591,7 +591,7 @@ def cli_schemaregistry_createupdate(cmd, client, resource_group_name, namespace_
     return client.create_or_update(resource_group_name, namespace_name, schema_group_name, ehSchemaGroup)
 
 
-def cli_appgroup_create(cmd, client, resource_group_name, namespace_name, application_group_name, client_app_group_identifier,
+'''def cli_appgroup_create(cmd, client, resource_group_name, namespace_name, application_group_name, client_app_group_identifier,
                         throttling_policy_config, is_enabled=None):
     ApplicationGroup = cmd.get_models('ApplicationGroup', resource_type=ResourceType.MGMT_EVENTHUB)
     appGroup = ApplicationGroup(policies=throttling_policy_config, client_app_group_identifier=client_app_group_identifier)
@@ -629,4 +629,4 @@ def cli_remove_appgroup_policy(client, resource_group_name, namespace_name, appl
             else:
                 raise CLIError('The following policy was not found: Name: ' + policy_object.name + ', RateLimitThreshold: ' + str(policy_object.rate_limit_threshold) + ', MetricId: ' + policy_object.metric_id)
 
-    return client.create_or_update_application_group(resource_group_name, namespace_name, application_group_name, appGroup)
+    return client.create_or_update_application_group(resource_group_name, namespace_name, application_group_name, appGroup)'''
