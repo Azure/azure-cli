@@ -93,10 +93,384 @@ class Update(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.ip_configurations = AAZListArg(
+            options=["--ip-configurations"],
+            arg_group="Properties",
+            help="List of IP configurations of the network interface.",
+            nullable=True,
+        )
         _args_schema.nsg = AAZObjectArg(
             options=["--nsg"],
             arg_group="Properties",
             help="The reference to the NetworkSecurityGroup resource.",
+            nullable=True,
+        )
+
+        ip_configurations = cls._args_schema.ip_configurations
+        ip_configurations.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.ip_configurations.Element
+        _element.id = AAZResourceIdArg(
+            options=["id"],
+            help="Resource ID.",
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/networkInterfaces/{}/ipConfigurations/{}",
+            ),
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="The name of the resource that is unique within a resource group. This name can be used to access the resource.",
+            nullable=True,
+        )
+        _element.application_gateway_backend_address_pools = AAZListArg(
+            options=["application-gateway-backend-address-pools"],
+            help="The reference to ApplicationGatewayBackendAddressPool resource.",
+            nullable=True,
+        )
+        _element.application_security_groups = AAZListArg(
+            options=["application-security-groups"],
+            help="Application security groups in which the IP configuration is included.",
+            nullable=True,
+        )
+        _element.gateway_load_balancer = AAZObjectArg(
+            options=["gateway-load-balancer"],
+            help="The reference to gateway load balancer frontend IP.",
+            nullable=True,
+        )
+        cls._build_args_sub_resource_update(_element.gateway_load_balancer)
+        _element.load_balancer_backend_address_pools = AAZListArg(
+            options=["load-balancer-backend-address-pools"],
+            help="The reference to LoadBalancerBackendAddressPool resource.",
+            nullable=True,
+        )
+        _element.load_balancer_inbound_nat_rules = AAZListArg(
+            options=["load-balancer-inbound-nat-rules"],
+            help="A list of references of LoadBalancerInboundNatRules.",
+            nullable=True,
+        )
+        _element.primary = AAZBoolArg(
+            options=["primary"],
+            help="Whether this is a primary customer address on the network interface.",
+            nullable=True,
+        )
+        _element.private_ip_address = AAZStrArg(
+            options=["private-ip-address"],
+            help="Private IP address of the IP configuration.",
+            nullable=True,
+        )
+        _element.private_ip_address_version = AAZStrArg(
+            options=["private-ip-address-version"],
+            help="Whether the specific IP configuration is IPv4 or IPv6. Default is IPv4.",
+            nullable=True,
+            enum={"IPv4": "IPv4", "IPv6": "IPv6"},
+        )
+        _element.private_ip_allocation_method = AAZStrArg(
+            options=["private-ip-allocation-method"],
+            help="The private IP address allocation method.",
+            nullable=True,
+            enum={"Dynamic": "Dynamic", "Static": "Static"},
+        )
+        _element.public_ip_address = AAZObjectArg(
+            options=["public-ip-address"],
+            help="Public IP address bound to the IP configuration.",
+            nullable=True,
+        )
+        cls._build_args_public_ip_address_update(_element.public_ip_address)
+        _element.subnet = AAZObjectArg(
+            options=["subnet"],
+            help="Subnet bound to the IP configuration.",
+            nullable=True,
+        )
+        cls._build_args_subnet_update(_element.subnet)
+        _element.virtual_network_taps = AAZListArg(
+            options=["virtual-network-taps"],
+            help="The reference to Virtual Network Taps.",
+            nullable=True,
+        )
+        _element.type = AAZStrArg(
+            options=["type"],
+            help="Resource type.",
+            nullable=True,
+        )
+
+        application_gateway_backend_address_pools = cls._args_schema.ip_configurations.Element.application_gateway_backend_address_pools
+        application_gateway_backend_address_pools.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.ip_configurations.Element.application_gateway_backend_address_pools.Element
+        _element.id = AAZStrArg(
+            options=["id"],
+            help="Resource ID.",
+            nullable=True,
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="Name of the backend address pool that is unique within an Application Gateway.",
+            nullable=True,
+        )
+        _element.backend_addresses = AAZListArg(
+            options=["backend-addresses"],
+            help="Backend addresses.",
+            nullable=True,
+        )
+
+        backend_addresses = cls._args_schema.ip_configurations.Element.application_gateway_backend_address_pools.Element.backend_addresses
+        backend_addresses.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.ip_configurations.Element.application_gateway_backend_address_pools.Element.backend_addresses.Element
+        _element.fqdn = AAZStrArg(
+            options=["fqdn"],
+            help="Fully qualified domain name (FQDN).",
+            nullable=True,
+        )
+        _element.ip_address = AAZStrArg(
+            options=["ip-address"],
+            help="IP address.",
+            nullable=True,
+        )
+
+        application_security_groups = cls._args_schema.ip_configurations.Element.application_security_groups
+        application_security_groups.Element = AAZObjectArg(
+            nullable=True,
+        )
+        cls._build_args_application_security_group_update(application_security_groups.Element)
+
+        load_balancer_backend_address_pools = cls._args_schema.ip_configurations.Element.load_balancer_backend_address_pools
+        load_balancer_backend_address_pools.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.ip_configurations.Element.load_balancer_backend_address_pools.Element
+        _element.id = AAZResourceIdArg(
+            options=["id"],
+            help="Resource ID.",
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/loadBalancers/{}/backendAddressPools/{}",
+            ),
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="The name of the resource that is unique within the set of backend address pools used by the load balancer. This name can be used to access the resource.",
+            nullable=True,
+        )
+        _element.drain_period_in_seconds = AAZIntArg(
+            options=["drain-period-in-seconds"],
+            help="Amount of seconds Load Balancer waits for before sending RESET to client and backend address.",
+            nullable=True,
+        )
+        _element.load_balancer_backend_addresses = AAZListArg(
+            options=["load-balancer-backend-addresses"],
+            help="An array of backend addresses.",
+            nullable=True,
+        )
+        _element.location = AAZStrArg(
+            options=["location"],
+            help="The location of the backend address pool.",
+            nullable=True,
+        )
+        _element.tunnel_interfaces = AAZListArg(
+            options=["tunnel-interfaces"],
+            help="An array of gateway load balancer tunnel interfaces.",
+            nullable=True,
+        )
+
+        load_balancer_backend_addresses = cls._args_schema.ip_configurations.Element.load_balancer_backend_address_pools.Element.load_balancer_backend_addresses
+        load_balancer_backend_addresses.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.ip_configurations.Element.load_balancer_backend_address_pools.Element.load_balancer_backend_addresses.Element
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="Name of the backend address.",
+            nullable=True,
+        )
+        _element.admin_state = AAZStrArg(
+            options=["admin-state"],
+            help="A list of administrative states which once set can override health probe so that Load Balancer will always forward new connections to backend, or deny new connections and reset existing connections.",
+            nullable=True,
+            enum={"Down": "Down", "Drain": "Drain", "None": "None", "Up": "Up"},
+        )
+        _element.ip_address = AAZStrArg(
+            options=["ip-address"],
+            help="IP Address belonging to the referenced virtual network.",
+            nullable=True,
+        )
+        _element.load_balancer_frontend_ip_configuration = AAZObjectArg(
+            options=["load-balancer-frontend-ip-configuration"],
+            help="Reference to the frontend ip address configuration defined in regional loadbalancer.",
+            nullable=True,
+        )
+        cls._build_args_sub_resource_update(_element.load_balancer_frontend_ip_configuration)
+        _element.subnet = AAZObjectArg(
+            options=["subnet"],
+            help="Reference to an existing subnet.",
+            nullable=True,
+        )
+        cls._build_args_sub_resource_update(_element.subnet)
+        _element.virtual_network = AAZObjectArg(
+            options=["virtual-network"],
+            help="Reference to an existing virtual network.",
+            nullable=True,
+        )
+        cls._build_args_sub_resource_update(_element.virtual_network)
+
+        tunnel_interfaces = cls._args_schema.ip_configurations.Element.load_balancer_backend_address_pools.Element.tunnel_interfaces
+        tunnel_interfaces.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.ip_configurations.Element.load_balancer_backend_address_pools.Element.tunnel_interfaces.Element
+        _element.identifier = AAZIntArg(
+            options=["identifier"],
+            help="Identifier of gateway load balancer tunnel interface.",
+            nullable=True,
+        )
+        _element.port = AAZIntArg(
+            options=["port"],
+            help="Port of gateway load balancer tunnel interface.",
+            nullable=True,
+        )
+        _element.protocol = AAZStrArg(
+            options=["protocol"],
+            help="Protocol of gateway load balancer tunnel interface.",
+            nullable=True,
+            enum={"Native": "Native", "None": "None", "VXLAN": "VXLAN"},
+        )
+        _element.type = AAZStrArg(
+            options=["type"],
+            help="Traffic type of gateway load balancer tunnel interface.",
+            nullable=True,
+            enum={"External": "External", "Internal": "Internal", "None": "None"},
+        )
+
+        load_balancer_inbound_nat_rules = cls._args_schema.ip_configurations.Element.load_balancer_inbound_nat_rules
+        load_balancer_inbound_nat_rules.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.ip_configurations.Element.load_balancer_inbound_nat_rules.Element
+        _element.id = AAZResourceIdArg(
+            options=["id"],
+            help="Resource ID.",
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/loadBalancers/{}/inboundNatRules/{}",
+            ),
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="The name of the resource that is unique within the set of inbound NAT rules used by the load balancer. This name can be used to access the resource.",
+            nullable=True,
+        )
+        _element.backend_address_pool = AAZObjectArg(
+            options=["backend-address-pool"],
+            help="A reference to backendAddressPool resource.",
+            nullable=True,
+        )
+        cls._build_args_sub_resource_update(_element.backend_address_pool)
+        _element.backend_port = AAZIntArg(
+            options=["backend-port"],
+            help="The port used for the internal endpoint. Acceptable values range from 1 to 65535.",
+            nullable=True,
+        )
+        _element.enable_floating_ip = AAZBoolArg(
+            options=["enable-floating-ip"],
+            help="Configures a virtual machine's endpoint for the floating IP capability required to configure a SQL AlwaysOn Availability Group. This setting is required when using the SQL AlwaysOn Availability Groups in SQL server. This setting can't be changed after you create the endpoint.",
+            nullable=True,
+        )
+        _element.enable_tcp_reset = AAZBoolArg(
+            options=["enable-tcp-reset"],
+            help="Receive bidirectional TCP Reset on TCP flow idle timeout or unexpected connection termination. This element is only used when the protocol is set to TCP.",
+            nullable=True,
+        )
+        _element.frontend_ip_configuration = AAZObjectArg(
+            options=["frontend-ip-configuration"],
+            help="A reference to frontend IP addresses.",
+            nullable=True,
+        )
+        cls._build_args_sub_resource_update(_element.frontend_ip_configuration)
+        _element.frontend_port = AAZIntArg(
+            options=["frontend-port"],
+            help="The port for the external endpoint. Port numbers for each rule must be unique within the Load Balancer. Acceptable values range from 1 to 65534.",
+            nullable=True,
+        )
+        _element.frontend_port_range_end = AAZIntArg(
+            options=["frontend-port-range-end"],
+            help="The port range end for the external endpoint. This property is used together with BackendAddressPool and FrontendPortRangeStart. Individual inbound NAT rule port mappings will be created for each backend address from BackendAddressPool. Acceptable values range from 1 to 65534.",
+            nullable=True,
+        )
+        _element.frontend_port_range_start = AAZIntArg(
+            options=["frontend-port-range-start"],
+            help="The port range start for the external endpoint. This property is used together with BackendAddressPool and FrontendPortRangeEnd. Individual inbound NAT rule port mappings will be created for each backend address from BackendAddressPool. Acceptable values range from 1 to 65534.",
+            nullable=True,
+        )
+        _element.idle_timeout_in_minutes = AAZIntArg(
+            options=["idle-timeout-in-minutes"],
+            help="The timeout for the TCP idle connection. The value can be set between 4 and 30 minutes. The default value is 4 minutes. This element is only used when the protocol is set to TCP.",
+            nullable=True,
+        )
+        _element.protocol = AAZStrArg(
+            options=["protocol"],
+            help="The reference to the transport protocol used by the load balancing rule.",
+            nullable=True,
+            enum={"All": "All", "Tcp": "Tcp", "Udp": "Udp"},
+        )
+
+        virtual_network_taps = cls._args_schema.ip_configurations.Element.virtual_network_taps
+        virtual_network_taps.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.ip_configurations.Element.virtual_network_taps.Element
+        _element.id = AAZResourceIdArg(
+            options=["id"],
+            help="Resource ID.",
+            nullable=True,
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworkTaps/{}",
+            ),
+        )
+        _element.location = AAZResourceLocationArg(
+            options=["l", "location"],
+            help="Resource location.",
+            nullable=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        _element.destination_load_balancer_front_end_ip_configuration = AAZObjectArg(
+            options=["destination-load-balancer-front-end-ip-configuration"],
+            help="The reference to the private IP address on the internal Load Balancer that will receive the tap.",
+            nullable=True,
+        )
+        cls._build_args_frontend_ip_configuration_update(_element.destination_load_balancer_front_end_ip_configuration)
+        _element.destination_network_interface_ip_configuration = AAZObjectArg(
+            options=["destination-network-interface-ip-configuration"],
+            help="The reference to the private IP Address of the collector nic that will receive the tap.",
+            nullable=True,
+        )
+        cls._build_args_network_interface_ip_configuration_update(_element.destination_network_interface_ip_configuration)
+        _element.destination_port = AAZIntArg(
+            options=["destination-port"],
+            help="The VXLAN destination port that will receive the tapped traffic.",
+            nullable=True,
+        )
+        _element.tags = AAZDictArg(
+            options=["tags"],
+            help="Resource tags.",
+            nullable=True,
+        )
+
+        tags = cls._args_schema.ip_configurations.Element.virtual_network_taps.Element.tags
+        tags.Element = AAZStrArg(
             nullable=True,
         )
 
@@ -863,13 +1237,11 @@ class Update(AAZCommand):
             _schema.idle_timeout_in_minutes = cls._args_public_ip_address_update.idle_timeout_in_minutes
             _schema.ip_address = cls._args_public_ip_address_update.ip_address
             _schema.ip_tags = cls._args_public_ip_address_update.ip_tags
-            _schema.linked_public_ip_address = cls._args_public_ip_address_update.linked_public_ip_address
             _schema.location = cls._args_public_ip_address_update.location
             _schema.nat_gateway = cls._args_public_ip_address_update.nat_gateway
             _schema.public_ip_address_version = cls._args_public_ip_address_update.public_ip_address_version
             _schema.public_ip_allocation_method = cls._args_public_ip_address_update.public_ip_allocation_method
             _schema.public_ip_prefix = cls._args_public_ip_address_update.public_ip_prefix
-            _schema.service_public_ip_address = cls._args_public_ip_address_update.service_public_ip_address
             _schema.sku = cls._args_public_ip_address_update.sku
             _schema.tags = cls._args_public_ip_address_update.tags
             _schema.zones = cls._args_public_ip_address_update.zones
@@ -933,12 +1305,6 @@ class Update(AAZCommand):
             help="The list of tags associated with the public IP address.",
             nullable=True,
         )
-        public_ip_address_update.linked_public_ip_address = AAZObjectArg(
-            options=["linked-public-ip-address"],
-            help="The linked public IP address of the public IP address resource.",
-            nullable=True,
-        )
-        cls._build_args_public_ip_address_update(public_ip_address_update.linked_public_ip_address)
         public_ip_address_update.nat_gateway = AAZObjectArg(
             options=["nat-gateway"],
             help="The NatGateway for the Public IP address.",
@@ -962,12 +1328,6 @@ class Update(AAZCommand):
             nullable=True,
         )
         cls._build_args_sub_resource_update(public_ip_address_update.public_ip_prefix)
-        public_ip_address_update.service_public_ip_address = AAZObjectArg(
-            options=["service-public-ip-address"],
-            help="The service public IP address of the public IP address resource.",
-            nullable=True,
-        )
-        cls._build_args_public_ip_address_update(public_ip_address_update.service_public_ip_address)
         public_ip_address_update.sku = AAZObjectArg(
             options=["sku"],
             help="The public IP address SKU.",
@@ -1147,13 +1507,11 @@ class Update(AAZCommand):
         _schema.idle_timeout_in_minutes = cls._args_public_ip_address_update.idle_timeout_in_minutes
         _schema.ip_address = cls._args_public_ip_address_update.ip_address
         _schema.ip_tags = cls._args_public_ip_address_update.ip_tags
-        _schema.linked_public_ip_address = cls._args_public_ip_address_update.linked_public_ip_address
         _schema.location = cls._args_public_ip_address_update.location
         _schema.nat_gateway = cls._args_public_ip_address_update.nat_gateway
         _schema.public_ip_address_version = cls._args_public_ip_address_update.public_ip_address_version
         _schema.public_ip_allocation_method = cls._args_public_ip_address_update.public_ip_allocation_method
         _schema.public_ip_prefix = cls._args_public_ip_address_update.public_ip_prefix
-        _schema.service_public_ip_address = cls._args_public_ip_address_update.service_public_ip_address
         _schema.sku = cls._args_public_ip_address_update.sku
         _schema.tags = cls._args_public_ip_address_update.tags
         _schema.zones = cls._args_public_ip_address_update.zones
@@ -1811,6 +2169,7 @@ class Update(AAZCommand):
                 properties.set_prop("dnsSettings", AAZObjectType)
                 properties.set_prop("enableAcceleratedNetworking", AAZBoolType, ".accelerated_networking")
                 properties.set_prop("enableIPForwarding", AAZBoolType, ".ip_forwarding")
+                properties.set_prop("ipConfigurations", AAZListType, ".ip_configurations")
                 properties.set_prop("networkSecurityGroup", AAZObjectType, ".nsg")
 
             dns_settings = _builder.get(".properties.dnsSettings")
@@ -1821,6 +2180,148 @@ class Update(AAZCommand):
             dns_servers = _builder.get(".properties.dnsSettings.dnsServers")
             if dns_servers is not None:
                 dns_servers.set_elements(AAZStrType, ".")
+
+            ip_configurations = _builder.get(".properties.ipConfigurations")
+            if ip_configurations is not None:
+                ip_configurations.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.ipConfigurations[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("type", AAZStrType, ".type")
+
+            properties = _builder.get(".properties.ipConfigurations[].properties")
+            if properties is not None:
+                properties.set_prop("applicationGatewayBackendAddressPools", AAZListType, ".application_gateway_backend_address_pools")
+                properties.set_prop("applicationSecurityGroups", AAZListType, ".application_security_groups")
+                _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("gatewayLoadBalancer", AAZObjectType, ".gateway_load_balancer"))
+                properties.set_prop("loadBalancerBackendAddressPools", AAZListType, ".load_balancer_backend_address_pools")
+                properties.set_prop("loadBalancerInboundNatRules", AAZListType, ".load_balancer_inbound_nat_rules")
+                properties.set_prop("primary", AAZBoolType, ".primary")
+                properties.set_prop("privateIPAddress", AAZStrType, ".private_ip_address")
+                properties.set_prop("privateIPAddressVersion", AAZStrType, ".private_ip_address_version")
+                properties.set_prop("privateIPAllocationMethod", AAZStrType, ".private_ip_allocation_method")
+                _UpdateHelper._build_schema_public_ip_address_update(properties.set_prop("publicIPAddress", AAZObjectType, ".public_ip_address"))
+                _UpdateHelper._build_schema_subnet_update(properties.set_prop("subnet", AAZObjectType, ".subnet"))
+                properties.set_prop("virtualNetworkTaps", AAZListType, ".virtual_network_taps")
+
+            application_gateway_backend_address_pools = _builder.get(".properties.ipConfigurations[].properties.applicationGatewayBackendAddressPools")
+            if application_gateway_backend_address_pools is not None:
+                application_gateway_backend_address_pools.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.ipConfigurations[].properties.applicationGatewayBackendAddressPools[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            properties = _builder.get(".properties.ipConfigurations[].properties.applicationGatewayBackendAddressPools[].properties")
+            if properties is not None:
+                properties.set_prop("backendAddresses", AAZListType, ".backend_addresses")
+
+            backend_addresses = _builder.get(".properties.ipConfigurations[].properties.applicationGatewayBackendAddressPools[].properties.backendAddresses")
+            if backend_addresses is not None:
+                backend_addresses.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.ipConfigurations[].properties.applicationGatewayBackendAddressPools[].properties.backendAddresses[]")
+            if _elements is not None:
+                _elements.set_prop("fqdn", AAZStrType, ".fqdn")
+                _elements.set_prop("ipAddress", AAZStrType, ".ip_address")
+
+            application_security_groups = _builder.get(".properties.ipConfigurations[].properties.applicationSecurityGroups")
+            if application_security_groups is not None:
+                _UpdateHelper._build_schema_application_security_group_update(application_security_groups.set_elements(AAZObjectType, "."))
+
+            load_balancer_backend_address_pools = _builder.get(".properties.ipConfigurations[].properties.loadBalancerBackendAddressPools")
+            if load_balancer_backend_address_pools is not None:
+                load_balancer_backend_address_pools.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.ipConfigurations[].properties.loadBalancerBackendAddressPools[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            properties = _builder.get(".properties.ipConfigurations[].properties.loadBalancerBackendAddressPools[].properties")
+            if properties is not None:
+                properties.set_prop("drainPeriodInSeconds", AAZIntType, ".drain_period_in_seconds")
+                properties.set_prop("loadBalancerBackendAddresses", AAZListType, ".load_balancer_backend_addresses")
+                properties.set_prop("location", AAZStrType, ".location")
+                properties.set_prop("tunnelInterfaces", AAZListType, ".tunnel_interfaces")
+
+            load_balancer_backend_addresses = _builder.get(".properties.ipConfigurations[].properties.loadBalancerBackendAddressPools[].properties.loadBalancerBackendAddresses")
+            if load_balancer_backend_addresses is not None:
+                load_balancer_backend_addresses.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.ipConfigurations[].properties.loadBalancerBackendAddressPools[].properties.loadBalancerBackendAddresses[]")
+            if _elements is not None:
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            properties = _builder.get(".properties.ipConfigurations[].properties.loadBalancerBackendAddressPools[].properties.loadBalancerBackendAddresses[].properties")
+            if properties is not None:
+                properties.set_prop("adminState", AAZStrType, ".admin_state")
+                properties.set_prop("ipAddress", AAZStrType, ".ip_address")
+                _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("loadBalancerFrontendIPConfiguration", AAZObjectType, ".load_balancer_frontend_ip_configuration"))
+                _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("subnet", AAZObjectType, ".subnet"))
+                _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("virtualNetwork", AAZObjectType, ".virtual_network"))
+
+            tunnel_interfaces = _builder.get(".properties.ipConfigurations[].properties.loadBalancerBackendAddressPools[].properties.tunnelInterfaces")
+            if tunnel_interfaces is not None:
+                tunnel_interfaces.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.ipConfigurations[].properties.loadBalancerBackendAddressPools[].properties.tunnelInterfaces[]")
+            if _elements is not None:
+                _elements.set_prop("identifier", AAZIntType, ".identifier")
+                _elements.set_prop("port", AAZIntType, ".port")
+                _elements.set_prop("protocol", AAZStrType, ".protocol")
+                _elements.set_prop("type", AAZStrType, ".type")
+
+            load_balancer_inbound_nat_rules = _builder.get(".properties.ipConfigurations[].properties.loadBalancerInboundNatRules")
+            if load_balancer_inbound_nat_rules is not None:
+                load_balancer_inbound_nat_rules.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.ipConfigurations[].properties.loadBalancerInboundNatRules[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            properties = _builder.get(".properties.ipConfigurations[].properties.loadBalancerInboundNatRules[].properties")
+            if properties is not None:
+                _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("backendAddressPool", AAZObjectType, ".backend_address_pool"))
+                properties.set_prop("backendPort", AAZIntType, ".backend_port")
+                properties.set_prop("enableFloatingIP", AAZBoolType, ".enable_floating_ip")
+                properties.set_prop("enableTcpReset", AAZBoolType, ".enable_tcp_reset")
+                _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("frontendIPConfiguration", AAZObjectType, ".frontend_ip_configuration"))
+                properties.set_prop("frontendPort", AAZIntType, ".frontend_port")
+                properties.set_prop("frontendPortRangeEnd", AAZIntType, ".frontend_port_range_end")
+                properties.set_prop("frontendPortRangeStart", AAZIntType, ".frontend_port_range_start")
+                properties.set_prop("idleTimeoutInMinutes", AAZIntType, ".idle_timeout_in_minutes")
+                properties.set_prop("protocol", AAZStrType, ".protocol")
+
+            virtual_network_taps = _builder.get(".properties.ipConfigurations[].properties.virtualNetworkTaps")
+            if virtual_network_taps is not None:
+                virtual_network_taps.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.ipConfigurations[].properties.virtualNetworkTaps[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
+                _elements.set_prop("location", AAZStrType, ".location")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("tags", AAZDictType, ".tags")
+
+            properties = _builder.get(".properties.ipConfigurations[].properties.virtualNetworkTaps[].properties")
+            if properties is not None:
+                _UpdateHelper._build_schema_frontend_ip_configuration_update(properties.set_prop("destinationLoadBalancerFrontEndIPConfiguration", AAZObjectType, ".destination_load_balancer_front_end_ip_configuration"))
+                _UpdateHelper._build_schema_network_interface_ip_configuration_update(properties.set_prop("destinationNetworkInterfaceIPConfiguration", AAZObjectType, ".destination_network_interface_ip_configuration"))
+                properties.set_prop("destinationPort", AAZIntType, ".destination_port")
+
+            tags = _builder.get(".properties.ipConfigurations[].properties.virtualNetworkTaps[].tags")
+            if tags is not None:
+                tags.set_elements(AAZStrType, ".")
 
             network_security_group = _builder.get(".properties.networkSecurityGroup")
             if network_security_group is not None:
@@ -2112,12 +2613,10 @@ class _UpdateHelper:
             properties.set_prop("idleTimeoutInMinutes", AAZIntType, ".idle_timeout_in_minutes")
             properties.set_prop("ipAddress", AAZStrType, ".ip_address")
             properties.set_prop("ipTags", AAZListType, ".ip_tags")
-            cls._build_schema_public_ip_address_update(properties.set_prop("linkedPublicIPAddress", AAZObjectType, ".linked_public_ip_address"))
             properties.set_prop("natGateway", AAZObjectType, ".nat_gateway")
             properties.set_prop("publicIPAddressVersion", AAZStrType, ".public_ip_address_version")
             properties.set_prop("publicIPAllocationMethod", AAZStrType, ".public_ip_allocation_method")
             cls._build_schema_sub_resource_update(properties.set_prop("publicIPPrefix", AAZObjectType, ".public_ip_prefix"))
-            cls._build_schema_public_ip_address_update(properties.set_prop("servicePublicIPAddress", AAZObjectType, ".service_public_ip_address"))
 
         ddos_settings = _builder.get(".properties.ddosSettings")
         if ddos_settings is not None:

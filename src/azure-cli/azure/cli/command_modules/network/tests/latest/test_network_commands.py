@@ -4258,6 +4258,32 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
             ]
         )
 
+    @ResourceGroupPreparer(name_prefix="cli_test_multiple_ipconfigs_update_with_shorthand_", location="westus")
+    def test_multiple_ipconfigs_remove_by_shorthand(self):
+        self.kwargs.update({
+            "nic": self.create_random_name("nic-", 8),
+            "vnet": self.create_random_name("vnet-", 12),
+            "subnet": self.create_random_name("subnet-", 12),
+        })
+
+        self.cmd("network vnet create -n {vnet} -g {rg} --subnet-name {subnet}")
+        self.cmd("network nic create -n {nic} -g {rg} --vnet-name {vnet} --subnet {subnet}")
+
+        # `ipconfg1` implicitly created
+        self.cmd("network nic ip-config create -n ipconfig2 -g {rg} --nic-name {nic}")
+        self.cmd("network nic ip-config create -n ipconfig3 -g {rg} --nic-name {nic}")
+        self.cmd("network nic ip-config create -n ipconfig4 -g {rg} --nic-name {nic}")
+        self.cmd("network nic ip-config create -n ipconfig5 -g {rg} --nic-name {nic}")
+
+        self.cmd(
+            "network nic update -n {nic} -g {rg} --ip-configurations [1]=null [2]=null [4]=null",
+            checks=[
+                self.check("ipConfigurations | length(@)", 2),
+                self.check("ipConfigurations[0].name", "ipconfig1"),
+                self.check("ipConfigurations[1].name", "ipconfig4"),
+            ]
+        )
+
     @ResourceGroupPreparer(name_prefix='cli_test_nic_lb_address_pools', location='eastus2')
     def test_network_nic_lb_address_pools(self, resource_group):
 
