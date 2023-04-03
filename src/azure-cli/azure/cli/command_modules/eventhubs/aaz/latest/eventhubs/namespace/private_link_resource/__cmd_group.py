@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "eventhubs namespace private-link-resource",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage eventhubs namespace private link resources.
+    """Manage eventhubs namespace private link resources .
     """
     pass
 
