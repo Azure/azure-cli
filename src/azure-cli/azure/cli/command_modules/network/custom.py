@@ -2656,62 +2656,34 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
 
 # pylint: disable=too-many-return-statements, inconsistent-return-statements, too-many-branches
 def _build_record(cmd, data):
-    (
-        AaaaRecord,
-        ARecord,
-        CaaRecord,
-        CnameRecord,
-        MxRecord,
-        NsRecord,
-        PtrRecord,
-        SoaRecord,
-        SrvRecord,
-        TxtRecord,
-        SubResource,
-    ) = cmd.get_models(
-        "AaaaRecord",
-        "ARecord",
-        "CaaRecord",
-        "CnameRecord",
-        "MxRecord",
-        "NsRecord",
-        "PtrRecord",
-        "SoaRecord",
-        "SrvRecord",
-        "TxtRecord",
-        "SubResource",
-        resource_type=ResourceType.MGMT_NETWORK_DNS,
-    )
     record_type = data['delim'].lower()
     try:
         if record_type == 'aaaa':
-            return AaaaRecord(ipv6_address=data['ip'])
+            return {"ipv6_address": data["ip"]}
         if record_type == 'a':
-            return ARecord(ipv4_address=data['ip'])
-        if (record_type == 'caa' and
-                supported_api_version(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS, min_api='2018-03-01-preview')):
-            return CaaRecord(value=data['val'], flags=int(data['flags']), tag=data['tag'])
+            return {"ipv4_address": data["ip"]}
+        if record_type == 'caa':
+            return {"value": data["val"], "flags": int(data["flags"]), "tag": data["tag"]}
         if record_type == 'cname':
-            return CnameRecord(cname=data['alias'])
+            return {"cname": data["alias"]}
         if record_type == 'mx':
-            return MxRecord(preference=data['preference'], exchange=data['host'])
+            return {"preference": data["preference"], "exchange": data["host"]}
         if record_type == 'ns':
-            return NsRecord(nsdname=data['host'])
+            return {"nsdname": data["host"]}
         if record_type == 'ptr':
-            return PtrRecord(ptrdname=data['host'])
+            return {"ptrdname": data["host"]}
         if record_type == 'soa':
-            return SoaRecord(host=data['host'], email=data['email'], serial_number=data['serial'],
-                             refresh_time=data['refresh'], retry_time=data['retry'], expire_time=data['expire'],
-                             minimum_ttl=data['minimum'])
+            return {"host": data["host"], "email": data["email"], "serial_number": data["serial"],
+                    "refresh_time": data["refresh"], "retry_time": data["retry"], "expire_time": data["expire"],
+                    "minimum_ttl": data["minimum"]}
         if record_type == 'srv':
-            return SrvRecord(
-                priority=int(data['priority']), weight=int(data['weight']), port=int(data['port']),
-                target=data['target'])
+            return {"priority": int(data["priority"]), "weight": int(data["weight"]), "port": int(data["port"]),
+                    "target": data["target"]}
         if record_type in ['txt', 'spf']:
             text_data = data['txt']
-            return TxtRecord(value=text_data) if isinstance(text_data, list) else TxtRecord(value=[text_data])
+            return {"value": text_data} if isinstance(text_data, list) else {"value": [text_data]}
         if record_type == 'alias':
-            return SubResource(id=data["resourceId"])
+            return {"id": data["resourceId"]}
     except KeyError as ke:
         raise CLIError("The {} record '{}' is missing a property.  {}"
                        .format(record_type, data['name'], ke))
@@ -2777,7 +2749,7 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
                             'imported at this time. Skipping...', relative_record_set_name)
                         continue
 
-                    record_set = RecordSet(ttl=record_set_ttl)
+                    record_set = {"ttl": record_set_ttl}
                     record_sets[record_set_key] = record_set
                 _add_record(record_set, record, record_set_type,
                             is_list=record_set_type.lower() not in ['soa', 'cname', 'alias'])
@@ -2787,7 +2759,7 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
         rs_name, rs_type = key.lower().rsplit('.', 1)
         rs_name = rs_name[:-(len(origin) + 1)] if rs_name != origin else '@'
         try:
-            record_count = len(getattr(rs, _type_to_property_name(rs_type)[0]))
+            record_count = len(rs[_type_to_property_name(rs_type)[0]])
         except TypeError:
             record_count = 1
         total_records += record_count
@@ -2806,16 +2778,16 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
             rs_name = rs_name[:-(len(origin) + 1)]
 
         try:
-            record_count = len(getattr(rs, _type_to_property_name(rs_type)[0]))
+            record_count = len(rs[_type_to_property_name(rs_type)[0]])
         except TypeError:
             record_count = 1
         if rs_name == '@' and rs_type == 'soa':
             root_soa = client.record_sets.get(resource_group_name, zone_name, '@', 'SOA')
-            rs.soa_record.host = root_soa.soa_record.host
+            rs["soa_record"]["host"] = root_soa.soa_record.host
             rs_name = '@'
         elif rs_name == '@' and rs_type == 'ns':
             root_ns = client.record_sets.get(resource_group_name, zone_name, '@', 'NS')
-            root_ns.ttl = rs.ttl
+            root_ns.ttl = rs["ttl"]
             rs = root_ns
             rs_type = rs.type.rsplit('/', 1)[1]
         try:
