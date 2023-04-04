@@ -631,7 +631,7 @@ def _configure_db_dw_create_params(
         arg_ctx.ignore('sample_name')
         arg_ctx.ignore('catalog_collation')
         arg_ctx.ignore('maintenance_configuration_id')
-        arg_ctx.ignore('is_ledger_on')
+        
 
     # Only applicable to point in time restore or deleted restore create mode.
     if create_mode not in [CreateMode.restore, CreateMode.point_in_time_restore]:
@@ -2378,7 +2378,7 @@ def load_arguments(self, _):
             ])
 
     with self.argument_context('sql mi ad-admin update') as c:
-        # Create args that will be used to build up the ManagedInstanceAdministrator object
+        # Create args that will be used to build up the ManagedInstanceAdminimstrator object
         create_args_for_complex_type(
             c, 'properties', ManagedInstanceAdministrator, [
                 'login',
@@ -2428,6 +2428,7 @@ def load_arguments(self, _):
             c, 'parameters', ManagedDatabase, [
                 'collation',
                 'tags',
+                'is_ledger_on'
             ])
 
         c.argument('tags', arg_type=tags_type)
@@ -2436,6 +2437,10 @@ def load_arguments(self, _):
                    required=False,
                    help='The collation of the Azure SQL Managed Database collation to use, '
                    'e.g.: SQL_Latin1_General_CP1_CI_AS or Latin1_General_100_CS_AS_SC')
+                   
+        c.argument('is_ledger_on',
+                   required=False,
+                   arg_type=ledger_on_param_type)
 
     with self.argument_context('sql midb update') as c:
         create_args_for_complex_type(
@@ -2686,6 +2691,15 @@ def load_arguments(self, _):
                    required=False,
                    options_list=['--last-backup-name', '--last-bn'],
                    help='The name of the last backup to restore.')
+
+    ######
+    #           sql midb ledger-digest-uploads
+    ######
+    with self.argument_context('sql midb ledger-digest-uploads enable') as c:
+        c.argument('endpoint',
+                   options_list=['--endpoint'],
+                   help='The endpoint of a digest storage, '
+                   'which can be either an Azure Blob storage or a ledger in Azure Confidential Ledger.')
 
     ###############################################
     #                sql virtual cluster          #
