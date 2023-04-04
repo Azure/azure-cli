@@ -241,7 +241,7 @@ def load_command_table(self, _):
             g.show_command('show', 'get', transform=transform_dns_record_set_output)
             g.command('delete', 'delete', confirmation=True)
             g.custom_command('list', 'list_dns_record_set', transform=transform_dns_record_set_output, table_transformer=transform_dns_record_set_table_output)
-            g.custom_command('create', 'create_dns_record_set', transform=transform_dns_record_set_output)
+            g.custom_command('create', 'create_dns_record_set', transform=transform_dns_record_set_output, doc_string_source=dns_doc_string)
             g.custom_command('add-record', 'add_dns_{}_record'.format(record), transform=transform_dns_record_set_output)
             g.custom_command('remove-record', 'remove_dns_{}_record'.format(record), transform=transform_dns_record_set_output)
 
