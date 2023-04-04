@@ -19,7 +19,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.azclierror import InvalidArgumentValueError, ValidationError, \
     UnrecognizedArgumentError, ResourceNotFoundError, ArgumentUsageError
-from azure.cli.core.profiles import ResourceType, supported_api_version
+from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
