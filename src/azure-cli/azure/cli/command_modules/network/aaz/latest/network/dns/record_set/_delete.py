@@ -40,7 +40,7 @@ class Delete(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.if_match = AAZStrArg(
             options=["--if-match"],
-            help="The etag of the record set. Omit this value to always delete the current record set. Specify the last-seen etag value to prevent accidentally deleting any concurrent changes.",
+            help="Etag of the record set. Omit this value to always delete the current record set. Specify the last-seen etag value to prevent accidentally deleting any concurrent changes.",
         )
         _args_schema.record_type = AAZStrArg(
             options=["--record-type"],
@@ -51,7 +51,7 @@ class Delete(AAZCommand):
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="The name of the record set, relative to the name of the zone.",
+            help="Name of the record set, relative to the name of the zone.",
             required=True,
             id_part="child_name_1",
         )
@@ -59,8 +59,8 @@ class Delete(AAZCommand):
             required=True,
         )
         _args_schema.zone_name = AAZStrArg(
-            options=["--zone-name"],
-            help="The name of the DNS zone (without a terminating dot).",
+            options=["-z", "--zone-name"],
+            help="Name of the DNS zone.",
             required=True,
             id_part="name",
         )

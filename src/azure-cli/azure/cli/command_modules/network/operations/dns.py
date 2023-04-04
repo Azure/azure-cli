@@ -5,7 +5,8 @@
 from knack.log import get_logger
 
 from azure.cli.core.aaz import has_value, register_command, AAZResourceIdArgFormat
-from ..aaz.latest.network.dns.record_set import Update as _RecordSetUpdate
+from ..aaz.latest.network.dns.record_set import Delete as _RecordSetDelete, Show as _RecordSetShow, \
+    Update as _RecordSetUpdate
 
 logger = get_logger(__name__)
 

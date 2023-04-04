@@ -63,7 +63,7 @@ from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condit
 from .aaz.latest.network.application_gateway.waf_policy.policy_setting import Update as _WAFPolicySettingUpdate
 from .aaz.latest.network.custom_ip.prefix import Update as _CustomIpPrefixUpdate
 from .aaz.latest.network.dns.record_set import Create as _DNSRecordSetCreate, Delete as _DNSRecordSetDelete, \
-    Show as _DNSRecordSetShow, Update as _DNSRecordSetUpdate
+    ListByType as _DNSRecordSetListByType, Show as _DNSRecordSetShow, Update as _DNSRecordSetUpdate
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
 from .aaz.latest.network.express_route.gateway import Create as _ExpressRouteGatewayCreate, \
     Update as _ExpressRouteGatewayUpdate
@@ -2528,11 +2528,12 @@ def create_dns_record_set(cmd, resource_group_name, zone_name, record_set_name, 
     })
 
 
-def list_dns_record_set(client, resource_group_name, zone_name, record_type=None):
-    if record_type:
-        return client.list_by_type(resource_group_name, zone_name, record_type)
-
-    return client.list_by_dns_zone(resource_group_name, zone_name)
+def list_dns_record_set(cmd, resource_group_name, zone_name, record_type):
+    return _DNSRecordSetListByType(cli_ctx=cmd.cli_ctx)(command_args={
+        "record_type": record_type,
+        "resource_group": resource_group_name,
+        "zone_name": zone_name
+    })
 
 
 def update_dns_record_set(instance, cmd, metadata=None, target_resource=None):
