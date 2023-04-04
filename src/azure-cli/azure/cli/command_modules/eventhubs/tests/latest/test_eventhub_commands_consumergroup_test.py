@@ -34,36 +34,36 @@ class EHConsumerGroupCURDScenarioTest(ScenarioTest):
         })
 
         # Create Namespace
-        self.cmd('eventhubs namespace create --resource-group test-migration --name {namespacename} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits}',
+        self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits}',
                  checks=[self.check('sku.name', self.kwargs['sku'])])
 
         # Get Created Namespace
-        self.cmd('eventhubs namespace show --resource-group test-migration --name {namespacename}', checks=[self.check('sku.name', self.kwargs['sku'])])
+        self.cmd('eventhubs namespace show --resource-group {rg} --name {namespacename}', checks=[self.check('sku.name', self.kwargs['sku'])])
 
         # Create Eventhub
-        self.cmd('eventhubs eventhub create --resource-group test-migration --namespace-name {namespacename} --name {eventhubname}', checks=[self.check('name', self.kwargs['eventhubname'])])
+        self.cmd('eventhubs eventhub create --resource-group {rg} --namespace-name {namespacename} --name {eventhubname}', checks=[self.check('name', self.kwargs['eventhubname'])])
 
         # Get Eventhub
-        self.cmd('eventhubs eventhub show --resource-group test-migration --namespace-name {namespacename} --name {eventhubname}', checks=[self.check('name', self.kwargs['eventhubname'])])
+        self.cmd('eventhubs eventhub show --resource-group {rg} --namespace-name {namespacename} --name {eventhubname}', checks=[self.check('name', self.kwargs['eventhubname'])])
 
         # Create ConsumerGroup
-        self.cmd('eventhubs eventhub consumer-group create --resource-group test-migration --namespace-name {namespacename} --eventhub-name {eventhubname} --name {consumergroupname} --user-metadata {usermetadata1} ', checks=[self.check('name', self.kwargs['consumergroupname'])])
+        self.cmd('eventhubs eventhub consumer-group create --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {consumergroupname} --user-metadata {usermetadata1}', checks=[self.check('name', self.kwargs['consumergroupname'])])
 
         # Get Consumer Group
-        self.cmd('eventhubs eventhub consumer-group show --resource-group test-migration --namespace-name {namespacename} --eventhub-name {eventhubname} --name {consumergroupname}', checks=[self.check('name', self.kwargs['consumergroupname'])])
+        self.cmd('eventhubs eventhub consumer-group show --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {consumergroupname}', checks=[self.check('name', self.kwargs['consumergroupname'])])
 
         # Update ConsumerGroup
-        self.cmd('eventhubs eventhub consumer-group update --resource-group test-migration --namespace-name {namespacename} --eventhub-name {eventhubname} --name {consumergroupname} --user-metadata {usermetadata2}', checks=[self.check('userMetadata', self.kwargs['usermetadata2'])])
+        self.cmd('eventhubs eventhub consumer-group update --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {consumergroupname} --user-metadata {usermetadata2}', checks=[self.check('userMetadata', self.kwargs['usermetadata2'])])
 
         # Get ConsumerGroup List
-        listconsumergroup = self.cmd('eventhubs eventhub consumer-group list --resource-group test-migration --namespace-name {namespacename} --eventhub-name {eventhubname}').output
+        listconsumergroup = self.cmd('eventhubs eventhub consumer-group list --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname}').output
         self.assertGreater(len(listconsumergroup), 0)
 
         # Delete ConsumerGroup
-        self.cmd('eventhubs eventhub consumer-group delete --resource-group test-migration --namespace-name {namespacename} --eventhub-name {eventhubname} --name {consumergroupname}')
+        self.cmd('eventhubs eventhub consumer-group delete --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {consumergroupname}')
 
         # Delete Eventhub
-        self.cmd('eventhubs eventhub delete --resource-group test-migration --namespace-name {namespacename} --name {eventhubname}')
+        self.cmd('eventhubs eventhub delete --resource-group {rg} --namespace-name {namespacename} --name {eventhubname}')
 
         # Delete Namespace
-        self.cmd('eventhubs namespace delete --resource-group test-migration --name {namespacename}')
+        self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename}')
