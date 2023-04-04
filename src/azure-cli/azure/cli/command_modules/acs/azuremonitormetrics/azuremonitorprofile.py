@@ -4,14 +4,16 @@
 # --------------------------------------------------------------------------------------------
 import json
 import uuid
-from sre_constants import FAILURE, SUCCESS
+# from sre_constants import FAILURE, SUCCESS
+
+from azure-cli.azure.cli.command_modules.acs.azuremonitormetrics.addonput import addon_put
 from azure.cli.command_modules.acs.azuremonitormetrics.responseparsers.amwlocationresponseparser import parseResourceProviderResponseForLocations
 
-from knack.util import CLIError
 from azure.cli.core.azclierror import (
     UnknownError,
     InvalidArgumentValueError,
-    ClientRequestError
+    ClientRequestError,
+    CLIError
 )
 from .._client_factory import get_resources_client, get_resource_groups_client
 from enum import Enum
@@ -118,28 +120,6 @@ def check_azuremonitormetrics_profile(cmd, cluster_subscription, cluster_resourc
         if "metrics" in values_array["azureMonitorProfile"]:
             if values_array["azureMonitorProfile"]["metrics"]["enabled"] is True:
                 raise CLIError(f"Azure Monitor Metrics is already enabled for this cluster. Please use `az aks update --disable-azuremonitormetrics -g {cluster_resource_group_name} -n {cluster_name}` and then try enabling.")
-
-
-# check if `az feature register --namespace Microsoft.ContainerService --name AKS-PrometheusAddonPreview` is Registered
-def check_azuremonitoraddon_feature(cmd, cluster_subscription, raw_parameters):
-    aks_custom_headers = raw_parameters.get("aks_custom_headers")
-    if (aks_custom_headers is not None) and ("aks-prometheusaddonpreview" in aks_custom_headers.lower()):
-        return
-    from azure.cli.core.util import send_raw_request
-    feature_check_url = f"https://management.azure.com/subscriptions/{cluster_subscription}/providers/Microsoft.Features/subscriptionFeatureRegistrations?api-version={FEATURE_API}&featurename=AKS-PrometheusAddonPreview"
-    try:
-        headers = ['User-Agent=azuremonitormetrics.check_azuremonitoraddon_feature']
-        r = send_raw_request(cmd.cli_ctx, "GET", feature_check_url,
-                             body={}, headers=headers)
-    except CLIError as e:
-        raise UnknownError(e)
-    json_response = json.loads(r.text)
-    values_array = json_response["value"]
-    for value in values_array:
-        if value["properties"]["providerNamespace"].lower() == "microsoft.containerservice" and value["properties"]["state"].lower() == "registered":
-            return
-    raise CLIError("Please enable the feature AKS-PrometheusAddonPreview on your subscription using `az feature register --namespace Microsoft.ContainerService --name AKS-PrometheusAddonPreview` to use this feature.\
-        If this feature was recently registered then please wait upto 5 mins for the feature registration to finish")
 
 
 # DCR = 64, DCE = 44, DCRA = 64
@@ -656,7 +636,7 @@ def delete_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
     delete_rule(cmd, cluster_subscription, cluster_resource_group_name, cluster_name, "NodeAndKubernetesRecordingRulesRuleGroup-Win-{0}".format(cluster_name))
 
 
-def link_azure_monitor_profile_artifacts(cmd, cluster_subscription, cluster_resource_group_name, cluster_name, cluster_region, raw_parameters):
+def link_azure_monitor_profile_artifacts(cmd, cluster_subscription, cluster_resource_group_name, cluster_name, cluster_region, raw_parameters, create_flow):
     # MAC creation if required
     azure_monitor_workspace_resource_id = get_azure_monitor_workspace_resource_id(cmd, cluster_subscription, cluster_region, raw_parameters)
     # Get MAC region (required for DCE, DCR creation) and check support for DCE,DCR creation
@@ -671,6 +651,9 @@ def link_azure_monitor_profile_artifacts(cmd, cluster_subscription, cluster_reso
     link_grafana_instance(cmd, raw_parameters, azure_monitor_workspace_resource_id)
     # create recording rules and alerts
     create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster_name, azure_monitor_workspace_resource_id, mac_region, raw_parameters)
+    # if aks cluster create flow -> do a PUT on the AKS cluster to enable the addon
+    if create_flow:
+        addon_put(cmd, cluster_subscription, cluster_resource_group_name, cluster_name)
 
 
 def unlink_azure_monitor_profile_artifacts(cmd, cluster_subscription, cluster_resource_group_name, cluster_name, cluster_region):
@@ -769,8 +752,6 @@ def ensure_azure_monitor_profile_prerequisites(
         # Check if already onboarded
         if create_flow == False:
             check_azuremonitormetrics_profile(cmd, cluster_subscription, cluster_resource_group_name, cluster_name)
-        # If the feature is not registered then STOP onboarding and request to register the feature
-        check_azuremonitoraddon_feature(cmd, cluster_subscription, raw_parameters)
         # Do RP registrations if required
         rp_registrations(cmd, cluster_subscription)
         link_azure_monitor_profile_artifacts(
@@ -779,6 +760,7 @@ def ensure_azure_monitor_profile_prerequisites(
             cluster_resource_group_name,
             cluster_name,
             cluster_region,
-            raw_parameters
+            raw_parameters,
+            create_flow
         )
     return
