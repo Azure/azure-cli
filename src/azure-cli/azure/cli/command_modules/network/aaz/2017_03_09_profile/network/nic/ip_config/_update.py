@@ -1588,21 +1588,21 @@ class _UpdateHelper:
 
         _elements = _builder.get(".properties.ipConfigurations[]")
         if _elements is not None:
-            _elements.set_prop("etag", AAZStrType, "@NetworkInterface_update.ip_configurations.[].etag")
-            _elements.set_prop("id", AAZStrType, "@NetworkInterface_update.ip_configurations.[].id")
-            _elements.set_prop("name", AAZStrType, "@NetworkInterface_update.ip_configurations.[].name")
+            _elements.set_prop("etag", AAZStrType, ".etag")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("name", AAZStrType, ".name")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
         properties = _builder.get(".properties.ipConfigurations[].properties")
         if properties is not None:
-            properties.set_prop("loadBalancerBackendAddressPools", AAZListType, "@NetworkInterface_update.ip_configurations.[].load_balancer_backend_address_pools")
-            properties.set_prop("loadBalancerInboundNatRules", AAZListType, "@NetworkInterface_update.ip_configurations.[].load_balancer_inbound_nat_rules")
-            properties.set_prop("primary", AAZBoolType, "@NetworkInterface_update.ip_configurations.[].primary")
-            properties.set_prop("privateIPAddress", AAZStrType, "@NetworkInterface_update.ip_configurations.[].private_ip_address")
-            properties.set_prop("privateIPAllocationMethod", AAZStrType, "@NetworkInterface_update.ip_configurations.[].private_ip_allocation_method")
-            properties.set_prop("provisioningState", AAZStrType, "@NetworkInterface_update.ip_configurations.[].provisioning_state")
-            properties.set_prop("publicIPAddress", AAZObjectType, "@NetworkInterface_update.ip_configurations.[].public_ip_address")
-            properties.set_prop("subnet", AAZObjectType, "@NetworkInterface_update.ip_configurations.[].subnet")
+            properties.set_prop("loadBalancerBackendAddressPools", AAZListType, ".load_balancer_backend_address_pools")
+            properties.set_prop("loadBalancerInboundNatRules", AAZListType, ".load_balancer_inbound_nat_rules")
+            properties.set_prop("primary", AAZBoolType, ".primary")
+            properties.set_prop("privateIPAddress", AAZStrType, ".private_ip_address")
+            properties.set_prop("privateIPAllocationMethod", AAZStrType, ".private_ip_allocation_method")
+            properties.set_prop("provisioningState", AAZStrType, ".provisioning_state")
+            properties.set_prop("publicIPAddress", AAZObjectType, ".public_ip_address")
+            properties.set_prop("subnet", AAZObjectType, ".subnet")
 
         load_balancer_backend_address_pools = _builder.get(".properties.ipConfigurations[].properties.loadBalancerBackendAddressPools")
         if load_balancer_backend_address_pools is not None:
@@ -1610,14 +1610,14 @@ class _UpdateHelper:
 
         _elements = _builder.get(".properties.ipConfigurations[].properties.loadBalancerBackendAddressPools[]")
         if _elements is not None:
-            _elements.set_prop("etag", AAZStrType, "@NetworkInterface_update.ip_configurations.[].load_balancer_backend_address_pools.[].etag")
-            _elements.set_prop("id", AAZStrType, "@NetworkInterface_update.ip_configurations.[].load_balancer_backend_address_pools.[].id")
-            _elements.set_prop("name", AAZStrType, "@NetworkInterface_update.ip_configurations.[].load_balancer_backend_address_pools.[].name")
+            _elements.set_prop("etag", AAZStrType, ".etag")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("name", AAZStrType, ".name")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
         properties = _builder.get(".properties.ipConfigurations[].properties.loadBalancerBackendAddressPools[].properties")
         if properties is not None:
-            properties.set_prop("provisioningState", AAZStrType, "@NetworkInterface_update.ip_configurations.[].load_balancer_backend_address_pools.[].provisioning_state")
+            properties.set_prop("provisioningState", AAZStrType, ".provisioning_state")
 
         load_balancer_inbound_nat_rules = _builder.get(".properties.ipConfigurations[].properties.loadBalancerInboundNatRules")
         if load_balancer_inbound_nat_rules is not None:
@@ -1625,20 +1625,20 @@ class _UpdateHelper:
 
         _elements = _builder.get(".properties.ipConfigurations[].properties.loadBalancerInboundNatRules[]")
         if _elements is not None:
-            _elements.set_prop("etag", AAZStrType, "@NetworkInterface_update.ip_configurations.[].load_balancer_inbound_nat_rules.[].etag")
-            _elements.set_prop("id", AAZStrType, "@NetworkInterface_update.ip_configurations.[].load_balancer_inbound_nat_rules.[].id")
-            _elements.set_prop("name", AAZStrType, "@NetworkInterface_update.ip_configurations.[].load_balancer_inbound_nat_rules.[].name")
+            _elements.set_prop("etag", AAZStrType, ".etag")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("name", AAZStrType, ".name")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
         properties = _builder.get(".properties.ipConfigurations[].properties.loadBalancerInboundNatRules[].properties")
         if properties is not None:
-            properties.set_prop("backendPort", AAZIntType, "@NetworkInterface_update.ip_configurations.[].load_balancer_inbound_nat_rules.[].backend_port")
-            properties.set_prop("enableFloatingIP", AAZBoolType, "@NetworkInterface_update.ip_configurations.[].load_balancer_inbound_nat_rules.[].enable_floating_ip")
-            cls._build_schema_sub_resource_update(properties.set_prop("frontendIPConfiguration", AAZObjectType, "@NetworkInterface_update.ip_configurations.[].load_balancer_inbound_nat_rules.[].frontend_ip_configuration"))
-            properties.set_prop("frontendPort", AAZIntType, "@NetworkInterface_update.ip_configurations.[].load_balancer_inbound_nat_rules.[].frontend_port")
-            properties.set_prop("idleTimeoutInMinutes", AAZIntType, "@NetworkInterface_update.ip_configurations.[].load_balancer_inbound_nat_rules.[].idle_timeout_in_minutes")
-            properties.set_prop("protocol", AAZStrType, "@NetworkInterface_update.ip_configurations.[].load_balancer_inbound_nat_rules.[].protocol")
-            properties.set_prop("provisioningState", AAZStrType, "@NetworkInterface_update.ip_configurations.[].load_balancer_inbound_nat_rules.[].provisioning_state")
+            properties.set_prop("backendPort", AAZIntType, ".backend_port")
+            properties.set_prop("enableFloatingIP", AAZBoolType, ".enable_floating_ip")
+            cls._build_schema_sub_resource_update(properties.set_prop("frontendIPConfiguration", AAZObjectType, ".frontend_ip_configuration"))
+            properties.set_prop("frontendPort", AAZIntType, ".frontend_port")
+            properties.set_prop("idleTimeoutInMinutes", AAZIntType, ".idle_timeout_in_minutes")
+            properties.set_prop("protocol", AAZStrType, ".protocol")
+            properties.set_prop("provisioningState", AAZStrType, ".provisioning_state")
 
         public_ip_address = _builder.get(".properties.ipConfigurations[].properties.publicIPAddress")
         if public_ip_address is not None:
@@ -1701,17 +1701,17 @@ class _UpdateHelper:
 
         _elements = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.routeTable.properties.routes[]")
         if _elements is not None:
-            _elements.set_prop("etag", AAZStrType, "@NetworkInterface_update.ip_configurations.[].subnet.route_table.routes.[].etag")
-            _elements.set_prop("id", AAZStrType, "@NetworkInterface_update.ip_configurations.[].subnet.route_table.routes.[].id")
-            _elements.set_prop("name", AAZStrType, "@NetworkInterface_update.ip_configurations.[].subnet.route_table.routes.[].name")
+            _elements.set_prop("etag", AAZStrType, ".etag")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("name", AAZStrType, ".name")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
         properties = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.routeTable.properties.routes[].properties")
         if properties is not None:
-            properties.set_prop("addressPrefix", AAZStrType, "@NetworkInterface_update.ip_configurations.[].subnet.route_table.routes.[].address_prefix")
-            properties.set_prop("nextHopIpAddress", AAZStrType, "@NetworkInterface_update.ip_configurations.[].subnet.route_table.routes.[].next_hop_ip_address")
-            properties.set_prop("nextHopType", AAZStrType, "@NetworkInterface_update.ip_configurations.[].subnet.route_table.routes.[].next_hop_type", typ_kwargs={"flags": {"required": True}})
-            properties.set_prop("provisioningState", AAZStrType, "@NetworkInterface_update.ip_configurations.[].subnet.route_table.routes.[].provisioning_state")
+            properties.set_prop("addressPrefix", AAZStrType, ".address_prefix")
+            properties.set_prop("nextHopIpAddress", AAZStrType, ".next_hop_ip_address")
+            properties.set_prop("nextHopType", AAZStrType, ".next_hop_type", typ_kwargs={"flags": {"required": True}})
+            properties.set_prop("provisioningState", AAZStrType, ".provisioning_state")
 
         subnets = _builder.get(".properties.ipConfigurations[].properties.subnet.properties.routeTable.properties.subnets")
         if subnets is not None:
@@ -1795,23 +1795,23 @@ class _UpdateHelper:
 
         _elements = _builder.get(".properties.securityRules[]")
         if _elements is not None:
-            _elements.set_prop("etag", AAZStrType, "@NetworkSecurityGroup_update.security_rules.[].etag")
-            _elements.set_prop("id", AAZStrType, "@NetworkSecurityGroup_update.security_rules.[].id")
-            _elements.set_prop("name", AAZStrType, "@NetworkSecurityGroup_update.security_rules.[].name")
+            _elements.set_prop("etag", AAZStrType, ".etag")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("name", AAZStrType, ".name")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
         properties = _builder.get(".properties.securityRules[].properties")
         if properties is not None:
-            properties.set_prop("access", AAZStrType, "@NetworkSecurityGroup_update.security_rules.[].access", typ_kwargs={"flags": {"required": True}})
-            properties.set_prop("description", AAZStrType, "@NetworkSecurityGroup_update.security_rules.[].description")
-            properties.set_prop("destinationAddressPrefix", AAZStrType, "@NetworkSecurityGroup_update.security_rules.[].destination_address_prefix", typ_kwargs={"flags": {"required": True}})
-            properties.set_prop("destinationPortRange", AAZStrType, "@NetworkSecurityGroup_update.security_rules.[].destination_port_range")
-            properties.set_prop("direction", AAZStrType, "@NetworkSecurityGroup_update.security_rules.[].direction", typ_kwargs={"flags": {"required": True}})
-            properties.set_prop("priority", AAZIntType, "@NetworkSecurityGroup_update.security_rules.[].priority")
-            properties.set_prop("protocol", AAZStrType, "@NetworkSecurityGroup_update.security_rules.[].protocol", typ_kwargs={"flags": {"required": True}})
-            properties.set_prop("provisioningState", AAZStrType, "@NetworkSecurityGroup_update.security_rules.[].provisioning_state")
-            properties.set_prop("sourceAddressPrefix", AAZStrType, "@NetworkSecurityGroup_update.security_rules.[].source_address_prefix", typ_kwargs={"flags": {"required": True}})
-            properties.set_prop("sourcePortRange", AAZStrType, "@NetworkSecurityGroup_update.security_rules.[].source_port_range")
+            properties.set_prop("access", AAZStrType, ".access", typ_kwargs={"flags": {"required": True}})
+            properties.set_prop("description", AAZStrType, ".description")
+            properties.set_prop("destinationAddressPrefix", AAZStrType, ".destination_address_prefix", typ_kwargs={"flags": {"required": True}})
+            properties.set_prop("destinationPortRange", AAZStrType, ".destination_port_range")
+            properties.set_prop("direction", AAZStrType, ".direction", typ_kwargs={"flags": {"required": True}})
+            properties.set_prop("priority", AAZIntType, ".priority")
+            properties.set_prop("protocol", AAZStrType, ".protocol", typ_kwargs={"flags": {"required": True}})
+            properties.set_prop("provisioningState", AAZStrType, ".provisioning_state")
+            properties.set_prop("sourceAddressPrefix", AAZStrType, ".source_address_prefix", typ_kwargs={"flags": {"required": True}})
+            properties.set_prop("sourcePortRange", AAZStrType, ".source_port_range")
 
         subnets = _builder.get(".properties.subnets")
         if subnets is not None:
@@ -1883,17 +1883,17 @@ class _UpdateHelper:
 
         _elements = _builder.get(".properties.routeTable.properties.routes[]")
         if _elements is not None:
-            _elements.set_prop("etag", AAZStrType, "@Subnet_update.route_table.routes.[].etag")
-            _elements.set_prop("id", AAZStrType, "@Subnet_update.route_table.routes.[].id")
-            _elements.set_prop("name", AAZStrType, "@Subnet_update.route_table.routes.[].name")
+            _elements.set_prop("etag", AAZStrType, ".etag")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("name", AAZStrType, ".name")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
         properties = _builder.get(".properties.routeTable.properties.routes[].properties")
         if properties is not None:
-            properties.set_prop("addressPrefix", AAZStrType, "@Subnet_update.route_table.routes.[].address_prefix")
-            properties.set_prop("nextHopIpAddress", AAZStrType, "@Subnet_update.route_table.routes.[].next_hop_ip_address")
-            properties.set_prop("nextHopType", AAZStrType, "@Subnet_update.route_table.routes.[].next_hop_type", typ_kwargs={"flags": {"required": True}})
-            properties.set_prop("provisioningState", AAZStrType, "@Subnet_update.route_table.routes.[].provisioning_state")
+            properties.set_prop("addressPrefix", AAZStrType, ".address_prefix")
+            properties.set_prop("nextHopIpAddress", AAZStrType, ".next_hop_ip_address")
+            properties.set_prop("nextHopType", AAZStrType, ".next_hop_type", typ_kwargs={"flags": {"required": True}})
+            properties.set_prop("provisioningState", AAZStrType, ".provisioning_state")
 
         subnets = _builder.get(".properties.routeTable.properties.subnets")
         if subnets is not None:

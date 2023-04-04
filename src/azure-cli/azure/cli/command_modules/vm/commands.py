@@ -9,8 +9,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set,
                                                           cf_vmss, cf_vmss_vm,
                                                           cf_vm_sizes, cf_disks, cf_snapshots,
                                                           cf_disk_accesses, cf_images, cf_run_commands,
-                                                          cf_rolling_upgrade_commands, cf_galleries,
-                                                          cf_gallery_images, cf_gallery_image_versions,
+                                                          cf_galleries, cf_gallery_images, cf_gallery_image_versions,
                                                           cf_proximity_placement_groups,
                                                           cf_dedicated_hosts, cf_dedicated_host_groups,
                                                           cf_log_analytics_data_plane,
@@ -140,12 +139,6 @@ def load_command_table(self, _):
     compute_vmss_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#VirtualMachineScaleSetsOperations.{}',
         client_factory=cf_vmss,
-        operation_group='virtual_machine_scale_sets'
-    )
-
-    compute_vmss_rolling_upgrade_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineScaleSetRollingUpgradesOperations.{}',
-        client_factory=cf_rolling_upgrade_commands,
         operation_group='virtual_machine_scale_sets'
     )
 
@@ -407,9 +400,6 @@ def load_command_table(self, _):
         g.wait_command('wait')
 
     with self.command_group('vm extension image', compute_vm_extension_image_sdk) as g:
-        g.show_command('show', 'get')
-        g.command('list-names', 'list_types')
-        g.command('list-versions', 'list_versions')
         g.custom_command('list', 'list_vm_extension_images')
 
     with self.command_group('vm image', compute_vm_image_sdk) as g:
@@ -460,13 +450,9 @@ def load_command_table(self, _):
 
     with self.command_group('vm host', compute_dedicated_host_sdk, client_factory=cf_dedicated_hosts,
                             min_api='2019-03-01') as g:
-        g.show_command('show', 'get')
         g.custom_command('get-instance-view', 'get_dedicated_host_instance_view')
         g.custom_command('create', 'create_dedicated_host')
-        g.command('list', 'list_by_host_group')
         g.generic_update_command('update', setter_name='begin_create_or_update')
-        g.command('restart', 'begin_restart', min_api='2021-07-01')
-        g.command('delete', 'begin_delete', confirmation=True)
 
     with self.command_group('vm host group', compute_dedicated_host_groups_sdk, client_factory=cf_dedicated_host_groups,
                             min_api='2019-03-01') as g:
@@ -534,11 +520,6 @@ def load_command_table(self, _):
         g.custom_command('create', 'vmss_run_command_create', supports_no_wait=True)
         g.custom_command('update', 'vmss_run_command_update', supports_no_wait=True)
         g.custom_command('delete', 'vmss_run_command_delete', supports_no_wait=True, confirmation=True)
-
-    with self.command_group('vmss rolling-upgrade', compute_vmss_rolling_upgrade_sdk, min_api='2017-03-30') as g:
-        g.command('cancel', 'begin_cancel')
-        g.command('get-latest', 'get_latest')
-        g.command('start', 'begin_start_os_upgrade')
 
     with self.command_group('sig', compute_galleries_sdk, operation_group='galleries', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_image_gallery')

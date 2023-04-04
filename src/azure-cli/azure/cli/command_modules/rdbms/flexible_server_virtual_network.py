@@ -27,6 +27,76 @@ DEFAULT_SUBNET_ADDRESS_PREFIX = '10.0.0.0/24'
 IP_ADDRESS_CHECKER = 'https://api.ipify.org'
 
 
+def prepare_mysql_exist_private_network(cmd, resource_group, server_name, vnet, subnet, location, delegation_service_name):
+    nw_subscription = get_subscription_id(cmd.cli_ctx)
+    resource_client = resource_client_factory(cmd.cli_ctx)
+    if subnet is not None and vnet is None:
+        if not is_valid_resource_id(subnet):
+            raise ValidationError("Incorrectly formed Subnet ID. If you are providing only --subnet (not --vnet), the Subnet parameter should be in resource ID format.")
+        if 'child_name_1' not in parse_resource_id(subnet):
+            raise ValidationError("Incorrectly formed Subnet ID. Check if the Subnet ID is in the right format.")
+
+        id_subscription, id_resource_group, id_vnet, id_subnet = get_id_components(subnet)
+        nw_subscription, resource_client = _change_client_with_different_subscription(cmd, id_subscription, nw_subscription, resource_client)
+
+        if id_subnet is None:
+            id_subnet = 'Subnet' + server_name
+
+        subnet_result = _create_mysql_exist_vnet_subnet_delegation(cmd, nw_subscription, resource_client, delegation_service_name, id_resource_group, id_vnet, id_subnet, location)
+    elif subnet is None and vnet is not None:
+        raise ValidationError("Missing Subnet. If you want to use private access, --subnet is requried.")
+    elif subnet is not None and vnet is not None:
+        if _is_resource_name(vnet) and _is_resource_name(subnet):
+            subnet_result = _create_mysql_exist_vnet_subnet_delegation(cmd, nw_subscription, resource_client, delegation_service_name, resource_group, vnet, subnet, location)
+        else:
+            raise ValidationError("If you pass both --vnet and --subnet, consider passing names instead of IDs. If you want to use an existing subnet, please provide the subnet Id only (not vnet Id).")
+
+    return subnet_result["id"]
+
+
+def _create_mysql_exist_vnet_subnet_delegation(cmd, nw_subscription, resource_client, delegation_service_name, resource_group, vnet_name, subnet_name, location):
+    if not check_existence(resource_client, vnet_name, resource_group, 'Microsoft.Network', 'virtualNetworks'):
+        raise ValidationError("Invalid Vnet. The vnet id of the subnet id your provided was not found.")
+
+    if not check_existence(resource_client, subnet_name, resource_group, 'Microsoft.Network', 'subnets', parent_name=vnet_name, parent_type='virtualNetworks'):
+        raise ValidationError("Invalid Subnet. The subnet id your provided was not found.")
+
+    logger.warning('Using existing Vnet "%s" in resource group "%s"', vnet_name, resource_group)
+    vnet = VNetShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": vnet_name,
+        "subscription": nw_subscription,
+        "resource_group": resource_group
+    })
+    validate_vnet_location(vnet, location)
+
+    delegation = {"name": delegation_service_name, "service_name": delegation_service_name}
+    logger.warning('Using existing Subnet "%s" in resource group "%s"', subnet_name, resource_group)
+    subnet = SubnetShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": subnet_name,
+        "vnet_name": vnet_name,
+        "subscription": nw_subscription,
+        "resource_group": resource_group
+    })
+
+    # Add Delegation if not delegated already
+    if not subnet.get("delegations", None):
+        logger.warning('Adding "%s" delegation to the existing subnet %s.', delegation_service_name, subnet_name)
+        poller = SubnetUpdate(cli_ctx=cmd.cli_ctx)(command_args={
+            "name": subnet_name,
+            "vnet_name": vnet_name,
+            "subscription": nw_subscription,
+            "resource_group": resource_group,
+            "delegated_services": [delegation]
+        })
+        subnet = LongRunningOperation(cmd.cli_ctx)(poller)
+    else:
+        for delgtn in subnet["delegations"]:
+            if delgtn["serviceName"] != delegation_service_name:
+                raise CLIError("Can not use subnet with existing delegations other than {}".format(delegation_service_name))
+
+    return subnet
+
+
 # pylint: disable=too-many-locals, too-many-statements, too-many-branches, import-outside-toplevel
 def prepare_private_network(cmd, resource_group_name, server_name, vnet, subnet, location, delegation_service_name, vnet_address_pref, subnet_address_pref, yes):
 
@@ -198,6 +268,72 @@ def _create_subnet_delegation(cmd, nw_subscription, resource_client, delegation_
                         delegation_service_name))
 
     return subnet
+
+
+def prepare_mysql_exist_private_dns_zone(cmd, resource_group, private_dns_zone, subnet_id):
+    # Get Vnet Components
+    vnet_subscription, vnet_rg, vnet_name, _ = get_id_components(subnet_id)
+    vnet_id = resource_id(subscription=vnet_subscription,
+                          resource_group=vnet_rg,
+                          namespace='Microsoft.Network',
+                          type='virtualNetworks',
+                          name=vnet_name)
+    vnet = VNetShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": vnet_name,
+        "subscription": vnet_subscription,
+        "resource_group": vnet_rg
+    })
+
+    dns_rg = None
+    dns_subscription = vnet_subscription
+    if not _is_resource_name(private_dns_zone) and is_valid_resource_id(private_dns_zone):
+        dns_subscription, dns_rg, private_dns_zone, _ = get_id_components(private_dns_zone)
+
+    server_sub_resource_client = resource_client_factory(cmd.cli_ctx, subscription_id=get_subscription_id(cmd.cli_ctx))
+    vnet_sub_resource_client = resource_client_factory(cmd.cli_ctx, subscription_id=vnet_subscription)
+    dns_sub_resource_client = resource_client_factory(cmd.cli_ctx, subscription_id=dns_subscription)
+
+    zone_exist_flag = False
+    if dns_rg is not None and check_existence(dns_sub_resource_client, private_dns_zone, dns_rg, 'Microsoft.Network', 'privateDnsZones'):
+        zone_exist_flag = True
+    elif dns_rg is None and check_existence(server_sub_resource_client, private_dns_zone, resource_group, 'Microsoft.Network', 'privateDnsZones'):
+        zone_exist_flag = True
+        dns_rg = resource_group
+        dns_subscription = get_subscription_id(cmd.cli_ctx)
+    elif dns_rg is None and check_existence(vnet_sub_resource_client, private_dns_zone, vnet_rg, 'Microsoft.Network', 'privateDnsZones'):
+        zone_exist_flag = True
+        dns_subscription = vnet_subscription
+        dns_rg = vnet_rg
+    elif dns_rg is None:
+        zone_exist_flag = False
+        dns_subscription = vnet_subscription
+        dns_rg = vnet_rg
+
+    if not zone_exist_flag:
+        raise ValidationError("Invalid Private DNS Zone. --private-dns-zone your provided was not found.")
+
+    private_dns_client = private_dns_client_factory(cmd.cli_ctx, subscription_id=dns_subscription)
+    private_dns_link_client = private_dns_link_client_factory(cmd.cli_ctx, subscription_id=dns_subscription)
+    link = VirtualNetworkLink(location='global', virtual_network=SubResource(id=vnet["id"]))
+    link.registration_enabled = False
+
+    logger.warning('Using existing private dns zone %s in resource group "%s"', private_dns_zone, dns_rg)
+
+    private_zone = private_dns_client.get(resource_group_name=dns_rg, private_zone_name=private_dns_zone)
+    virtual_links = private_dns_link_client.list(resource_group_name=dns_rg, private_zone_name=private_dns_zone)
+
+    link_exist_flag = False
+    for virtual_link in virtual_links:
+        if virtual_link.virtual_network.id == vnet_id:
+            link_exist_flag = True
+            break
+
+    if not link_exist_flag:
+        private_dns_link_client.begin_create_or_update(resource_group_name=dns_rg,
+                                                       private_zone_name=private_dns_zone,
+                                                       virtual_network_link_name=vnet_name + '-link',
+                                                       parameters=link, if_none_match='*').result()
+    return private_zone.id
 
 
 def prepare_private_dns_zone(db_context, database_engine, resource_group, server_name, private_dns_zone, subnet_id, location, yes):
