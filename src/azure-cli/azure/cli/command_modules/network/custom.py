@@ -2697,7 +2697,6 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
     from azure.core.exceptions import HttpResponseError
     import sys
     logger.warning("In the future, zone name will be case insensitive.")
-    RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
 
     from azure.cli.core.azclierror import FileOperationError, UnclassifiedUserFault
     try:
@@ -3092,14 +3091,14 @@ def _add_save_record(cmd, record, record_type, record_set_name, resource_group_n
     _add_record(record_set, record, record_type, is_list)
 
     return _DNSRecordSetCreate(cli_ctx=cmd.cli_ctx)(command_args={
-            "name": record_set_name,
-            "zone_name": zone_name,
-            "subscription": subscription_id,
-            "resource_group": resource_group_name,
-            "record_type": record_type,
-            "if_none_match": "*" if if_none_match else None,
-            **record_set
-        })
+        "name": record_set_name,
+        "zone_name": zone_name,
+        "subscription": subscription_id,
+        "resource_group": resource_group_name,
+        "record_type": record_type,
+        "if_none_match": "*" if if_none_match else None,
+        **record_set
+    })
 
 
 def _remove_record(cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
