@@ -17,8 +17,6 @@ def load_command_table(self, _):
                                                                      consumer_groups_mgmt_client_factory,
                                                                      disaster_recovery_mgmt_client_factory,
                                                                      cluster_mgmt_client_factory,
-                                                                     private_endpoint_connections_mgmt_client_factory,
-                                                                     private_link_mgmt_client_factory,
                                                                      schema_registry_mgmt_client_factory,
                                                                      application_group_mgmt_client_factory)
 
@@ -48,16 +46,6 @@ def load_command_table(self, _):
     eh_geodr_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventhub.operations#DisasterRecoveryConfigsOperations.{}',
         client_factory=disaster_recovery_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_EVENTHUB)
-
-    eh_private_endpoints_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventhub.operations#PrivateEndpointConnectionsOperations.{}',
-        client_factory=private_endpoint_connections_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_EVENTHUB)
-
-    eh_private_links_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventhub.operations#PrivateLinkResourcesOperations.{}',
-        client_factory=private_link_mgmt_client_factory,
         resource_type=ResourceType.MGMT_EVENTHUB)
 
     eh_schema_registry_util = CliCommandType(
@@ -94,23 +82,12 @@ def load_command_table(self, _):
         g.command('delete', 'delete_authorization_rule')
         g.generic_update_command('update', getter_name='get_authorization_rule', setter_name='create_or_update_authorization_rule', custom_func_name='cli_autho_update')
 
-    with self.command_group('eventhubs namespace private-endpoint-connection', eh_private_endpoints_util, resource_type=ResourceType.MGMT_EVENTHUB,
-                            custom_command_type=eventhubs_custom, is_preview=True,
-                            client_factory=private_endpoint_connections_mgmt_client_factory) as g:
+    with self.command_group('eventhubs namespace private-endpoint-connection', custom_command_type=eh_namespace_custom,
+                            is_preview=True) as g:
         from ._validator import validate_private_endpoint_connection_id
-        g.command('delete', 'begin_delete', confirmation=True, validator=validate_private_endpoint_connection_id)
-        g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
-        g.command('list', 'list', validator=validate_private_endpoint_connection_id)
-        g.custom_command('approve', 'approve_private_endpoint_connection',
-                         validator=validate_private_endpoint_connection_id)
-        g.custom_command('reject', 'reject_private_endpoint_connection',
-                         validator=validate_private_endpoint_connection_id)
-
-    with self.command_group('eventhubs namespace private-link-resource', eh_private_links_util,
-                            resource_type=ResourceType.MGMT_EVENTHUB) as g:
-        from azure.cli.core.commands.transform import gen_dict_to_list_transform
-        g.show_command('show', 'get', is_preview=True, min_api='2021-06-01-preview',
-                       transform=gen_dict_to_list_transform(key="value"))
+        g.custom_command('approve', 'approve_private_endpoint_connection', validator=validate_private_endpoint_connection_id)
+        g.custom_command('reject', 'reject_private_endpoint_connection', validator=validate_private_endpoint_connection_id)
+        g.custom_command('delete', 'delete_private_endpoint_connection', confirmation=True, validator=validate_private_endpoint_connection_id)
 
 # Cluster Region
     with self.command_group('eventhubs cluster', eh_clusters_util, resource_type=ResourceType.MGMT_EVENTHUB,
