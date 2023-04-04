@@ -181,7 +181,7 @@ def auto_register(func, *args, **kwargs):
         if ex.error and ex.error.code == 'SubscriptionNotRegistered':
             if register_provider():
                 return func(*args, **kwargs_backup)
-            raise CLIInternalError('Registeration failed, please manually run command '
+            raise CLIInternalError('Registration failed, please manually run command '
                                    '`az provider register -n Microsoft.ServiceLinker` to register the provider.')
         # target subscription is not registered, raw check
         if ex.error and ex.error.code == 'UnauthorizedResourceAccess' and 'not registered' in ex.error.message:
@@ -193,7 +193,7 @@ def auto_register(func, *args, **kwargs):
                 if not provider_is_registered(target_subs):
                     if register_provider(target_subs):
                         return func(*args, **kwargs_backup)
-                    raise CLIInternalError('Registeration failed, please manually run command '
+                    raise CLIInternalError('Registration failed, please manually run command '
                                            '`az provider register -n Microsoft.ServiceLinker --subscription {}` '
                                            'to register the provider.'.format(target_subs))
         raise ex
@@ -202,7 +202,7 @@ def auto_register(func, *args, **kwargs):
 def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id):
     from ._validators import get_source_resource_name
 
-    logger.warning('get valid key vualt reference connection')
+    logger.warning('get valid key vault reference connection')
     key_vault_connections = []
     for connection in client.list(resource_uri=source_id):
         connection = todict(connection)
@@ -288,13 +288,13 @@ def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_
                     auth_info = connection.get('authInfo')
                     if auth_info.get('clientId') == client_id and auth_info.get('subscriptionId') == subscription_id:
                         logger.warning(
-                            'key vualt reference connection: %s', connection.get('id'))
+                            'key vault reference connection: %s', connection.get('id'))
                         return
             else:  # System Identity
                 for connection in key_vault_connections:
                     if connection.get('authInfo').get('authType') == auth_type:
                         logger.warning(
-                            'key vualt reference connection: %s', connection.get('id'))
+                            'key vault reference connection: %s', connection.get('id'))
                         return
 
         # any connection with csi enabled is a valid connection
@@ -306,7 +306,7 @@ def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_
             return {'authType': 'userAssignedIdentity'}
 
         else:
-            logger.warning('key vualt reference connection: %s',
+            logger.warning('key vault reference connection: %s',
                            key_vault_connections[0].get('id'))
             return
 

@@ -31,9 +31,11 @@ fix_failure_tests = sys.argv[5].lower() == 'true' if len(sys.argv) >= 6 else Fal
 target = sys.argv[6].lower() if len(sys.argv) >= 7 else 'cli'
 working_directory = os.getenv('BUILD_SOURCESDIRECTORY') if target == 'cli' else f"{os.getenv('BUILD_SOURCESDIRECTORY')}/azure-cli-extensions"
 azdev_test_result_dir = os.path.expanduser("~/.azdev/env_config/mnt/vss/_work/1/s/env")
-python_version = os.environ.get('PYTHON_VERSION')
-job_name = os.environ.get('JOB_NAME')
-unique_job_name = ' '.join([job_name, python_version, profile, str(instance_idx)])
+python_version = os.environ.get('PYTHON_VERSION', None)
+job_name = os.environ.get('JOB_NAME', None)
+pull_request_number = os.environ.get('PULL_REQUEST_NUMBER', None)
+enable_pipeline_result = bool(job_name and python_version)
+unique_job_name = ' '.join([job_name, python_version, profile, str(instance_idx)]) if enable_pipeline_result else None
 cli_jobs = {
             'acr': 45,
             'acs': 62,
@@ -375,22 +377,23 @@ def build_pipeline_result():
     selected_modules += ['core', 'telemetry']
     pipeline_result = {
         # "Automation Full Test Python310 Profile Latest instance1"
-        unique_job_name:
-            {
-                "Name": job_name,
-                "Details": [
-                    {
-                        "Profile": profile,
-                        "Details": [
-                            {
-                                "PythonVersion": python_version,
-                                "Details": []
-                            }
-                        ]
-                    }
-                ]
-            }
+        unique_job_name: {
+            "Name": job_name,
+            "Details": [
+                {
+                    "Profile": profile,
+                    "Details": [
+                        {
+                            "PythonVersion": python_version,
+                            "Details": []
+                        }
+                    ]
+                }
+            ]
+        }
     }
+    if pull_request_number != '$(System.PullRequest.PullRequestNumber)':
+        pipeline_result['pull_request_number'] = pull_request_number
 
     for k in selected_modules:
         pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details'].append({
@@ -411,13 +414,19 @@ def get_pipeline_result(test_result_fp, pipeline_result):
             # ['src', 'azure-cli-core', 'azure', 'cli', 'core', 'tests', 'test_aaz_arg', 'TestAAZArg']
             # ['src', 'azure-cli-telemetry', 'azure', 'cli', 'telemetry', 'tests', 'test_records_collection', 'TestRecordsCollection']
             class_name = testcase.attrib['classname'].split('.')
+            # classname="azure.cli.command_modules.network.tests"
             if class_name[2] == 'command_modules':
                 module = class_name[3]
+            # classname="azure.cli.core.tests"
+            # classname="azure.cli.telemetry.tests"
+            elif class_name[2] in ['core', 'telemetry']:
+                module = class_name[2]
+            # classname="src.azure-cli.azure.cli.command_modules.network.tests"
             elif class_name[4] == 'command_modules':
                 module = class_name[5]
-            elif class_name[1] == 'azure-cli-core':
-                module = class_name[4]
-            elif class_name[1] == 'azure-cli-telemetry':
+            # classname="src.azure-cli-core.azure.cli.core.tests"
+            # classname="src.azure-cli-telemetry.azure.cli.telemetry.tests"
+            elif class_name[1] in ['azure-cli-core', 'azure-cli-telemetry']:
                 module = class_name[4]
             else:
                 logger.error(f'unexpected class name: {class_name}')
@@ -554,20 +563,20 @@ class AutomaticScheduling(object):
                 serial_tests.append(k)
             else:
                 parallel_tests.append(k)
-        pipeline_result = build_pipeline_result()
+        pipeline_result = build_pipeline_result() if enable_pipeline_result else None
         if serial_tests:
-            azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{instance_idx}.serial.xml")
+            azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{python_version}_{profile}_{instance_idx}.serial.xml")
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose', '--series'] + serial_tests + \
                   ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '-o junit_family=xunit1 --durations=10 --tb=no']
             serial_error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
-            pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result)
+            pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result) if enable_pipeline_result else None
         if parallel_tests:
-            azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{instance_idx}.parallel.xml")
+            azdev_test_result_fp = os.path.join(azdev_test_result_dir, f"test_results_{python_version}_{profile}_{instance_idx}.parallel.xml")
             cmd = ['azdev', 'test', '--no-exitfirst', '--verbose'] + parallel_tests + \
                   ['--profile', f'{profile}', '--xml-path', azdev_test_result_fp, '--pytest-args', '-o junit_family=xunit1 --durations=10 --tb=no']
             parallel_error_flag = process_test(cmd, azdev_test_result_fp, live_rerun=fix_failure_tests)
-            pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result)
-        save_pipeline_result(pipeline_result)
+            pipeline_result = get_pipeline_result(azdev_test_result_fp, pipeline_result) if enable_pipeline_result else None
+        save_pipeline_result(pipeline_result) if enable_pipeline_result else None
         return serial_error_flag or parallel_error_flag
 
     def run_extension_instance_modules(self, instance_modules):

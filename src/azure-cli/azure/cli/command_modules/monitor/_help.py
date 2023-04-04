@@ -220,20 +220,20 @@ short-summary: Manage activity logs.
 
 helps['monitor activity-log alert'] = """
 type: group
-short-summary: Manage activity log alerts
+short-summary: Manage activity log alert rules.
 """
 
 helps['monitor activity-log alert action-group'] = """
 type: group
-short-summary: Manage action groups for activity log alerts
+short-summary: Manage action groups for activity log alert rules.
 """
 
 helps['monitor activity-log alert action-group add'] = """
 type: command
-short-summary: Add action groups to this activity log alert. It can also be used to overwrite existing webhook properties of particular action groups.
+short-summary: Add action groups to this activity log alert rule. It can also be used to overwrite existing webhook properties of particular action groups.
 parameters:
   - name: --name -n
-    short-summary: Name of the activity log alerts
+    short-summary: Name of the activity log alert rule.
   - name: --action-group -a
     short-summary: The names or the resource ids of the action groups to be added.
   - name: --reset
@@ -270,32 +270,32 @@ examples:
 
 helps['monitor activity-log alert action-group remove'] = """
 type: command
-short-summary: Remove action groups from this activity log alert
+short-summary: Remove action groups from this activity log alert rule.
 parameters:
   - name: --name -n
-    short-summary: Name of the activity log alerts
+    short-summary: Name of the activity log alert rule.
   - name: --action-group -a
-    short-summary: The names or the resource ids of the action groups to be added.
+    short-summary: The names or the resource ids of the action groups to be removed.
 """
 
 helps['monitor activity-log alert create'] = """
 type: command
-short-summary: Create a default activity log alert
+short-summary: Create a default activity log alert rule.
 long-summary: This command will create a default activity log with one condition which compares if the activities logs 'category' field equals to 'ServiceHealth'. The newly created activity log alert does not have any action groups attached to it.
 parameters:
   - name: --name -n
-    short-summary: Name of the activity log alerts
+    short-summary: Name of the activity log alert rule.
   - name: --scope -s
     short-summary: A list of strings that will be used as prefixes.
     long-summary: >
-        The alert will only apply to activity logs with resourceIDs that fall under one of these prefixes.
+        The alert rule will only apply to activity logs with resourceIDs that fall under one of these prefixes.
         If not provided, the path to the resource group will be used.
   - name: --disable
-    short-summary: Disable the activity log alert after it is created.
+    short-summary: Disable the activity log alert rule after it is created.
   - name: --description
-    short-summary: A description of this activity log alert
+    short-summary: A description of this activity log alert rule.
   - name: --condition -c
-    short-summary: The condition that will cause the alert to activate. The format is FIELD=VALUE[ and FIELD=VALUE...].
+    short-summary: The condition that will cause the alert rule to activate. The format is FIELD=VALUE[ and FIELD=VALUE...].
     long-summary: >
         The possible values for the field are 'resourceId', 'category', 'caller', 'level', 'operationName', 'resourceGroup',
         'resourceProvider', 'status', 'subStatus', 'resourceType', or anything beginning with 'properties.'.
@@ -311,48 +311,48 @@ parameters:
         For any webhook receiver in these action group, this data is appended to the webhook payload. To attach different webhook
         properties to different action groups, add the action groups in separate update-action commands.
 examples:
-  - name: Create an alert with default settings.
+  - name: Create an alert rule with default settings.
     text: >
         az monitor activity-log alert create -n {AlertName} -g {ResourceGroup}
-  - name: Create an alert with condition about error level service health log.
+  - name: Create an alert rule with condition about error level service health log.
     text: >
         az monitor activity-log alert create -n {AlertName} -g {ResourceGroup} \\
           --condition category=ServiceHealth and level=Error
-  - name: Create an alert with an action group and specify webhook properties.
+  - name: Create an alert rule with an action group and specify webhook properties.
     text: >
         az monitor activity-log alert create -n {AlertName} -g {ResourceGroup} \\
           -a /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.insights/actionGroups/{ActionGroup} \\
           -w usage=test owner=jane
-  - name: Create an alert which is initially disabled.
+  - name: Create an alert rule which is initially disabled.
     text: >
         az monitor activity-log alert create -n {AlertName} -g {ResourceGroup} --disable
 """
 
 helps['monitor activity-log alert list'] = """
 type: command
-short-summary: List activity log alerts under a resource group or the current subscription.
+short-summary: List activity log alert rules under a resource group or the current subscription.
 parameters:
   - name: --resource-group -g
-    short-summary: Name of the resource group under which the activity log alerts are being listed. If it is omitted, all the activity log alerts under the current subscription are listed.
+    short-summary: Name of the resource group under which the activity log alert rules are being listed. If it is omitted, all the activity log alert rules under the current subscription are listed.
 """
 
 helps['monitor activity-log alert scope'] = """
 type: group
-short-summary: Manage scopes for activity log alerts
+short-summary: Manage scopes for activity log alert rules.
 """
 
 helps['monitor activity-log alert scope add'] = """
 type: command
-short-summary: Add scopes to this activity log alert.
+short-summary: Add scopes to this activity log alert rule.
 parameters:
   - name: --name -n
-    short-summary: Name of the activity log alerts
+    short-summary: Name of the activity log alert rule.
   - name: --scope -s
     short-summary: List of scopes to add. Each scope could be a resource ID, a resource group ID or a subscription ID.
   - name: --reset
     short-summary: Remove all the existing scopes before add new scopes.
 examples:
-  - name: Add scopes to this activity log alert. (autogenerated)
+  - name: Add scopes to this activity log alert rule. (autogenerated)
     text: |
         az monitor activity-log alert scope add --name MyActivityLogAlerts --resource-group MyResourceGroup --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myRG  /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myRG/Microsoft.KeyVault/vaults/mykey
     crafted: true
@@ -360,22 +360,22 @@ examples:
 
 helps['monitor activity-log alert scope remove'] = """
 type: command
-short-summary: Removes scopes from this activity log alert.
+short-summary: Removes scopes from this activity log alert rule.
 parameters:
   - name: --name -n
-    short-summary: Name of the activity log alerts
+    short-summary: Name of the activity log alert rule.
   - name: --scope -s
     short-summary: The scopes to remove
 """
 
 helps['monitor activity-log alert update'] = """
 type: command
-short-summary: Update the details of this activity log alert
+short-summary: Update the details of this activity log alert rule.
 parameters:
   - name: --description
-    short-summary: A description of this activity log alert.
+    short-summary: A description of this activity log alert rule.
   - name: --condition -c
-    short-summary: The conditional expression that will cause the alert to activate. The format is FIELD=VALUE[ and FIELD=VALUE...].
+    short-summary: The conditional expression that will cause the alert rule to activate. The format is FIELD=VALUE[ and FIELD=VALUE...].
     long-summary: >
         The possible values for the field are 'resourceId', 'category', 'caller', 'level', 'operationName', 'resourceGroup',
         'resourceProvider', 'status', 'subStatus', 'resourceType', or anything beginning with 'properties.'.
@@ -384,10 +384,10 @@ examples:
     text: >
         az monitor activity-log alert update -n {AlertName} -g {ResourceGroup} \\
           --condition category=ServiceHealth and level=Error
-  - name: Disable an alert
+  - name: Disable an alert rule.
     text: >
         az monitor activity-log alert update -n {AlertName} -g {ResourceGroup} --enable false
-  - name: Update the details of this activity log alert (autogenerated)
+  - name: Update the details of this activity log alert rule. (autogenerated)
     text: |
         az monitor activity-log alert update --enabled true --name MyActivityLogAlerts --resource-group MyResourceGroup --subscription MySubscription
     crafted: true

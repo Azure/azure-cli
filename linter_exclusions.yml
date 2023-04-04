@@ -1431,6 +1431,14 @@ cosmosdb create:
     virtual_network_rules:
       rule_exclusions:
       - option_length_too_long
+    gremlin_databases_to_restore:
+      rule_exclusions:
+      - option_length_too_long
+cosmosdb restore:
+  parameters:
+    gremlin_databases_to_restore:
+      rule_exclusions:
+      - option_length_too_long
 cosmosdb mongodb collection create:
   parameters:
     analytical_storage_ttl:

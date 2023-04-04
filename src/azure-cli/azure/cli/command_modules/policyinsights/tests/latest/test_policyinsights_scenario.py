@@ -390,9 +390,10 @@ class PolicyInsightsTests(ScenarioTest):
     @AllowLargeResponse(8192)
     def test_policy_insights_remediation_complete(self):
         self.kwargs.update({
-            'pan': '78447a35ea2b4b14b701dae0',
+            'pan': '4923264e54b94072a3e73198',
             'rg': 'az-cli-policy-insights-test',
-            'rn': self.create_random_name('azurecli-test-remediation', 40)
+            'rn': self.create_random_name('azurecli-test-remediation', 40),
+            'pan_sub':'2c9ea0b32ba5436ba81db8cf'
         })
 
         assignment = self.cmd(
@@ -438,6 +439,26 @@ class PolicyInsightsTests(ScenarioTest):
 
         # cancel the remediation
         self.cmd('policy remediation cancel -n {rn} -g {rg}', checks=[
+            self.check('provisioningState', 'Cancelling')
+        ])
+
+        assignment = self.cmd(
+            'policy assignment show -n {pan_sub}').get_output_in_json()
+
+        self.kwargs['pid'] = assignment['id'].lower()
+        self.kwargs['rn'] = self.create_random_name('azurecli-test-remediation', 40)
+
+        # create a remediation at subscription scope with full id of policy assignment
+        self.cmd('policy remediation create -n {rn} -a {pid}', checks=[
+            self.check('name', '{rn}'),
+            self.check('policyAssignmentId', '{pid}'),
+            self.check('policyDefinitionReferenceId', None),
+            self.check('filters', None),
+            self.check('resourceDiscoveryMode', 'ExistingNonCompliant')
+        ])
+
+        # cancel the remediation created above
+        self.cmd('policy remediation cancel -n {rn}', checks=[
             self.check('provisioningState', 'Cancelling')
         ])
 

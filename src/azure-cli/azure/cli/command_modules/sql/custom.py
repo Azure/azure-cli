@@ -825,15 +825,17 @@ def db_show_conn_str(
     formats = {
         ClientType.ado_net.value: {
             ClientAuthenticationType.sql_password.value:
-                'Server=tcp:{server_fqdn},1433;Database={db};User ID=<username>;'
-                'Password=<password>;Encrypt=true;Connection Timeout=30;',
+                'Server=tcp:{server_fqdn},1433;Initial Catalog={db};Persist Security Info=False;'
+                'User ID=<username>;Password=<password>;MultipleActiveResultSets=False;Encrypt=true;'
+                'TrustServerCertificate=False;Connection Timeout=30;',
             ClientAuthenticationType.active_directory_password.value:
-                'Server=tcp:{server_fqdn},1433;Database={db};User ID=<username>;'
-                'Password=<password>;Encrypt=true;Connection Timeout=30;'
-                'Authentication="Active Directory Password"',
+                'Server=tcp:{server_fqdn},1433;Initial Catalog={db};Persist Security Info=False;'
+                'User ID=<username>;Password=<password>;MultipleActiveResultSets=False;Encrypt=true;'
+                'TrustServerCertificate=False;Authentication="Active Directory Password"',
             ClientAuthenticationType.active_directory_integrated.value:
-                'Server=tcp:{server_fqdn},1433;Database={db};Encrypt=true;'
-                'Connection Timeout=30;Authentication="Active Directory Integrated"'
+                'Server=tcp:{server_fqdn},1433;Initial Catalog={db};Persist Security Info=False;'
+                'User ID=<username>;MultipleActiveResultSets=False;Encrypt=true;'
+                'TrustServerCertificate=False;Authentication="Active Directory Integrated"'
         },
         ClientType.sqlcmd.value: {
             ClientAuthenticationType.sql_password.value:
@@ -3168,10 +3170,6 @@ def restore_long_term_retention_backup(
         target_database_name,
         target_server_name,
         target_resource_group_name,
-        requested_backup_storage_redundancy,
-        high_availability_replica_count,
-        zone_redundant,
-        service_objective,
         assign_identity=False,
         user_assigned_identity_id=None,
         keys=None,
@@ -3197,10 +3195,6 @@ def restore_long_term_retention_backup(
 
     kwargs['create_mode'] = CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP
     kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
-    kwargs['requested_backup_storage_redundancy'] = requested_backup_storage_redundancy
-    kwargs['high_availability_replica_count'] = high_availability_replica_count
-    kwargs['zone_redundant'] = zone_redundant
-    kwargs['service_objective'] = service_objective
 
     # Check backup storage redundancy configurations
     if _should_show_backup_storage_redundancy_warnings(kwargs['location']):
@@ -3243,10 +3237,7 @@ def restore_geo_backup(
         target_database_name,
         target_server_name,
         target_resource_group_name,
-        requested_backup_storage_redundancy,
-        high_availability_replica_count,
-        zone_redundant,
-        service_objective,
+        sku,
         assign_identity=False,
         user_assigned_identity_id=None,
         keys=None,
@@ -3254,7 +3245,7 @@ def restore_geo_backup(
         federated_client_id=None,
         **kwargs):
     '''
-    Restores an existing database (i.e. create with 'RestoreGeoBackup' create mode.)
+    Restores an existing database (i.e. create with 'recovery' create mode.)
     '''
 
     if not target_resource_group_name or not target_server_name or not target_database_name:
@@ -3272,10 +3263,14 @@ def restore_geo_backup(
 
     kwargs['create_mode'] = CreateMode.RECOVERY
     kwargs['recoverableDatabaseId'] = geo_backup_id
-    kwargs['requested_backup_storage_redundancy'] = requested_backup_storage_redundancy
-    kwargs['high_availability_replica_count'] = high_availability_replica_count
-    kwargs['zone_redundant'] = zone_redundant
-    kwargs['service_objective'] = service_objective
+
+    # If sku.name is not specified, resolve the requested sku name
+    # using capabilities.
+    kwargs['sku'] = _find_db_sku_from_capabilities(
+        cmd.cli_ctx,
+        kwargs['location'],
+        sku,
+        compute_model=kwargs['compute_model'])
 
     # Check backup storage redundancy configurations
     if _should_show_backup_storage_redundancy_warnings(kwargs['location']):

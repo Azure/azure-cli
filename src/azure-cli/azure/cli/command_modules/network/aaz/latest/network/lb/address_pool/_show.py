@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "network lb address-pool show",
 )
 class Show(AAZCommand):
-    """Get load balancer backend address pool.
+    """Get the details of an address pool.
 
     :example: Get the details of an address pool.
         az network lb address-pool show -g MyResourceGroup --lb-name MyLb -n MyAddressPool
@@ -46,7 +46,7 @@ class Show(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.address_pool_name = AAZStrArg(
             options=["-n", "--name", "--address-pool-name"],
-            help="The name of the backend address pool. If only one exists, omit to use as default.",
+            help="The name of the backend address pool.",
             required=True,
             id_part="child_name_1",
         )

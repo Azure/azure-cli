@@ -26,7 +26,7 @@ parameters:
 - name: jobName
   displayName: Job name
   type: string
-  default: 'FullTest'
+  default: ''
 
 steps:
   - task: UsePythonVersion@0
@@ -34,6 +34,8 @@ steps:
       versionSpec: ${{ parameters.pythonVersion }}
       displayName: "Use Python ${{ parameters.pythonVersion }}"
   - template: ./azdev_setup.yml
+    parameters:
+      EnableCompactAAZ: true
   - bash: |
       set -ev
 
@@ -75,26 +77,29 @@ steps:
       ADO_PULL_REQUEST_LATEST_COMMIT: $(System.PullRequest.TargetBranch)
       PYTHON_VERSION: ${{ parameters.pythonVersion }}
       JOB_NAME: ${{ parameters.jobName }}
+      PULL_REQUEST_NUMBER: $(System.PullRequest.PullRequestNumber)
   - bash: |
       pipelineTestJson='false'
-      pipelineTestJsonFile='/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.json'
       if [[ -f '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.json' ]]; then
         pipelineTestJson='true'
       fi
       echo $pipelineTestJson
-      echo $pipelineTestJsonFile
       echo "##vso[task.setvariable variable=pipelineTestJson]$pipelineTestJson"
-      echo ${{ variables.pipelineTestJson }}
 
-      pipelineTestXml='false'
-      pipelineTestXmlFile='/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_*.xml'
-      if [[ -f '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_${{ parameters.instance_idx }}.parallel.xml' ]] || [[ -f '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_${{ parameters.instance_idx }}.serial.xml' ]]; then
-        pipelineTestXml='true'
+      pipelineTestParallelXml='false'
+      if [[ -f '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.parallel.xml' ]]; then
+        pipelineTestParallelXml='true'
       fi
-      echo $pipelineTestXml
-      echo $pipelineTestXmlFile
-      echo "##vso[task.setvariable variable=pipelineTestXml]$pipelineTestXml"
-      echo ${{ variables.pipelineTestXml }}
+      echo $pipelineTestParallelXml
+      echo "##vso[task.setvariable variable=pipelineTestParallelXml]$pipelineTestParallelXml"
+
+      pipelineTestSerialXml='false'
+      if [[ -f '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.serial.xml' ]]; then
+        pipelineTestSerialXml='true'
+      fi
+      echo $pipelineTestSerialXml
+      echo "##vso[task.setvariable variable=pipelineTestSerialXml]$pipelineTestSerialXml"
+    condition: succeededOrFailed()
   - task: PublishBuildArtifacts@1
     condition: and(succeededOrFailed(), eq(variables.pipelineTestJson, 'true'))
     inputs:
@@ -102,8 +107,26 @@ steps:
       PathtoPublish: '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.json'
       ArtifactName: 'test_results'
       publishLocation: 'Container'
+  # https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/publish-build-artifacts-v1?view=azure-pipelines#inputs
+  # Wildcards are not supported.
+  - task: PublishBuildArtifacts@1
+    condition: and(succeededOrFailed(), eq(variables.pipelineTestParallelXml, 'true'))
+    inputs:
+      # /home/cloudtest/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_3.8_latest_1.parallel.xml
+      PathtoPublish: '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.parallel.xml'
+      # Use another artifact to publish the test results xml files, otherwise the bot will download too many files.
+      ArtifactName: 'test_results_xml'
+      publishLocation: 'Container'
+  - task: PublishBuildArtifacts@1
+    condition: and(succeededOrFailed(), eq(variables.pipelineTestSerialXml, 'true'))
+    inputs:
+      # /home/cloudtest/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_3.8_latest_1.serial.xml
+      PathtoPublish: '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_${{ parameters.pythonVersion }}_${{ parameters.profile }}_${{ parameters.instance_idx }}.serial.xml'
+      # # Use another artifact to publish the test results xml files, otherwise the bot will download too many files.
+      ArtifactName: 'test_results_xml'
+      publishLocation: 'Container'
   - task: PublishTestResults@2
-    condition: and(succeededOrFailed(), eq(variables.pipelineTestXml, 'true'))
+    condition: and(succeededOrFailed(), or(eq(variables.pipelineTestParallelXml, 'true'), eq(variables.pipelineTestSerialXml, 'true')))
     inputs:
       testResultsFiles: '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_*.xml'
       testRunTitle: 'CLI full test results of instance ${{ parameters.instance_idx }}'
