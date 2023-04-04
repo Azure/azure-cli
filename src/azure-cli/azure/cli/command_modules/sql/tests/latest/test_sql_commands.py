@@ -5746,6 +5746,49 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                  .format(resource_group_1, managed_instance_name_1, database_name),
                  expect_failure=True)
 
+    @ManagedInstancePreparer()
+    def test_sql_midb_ledger(self, mi, rg):
+        database_name_one = "cliautomationmidb01"
+        database_name_two = "cliautomationmidb02"
+        
+        resource_group_location = ManagedInstancePreparer.location
+        resource_group = rg
+        managed_instance_name = mi
+
+        # test sql mi db is created with ledger off by default
+        self.cmd('sql midb create -g {} --mi {} -n {} --yes'
+                 .format(resource_group, managed_instance_name, database_name_one),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('ledgerOn', False)])
+
+        self.cmd('sql midb show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, database_name_one),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('ledgerOn', False)])
+
+        # test sql mi db with ledger on
+        self.cmd('sql midb create -g {} --mi {} -n {} --ledger-on --yes'
+                 .format(resource_group, managed_instance_name, database_name_two),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('ledgerOn', True)])
+
+        self.cmd('sql midb show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, database_name_two),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('ledgerOn', True)])
+
 
 class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
     # This MI AAD test needs special AD setup, please contact MI AAD team for new recording.
