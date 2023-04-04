@@ -631,7 +631,7 @@ def _configure_db_dw_create_params(
         arg_ctx.ignore('sample_name')
         arg_ctx.ignore('catalog_collation')
         arg_ctx.ignore('maintenance_configuration_id')
-        
+        arg_ctx.ignore('is_ledger_on')
 
     # Only applicable to point in time restore or deleted restore create mode.
     if create_mode not in [CreateMode.restore, CreateMode.point_in_time_restore]:
@@ -2378,7 +2378,7 @@ def load_arguments(self, _):
             ])
 
     with self.argument_context('sql mi ad-admin update') as c:
-        # Create args that will be used to build up the ManagedInstanceAdminimstrator object
+        # Create args that will be used to build up the ManagedInstanceAdministrator object
         create_args_for_complex_type(
             c, 'properties', ManagedInstanceAdministrator, [
                 'login',
