@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "eventhubs",
+    "eventhubs namespace private-link-resource",
 )
 class __CMDGroup(AAZCommandGroup):
-    """eventhubs
+    """Manage eventhubs namespace private link resources .
     """
     pass
 
