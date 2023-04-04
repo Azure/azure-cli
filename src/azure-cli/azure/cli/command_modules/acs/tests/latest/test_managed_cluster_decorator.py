@@ -1786,6 +1786,42 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # overwrite warning
         self.assertEqual(ctx_3.get_network_plugin(), "azure")
 
+    def test_mc_get_network_dataplane(self):
+        # Default, not set.
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_network_dataplane(), None)
+
+        # Set to cilium.
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "network_dataplane": "cilium",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_2.get_network_dataplane(), "cilium")
+
+        # Set to azure.
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "network_dataplane": "azure",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_3.get_network_dataplane(), "azure")
+
     def test_get_pod_cidrs(self):
         # default
         ctx_1 = AKSManagedClusterContext(
@@ -4132,6 +4168,138 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             ),
         )
         self.assertEqual(defender_config_4, ground_truth_defender_config_4)
+
+    def test_get_workload_identity_profile__create_no_set(self):
+        ctx = AKSManagedClusterContext(
+            self.cmd, AKSManagedClusterParamDict({}), self.models, decorator_mode=DecoratorMode.CREATE
+        )
+        self.assertIsNone(ctx.get_workload_identity_profile())
+
+    def test_get_workload_identity_profile__create_enable_without_oidc_issuer(self):
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_workload_identity": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx.get_workload_identity_profile()
+
+    def test_get_workload_identity_profile__create_enable_with_oidc_issuer(self):
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_oidc_issuer": True,
+                    "enable_workload_identity": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        profile = ctx.get_workload_identity_profile()
+        self.assertTrue(profile.enabled)
+
+    def test_get_workload_identity_profile__update_not_set(self):
+        ctx = AKSManagedClusterContext(
+            self.cmd, AKSManagedClusterParamDict({}), self.models, decorator_mode=DecoratorMode.UPDATE
+        )
+        ctx.attach_mc(self.models.ManagedCluster(location="test_location"))
+        self.assertIsNone(ctx.get_workload_identity_profile())
+
+    def test_get_workload_identity_profile__update_with_enable_and_disable(self):
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_workload_identity": True,
+                    "disable_workload_identity": True,
+                }
+            ),
+            self.models, decorator_mode=DecoratorMode.UPDATE
+        )
+        ctx.attach_mc(self.models.ManagedCluster(location="test_location"))
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx.get_workload_identity_profile()
+
+    def test_get_workload_identity_profile__update_with_enable_without_oidc_issuer(self):
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_workload_identity": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        ctx.attach_mc(self.models.ManagedCluster(location="test_location"))
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx.get_workload_identity_profile()
+
+    def test_get_workload_identity_profile__update_with_enable(self):
+        for previous_enablement_status in [
+            None,  # preivous not set
+            True,  # previous set to enabled=true
+            False,  # previous set to enabled=false
+        ]:
+            ctx = AKSManagedClusterContext(
+                self.cmd,
+                AKSManagedClusterParamDict(
+                    {
+                        "enable_workload_identity": True,
+                    }
+                ),
+                self.models,
+                decorator_mode=DecoratorMode.UPDATE,
+            )
+            mc = self.models.ManagedCluster(location="test_location")
+            mc.oidc_issuer_profile = self.models.ManagedClusterOIDCIssuerProfile(enabled=True)
+            if previous_enablement_status is None:
+                mc.security_profile = None
+            else:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile(
+                    workload_identity=self.models.ManagedClusterSecurityProfileWorkloadIdentity(
+                        enabled=previous_enablement_status
+                    )
+                )
+            ctx.attach_mc(mc)
+            profile = ctx.get_workload_identity_profile()
+            self.assertTrue(profile.enabled)
+
+    def test_get_workload_identity_profile__update_with_disable(self):
+        for previous_enablement_status in [
+            None,  # preivous not set
+            True,  # previous set to enabled=true
+            False,  # previous set to enabled=false
+        ]:
+            ctx = AKSManagedClusterContext(
+                self.cmd,
+                AKSManagedClusterParamDict(
+                    {
+                        "disable_workload_identity": True,
+                    }
+                ),
+                self.models,
+                decorator_mode=DecoratorMode.UPDATE,
+            )
+            mc = self.models.ManagedCluster(location="test_location")
+            mc.oidc_issuer_profile = self.models.ManagedClusterOIDCIssuerProfile(enabled=True)
+            if previous_enablement_status is None:
+                mc.security_profile = None
+            else:
+                mc.security_profile = self.models.ManagedClusterSecurityProfile(
+                    workload_identity=self.models.ManagedClusterSecurityProfileWorkloadIdentity(
+                        enabled=previous_enablement_status
+                    )
+                )
+            ctx.attach_mc(mc)
+            profile = ctx.get_workload_identity_profile()
+            self.assertFalse(profile.enabled)
 
     def test_get_enable_azure_keyvault_kms(self):
         ctx_0 = AKSManagedClusterContext(
@@ -6849,6 +7017,36 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
+    def test_set_up_workload_identity_profile__default_value(self):
+        dec = AKSManagedClusterCreateDecorator(self.cmd, self.client, {}, ResourceType.MGMT_CONTAINERSERVICE)
+        mc = self.models.ManagedCluster(location="test_location")
+        dec.context.attach_mc(mc)
+        updated_mc = dec.set_up_workload_identity_profile(mc)
+        self.assertIsNone(updated_mc.security_profile)
+
+    def test_set_up_workload_identity_profile__default_value_with_security_profile(self):
+        dec = AKSManagedClusterCreateDecorator(self.cmd, self.client, {}, ResourceType.MGMT_CONTAINERSERVICE)
+        mc = self.models.ManagedCluster(location="test_location")
+        mc.security_profile = self.models.ManagedClusterSecurityProfile()
+        dec.context.attach_mc(mc)
+        updated_mc = dec.set_up_workload_identity_profile(mc)
+        self.assertIsNone(updated_mc.security_profile.workload_identity)
+
+    def test_set_up_workload_identity_profile__enabled(self):
+        dec = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_oidc_issuer": True,
+                "enable_workload_identity": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc = self.models.ManagedCluster(location="test_location")
+        dec.context.attach_mc(mc)
+        updated_mc = dec.set_up_workload_identity_profile(mc)
+        self.assertTrue(updated_mc.security_profile.workload_identity.enabled)
+
     def test_construct_mc_profile_default(self):
         import inspect
 
@@ -9188,6 +9386,43 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
 
+    def test_update_workload_identity_profile__default_value(self):
+        dec = AKSManagedClusterUpdateDecorator(self.cmd, self.client, {}, ResourceType.MGMT_CONTAINERSERVICE)
+        mc = self.models.ManagedCluster(location="test_location")
+        dec.context.attach_mc(mc)
+        updated_mc = dec.update_workload_identity_profile(mc)
+        self.assertIsNone(updated_mc.security_profile)
+
+    def test_update_workload_identity_profile__enabled(self):
+        dec = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_workload_identity": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc = self.models.ManagedCluster(location="test_location")
+        mc.oidc_issuer_profile = self.models.ManagedClusterOIDCIssuerProfile(enabled=True)
+        dec.context.attach_mc(mc)
+        updated_mc = dec.update_workload_identity_profile(mc)
+        self.assertTrue(updated_mc.security_profile.workload_identity.enabled)
+
+    def test_update_workload_identity_profile__disabled(self):
+        dec = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_workload_identity": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc = self.models.ManagedCluster(location="test_location")
+        mc.oidc_issuer_profile = self.models.ManagedClusterOIDCIssuerProfile(enabled=True)
+        dec.context.attach_mc(mc)
+        updated_mc = dec.update_workload_identity_profile(mc)
+        self.assertFalse(updated_mc.security_profile.workload_identity.enabled)
+
     def test_update_identity_profile(self):
         dec_1 = AKSManagedClusterUpdateDecorator(
             self.cmd,
@@ -9316,6 +9551,79 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                 identity_profile=identity_profile_5,
             )
             self.assertEqual(dec_mc_5, ground_truth_mc_5)
+
+    def test_update_network_plugin_settings(self):
+        # default value in `aks_update`
+        dec_1 =AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "pod_cidr": "100.64.0.0/10",
+                "network_plugin_mode": "overlay",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                pod_cidr=None,
+                service_cidr="192.168.0.0/16"
+            ),
+        )
+
+        dec_1.context.attach_mc(mc_1)
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_network_plugin_settings(None)
+        dec_mc_1 = dec_1.update_network_plugin_settings(mc_1)
+
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                pod_cidr="100.64.0.0/10",
+                service_cidr="192.168.0.0/16",
+            ),
+        )
+
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # test expanding pod cidr
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "pod_cidr": "100.64.0.0/10",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                pod_cidr="100.64.0.0/16",
+                service_cidr="192.168.0.0/16"
+            ),
+        )
+
+        dec_2.context.attach_mc(mc_2)
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_2.update_network_plugin_settings(None)
+        dec_mc_2 = dec_2.update_network_plugin_settings(mc_2)
+
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                pod_cidr="100.64.0.0/10",
+                service_cidr="192.168.0.0/16",
+            ),
+        )
+
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
 
     def test_update_mc_profile_default(self):
         import inspect

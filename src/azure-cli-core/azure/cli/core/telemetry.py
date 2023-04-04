@@ -47,6 +47,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.extension_name = None
         self.extension_version = None
         self.event_id = str(uuid.uuid4())
+        self.cli_recommendation = None
         self.feedback = None
         self.extension_management_detail = None
         self.raw_command = None
@@ -200,6 +201,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'PythonVersion', platform.python_version())
         set_custom_properties(result, 'ModuleCorrelation', self.module_correlation)
         set_custom_properties(result, 'ExtensionName', ext_info)
+        set_custom_properties(result, 'CLIRecommendation', self.cli_recommendation)
         set_custom_properties(result, 'Feedback', self.feedback)
         set_custom_properties(result, 'ExtensionManagementDetail', self.extension_management_detail)
         set_custom_properties(result, 'Mode', self.mode)
@@ -400,6 +402,14 @@ def set_feedback(feedback):
     """ This method is used for modules in which user feedback is collected. The data can be an arbitrary string but it
     will be truncated at 512 characters to avoid abusing the telemetry."""
     _session.feedback = feedback[:512]
+
+
+@decorators.suppress_all_exceptions()
+def set_cli_recommendation(api_version, feedback):
+    # This function returns the user's selection and feedback on the cli-recommendation results
+    # Please refer to feedback_design.md of cli-recommendation for detailed information
+    _session.cli_recommendation = {"api_version": api_version,
+                                   "feedback": feedback}
 
 
 @decorators.suppress_all_exceptions()
