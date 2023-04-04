@@ -623,8 +623,8 @@ def cli_remove_appgroup_policy(client, resource_group_name, namespace_name, appl
     appGroup = client.get(resource_group_name, namespace_name, application_group_name)
 
     logger.warning(
-        'Parameter metric-id,rate-limit-threshold would not be required for a command eventhub application-group policy remove in future release '
-        'and the new policy remove cmdlets will br contain only name.')
+        'the policy remove policy cmdlets will do removals based on policy name')
+    
     if appGroup.policies:
         for policy_object in throttling_policy_config:
             if policy_object in appGroup.policies:
