@@ -20,7 +20,7 @@ class EHConsumerGroupCURDScenarioTest(ScenarioTest):
     def test_eh_consumergroup(self, resource_group):
         self.kwargs.update({
             'loc': 'westus2',
-            'rg': 'test-migration',
+            'rg': resource_group,
             'namespacename': self.create_random_name(prefix='eventhubs-nscli', length=20),
             'tags': {'tag1: value1', 'tag2: value2'},
             'sku': 'Standard',
