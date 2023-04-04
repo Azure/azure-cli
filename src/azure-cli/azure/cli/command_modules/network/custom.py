@@ -2419,6 +2419,7 @@ def _to_snake(s):
 
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
+
 def _convert_to_snake_case(element):
     if isinstance(element, dict):
         ret = dict()
@@ -2431,6 +2432,7 @@ def _convert_to_snake_case(element):
         return [_convert_to_snake_case(i) for i in element]
 
     return element
+
 
 def add_dns_delegation(cmd, child_zone, parent_zone, child_rg, child_zone_name):
     """
