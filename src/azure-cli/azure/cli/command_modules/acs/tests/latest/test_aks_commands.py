@@ -7248,7 +7248,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--node-count 1 ' \
                      '--ssh-key-value={ssh_key_value} '
         create_cmd += f'--assign-identity {identity_id} ' if user_assigned_identity else ''
-        create_cmd += f'--enable-syslog' if syslog_enabled else ''
+        create_cmd += f'--enable-syslog ' if syslog_enabled else ''
         create_cmd += f'--data-collection-settings {data_collection_settings} ' if data_collection_settings else ''
 
         response = self.cmd(create_cmd, checks=[
@@ -7357,7 +7357,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         enable_monitoring_cmd = f'aks enable-addons -a monitoring --resource-group={resource_group} --name={aks_name} ' \
                                 '--enable-msi-auth-for-monitoring '
         if syslog_enabled:
-            enable_monitoring_cmd += f'--enable-syslog'
+            enable_monitoring_cmd += f'--enable-syslog '
 
         response = self.cmd(enable_monitoring_cmd, checks=[
             self.check('addonProfiles.omsagent.enabled', True),
