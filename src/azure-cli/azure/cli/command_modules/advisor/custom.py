@@ -149,7 +149,7 @@ def _parse_recommendation_uri(recommendation_uri):
 def _generate_recommendations(client):
     from msrestazure.azure_exceptions import CloudError
 
-    response = client.generate(raw=True)
+    response = client.generate(cls=_callback)
     location = response.headers['Location']
     operation_id = _parse_operation_id(location)
 
@@ -187,3 +187,7 @@ def _get_recommendations(client, ids=None, resource_group_name=None, recommendat
     if recommendation_name:
         return [r for r in recs if r.name == recommendation_name]
     return recs
+
+
+def _callback(*args):
+    return args[0].http_response

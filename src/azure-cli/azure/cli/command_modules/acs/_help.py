@@ -252,6 +252,12 @@ parameters:
         Using together with "azure" network plugin.
         Specify "azure" for Azure network policy manager and "calico" for calico network policy controller.
         Defaults to "" (network policy disabled).
+  - name: --network-dataplane
+    type: string
+    short-summary: The network dataplane to use.
+    long-summary: |
+        Network dataplane used in the Kubernetes cluster.
+        Specify "azure" to use the Azure dataplane (default) or "cilium" to enable Cilium dataplane.
   - name: --no-ssh-key -x
     type: string
     short-summary: Do not use or create a local SSH key.
@@ -340,6 +346,9 @@ parameters:
   - name: --node-osdisk-diskencryptionset-id -d
     type: string
     short-summary: ResourceId of the disk encryption set to use for enabling encryption at rest on agent node os disk.
+  - name: --enable-workload-identity
+    type: bool
+    short-summary: Enable workload identity addon.
   - name: --aci-subnet-name
     type: string
     short-summary: The name of a subnet in an existing VNet into which to deploy the virtual nodes.
@@ -570,6 +579,12 @@ parameters:
   - name: --tier
     type: string
     short-summary: Specify SKU tier for managed clusters. '--tier standard' enables a standard managed cluster service with a financially backed SLA. '--tier free' changes a standard managed cluster to a free one.
+  - name: --network-plugin-mode
+    type: string
+    short-summary: Update the mode of a network plugin to migrate to a different pod networking setup.
+  - name: --pod-cidr
+    type: string
+    short-summary: Update the pod CIDR for a cluster. Used when updating a cluster from Azure CNI to Azure CNI Overlay.
   - name: --load-balancer-managed-outbound-ip-count
     type: int
     short-summary: Load balancer managed outbound IP count.
@@ -676,6 +691,12 @@ parameters:
   - name: --aks-custom-headers
     type: string
     short-summary: Comma-separated key-value pairs to specify custom headers.
+  - name: --enable-workload-identity
+    type: bool
+    short-summary: Enable workload identity addon.
+  - name: --disable-workload-identity
+    type: bool
+    short-summary: Disable workload identity addon.
   - name: --enable-secret-rotation
     type: bool
     short-summary: Enable secret rotation. Use with azure-keyvault-secrets-provider addon.
