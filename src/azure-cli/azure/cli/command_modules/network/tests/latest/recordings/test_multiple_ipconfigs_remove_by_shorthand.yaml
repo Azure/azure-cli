@@ -1,0 +1,2092 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subnet-name
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001","name":"cli_test_multiple_ipconfigs_update_with_shorthand_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-03-31T06:44:33Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '390'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:44:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "enableDdosProtection": false, "enableVmProtection": false,
+      "subnets": [{"name": "subnet-000004", "properties": {"addressPrefix": "10.0.0.0/24"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '240'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --subnet-name
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003\",\r\n
+        \ \"etag\": \"W/\\\"a8d857a7-5fac-4e9b-aeec-fddc0e39a9e8\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"78a10bed-c276-4733-adcb-961fb4192fa6\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
+        \     {\r\n        \"name\": \"subnet-000004\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\",\r\n
+        \       \"etag\": \"W/\\\"a8d857a7-5fac-4e9b-aeec-fddc0e39a9e8\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/1f61b951-caf7-4bb5-b325-21f77922049e?api-version=2022-01-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1327'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:44:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 3312e009-5b4a-4554-a79a-d5d8739402b3
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subnet-name
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/1f61b951-caf7-4bb5-b325-21f77922049e?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:44:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - b5f84ed6-3f83-4d6d-9c80-acf594a42228
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subnet-name
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003\",\r\n
+        \ \"etag\": \"W/\\\"63e9e5fc-0abf-4477-b753-6bd18dcf72e2\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"78a10bed-c276-4733-adcb-961fb4192fa6\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
+        \     {\r\n        \"name\": \"subnet-000004\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\",\r\n
+        \       \"etag\": \"W/\\\"63e9e5fc-0abf-4477-b753-6bd18dcf72e2\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1329'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:44:47 GMT
+      etag:
+      - W/"63e9e5fc-0abf-4477-b753-6bd18dcf72e2"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 310109be-c889-4934-afd8-c351265f6dff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --vnet-name --subnet
+      User-Agent:
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001","name":"cli_test_multiple_ipconfigs_update_with_shorthand_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-03-31T06:44:33Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '390'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:44:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"ipConfigurations": [{"name": "ipconfig1",
+      "properties": {"privateIPAddressVersion": "IPv4", "privateIPAllocationMethod":
+      "Dynamic", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004"}}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '397'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --vnet-name --subnet
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"nic-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002\",\r\n
+        \ \"etag\": \"W/\\\"51d130f2-baee-4955-9661-5663a8a2860c\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"ddbee0d0-f173-4b69-8b12-b18dfd002a99\",\r\n
+        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"51d130f2-baee-4955-9661-5663a8a2860c\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"3uf0c4dwyizuplolsyp1igjpug.dx.internal.cloudapp.net\"\r\n    },\r\n    \"vnetEncryptionSupported\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\n    \"allowPort25Out\":
+        true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\":
+        \"westus\",\r\n  \"kind\": \"Regular\"\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2e2aa3f4-14ab-4845-a589-5ba11833bb68?api-version=2022-01-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1816'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:44:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 9273f67d-0f16-4786-b8e5-d420c89e9968
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --vnet-name --subnet
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2e2aa3f4-14ab-4845-a589-5ba11833bb68?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:45:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 0d422ca9-7006-4730-8317-aba52b88887b
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --vnet-name --subnet
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"nic-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002\",\r\n
+        \ \"etag\": \"W/\\\"51d130f2-baee-4955-9661-5663a8a2860c\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"ddbee0d0-f173-4b69-8b12-b18dfd002a99\",\r\n
+        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"51d130f2-baee-4955-9661-5663a8a2860c\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"3uf0c4dwyizuplolsyp1igjpug.dx.internal.cloudapp.net\"\r\n    },\r\n    \"vnetEncryptionSupported\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\n    \"allowPort25Out\":
+        true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\":
+        \"westus\",\r\n  \"kind\": \"Regular\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1816'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:45:23 GMT
+      etag:
+      - W/"51d130f2-baee-4955-9661-5663a8a2860c"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 560e7805-cee0-4df9-9be2-40cb106bc0ae
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic ip-config create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --nic-name
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"nic-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002\",\r\n
+        \ \"etag\": \"W/\\\"51d130f2-baee-4955-9661-5663a8a2860c\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"ddbee0d0-f173-4b69-8b12-b18dfd002a99\",\r\n
+        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"51d130f2-baee-4955-9661-5663a8a2860c\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"3uf0c4dwyizuplolsyp1igjpug.dx.internal.cloudapp.net\"\r\n    },\r\n    \"vnetEncryptionSupported\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\n    \"allowPort25Out\":
+        true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\":
+        \"westus\",\r\n  \"kind\": \"Regular\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1816'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:45:24 GMT
+      etag:
+      - W/"51d130f2-baee-4955-9661-5663a8a2860c"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 60670009-b3d1-4bef-a3fd-878e772655b1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002",
+      "location": "westus", "properties": {"dnsSettings": {"dnsServers": []}, "enableIPForwarding":
+      false, "ipConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig1",
+      "name": "ipconfig1", "properties": {"primary": true, "privateIPAddress": "10.0.0.4",
+      "privateIPAddressVersion": "IPv4", "privateIPAllocationMethod": "Dynamic", "subnet":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004"}},
+      "type": "Microsoft.Network/networkInterfaces/ipConfigurations"}, {"name": "ipconfig2",
+      "properties": {"primary": false, "privateIPAddressVersion": "IPv4", "privateIPAllocationMethod":
+      "Dynamic", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004"}}}],
+      "nicType": "Standard"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic ip-config create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1359'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --nic-name
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"nic-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002\",\r\n
+        \ \"etag\": \"W/\\\"4da8b16e-0c63-4e04-9f81-13a3e0f64d65\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"ddbee0d0-f173-4b69-8b12-b18dfd002a99\",\r\n
+        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"4da8b16e-0c63-4e04-9f81-13a3e0f64d65\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig2\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig2\",\r\n
+        \       \"etag\": \"W/\\\"4da8b16e-0c63-4e04-9f81-13a3e0f64d65\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.5\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"3uf0c4dwyizuplolsyp1igjpug.dx.internal.cloudapp.net\"\r\n    },\r\n    \"vnetEncryptionSupported\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\n    \"allowPort25Out\":
+        true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\":
+        \"westus\",\r\n  \"kind\": \"Regular\"\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/567f32d6-73a7-4cd5-a29f-4d125ebed8e4?api-version=2022-01-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2736'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:45:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 5e0b2f96-61d8-4752-9074-04774d5a6eb1
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic ip-config create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --nic-name
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/567f32d6-73a7-4cd5-a29f-4d125ebed8e4?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:45:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - fadd464e-dce0-4ea7-ba78-87ab6c0b1897
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic ip-config create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --nic-name
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"nic-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002\",\r\n
+        \ \"etag\": \"W/\\\"4da8b16e-0c63-4e04-9f81-13a3e0f64d65\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"ddbee0d0-f173-4b69-8b12-b18dfd002a99\",\r\n
+        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"4da8b16e-0c63-4e04-9f81-13a3e0f64d65\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig2\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig2\",\r\n
+        \       \"etag\": \"W/\\\"4da8b16e-0c63-4e04-9f81-13a3e0f64d65\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.5\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"3uf0c4dwyizuplolsyp1igjpug.dx.internal.cloudapp.net\"\r\n    },\r\n    \"vnetEncryptionSupported\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\n    \"allowPort25Out\":
+        true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\":
+        \"westus\",\r\n  \"kind\": \"Regular\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2736'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:45:59 GMT
+      etag:
+      - W/"4da8b16e-0c63-4e04-9f81-13a3e0f64d65"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - d6eacf61-a045-4af7-90ae-e33be74816d7
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic ip-config create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --nic-name
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"nic-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002\",\r\n
+        \ \"etag\": \"W/\\\"4da8b16e-0c63-4e04-9f81-13a3e0f64d65\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"ddbee0d0-f173-4b69-8b12-b18dfd002a99\",\r\n
+        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"4da8b16e-0c63-4e04-9f81-13a3e0f64d65\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig2\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig2\",\r\n
+        \       \"etag\": \"W/\\\"4da8b16e-0c63-4e04-9f81-13a3e0f64d65\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.5\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"3uf0c4dwyizuplolsyp1igjpug.dx.internal.cloudapp.net\"\r\n    },\r\n    \"vnetEncryptionSupported\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\n    \"allowPort25Out\":
+        true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\":
+        \"westus\",\r\n  \"kind\": \"Regular\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2736'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:46:00 GMT
+      etag:
+      - W/"4da8b16e-0c63-4e04-9f81-13a3e0f64d65"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - cb10d82b-896b-470b-813f-82a7dc3d5be4
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002",
+      "location": "westus", "properties": {"dnsSettings": {"dnsServers": []}, "enableIPForwarding":
+      false, "ipConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig1",
+      "name": "ipconfig1", "properties": {"primary": true, "privateIPAddress": "10.0.0.4",
+      "privateIPAddressVersion": "IPv4", "privateIPAllocationMethod": "Dynamic", "subnet":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004"}},
+      "type": "Microsoft.Network/networkInterfaces/ipConfigurations"}, {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig2",
+      "name": "ipconfig2", "properties": {"primary": false, "privateIPAddress": "10.0.0.5",
+      "privateIPAddressVersion": "IPv4", "privateIPAllocationMethod": "Dynamic", "subnet":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004"}},
+      "type": "Microsoft.Network/networkInterfaces/ipConfigurations"}, {"name": "ipconfig3",
+      "properties": {"primary": false, "privateIPAddressVersion": "IPv4", "privateIPAllocationMethod":
+      "Dynamic", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004"}}}],
+      "nicType": "Standard"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic ip-config create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2027'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --nic-name
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"nic-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002\",\r\n
+        \ \"etag\": \"W/\\\"464c5459-3930-4beb-9ce8-0fde75b10da8\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"ddbee0d0-f173-4b69-8b12-b18dfd002a99\",\r\n
+        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"464c5459-3930-4beb-9ce8-0fde75b10da8\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig2\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig2\",\r\n
+        \       \"etag\": \"W/\\\"464c5459-3930-4beb-9ce8-0fde75b10da8\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.5\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig3\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig3\",\r\n
+        \       \"etag\": \"W/\\\"464c5459-3930-4beb-9ce8-0fde75b10da8\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.6\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"3uf0c4dwyizuplolsyp1igjpug.dx.internal.cloudapp.net\"\r\n    },\r\n    \"vnetEncryptionSupported\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\n    \"allowPort25Out\":
+        true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\":
+        \"westus\",\r\n  \"kind\": \"Regular\"\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6904295b-44c4-4cb8-bf6e-2346d23b7f39?api-version=2022-01-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '3656'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:46:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - d92ce0bf-8d1f-4997-8314-1f0170029ca7
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic ip-config create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --nic-name
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6904295b-44c4-4cb8-bf6e-2346d23b7f39?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:46:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 23e58bf1-5f21-4eb8-9fdc-15ec85487930
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic ip-config create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --nic-name
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"nic-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002\",\r\n
+        \ \"etag\": \"W/\\\"464c5459-3930-4beb-9ce8-0fde75b10da8\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"ddbee0d0-f173-4b69-8b12-b18dfd002a99\",\r\n
+        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"464c5459-3930-4beb-9ce8-0fde75b10da8\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig2\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig2\",\r\n
+        \       \"etag\": \"W/\\\"464c5459-3930-4beb-9ce8-0fde75b10da8\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.5\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig3\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig3\",\r\n
+        \       \"etag\": \"W/\\\"464c5459-3930-4beb-9ce8-0fde75b10da8\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.6\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"3uf0c4dwyizuplolsyp1igjpug.dx.internal.cloudapp.net\"\r\n    },\r\n    \"vnetEncryptionSupported\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\n    \"allowPort25Out\":
+        true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\":
+        \"westus\",\r\n  \"kind\": \"Regular\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3656'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:46:33 GMT
+      etag:
+      - W/"464c5459-3930-4beb-9ce8-0fde75b10da8"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 30fe76cc-0e51-4838-b90c-9de788cb490f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic ip-config create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --nic-name
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"nic-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002\",\r\n
+        \ \"etag\": \"W/\\\"464c5459-3930-4beb-9ce8-0fde75b10da8\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"ddbee0d0-f173-4b69-8b12-b18dfd002a99\",\r\n
+        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"464c5459-3930-4beb-9ce8-0fde75b10da8\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig2\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig2\",\r\n
+        \       \"etag\": \"W/\\\"464c5459-3930-4beb-9ce8-0fde75b10da8\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.5\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig3\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig3\",\r\n
+        \       \"etag\": \"W/\\\"464c5459-3930-4beb-9ce8-0fde75b10da8\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.6\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"3uf0c4dwyizuplolsyp1igjpug.dx.internal.cloudapp.net\"\r\n    },\r\n    \"vnetEncryptionSupported\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\n    \"allowPort25Out\":
+        true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\":
+        \"westus\",\r\n  \"kind\": \"Regular\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3656'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:46:36 GMT
+      etag:
+      - W/"464c5459-3930-4beb-9ce8-0fde75b10da8"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - dd3e8d1d-0801-41fe-ae60-86687bc54074
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002",
+      "location": "westus", "properties": {"dnsSettings": {"dnsServers": []}, "enableIPForwarding":
+      false, "ipConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig1",
+      "name": "ipconfig1", "properties": {"primary": true, "privateIPAddress": "10.0.0.4",
+      "privateIPAddressVersion": "IPv4", "privateIPAllocationMethod": "Dynamic", "subnet":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004"}},
+      "type": "Microsoft.Network/networkInterfaces/ipConfigurations"}, {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig2",
+      "name": "ipconfig2", "properties": {"primary": false, "privateIPAddress": "10.0.0.5",
+      "privateIPAddressVersion": "IPv4", "privateIPAllocationMethod": "Dynamic", "subnet":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004"}},
+      "type": "Microsoft.Network/networkInterfaces/ipConfigurations"}, {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig3",
+      "name": "ipconfig3", "properties": {"primary": false, "privateIPAddress": "10.0.0.6",
+      "privateIPAddressVersion": "IPv4", "privateIPAllocationMethod": "Dynamic", "subnet":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004"}},
+      "type": "Microsoft.Network/networkInterfaces/ipConfigurations"}, {"name": "ipconfig4",
+      "properties": {"primary": false, "privateIPAddressVersion": "IPv4", "privateIPAllocationMethod":
+      "Dynamic", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004"}}}],
+      "nicType": "Standard"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic ip-config create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2695'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --nic-name
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"nic-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002\",\r\n
+        \ \"etag\": \"W/\\\"143690f4-775e-4b9b-b71f-ca7e5a8f89b8\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"ddbee0d0-f173-4b69-8b12-b18dfd002a99\",\r\n
+        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"143690f4-775e-4b9b-b71f-ca7e5a8f89b8\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig2\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig2\",\r\n
+        \       \"etag\": \"W/\\\"143690f4-775e-4b9b-b71f-ca7e5a8f89b8\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.5\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig3\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig3\",\r\n
+        \       \"etag\": \"W/\\\"143690f4-775e-4b9b-b71f-ca7e5a8f89b8\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.6\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig4\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig4\",\r\n
+        \       \"etag\": \"W/\\\"143690f4-775e-4b9b-b71f-ca7e5a8f89b8\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.7\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"3uf0c4dwyizuplolsyp1igjpug.dx.internal.cloudapp.net\"\r\n    },\r\n    \"vnetEncryptionSupported\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\n    \"allowPort25Out\":
+        true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\":
+        \"westus\",\r\n  \"kind\": \"Regular\"\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/8f617c6f-2ca0-4814-aed1-1bef07490eea?api-version=2022-01-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '4576'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:46:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - e460b312-17aa-4ebb-8e1d-88d921a5d7cc
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic ip-config create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --nic-name
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/8f617c6f-2ca0-4814-aed1-1bef07490eea?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:47:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - d40c7c81-2a52-4d53-a4aa-5ae51014e3b8
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic ip-config create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --nic-name
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"nic-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002\",\r\n
+        \ \"etag\": \"W/\\\"143690f4-775e-4b9b-b71f-ca7e5a8f89b8\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"ddbee0d0-f173-4b69-8b12-b18dfd002a99\",\r\n
+        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"143690f4-775e-4b9b-b71f-ca7e5a8f89b8\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig2\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig2\",\r\n
+        \       \"etag\": \"W/\\\"143690f4-775e-4b9b-b71f-ca7e5a8f89b8\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.5\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig3\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig3\",\r\n
+        \       \"etag\": \"W/\\\"143690f4-775e-4b9b-b71f-ca7e5a8f89b8\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.6\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig4\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig4\",\r\n
+        \       \"etag\": \"W/\\\"143690f4-775e-4b9b-b71f-ca7e5a8f89b8\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.7\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"3uf0c4dwyizuplolsyp1igjpug.dx.internal.cloudapp.net\"\r\n    },\r\n    \"vnetEncryptionSupported\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\n    \"allowPort25Out\":
+        true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\":
+        \"westus\",\r\n  \"kind\": \"Regular\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4576'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:47:09 GMT
+      etag:
+      - W/"143690f4-775e-4b9b-b71f-ca7e5a8f89b8"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - d5209905-f114-437f-a420-f95a7211bcec
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic ip-config create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --nic-name
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"nic-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002\",\r\n
+        \ \"etag\": \"W/\\\"143690f4-775e-4b9b-b71f-ca7e5a8f89b8\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"ddbee0d0-f173-4b69-8b12-b18dfd002a99\",\r\n
+        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"143690f4-775e-4b9b-b71f-ca7e5a8f89b8\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig2\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig2\",\r\n
+        \       \"etag\": \"W/\\\"143690f4-775e-4b9b-b71f-ca7e5a8f89b8\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.5\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig3\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig3\",\r\n
+        \       \"etag\": \"W/\\\"143690f4-775e-4b9b-b71f-ca7e5a8f89b8\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.6\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig4\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig4\",\r\n
+        \       \"etag\": \"W/\\\"143690f4-775e-4b9b-b71f-ca7e5a8f89b8\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.7\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"3uf0c4dwyizuplolsyp1igjpug.dx.internal.cloudapp.net\"\r\n    },\r\n    \"vnetEncryptionSupported\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\n    \"allowPort25Out\":
+        true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\":
+        \"westus\",\r\n  \"kind\": \"Regular\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4576'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:47:11 GMT
+      etag:
+      - W/"143690f4-775e-4b9b-b71f-ca7e5a8f89b8"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 717cdea6-1cd8-4216-825f-8a997ce2999d
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002",
+      "location": "westus", "properties": {"dnsSettings": {"dnsServers": []}, "enableIPForwarding":
+      false, "ipConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig1",
+      "name": "ipconfig1", "properties": {"primary": true, "privateIPAddress": "10.0.0.4",
+      "privateIPAddressVersion": "IPv4", "privateIPAllocationMethod": "Dynamic", "subnet":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004"}},
+      "type": "Microsoft.Network/networkInterfaces/ipConfigurations"}, {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig2",
+      "name": "ipconfig2", "properties": {"primary": false, "privateIPAddress": "10.0.0.5",
+      "privateIPAddressVersion": "IPv4", "privateIPAllocationMethod": "Dynamic", "subnet":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004"}},
+      "type": "Microsoft.Network/networkInterfaces/ipConfigurations"}, {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig3",
+      "name": "ipconfig3", "properties": {"primary": false, "privateIPAddress": "10.0.0.6",
+      "privateIPAddressVersion": "IPv4", "privateIPAllocationMethod": "Dynamic", "subnet":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004"}},
+      "type": "Microsoft.Network/networkInterfaces/ipConfigurations"}, {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig4",
+      "name": "ipconfig4", "properties": {"primary": false, "privateIPAddress": "10.0.0.7",
+      "privateIPAddressVersion": "IPv4", "privateIPAllocationMethod": "Dynamic", "subnet":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004"}},
+      "type": "Microsoft.Network/networkInterfaces/ipConfigurations"}, {"name": "ipconfig5",
+      "properties": {"primary": false, "privateIPAddressVersion": "IPv4", "privateIPAllocationMethod":
+      "Dynamic", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004"}}}],
+      "nicType": "Standard"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic ip-config create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '3363'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --nic-name
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"nic-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002\",\r\n
+        \ \"etag\": \"W/\\\"4a778a64-ec5e-4bf4-80b8-d6940874dddd\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"ddbee0d0-f173-4b69-8b12-b18dfd002a99\",\r\n
+        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"4a778a64-ec5e-4bf4-80b8-d6940874dddd\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig2\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig2\",\r\n
+        \       \"etag\": \"W/\\\"4a778a64-ec5e-4bf4-80b8-d6940874dddd\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.5\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig3\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig3\",\r\n
+        \       \"etag\": \"W/\\\"4a778a64-ec5e-4bf4-80b8-d6940874dddd\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.6\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig4\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig4\",\r\n
+        \       \"etag\": \"W/\\\"4a778a64-ec5e-4bf4-80b8-d6940874dddd\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.7\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig5\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig5\",\r\n
+        \       \"etag\": \"W/\\\"4a778a64-ec5e-4bf4-80b8-d6940874dddd\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.8\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"3uf0c4dwyizuplolsyp1igjpug.dx.internal.cloudapp.net\"\r\n    },\r\n    \"vnetEncryptionSupported\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\n    \"allowPort25Out\":
+        true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\":
+        \"westus\",\r\n  \"kind\": \"Regular\"\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/40f2fde2-e556-434e-8321-888182eeb83f?api-version=2022-01-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '5496'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:47:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 3ee67c3c-6f8c-417f-a7c2-7a85e5f3c33e
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic ip-config create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --nic-name
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/40f2fde2-e556-434e-8321-888182eeb83f?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:47:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - eea9d5aa-3a91-462f-96e2-ab43e84f671e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic ip-config create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --nic-name
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"nic-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002\",\r\n
+        \ \"etag\": \"W/\\\"4a778a64-ec5e-4bf4-80b8-d6940874dddd\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"ddbee0d0-f173-4b69-8b12-b18dfd002a99\",\r\n
+        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"4a778a64-ec5e-4bf4-80b8-d6940874dddd\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig2\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig2\",\r\n
+        \       \"etag\": \"W/\\\"4a778a64-ec5e-4bf4-80b8-d6940874dddd\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.5\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig3\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig3\",\r\n
+        \       \"etag\": \"W/\\\"4a778a64-ec5e-4bf4-80b8-d6940874dddd\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.6\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig4\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig4\",\r\n
+        \       \"etag\": \"W/\\\"4a778a64-ec5e-4bf4-80b8-d6940874dddd\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.7\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig5\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig5\",\r\n
+        \       \"etag\": \"W/\\\"4a778a64-ec5e-4bf4-80b8-d6940874dddd\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.8\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"3uf0c4dwyizuplolsyp1igjpug.dx.internal.cloudapp.net\"\r\n    },\r\n    \"vnetEncryptionSupported\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\n    \"allowPort25Out\":
+        true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\":
+        \"westus\",\r\n  \"kind\": \"Regular\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5496'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:47:45 GMT
+      etag:
+      - W/"4a778a64-ec5e-4bf4-80b8-d6940874dddd"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 270a0d02-24c3-4896-ba21-0548ace413f5
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --ip-configurations
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"nic-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002\",\r\n
+        \ \"etag\": \"W/\\\"4a778a64-ec5e-4bf4-80b8-d6940874dddd\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"ddbee0d0-f173-4b69-8b12-b18dfd002a99\",\r\n
+        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"4a778a64-ec5e-4bf4-80b8-d6940874dddd\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig2\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig2\",\r\n
+        \       \"etag\": \"W/\\\"4a778a64-ec5e-4bf4-80b8-d6940874dddd\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.5\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig3\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig3\",\r\n
+        \       \"etag\": \"W/\\\"4a778a64-ec5e-4bf4-80b8-d6940874dddd\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.6\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig4\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig4\",\r\n
+        \       \"etag\": \"W/\\\"4a778a64-ec5e-4bf4-80b8-d6940874dddd\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.7\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig5\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig5\",\r\n
+        \       \"etag\": \"W/\\\"4a778a64-ec5e-4bf4-80b8-d6940874dddd\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.8\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"3uf0c4dwyizuplolsyp1igjpug.dx.internal.cloudapp.net\"\r\n    },\r\n    \"vnetEncryptionSupported\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\n    \"allowPort25Out\":
+        true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\":
+        \"westus\",\r\n  \"kind\": \"Regular\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5496'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:47:46 GMT
+      etag:
+      - W/"4a778a64-ec5e-4bf4-80b8-d6940874dddd"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 322b2bf3-116a-4e1e-9871-213f5e6face2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002",
+      "location": "westus", "properties": {"dnsSettings": {"dnsServers": []}, "enableIPForwarding":
+      false, "ipConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig1",
+      "name": "ipconfig1", "properties": {"primary": true, "privateIPAddress": "10.0.0.4",
+      "privateIPAddressVersion": "IPv4", "privateIPAllocationMethod": "Dynamic", "subnet":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004"}},
+      "type": "Microsoft.Network/networkInterfaces/ipConfigurations"}, {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig4",
+      "name": "ipconfig4", "properties": {"primary": false, "privateIPAddress": "10.0.0.7",
+      "privateIPAddressVersion": "IPv4", "privateIPAllocationMethod": "Dynamic", "subnet":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004"}},
+      "type": "Microsoft.Network/networkInterfaces/ipConfigurations"}], "nicType":
+      "Standard"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1672'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --ip-configurations
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"nic-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002\",\r\n
+        \ \"etag\": \"W/\\\"319b822c-e81d-44d6-bc4b-ddbfd9cb5dc0\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"ddbee0d0-f173-4b69-8b12-b18dfd002a99\",\r\n
+        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"319b822c-e81d-44d6-bc4b-ddbfd9cb5dc0\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig4\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig4\",\r\n
+        \       \"etag\": \"W/\\\"319b822c-e81d-44d6-bc4b-ddbfd9cb5dc0\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.7\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"3uf0c4dwyizuplolsyp1igjpug.dx.internal.cloudapp.net\"\r\n    },\r\n    \"vnetEncryptionSupported\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\n    \"allowPort25Out\":
+        true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\":
+        \"westus\",\r\n  \"kind\": \"Regular\"\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/1afa570c-9fd2-4b9d-8e89-3d1205e65482?api-version=2022-01-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2736'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:47:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 94257f5f-43cb-4de9-931f-57279136de5a
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --ip-configurations
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/1afa570c-9fd2-4b9d-8e89-3d1205e65482?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:48:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ce7cfc18-1147-4cde-8a88-891e2018c0ca
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nic update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --ip-configurations
+      User-Agent:
+      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.10 (Windows-10-10.0.19045-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"nic-000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002\",\r\n
+        \ \"etag\": \"W/\\\"319b822c-e81d-44d6-bc4b-ddbfd9cb5dc0\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"ddbee0d0-f173-4b69-8b12-b18dfd002a99\",\r\n
+        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"319b822c-e81d-44d6-bc4b-ddbfd9cb5dc0\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"ipconfig4\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/networkInterfaces/nic-000002/ipConfigurations/ipconfig4\",\r\n
+        \       \"etag\": \"W/\\\"319b822c-e81d-44d6-bc4b-ddbfd9cb5dc0\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.7\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_multiple_ipconfigs_update_with_shorthand_000001/providers/Microsoft.Network/virtualNetworks/vnet-000003/subnets/subnet-000004\"\r\n
+        \         },\r\n          \"primary\": false,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"3uf0c4dwyizuplolsyp1igjpug.dx.internal.cloudapp.net\"\r\n    },\r\n    \"vnetEncryptionSupported\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\",\r\n    \"allowPort25Out\":
+        true\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\",\r\n  \"location\":
+        \"westus\",\r\n  \"kind\": \"Regular\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2736'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 31 Mar 2023 06:48:20 GMT
+      etag:
+      - W/"319b822c-e81d-44d6-bc4b-ddbfd9cb5dc0"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 248c712f-b440-4c50-b8a2-4f66c004d13d
+    status:
+      code: 200
+      message: OK
+version: 1
