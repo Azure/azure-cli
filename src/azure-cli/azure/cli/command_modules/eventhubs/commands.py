@@ -17,8 +17,6 @@ def load_command_table(self, _):
                                                                      consumer_groups_mgmt_client_factory,
                                                                      disaster_recovery_mgmt_client_factory,
                                                                      cluster_mgmt_client_factory,
-                                                                     private_endpoint_connections_mgmt_client_factory,
-                                                                     private_link_mgmt_client_factory,
                                                                      schema_registry_mgmt_client_factory,
                                                                      application_group_mgmt_client_factory)
 
@@ -48,16 +46,6 @@ def load_command_table(self, _):
     eh_geodr_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventhub.operations#DisasterRecoveryConfigsOperations.{}',
         client_factory=disaster_recovery_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_EVENTHUB)
-
-    eh_private_endpoints_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventhub.operations#PrivateEndpointConnectionsOperations.{}',
-        client_factory=private_endpoint_connections_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_EVENTHUB)
-
-    eh_private_links_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventhub.operations#PrivateLinkResourcesOperations.{}',
-        client_factory=private_link_mgmt_client_factory,
         resource_type=ResourceType.MGMT_EVENTHUB)
 
     eh_schema_registry_util = CliCommandType(
