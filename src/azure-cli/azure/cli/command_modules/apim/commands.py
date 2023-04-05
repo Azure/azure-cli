@@ -10,7 +10,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.apim._format import (service_output_format)
 from azure.cli.command_modules.apim._client_factory import (cf_service, cf_api, cf_product, cf_nv, cf_apiops,
                                                             cf_apirelease, cf_apirevision, cf_apiversionset,
-                                                            cf_apischema, cf_ds)
+                                                            cf_apischema, cf_ds, cf_graphqlapiresolver)
 
 
 def load_command_table(self, _):
@@ -62,6 +62,11 @@ def load_command_table(self, _):
     apids_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.apimanagement.operations#DeletedServicesOperations.{}',
         client_factory=cf_ds
+    )
+
+    graphql_api_resolver = CliCommandType(
+        operations_tmpl='azure.mgmt.apimanagement.operations#GraphQLApiResolverOperations.{}',
+        client_factory=cf_graphqlapiresolver
     )
 
     # pylint: disable=line-too-long
@@ -154,3 +159,8 @@ def load_command_table(self, _):
         g.custom_command('list', 'apim_ds_list')
         g.custom_show_command('show', 'apim_ds_get')
         g.custom_command('purge', 'apim_ds_purge')
+
+    with self.command_group('apim graphqlapi resolver', graphql_api_resolver) as g:
+        g.custom_command('create', 'apim_graphqlapi_resolver_create')
+        g.custom_command('show', 'apim_graphqlapi_resolver_get')
+        g.custom_command('list', 'apim_graphqlapi_resolver_list')

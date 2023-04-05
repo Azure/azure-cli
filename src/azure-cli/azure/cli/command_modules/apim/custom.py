@@ -37,7 +37,7 @@ from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiMa
                                              OpenIdAuthenticationSettingsContract, ProductContract, ProductState,
                                              NamedValueCreateContract, VersioningScheme, ApiVersionSetContract,
                                              OperationContract, ApiManagementServiceCheckNameAvailabilityParameters,
-                                             ApiReleaseContract, SchemaContract)
+                                             ApiReleaseContract, SchemaContract, ResolverContract)
 
 
 # Helpers
@@ -952,3 +952,66 @@ def apim_ds_purge(client, service_name, location, no_wait=False):
         client.deleted_services.begin_purge,
         service_name=service_name,
         location=location)
+
+# Graphql Resolver Operations
+
+
+def apim_graphqlapi_resolver_create(client, resource_group_name, service_name, api_id, resolver_id, resolver_name , path, description=None, no_wait=True):
+    """Creates a new Resolver. """
+    resource_group_name="anan68"
+    service_name="anan68-apim"
+    api_id="testapi"
+    resolver_id="new-resolver"
+    parameters = ResolverContract(
+        display_name="Query-allFamilies",
+        path= "Query/allFamilies",
+        description="A GraphQL Resolver example"
+    )
+    return sdk_no_wait(no_wait, client.graph_ql_api_resolver.create_or_update,
+                       resource_group_name=resource_group_name,
+                       service_name=service_name,
+                       api_id=api_id,
+                       resolver_id=resolver_id,
+                       parameters=parameters)
+
+    response =  client.graph_ql_api_resolver.create_or_update(
+                      resource_group_name="anan68",
+                       service_name="anan68-apim",
+                       api_id="testapi",
+                       resolver_id="new-resolver",
+                       parameters= {
+                            "properties": {
+                                 "displayName": "Query-allFamilies",
+                                 "path": "Query/allFamilies",
+                                 "description": "A GraphQL Resolver example",
+                            }
+                       },
+                    )
+    print(response)
+    return response
+    # print(parameters)
+    # return sdk_no_wait(no_wait, client.graph_ql_api_resolver.create_or_update,
+    #                    resource_group_name=resource_group_name,
+    #                    service_name=service_name,
+    #                    api_id=api_id,
+    #                    resolver_id=resolver_id,
+    #                    parameters=parameters)
+
+def apim_graphqlapi_resolver_get(client, resource_group_name, service_name, api_id, resolver_id, no_wait=False):
+    
+    
+
+    return sdk_no_wait(no_wait, client.graph_ql_api_resolver.get,
+                       resource_group_name=resource_group_name,
+                       service_name=service_name,
+                       api_id=api_id,
+                       resolver_id=resolver_id)
+
+def apim_graphqlapi_resolver_list(client, resource_group_name, service_name, api_id, no_wait=False):
+    
+    
+
+    return sdk_no_wait(no_wait, client.graph_ql_api_resolver.list_by_api,
+                       resource_group_name=resource_group_name,
+                       service_name=service_name,
+                       api_id=api_id)

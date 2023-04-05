@@ -420,3 +420,24 @@ def load_arguments(self, _):
         c.argument(
             'service_name', options_list=['--service-name', '-n'],
             help="The name of the soft deleted API Management service instance.")
+    
+    with self.argument_context('apim graphql api resolver create') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('resolver_name',
+                   help='Resolver Name.')
+        c.argument('api_id', arg_type=api_id, required=True)
+        c.argument('path', help='Path is type/field being resolved.')
+        c.argument('resolver_id',required=True)
+    
+    with self.argument_context('apim graphql api resolver get') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('api_id', arg_type=api_id, required=True)
+        c.argument('resolver_id',required=True)
+    
+    with self.argument_context('apim graphql api resolver list') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('api_id', arg_type=api_id, required=True)
+        
