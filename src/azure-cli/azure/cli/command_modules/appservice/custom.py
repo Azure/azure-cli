@@ -379,7 +379,7 @@ def validate_container_app_create_options(runtime=None, deployment_container_ima
     return len([x for x in opts if x]) == 1  # you can only specify one out the combinations
 
 
-def parse_docker_image_name(deployment_container_image_name):
+def parse_docker_image_name(deployment_container_image_name, environment=None):
     if not deployment_container_image_name:
         return None
     non_url = "/" not in deployment_container_image_name
@@ -390,6 +390,8 @@ def parse_docker_image_name(deployment_container_image_name):
     if parsed_url.scheme:
         return parsed_url.hostname
     hostname = urlparse("https://{}".format(deployment_container_image_name)).hostname
+    if environment:
+        return hostname
     return "https://{}".format(hostname)
 
 
@@ -1504,7 +1506,29 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
     if not updating_ip_security_restrictions:
         setattr(configs, 'ip_security_restrictions', None)
         setattr(configs, 'scm_ip_security_restrictions', None)
+
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        return update_configuration_polling(cmd, resource_group_name, name, slot, configs)
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+
+
+def update_configuration_polling(cmd, resource_group_name, name, slot, configs):
+    try:
+        return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    except Exception as ex:  # pylint: disable=broad-except
+        poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
+        if ex.response.status_code == 202 and poll_url:
+            r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+            poll_timeout = time.time() + 60 * 2  # 2 minute timeout
+
+            while r.status_code != 200 and time.time() < poll_timeout:
+                time.sleep(5)
+                r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+
+            if r.status_code == 200:
+                return r.json()
+        else:
+            raise CLIError(ex)
 
 
 def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None):
@@ -3694,7 +3718,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         if image is None:
             image = DEFAULT_CENTAURI_IMAGE
 
-    docker_registry_server_url = parse_docker_image_name(image)
+    docker_registry_server_url = parse_docker_image_name(image, environment)
 
     if functions_version == '2' and functionapp_def.location in FUNCTIONS_NO_V2_REGIONS:
         raise ValidationError("2.x functions are not supported in this region. To create a 3.x function, "
