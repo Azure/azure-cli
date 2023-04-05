@@ -93,10 +93,10 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
 
 # DisasterRecoveryConfigs Authorization Region
-    with self.command_group('servicebus georecovery-alias authorization-rule', sb_geodr_util, client_factory=disaster_recovery_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
+    '''with self.command_group('servicebus georecovery-alias authorization-rule', sb_geodr_util, client_factory=disaster_recovery_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
         g.command('list', 'list_authorization_rules')
         g.show_command('show', 'get_authorization_rule')
-        g.command('keys list', 'list_keys')
+        g.command('keys list', 'list_keys')'''
 
 # MigrationConfigs Region
     with self.command_group('servicebus migration', sb_migration_util, client_factory=migration_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
