@@ -137,11 +137,6 @@ def load_command_table(self, _):
         g.custom_command('exists', 'cli_geodr_name_exists')
         g.command('delete', 'delete')
 
-    with self.command_group('eventhubs georecovery-alias authorization-rule', eh_geodr_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=disaster_recovery_mgmt_client_factory) as g:
-        g.command('list', 'list_authorization_rules')
-        g.show_command('show', 'get_authorization_rule')
-        g.command('keys list', 'list_keys')
-
 # NetwrokRuleSet Region
     with self.command_group('eventhubs namespace network-rule', eh_namespace_util, min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
         g.custom_command('add', 'cli_networkrule_createupdate', validator=validate_subnet)
