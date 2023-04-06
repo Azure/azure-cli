@@ -5,7 +5,6 @@ from azure.cli.core.azclierror import (
     CLIError
 )
 
-AKS_CLUSTER_API = "2023-01-01" # "2023-01-01"
 
 def addon_put(cmd, cluster_subscription, cluster_resource_group_name, cluster_name):
     from azure.cli.core.util import send_raw_request
@@ -30,4 +29,3 @@ def addon_put(cmd, cluster_subscription, cluster_resource_group_name, cluster_na
                              body=body, headers=headers)
     except CLIError as e:
         raise UnknownError(e)
-    

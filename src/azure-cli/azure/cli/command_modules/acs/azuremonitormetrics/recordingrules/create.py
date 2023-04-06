@@ -1,0 +1,95 @@
+import json
+
+
+def get_recording_rules_template(cmd, azure_monitor_workspace_resource_id):
+    from azure.cli.core.util import send_raw_request
+    headers = ['User-Agent=azuremonitormetrics.get_recording_rules_template']
+    url = f"https://management.azure.com{azure_monitor_workspace_resource_id}/providers/microsoft.alertsManagement/alertRuleRecommendations?api-version={ALERTS_API}"
+    r = send_raw_request(cmd.cli_ctx, "GET", url, headers=headers)
+    data = json.loads(r.text)
+    return data['value']
+
+
+def put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, i):
+    from azure.cli.core.util import send_raw_request
+    body = json.dumps({
+        "id": default_rule_group_id,
+        "name": default_rule_group_name,
+        "type": "Microsoft.AlertsManagement/prometheusRuleGroups",
+        "location": mac_region,
+        "properties": {
+            "scopes": [
+                azure_monitor_workspace_resource_id
+            ],
+            "enabled": True,
+            "clusterName": cluster_name,
+            "interval": "PT1M",
+            "rules": default_rules_template[i]["properties"]["rulesArmTemplate"]["resources"][0]["properties"]["rules"]
+        }
+    })
+    for _ in range(3):
+        try:
+            headers = ['User-Agent=azuremonitormetrics.put_rules.' + default_rule_group_name]
+            send_raw_request(cmd.cli_ctx, "PUT", url,
+                             body=body, headers=headers)
+            error = None
+            break
+        except CLIError as e:
+            error = e
+    else:
+        raise error
+
+def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster_name, azure_monitor_workspace_resource_id, mac_region, raw_parameters):
+    # with urllib.request.urlopen("https://defaultrulessc.blob.core.windows.net/defaultrules/ManagedPrometheusDefaultRecordingRules.json") as url:
+    #     default_rules_template = json.loads(url.read().decode())
+    default_rules_template = get_recording_rules_template(cmd, azure_monitor_workspace_resource_id)
+    default_rule_group_name = "NodeRecordingRulesRuleGroup-{0}".format(cluster_name)
+    default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
+        cluster_subscription,
+        cluster_resource_group_name,
+        default_rule_group_name
+    )
+    url = "https://management.azure.com{0}?api-version={1}".format(
+        default_rule_group_id,
+        RULES_API
+    )
+    put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, 0)
+
+    default_rule_group_name = "KubernetesRecordingRulesRuleGroup-{0}".format(cluster_name)
+    default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
+        cluster_subscription,
+        cluster_resource_group_name,
+        default_rule_group_name
+    )
+    url = "https://management.azure.com{0}?api-version={1}".format(
+        default_rule_group_id,
+        RULES_API
+    )
+    put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, 1)
+
+    enable_windows_recording_rules = raw_parameters.get("enable_windows_recording_rules")
+
+    if enable_windows_recording_rules is True:
+        default_rule_group_name = "NodeRecordingRulesRuleGroup-Win-{0}".format(cluster_name)
+        default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
+            cluster_subscription,
+            cluster_resource_group_name,
+            default_rule_group_name
+        )
+        url = "https://management.azure.com{0}?api-version={1}".format(
+            default_rule_group_id,
+            RULES_API
+        )
+        put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, 2)
+
+        default_rule_group_name = "NodeAndKubernetesRecordingRulesRuleGroup-Win-{0}".format(cluster_name)
+        default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
+            cluster_subscription,
+            cluster_resource_group_name,
+            default_rule_group_name
+        )
+        url = "https://management.azure.com{0}?api-version={1}".format(
+            default_rule_group_id,
+            RULES_API
+        )
+        put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, 3)
