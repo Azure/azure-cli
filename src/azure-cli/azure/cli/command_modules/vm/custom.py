@@ -927,6 +927,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                            'The "UbuntuLTS" will be removed with the breaking change release of Fall 2023.')
         if image in ["RHEL", "Debian", "CentOS", "Flatcar"]:
             logger.warning('Consider using the image alias including the version of the distribution you want to use. '
+                           'In October 2023, the aliases `CentOS`, `Debian`, `Flatcar`, and `RHEL` will be removed.'
                            'For example: please use Debian11 instead of Debian')
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -3156,6 +3157,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                            'The "UbuntuLTS" will be removed with the breaking change release of Fall 2023.')
         if image in ["RHEL", "Debian", "CentOS", "Flatcar"]:
             logger.warning('Consider using the image alias including the version of the distribution you want to use. '
+                           'In October 2023, the aliases `CentOS`, `Debian`, `Flatcar`, and `RHEL` will be removed.'
                            'For example: please use Debian11 instead of Debian')
 
     # The default load balancer will be expected to be changed from Basic to Standard.

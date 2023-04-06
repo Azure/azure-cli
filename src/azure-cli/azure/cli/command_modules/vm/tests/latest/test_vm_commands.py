@@ -50,16 +50,16 @@ def _write_config_file(user_name):
 class VMImageListByAliasesScenarioTest(ScenarioTest):
 
     def test_vm_image_list_by_alias(self):
-        result = self.cmd('vm image list --offer ubuntu').get_output_in_json()
+        result = self.cmd('vm image list --offer CentOS').get_output_in_json()
         self.assertTrue(len(result) >= 1)
-        self.assertEqual(result[0]['publisher'], 'Canonical')
-        self.assertTrue(result[0]['sku'].endswith('LTS'))
+        self.assertEqual(result[0]['publisher'], 'OpenLogic')
+        self.assertTrue(result[0]['urnAlias'].startswith('Cent'))
 
     def test_vm_image_list_by_alias_and_filtered_by_arch(self):
-        result = self.cmd('vm image list --offer ubuntu --architecture x64').get_output_in_json()
+        result = self.cmd('vm image list --offer CentOS --architecture x64').get_output_in_json()
         self.assertTrue(len(result) >= 1)
-        self.assertEqual(result[0]['publisher'], 'Canonical')
-        self.assertTrue(result[0]['sku'].endswith('LTS'))
+        self.assertEqual(result[0]['publisher'], 'OpenLogic')
+        self.assertTrue(result[0]['urnAlias'].startswith('Cent'))
         self.assertEqual(result[0]['architecture'], 'x64')
 
 
@@ -388,7 +388,7 @@ class VMGeneralizeScenarioTest(ScenarioTest):
             'vm': 'vm-generalize'
         })
 
-        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username ubuntu --image CentOS85Gen2 --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
+        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username centos --image CentOS85Gen2 --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
         self.cmd('vm deallocate -g {rg} -n {vm}')
         # Should be able to generalize the VM after it has been stopped
         self.cmd('vm generalize -g {rg} -n {vm}', checks=self.is_empty())
@@ -396,7 +396,8 @@ class VMGeneralizeScenarioTest(ScenarioTest):
 
         # capture to a custom image
         self.kwargs['image'] = 'myImage2'
-        self.cmd('image create -g {rg} -n {image} --source {vm} --zone-resilient -l {loc}', checks=[
+        # zone resilient image, hyper-v generation V2 to adopt to CentOS 8.5 Gen2
+        self.cmd('image create -g {rg} -n {image} --source {vm} --zone-resilient --hyper-v-generation V2 -l {loc}', checks=[
             self.check('name', '{image}'),
             self.check('sourceVirtualMachine.id', vm['id']),
             self.check('storageProfile.zoneResilient', True)
@@ -643,7 +644,7 @@ class VMCustomImageTest(ScenarioTest):
         self.cmd('vm deallocate -g {rg} -n {vm1}')
         self.cmd('vm generalize -g {rg} -n {vm1}')    
 
-        self.cmd('image create -g {rg} -n {image1} --source {vm1}')
+        self.cmd('image create -g {rg} -n {image1} --source {vm1} --hyper-v-generation V2')
 
         self.cmd('image list -g {rg}', checks=self.check('length(@)', 1))
         self.cmd('image update -n {image1} -g {rg} --tags foo=bar', checks=self.check('tags.foo', 'bar'))
@@ -863,7 +864,7 @@ class VMAttachDisksOnCreate(ScenarioTest):
             'data_snapshot': 'dSnapshot',
             'data_disk': 'dDisk'
         })
-        self.cmd('snapshot create -g {rg} -n {os_snapshot} --source {origin_os_disk} --no-wait')
+        self.cmd('snapshot create -g {rg} -n {os_snapshot} --hyper-v-generation V2 --source {origin_os_disk} --no-wait')
         self.cmd('disk create -g {rg} -n {os_disk} --source {os_snapshot} --no-wait')
         self.cmd('snapshot create -g {rg} -n {data_snapshot} --source {origin_data_disk} --no-wait')
         self.cmd('disk create -g {rg} -n {data_disk} --source {data_snapshot} --no-wait')
@@ -892,7 +893,7 @@ class VMAttachDisksOnCreate(ScenarioTest):
     @ResourceGroupPreparer()
     def test_vm_create_by_attach_unmanaged_os_and_data_disks(self, resource_group):
         # creating a vm
-        self.cmd('vm create -g {rg} -n vm1 --use-unmanaged-disk --image CentOS85Gen2 --admin-username centosadmin --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n vm1 --use-unmanaged-disk --image CentOS --admin-username centosadmin --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
         self.cmd('vm unmanaged-disk attach -g {rg} --vm-name vm1 --new --size-gb 2')
         result = self.cmd('vm show -g {rg} -n vm1').get_output_in_json()
         self.kwargs['os_disk_vhd'] = result['storageProfile']['osDisk']['vhd']['uri']
@@ -931,7 +932,7 @@ class VMAttachDisksOnCreate(ScenarioTest):
             'data_disk': 'dDisk',
             'data_disk2': 'dDisk2'
         })
-        self.cmd('snapshot create -g {rg} -n {os_snapshot} --source {origin_os_disk}')
+        self.cmd('snapshot create -g {rg} -n {os_snapshot} --hyper-v-generation V2 --source {origin_os_disk}')
         self.cmd('disk create -g {rg} -n {os_disk} --source {os_snapshot}')
         self.cmd('snapshot create -g {rg} -n {data_snapshot} --source {origin_data_disk}')
         self.cmd('disk create -g {rg} -n {data_disk} --source {data_snapshot}')
