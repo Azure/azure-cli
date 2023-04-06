@@ -97,25 +97,6 @@ def cli_namespace_exists(cmd, client, name):
         return client.check_name_availability(parameters={'name': name})
 
 
-# DisasterRecoveryConfigs Region
-def cli_georecovery_alias_create(cmd, client, resource_group_name, namespace_name, alias,
-                                 partner_namespace, alternate_name=None):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        parameters = {
-            'partner_namespace': partner_namespace,
-            'alternate_name': alternate_name,
-        }
-        return client.create_or_update(resource_group_name=resource_group_name, namespace_name=namespace_name,
-                                       alias=alias, parameters=parameters)
-
-
-def cli_georecovery_alias_exists(cmd, client, resource_group_name, namespace_name, name):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        return client.check_name_availability(resource_group_name=resource_group_name,
-                                              namespace_name=namespace_name,
-                                              parameters={'name': name})
-
-
 # MigrationConfigs Region
 def cli_migration_start(cmd, client, resource_group_name, namespace_name,
                         target_namespace, post_migration_name, config_name="$default"):

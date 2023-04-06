@@ -58,14 +58,9 @@ def load_command_table(self, _):
         g.custom_command('create', 'sb_rule_create', supports_no_wait=True)
 
 # DisasterRecoveryConfigs Region
-    with self.command_group('servicebus georecovery-alias', sb_geodr_util, client_factory=disaster_recovery_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
-        g.custom_command('set', 'cli_georecovery_alias_create')
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.command('break-pair', 'break_pairing')
-        g.command('fail-over', 'fail_over')
-        g.custom_command('exists', 'cli_georecovery_alias_exists')
-        g.command('delete', 'delete')
+    with self.command_group('servicebus georecovery-alias', custom_command_type=sb_namespace_custom,
+                            is_preview=True) as g:
+        g.custom_command('set', 'set_georecovery_alias', supports_no_wait=True)
 
 # MigrationConfigs Region
     with self.command_group('servicebus migration', sb_migration_util, client_factory=migration_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
