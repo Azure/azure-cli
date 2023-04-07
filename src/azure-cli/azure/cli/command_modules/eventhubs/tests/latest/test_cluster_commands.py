@@ -34,7 +34,7 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
 
         # Create Cluster
         # Created test-migration resource group for cluster cmdlets to monitor the cluster to save the cost.
-        # Same resource group can be used to rerun the test or you can replace the resource-group but any.
+        # Same resource group can be used to rerun the test or you can change the resource-group by replacing test-migration.
         self.cmd('eventhubs cluster create --resource-group test-migration --name {clustername} --location eastus --tags tag1=value1',
                  checks=[self.check('name', self.kwargs['clustername'])])
 
