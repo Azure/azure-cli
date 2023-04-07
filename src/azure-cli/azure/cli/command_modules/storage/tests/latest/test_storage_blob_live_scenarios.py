@@ -146,6 +146,14 @@ class StorageBlobQueryTests(StorageScenarioMixin, LiveScenarioTest):
         result = self.storage_cmd('storage blob query -c {} -n {} --query-expression "{}"',
                                   account_info, container, csv_blob, query_string).output
         self.assertIsNotNone(result)
+        #test blob-url
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        blob_uri = self.storage_cmd('storage blob generate-sas -n {} -c {} --expiry {} --permissions '
+                                    'rwad --https-only --full-uri -o tsv',
+                                    account_info, csv_blob, container, expiry).output.strip()
+        result = self.cmd('storage blob query --blob-url {} --query-expression "{}"'
+                          .format(blob_uri, query_string)).output
+        self.assertIsNotNone(result)
 
         # test csv output
         temp_dir = self.create_temp_dir()

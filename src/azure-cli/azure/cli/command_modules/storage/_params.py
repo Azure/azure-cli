@@ -933,7 +933,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob rewrite', resource_type=ResourceType.DATA_STORAGE_BLOB,
                                min_api='2020-04-08') as c:
-        c.register_blob_arguments_track2()
+        c.register_blob_arguments()
         c.register_precondition_options()
 
         c.argument('source_url', options_list=['--source-uri', '-u'],
@@ -954,7 +954,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 'configured to allow overrides. Otherwise an error will be raised.')
 
     with self.argument_context('storage blob update') as c:
-        c.register_blob_arguments_track2()
+        c.register_blob_arguments()
         c.register_precondition_options()
         t_blob_content_settings = self.get_sdk('_models#ContentSettings', resource_type=ResourceType.DATA_STORAGE_BLOB)
         c.register_content_settings_argument(t_blob_content_settings, update=True, process_md5=True)
@@ -990,15 +990,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                          "The priority can be set on a blob only once, default value is Standard.")
 
     with self.argument_context('storage blob set-legal-hold') as c:
-        c.register_blob_arguments_track2()
+        c.register_blob_arguments()
         c.argument('legal_hold', arg_type=get_three_state_flag(),
                    help='Specified if a legal hold should be set on the blob.')
 
     with self.argument_context('storage blob immutability-policy delete') as c:
-        c.register_blob_arguments_track2()
+        c.register_blob_arguments()
 
     with self.argument_context('storage blob immutability-policy set') as c:
-        c.register_blob_arguments_track2()
+        c.register_blob_arguments()
         c.argument('expiry_time', type=get_datetime_type(False),
                    help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
         c.argument('policy_mode', arg_type=get_enum_type(['Locked', 'Unlocked']), help='Lock or Unlock the policy')
@@ -1173,7 +1173,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob lease acquire') as c:
         c.register_precondition_options()
-        c.register_blob_arguments_track2()
+        c.register_blob_arguments()
         c.extra('lease_id', options_list='--proposed-lease-id', help='Proposed lease ID, in a GUID string format. '
                 'The Blob service returns 400 (Invalid request) if the proposed lease ID is not in the correct format.')
         c.argument('lease_duration', help='Specify the duration of the lease, in seconds, or negative one (-1) for '
@@ -1182,7 +1182,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob lease break') as c:
         c.register_precondition_options()
-        c.register_blob_arguments_track2()
+        c.register_blob_arguments()
         c.argument('lease_break_period', type=int,
                    help="This is the proposed duration of seconds that the lease should continue before it is broken, "
                    "between 0 and 60 seconds. This break period is only used if it is shorter than the time remaining "
@@ -1193,7 +1193,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob lease change') as c:
         c.register_precondition_options()
-        c.register_blob_arguments_track2()
+        c.register_blob_arguments()
         c.extra('proposed_lease_id', help='Proposed lease ID, in a GUID string format. The Blob service returns 400 '
                 '(Invalid request) if the proposed lease ID is not in the correct format.', required=True)
         c.extra('lease_id', help='Required if the blob has an active lease.', required=True)
@@ -1201,7 +1201,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     for item in ['release', 'renew']:
         with self.argument_context('storage blob lease {}'.format(item)) as c:
             c.register_precondition_options()
-            c.register_blob_arguments_track2()
+            c.register_blob_arguments()
             c.extra('lease_id', help='Required if the blob has an active lease.', required=True)
 
     with self.argument_context('storage copy') as c:
@@ -1295,7 +1295,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage blob copy start', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         from ._validators import validate_source_url
 
-        c.register_blob_arguments_track2()
+        c.register_blob_arguments()
         c.register_precondition_options()
         c.register_precondition_options(prefix='source_')
         c.register_source_uri_arguments(validator=validate_source_url)
