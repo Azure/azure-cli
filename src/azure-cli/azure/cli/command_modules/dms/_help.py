@@ -287,7 +287,9 @@ parameters:
                     // optional, migrates the enumerated events
                     'selected_events': [
                         'sourceSchema1.nightly_maintenance'
-                    ]
+                    ],
+                    // Optional. If true, the database will be selected for schema migration.
+                    "select_database_for_schema_migration": "true|false"
                 },
                 ...n
             ],
