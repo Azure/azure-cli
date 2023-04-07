@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "eventhubs eventhub",
+    "eventhubs eventhub consumer-group",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage Azure EventHubs eventhub
+    """Manage Azure Event Hubs consumergroup.
     """
     pass
 
