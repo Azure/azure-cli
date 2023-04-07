@@ -134,7 +134,7 @@ def internal_validate_lock_parameters(namespace, resource_group, resource_provid
     parts = resource_type.split('/')
     if resource_provider_namespace is None:
         if len(parts) == 1:
-            raise CLIError('A resource namespace is required if the name, --resource, --resource-group is present.'
+            raise CLIError('A resource namespace is required if the --name, --resource, --resource-group is present.'
                            'Expected <namespace>/<type> or --namespace=<namespace>')
     elif len(parts) != 1:
         raise CLIError('Resource namespace specified in both --resource-type and --namespace')
