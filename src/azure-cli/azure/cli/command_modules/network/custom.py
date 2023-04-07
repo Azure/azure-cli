@@ -5261,18 +5261,19 @@ class PublicIpPrefixCreate(_PublicIpPrefixCreate):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZDictArg, AAZStrArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.custom_ip_prefix_name = AAZResourceIdArg(
-            options=['--custom-ip-prefix-name'],
-            help="A custom prefix from which the public prefix derived. If you'd like to cross subscription, please use Resource ID instead.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/customIPPrefixes/{}"
-            )
+        args_schema.custom_ip_prefix_name._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/customIPPrefixes/{}"
         )
-        args_schema.custom_ip_prefix._registered = False
+        args_schema.ip_tags = AAZDictArg(
+            options=["--ip-tags"],
+            help="The list of tags associated with the public IP prefix in 'TYPE=VAL' format.",
+        )
+        args_schema.ip_tags.Element = AAZStrArg()
         args_schema.type._registered = False
         args_schema.sku._registered = False
+        args_schema.ip_tags_list._registered = False
 
         return args_schema
 
@@ -5281,8 +5282,11 @@ class PublicIpPrefixCreate(_PublicIpPrefixCreate):
         args.sku = {'name': 'Standard'}
         if has_value(args.edge_zone):
             args.type = 'EdgeZone'
-        if has_value(args.custom_ip_prefix_name):
-            args.custom_ip_prefix = {'id': args.custom_ip_prefix_name}
+        if has_value(args.ip_tags):
+            ip_tags = []
+            for k, v in args.ip_tags.to_serialized_data().items():
+                ip_tags.append({"ip_tag_type": k, "tag": v})
+            args.ip_tags_list = ip_tags
 # endregion
 
 

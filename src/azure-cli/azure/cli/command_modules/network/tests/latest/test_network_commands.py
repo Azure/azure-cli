@@ -704,6 +704,18 @@ class NetworkPublicIpPrefix(ScenarioTest):
             ]
         )
 
+    @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix_with_ip_tags', location='eastus2')
+    def test_network_public_ip_prefix_with_ip_tags(self, resource_group):
+        self.kwargs.update({
+            'prefix': 'prefix1',
+            'ip_tags': 'RoutingPreference=Internet'
+        })
+        # Test prefix create with param --ip-tags
+        self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30 --ip-tags {ip_tags}',
+                 checks=[
+                     self.check('ipTags[0].ipTagType', 'RoutingPreference'),
+                     self.check('ipTags[0].tag', 'Internet')])
+
 
 class NetworkMultiIdsShowScenarioTest(ScenarioTest):
     @live_only()
