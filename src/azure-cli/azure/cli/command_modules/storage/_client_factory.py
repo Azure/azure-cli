@@ -389,6 +389,9 @@ def cf_share_service(cli_ctx, kwargs):
     sas_token = kwargs.pop('sas_token', None)
     account_name = kwargs.pop('account_name', None)
     account_url = kwargs.pop('account_url', None)
+    enable_file_backup_request_intent = kwargs.pop('enable_file_backup_request_intent', None)
+    if enable_file_backup_request_intent:
+        client_kwargs['token_intent'] = 'backup'
     if connection_string:
         return t_share_service.from_connection_string(conn_str=connection_string, **client_kwargs)
     if not account_url:
