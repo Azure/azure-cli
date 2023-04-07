@@ -119,9 +119,11 @@ def validate_import_key(key):
 
 
 def validate_import_feature(feature):
+    invalid_characters = ['%', ':']
+
     if feature:
-        if '%' in feature:
-            logger.warning("Ignoring invalid feature '%s'. Feature name cannot contain the '%%' character.", feature)
+        if any(invalid_char in feature for invalid_char in invalid_characters):
+            logger.warning("Ignoring invalid feature '%s'. Feature name cannot contain the following characters: '%s'.", feature, "', '".join(invalid_characters))
             return False
     else:
         logger.warning("Ignoring invalid feature ''. Feature name cannot be empty.")
