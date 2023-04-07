@@ -1395,7 +1395,6 @@ def export_group_as_template(
 
     return result.template
 
-
 def create_application(cmd, resource_group_name,
                        application_name, managedby_resource_group_id,
                        kind, managedapp_definition_id=None, location=None,
@@ -2116,7 +2115,7 @@ def list_template_specs(cmd, resource_group_name=None, name=None):
         return rcf.template_specs.list_by_resource_group(resource_group_name)
     return rcf.template_specs.list_by_subscription()
 
-def create_deployment_stack_at_subscription(cmd, name, location, delete_resources=False, delete_resource_groups=False, delete_all=False, deployment_resource_group=None, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_mode = None, deny_settings_excluded_principals = None, deny_settings_apply_to_child_scopes = False, tags=None, yes=False):
+def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_mode, delete_resources=False, delete_resource_groups=False, delete_all=False, deployment_resource_group=None, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_excluded_principals = None, deny_settings_apply_to_child_scopes = False, tags=None, yes=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
     delete_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
@@ -2133,6 +2132,7 @@ def create_deployment_stack_at_subscription(cmd, name, location, delete_resource
     if delete_resources:
         delete_resources_enum = delete_model
     
+    deny_settings_mode = None if deny_settings_mode.lower() == "none" else deny_settings_mode
     deny_settings_enum = None
     if deny_settings_mode:
         if deny_settings_mode.lower().replace(' ', '') == "denydelete":
@@ -2200,7 +2200,7 @@ def create_deployment_stack_at_subscription(cmd, name, location, delete_resource
     else:
         raise InvalidArgumentValueError("Please enter one of the following: template file, template spec, or template url")
     
-    action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesSharedActionOnUnmanage(resources = delete_resources_enum, resource_groups=delete_resource_groups_enum)
+    action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesActionOnUnmanage(resources = delete_resources_enum, resource_groups=delete_resource_groups_enum)
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = rcf.deployment_stacks.models.DenySettings(mode = deny_settings_enum, excluded_principals = excluded_principals_array, apply_to_child_scopes = apply_to_child_scopes)
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(description = description, location = location, action_on_unmanage = action_on_unmanage_model, deployment_scope = deployment_scope, deny_settings = deny_settings_model, tags=tags)
@@ -2248,9 +2248,9 @@ def list_deployment_stack_at_subscription(cmd):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     return rcf.deployment_stacks.list_at_subscription()
 
-def delete_deployment_stack_at_subscription(cmd, name=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False):
+def delete_deployment_stack_at_subscription(cmd, name=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-    confirmation = "Are you sure you want to delete this stack"
+    confirmation = "Are you also sure you want to delete the specified resources: "
     delete_list = []
 
     delete_resources_enum = rcf.deployment_stacks.models.UnmanageActionResourceMode.Detach
@@ -2272,14 +2272,9 @@ def delete_deployment_stack_at_subscription(cmd, name=None, id=None, delete_reso
     
     #build confirmation string
     from knack.prompting import prompt_y_n
-    if not yes:
-        if not delete_list:
-            response = prompt_y_n(confirmation + "?")
-            if not response: return None
-        else:
-            confirmation += " and the specified resources: "
-            response = prompt_y_n(confirmation + ", ".join(set(delete_list)) + '?')
-            if not response: return None
+    if delete_list:
+        response = prompt_y_n(confirmation + ", ".join(set(delete_list)) + '?')
+        if not response: return None
 
     if name or id:
         rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
@@ -2305,7 +2300,7 @@ def export_template_deployment_stack_at_subscription(cmd, name=None, id=None):
         return rcf.deployment_stacks.export_template_at_subscription(id.split('/')[-1])
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id.")
 
-def create_deployment_stack_at_resource_group(cmd, name, resource_group, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_mode = None, deny_settings_excluded_principals = None, deny_settings_apply_to_child_scopes = False, yes=False, tags=None):
+def create_deployment_stack_at_resource_group(cmd, name, resource_group, deny_settings_mode, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_excluded_principals = None, deny_settings_apply_to_child_scopes = False, yes=False, tags=None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
@@ -2322,6 +2317,7 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, delete_
     if delete_resources:
         delete_resources_enum = delete_model
     
+    deny_settings_mode = None if deny_settings_mode.lower() == "none" else deny_settings_mode
     deny_settings_enum = None
     if deny_settings_mode:
         if deny_settings_mode.lower().replace(' ', '') == "denydelete":
@@ -2377,7 +2373,7 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, delete_
     else:
         raise InvalidArgumentValueError("Please enter one of the following: template file, template spec, or template url")
     
-    action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesSharedActionOnUnmanage(resources = delete_resources_enum, resource_groups = delete_resource_groups_enum)
+    action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesActionOnUnmanage(resources = delete_resources_enum, resource_groups = delete_resource_groups_enum)
     #removed the following code because it is not in service yet, need to add this back eventually
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = rcf.deployment_stacks.models.DenySettings(mode = deny_settings_enum, excluded_principals = excluded_principals_array, apply_to_child_scopes = apply_to_child_scopes)
@@ -2431,9 +2427,9 @@ def list_deployment_stack_at_resource_group(cmd, resource_group):
         return rcf.deployment_stacks.list_at_resource_group(resource_group)
     raise InvalidArgumentValueError("Please enter the resource group")
 
-def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False):
+def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-    confirmation = "Are you sure you want to delete this stack"
+    confirmation = "Are you also sure you want to delete the specified resources: "
     delete_list = []
 
     delete_resources_enum = rcf.deployment_stacks.models.UnmanageActionResourceMode.Detach
@@ -2455,14 +2451,9 @@ def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group=Non
     
     #build confirmation string
     from knack.prompting import prompt_y_n
-    if not yes:
-        if not delete_list:
-            response = prompt_y_n(confirmation + "?")
-            if not response: return None
-        else:
-            confirmation += " and the specified resources: "
-            response = prompt_y_n(confirmation + ", ".join(set(delete_list)) + '?')
-            if not response: return None
+    if delete_list:
+        response = prompt_y_n(confirmation + ", ".join(set(delete_list)) + '?')
+        if not response: return None
 
     if name and resource_group:
         try:
@@ -2494,7 +2485,7 @@ def export_template_deployment_stack_at_resource_group(cmd, name=None, resource_
         return rcf.deployment_stacks.export_template_at_resource_group(stack_arr[4], stack_arr[-1])
     raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
 
-def create_deployment_stack_at_management_group(cmd, management_group_id, name, location, deployment_subscription=None, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_mode = None, deny_settings_excluded_principals = None, deny_settings_apply_to_child_scopes = False, yes=False, tags=None):
+def create_deployment_stack_at_management_group(cmd, management_group_id, name, location, deny_settings_mode, deployment_subscription=None, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_excluded_principals = None, deny_settings_apply_to_child_scopes = False, yes=False, tags=None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
@@ -2511,6 +2502,7 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
     if delete_resources:
         delete_resources_enum = delete_model
     
+    deny_settings_mode = None if deny_settings_mode.lower() == "none" else deny_settings_mode
     deny_settings_enum = None
     if deny_settings_mode:
         if deny_settings_mode.lower().replace(' ', '') == "denydelete":
@@ -2573,7 +2565,7 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
     else:
         raise InvalidArgumentValueError("Please enter one of the following: template file, template spec, or template url")
     
-    action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesSharedActionOnUnmanage(resources = delete_resources_enum, resource_groups=delete_resource_groups_enum)
+    action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesActionOnUnmanage(resources = delete_resources_enum, resource_groups=delete_resource_groups_enum)
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = rcf.deployment_stacks.models.DenySettings(mode = deny_settings_enum, excluded_principals = excluded_principals_array, apply_to_child_scopes = apply_to_child_scopes)
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(description = description, location = location, action_on_unmanage = action_on_unmanage_model, deployment_scope = deployment_scope, deny_settings = deny_settings_model, tags=tags)
@@ -2621,9 +2613,9 @@ def list_deployment_stack_at_management_group(cmd, management_group_id):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     return rcf.deployment_stacks.list_at_management_group(management_group_id)
 
-def delete_deployment_stack_at_management_group(cmd, management_group_id, name=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False):
+def delete_deployment_stack_at_management_group(cmd, management_group_id, name=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-    confirmation = "Are you sure you want to delete this stack"
+    confirmation = "Are you also sure you want to delete the specified resources: "
     delete_list = []
 
     delete_resources_enum = rcf.deployment_stacks.models.UnmanageActionResourceMode.Detach
@@ -2645,14 +2637,9 @@ def delete_deployment_stack_at_management_group(cmd, management_group_id, name=N
     
     #build confirmation string
     from knack.prompting import prompt_y_n
-    if not yes:
-        if not delete_list:
-            response = prompt_y_n(confirmation + "?")
-            if not response: return None
-        else:
-            confirmation += " and the specified resources: "
-            response = prompt_y_n(confirmation + ", ".join(set(delete_list)) + '?')
-            if not response: return None
+    if delete_list:
+        response = prompt_y_n(confirmation + ", ".join(set(delete_list)) + '?')
+        if not response: return None
 
     if name or id:
         rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
