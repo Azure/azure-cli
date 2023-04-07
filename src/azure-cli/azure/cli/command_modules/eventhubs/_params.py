@@ -12,8 +12,7 @@ def load_arguments_eh(self, _):
     from azure.cli.core.commands.parameters import tags_type, get_enum_type, resource_group_name_type, name_type, \
         get_location_type, get_three_state_flag, get_resource_name_completion_list
     from azure.cli.core.commands.validators import get_default_location_from_resource_group
-    from azure.cli.command_modules.eventhubs._completers import get_consumergroup_command_completion_list, \
-        get_eventhubs_command_completion_list
+    from azure.cli.command_modules.eventhubs._completers import get_eventhubs_command_completion_list
     from azure.cli.command_modules.eventhubs._validator import validate_storageaccount, validate_partner_namespace, validate_rights
     from knack.arguments import CLIArgumentType
     from azure.cli.core.profiles import ResourceType
@@ -143,34 +142,19 @@ def load_arguments_eh(self, _):
         c.argument('event_hub_name', id_part=None, arg_type=event_hub_name_arg_type)
         c.argument('authorization_rule_name', arg_type=name_type, id_part=None, help='Name of EventHub AuthorizationRule')
 
-
-# - ConsumerGroup Region
-    with self.argument_context('eventhubs eventhub consumer-group') as c:
-        c.argument('event_hub_name', arg_type=event_hub_name_arg_type, help='Name of EventHub')
-        c.argument('consumer_group_name', arg_type=name_type, id_part='child_name_2', completer=get_consumergroup_command_completion_list, help='Name of ConsumerGroup')
-
-    for scope in ['eventhubs eventhub consumer-group create', 'eventhubs eventhub consumer-group update']:
-        with self.argument_context(scope) as c:
-            c.argument('name', arg_type=name_type, help='Name of ConsumerGroup')
-            c.argument('user_metadata', help='Usermetadata is a placeholder to store user-defined string data with maximum length 1024. e.g. it can be used to store descriptive data, such as list of teams and their contact information also user-defined configuration settings can be stored.')
-
-    with self.argument_context('eventhubs eventhub consumer-group list') as c:
-        c.argument('event_hub_name', arg_type=event_hub_name_arg_type, id_part=None, help='Name of EventHub')
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-
 #   : Region Geo DR Configuration
-    with self.argument_context('eventhubs georecovery-alias') as c:
+    '''with self.argument_context('eventhubs georecovery-alias') as c:
         c.argument('alias', options_list=['--alias', '-a'], id_part='child_name_1', help='Name of Geo-Disaster Recovery Configuration Alias')
 
     with self.argument_context('eventhubs georecovery-alias exists') as c:
         c.argument('name', options_list=['--alias', '-a'], arg_type=name_type, help='Name of Geo Recovery Configs - Alias to check availability')
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')'''
 
     with self.argument_context('eventhubs georecovery-alias set') as c:
         c.argument('partner_namespace', required=True, validator=validate_partner_namespace, help='Name (if within the same resource group) or ARM Id of the Primary/Secondary eventhub namespace name, which is part of GEO DR pairing')
         c.argument('alternate_name', help='Alternate Name for the Alias, when the Namespace name and Alias name are same')
 
-    for scope in ['eventhubs georecovery-alias authorization-rule show']:
+    '''for scope in ['eventhubs georecovery-alias authorization-rule show']:
         with self.argument_context(scope)as c:
             c.argument('authorization_rule_name', arg_type=name_type, id_part='child_name_2', help='Name of Namespace AuthorizationRule')
 
@@ -184,7 +168,7 @@ def load_arguments_eh(self, _):
     with self.argument_context('eventhubs georecovery-alias authorization-rule keys list') as c:
         c.argument('alias', options_list=['--alias', '-a'], id_part=None, help='Name of Geo-Disaster Recovery Configuration Alias')
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-        c.argument('authorization_rule_name', arg_type=name_type, help='Name of Namespace AuthorizationRule')
+        c.argument('authorization_rule_name', arg_type=name_type, help='Name of Namespace AuthorizationRule')'''
 
 # Region Namespace NetworkRuleSet
     with self.argument_context('eventhubs namespace network-rule', resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01') as c:

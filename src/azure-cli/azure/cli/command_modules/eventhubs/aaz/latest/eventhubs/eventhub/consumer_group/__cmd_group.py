@@ -8,12 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
-from .__cmd_group import *
-from ._break_pair import *
-from ._create import *
-from ._delete import *
-from ._exists import *
-from ._fail_over import *
-from ._list import *
-from ._show import *
-from ._update import *
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "eventhubs eventhub consumer-group",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Manage Azure Event Hubs consumergroup.
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]

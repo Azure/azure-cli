@@ -14,7 +14,6 @@ from azure.cli.core.profiles import ResourceType
 def load_command_table(self, _):
     from azure.cli.command_modules.eventhubs._client_factory import (namespaces_mgmt_client_factory,
                                                                      event_hub_mgmt_client_factory,
-                                                                     consumer_groups_mgmt_client_factory,
                                                                      disaster_recovery_mgmt_client_factory,
                                                                      cluster_mgmt_client_factory,
                                                                      schema_registry_mgmt_client_factory,
@@ -36,11 +35,6 @@ def load_command_table(self, _):
     eh_event_hub_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventhub.operations#EventHubsOperations.{}',
         client_factory=event_hub_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_EVENTHUB)
-
-    eh_consumer_groups_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventhub.operations#ConsumerGroupsOperations.{}',
-        client_factory=consumer_groups_mgmt_client_factory,
         resource_type=ResourceType.MGMT_EVENTHUB)
 
     eh_geodr_util = CliCommandType(
@@ -119,23 +113,10 @@ def load_command_table(self, _):
         g.command('delete', 'delete_authorization_rule')
         g.generic_update_command('update', getter_name='get_authorization_rule', setter_name='create_or_update_authorization_rule', custom_func_name='cli_autho_update')
 
-# ConsumerGroup Region
-    with self.command_group('eventhubs eventhub consumer-group', eh_consumer_groups_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=consumer_groups_mgmt_client_factory) as g:
-        g.custom_command('create', 'cli_consumergroup_create')
-        g.show_command('show', 'get')
-        g.command('list', 'list_by_event_hub')
-        g.command('delete', 'delete')
-        g.generic_update_command('update', custom_func_name='cli_consumergroup_update', custom_func_type=eventhubs_custom)
-
 # DisasterRecoveryConfigs Region
-    with self.command_group('eventhubs georecovery-alias', eh_geodr_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=disaster_recovery_mgmt_client_factory) as g:
-        g.custom_command('set', 'cli_geodr_create')
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.command('break-pair', 'break_pairing')
-        g.command('fail-over', 'fail_over')
-        g.custom_command('exists', 'cli_geodr_name_exists')
-        g.command('delete', 'delete')
+    with self.command_group('eventhubs georecovery-alias', custom_command_type=eh_namespace_custom,
+                            is_preview=True) as g:
+        g.custom_command('set', 'set_georecovery_alias', supports_no_wait=True)
 
 # NetwrokRuleSet Region
     with self.command_group('eventhubs namespace network-rule', eh_namespace_util, min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:

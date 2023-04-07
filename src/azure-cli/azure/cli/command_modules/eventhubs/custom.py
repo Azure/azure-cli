@@ -298,25 +298,6 @@ def cli_eventhub_keys_renew(client, resource_group_name, namespace_name, event_h
     )
 
 
-# ConsumerGroup region
-def cli_consumergroup_create(client, resource_group_name, namespace_name, event_hub_name, name, user_metadata=None):
-    return client.create_or_update(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        event_hub_name=event_hub_name,
-        consumer_group_name=name,
-        parameters={'user_metadata': user_metadata}
-    )
-
-
-def cli_consumergroup_update(cmd, instance, user_metadata=None):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
-        if user_metadata:
-            instance.user_metadata = user_metadata
-
-    return instance
-
-
 # NetwrokRuleSet Region
 def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_name, subnet=None, ip_mask=None, ignore_missing_vnet_service_endpoint=False, action='Allow'):
     NWRuleSetVirtualNetworkRules = cmd.get_models('NWRuleSetVirtualNetworkRules', resource_type=ResourceType.MGMT_EVENTHUB)
@@ -382,20 +363,6 @@ def cli_networkrule_delete(cmd, client, resource_group_name, namespace_name, sub
                 netwrokruleset.ip_rules.remove(ipruletodelete)
 
     return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
-
-
-# GeoDR region
-def cli_geodr_name_exists(client, resource_group_name, namespace_name, name):
-
-    return client.check_name_availability(resource_group_name, namespace_name, parameters={'name': name})
-
-
-def cli_geodr_create(client, resource_group_name, namespace_name, alias, partner_namespace=None, alternate_name=None):
-
-    return client.create_or_update(resource_group_name,
-                                   namespace_name,
-                                   alias,
-                                   parameters={'partner_namespace': partner_namespace, 'alternate_name': alternate_name})
 
 
 def cli_add_identity(cmd, client, resource_group_name, namespace_name, system_assigned=None, user_assigned=None):
