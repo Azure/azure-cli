@@ -235,28 +235,22 @@ def load_arguments_sb(self, _):
     with self.argument_context('servicebus namespace network-rule') as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
 
-    for scope in ['servicebus namespace network-rule add', 'servicebus namespace network-rule remove']:
+    for scope in ['servicebus namespace network-rule-set ip-rule add', 'servicebus namespace network-rule-set ip-rule remove']:
         with self.argument_context(scope) as c:
-            c.argument('subnet', arg_group='Virtual Network Rule', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
+            c.argument('action', arg_group='IP Address Rule', options_list=['--action'],
+                       arg_type=get_enum_type(['Allow']), help='Action of the IP rule')
             c.argument('ip_mask', arg_group='IP Address Rule', options_list=['--ip-address'], help='IPv4 address or CIDR range.')
             c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
-            c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'], help='Name of the Virtual Network')
 
-    with self.argument_context('servicebus namespace network-rule update', resource_type=ResourceType.MGMT_SERVICEBUS,
-                               min_api='2017-04-01') as c:
-        c.argument('public_network_access', options_list=['--public-network-access', '--public-network'],
-                   arg_type=get_enum_type(['Enabled', 'Disabled']),
-                   help='This determines if traffic is allowed over public network. By default it is enabled. If value is SecuredByPerimeter then Inbound and Outbound communication is controlled by the network security perimeter and profile\' access rules.')
-        c.argument('trusted_service_access_enabled', options_list=['--enable-trusted-service-access', '-t'],
-                   arg_type=get_three_state_flag(),
-                   help='A boolean value that indicates whether Trusted Service Access is enabled for Network Rule Set.')
-        c.argument('default_action', arg_group='networkrule', options_list=['--default-action'],
-                   arg_type=get_enum_type(['Allow', 'Deny']),
-                   help='Default Action for Network Rule Set.')
 
-    with self.argument_context('servicebus namespace network-rule add') as c:
-        c.argument('ignore_missing_vnet_service_endpoint', arg_group='Virtual Network Rule', options_list=['--ignore-missing-endpoint'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
-        c.argument('action', arg_group='IP Address Rule', options_list=['--action'], arg_type=get_enum_type(['Allow']), help='Action of the IP rule')
+    for scope in ['servicebus namespace network-rule virtual-network-rule add', 'servicebus namespace network-rule virtual-network-rule remove']:
+        with self.argument_context(scope) as c:
+            c.argument('ignore_missing_vnet_service_endpoint', arg_group='Virtual Network Rule', options_list=['--ignore-missing-endpoint'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
+            c.argument('subnet', arg_group='Virtual Network Rule', options_list=['--subnet'],
+                        help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
+            c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'],
+                        help='Name of the Virtual Network')
+            c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
 
 # Private end point connection
     with self.argument_context('servicebus namespace private-endpoint-connection') as c:

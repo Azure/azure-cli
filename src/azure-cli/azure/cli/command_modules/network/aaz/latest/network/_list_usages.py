@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "network list-usages",
-    confirmation="",
 )
 class ListUsages(AAZCommand):
     """List the number of network resources in a region that are used against a subscription quota.
@@ -178,6 +177,10 @@ class ListUsages(AAZCommand):
             name.value = AAZStrType()
 
             return cls._schema_on_200
+
+
+class _ListUsagesHelper:
+    """Helper class for ListUsages"""
 
 
 __all__ = ["ListUsages"]

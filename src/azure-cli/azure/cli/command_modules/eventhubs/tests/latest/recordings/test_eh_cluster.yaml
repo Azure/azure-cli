@@ -1,5 +1,51 @@
 interactions:
 - request:
+    body: '{"location": "westcentralus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '29'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --location
+      User-Agent:
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001","name":"rg-cluster-000001","type":"Microsoft.Resources/resourceGroups","location":"westcentralus","properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '238'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 02 Feb 2023 14:35:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
     body: '{"location": "southcentralus", "tags": {"tag1": "value1"}, "sku": {"name":
       "Dedicated", "capacity": 1}}'
     headers:
@@ -18,27 +64,27 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --tags
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shubham-rg/providers/Microsoft.EventHub/clusters/eventhubs-clus-000001?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/shubham-rg/providers/Microsoft.EventHub/clusters/eventhubs-clus-000001","name":"eventhubs-clus-000001","type":"Microsoft.EventHub/Clusters","location":"southcentralus","tags":{"tag1":"value1"},"properties":{"createdAt":"2023-03-13T11:52:20.6928468Z","updatedAt":"2023-03-13T11:52:20.6928468Z","provisioningState":"Creating","status":"Creating","supportsScaling":true,"metricId":""},"sku":{"name":"Dedicated","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"southcentralus","tags":{"tag1":"value1"},"properties":{"createdAt":"2023-02-02T14:35:59.6211013Z","updatedAt":"2023-02-02T14:35:59.6211013Z","provisioningState":"Creating","status":"Creating","supportsScaling":true,"metricId":""},"sku":{"name":"Dedicated","capacity":1}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/southcentralus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-shubham-rg-eventhubs-clus-000001?isAsyncHeader=true&resourceName=eventhubs-clus-000001&resourceGroupName=shubham-rg&resourceType=cluster&api-version=2022-01-01-preview
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/southcentralus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-rg-cluster-000001-eventhubs-clus1-000002?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '496'
+      - '505'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Mar 2023 11:52:20 GMT
+      - Thu, 02 Feb 2023 14:35:59 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/southcentralus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-shubham-rg-eventhubs-clus-000001?isAsyncHeader=false&resourceName=eventhubs-clus-000001&resourceGroupName=shubham-rg&resourceType=cluster&api-version=2022-01-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/southcentralus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-rg-cluster-000001-eventhubs-clus1-000002?isAsyncHeader=false&resourceName=eventhubs-clus1-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
       pragma:
       - no-cache
       server:
@@ -48,7 +94,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 202
       message: Accepted
@@ -66,21 +112,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --tags
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/southcentralus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-shubham-rg-eventhubs-clus-000001?isAsyncHeader=true&resourceName=eventhubs-clus-000001&resourceGroupName=shubham-rg&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/southcentralus/clusterOperationResults/326100e2-f69d-4268-8503-075374f62b6e-rg-cluster-000001-eventhubs-clus1-000002?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
   response:
     body:
-      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-shubham-rg-eventhubs-clus-000001","status":"Succeeded"}'
+      string: '{"name":"326100e2-f69d-4268-8503-075374f62b6e-rg-cluster-000001-eventhubs-clus1-000002","status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '101'
+      - '109'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Mar 2023 11:52:50 GMT
+      - Thu, 02 Feb 2023 14:36:29 GMT
       expires:
       - '-1'
       pragma:
@@ -112,21 +158,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --tags
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shubham-rg/providers/Microsoft.EventHub/clusters/eventhubs-clus-000001?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/shubham-rg/providers/Microsoft.EventHub/clusters/eventhubs-clus-000001","name":"eventhubs-clus-000001","type":"Microsoft.EventHub/Clusters","location":"southcentralus","tags":{"tag1":"value1"},"properties":{"createdAt":"2023-03-13T11:52:20.8521164Z","updatedAt":"2023-03-13T11:52:22.1178023Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-SN-V51012"},"sku":{"name":"Dedicated","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"southcentralus","tags":{"tag1":"value1"},"properties":{"createdAt":"2023-02-02T14:35:59.8213965Z","updatedAt":"2023-02-02T14:36:00.680835Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-SN-V51020"},"sku":{"name":"Dedicated","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '509'
+      - '517'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Mar 2023 11:52:50 GMT
+      - Thu, 02 Feb 2023 14:36:29 GMT
       expires:
       - '-1'
       pragma:
@@ -158,21 +204,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shubham-rg/providers/Microsoft.EventHub/clusters/eventhubs-clus-000001?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/shubham-rg/providers/Microsoft.EventHub/clusters/eventhubs-clus-000001","name":"eventhubs-clus-000001","type":"Microsoft.EventHub/Clusters","location":"southcentralus","tags":{"tag1":"value1"},"properties":{"createdAt":"2023-03-13T11:52:20.8521164Z","updatedAt":"2023-03-13T11:52:22.1178023Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-SN-V51012"},"sku":{"name":"Dedicated","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"southcentralus","tags":{"tag1":"value1"},"properties":{"createdAt":"2023-02-02T14:35:59.8213965Z","updatedAt":"2023-02-02T14:36:00.680835Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-SN-V51020"},"sku":{"name":"Dedicated","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '509'
+      - '517'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Mar 2023 11:52:51 GMT
+      - Thu, 02 Feb 2023 14:36:29 GMT
       expires:
       - '-1'
       pragma:
@@ -192,7 +238,7 @@ interactions:
       message: OK
 - request:
     body: '{"identity": {"type": "None"}, "location": "southcentralus", "properties":
-      {"clusterArmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/shubham-rg/providers/Microsoft.EventHub/clusters/eventhubs-clus-000001"},
+      {"clusterArmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002"},
       "sku": {"name": "Standard", "tier": "Standard"}, "tags": {"{tag1": "value1}"}}'
     headers:
       Accept:
@@ -204,28 +250,28 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '312'
+      - '320'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --location --tags --sku --cluster-arm-id
       User-Agent:
-      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.44.1 (AAZ) azsdk-python-core/1.24.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shubham-rg/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shubham-rg/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"South
-        Central US","tags":{"{tag1":"value1}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shubham-rg/providers/Microsoft.EventHub/clusters/eventhubs-clus-000001","kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2023-03-13T11:52:53.34Z","updatedAt":"2023-03-13T11:52:53.34Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003","name":"eventhubs-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"South
+        Central US","tags":{"{tag1":"value1}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000003","createdAt":"2023-02-02T14:36:33.093Z","updatedAt":"2023-02-02T14:36:33.093Z","serviceBusEndpoint":"https://eventhubs-nscli000003.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '964'
+      - '981'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Mar 2023 11:52:53 GMT
+      - Thu, 02 Feb 2023 14:36:33 GMT
       expires:
       - '-1'
       pragma:
@@ -244,7 +290,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '49'
+      - '48'
     status:
       code: 200
       message: OK
@@ -262,22 +308,22 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --tags --sku --cluster-arm-id
       User-Agent:
-      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.44.1 (AAZ) azsdk-python-core/1.24.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shubham-rg/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shubham-rg/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"South
-        Central US","tags":{"{tag1":"value1}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shubham-rg/providers/Microsoft.EventHub/clusters/eventhubs-clus-000001","kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2023-03-13T11:52:53.34Z","updatedAt":"2023-03-13T11:52:53.34Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003","name":"eventhubs-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"South
+        Central US","tags":{"{tag1":"value1}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000003","createdAt":"2023-02-02T14:36:33.093Z","updatedAt":"2023-02-02T14:36:33.093Z","serviceBusEndpoint":"https://eventhubs-nscli000003.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '964'
+      - '981'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Mar 2023 11:53:23 GMT
+      - Thu, 02 Feb 2023 14:37:04 GMT
       expires:
       - '-1'
       pragma:
@@ -312,22 +358,22 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --tags --sku --cluster-arm-id
       User-Agent:
-      - AZURECLI/2.46.0 (AAZ) azsdk-python-core/1.24.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.44.1 (AAZ) azsdk-python-core/1.24.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shubham-rg/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shubham-rg/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"South
-        Central US","tags":{"{tag1":"value1}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shubham-rg/providers/Microsoft.EventHub/clusters/eventhubs-clus-000001","kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","createdAt":"2023-03-13T11:52:53.34Z","updatedAt":"2023-03-13T11:53:50.107Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000003","name":"eventhubs-nscli000003","type":"Microsoft.EventHub/Namespaces","location":"South
+        Central US","tags":{"{tag1":"value1}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000003","createdAt":"2023-02-02T14:36:33.093Z","updatedAt":"2023-02-02T14:37:21.46Z","serviceBusEndpoint":"https://eventhubs-nscli000003.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '963'
+      - '978'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Mar 2023 11:53:54 GMT
+      - Thu, 02 Feb 2023 14:37:33 GMT
       expires:
       - '-1'
       pragma:
@@ -362,21 +408,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shubham-rg/providers/Microsoft.EventHub/clusters/eventhubs-clus-000001/namespaces?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002/namespaces?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/shubham-rg/providers/Microsoft.Eventhub/namespaces/eventhubs-nscli000002"}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.Eventhub/namespaces/eventhubs-nscli000003"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '160'
+      - '167'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Mar 2023 11:53:55 GMT
+      - Thu, 02 Feb 2023 14:37:34 GMT
       expires:
       - '-1'
       pragma:
@@ -408,21 +454,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shubham-rg/providers/Microsoft.EventHub/clusters/eventhubs-clus-000001?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/shubham-rg/providers/Microsoft.EventHub/clusters/eventhubs-clus-000001","name":"eventhubs-clus-000001","type":"Microsoft.EventHub/Clusters","location":"southcentralus","tags":{"tag1":"value1"},"properties":{"createdAt":"2023-03-13T11:52:20.8521164Z","updatedAt":"2023-03-13T11:52:22.1178023Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-SN-V51012"},"sku":{"name":"Dedicated","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"southcentralus","tags":{"tag1":"value1"},"properties":{"createdAt":"2023-02-02T14:35:59.8213965Z","updatedAt":"2023-02-02T14:36:00.680835Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-SN-V51020"},"sku":{"name":"Dedicated","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '509'
+      - '517'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Mar 2023 11:53:55 GMT
+      - Thu, 02 Feb 2023 14:37:35 GMT
       expires:
       - '-1'
       pragma:
@@ -459,27 +505,27 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shubham-rg/providers/Microsoft.EventHub/clusters/eventhubs-clus-000001?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/shubham-rg/providers/Microsoft.EventHub/clusters/eventhubs-clus-000001","name":"eventhubs-clus-000001","type":"Microsoft.EventHub/Clusters","location":"southcentralus","tags":{"tag2":"value2"},"properties":{"createdAt":"2023-03-13T11:52:20.8521164Z","updatedAt":"2023-03-13T11:52:22.1178023Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-SN-V51012"},"sku":{"name":"Dedicated","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"southcentralus","tags":{"tag2":"value2"},"properties":{"createdAt":"2023-02-02T14:35:59.8213965Z","updatedAt":"2023-02-02T14:36:00.680835Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-SN-V51020"},"sku":{"name":"Dedicated","capacity":1}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/southcentralus/clusterOperationResults/PROD-SN-V51012-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-clus-000001&resourceGroupName=shubham-rg&resourceType=cluster&api-version=2022-01-01-preview
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/southcentralus/clusterOperationResults/PROD-SN-V51020-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '509'
+      - '517'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Mar 2023 11:53:55 GMT
+      - Thu, 02 Feb 2023 14:37:36 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/southcentralus/clusterOperationResults/PROD-SN-V51012-DedicatedCluster?isAsyncHeader=false&resourceName=eventhubs-clus-000001&resourceGroupName=shubham-rg&resourceType=cluster&api-version=2022-01-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/southcentralus/clusterOperationResults/PROD-SN-V51020-DedicatedCluster?isAsyncHeader=false&resourceName=eventhubs-clus1-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
       pragma:
       - no-cache
       server:
@@ -489,7 +535,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 202
       message: Accepted
@@ -507,12 +553,12 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/southcentralus/clusterOperationResults/PROD-SN-V51012-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-clus-000001&resourceGroupName=shubham-rg&resourceType=cluster&api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.eventhub/locations/southcentralus/clusterOperationResults/PROD-SN-V51020-DedicatedCluster?isAsyncHeader=true&resourceName=eventhubs-clus1-000002&resourceGroupName=rg-cluster-000001&resourceType=cluster&api-version=2022-01-01-preview
   response:
     body:
-      string: '{"name":"PROD-SN-V51012-DedicatedCluster","status":"Succeeded"}'
+      string: '{"name":"PROD-SN-V51020-DedicatedCluster","status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
@@ -521,7 +567,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Mar 2023 11:54:26 GMT
+      - Thu, 02 Feb 2023 14:38:06 GMT
       expires:
       - '-1'
       pragma:
@@ -553,21 +599,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shubham-rg/providers/Microsoft.EventHub/clusters/eventhubs-clus-000001?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/shubham-rg/providers/Microsoft.EventHub/clusters/eventhubs-clus-000001","name":"eventhubs-clus-000001","type":"Microsoft.EventHub/Clusters","location":"southcentralus","tags":{"tag2":"value2"},"properties":{"createdAt":"2023-03-13T11:52:20.8521164Z","updatedAt":"2023-03-13T11:53:57.4945638Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-SN-V51012"},"sku":{"name":"Dedicated","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"southcentralus","tags":{"tag2":"value2"},"properties":{"createdAt":"2023-02-02T14:35:59.8213965Z","updatedAt":"2023-02-02T14:37:37.5092114Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-SN-V51020"},"sku":{"name":"Dedicated","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '509'
+      - '518'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Mar 2023 11:54:26 GMT
+      - Thu, 02 Feb 2023 14:38:06 GMT
       expires:
       - '-1'
       pragma:
@@ -599,34 +645,35 @@ interactions:
       ParameterSetName:
       - --resource-group
       User-Agent:
-      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.44.1 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shubham-rg/providers/Microsoft.EventHub/clusters?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/shubham-rg/providers/Microsoft.EventHub/clusters/eventhubs-clus-000001","name":"eventhubs-clus-000001","type":"Microsoft.EventHub/Clusters","location":"southcentralus","tags":{"tag2":"value2"},"properties":{"createdAt":"2023-03-13T11:52:20.8521164Z","updatedAt":"2023-03-13T11:53:57.4945638Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-SN-V51012"},"sku":{"name":"Dedicated","capacity":1}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/shubham-rg/providers/Microsoft.EventHub/clusters/eventhubs-clus1-eayz","name":"eventhubs-clus1-eayz","type":"Microsoft.EventHub/Clusters","location":"southcentralus","tags":{"tag2":"value2"},"properties":{"createdAt":"2023-03-13T09:11:20.5972227Z","updatedAt":"2023-03-13T09:13:27.5414111Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-SN-V51010"},"sku":{"name":"Dedicated","capacity":1}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/shubham-rg/providers/Microsoft.EventHub/clusters/eventhubs-selfserve-7dzf","name":"eventhubs-selfserve-7dzf","type":"Microsoft.EventHub/Clusters","location":"westus","properties":{"createdAt":"2023-03-13T09:20:27.0846244Z","updatedAt":"2023-03-13T10:30:17.0633179Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-BY-V51039"},"sku":{"name":"Dedicated","capacity":1}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rg-cluster-000001/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000002","name":"eventhubs-clus1-000002","type":"Microsoft.EventHub/Clusters","location":"southcentralus","tags":{"tag2":"value2"},"properties":{"createdAt":"2023-02-02T14:35:59.8213965Z","updatedAt":"2023-02-02T14:37:37.5092114Z","provisioningState":"Succeeded","status":"Active","supportsScaling":true,"metricId":"PROD-SN-V51020"},"sku":{"name":"Dedicated","capacity":1}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1512'
+      - '530'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Mar 2023 11:54:26 GMT
+      - Thu, 02 Feb 2023 14:38:07 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
       vary:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-original-request-ids:
-      - ''
-      - ''
     status:
       code: 200
       message: OK

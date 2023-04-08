@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network private-endpoint dns-zone-group delete"
+    "network private-endpoint dns-zone-group delete",
 )
 class Delete(AAZCommand):
     """Delete a private endpoint dns zone group.

@@ -13,7 +13,6 @@ from azure.cli.core.azclierror import ValidationError
 
 from azure.mgmt.web import WebSiteManagementClient
 from azure.mgmt.web.models import HostingEnvironmentProfile, AseV3NetworkingConfiguration
-from azure.mgmt.network.models import (Subnet, RouteTable, Route, NetworkSecurityGroup, SecurityRule, Delegation)
 
 from azure.cli.command_modules.appservice.appservice_environment import (show_appserviceenvironment,
                                                                          list_appserviceenvironments,
@@ -85,9 +84,9 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_unique_deployment_name', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_resource_client_factory', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_network_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment.Subnet.Show', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
-    def test_app_service_environment_create(self, ase_client_factory_mock, network_client_factory_mock,
+    def test_app_service_environment_create(self, ase_client_factory_mock, subnet_show_mock,
                                             resource_client_factory_mock, deployment_name_mock):
         ase_name = 'mock_ase_name'
         rg_name = 'mock_rg_name'
@@ -103,11 +102,11 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
 
         deployment_name_mock.return_value = deployment_name
 
-        network_client = mock.MagicMock()
-        network_client_factory_mock.return_value = network_client
+        show = mock.MagicMock()
+        subnet_show_mock.return_value = show
 
-        subnet = Subnet(id=1, address_prefix='10.10.10.10/25')
-        network_client.subnets.get.return_value = subnet
+        fake_data = {"id": "1", "addressPrefix": "10.10.10.10/25"}
+        show.return_value = fake_data
 
         # assert that ValidationError raised when called with small subnet
         with self.assertRaises(ValidationError):
@@ -116,8 +115,8 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
                                              ignore_network_security_group=True, ignore_route_table=True,
                                              location='westeurope')
 
-        subnet = Subnet(id=1, address_prefix='10.10.10.10/24')
-        network_client.subnets.get.return_value = subnet
+        fake_data = {"id": "1", "addressPrefix": "10.10.10.10/24"}
+        show.return_value = fake_data
         create_appserviceenvironment_arm(self.mock_cmd, resource_group_name=rg_name, name=ase_name,
                                          subnet=subnet_name, vnet_name=vnet_name,
                                          ignore_network_security_group=True, ignore_route_table=True,
@@ -217,9 +216,9 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_unique_deployment_name', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_resource_client_factory', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_network_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment.Subnet.Show', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
-    def test_app_service_environment_v3_create(self, ase_client_factory_mock, network_client_factory_mock,
+    def test_app_service_environment_v3_create(self, ase_client_factory_mock, subnet_show_mock,
                                                resource_client_factory_mock, deployment_name_mock):
         ase_name = 'mock_ase_name'
         rg_name = 'mock_rg_name'
@@ -235,13 +234,18 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
 
         deployment_name_mock.return_value = deployment_name
 
-        network_client = mock.MagicMock()
-        network_client_factory_mock.return_value = network_client
+        show = mock.MagicMock()
+        subnet_show_mock.return_value = show
 
-        subnet = Subnet(id=1, address_prefix='10.10.10.10/24')
-        hosting_delegation = Delegation(id=1, service_name='Microsoft.Web/hostingEnvironments')
-        subnet.delegations = [hosting_delegation]
-        network_client.subnets.get.return_value = subnet
+        fake_data = {
+            "id": "1",
+            "addressPrefix": "10.10.10.10/24",
+            "delegations": [{
+                "id": "1",
+                "serviceName": "Microsoft.Web/hostingEnvironments"
+            }]
+        }
+        show.return_value = fake_data
         create_appserviceenvironment_arm(self.mock_cmd, resource_group_name=rg_name, name=ase_name,
                                          subnet=subnet_name, vnet_name=vnet_name, kind='ASEv3',
                                          location='westeurope')
@@ -254,9 +258,9 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_unique_deployment_name', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_resource_client_factory', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_network_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment.Subnet.Show', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
-    def test_app_service_environment_v3_zone_create(self, ase_client_factory_mock, network_client_factory_mock,
+    def test_app_service_environment_v3_zone_create(self, ase_client_factory_mock, subnet_show_mock,
                                                resource_client_factory_mock, deployment_name_mock):
         ase_name = 'mock_ase_name'
         rg_name = 'mock_rg_name'
@@ -272,13 +276,18 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
 
         deployment_name_mock.return_value = deployment_name
 
-        network_client = mock.MagicMock()
-        network_client_factory_mock.return_value = network_client
+        show = mock.MagicMock()
+        subnet_show_mock.return_value = show
 
-        subnet = Subnet(id=1, address_prefix='10.10.10.10/24')
-        hosting_delegation = Delegation(id=1, service_name='Microsoft.Web/hostingEnvironments')
-        subnet.delegations = [hosting_delegation]
-        network_client.subnets.get.return_value = subnet
+        fake_data = {
+            "id": "1",
+            "addressPrefix": "10.10.10.10/24",
+            "delegations": [{
+                "id": "1",
+                "serviceName": "Microsoft.Web/hostingEnvironments"
+            }]
+        }
+        show.return_value = fake_data
         create_appserviceenvironment_arm(self.mock_cmd, resource_group_name=rg_name, name=ase_name,
                                          subnet=subnet_name, vnet_name=vnet_name, kind='ASEv3',
                                          location='westeurope', zone_redundant=True)

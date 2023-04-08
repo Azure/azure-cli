@@ -61,7 +61,7 @@ class Update(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.default_action = AAZStrArg(
-            options=["--action", "--default-action"],
+            options=["--default-action"],
             arg_group="Properties",
             help="Default Action for Network Rule Set",
             nullable=True,

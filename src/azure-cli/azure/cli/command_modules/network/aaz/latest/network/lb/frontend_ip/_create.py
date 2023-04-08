@@ -460,7 +460,9 @@ class Create(AAZCommand):
     def _execute_operations(self):
         self.pre_operations()
         self.LoadBalancersGet(ctx=self.ctx)()
+        self.pre_instance_create()
         self.InstanceCreateByJson(ctx=self.ctx)()
+        self.post_instance_create(self.ctx.selectors.subresource.required())
         yield self.LoadBalancersCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -470,6 +472,14 @@ class Create(AAZCommand):
 
     @register_callback
     def post_operations(self):
+        pass
+
+    @register_callback
+    def pre_instance_create(self):
+        pass
+
+    @register_callback
+    def post_instance_create(self, instance):
         pass
 
     def _output(self, *args, **kwargs):
@@ -810,8 +820,8 @@ class _CreateHelper:
 
         _elements = _builder.get(".properties.ipTags[]")
         if _elements is not None:
-            _elements.set_prop("ipTagType", AAZStrType, "@PublicIPAddress_update.ip_tags.[].ip_tag_type")
-            _elements.set_prop("tag", AAZStrType, "@PublicIPAddress_update.ip_tags.[].tag")
+            _elements.set_prop("ipTagType", AAZStrType, ".ip_tag_type")
+            _elements.set_prop("tag", AAZStrType, ".tag")
 
         nat_gateway = _builder.get(".properties.natGateway")
         if nat_gateway is not None:

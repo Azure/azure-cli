@@ -95,9 +95,11 @@ class Add(AAZCommand):
         _element = cls._args_schema.external_mappings_ip.Element
         _element.address_space = AAZStrArg(
             options=["address-space"],
+            help="Address space for Vpn NatRule mapping.",
         )
         _element.port_range = AAZStrArg(
             options=["port-range"],
+            help="Port range for Vpn NatRule mapping.",
         )
 
         internal_mappings_ip = cls._args_schema.internal_mappings_ip

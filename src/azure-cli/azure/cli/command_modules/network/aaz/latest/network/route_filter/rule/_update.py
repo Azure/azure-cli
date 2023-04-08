@@ -70,10 +70,30 @@ class Update(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         self.RouteFilterRulesGet(ctx=self.ctx)()
+        self.pre_instance_update(self.ctx.vars.instance)
         self.InstanceUpdateByJson(ctx=self.ctx)()
         self.InstanceUpdateByGeneric(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.vars.instance)
         yield self.RouteFilterRulesCreateOrUpdate(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
+
+    @register_callback
+    def pre_instance_update(self, instance):
+        pass
+
+    @register_callback
+    def post_instance_update(self, instance):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -162,7 +182,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_route_filter_rule_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_route_filter_rule_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -277,7 +297,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _build_schema_route_filter_rule_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_route_filter_rule_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -306,56 +326,58 @@ class Update(AAZCommand):
             )
 
 
-_schema_route_filter_rule_read = None
+class _UpdateHelper:
+    """Helper class for Update"""
 
+    _schema_route_filter_rule_read = None
 
-def _build_schema_route_filter_rule_read(_schema):
-    global _schema_route_filter_rule_read
-    if _schema_route_filter_rule_read is not None:
-        _schema.etag = _schema_route_filter_rule_read.etag
-        _schema.id = _schema_route_filter_rule_read.id
-        _schema.location = _schema_route_filter_rule_read.location
-        _schema.name = _schema_route_filter_rule_read.name
-        _schema.properties = _schema_route_filter_rule_read.properties
-        return
+    @classmethod
+    def _build_schema_route_filter_rule_read(cls, _schema):
+        if cls._schema_route_filter_rule_read is not None:
+            _schema.etag = cls._schema_route_filter_rule_read.etag
+            _schema.id = cls._schema_route_filter_rule_read.id
+            _schema.location = cls._schema_route_filter_rule_read.location
+            _schema.name = cls._schema_route_filter_rule_read.name
+            _schema.properties = cls._schema_route_filter_rule_read.properties
+            return
 
-    _schema_route_filter_rule_read = AAZObjectType()
+        cls._schema_route_filter_rule_read = _schema_route_filter_rule_read = AAZObjectType()
 
-    route_filter_rule_read = _schema_route_filter_rule_read
-    route_filter_rule_read.etag = AAZStrType(
-        flags={"read_only": True},
-    )
-    route_filter_rule_read.id = AAZStrType()
-    route_filter_rule_read.location = AAZStrType()
-    route_filter_rule_read.name = AAZStrType()
-    route_filter_rule_read.properties = AAZObjectType(
-        flags={"client_flatten": True},
-    )
+        route_filter_rule_read = _schema_route_filter_rule_read
+        route_filter_rule_read.etag = AAZStrType(
+            flags={"read_only": True},
+        )
+        route_filter_rule_read.id = AAZStrType()
+        route_filter_rule_read.location = AAZStrType()
+        route_filter_rule_read.name = AAZStrType()
+        route_filter_rule_read.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
 
-    properties = _schema_route_filter_rule_read.properties
-    properties.access = AAZStrType(
-        flags={"required": True},
-    )
-    properties.communities = AAZListType(
-        flags={"required": True},
-    )
-    properties.provisioning_state = AAZStrType(
-        serialized_name="provisioningState",
-        flags={"read_only": True},
-    )
-    properties.route_filter_rule_type = AAZStrType(
-        serialized_name="routeFilterRuleType",
-        flags={"required": True},
-    )
+        properties = _schema_route_filter_rule_read.properties
+        properties.access = AAZStrType(
+            flags={"required": True},
+        )
+        properties.communities = AAZListType(
+            flags={"required": True},
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.route_filter_rule_type = AAZStrType(
+            serialized_name="routeFilterRuleType",
+            flags={"required": True},
+        )
 
-    communities = _schema_route_filter_rule_read.properties.communities
-    communities.Element = AAZStrType()
+        communities = _schema_route_filter_rule_read.properties.communities
+        communities.Element = AAZStrType()
 
-    _schema.etag = _schema_route_filter_rule_read.etag
-    _schema.id = _schema_route_filter_rule_read.id
-    _schema.location = _schema_route_filter_rule_read.location
-    _schema.name = _schema_route_filter_rule_read.name
-    _schema.properties = _schema_route_filter_rule_read.properties
+        _schema.etag = cls._schema_route_filter_rule_read.etag
+        _schema.id = cls._schema_route_filter_rule_read.id
+        _schema.location = cls._schema_route_filter_rule_read.location
+        _schema.name = cls._schema_route_filter_rule_read.name
+        _schema.properties = cls._schema_route_filter_rule_read.properties
 
 
 __all__ = ["Update"]

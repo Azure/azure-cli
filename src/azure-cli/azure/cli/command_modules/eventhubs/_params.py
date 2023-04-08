@@ -12,8 +12,7 @@ def load_arguments_eh(self, _):
     from azure.cli.core.commands.parameters import tags_type, get_enum_type, resource_group_name_type, name_type, \
         get_location_type, get_three_state_flag, get_resource_name_completion_list
     from azure.cli.core.commands.validators import get_default_location_from_resource_group
-    from azure.cli.command_modules.eventhubs._completers import get_consumergroup_command_completion_list, \
-        get_eventhubs_command_completion_list
+    from azure.cli.command_modules.eventhubs._completers import get_eventhubs_command_completion_list
     from azure.cli.command_modules.eventhubs._validator import validate_storageaccount, validate_partner_namespace, validate_rights
     from knack.arguments import CLIArgumentType
     from azure.cli.core.profiles import ResourceType
@@ -142,21 +141,6 @@ def load_arguments_eh(self, _):
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
         c.argument('event_hub_name', id_part=None, arg_type=event_hub_name_arg_type)
         c.argument('authorization_rule_name', arg_type=name_type, id_part=None, help='Name of EventHub AuthorizationRule')
-
-
-# - ConsumerGroup Region
-    with self.argument_context('eventhubs eventhub consumer-group') as c:
-        c.argument('event_hub_name', arg_type=event_hub_name_arg_type, help='Name of EventHub')
-        c.argument('consumer_group_name', arg_type=name_type, id_part='child_name_2', completer=get_consumergroup_command_completion_list, help='Name of ConsumerGroup')
-
-    for scope in ['eventhubs eventhub consumer-group create', 'eventhubs eventhub consumer-group update']:
-        with self.argument_context(scope) as c:
-            c.argument('name', arg_type=name_type, help='Name of ConsumerGroup')
-            c.argument('user_metadata', help='Usermetadata is a placeholder to store user-defined string data with maximum length 1024. e.g. it can be used to store descriptive data, such as list of teams and their contact information also user-defined configuration settings can be stored.')
-
-    with self.argument_context('eventhubs eventhub consumer-group list') as c:
-        c.argument('event_hub_name', arg_type=event_hub_name_arg_type, id_part=None, help='Name of EventHub')
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
 
 #   : Region Geo DR Configuration
     with self.argument_context('eventhubs georecovery-alias') as c:
