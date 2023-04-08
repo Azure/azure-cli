@@ -1,8 +1,10 @@
 import json
-
+from azure.cli.command_modules.acs.azuremonitormetrics.constants import DC_API
+from azure.cli.command_modules.acs.azuremonitormetrics.dc.defaults import get_default_dcra_name
 from azure.cli.core.azclierror import (
     CLIError
 )
+
 
 def create_dcra(cmd, cluster_region, cluster_subscription, cluster_resource_group_name, cluster_name, dcr_resource_id):
     from azure.cli.core.util import send_raw_request

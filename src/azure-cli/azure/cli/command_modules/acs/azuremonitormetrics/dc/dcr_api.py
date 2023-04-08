@@ -1,7 +1,10 @@
 import json
 from azure.cli.command_modules.acs.azuremonitormetrics.constants import MapToClosestMACRegion
 from azure.cli.command_modules.acs.azuremonitormetrics.dc.defaults import get_default_region, sanitize_name
-from azure.cli.command_modules.acs.azuremonitormetrics.constants import DC_TYPE
+from azure.cli.command_modules.acs.azuremonitormetrics.constants import (
+    DC_TYPE,
+    DC_API
+)
 from knack.util import CLIError
 
 

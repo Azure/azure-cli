@@ -1,6 +1,7 @@
 import json
 from azure.cli.command_modules.acs.azuremonitormetrics.constants import DC_API
 from azure.cli.command_modules.acs.azuremonitormetrics.dc.defaults import get_default_dce_name
+from azure.cli.command_modules.acs.azuremonitormetrics.constants import DC_API
 from knack.util import CLIError
 
 

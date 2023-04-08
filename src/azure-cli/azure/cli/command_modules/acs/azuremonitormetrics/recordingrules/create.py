@@ -1,4 +1,6 @@
 import json
+from azure.cli.command_modules.acs.azuremonitormetrics.constants import ALERTS_API, RULES_API
+from knack.util import CLIError
 
 
 def get_recording_rules_template(cmd, azure_monitor_workspace_resource_id):
