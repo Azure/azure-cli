@@ -252,6 +252,16 @@ type: group
 short-summary: Manage Azure ServiceBus networkruleSet for namespace
 """
 
+helps['servicebus namespace network-rule-set ip-rule'] = """
+type: group
+short-summary: Manage Azure ServiceBus ip-rules in networkruleSet for namespace
+"""
+
+helps['servicebus namespace network-rule-set virtual-network-rule'] = """
+type: group
+short-summary: Manage Azure ServiceBus subnet-rule in networkruleSet for namespace
+"""
+
 helps['servicebus namespace network-rule-set ip-rule add'] = """
 type: command
 short-summary: Add a IP-Rule for network rule of namespace.
