@@ -20,7 +20,7 @@ from ._utils import (is_valid_connection_string,
                      validate_feature_flag_name,
                      validate_feature_flag_key)
 from ._models import QueryFields
-from ._constants import FeatureFlagConstants, ImportExportProfiles
+from ._constants import ImportExportProfiles
 from ._featuremodels import FeatureQueryFields
 
 logger = get_logger(__name__)
@@ -245,6 +245,7 @@ def validate_feature(namespace):
 def validate_feature_key(namespace):
     if namespace.key is not None:
         validate_feature_flag_key(namespace.key)
+
 
 def validate_import_profile(namespace):
     if namespace.profile == ImportExportProfiles.KVSET:

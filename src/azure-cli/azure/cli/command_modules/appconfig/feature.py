@@ -60,7 +60,9 @@ def set_feature(cmd,
         try:
             validate_feature_flag_name(feature)
         except CLIErrors.InvalidArgumentValueError as exception:
-            exception.error_msg
+            exception.error_msg = "The feature name derived from the specified key is invalid. " + exception.error_msg
+            raise exception
+
     # when creating a new Feature flag, these defaults will be used
     tags = {}
     default_conditions = {'client_filters': []}
