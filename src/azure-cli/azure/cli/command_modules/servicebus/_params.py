@@ -242,7 +242,6 @@ def load_arguments_sb(self, _):
             c.argument('ip_mask', arg_group='IP Address Rule', options_list=['--ip-address'], help='IPv4 address or CIDR range.')
             c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
 
-
     for scope in ['servicebus namespace network-rule virtual-network-rule add', 'servicebus namespace network-rule virtual-network-rule remove']:
         with self.argument_context(scope) as c:
             c.argument('ignore_missing_vnet_service_endpoint', arg_group='Virtual Network Rule', options_list=['--ignore-missing-endpoint', '--missing-endpoint'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')

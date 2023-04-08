@@ -95,12 +95,6 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_virtual_network_rule', validator=validate_subnet)
         g.custom_command('remove', 'remove_virtual_network_rule', validator=validate_subnet)
 
-    '''with self.command_group('servicebus namespace network-rule', sb_namespace_util, client_factory=namespaces_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
-        g.custom_command('add', 'cli_networkrule_createupdate', validator=validate_subnet)
-        g.command('list', 'get_network_rule_set')
-        g.custom_command('remove', 'cli_networkrule_delete', validator=validate_subnet)
-        g.custom_command('update', 'cli_networkrule_update')'''
-
 # Identity Region
     with self.command_group('servicebus namespace identity', custom_command_type=sb_namespace_custom, is_preview=True) as g:
         g.custom_command('assign', 'cli_add_identity')
