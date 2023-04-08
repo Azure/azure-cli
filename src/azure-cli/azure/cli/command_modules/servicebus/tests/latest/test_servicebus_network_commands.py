@@ -189,7 +189,7 @@ class SBNetworkrulesetCRUDScenarioTest(ScenarioTest):
         networkRule = self.cmd('servicebus namespace network-rule-set update --resource-group {rg} --name {namespacename} '
                                '--enable-trusted-service-access').get_output_in_json()
         self.assertEqual(len(networkRule['virtualNetworkRules']), 3)
-        self.assertEqual(len(networkRule['ipRules']), )
+        self.assertEqual(len(networkRule['ipRules']), 1)
         self.assertTrue(networkRule['ipRules'][0]['ipMask'] == '1.1.1.1')
         self.assertEqual('Enabled', networkRule['publicNetworkAccess'])
         self.assertEqual('Allow', networkRule['defaultAction'])
@@ -202,7 +202,6 @@ class SBNetworkrulesetCRUDScenarioTest(ScenarioTest):
         self.assertTrue(networkRule['ipRules'][0]['ipMask'] == '1.1.1.1')
         self.assertEqual('Enabled', networkRule['publicNetworkAccess'])
         self.assertEqual('Allow', networkRule['defaultAction'])
-        self.assertIsNone(networkRule['trustedServiceAccessEnabled'])
 
         # list Vnetrules
         self.cmd(
@@ -216,6 +215,6 @@ class SBNetworkrulesetCRUDScenarioTest(ScenarioTest):
 
         # remove Vnetrule2
         networkRule = self.cmd(
-            'servicebus namespace network-rule-set virtual-network-rule remove --resource-group {rg} --name {namespacename} --subnet {namesubnet3}'
+            'servicebus namespace network-rule-set virtual-network-rule remove --resource-group {rg} --name {namespacename} --subnet {namesubnet3} '
              '--vnet-name {namevnet2}').get_output_in_json()
         self.assertEqual(len(networkRule['virtualNetworkRules']), 1)

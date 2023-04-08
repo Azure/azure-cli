@@ -247,9 +247,9 @@ def load_arguments_sb(self, _):
         with self.argument_context(scope) as c:
             c.argument('ignore_missing_vnet_service_endpoint', arg_group='Virtual Network Rule', options_list=['--ignore-missing-endpoint'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
             c.argument('subnet', arg_group='Virtual Network Rule', options_list=['--subnet'],
-                        help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
+                       help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
             c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'],
-                        help='Name of the Virtual Network')
+                    help='Name of the Virtual Network')
             c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
 
 # Private end point connection
