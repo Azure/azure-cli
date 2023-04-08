@@ -245,7 +245,7 @@ def load_arguments_sb(self, _):
 
     for scope in ['servicebus namespace network-rule virtual-network-rule add', 'servicebus namespace network-rule virtual-network-rule remove']:
         with self.argument_context(scope) as c:
-            c.argument('ignore_missing_vnet_service_endpoint', options_list=['--ignore-missing-endpoint', 'missing-endpoint'], arg_group='Virtual Network Rule', options_list=['--ignore-missing-endpoint'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
+            c.argument('ignore_missing_vnet_service_endpoint', arg_group='Virtual Network Rule', options_list=['--ignore-missing-endpoint', '--missing-endpoint'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
             c.argument('subnet', arg_group='Virtual Network Rule', options_list=['--subnet'],
                        help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
             c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'],
