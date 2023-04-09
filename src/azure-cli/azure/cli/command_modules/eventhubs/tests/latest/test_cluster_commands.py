@@ -75,9 +75,6 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
             'tier': 'Standard'
         })
 
-        # create Resource group
-        self.cmd('az group create --resource-group test-migration --location {loc}')
-
         # Create Cluster
         self.cmd(
             'eventhubs cluster create --resource-group test-migration --name {clustername} --location {loc} --supports-scaling --capacity 2')
