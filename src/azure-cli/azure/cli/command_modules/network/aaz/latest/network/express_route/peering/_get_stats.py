@@ -178,4 +178,8 @@ class GetStats(AAZCommand):
             return cls._schema_on_200
 
 
+class _GetStatsHelper:
+    """Helper class for GetStats"""
+
+
 __all__ = ["GetStats"]

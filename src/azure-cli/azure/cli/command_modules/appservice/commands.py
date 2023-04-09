@@ -11,7 +11,12 @@ from ._client_factory import cf_web_client, cf_plans, cf_webapps
 from ._validators import (validate_onedeploy_params, validate_staticsite_link_function, validate_staticsite_sku,
                           validate_vnet_integration, validate_asp_create, validate_functionapp_asp_create,
                           validate_webapp_up, validate_app_exists, validate_add_vnet, validate_app_is_functionapp,
-                          validate_app_is_webapp)
+                          validate_app_is_webapp, validate_functionapp_on_containerapp_vnet,
+                          validate_functionapp_on_containerapp_vnet_add, validate_centauri_delete_function,
+                          validate_functionapp_on_containerapp_site_config_set,
+                          validate_functionapp_on_containerapp_site_config_show,
+                          validate_functionapp_on_containerapp_container_settings_delete,
+                          validate_functionapp_on_containerapp_update)
 
 
 def output_slots_in_table(slots):
@@ -292,9 +297,9 @@ def load_command_table(self, _):
         g.custom_command('remove', 'remove_vnet_integration')
 
     with self.command_group('functionapp vnet-integration') as g:
-        g.custom_command('add', 'add_functionapp_vnet_integration', validator=validate_add_vnet, exception_handler=ex_handler_factory())
-        g.custom_command('list', 'list_vnet_integration')
-        g.custom_command('remove', 'remove_vnet_integration')
+        g.custom_command('add', 'add_functionapp_vnet_integration', validator=validate_functionapp_on_containerapp_vnet_add, exception_handler=ex_handler_factory())
+        g.custom_command('list', 'list_functionapp_vnet_integration', validator=validate_functionapp_on_containerapp_vnet, exception_handler=ex_handler_factory())
+        g.custom_command('remove', 'remove_functionapp_vnet_integration', validator=validate_functionapp_on_containerapp_vnet, exception_handler=ex_handler_factory())
 
     with self.command_group('appservice plan', appservice_plan_sdk) as g:
         g.custom_command('create', 'create_app_service_plan', supports_no_wait=True,
@@ -317,7 +322,7 @@ def load_command_table(self, _):
                          validator=validate_vnet_integration)
         g.custom_command('list-runtimes', 'list_function_app_runtimes')
         g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
-        g.custom_show_command('show', 'show_app', table_transformer=transform_web_output)
+        g.custom_show_command('show', 'show_functionapp', table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_function_app')
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')
@@ -328,11 +333,12 @@ def load_command_table(self, _):
         g.custom_command('identity remove', 'remove_identity')
         g.custom_command('deploy', 'perform_onedeploy', validator=validate_onedeploy_params, is_preview=True)
         g.generic_update_command('update', getter_name="get_functionapp", setter_name='set_functionapp', exception_handler=update_function_ex_handler_factory(),
-                                 custom_func_name='update_functionapp', getter_type=appservice_custom, setter_type=appservice_custom, command_type=webapp_sdk)
+                                 custom_func_name='update_functionapp', getter_type=appservice_custom, setter_type=appservice_custom, command_type=webapp_sdk,
+                                 validator=validate_functionapp_on_containerapp_update)
 
     with self.command_group('functionapp config') as g:
-        g.custom_command('set', 'update_site_configs')
-        g.custom_show_command('show', 'get_site_configs')
+        g.custom_command('set', 'update_site_configs', validator=validate_functionapp_on_containerapp_site_config_set, exception_handler=ex_handler_factory())
+        g.custom_show_command('show', 'get_site_configs', validator=validate_functionapp_on_containerapp_site_config_show, exception_handler=ex_handler_factory())
 
     with self.command_group('functionapp config appsettings') as g:
         g.custom_command('list', 'get_app_settings', exception_handler=empty_on_404)
@@ -395,7 +401,7 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp config container') as g:
         g.custom_command('set', 'update_container_settings_functionapp')
-        g.custom_command('delete', 'delete_container_settings')
+        g.custom_command('delete', 'delete_container_settings', validator=validate_functionapp_on_containerapp_container_settings_delete)
         g.custom_show_command('show', 'show_container_settings_functionapp')
 
     with self.command_group('functionapp deployment slot') as g:
@@ -412,7 +418,7 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp function') as g:
         g.custom_command('show', 'show_function')  # pylint: disable=show-command
-        g.custom_command('delete', 'delete_function')
+        g.custom_command('delete', 'delete_function', validator=validate_centauri_delete_function, exception_handler=ex_handler_factory())
         g.custom_command('list', 'list_functions')
 
     with self.command_group('functionapp function keys') as g:

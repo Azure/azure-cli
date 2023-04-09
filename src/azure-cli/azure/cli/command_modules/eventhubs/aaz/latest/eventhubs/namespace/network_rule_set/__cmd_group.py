@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "eventhubs namespace network-rule-set",
 )
 class __CMDGroup(AAZCommandGroup):
-    """eventhubs namespace network-rule-set
+    """Manage Azure EventHubs networkruleset for namespace
     """
     pass
 

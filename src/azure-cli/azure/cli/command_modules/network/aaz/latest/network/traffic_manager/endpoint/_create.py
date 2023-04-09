@@ -51,20 +51,17 @@ class Create(AAZCommand):
             options=["-n", "--name"],
             help="Endpoint name.",
             required=True,
-            id_part="child_name_1",
         )
         _args_schema.type = AAZStrArg(
             options=["-t", "--type"],
             help="Endpoint type.",
             required=True,
-            id_part="child_type_1",
             enum={"AzureEndpoints": "AzureEndpoints", "ExternalEndpoints": "ExternalEndpoints", "NestedEndpoints": "NestedEndpoints"},
         )
         _args_schema.profile_name = AAZStrArg(
             options=["--profile-name"],
             help="Name of parent profile.",
             required=True,
-            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -405,6 +402,10 @@ class Create(AAZCommand):
             _element.scope = AAZIntType()
 
             return cls._schema_on_200_201
+
+
+class _CreateHelper:
+    """Helper class for Create"""
 
 
 __all__ = ["Create"]

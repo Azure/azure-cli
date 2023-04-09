@@ -41,7 +41,7 @@ class List(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.namespace_name = AAZStrArg(
-            options=["--namespace-name"],
+            options=["-n", "--name", "--namespace-name"],
             help="The Namespace name",
             required=True,
             fmt=AAZStrArgFormat(

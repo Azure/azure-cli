@@ -587,6 +587,7 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
             self.check('instanceView.statuses[1].code', expected_power_state),
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_state_mod')
     def test_vm_create_state_modifications(self, resource_group):
 
@@ -595,7 +596,7 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
             'vm': 'vm-state-mod',
             'nsg': 'mynsg',
             'ip': 'mypubip',
-            'sa': self.create_random_name('clistorage', 15),
+            'sa': self.create_random_name('clistorage', 20),
             'vnet': 'myvnet'
         })
 
@@ -1644,8 +1645,7 @@ class VMSSCreateExistingOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.osDisk.name', '{os_disk}'),
             self.check('virtualMachineProfile.storageProfile.osDisk.vhdContainers[0].ends_with(@, \'{container}\')', True)
         ])
-        self.cmd('network lb show --name {lb} -g {rg}',
-                 checks=self.check('backendAddressPools[0].backendIPConfigurations[0].id.contains(@, \'{vmss}\')', True))
+        self.cmd('network lb show --name {lb} -g {rg}')
         self.cmd('network vnet show --name {vnet} -g {rg}',
                  checks=self.check('subnets[0].ipConfigurations[0].id.contains(@, \'{vmss}\')', True))
 

@@ -49,7 +49,6 @@ class Create(AAZCommand):
             options=["-n", "--name"],
             help="The name of the public IP prefix.",
             required=True,
-            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -267,7 +266,7 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                _build_schema_sub_resource_create(properties.set_prop("customIPPrefix", AAZObjectType, ".custom_ip_prefix"))
+                _CreateHelper._build_schema_sub_resource_create(properties.set_prop("customIPPrefix", AAZObjectType, ".custom_ip_prefix"))
                 properties.set_prop("prefixLength", AAZIntType, ".length")
                 properties.set_prop("publicIPAddressVersion", AAZStrType, ".version")
 
@@ -333,7 +332,7 @@ class Create(AAZCommand):
             properties.custom_ip_prefix = AAZObjectType(
                 serialized_name="customIPPrefix",
             )
-            _build_schema_sub_resource_read(properties.custom_ip_prefix)
+            _CreateHelper._build_schema_sub_resource_read(properties.custom_ip_prefix)
             properties.ip_prefix = AAZStrType(
                 serialized_name="ipPrefix",
                 flags={"read_only": True},
@@ -344,7 +343,7 @@ class Create(AAZCommand):
             properties.load_balancer_frontend_ip_configuration = AAZObjectType(
                 serialized_name="loadBalancerFrontendIpConfiguration",
             )
-            _build_schema_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
+            _CreateHelper._build_schema_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
             properties.nat_gateway = AAZObjectType(
                 serialized_name="natGateway",
             )
@@ -419,15 +418,15 @@ class Create(AAZCommand):
 
             public_ip_addresses = cls._schema_on_200_201.properties.nat_gateway.properties.public_ip_addresses
             public_ip_addresses.Element = AAZObjectType()
-            _build_schema_sub_resource_read(public_ip_addresses.Element)
+            _CreateHelper._build_schema_sub_resource_read(public_ip_addresses.Element)
 
             public_ip_prefixes = cls._schema_on_200_201.properties.nat_gateway.properties.public_ip_prefixes
             public_ip_prefixes.Element = AAZObjectType()
-            _build_schema_sub_resource_read(public_ip_prefixes.Element)
+            _CreateHelper._build_schema_sub_resource_read(public_ip_prefixes.Element)
 
             subnets = cls._schema_on_200_201.properties.nat_gateway.properties.subnets
             subnets.Element = AAZObjectType()
-            _build_schema_sub_resource_read(subnets.Element)
+            _CreateHelper._build_schema_sub_resource_read(subnets.Element)
 
             sku = cls._schema_on_200_201.properties.nat_gateway.sku
             sku.name = AAZStrType()
@@ -457,27 +456,29 @@ class Create(AAZCommand):
             return cls._schema_on_200_201
 
 
-def _build_schema_sub_resource_create(_builder):
-    if _builder is None:
-        return
-    _builder.set_prop("id", AAZStrType, ".id")
+class _CreateHelper:
+    """Helper class for Create"""
 
+    @classmethod
+    def _build_schema_sub_resource_create(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("id", AAZStrType, ".id")
 
-_schema_sub_resource_read = None
+    _schema_sub_resource_read = None
 
+    @classmethod
+    def _build_schema_sub_resource_read(cls, _schema):
+        if cls._schema_sub_resource_read is not None:
+            _schema.id = cls._schema_sub_resource_read.id
+            return
 
-def _build_schema_sub_resource_read(_schema):
-    global _schema_sub_resource_read
-    if _schema_sub_resource_read is not None:
-        _schema.id = _schema_sub_resource_read.id
-        return
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
 
-    _schema_sub_resource_read = AAZObjectType()
+        sub_resource_read = _schema_sub_resource_read
+        sub_resource_read.id = AAZStrType()
 
-    sub_resource_read = _schema_sub_resource_read
-    sub_resource_read.id = AAZStrType()
-
-    _schema.id = _schema_sub_resource_read.id
+        _schema.id = cls._schema_sub_resource_read.id
 
 
 __all__ = ["Create"]

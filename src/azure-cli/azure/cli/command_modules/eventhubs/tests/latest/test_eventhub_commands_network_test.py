@@ -30,8 +30,10 @@ class EHNetworkCURDScenarioTest(ScenarioTest):
             'accessrights': 'Send',
             'namevnet': 'sbehvnettest1',
             'namevnet1': 'sbehvnettest2',
+            'namevnet2': 'sbehvnettest3',
             'namesubnet1': 'default',
             'namesubnet2': 'secondvnet',
+            'namesubnet3': 'thirdvnet',
             'isautoinflateenabled': 'True',
             'maximumthroughputunits': 4,
             'maximumthroughputunits_update': 5,
@@ -42,12 +44,14 @@ class EHNetworkCURDScenarioTest(ScenarioTest):
 
         self.cmd('network vnet create --resource-group {rg} --name {namevnet}')
         self.cmd('network vnet create --resource-group {rg} --name {namevnet1}')
+        self.cmd('network vnet create --resource-group {rg} --name {namevnet2}')
 
         created_subnet1 = self.cmd(
             'network vnet subnet create --resource-group {rg} --name {namesubnet1} --vnet-name {namevnet} --address-prefixes 10.0.0.0/24').get_output_in_json()
         created_subnet2 = self.cmd(
             'network vnet subnet create --resource-group {rg} --name {namesubnet2} --vnet-name {namevnet1} --address-prefixes 10.0.0.0/24').get_output_in_json()
-
+        created_subnet3 = self.cmd(
+            'network vnet subnet create --resource-group {rg} --name {namesubnet3} --vnet-name {namevnet2} --address-prefixes 10.0.0.0/24').get_output_in_json()
         # Check for the NameSpace name Availability
         self.cmd('eventhubs namespace exists --name {namespacename}',
                  checks=[self.check('nameAvailable', True)])
@@ -68,9 +72,6 @@ class EHNetworkCURDScenarioTest(ScenarioTest):
         # add IP Rule
         networkRule = self.cmd(
             'eventhubs namespace network-rule-set ip-rule add --resource-group {rg} --name {namespacename} --ip-address {ipmask1} --action Allow').get_output_in_json()
-
-        networkRule = self.cmd(
-            'eventhubs namespace network-rule-set show --resource-group {rg} --name {namespacename}').get_output_in_json()
         self.assertEqual(len(networkRule['ipRules']), 1)
         self.assertEqual(len(networkRule['virtualNetworkRules']), 0)
         self.assertTrue(networkRule['ipRules'][0]['ipMask'] == '1.1.1.1')
@@ -80,7 +81,14 @@ class EHNetworkCURDScenarioTest(ScenarioTest):
         # add IP Rule
         networkRule = self.cmd(
             'eventhubs namespace network-rule-set ip-rule add --resource-group {rg} --name {namespacename} --ip-address {ipmask2} --action Allow').get_output_in_json()
+        self.assertEqual(len(networkRule['ipRules']), 2)
+        self.assertTrue(networkRule['ipRules'][0]['ipMask'] == '1.1.1.1')
+        self.assertTrue(networkRule['ipRules'][1]['ipMask'] == '2.2.2.2')
+        self.assertEqual(len(networkRule['virtualNetworkRules']), 0)
+        self.assertEqual('Enabled', networkRule['publicNetworkAccess'])
+        self.assertEqual('Allow', networkRule['defaultAction'])
 
+        # Get list of IP rule
         networkRule = self.cmd(
             'eventhubs namespace network-rule-set show --resource-group {rg} --name {namespacename}').get_output_in_json()
         self.assertEqual(len(networkRule['ipRules']), 2)
@@ -90,23 +98,9 @@ class EHNetworkCURDScenarioTest(ScenarioTest):
         self.assertEqual('Enabled', networkRule['publicNetworkAccess'])
         self.assertEqual('Allow', networkRule['defaultAction'])
 
-        # Get Ip rule at particular index
-        networkRule = self.cmd(
-            'eventhubs namespace network-rule-set ip-rule show --resource-group {rg} --name {namespacename} --ip-rule-index 1').get_output_in_json()
-        self.assertTrue(networkRule['ipMask'] == '2.2.2.2')
-
-        # Get list of IP rule
-        networkRule = self.cmd(
-            'eventhubs namespace network-rule-set ip-rule list --resource-group {rg} --name {namespacename}').get_output_in_json()
-        self.assertEqual(len(networkRule), 2)
-        self.assertTrue(networkRule[0]['ipMask'] == '1.1.1.1')
-        self.assertTrue(networkRule[1]['ipMask'] == '2.2.2.2')
-
         # Remove IPRule
-        self.cmd(
-            'eventhubs namespace network-rule-set ip-rule remove --resource-group {rg} --name {namespacename} --ip-rule-index 1')
-
-        networkRule = self.cmd('eventhubs namespace network-rule-set show --resource-group {rg} --name {namespacename}').get_output_in_json()
+        networkRule = self.cmd(
+            'eventhubs namespace network-rule-set ip-rule remove --resource-group {rg} --name {namespacename} --ip-address {ipmask2}').get_output_in_json()
         self.assertEqual(len(networkRule['ipRules']), 1)
         self.assertTrue(networkRule['ipRules'][0]['ipMask'] == '1.1.1.1')
         self.assertEqual(len(networkRule['virtualNetworkRules']), 0)
@@ -114,12 +108,9 @@ class EHNetworkCURDScenarioTest(ScenarioTest):
         self.assertEqual('Allow', networkRule['defaultAction'])
 
         # add vnetrule
-        self.cmd(
-            'eventhubs namespace network-rule-set virtual-network-rule add --resource-group {rg} --name {namespacename} --subnet ' +
-            created_subnet1['id'] + ' --ignore-missing-endpoint True').get_output_in_json()
-
         networkRule = self.cmd(
-            'eventhubs namespace network-rule-set show --resource-group {rg} --name {namespacename}').get_output_in_json()
+            'eventhubs namespace network-rule-set virtual-network-rule add --resource-group {rg} --name {namespacename} --subnet ' +
+            created_subnet1['id'] + ' --ignore-missing-endpoint ').get_output_in_json()
         self.assertEqual(len(networkRule['virtualNetworkRules']), 1)
         self.assertEqual(networkRule['virtualNetworkRules'][0]['subnet']['id'].lower(), created_subnet1['id'].lower())
         self.assertEqual(networkRule['virtualNetworkRules'][0]['ignoreMissingVnetServiceEndpoint'], True)
@@ -129,21 +120,30 @@ class EHNetworkCURDScenarioTest(ScenarioTest):
         self.assertEqual('Allow', networkRule['defaultAction'])
 
         # add vnetrule2
-        self.cmd('eventhubs namespace network-rule-set virtual-network-rule add --resource-group {rg} --name {namespacename} --subnet ' +
-             created_subnet2['id'] + ' --ignore-missing-endpoint True')
-
-        # list Vnetrules
         networkRule = self.cmd(
-            'eventhubs namespace network-rule-set virtual-network-rule list --resource-group {rg} --name {namespacename}').get_output_in_json()
-        self.assertEqual(len(networkRule), 2)
-
-        networkRule = self.cmd(
-            'eventhubs namespace network-rule-set show --resource-group {rg} --name {namespacename}').get_output_in_json()
+            'eventhubs namespace network-rule-set virtual-network-rule add --resource-group {rg} --name {namespacename} --subnet ' +
+            created_subnet2['id'] + ' --ignore-missing-endpoint').get_output_in_json()
         self.assertEqual(len(networkRule['virtualNetworkRules']), 2)
-        self.assertEqual(networkRule['virtualNetworkRules'][0]['subnet']['id'].lower(), created_subnet2['id'].lower())
+        self.assertEqual(networkRule['virtualNetworkRules'][0]['subnet']['id'].lower(), created_subnet1['id'].lower())
         self.assertEqual(networkRule['virtualNetworkRules'][0]['ignoreMissingVnetServiceEndpoint'], True)
-        self.assertEqual(networkRule['virtualNetworkRules'][1]['subnet']['id'].lower(), created_subnet1['id'].lower())
+        self.assertEqual(networkRule['virtualNetworkRules'][1]['subnet']['id'].lower(), created_subnet2['id'].lower())
         self.assertEqual(networkRule['virtualNetworkRules'][1]['ignoreMissingVnetServiceEndpoint'], True)
+        self.assertEqual(len(networkRule['ipRules']), 1)
+        self.assertTrue(networkRule['ipRules'][0]['ipMask'] == '1.1.1.1')
+        self.assertEqual('Enabled', networkRule['publicNetworkAccess'])
+        self.assertEqual('Allow', networkRule['defaultAction'])
+
+        # add vnetrule3
+        networkRule = self.cmd(
+            'eventhubs namespace network-rule-set virtual-network-rule add --resource-group {rg} --name {namespacename} --subnet {namesubnet3} '
+            '--ignore-missing-endpoint --vnet-name {namevnet2}').get_output_in_json()
+        self.assertEqual(len(networkRule['virtualNetworkRules']), 3)
+        self.assertEqual(networkRule['virtualNetworkRules'][0]['subnet']['id'].lower(), created_subnet1['id'].lower())
+        self.assertEqual(networkRule['virtualNetworkRules'][0]['ignoreMissingVnetServiceEndpoint'], True)
+        self.assertEqual(networkRule['virtualNetworkRules'][1]['subnet']['id'].lower(), created_subnet2['id'].lower())
+        self.assertEqual(networkRule['virtualNetworkRules'][1]['ignoreMissingVnetServiceEndpoint'], True)
+        self.assertEqual(networkRule['virtualNetworkRules'][2]['subnet']['id'].lower(), created_subnet3['id'].lower())
+        self.assertEqual(networkRule['virtualNetworkRules'][2]['ignoreMissingVnetServiceEndpoint'], True)
         self.assertEqual(len(networkRule['ipRules']), 1)
         self.assertTrue(networkRule['ipRules'][0]['ipMask'] == '1.1.1.1')
         self.assertEqual('Enabled', networkRule['publicNetworkAccess'])
@@ -151,7 +151,7 @@ class EHNetworkCURDScenarioTest(ScenarioTest):
 
         networkRule = self.cmd('eventhubs namespace network-rule-set update --resource-group {rg} --name {namespacename} '
                                '--public-network-access Disabled').get_output_in_json()
-        self.assertEqual(len(networkRule['virtualNetworkRules']), 2)
+        self.assertEqual(len(networkRule['virtualNetworkRules']), 3)
         self.assertEqual(len(networkRule['ipRules']), 1)
         self.assertTrue(networkRule['ipRules'][0]['ipMask'] == '1.1.1.1')
         self.assertEqual('Disabled', networkRule['publicNetworkAccess'])
@@ -159,20 +159,15 @@ class EHNetworkCURDScenarioTest(ScenarioTest):
 
         networkRule = self.cmd('eventhubs namespace network-rule-set update --resource-group {rg} --name {namespacename} '
                                '--public-network-access Enabled').get_output_in_json()
-        self.assertEqual(len(networkRule['virtualNetworkRules']), 2)
+        self.assertEqual(len(networkRule['virtualNetworkRules']), 3)
         self.assertEqual(len(networkRule['ipRules']), 1)
         self.assertTrue(networkRule['ipRules'][0]['ipMask'] == '1.1.1.1')
         self.assertEqual('Enabled', networkRule['publicNetworkAccess'])
         self.assertEqual('Allow', networkRule['defaultAction'])
 
-        # show the vnet from particular index subnet-rule
-        networkRule = self.cmd('eventhubs namespace network-rule-set virtual-network-rule show --resource-group {rg} '
-                               '--name {namespacename} --virtual-network-rule-index 0').get_output_in_json()
-        self.assertEqual(networkRule['subnet']['id'].lower(), created_subnet2['id'].lower())
-
         networkRule = self.cmd('eventhubs namespace network-rule-set update --resource-group {rg} --name {namespacename} '
                                '--public-network-access Enabled').get_output_in_json()
-        self.assertEqual(len(networkRule['virtualNetworkRules']), 2)
+        self.assertEqual(len(networkRule['virtualNetworkRules']), 3)
         self.assertEqual(len(networkRule['ipRules']), 1)
         self.assertTrue(networkRule['ipRules'][0]['ipMask'] == '1.1.1.1')
         self.assertEqual('Enabled', networkRule['publicNetworkAccess'])
@@ -180,7 +175,7 @@ class EHNetworkCURDScenarioTest(ScenarioTest):
 
         networkRule = self.cmd('eventhubs namespace network-rule-set update --resource-group {rg} --name {namespacename} '
                                '--default-action Deny').get_output_in_json()
-        self.assertEqual(len(networkRule['virtualNetworkRules']), 2)
+        self.assertEqual(len(networkRule['virtualNetworkRules']), 3)
         self.assertEqual(len(networkRule['ipRules']), 1)
         self.assertTrue(networkRule['ipRules'][0]['ipMask'] == '1.1.1.1')
         self.assertEqual('Enabled', networkRule['publicNetworkAccess'])
@@ -188,7 +183,7 @@ class EHNetworkCURDScenarioTest(ScenarioTest):
 
         networkRule = self.cmd('eventhubs namespace network-rule-set update --resource-group {rg} --name {namespacename} '
                                '--default-action Allow').get_output_in_json()
-        self.assertEqual(len(networkRule['virtualNetworkRules']), 2)
+        self.assertEqual(len(networkRule['virtualNetworkRules']), 3)
         self.assertEqual(len(networkRule['ipRules']), 1)
         self.assertTrue(networkRule['ipRules'][0]['ipMask'] == '1.1.1.1')
         self.assertEqual('Enabled', networkRule['publicNetworkAccess'])
@@ -196,7 +191,7 @@ class EHNetworkCURDScenarioTest(ScenarioTest):
 
         networkRule = self.cmd('eventhubs namespace network-rule-set update --resource-group {rg} --name {namespacename} '
                                '--enable-trusted-service-access').get_output_in_json()
-        self.assertEqual(len(networkRule['virtualNetworkRules']), 2)
+        self.assertEqual(len(networkRule['virtualNetworkRules']), 3)
         self.assertEqual(len(networkRule['ipRules']), 1)
         self.assertTrue(networkRule['ipRules'][0]['ipMask'] == '1.1.1.1')
         self.assertEqual('Enabled', networkRule['publicNetworkAccess'])
@@ -205,18 +200,28 @@ class EHNetworkCURDScenarioTest(ScenarioTest):
 
         networkRule = self.cmd('eventhubs namespace network-rule-set update --resource-group {rg} --name {namespacename} '
                                '--enable-trusted-service-access false').get_output_in_json()
-        self.assertEqual(len(networkRule['virtualNetworkRules']), 2)
+        self.assertEqual(len(networkRule['virtualNetworkRules']), 3)
         self.assertEqual(len(networkRule['ipRules']), 1)
         self.assertTrue(networkRule['ipRules'][0]['ipMask'] == '1.1.1.1')
         self.assertEqual('Enabled', networkRule['publicNetworkAccess'])
         self.assertEqual('Allow', networkRule['defaultAction'])
 
-        # remove Vnetrule
-        self.cmd(
-            'eventhubs namespace network-rule-set virtual-network-rule remove --resource-group {rg} --name {namespacename} --virtual-network-rule-index 1')
 
-        networkRule = self.cmd('eventhubs namespace network-rule-set virtual-network-rule list --resource-group {rg} --name {namespacename} ').get_output_in_json()
-        self.assertEqual(len(networkRule), 1)
+        # list Vnetrules
+        self.cmd(
+            'eventhubs namespace network-rule-set list --resource-group {rg} --name {namespacename}')
+
+        # remove Vnetrule
+        networkRule = self.cmd(
+            'eventhubs namespace network-rule-set virtual-network-rule remove --resource-group {rg} --name {namespacename} --subnet ' +
+            created_subnet2['id']).get_output_in_json()
+        self.assertEqual(len(networkRule['virtualNetworkRules']), 2)
+
+        # remove Vnetrule2
+        networkRule = self.cmd(
+            'eventhubs namespace network-rule-set virtual-network-rule remove --resource-group {rg} --name {namespacename} --subnet {namesubnet3} '
+            '--vnet-name {namevnet2}').get_output_in_json()
+        self.assertEqual(len(networkRule['virtualNetworkRules']), 1)
 
         # Delete Namespace list by ResourceGroup
         self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename}')

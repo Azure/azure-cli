@@ -42,7 +42,7 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.namespace_name = AAZStrArg(
-            options=["--namespace-name"],
+            options=["-n", "--name", "--namespace-name"],
             help="The Namespace name",
             required=True,
             fmt=AAZStrArgFormat(
@@ -76,7 +76,7 @@ class Create(AAZCommand):
             enum={"Disabled": "Disabled", "Enabled": "Enabled", "SecuredByPerimeter": "SecuredByPerimeter"},
         )
         _args_schema.enable_trusted_service_access = AAZBoolArg(
-            options=["--enable-trusted-service-access"],
+            options=["-t", "--enable-trusted-service-access"],
             arg_group="Properties",
             help="Value that indicates whether Trusted Service Access is Enabled or not.",
         )
@@ -104,8 +104,8 @@ class Create(AAZCommand):
         virtual_network_rules.Element = AAZObjectArg()
 
         _element = cls._args_schema.virtual_network_rules.Element
-        _element.ignore_missing_vnet_service_endpoint = AAZBoolArg(
-            options=["ignore-missing-vnet-service-endpoint"],
+        _element.ignore_missing_endpoint = AAZBoolArg(
+            options=["missing-endpoint", "ignore-missing-endpoint"],
             help="Value that indicates whether to ignore missing Vnet Service Endpoint",
         )
         _element.subnet = AAZStrArg(
@@ -229,7 +229,7 @@ class Create(AAZCommand):
 
             _elements = _builder.get(".properties.virtualNetworkRules[]")
             if _elements is not None:
-                _elements.set_prop("ignoreMissingVnetServiceEndpoint", AAZBoolType, ".ignore_missing_vnet_service_endpoint")
+                _elements.set_prop("ignoreMissingVnetServiceEndpoint", AAZBoolType, ".ignore_missing_endpoint")
                 _elements.set_prop("subnet", AAZObjectType)
 
             subnet = _builder.get(".properties.virtualNetworkRules[].subnet")

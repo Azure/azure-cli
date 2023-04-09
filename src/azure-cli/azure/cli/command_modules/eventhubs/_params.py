@@ -12,8 +12,7 @@ def load_arguments_eh(self, _):
     from azure.cli.core.commands.parameters import tags_type, get_enum_type, resource_group_name_type, name_type, \
         get_location_type, get_three_state_flag, get_resource_name_completion_list
     from azure.cli.core.commands.validators import get_default_location_from_resource_group
-    from azure.cli.command_modules.eventhubs._completers import get_consumergroup_command_completion_list, \
-        get_eventhubs_command_completion_list
+    from azure.cli.command_modules.eventhubs._completers import get_eventhubs_command_completion_list
     from azure.cli.command_modules.eventhubs._validator import validate_storageaccount, validate_partner_namespace, validate_rights
     from knack.arguments import CLIArgumentType
     from azure.cli.core.profiles import ResourceType
@@ -34,7 +33,7 @@ def load_arguments_eh(self, _):
         c.argument('name', arg_type=name_type, help='Namespace name. Name can contain only letters, numbers, and hyphens. The namespace must start with a letter, and it must end with a letter or number.')
 
     with self.argument_context('eventhubs namespace', min_api='2021-06-01-preview') as c:
-        c.argument('namespace_name', arg_type=name_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.ServiceBus/namespaces'), help='Name of Namespace')
+        c.argument('namespace_name', arg_type=name_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.eventhubs/namespaces'), help='Name of Namespace')
         c.argument('is_kafka_enabled', options_list=['--enable-kafka'], arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether Kafka is enabled for eventhub namespace.')
         c.argument('tags', arg_type=tags_type)
@@ -143,21 +142,6 @@ def load_arguments_eh(self, _):
         c.argument('event_hub_name', id_part=None, arg_type=event_hub_name_arg_type)
         c.argument('authorization_rule_name', arg_type=name_type, id_part=None, help='Name of EventHub AuthorizationRule')
 
-
-# - ConsumerGroup Region
-    with self.argument_context('eventhubs eventhub consumer-group') as c:
-        c.argument('event_hub_name', arg_type=event_hub_name_arg_type, help='Name of EventHub')
-        c.argument('consumer_group_name', arg_type=name_type, id_part='child_name_2', completer=get_consumergroup_command_completion_list, help='Name of ConsumerGroup')
-
-    for scope in ['eventhubs eventhub consumer-group create', 'eventhubs eventhub consumer-group update']:
-        with self.argument_context(scope) as c:
-            c.argument('name', arg_type=name_type, help='Name of ConsumerGroup')
-            c.argument('user_metadata', help='Usermetadata is a placeholder to store user-defined string data with maximum length 1024. e.g. it can be used to store descriptive data, such as list of teams and their contact information also user-defined configuration settings can be stored.')
-
-    with self.argument_context('eventhubs eventhub consumer-group list') as c:
-        c.argument('event_hub_name', arg_type=event_hub_name_arg_type, id_part=None, help='Name of EventHub')
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-
 #   : Region Geo DR Configuration
     with self.argument_context('eventhubs georecovery-alias') as c:
         c.argument('alias', options_list=['--alias', '-a'], id_part='child_name_1', help='Name of Geo-Disaster Recovery Configuration Alias')
@@ -185,6 +169,24 @@ def load_arguments_eh(self, _):
         c.argument('alias', options_list=['--alias', '-a'], id_part=None, help='Name of Geo-Disaster Recovery Configuration Alias')
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
         c.argument('authorization_rule_name', arg_type=name_type, help='Name of Namespace AuthorizationRule')
+
+# Region Namespace NetworkRuleSet
+    with self.argument_context('eventhubs namespace network-rule') as c:
+        c.argument('namespace_name', options_list=['--namespace-name', '--name', '-n'], id_part=None, help='Name of the Namespace')
+
+    for scope in ['eventhubs namespace network-rule-set ip-rule add', 'eventhubs namespace network-rule-set ip-rule remove']:
+        with self.argument_context(scope) as c:
+            c.argument('default_action', arg_group='IP Address Rule', options_list=['--default-action', '--action'], arg_type=get_enum_type(['Allow']), help='Action of the IP rule')
+            c.argument('ip_mask', arg_group='IP Address Rule', options_list=['--ip-address'], help='IPv4 address or CIDR range.')
+            c.argument('namespace_name', options_list=['--namespace-name', '--name', '-n'], id_part=None, help='Name of the Namespace')
+
+    for scope in ['eventhubs namespace network-rule virtual-network-rule add', 'eventhubs namespace network-rule virtual-network-rule remove']:
+        with self.argument_context(scope) as c:
+            c.argument('ignore_missing_vnet_service_endpoint', arg_group='Virtual Network Rule', options_list=['--ignore-missing-endpoint', '--missing-endpoint'], arg_type=get_three_state_flag(),
+                       help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
+            c.argument('subnet', arg_group='Virtual Network Rule', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
+            c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'], help='Name of the Virtual Network')
+            c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
 
 # Private end point connection
     with self.argument_context('eventhubs namespace private-endpoint-connection',
