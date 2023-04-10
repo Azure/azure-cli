@@ -956,8 +956,6 @@ class CrossRegionLoadBalancerRuleCreate(_LBRuleCreate):
         args_schema.backend_port._required = True
         args_schema.backend_address_pools._registered = False
         args_schema.disable_outbound_snat._registered = False   # it's not required for cross-region-lb
-        args_schema.idle_timeout_in_minutes._registered = False
-        args_schema.enable_tcp_reset._registered = False
         return args_schema
 
     def pre_instance_create(self):
