@@ -397,11 +397,11 @@ def load_arguments(self, _):
     with self.argument_context('network dns record-set soa') as c:
         c.argument('host', options_list=['--host', '-t'], help='Host name.')
         c.argument('email', options_list=['--email', '-e'], help='Email address.')
-        c.argument('expire_time', options_list=['--expire-time', '-x'], help='Expire time (seconds).')
-        c.argument('minimum_ttl', options_list=['--minimum-ttl', '-m'], help='Minimum TTL (time-to-live, seconds).')
-        c.argument('refresh_time', options_list=['--refresh-time', '-f'], help='Refresh value (seconds).')
-        c.argument('retry_time', options_list=['--retry-time', '-r'], help='Retry time (seconds).')
-        c.argument('serial_number', options_list=['--serial-number', '-s'], help='Serial number.')
+        c.argument('expire_time', options_list=['--expire-time', '-x'], type=int, help='Expire time (seconds).')
+        c.argument('minimum_ttl', options_list=['--minimum-ttl', '-m'], type=int, help='Minimum TTL (time-to-live, seconds).')
+        c.argument('refresh_time', options_list=['--refresh-time', '-f'], type=int, help='Refresh value (seconds).')
+        c.argument('retry_time', options_list=['--retry-time', '-r'], type=int, help='Retry time (seconds).')
+        c.argument('serial_number', options_list=['--serial-number', '-s'], type=int, help='Serial number.')
 
     with self.argument_context('network dns record-set srv') as c:
         c.argument('priority', type=int, options_list=['--priority', '-p'], help='Priority metric.')
