@@ -140,7 +140,9 @@ def cli_cluster_create(cmd, client, resource_group_name, cluster_name, location=
 
         if supports_scaling is not None:
             ehparam.supports_scaling = supports_scaling
-
+        logger.warning('Instead of key1=val1, the tags parameter should be used as "{key1:val1}".'
+                       'If more than one value is present, the format will be "{key1:val1,key2:val2}".'
+                       '')
         ehparam.tags = tags
 
         cluster_result = client.begin_create_or_update(
