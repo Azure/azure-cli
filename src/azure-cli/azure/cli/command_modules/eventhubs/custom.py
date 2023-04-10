@@ -13,6 +13,7 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
+logger.warning('.')
 
 # , resource_type = ResourceType.MGMT_EVENTHUB
 # Namespace Region
@@ -121,46 +122,6 @@ def cli_namespace_list(cmd, client, resource_group_name=None):
 def cli_namespace_exists(client, name):
 
     return client.check_name_availability(parameters={'name': name})
-
-
-# Cluster region
-def cli_cluster_create(cmd, client, resource_group_name, cluster_name, location=None, tags=None, capacity=None, supports_scaling=None):
-    Cluster = cmd.get_models('Cluster', resource_type=ResourceType.MGMT_EVENTHUB)
-    ClusterSku = cmd.get_models('ClusterSku', resource_type=ResourceType.MGMT_EVENTHUB)
-
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2016-06-01-preview'):
-        ehparam = Cluster()
-        ehparam.sku = ClusterSku(name='Dedicated')
-        ehparam.location = location
-
-        if capacity:
-            ehparam.sku.capacity = capacity
-        else:
-            ehparam.sku.capacity = 1
-
-        if supports_scaling is not None:
-            ehparam.supports_scaling = supports_scaling
-
-        ehparam.tags = tags
-
-        cluster_result = client.begin_create_or_update(
-            resource_group_name=resource_group_name,
-            cluster_name=cluster_name,
-            parameters=ehparam).result()
-
-    return cluster_result
-
-
-def cli_cluster_update(cmd, instance, tags=None, capacity=None):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2016-06-01-preview'):
-
-        if tags:
-            instance.tags = tags
-
-        if capacity:
-            instance.sku.capacity = capacity
-
-    return instance
 
 
 # Namespace Authorization rule:
