@@ -825,7 +825,7 @@ parameters:
     short-summary: Enable Windows Recording Rules when enabling the Azure Monitor Metrics addon
   - name: --disable-azuremonitormetrics
     type: bool
-    short-summary: Disable Azure Monitor Metrics Profile
+    short-summary: Disable Azure Monitor Metrics Profile. This will delete all DCRA's associated with the cluster, any linked DCRs with the data stream = prometheus-stream and the recording rule groups created by the addon for this AKS cluster.
 
 examples:
   - name: Reconcile the cluster back to its current state.
