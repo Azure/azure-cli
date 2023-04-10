@@ -330,7 +330,7 @@ def show_protectable_instance(items, server_name, protectable_item_type):
 
 def list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type,
                            backup_management_type="AzureWorkload", container_uri=None, protectable_item_type=None,
-                           server_name=None):
+                           server_name=None, instance_name=None):
 
     workload_type = _check_map(workload_type, workload_type_map)
     if protectable_item_type is not None:
@@ -344,6 +344,7 @@ def list_protectable_items(cmd, client, resource_group_name, vault_name, workloa
     items = client.list(vault_name, resource_group_name, filter_string)
     paged_items = cust_help.get_list_from_paged_response(items)
 
+    print("og: ", paged_items, len(paged_items))
     if protectable_item_type is not None:
         # Protectable Item Type filter
         paged_items = [item for item in paged_items if item.properties.protectable_item_type is not None and
@@ -356,6 +357,10 @@ def list_protectable_items(cmd, client, resource_group_name, vault_name, workloa
         # Container URI filter
         paged_items = [item for item in paged_items if
                        cust_help.get_protection_container_uri_from_id(item.id).lower() == container_uri.lower()]
+    if instance_name:
+        # Instance name filter
+        paged_items = [item for item in paged_items if item.name.lower() == instance_name.lower()]
+    print("after filtering: ", paged_items, len(paged_items))
 
     _fetch_nodes_list_and_auto_protection_policy(cmd, paged_items, resource_group_name, vault_name)
 
