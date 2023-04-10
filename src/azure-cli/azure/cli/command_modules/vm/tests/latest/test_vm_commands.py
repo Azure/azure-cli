@@ -6765,6 +6765,21 @@ class DedicatedHostScenarioTest(ScenarioTest):
         self.cmd('vm host delete -n {host} --host-group {host-group} -g {rg} --yes')
         self.cmd('vm host group delete -n {host-group} -g {rg} --yes')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_host_resize_', location='centraluseuap')
+    def test_vm_host_resize(self, resource_group):
+        self.kwargs.update({
+            'host-group': 'my-host-group',
+            'host': 'my-host',
+        })
+
+        self.cmd('vm host group create -n {host-group} -c 1 -g {rg}')
+        self.cmd('vm host create -n {host} --host-group {host-group} -d 0 -g {rg} --sku DSv3-Type1')
+
+        self.kwargs['resize-sku'] = self.cmd('vm host list-host-resize-options --name {host} --host-group {host-group} -g {rg}').get_output_in_json()[0]
+
+        self.cmd('vm host group resize -n {host} --host-group {host-group} -g {rg} --sku {resize-sku}', checks=[
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vm_host_ultra_ssd_')
     def test_vm_host_ultra_ssd(self, resource_group):
         self.kwargs.update({
