@@ -3799,9 +3799,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     for app_setting, value in app_settings_dict.items():
         site_config.app_settings.append(NameValuePair(name=app_setting, value=value))
 
-    site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
-                                                  value=_get_extension_version_functionapp(functions_version)))
-    site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
+    if environment is None:
+        site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
+                                                    value=_get_extension_version_functionapp(functions_version)))
+        site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
 
     # If plan is not consumption or elastic premium, we need to set always on
     if consumption_plan_location is None and plan_info is not None and not is_plan_elastic_premium(cmd, plan_info):
