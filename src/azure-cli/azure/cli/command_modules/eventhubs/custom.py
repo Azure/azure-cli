@@ -622,7 +622,7 @@ def cli_remove_appgroup_policy(client, resource_group_name, namespace_name, appl
 
     appGroup = client.get(resource_group_name, namespace_name, application_group_name)
     logger.warning(
-        'the policy remove policy cmdlets will do removals based on policy name')
+        'This operation will do removals based on policy name')
     if appGroup.policies:
         for policy_object in throttling_policy_config:
             if policy_object in appGroup.policies:
