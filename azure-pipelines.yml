@@ -1142,7 +1142,7 @@ jobs:
         teams_api_url=$(az keyvault secret show --vault-name kv-azuresdk --name azure-cli-teams-bot-api-url --query value -otsv)
         teams_api_key=$(az keyvault secret show --vault-name kv-azuresdk --name azure-cli-teams-bot-api-key --query value -otsv)
         echo "If any task fails, notify to teams channel"
-        python scripts/ci/notify_ci_errors.py $teams_api_url $teams_api_key
+        python scripts/ci/notify_ci_errors.py $teams_api_url $teams_api_key $(teams_channel_id)
     displayName: 'Notify To Teams Channel'
     env:
       BASE_URI: $(System.CollectionUri)

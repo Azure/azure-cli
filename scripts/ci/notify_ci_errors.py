@@ -20,6 +20,7 @@ logger.addHandler(ch)
 
 teams_api_url = sys.argv[1]
 teams_api_key = sys.argv[2]
+teams_channel_id = sys.argv[3]
 # https://dev.azure.com/azclitools/
 base_uri = os.environ.get('BASE_URI', False)
 # public
@@ -40,7 +41,7 @@ def notify_batch_ci_errors():
             "body": "Azure cli team,\n\nPlease click to take a look at the batch CI error.",
             "notificationUrl": url,
             "targetType": "channel",
-            "recipients": "19%3a42c79e58f56149d8917489b0c595fc78%40thread.tacv2"
+            "recipients": teams_channel_id
         }
         headers = {
           'x-api-key': teams_api_key
