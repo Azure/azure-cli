@@ -2779,6 +2779,9 @@ class CosmosDBTests(ScenarioTest):
             assert location_val['properties']['backupStorageRedundancies'] != None
             assert location_val['properties']['isResidencyRestricted'] != None
             assert location_val['properties']['supportsAvailabilityZone'] != None
+            assert location_val['properties']['isSubscriptionRegionAccessAllowedForRegular'] != None
+            assert location_val['properties']['isSubscriptionRegionAccessAllowedForAz'] != None
+            assert location_val['properties']['status'] != None
 
         locations_show = self.cmd('az cosmosdb locations show --location {loc}').get_output_in_json()
         assert locations_show['id'] != None
@@ -2787,6 +2790,9 @@ class CosmosDBTests(ScenarioTest):
         assert locations_show['properties']['backupStorageRedundancies'] != None
         assert locations_show['properties']['isResidencyRestricted'] != None
         assert locations_show['properties']['supportsAvailabilityZone'] != None
+        assert locations_show['properties']['isSubscriptionRegionAccessAllowedForRegular'] != None
+        assert locations_show['properties']['isSubscriptionRegionAccessAllowedForAz'] != None
+        assert locations_show['properties']['status'] != None
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_service', location='eastus2')
     def test_cosmosdb_service(self, resource_group):
