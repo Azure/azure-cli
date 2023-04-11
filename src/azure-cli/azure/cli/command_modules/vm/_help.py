@@ -160,11 +160,6 @@ examples:
     crafted: true
 """
 
-helps['disk-access'] = """
-type: group
-short-summary: Manage disk access resources.
-"""
-
 helps['disk-access create'] = """
 type: command
 short-summary: Create a disk access resource.
@@ -181,33 +176,6 @@ examples:
   - name: Update a disk access resource.
     text: >
         az disk-access update -g MyResourceGroup -n MyDiskAccess --tags tag1=val1 tag2=val2
-"""
-
-helps['disk-access list'] = """
-type: command
-short-summary: List disk access resources.
-examples:
-  - name: List all disk access reosurces in a resource group.
-    text: |
-        az disk-access list -g MyResourceGroup
-"""
-
-helps['disk-access show'] = """
-type: command
-short-summary: Get information of a disk access resource.
-examples:
-  - name: Get information of a disk access reosurce.
-    text: |
-        az disk-access show -g MyResourceGroup -n MyDiskAccess
-"""
-
-helps['disk-access delete'] = """
-type: command
-short-summary: Delete a disk access resource.
-examples:
-  - name: Delete a disk access reosurce.
-    text: |
-        az disk-access delete -g MyResourceGroup -n MyDiskAccess
 """
 
 helps['disk-access wait'] = """
