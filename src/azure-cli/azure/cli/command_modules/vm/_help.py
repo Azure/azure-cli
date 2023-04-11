@@ -1179,15 +1179,6 @@ examples:
         az sig list-community --location myLocation --marker nextMarker
 """
 
-helps['sig list'] = """
-type: command
-short-summary: list share image galleries.
-examples:
-  - name: List shared galleries by subscription id.
-    text: |
-        az sig list-shared --location myLocation
-"""
-
 helps['sig share'] = """
 type: group
 short-summary: Manage gallery sharing profile
@@ -1238,16 +1229,6 @@ examples:
   - name: Place the CLI in a waiting state until the gallery sharing object is updated.
     text: |
         az sig share wait --updated --resource-group MyResourceGroup --gallery-name Gallery
-"""
-
-helps['sig show-shared'] = """
-type: command
-short-summary: Get a gallery that has been shared directly to your subscription or tenant
-long-summary: Get a gallery that has been shared directly to your subscription or tenant
-examples:
-  - name: Get a gallery that has been shared directly to your subscription or tenant in the given location.
-    text: |
-        az sig show-shared --gallery-unique-name galleryUniqueName --location myLocation
 """
 
 helps['sig update'] = """

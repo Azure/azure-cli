@@ -524,12 +524,9 @@ def load_command_table(self, _):
     with self.command_group('sig', compute_galleries_sdk, operation_group='galleries', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_image_gallery')
         g.custom_show_command('show', 'show_image_gallery')
-        g.custom_command('list', 'list_image_galleries')
-        g.command('delete', 'begin_delete')
         g.generic_update_command('update', setter_type=compute_custom, setter_name='update_image_galleries', setter_arg_name='gallery')
 
     with self.command_group('sig', community_gallery_sdk, client_factory=cf_community_gallery, operation_group='shared_galleries', min_api='2022-01-03') as g:
-        g.command('show-community', 'get')
         g.custom_command('list-community', 'sig_community_gallery_list')
 
     with self.command_group('sig image-definition', community_gallery_image_sdk, client_factory=cf_community_gallery_image, operation_group='shared_galleries', min_api='2022-01-03') as g:
@@ -563,7 +560,6 @@ def load_command_table(self, _):
     with self.command_group('sig', vm_shared_gallery) as g:
         g.custom_command('list-shared', 'sig_shared_gallery_list', client_factory=cf_shared_galleries,
                          operation_group='shared_galleries', min_api='2020-09-30')
-        g.command('show-shared', 'get', operation_group='shared_galleries', min_api='2020-09-30')
 
     vm_gallery_sharing_profile = CliCommandType(
         operations_tmpl=(
