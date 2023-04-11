@@ -271,7 +271,7 @@ def list_associated_items_for_policy(client, resource_group_name, vault_name, na
 
 def list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type,
                            backup_management_type="AzureWorkload", container_name=None, protectable_item_type=None,
-                           server_name=None, instance_name=None):
+                           server_name=None):
 
     if backup_management_type != "AzureWorkload":
         raise ValidationError("""
@@ -293,8 +293,7 @@ def list_protectable_items(cmd, client, resource_group_name, vault_name, workloa
                 """)
             container_uri = container.name
     return custom_wl.list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type,
-                                            backup_management_type, container_uri, protectable_item_type, server_name,
-                                            instance_name=instance_name)
+                                            backup_management_type, container_uri, protectable_item_type, server_name)
 
 
 def show_protectable_item(cmd, client, resource_group_name, vault_name, name, server_name, protectable_item_type,
@@ -307,8 +306,8 @@ def show_protectable_instance(cmd, client, resource_group_name, vault_name, serv
                               workload_type, container_name=None, backup_management_type="AzureWorkload",
                               instance_name=None):
     items = list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type, backup_management_type,
-                                   container_name, instance_name=instance_name)
-    return custom_wl.show_protectable_instance(items, server_name, protectable_item_type)
+                                   container_name)
+    return custom_wl.show_protectable_instance(items, server_name, protectable_item_type, instance_name=instance_name)
 
 
 def initialize_protectable_items(client, resource_group_name, vault_name, container_name, workload_type):
@@ -528,7 +527,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         protectable_items_client = backup_protectable_items_cf(cmd.cli_ctx)
         target_item = show_protectable_instance(
             cmd, protectable_items_client, target_resource_group, target_vault_name,
-            target_server_name, target_server_type, workload_type, target_container_name, 
+            target_server_name, target_server_type, workload_type, target_container_name,
             "AzureWorkload", instance_name=target_instance_name)
 
     target_container = None
