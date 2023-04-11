@@ -2437,7 +2437,7 @@ def load_arguments(self, _):
                    required=False,
                    help='The collation of the Azure SQL Managed Database collation to use, '
                    'e.g.: SQL_Latin1_General_CP1_CI_AS or Latin1_General_100_CS_AS_SC')
-                   
+
         c.argument('is_ledger_on',
                    required=False,
                    arg_type=ledger_on_param_type)

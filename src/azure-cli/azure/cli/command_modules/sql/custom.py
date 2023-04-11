@@ -5952,6 +5952,7 @@ def managed_db_log_replay_get(
         resource_group_name=resource_group_name,
         restore_details_name=RestoreDetailsName.DEFAULT)
 
+
 def managed_ledger_digest_uploads_show(
         client,
         resource_group_name,
@@ -5966,6 +5967,7 @@ def managed_ledger_digest_uploads_show(
         managed_instance_name=managed_instance_name,
         database_name=database_name,
         ledger_digest_uploads=LedgerDigestUploadsName.CURRENT)
+
 
 def managed_ledger_digest_uploads_enable(
         client,
@@ -5986,6 +5988,7 @@ def managed_ledger_digest_uploads_enable(
         database_name=database_name,
         ledger_digest_uploads=LedgerDigestUploadsName.CURRENT,
         parameters=kwargs)
+
 
 def managed_ledger_digest_uploads_disable(
         client,
