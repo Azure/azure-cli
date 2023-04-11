@@ -455,6 +455,11 @@ type: group
 short-summary: Manage function app deployments.
 """
 
+helps['functionapp deployment user show'] = """
+type: command
+short-summary: Gets publishing user.
+"""
+
 helps['functionapp deployment container'] = """
 type: group
 short-summary: Manage container-based continuous deployment.
