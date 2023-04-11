@@ -589,6 +589,7 @@ class TestAAZField(unittest.TestCase):
         action_configuration.classification = AAZStrType()
         action_configuration.classification_comment = AAZStrType()
         action_configuration.severity = AAZStrType()
+        action_configuration.secret = AAZStrType(flags={"secret": True})
 
         disc_run_playbook = element.discriminate_by('action_type', 'RunPlaybook')
         disc_run_playbook.logic_app_resource_id = AAZStrType()
@@ -602,6 +603,7 @@ class TestAAZField(unittest.TestCase):
                     "classification": "BenignPositive",
                     "classification_comment": "comments 1",
                     "severity": "High",
+                    "secret": "secret-value",
                 }
             },
             {
@@ -621,6 +623,7 @@ class TestAAZField(unittest.TestCase):
                         "classification": "BenignPositive",
                         "classification_comment": "comments 1",
                         "severity": "High",
+                        "secret": "secret-value",
                     }
                 },
                 {
@@ -653,6 +656,7 @@ class TestAAZField(unittest.TestCase):
                         "classification": "BenignPositive",
                         "classification_comment": "comments 1",
                         "severity": "High",
+                        "secret": "secret-value",
                     }
                 },
                 {
@@ -688,6 +692,7 @@ class TestAAZField(unittest.TestCase):
                         "classification": "BenignPositive",
                         "classification_comment": "comments 1",
                         "severity": "High",
+                        "secret": "secret-value",
                     }
                 },
                 {
@@ -715,6 +720,7 @@ class TestAAZField(unittest.TestCase):
                         "classification": "BenignPositive",
                         "classification_comment": "comments 1",
                         "severity": "High",
+                        "secret": "secret-value",
                     }
                 },
                 {
@@ -733,8 +739,8 @@ class TestAAZField(unittest.TestCase):
             ]
         })
 
-        # test client flatten
-        self.assertTrue(AAZCommand.deserialize_output(v, client_flatten=True) == {
+        # test client flatten and secret hidden
+        self.assertTrue(AAZCommand.deserialize_output(v, client_flatten=True, secret_hidden=True) == {
             "actions": [
                 {
                     "action_type": "ModifyProperties",
@@ -753,6 +759,85 @@ class TestAAZField(unittest.TestCase):
                     "action_type": "ModifyProperties",
                     "order": 2,
                     "classification": "FalsePositive"
+                }
+            ]
+        })
+
+        self.assertTrue(AAZCommand.deserialize_output(v, client_flatten=True, secret_hidden=False) == {
+            "actions": [
+                {
+                    "action_type": "ModifyProperties",
+                    "order": 0,
+                    "classification": "BenignPositive",
+                    "classification_comment": "comments 1",
+                    "severity": "High",
+                    "secret": "secret-value",
+                },
+                {
+                    "action_type": "RunPlaybook",
+                    "order": 1,
+                    "logic_app_resource_id": "123333",
+                    "tenant_id": "111111",
+                },
+                {
+                    "action_type": "ModifyProperties",
+                    "order": 2,
+                    "classification": "FalsePositive"
+                }
+            ]
+        })
+
+        self.assertTrue(AAZCommand.deserialize_output(v, client_flatten=False, secret_hidden=True) == {
+            "actions": [
+                {
+                    "action_type": "ModifyProperties",
+                    "order": 0,
+                    "action_configuration": {
+                        "classification": "BenignPositive",
+                        "classification_comment": "comments 1",
+                        "severity": "High",
+                    }
+                },
+                {
+                    "action_type": "RunPlaybook",
+                    "order": 1,
+                    "logic_app_resource_id": "123333",
+                    "tenant_id": "111111",
+                },
+                {
+                    "action_type": "ModifyProperties",
+                    "order": 2,
+                    "action_configuration": {
+                        "classification": "FalsePositive"
+                    }
+                }
+            ]
+        })
+
+        self.assertTrue(AAZCommand.deserialize_output(v, client_flatten=False, secret_hidden=False) == {
+            "actions": [
+                {
+                    "action_type": "ModifyProperties",
+                    "order": 0,
+                    "action_configuration": {
+                        "classification": "BenignPositive",
+                        "classification_comment": "comments 1",
+                        "severity": "High",
+                        "secret": "secret-value",
+                    }
+                },
+                {
+                    "action_type": "RunPlaybook",
+                    "order": 1,
+                    "logic_app_resource_id": "123333",
+                    "tenant_id": "111111",
+                },
+                {
+                    "action_type": "ModifyProperties",
+                    "order": 2,
+                    "action_configuration": {
+                        "classification": "FalsePositive"
+                    }
                 }
             ]
         })
