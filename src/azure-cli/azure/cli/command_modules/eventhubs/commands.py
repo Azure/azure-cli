@@ -55,9 +55,6 @@ def load_command_table(self, _):
     with self.command_group('eventhubs namespace', custom_command_type=eh_namespace_custom,
                             is_preview=True) as g:
         g.custom_command('create', 'create_eventhub_namespace')
-
-    custom_tmpl = 'azure.cli.command_modules.eventhubs.custom#{}'
-    eventhubs_custom = CliCommandType(operations_tmpl=custom_tmpl)
     with self.command_group('eventhubs namespace', eh_namespace_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
         g.custom_command('exists', 'cli_namespace_exists')
 

@@ -15,7 +15,7 @@ logger = get_logger(__name__)
 
 logger.warning('.')
 
-# , resource_type = ResourceType.MGMT_EVENTHUB
+
 # Namespace Region
 def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard', capacity=None,
                          is_auto_inflate_enabled=None, maximum_throughput_units=None, is_kafka_enabled=None, zone_redundant=None, cluster_arm_id=None,
