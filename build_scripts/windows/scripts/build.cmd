@@ -134,7 +134,7 @@ if %errorlevel% neq 0 goto ERROR
 copy %REPO_ROOT%\build_scripts\windows\resources\CLI_LICENSE.rtf %BUILDING_DIR%
 copy %REPO_ROOT%\build_scripts\windows\resources\ThirdPartyNotices.txt %BUILDING_DIR%
 copy %REPO_ROOT%\NOTICE.txt %BUILDING_DIR%
-copy %REPO_ROOT%\build_scripts\windows\scripts\az.completion.psm1 %BUILDING_DIR%
+copy %REPO_ROOT%\build_scripts\windows\scripts\az.completion.ps1 %BUILDING_DIR%
 
 REM Remove .py and only deploy .pyc files
 pushd %BUILDING_DIR%\Lib\site-packages
