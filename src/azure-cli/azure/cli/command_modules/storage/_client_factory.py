@@ -380,6 +380,7 @@ def cf_table_client(cli_ctx, kwargs):
 
 
 def cf_share_service(cli_ctx, kwargs):
+    from azure.cli.core.azclierror import RequiredArgumentMissingError
     client_kwargs = prepare_client_kwargs_track2(cli_ctx)
     client_kwargs = _config_location_mode(kwargs, client_kwargs)
     t_share_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILESHARE, '_share_service_client#ShareServiceClient')
@@ -390,6 +391,8 @@ def cf_share_service(cli_ctx, kwargs):
     account_name = kwargs.pop('account_name', None)
     account_url = kwargs.pop('account_url', None)
     enable_file_backup_request_intent = kwargs.pop('enable_file_backup_request_intent', None)
+    if token_credential is not None and not enable_file_backup_request_intent:
+        raise RequiredArgumentMissingError("--enable-file-backup-request-intent is required for file share OAuth")
     if enable_file_backup_request_intent:
         client_kwargs['token_intent'] = 'backup'
     if connection_string:
