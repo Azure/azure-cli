@@ -78,7 +78,8 @@ from ._util import (
     get_sql_virtual_network_rules_operations,
     get_sql_instance_failover_groups_operations,
     get_sql_database_ledger_digest_uploads_operations,
-    get_sql_database_encryption_protector_operations
+    get_sql_database_encryption_protector_operations,
+    get_sql_managed_database_ledger_digest_uploads_operations
 )
 
 from ._validators import (
@@ -991,6 +992,18 @@ def load_command_table(self, _):
                             client_factory=get_sql_managed_database_restore_details_operations) as g:
 
         g.custom_show_command('show', 'managed_db_log_replay_get')
+
+    managed_ledger_digest_uploads_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ManagedLedgerDigestUploadsOperations.{}',
+        client_factory=get_sql_managed_database_ledger_digest_uploads_operations)
+
+    with self.command_group('sql midb ledger-digest-uploads',
+                            managed_ledger_digest_uploads_operations,
+                            client_factory=get_sql_managed_database_ledger_digest_uploads_operations) as g:
+
+        g.custom_show_command('show', 'managed_ledger_digest_uploads_show')
+        g.custom_command('enable', 'managed_ledger_digest_uploads_enable')
+        g.custom_command('disable', 'managed_ledger_digest_uploads_disable')
 
     ###############################################
     #                sql virtual cluster         #
