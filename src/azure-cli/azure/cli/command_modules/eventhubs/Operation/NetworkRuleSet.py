@@ -11,10 +11,12 @@
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-return-statements
 
-def add_network_rule_set_ip_rule(cmd, resource_group_name, namespace_name, ip_address, action='Allow'):
+
+def add_network_rule_set_ip_rule(cmd, resource_group_name, namespace_name, ip_rule=None):
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set import Update
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set import Show
 
+    from azure.cli.core.azclierror import CLIError
     eventhubs_ip_rule = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "namespace_name": namespace_name
@@ -26,11 +28,15 @@ def add_network_rule_set_ip_rule(cmd, resource_group_name, namespace_name, ip_ad
             "action": i["action"]
         }
         ip_rule_list.append(ip_dict)
-
-    ip_rule_list.append({
-        "ip_mask": ip_address,
-        "action": action
-    })
+    for i in ip_rule:
+        dict = {
+            "ip_mask": i["ip-address"],
+            "action": i["action"]
+        }
+        if dict not in ip_rule_list:
+            ip_rule_list.append(dict)
+        else:
+           raise CLIError('Duplicate Ip-rules Found.')
     command_args_dict = {
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
@@ -39,7 +45,7 @@ def add_network_rule_set_ip_rule(cmd, resource_group_name, namespace_name, ip_ad
     return Update(cli_ctx=cmd.cli_ctx)(command_args=command_args_dict)
 
 
-def remove_network_rule_set_ip_rule(cmd, resource_group_name, namespace_name, ip_address):
+def remove_network_rule_set_ip_rule(cmd, resource_group_name, namespace_name, ip_rule=None):
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set import Update
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set import Show
     eventhubs_ip_rule = Show(cli_ctx=cmd.cli_ctx)(command_args={
@@ -54,9 +60,10 @@ def remove_network_rule_set_ip_rule(cmd, resource_group_name, namespace_name, ip
         }
         ip_rule_list.append(ip_rule_dict)
 
-    for i in ip_rule_list:
-        if i['ip_mask'] == ip_address:
-            ip_rule_list.remove(i)
+    for i in ip_rule:
+        for j in ip_rule_list:
+            if i['ip-address'] == j["ip_mask"]:
+                ip_rule_list.remove(j)
     command_args_dict = {
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
@@ -65,8 +72,7 @@ def remove_network_rule_set_ip_rule(cmd, resource_group_name, namespace_name, ip
     return Update(cli_ctx=cmd.cli_ctx)(command_args=command_args_dict)
 
 
-def add_virtual_network_rule(cmd, resource_group_name, namespace_name, subnet=None,
-                             vnet_name=None, ignore_missing_endpoint=False):
+def add_virtual_network_rule(cmd, resource_group_name, namespace_name, subnet=None):
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set import Update
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set import Show
     eventhubs_nw_rule = Show(cli_ctx=cmd.cli_ctx)(command_args={
@@ -80,11 +86,15 @@ def add_virtual_network_rule(cmd, resource_group_name, namespace_name, subnet=No
             "ignore_missing_endpoint": i["ignoreMissingVnetServiceEndpoint"]
         }
         virtual_network_rule_list.append(subnet_dict)
-
-    virtual_network_rule_list.append({
-        "subnet": subnet,
-        "ignore_missing_endpoint": ignore_missing_endpoint
-    })
+    for i in subnet:
+        dict = {
+            "subnet": i["id"],
+            "ignore_missing_endpoint": i["ignore_missing_endpoint"]
+        }
+        if dict not in virtual_network_rule_list:
+            virtual_network_rule_list.append(dict)
+        else:
+           raise CLIError('Duplicate Subnet-rules Found.')
     command_args_dict = {
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
@@ -93,7 +103,7 @@ def add_virtual_network_rule(cmd, resource_group_name, namespace_name, subnet=No
     return Update(cli_ctx=cmd.cli_ctx)(command_args=command_args_dict)
 
 
-def remove_virtual_network_rule(cmd, resource_group_name, namespace_name, subnet, vnet_name=None):
+def remove_virtual_network_rule(cmd, resource_group_name, namespace_name, subnet=None):
 
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set import Update
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set import Show
@@ -109,9 +119,10 @@ def remove_virtual_network_rule(cmd, resource_group_name, namespace_name, subnet
         }
         virtual_network_rule_list.append(subnet_dict)
 
-    for i in virtual_network_rule_list:
-        if i['subnet'].lower() == subnet.lower():
-            virtual_network_rule_list.remove(i)
+    for i in subnet:
+        for j in virtual_network_rule_list:
+            if i['id'].lower() == j['subnet'].lower():
+                virtual_network_rule_list.remove(j)
     command_args_dict = {
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,

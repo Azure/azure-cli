@@ -59,7 +59,7 @@ def load_command_table(self, _):
         resource_type=ResourceType.MGMT_EVENTHUB
     )
 
-    from ._validator import validate_subnet
+    #from ._validator import validate_subnet
 
 
 # Namespace Region
@@ -139,13 +139,12 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_network_rule_set_ip_rule')
         g.custom_command('remove', 'remove_network_rule_set_ip_rule')
 
-    with self.command_group('eventhubs namespace network-rule-set virtual-network-rule',
-                            custom_command_type=sb_network_custom,
+    with self.command_group('eventhubs namespace network-rule-set virtual-network-rule', custom_command_type=sb_network_custom,
                             is_preview=True) as g:
-        g.custom_command('add', 'add_virtual_network_rule', validator=validate_subnet)
-        g.custom_command('remove', 'remove_virtual_network_rule', validator=validate_subnet)
+        g.custom_command('add', 'add_virtual_network_rule')
+        g.custom_command('remove', 'remove_virtual_network_rule')
 
-    # Identity Region
+# Identity Region
     with self.command_group('eventhubs namespace identity', custom_command_type=eh_namespace_custom,
                             is_preview=True) as g:
         g.custom_command('assign', 'cli_add_identity')
