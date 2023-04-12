@@ -51,3 +51,6 @@ def cf_ds(cli_ctx, *_):
 
 def cf_graphqlapiresolver(cli_ctx, *_):
     return cf_apim(cli_ctx).graph_ql_api_resolver
+
+def cf_graphqlapiresolverpolicy(cli_ctx, *_):
+    return cf_apim(cli_ctx).graph_ql_api_resolver_policy

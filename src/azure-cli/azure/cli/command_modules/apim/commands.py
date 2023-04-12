@@ -10,7 +10,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.apim._format import (service_output_format)
 from azure.cli.command_modules.apim._client_factory import (cf_service, cf_api, cf_product, cf_nv, cf_apiops,
                                                             cf_apirelease, cf_apirevision, cf_apiversionset,
-                                                            cf_apischema, cf_ds, cf_graphqlapiresolver)
+                                                            cf_apischema, cf_ds, cf_graphqlapiresolver, cf_graphqlapiresolverpolicy)
 
 
 def load_command_table(self, _):
@@ -67,6 +67,11 @@ def load_command_table(self, _):
     graphql_api_resolver = CliCommandType(
         operations_tmpl='azure.mgmt.apimanagement.operations#GraphQLApiResolverOperations.{}',
         client_factory=cf_graphqlapiresolver
+    )
+
+    graphql_api_resolver_policy = CliCommandType(
+        operations_tmpl='azure.mgmt.apimanagement.operations#GraphQLApiResolverPolicyOperations.{}',
+        client_factory=cf_graphqlapiresolverpolicy
     )
 
     # pylint: disable=line-too-long
@@ -162,5 +167,12 @@ def load_command_table(self, _):
 
     with self.command_group('apim graphqlapi resolver', graphql_api_resolver) as g:
         g.custom_command('create', 'apim_graphqlapi_resolver_create')
+        g.custom_command('delete', 'apim_graphqlapi_resolver_delete')
         g.custom_command('show', 'apim_graphqlapi_resolver_get')
         g.custom_command('list', 'apim_graphqlapi_resolver_list')
+
+    with self.command_group('apim graphqlapi resolver policy', graphql_api_resolver_policy) as g:
+        g.custom_command('create', 'apim_graphqlapi_resolver_policy_create')
+        g.custom_command('delete', 'apim_graphqlapi_resolver_policy_delete')
+        g.custom_command('show', 'apim_graphqlapi_resolver_policy_get')
+        g.custom_command('list', 'apim_graphqlapi_resolver_policy_list')
