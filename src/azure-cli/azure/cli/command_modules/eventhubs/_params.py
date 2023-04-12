@@ -59,21 +59,6 @@ def load_arguments_eh(self, _):
     with self.argument_context('eventhubs namespace create', min_api='2021-06-01-preview') as c:
         c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], is_preview=True, help='Cluster ARM ID of the Namespace')
 
-
-# Cluster region
-    for scope in ['eventhubs cluster', 'eventhubs cluster namespace list']:
-        with self.argument_context(scope) as c:
-            c.argument('cluster_name', arg_type=name_type, id_part=None, help='Name of Cluster')
-
-    with self.argument_context('eventhubs cluster create') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part=None, help='Location of the Cluster, for locations of available pre-provision clusters, please check az event hubs ')
-        c.argument('supports_scaling', arg_type=get_three_state_flag(), help='A value that indicates whether Scaling is Supported.')
-
-    for scope in ['eventhubs cluster create', 'eventhubs cluster update']:
-        with self.argument_context(scope) as c:
-            c.argument('tags', arg_type=tags_type)
-            c.argument('capacity', type=int, help='Capacity for Sku, allowed value : 1')
-
 # region - Eventhub Create
     with self.argument_context('eventhubs eventhub') as c:
         c.argument('event_hub_name', arg_type=name_type, id_part='child_name_1', completer=get_eventhubs_command_completion_list, help='Name of Eventhub')

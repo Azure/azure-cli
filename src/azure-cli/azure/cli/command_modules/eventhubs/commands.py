@@ -15,18 +15,12 @@ def load_command_table(self, _):
     from azure.cli.command_modules.eventhubs._client_factory import (namespaces_mgmt_client_factory,
                                                                      event_hub_mgmt_client_factory,
                                                                      disaster_recovery_mgmt_client_factory,
-                                                                     cluster_mgmt_client_factory,
                                                                      schema_registry_mgmt_client_factory,
                                                                      application_group_mgmt_client_factory)
 
     eh_namespace_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventhub.operations#NamespacesOperations.{}',
         client_factory=namespaces_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_EVENTHUB)
-
-    eh_clusters_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventhub.operations#ClustersOperations.{}',
-        client_factory=cluster_mgmt_client_factory,
         resource_type=ResourceType.MGMT_EVENTHUB)
 
     eh_namespace_custom = CliCommandType(
@@ -61,9 +55,6 @@ def load_command_table(self, _):
     with self.command_group('eventhubs namespace', custom_command_type=eh_namespace_custom,
                             is_preview=True) as g:
         g.custom_command('create', 'create_eventhub_namespace')
-
-    custom_tmpl = 'azure.cli.command_modules.eventhubs.custom#{}'
-    eventhubs_custom = CliCommandType(operations_tmpl=custom_tmpl)
     with self.command_group('eventhubs namespace', eh_namespace_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
         g.custom_command('exists', 'cli_namespace_exists')
 
@@ -73,19 +64,6 @@ def load_command_table(self, _):
         g.custom_command('approve', 'approve_private_endpoint_connection', validator=validate_private_endpoint_connection_id)
         g.custom_command('reject', 'reject_private_endpoint_connection', validator=validate_private_endpoint_connection_id)
         g.custom_command('delete', 'delete_private_endpoint_connection', confirmation=True, validator=validate_private_endpoint_connection_id)
-
-# Cluster Region
-    with self.command_group('eventhubs cluster', eh_clusters_util, resource_type=ResourceType.MGMT_EVENTHUB,
-                            client_factory=cluster_mgmt_client_factory, min_api='2018-01-01-preview') as g:
-        g.custom_command('create', 'cli_cluster_create')
-        g.show_command('show', 'get')
-        g.command('list', 'list_by_resource_group')
-        g.command('namespace list', 'list_namespaces')
-        g.wait_command('wait')
-        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
-        g.command('available-region', 'list_available_cluster_region')
-        g.generic_update_command('update', getter_name='get', setter_name='begin_update',
-                                 custom_func_name='cli_cluster_update', custom_func_type=eventhubs_custom)
 
 # EventHub Region
     with self.command_group('eventhubs eventhub', eh_event_hub_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=event_hub_mgmt_client_factory) as g:

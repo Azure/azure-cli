@@ -961,7 +961,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('lease', options_list=['--lease-id'], help='Required if the blob has an active lease.')
 
     with self.argument_context('storage blob exists') as c:
-        c.register_blob_arguments()
+        c.register_blob_arguments_track2()
         c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
                                  'specifies the snapshot.')
 
@@ -974,13 +974,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                  'parameter indicates the snapshot version.')
 
     with self.argument_context('storage blob snapshot') as c:
-        c.register_blob_arguments()
+        c.register_blob_arguments_track2()
         c.register_precondition_options()
         c.extra('lease', options_list=['--lease-id'], help='Required if the blob has an active lease.')
 
     with self.argument_context('storage blob set-tier') as c:
         from azure.cli.command_modules.storage._validators import (blob_rehydrate_priority_validator)
-        c.register_blob_arguments()
+        c.register_blob_arguments_track2()
 
         c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(('block', 'page')))
         c.argument('tier', validator=blob_tier_validator)
@@ -1023,7 +1023,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     for item in ['show', 'metadata show', 'metadata update']:
         with self.argument_context('storage blob {}'.format(item)) as c:
-            c.register_blob_arguments()
+            c.register_blob_arguments_track2()
             c.register_precondition_options()
             c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
                                      'specifies the blob snapshot to retrieve.')
@@ -1148,7 +1148,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob delete') as c:
         from .sdkutil import get_delete_blob_snapshot_type_names
-        c.register_blob_arguments()
+        c.register_blob_arguments_track2()
         c.register_precondition_options()
         c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()),
                    help='Required if the blob has associated snapshots. '
@@ -1159,7 +1159,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                  'specifies the blob snapshot to delete.')
 
     with self.argument_context('storage blob undelete') as c:
-        c.register_blob_arguments()
+        c.register_blob_arguments_track2()
 
     with self.argument_context('storage blob delete-batch') as c:
         c.ignore('source_container_name')
@@ -1358,7 +1358,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob query') as c:
         from ._validators import validate_text_configuration
-        c.register_blob_arguments()
+        c.register_blob_arguments_track2()
         c.register_precondition_options()
         line_separator = CLIArgumentType(help="The string used to separate records.", default='\n')
         column_separator = CLIArgumentType(help="The string used to separate columns.", default=',')
