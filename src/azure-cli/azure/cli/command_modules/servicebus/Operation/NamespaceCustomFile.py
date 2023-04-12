@@ -275,3 +275,56 @@ def sb_rule_create(cmd, resource_group_name, namespace_name, topic_name, subscri
             'label': label
         })
     return Create(cli_ctx=cmd.cli_ctx)(command_args=command_arg_dict)
+
+
+def approve_private_endpoint_connection(cmd, resource_group_name, namespace_name,
+                                        private_endpoint_connection_name, description=None):
+
+    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace.private_endpoint_connection import Update
+    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace.private_endpoint_connection import Show
+
+    private_endpoint_connection = Show(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "namespace_name": namespace_name,
+        "private_endpoint_connection_name": private_endpoint_connection_name
+    })
+    if private_endpoint_connection["privateLinkServiceConnectionState"]["status"] != "Approved":
+        command_args_dict = {
+            "resource_group": resource_group_name,
+            "namespace_name": namespace_name,
+            "private_endpoint_connection_name": private_endpoint_connection_name,
+            "description": description,
+            "status": "Approved"
+        }
+        return Update(cli_ctx=cmd.cli_ctx)(command_args=command_args_dict)
+
+    return Show(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "namespace_name": namespace_name,
+        "private_endpoint_connection_name": private_endpoint_connection_name,
+    })
+
+
+def reject_private_endpoint_connection(cmd, resource_group_name, namespace_name, private_endpoint_connection_name,
+                                       description=None):
+    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace.private_endpoint_connection import Update
+    command_args_dict = {
+        "resource_group": resource_group_name,
+        "namespace_name": namespace_name,
+        "private_endpoint_connection_name": private_endpoint_connection_name,
+        "description": description,
+        "status": "Rejected"
+    }
+    return Update(cli_ctx=cmd.cli_ctx)(command_args=command_args_dict)
+
+
+def delete_private_endpoint_connection(cmd, resource_group_name, namespace_name, private_endpoint_connection_name,
+                                       description=None):
+    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace.private_endpoint_connection import Delete
+    command_args_dict = {
+        "resource_group": resource_group_name,
+        "namespace_name": namespace_name,
+        "private_endpoint_connection_name": private_endpoint_connection_name,
+        "description": description
+    }
+    return Delete(cli_ctx=cmd.cli_ctx)(command_args=command_args_dict)
