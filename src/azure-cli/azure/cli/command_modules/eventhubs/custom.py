@@ -622,7 +622,8 @@ def cli_remove_appgroup_policy(client, resource_group_name, namespace_name, appl
 
     appGroup = client.get(resource_group_name, namespace_name, application_group_name)
     logger.warning(
-        'This operation will do removals based on policy name')
+        'This operation will do removals based on policy name. Will not accept metric-id,rate-limit-threshold in the future.'
+        'Also throttling_policy_config will replace with policy only.')
     if appGroup.policies:
         for policy_object in throttling_policy_config:
             if policy_object in appGroup.policies:
