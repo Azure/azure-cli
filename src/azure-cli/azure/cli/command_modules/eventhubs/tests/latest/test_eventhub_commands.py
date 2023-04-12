@@ -107,7 +107,7 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         self.cmd('eventhubs namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key {secondary}')
 
         # Delete Authorization Rule
-        self.cmd('eventhubs namespace authorization-rule delete --resource-group {rg} --namespace-name {namespacename} --name {authoname} --yes')
+        self.cmd('eventhubs namespace authorization-rule delete --resource-group {rg} --namespace-name {namespacename} --name {authoname}')
 
         # Delete Namespace list by ResourceGroup
         self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename}')

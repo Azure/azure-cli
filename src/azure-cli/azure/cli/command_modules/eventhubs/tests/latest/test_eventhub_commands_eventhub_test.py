@@ -111,7 +111,7 @@ class EHEventhubCURDScenarioTest(ScenarioTest):
 
         # Delete Eventhub AuthorizationRule
         self.cmd(
-            'eventhubs eventhub authorization-rule delete --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {authoname} --yes')
+            'eventhubs eventhub authorization-rule delete --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {authoname} ')
 
         # Delete Eventhub
         self.cmd(
