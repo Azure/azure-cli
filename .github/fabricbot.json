@@ -12993,6 +12993,75 @@
           }
         ]
       }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "az artifacts",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "az artifacts",
+                    "isRegex": true
+                  }
+                }
+              ]
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "isAction",
+                  "parameters": {
+                    "action": "opened"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[Artifacts] auto assign labels and users based on issue description.",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Artifacts"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
+            }
+          }
+        ]
+      }
     }
   ],
   "userGroups": [
