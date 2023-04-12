@@ -368,8 +368,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('metadata update', 'set_blob_metadata')
         g.storage_command_oauth('snapshot', 'create_snapshot')
         g.storage_command_oauth('update', 'set_http_headers')
-        g.storage_custom_command_oauth('exists', 'exists', client_factory=cf_blob_service,
-                                       transform=create_boolean_result_output_transformer('exists'))
+        g.storage_command_oauth('exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
         g.storage_command_oauth('delete', 'delete_blob')
         g.storage_command_oauth('undelete', 'undelete_blob',
                                 transform=create_boolean_result_output_transformer('undeleted'),

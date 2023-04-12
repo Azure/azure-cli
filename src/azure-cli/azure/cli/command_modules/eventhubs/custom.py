@@ -13,8 +13,9 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
+logger.warning('.')
 
-# , resource_type = ResourceType.MGMT_EVENTHUB
+
 # Namespace Region
 def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard', capacity=None,
                          is_auto_inflate_enabled=None, maximum_throughput_units=None, is_kafka_enabled=None, zone_redundant=None, cluster_arm_id=None,
@@ -121,46 +122,6 @@ def cli_namespace_list(cmd, client, resource_group_name=None):
 def cli_namespace_exists(client, name):
 
     return client.check_name_availability(parameters={'name': name})
-
-
-# Cluster region
-def cli_cluster_create(cmd, client, resource_group_name, cluster_name, location=None, tags=None, capacity=None, supports_scaling=None):
-    Cluster = cmd.get_models('Cluster', resource_type=ResourceType.MGMT_EVENTHUB)
-    ClusterSku = cmd.get_models('ClusterSku', resource_type=ResourceType.MGMT_EVENTHUB)
-
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2016-06-01-preview'):
-        ehparam = Cluster()
-        ehparam.sku = ClusterSku(name='Dedicated')
-        ehparam.location = location
-
-        if capacity:
-            ehparam.sku.capacity = capacity
-        else:
-            ehparam.sku.capacity = 1
-
-        if supports_scaling is not None:
-            ehparam.supports_scaling = supports_scaling
-
-        ehparam.tags = tags
-
-        cluster_result = client.begin_create_or_update(
-            resource_group_name=resource_group_name,
-            cluster_name=cluster_name,
-            parameters=ehparam).result()
-
-    return cluster_result
-
-
-def cli_cluster_update(cmd, instance, tags=None, capacity=None):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2016-06-01-preview'):
-
-        if tags:
-            instance.tags = tags
-
-        if capacity:
-            instance.sku.capacity = capacity
-
-    return instance
 
 
 # Namespace Authorization rule:
@@ -298,25 +259,6 @@ def cli_eventhub_keys_renew(client, resource_group_name, namespace_name, event_h
     )
 
 
-# ConsumerGroup region
-def cli_consumergroup_create(client, resource_group_name, namespace_name, event_hub_name, name, user_metadata=None):
-    return client.create_or_update(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        event_hub_name=event_hub_name,
-        consumer_group_name=name,
-        parameters={'user_metadata': user_metadata}
-    )
-
-
-def cli_consumergroup_update(cmd, instance, user_metadata=None):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
-        if user_metadata:
-            instance.user_metadata = user_metadata
-
-    return instance
-
-
 # NetwrokRuleSet Region
 def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_name, subnet=None, ip_mask=None, ignore_missing_vnet_service_endpoint=False, action='Allow'):
     NWRuleSetVirtualNetworkRules = cmd.get_models('NWRuleSetVirtualNetworkRules', resource_type=ResourceType.MGMT_EVENTHUB)
@@ -396,53 +338,6 @@ def cli_geodr_create(client, resource_group_name, namespace_name, alias, partner
                                    namespace_name,
                                    alias,
                                    parameters={'partner_namespace': partner_namespace, 'alternate_name': alternate_name})
-
-
-# Private Endpoint
-def _update_private_endpoint_connection_status(cmd, client, resource_group_name, namespace_name,
-                                               private_endpoint_connection_name, is_approved=True, description=None):
-    from azure.core.exceptions import HttpResponseError
-    import time
-
-    PrivateEndpointServiceConnectionStatus = cmd.get_models('PrivateLinkConnectionStatus')
-
-    private_endpoint_connection = client.get(resource_group_name=resource_group_name, namespace_name=namespace_name,
-                                             private_endpoint_connection_name=private_endpoint_connection_name)
-
-    old_status = private_endpoint_connection.private_link_service_connection_state.status
-    if old_status != "Approved" or not is_approved:
-        private_endpoint_connection.private_link_service_connection_state.status = PrivateEndpointServiceConnectionStatus.APPROVED\
-            if is_approved else PrivateEndpointServiceConnectionStatus.REJECTED
-        private_endpoint_connection.private_link_service_connection_state.description = description
-        try:
-            private_endpoint_connection = client.create_or_update(resource_group_name=resource_group_name,
-                                                                  namespace_name=namespace_name,
-                                                                  private_endpoint_connection_name=private_endpoint_connection_name,
-                                                                  parameters=private_endpoint_connection)
-        except HttpResponseError as ex:
-            if 'Operation returned an invalid status ''Accepted''' in ex.message:
-                time.sleep(30)
-                private_endpoint_connection = client.get(resource_group_name=resource_group_name,
-                                                         namespace_name=namespace_name,
-                                                         private_endpoint_connection_name=private_endpoint_connection_name)
-    return private_endpoint_connection
-
-
-def approve_private_endpoint_connection(cmd, client, resource_group_name, namespace_name,
-                                        private_endpoint_connection_name, description=None):
-
-    return _update_private_endpoint_connection_status(
-        cmd, client, resource_group_name=resource_group_name, namespace_name=namespace_name, is_approved=True,
-        private_endpoint_connection_name=private_endpoint_connection_name, description=description
-    )
-
-
-def reject_private_endpoint_connection(cmd, client, resource_group_name, namespace_name, private_endpoint_connection_name,
-                                       description=None):
-    return _update_private_endpoint_connection_status(
-        cmd, client, resource_group_name=resource_group_name, namespace_name=namespace_name, is_approved=False,
-        private_endpoint_connection_name=private_endpoint_connection_name, description=description
-    )
 
 
 def cli_add_identity(cmd, client, resource_group_name, namespace_name, system_assigned=None, user_assigned=None):

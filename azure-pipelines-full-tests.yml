@@ -140,3 +140,37 @@ jobs:
       instance_idx: '$(Instance_idx)'
       fullTest: true
       jobName: 'FullTest'
+
+- job: NotifyCIErrors
+  dependsOn:
+    - AutomationTest20200901
+    - AutomationTest20190301
+    - AutomationTest20180301
+    - AutomationFullTestPython39ProfileLatest
+    - AutomationFullTestPython310ProfileLatest
+  condition: and(failed(), in(variables['Build.Reason'], 'BatchedCI'))
+  displayName: Notify CI Errors
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.10'
+    inputs:
+      versionSpec: 3.10
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: 'Azure CLI'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        pip install requests
+        teams_api_url=$(az keyvault secret show --vault-name $(TEAMS_BOT_VAULT_NAME) --name $(TEAMS_BOT_API_URL_SECRET_NAME) --query value -otsv)
+        teams_api_key=$(az keyvault secret show --vault-name $(TEAMS_BOT_VAULT_NAME) --name $(TEAMS_BOT_API_KEY_SECRET_NAME) --query value -otsv)
+        echo "If any task fails, notify to teams channel"
+        python scripts/ci/notify_ci_errors.py $teams_api_url $teams_api_key $(TEAMS_CHANNEL_ID)
+    displayName: 'Notify To Teams Channel'
+    env:
+      BASE_URI: $(System.CollectionUri)
+      PROJECT_TYPE: $(System.TeamProject)
+      BUILD_ID: $(Build.BuildId)
+      JOB_ID: $(System.JobId)
