@@ -8,8 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
-from .__cmd_group import *
-from ._delete import *
-from ._list import *
-from ._show_community import *
-from ._show_shared import *
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "disk-access",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Manage disk access resources.
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]
