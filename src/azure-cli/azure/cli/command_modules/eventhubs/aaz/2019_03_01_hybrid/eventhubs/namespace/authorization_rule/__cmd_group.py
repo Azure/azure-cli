@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "eventhubs",
+    "eventhubs namespace authorization-rule",
 )
 class __CMDGroup(AAZCommandGroup):
-    """eventhub
+    """Manage Azure EventHubs Authorizationrule for Namespace.
     """
     pass
 
