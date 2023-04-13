@@ -383,6 +383,12 @@ class ApimScenarioTest(ScenarioTest):
         content_value = api_file.read()
         value = content_value
         
+        pythonfile = 'policy.xml'
+        schemapath = os.path.join(TEST_DIR, pythonfile)
+        api_file = open(schemapath, 'r')
+        content_value = api_file.read()
+        xmlvalue = content_value
+
         self.kwargs.update({
             'graphql_api_id': self.create_random_name('gr-api', 10),
             'graphql_sch_id': 'graphql',
@@ -396,8 +402,13 @@ class ApimScenarioTest(ScenarioTest):
             'graphql_path': 'graphqltestpath',
             'graphql_service_url': 'https://api.spacex.land/graphql/',
             'graphql_im_api_id': self.create_random_name('gr-imp', 10),
-            'path3' : 'testingImportApiPath',
-            'graphql' : 'GraphQL'
+            'path3': 'testingImportApiPath',
+            'graphql': 'GraphQL',
+            'resolver_id': 'newresolver',
+            'resolver_display_name': 'Query-allFamilies',
+            'resolver_path': 'Query/allFamilies',
+            'resolver_decription': "A GraphQL Resolver example",
+            'value_path': xmlvalue
         })
 
         # import api
@@ -423,6 +434,17 @@ class ApimScenarioTest(ScenarioTest):
             checks=[self.check('contentType', '{graphql_schema_type}'),
                     self.check('name', '{graphql_sch_id}'),
                     self.check('value', '{schema_file_value}')])
+        
+        #create resolver
+        self.cmd(
+            'apim api graphqlapi resolver create -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}" --display-name "{resolver_display_name}" --path "{resolver_path}" --description "{resolver_decription}"',
+            checks=[self.check('name', '{resolver_display_name}'),
+                    self.check('path', '{resolver_path}')])
+        
+        #create resolver policy
+        self.cmd(
+            'apim api graphqlapi resolver policy create -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}" --format "xml" --value-path {value_path}',
+            checks=[self.check('format', 'xml')])
         
         #get schema
         self.cmd(
