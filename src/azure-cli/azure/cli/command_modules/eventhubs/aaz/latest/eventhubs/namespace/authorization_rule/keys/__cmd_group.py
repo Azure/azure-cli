@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "eventhubs",
+    "eventhubs namespace authorization-rule keys",
 )
 class __CMDGroup(AAZCommandGroup):
-    """eventhub
+    """authorization-rule keys
     """
     pass
 

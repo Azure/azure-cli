@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "eventhubs",
+    "eventhubs eventhub",
 )
 class __CMDGroup(AAZCommandGroup):
     """eventhub

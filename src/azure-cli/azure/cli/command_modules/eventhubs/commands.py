@@ -58,15 +58,6 @@ def load_command_table(self, _):
     with self.command_group('eventhubs namespace', eh_namespace_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
         g.custom_command('exists', 'cli_namespace_exists')
 
-    with self.command_group('eventhubs namespace authorization-rule', eh_namespace_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
-        g.custom_command('create', 'cli_namespaceautho_create')
-        g.show_command('show', 'get_authorization_rule')
-        g.command('list', 'list_authorization_rules')
-        g.command('keys list', 'list_keys')
-        g.custom_command('keys renew', 'cli_keys_renew')
-        g.command('delete', 'delete_authorization_rule')
-        g.generic_update_command('update', getter_name='get_authorization_rule', setter_name='create_or_update_authorization_rule', custom_func_name='cli_autho_update')
-
     with self.command_group('eventhubs namespace private-endpoint-connection', custom_command_type=eh_namespace_custom,
                             is_preview=True) as g:
         from ._validator import validate_private_endpoint_connection_id
@@ -81,15 +72,6 @@ def load_command_table(self, _):
         g.command('list', 'list_by_namespace')
         g.command('delete', 'delete')
         g.generic_update_command('update', custom_func_name='cli_eheventhub_update')
-
-    with self.command_group('eventhubs eventhub authorization-rule', eh_event_hub_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=event_hub_mgmt_client_factory) as g:
-        g.custom_command('create', 'cli_eventhubautho_create')
-        g.show_command('show', 'get_authorization_rule')
-        g.command('list', 'list_authorization_rules')
-        g.command('keys list', 'list_keys')
-        g.custom_command('keys renew', 'cli_eventhub_keys_renew')
-        g.command('delete', 'delete_authorization_rule')
-        g.generic_update_command('update', getter_name='get_authorization_rule', setter_name='create_or_update_authorization_rule', custom_func_name='cli_autho_update')
 
 # DisasterRecoveryConfigs Region
     with self.command_group('eventhubs georecovery-alias', eh_geodr_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=disaster_recovery_mgmt_client_factory) as g:
