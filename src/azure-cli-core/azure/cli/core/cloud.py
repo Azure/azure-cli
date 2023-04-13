@@ -594,8 +594,6 @@ def set_cloud_subscription(cli_ctx, cloud_name, subscription):
             config.remove_option(cloud_name, 'subscription')
         except configparser.NoSectionError:
             pass
-    if not os.path.isdir(GLOBAL_CONFIG_DIR):
-        os.makedirs(GLOBAL_CONFIG_DIR)
     with open(get_cloud_config_file(cli_ctx), 'w') as configfile:
         config.write(configfile)
 
