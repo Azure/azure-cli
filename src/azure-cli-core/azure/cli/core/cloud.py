@@ -18,7 +18,13 @@ from knack.util import CLIError
 
 logger = get_logger(__name__)
 
+# This default cloud name. If you use DummyCli(random_config_dir=True), use get_cloud_config_file() instead.
 CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
+
+
+def get_cloud_config_file(cli_ctx=None):
+    return os.path.join(cli_ctx.config.config_dir, 'clouds.config') if cli_ctx else CLOUD_CONFIG_FILE
+
 
 # Add names of clouds that don't allow telemetry data collection here such as some air-gapped clouds.
 CLOUDS_FORBIDDING_TELEMETRY = ['USSec', 'USNat']
@@ -511,10 +517,10 @@ def get_clouds(cli_ctx):
     for c in KNOWN_CLOUDS:
         _config_add_cloud(config, c)
     try:
-        config.read(CLOUD_CONFIG_FILE)
+        config.read(get_cloud_config_file(cli_ctx))
     except configparser.MissingSectionHeaderError:
-        os.remove(CLOUD_CONFIG_FILE)
-        logger.warning("'%s' is in bad format and has been removed.", CLOUD_CONFIG_FILE)
+        os.remove(get_cloud_config_file(cli_ctx))
+        logger.warning("'%s' is in bad format and has been removed.", get_cloud_config_file(cli_ctx))
     for section in config.sections():
         c = Cloud(section)
         for option in config.options(section):
@@ -563,9 +569,9 @@ def get_active_cloud(cli_ctx=None):
         return get_cloud(cli_ctx, default_cloud_name)
 
 
-def get_cloud_subscription(cloud_name):
+def get_cloud_subscription(cloud_name, cli_ctx=None):
     config = configparser.ConfigParser()
-    config.read(CLOUD_CONFIG_FILE)
+    config.read(get_cloud_config_file(cli_ctx))
     try:
         return config.get(cloud_name, 'subscription')
     except (configparser.NoOptionError, configparser.NoSectionError):
@@ -576,7 +582,7 @@ def set_cloud_subscription(cli_ctx, cloud_name, subscription):
     if not _get_cloud(cli_ctx, cloud_name):
         raise CloudNotRegisteredException(cloud_name)
     config = configparser.ConfigParser()
-    config.read(CLOUD_CONFIG_FILE)
+    config.read(get_cloud_config_file(cli_ctx))
     if subscription:
         try:
             config.add_section(cloud_name)
@@ -590,7 +596,7 @@ def set_cloud_subscription(cli_ctx, cloud_name, subscription):
             pass
     if not os.path.isdir(GLOBAL_CONFIG_DIR):
         os.makedirs(GLOBAL_CONFIG_DIR)
-    with open(CLOUD_CONFIG_FILE, 'w') as configfile:
+    with open(get_cloud_config_file(cli_ctx), 'w') as configfile:
         config.write(configfile)
 
 
@@ -598,7 +604,7 @@ def _set_active_subscription(cli_ctx, cloud_name):
     from azure.cli.core._profile import (Profile, _ENVIRONMENT_NAME, _SUBSCRIPTION_ID,
                                          _STATE, _SUBSCRIPTION_NAME)
     profile = Profile(cli_ctx=cli_ctx)
-    subscription_to_use = get_cloud_subscription(cloud_name) or \
+    subscription_to_use = get_cloud_subscription(cloud_name, cli_ctx) or \
                           next((s[_SUBSCRIPTION_ID] for s in profile.load_cached_subscriptions()  # noqa
                                 if s[_STATE] == 'Enabled'),
                                None)
@@ -644,20 +650,20 @@ def _config_add_cloud(config, cloud, overwrite=False):
             config.set(cloud.name, 'suffix_{}'.format(k), v)
 
 
-def _save_cloud(cloud, overwrite=False):
+def _save_cloud(cloud, overwrite=False, cli_ctx=None):
     config = configparser.ConfigParser()
-    config.read(CLOUD_CONFIG_FILE)
+    config.read(get_cloud_config_file(cli_ctx))
     _config_add_cloud(config, cloud, overwrite=overwrite)
     if not os.path.isdir(GLOBAL_CONFIG_DIR):
         os.makedirs(GLOBAL_CONFIG_DIR)
-    with open(CLOUD_CONFIG_FILE, 'w') as configfile:
+    with open(get_cloud_config_file(cli_ctx), 'w') as configfile:
         config.write(configfile)
 
 
 def add_cloud(cli_ctx, cloud):
     if _get_cloud(cli_ctx, cloud.name):
         raise CloudAlreadyRegisteredException(cloud.name)
-    _save_cloud(cloud)
+    _save_cloud(cloud, cli_ctx=cli_ctx)
 
 
 def update_cloud(cli_ctx, cloud):
@@ -677,9 +683,9 @@ def remove_cloud(cli_ctx, cloud_name):
         raise CannotUnregisterCloudException("The cloud '{}' cannot be unregistered "
                                              "as it's not a custom cloud.".format(cloud_name))
     config = configparser.ConfigParser()
-    config.read(CLOUD_CONFIG_FILE)
+    config.read(get_cloud_config_file(cli_ctx))
     config.remove_section(cloud_name)
-    with open(CLOUD_CONFIG_FILE, 'w') as configfile:
+    with open(get_cloud_config_file(cli_ctx), 'w') as configfile:
         config.write(configfile)
 
 
