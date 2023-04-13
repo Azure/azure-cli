@@ -393,7 +393,7 @@ type: command
 short-summary: Add a IP-Rule for network rule of namespace.
 examples:
   - name: add a IP rule in NetworkruleSet for a namespace
-    text: az eventhubs namespace network-rule-set ip-rule add --resource-group myresourcegroup --namespace-name mynamespace --ip-address 10.0.0.0/24 --action Allow
+    text: az eventhubs namespace network-rule-set ip-rule add --resource-group myresourcegroup --namespace-name mynamespace --ip-rule ip-address=10.0.0.0/24 action=Allow
 """
 
 helps['eventhubs namespace network-rule-set virtual-network-rule add'] = """
@@ -401,8 +401,7 @@ type: command
 short-summary: Add a Virtual-Network-Rule for network rule of namespace.
 examples:
   - name: add a VirtualNetwork rule in NetworkruleSet for a namespace
-    text: az eventhubs namespace network-rule-set virtual-network-rule add --resource-group myresourcegroup --namespace-name mynamespace --subnet {subnetId} --ignore-missing-endpoint True
-    text: az eventhubs namespace network-rule-set virtual-network-rule add --resource-group myresourcegroup --namespace-name mynamespace --vnet-name {vnet} --subnet {subnetname}
+    text: az eventhubs namespace network-rule-set virtual-network-rule add --resource-group myresourcegroup --namespace-name mynamespace --subnet id=/subscriptions/{subscriptionId}/resourceGroups/{resourcegroup}/providers/Microsoft.Network/virtualNetworks/{vnetname}/subnets/{subnetname} ignore-missing-endpoint=True
 """
 
 helps['eventhubs namespace network-rule-set list'] = """
@@ -426,7 +425,7 @@ type: command
 short-summary: Remove Ip-Rule from network rule of namespace
 examples:
   - name: remove IP rule from NetworkruleSet for a namespace
-    text: az eventhubs namespace network-rule-set ip-rule remove --resource-group myresourcegroup --namespace-name mynamespace --ip-address 10.0.0.0/24
+    text: az eventhubs namespace network-rule-set ip-rule remove --resource-group myresourcegroup --namespace-name mynamespace --ip-rule ip-address=10.0.0.0/24
 """
 
 helps['eventhubs namespace network-rule-set virtual-network-rule remove'] = """
@@ -434,8 +433,7 @@ type: command
 short-summary: Remove network rule for a namespace
 examples:
   - name: remove VirtualNetwork rule from NetworkruleSet of namespace
-    text: az eventhubs namespace network-rule-set virtual-network-rule remove --resource-group myresourcegroup --namespace-name mynamespace --subnet {subnetId}
-    text: az eventhubs namespace network-rule-set virtual-network-rule remove --resource-group myresourcegroup --namespace-name mynamespace --subnet {subnetname} --vnet-name {vnet}
+    text: az eventhubs namespace network-rule-set virtual-network-rule remove --resource-group myresourcegroup --namespace-name mynamespace --subnet id=/subscriptions/{subscriptionId}/resourceGroups/{resourcegroup}/providers/Microsoft.Network/virtualNetworks/{vnetname}/subnets/{subnetname}
 """
 
 helps['eventhubs namespace show'] = """

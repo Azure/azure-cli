@@ -71,7 +71,7 @@ class AlertAddVirtualNetwork(argparse._AppendAction):
             else:
                 raise InvalidArgumentValueError("Invalid Argument for:'{}' Only allowed arguments are 'id, ignore-missing-endpoint'".format(option_string))
 
-        if (VirtualNetworkList["id"] is None):
+        if VirtualNetworkList["id"] is None:
             raise CLIError('id is mandatory properties')
 
         return VirtualNetworkList
@@ -95,7 +95,7 @@ class AlertAddIpRule(argparse._AppendAction):
                 raise InvalidArgumentValueError(
                     "Invalid Argument for:'{}' Only allowed arguments are 'ip-address, action'".format(option_string))
 
-        if (IpRuleList["ip-address"] is None):
+        if IpRuleList["ip-address"] is None:
             raise CLIError('ip-address is mandatory properties')
 
         if "action" not in IpRuleList:
