@@ -438,7 +438,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        tags=None,
                                        replication_role=None,
                                        byok_identity=None, backup_byok_identity=None, byok_key=None, backup_byok_key=None,
-                                       disable_data_encryption=False):
+                                       disable_data_encryption=False,
+                                       public_access=None):
     # validator
     location = ''.join(instance.location.lower().split())
     db_context = DbContext(
@@ -560,6 +561,13 @@ def flexible_server_update_custom_func(cmd, client, instance,
     if auto_grow:
         instance.storage.auto_grow = auto_grow
 
+    if public_access:
+        # set the public_access here only when public_access's lower class equals 'disabled' and 'enabled'
+        if public_access.lower() == "disabled" or public_access.lower() == "enabled":
+            instance.network.public_network_access = public_access
+        else:
+            raise CLIError('Invalid public_access value for updating. Allowed values are Enabled or Disabled.')
+
     params = ServerForUpdate(sku=instance.sku,
                              storage=instance.storage,
                              backup=instance.backup,
@@ -567,7 +575,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
                              high_availability=instance.high_availability,
                              tags=tags,
                              identity=identity,
-                             data_encryption=data_encryption)
+                             data_encryption=data_encryption,
+                             network=instance.network)
 
     return params
 
@@ -641,7 +650,8 @@ def flexible_server_provision_network_resource(cmd, resource_group_name, server_
         raise RequiredArgumentMissingError("Private DNS zone can only be used with private access setting. Use vnet or/and subnet parameters.")
     else:
         start_ip, end_ip = prepare_public_network(public_access, yes=yes)
-
+        if public_access is not None and str(public_access).lower() == 'Disabled'.lower():
+            network.public_network_access = 'Disabled'
     return network, start_ip, end_ip
 
 
