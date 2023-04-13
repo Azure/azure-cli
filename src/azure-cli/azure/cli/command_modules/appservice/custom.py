@@ -3813,7 +3813,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         setattr(site_config, snake_case_prop, value)
 
     if environment is not None:
-        functionapp_def.kind = 'functionapp,linux,container,azurecontainerapps'
+        functionapp_def.kind = 'functionapp'
         functionapp_def.reserved = None
         functionapp_def.name = name
         functionapp_def.https_only = None
@@ -3839,7 +3839,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp_def.additional_properties["properties"] = existing_properties
         functionapp_def.additional_properties["properties"]["name"] = name
         functionapp_def.additional_properties["properties"]["managedEnvironmentId"] = managed_environment.id
-        functionapp_def.additional_properties["properties"]["minReplicas"] = int(min_replicas)
+        if min_replicas:
+            functionapp_def.additional_properties["properties"]["minReplicas"] = int(min_replicas)
 
     # temporary workaround for dotnet-isolated linux consumption apps
     if is_linux and consumption_plan_location is not None and runtime == 'dotnet-isolated':
