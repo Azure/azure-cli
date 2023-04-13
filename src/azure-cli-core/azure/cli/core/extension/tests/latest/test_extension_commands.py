@@ -301,7 +301,8 @@ class TestExtensionCommands(unittest.TestCase):
     def test_update_extension_not_found(self):
         with self.assertRaises(CLIError) as err:
             update_extension(self.cmd, MY_EXT_NAME)
-        self.assertEqual(str(err.exception), 'The extension {} is not installed.'.format(MY_EXT_NAME))
+        self.assertEqual(str(err.exception),
+            f"The extension {MY_EXT_NAME} is not installed. Please install the extension via `az extension add -n {MY_EXT_NAME}`.")
 
     def test_update_extension_no_updates(self):
         logger_msgs = []

@@ -1282,6 +1282,35 @@ examples:
     text: az sql midb log-replay wait --deleted --resource-group mygroup --managed-instance myinstance --name mymanageddb
 """
 
+helps['sql midb ledger-digest-uploads'] = """
+type: group
+short-summary: Manage ledger digest upload settings.
+"""
+
+helps['sql midb ledger-digest-uploads enable'] = """
+type: command
+short-summary: Enable uploading ledger digests to an Azure Storage account or to Azure Confidential Ledger. If uploading ledger digests is already enabled, the cmdlet resets the digest storage endpoint to a new value.
+examples:
+  - name: Enable uploading ledger digests to an Azure Blob storage.
+    text: az sql midb ledger-digest-uploads enable --n midb -g MyResourceGroup --mi myinstance --endpoint https://mystorage.blob.core.windows.net
+"""
+
+helps['sql midb ledger-digest-uploads disable'] = """
+type: command
+short-summary: Disable uploading ledger digests.
+examples:
+  - name: Disable uploading ledger digests.
+    text: az sql midb ledger-digest-uploads disable --n midb -g MyResourceGroup --mi myinstance
+"""
+
+helps['sql midb ledger-digest-uploads show'] = """
+type: command
+short-summary: Show the current ledger digest settings.
+examples:
+  - name: Show the settings for uploading ledger digests.
+    text: az sql midb ledger-digest-uploads show --n midb -g MyResourceGroup --mi myinstance
+"""
+
 helps['sql server'] = """
 type: group
 short-summary: Manage SQL servers.
@@ -1641,6 +1670,15 @@ examples:
     text: az sql server outbound-firewall-rule delete -g mygroup -s myserver -n myrule
   - name: Delete the outbound firewall rule
     text: az sql server outbound-firewall-rule delete -g mygroup -s myserver --outbound-rule-fqdn allowedFQDN
+"""
+
+helps['sql server refresh-external-governance-status'] = """
+type: command
+short-summary: Refreshes external governance status.
+
+examples:
+  - name:  Refresh external governance status for server
+    text: az sql server refresh-external-governance-status  --resource-group MyResourceGroup --server MyServer
 """
 
 helps['sql server key'] = """

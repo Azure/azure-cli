@@ -141,8 +141,14 @@ def load_arguments(self, _):
 
     with self.argument_context('resource create') as c:
         c.argument('resource_id', options_list=['--id'], help='Resource ID.', action=None)
-        c.argument('properties', options_list=['--properties', '-p'], help='a JSON-formatted string containing resource properties')
+        c.argument('properties', options_list=['--properties', '-p'], help='A JSON-formatted string containing resource properties.')
         c.argument('is_full_object', action='store_true', help='Indicate that the properties object includes other options such as location, tags, sku, and/or plan.')
+
+    with self.argument_context('resource patch') as c:
+        c.argument('properties', options_list=['--properties', '-p'],
+                   help='A JSON-formatted string containing resource properties.')
+        c.argument('is_full_object', action='store_true',
+                   help='Indicate that the properties object includes other options such as location, tags, sku, and/or plan.')
 
     with self.argument_context('resource link') as c:
         c.argument('target_id', options_list=['--target', c.deprecate(target='--target-id', redirect='--target', hide=True)], help='Fully-qualified resource ID of the resource link target.')
@@ -208,15 +214,15 @@ def load_arguments(self, _):
 
     with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('name', options_list=['--name', '-n'], completer=get_policy_assignment_completion_list, help='Name of the policy assignment.')
-        c.argument('scope', help='Scope to which this policy assignment applies.')
+        c.argument('scope', help='Scope at which this policy assignment subcommand applies. Defaults to current context subscription.')
         c.argument('disable_scope_strict_match', action='store_true', help='Include policy assignments either inherited from parent scope or at child scope.')
         c.argument('display_name', help='Display name of the policy assignment.')
         c.argument('description', help='Description of the policy assignment.', min_api='2016-12-01')
-        c.argument('policy', help='Name or id of the policy definition.', completer=get_policy_completion_list)
+        c.argument('policy', help='Name or id of the policy definition. If not provided, a policy set definition parameter must be provided.', completer=get_policy_completion_list)
         c.argument('params', options_list=['--params', '-p'], help='JSON formatted string or a path to a file or uri with parameter values of the policy rule.', type=file_type, completer=FilesCompleter(), min_api='2016-12-01')
 
     with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as c:
-        c.argument('policy_set_definition', options_list=['--policy-set-definition', '-d'], help='Name or id of the policy set definition.')
+        c.argument('policy_set_definition', options_list=['--policy-set-definition', '-d'], help='Name or id of the policy set definition. If not provided, a policy definition parameter must be provided.')
         c.argument('sku', options_list=['--sku', '-s'], help='policy sku.', arg_type=get_enum_type(['free', 'standard']), deprecate_info=c.deprecate(hide=True))
         c.argument('notscopes', options_list='--not-scopes', nargs='+')
 

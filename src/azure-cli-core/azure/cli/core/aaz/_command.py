@@ -12,6 +12,7 @@ from functools import partial
 from knack.commands import CLICommand, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
 from knack.deprecation import Deprecated
 from knack.experimental import ExperimentalItem
+from knack.log import get_logger
 from knack.preview import PreviewItem
 
 from azure.cli.core.azclierror import CLIInternalError
@@ -23,6 +24,9 @@ from ._paging import AAZPaged
 from ._poller import AAZLROPoller
 from ._command_ctx import AAZCommandCtx
 from .exceptions import AAZUnknownFieldError, AAZUnregisteredArg
+
+
+logger = get_logger(__name__)
 
 
 class AAZCommandGroup:
@@ -176,7 +180,7 @@ class AAZCommand(CLICommand):
         super().update_argument(param_name, argtype)
 
     @staticmethod
-    def deserialize_output(value, client_flatten=True):
+    def deserialize_output(value, client_flatten=True, secret_hidden=True):
         """ Deserialize output of a command.
         """
         if not isinstance(value, AAZBaseValue):
@@ -187,7 +191,7 @@ class AAZCommand(CLICommand):
             if result == AAZUndefined:
                 return result
 
-            if client_flatten and isinstance(schema, AAZObjectType):
+            if isinstance(schema, AAZObjectType):
                 # handle client flatten in result
                 disc_schema = schema.get_discriminator(result)
                 new_result = {}
@@ -201,7 +205,11 @@ class AAZCommand(CLICommand):
                         # get k_schema from discriminator definition
                         k_schema = disc_schema[k]
 
-                    if k_schema._flags.get('client_flatten', False):
+                    if secret_hidden and k_schema._flags.get('secret', False):
+                        # hidden secret properties in output
+                        continue
+
+                    if client_flatten and k_schema._flags.get('client_flatten', False):
                         # flatten k when there are client_flatten flag in it's schema
                         assert isinstance(k_schema, AAZObjectType) and isinstance(v, dict)
                         for sub_k, sub_v in v.items():
@@ -447,7 +455,13 @@ def _load_aaz_pkg(loader, pkg, parent_command_table, command_group_table, arg_st
         try:
             sub_pkg = importlib.import_module(f'.{sub_path}', pkg.__name__)
         except ModuleNotFoundError:
+            logger.debug('Failed to load package folder in aaz: %s.', os.path.join(pkg_path, sub_path))
             continue
+
+        if not sub_pkg.__file__:
+            logger.debug('Ignore invalid package folder in aaz: %s.', os.path.join(pkg_path, sub_path))
+            continue
+
         # recursively load sub package
         _load_aaz_pkg(loader, sub_pkg, command_table, command_group_table, arg_str, fully_load)
 

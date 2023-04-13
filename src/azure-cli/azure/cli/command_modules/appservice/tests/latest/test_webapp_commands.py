@@ -170,7 +170,7 @@ class WebappQuickCreateTest(ScenarioTest):
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
             JMESPathCheck('[0].value', '~14'),
         ])
-        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "DOTNETCORE|3.1"'.format(
+        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "dotnet:6"'.format(
             resource_group, webapp_name_2, plan)).get_output_in_json()
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
 
@@ -847,19 +847,6 @@ class WebappConfigureTest(ScenarioTest):
         self.assertEqual(set([x['name'] for x in result]), set(
             ['s1', 's2', 's3', 'WEBSITE_NODE_DEFAULT_VERSION']))
 
-        self.cmd(
-            'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
-
-        # show
-        result = self.cmd('webapp config appsettings list -g {} -n {}'.format(
-            resource_group, webapp_name)).get_output_in_json()
-        s2 = next((x for x in result if x['name'] == 's2'))
-        self.assertEqual(s2['name'], 's2')
-        self.assertEqual(s2['slotSetting'], False)
-        self.assertEqual(s2['value'], 'bar')
-        self.assertEqual(set([x['name'] for x in result]), set(
-            ['s1', 's2', 's3', 'WEBSITE_NODE_DEFAULT_VERSION']))
-
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_json', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_update_webapp_settings_thru_json(self, resource_group):
         webapp_name = self.create_random_name('webapp-config-test', 40)
@@ -1483,7 +1470,7 @@ class AppServiceCors(ScenarioTest):
         self.cmd(
             'storage account create --name {storage} -g {rg} --sku Standard_LRS')
         self.cmd(
-            'functionapp create -g {rg} -n {function} --plan {plan} -s {storage}')
+            'functionapp create -g {rg} -n {function} --plan {plan} -s {storage} --functions-version 4')
         self.cmd(
             'functionapp cors add -g {rg} -n {function} --allowed-origins https://msdn.com https://msn.com')
         result = self.cmd(

@@ -160,7 +160,7 @@ def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_a
 
     api_version = '2015-06-15'
     if application_security_groups:
-        asg_ids = [{'id': x.id} for x in application_security_groups]
+        asg_ids = [{'id': x['id']} for x in application_security_groups]
         nic_properties['ipConfigurations'][0]['properties']['applicationSecurityGroups'] = asg_ids
         api_version = '2017-09-01'
 
@@ -983,7 +983,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
     if application_security_groups and cmd.supported_api_version(min_api='2018-06-01',
                                                                  operation_group='virtual_machine_scale_sets'):
-        ip_config_properties['applicationSecurityGroups'] = [{'id': x.id} for x in application_security_groups]
+        ip_config_properties['applicationSecurityGroups'] = [{'id': x['id']} for x in application_security_groups]
 
     if ip_config_properties:
         ip_configuration = {
