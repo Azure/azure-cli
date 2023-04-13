@@ -122,20 +122,21 @@ def validate_import_key(key):
 def validate_import_feature(feature):
     try:
         validate_feature_flag_name(feature)
-        return True
     except InvalidArgumentValueError as exception:
         logger.warning("Ignoring invalid feature '%s'. %s", feature, exception.error_msg)
         return False
+
+    return True
 
 
 def validate_import_feature_key(key):
     try:
         validate_feature_flag_key(key)
-        return True
     except InvalidArgumentValueError as exception:
         logger.warning("Ignoring invalid feature with key '%s'. %s", key, exception.error_msg)
         return False
 
+    return True
 
 # File <-> List of KeyValue object
 
