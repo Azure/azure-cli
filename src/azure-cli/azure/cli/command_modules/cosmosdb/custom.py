@@ -2523,7 +2523,7 @@ def cli_cosmosdb_managed_cassandra_datacenter_create(client,
                                                      sku=None,
                                                      disk_sku=None,
                                                      disk_capacity=None,
-                                                     availability_zone=None
+                                                     availability_zone=None,
                                                      server_hostname=None,
                                                      server_port=None,
                                                      service_user_distinguished_name=None,
