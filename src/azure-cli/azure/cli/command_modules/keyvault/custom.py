@@ -2675,3 +2675,14 @@ def remove_hsm_region(client, resource_group_name, name, region_name, no_wait=Fa
     logger.warning("%s doesn't exist", region_name)
     return hsm
 # endregion
+
+# region secret
+def list_secret(client, **kwargs):
+    include_managed = kwargs.pop('include_managed', None)
+    result = client.list_properties_of_secrets(**kwargs)
+    kwargs.update({
+        "include_managed": include_managed
+    })
+    return result
+
+# endregion

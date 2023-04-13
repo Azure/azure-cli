@@ -15,7 +15,7 @@ def multi_transformers(*transformers):
 
 
 def keep_max_results(output, **command_args):
-    maxresults = command_args.get('maxresults', None)
+    maxresults = command_args.get('maxresults', command_args.get('max_page_size', None))
     if maxresults:
         return list(output)[:maxresults]
     return output
@@ -114,4 +114,38 @@ def transform_key_random_output(result, **command_args):
         import base64
         return {"value": base64.b64encode(result)}
 
+    return result
+
+
+def transform_secret_list(result, **command_args):
+    return [transform_secret_properties(secret) for secret in result]
+
+
+def transform_secret_properties(result):
+    if not isinstance(result, dict):
+        ret = {
+            "attributes": getattr(result, "_attributes", None),
+            "contentType": getattr(result, "content_type", None),
+            "id": getattr(result, "id", None),
+            "managed": getattr(result, "managed", None),
+            "name": getattr(result, "name", None),
+            "tags": getattr(result, "tags", None)
+        }
+        return ret
+    return result
+
+
+def transform_deleted_secret_list(result, **command_args):
+    return [transform_deleted_secret_properties(secret) for secret in result]
+
+
+def transform_deleted_secret_properties(result):
+    if not isinstance(result, dict):
+        ret = transform_secret_properties(getattr(result, "properties", None))
+        ret.update({
+            "deletedDate": getattr(result, "deleted_date", None),
+            "recoveryId": getattr(result, "recovery_id", None),
+            "scheduledPurgeDate": getattr(result, "scheduled_purge_date", None)
+        })
+        return ret
     return result

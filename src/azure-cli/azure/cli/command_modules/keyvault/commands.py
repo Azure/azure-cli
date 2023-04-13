@@ -14,9 +14,10 @@ from azure.cli.command_modules.keyvault._client_factory import (
 from azure.cli.command_modules.keyvault._transformers import (
     extract_subresource_name, filter_out_managed_resources,
     multi_transformers, transform_key_decryption_output, keep_max_results,
-    transform_key_output, transform_key_encryption_output, transform_key_random_output)
+    transform_key_output, transform_key_encryption_output, transform_key_random_output,
+    transform_secret_list, transform_deleted_secret_list)
 
-from azure.cli.command_modules.keyvault._format import transform_secret_list
+from azure.cli.command_modules.keyvault._format import transform_secret_list_table
 
 from azure.cli.command_modules.keyvault._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace,
@@ -42,6 +43,8 @@ def load_command_table(self, _):
     mgmt_plr_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.private_link_resources)
     data_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT)
     data_key_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_KEYS)
+    data_certificate_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_CERTIFICATES)
+    data_secret_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_SECRETS)
 
     if not is_azure_stack_profile(self):
         mgmt_hsms_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
@@ -196,22 +199,6 @@ def load_command_table(self, _):
             g.keyvault_custom('update', 'update_key_rotation_policy')
 
     with self.command_group('keyvault secret', data_entity.command_type) as g:
-        g.keyvault_command('list', 'get_secrets',
-                           transform=multi_transformers(
-                               filter_out_managed_resources,
-                               keep_max_results,
-                               extract_subresource_name()),
-                           table_transformer=transform_secret_list)
-        g.keyvault_command('list-versions', 'get_secret_versions',
-                           transform=multi_transformers(
-                               keep_max_results,
-                               extract_subresource_name()))
-        g.keyvault_command('list-deleted', 'get_deleted_secrets',
-                           transform=multi_transformers(
-                               keep_max_results,
-                               extract_subresource_name()))
-        g.keyvault_command('set', 'set_secret', validator=process_secret_set_namespace,
-                           transform=extract_subresource_name())
         g.keyvault_command('set-attributes', 'update_secret', transform=extract_subresource_name())
         g.keyvault_command('show', 'get_secret', transform=extract_subresource_name())
         g.keyvault_command('show-deleted', 'get_deleted_secret', transform=extract_subresource_name())
@@ -230,6 +217,24 @@ def load_command_table(self, _):
         g.keyvault_custom('restore', 'restore_secret',
                           doc_string_source=data_entity.operations_docs_tmpl.format('restore_secret'),
                           transform=extract_subresource_name())
+
+    # secret track2
+    with self.command_group('keyvault secret', data_secret_entity.command_type) as g:
+        g.keyvault_custom('list', "list_secret",
+                           transform=multi_transformers(
+                               filter_out_managed_resources,
+                               keep_max_results,
+                               transform_secret_list),
+                           table_transformer=transform_secret_list_table)
+        g.keyvault_command('list-versions', 'list_properties_of_secret_versions',
+                           transform=multi_transformers(
+                               keep_max_results,
+                               transform_secret_list))
+        g.keyvault_command('list-deleted', 'list_deleted_secrets',
+                           transform=multi_transformers(
+                               keep_max_results,
+                               transform_deleted_secret_list))
+        g.keyvault_command('set', 'set_secret', validator=process_secret_set_namespace)
 
     with self.command_group('keyvault certificate', data_entity.command_type) as g:
         g.keyvault_custom('create',

@@ -273,7 +273,7 @@ def load_arguments(self, _):
     # endregion
 
     # region Shared
-    for item in ['secret', 'certificate']:
+    for item in ['certificate']:
         with self.argument_context('keyvault ' + item, arg_group='Id') as c:
             c.argument(item + '_name', options_list=['--name', '-n'], help='Name of the {}.'.format(item),
                        id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
@@ -529,20 +529,6 @@ def load_arguments(self, _):
     # endregion
 
     # region KeyVault Secret
-    with self.argument_context('keyvault secret set') as c:
-        c.argument('content_type', options_list=['--description', '--content-type'],
-                   help='Description of the secret contents (e.g. password, connection string, etc)')
-        c.attributes_argument('secret', SecretAttributes, create=True)
-
-    with self.argument_context('keyvault secret set', arg_group='Content Source') as c:
-        c.argument('value', options_list=['--value'],
-                   help="Plain text secret value. Cannot be used with '--file' or '--encoding'", required=False)
-        c.extra('file_path', options_list=['--file', '-f'], type=file_type,
-                help="Source file for secret. Use in conjunction with '--encoding'", completer=FilesCompleter())
-        c.extra('encoding', arg_type=get_enum_type(secret_encoding_values, default='utf-8'),
-                options_list=['--encoding', '-e'],
-                help='Source file encoding. The value is saved as a tag (`file-encoding=<val>`) '
-                     'and used during download to automatically encode the resulting file.')
 
     with self.argument_context('keyvault secret set-attributes') as c:
         c.attributes_argument('secret', SecretAttributes)
@@ -559,13 +545,90 @@ def load_arguments(self, _):
             c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                        help='File to receive the secret contents.')
 
-    for scope in ['list', 'list-deleted', 'list-versions']:
-        with self.argument_context('keyvault secret {}'.format(scope)) as c:
-            c.argument('maxresults', options_list=['--maxresults'], type=int)
+    # secret track2
+    for item in ['secret']:
+        with self.argument_context('keyvault ' + item, arg_group='Id') as c:
+            c.argument(item + '_name', options_list=['--name', '-n'], help='Name of the {}.'.format(item),
+                       id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
+            c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+            c.argument(item + '_version', options_list=['--version', '-v'],
+                       help='The {} version. If omitted, uses the latest version.'.format(item), default='',
+                       required=False, completer=get_keyvault_version_completion_list(item))
+
+        for cmd in ['backup', 'decrypt', 'delete', 'download', 'encrypt', 'list-versions', 'set-attributes', 'show',
+                    'list', 'list-deleted']:
+            with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
+                try:
+                    if cmd in ['list', 'list-deleted']:
+                        c.extra('identifier', options_list=['--id'],
+                                help='Full URI of the Vault. '
+                                     'If specified all other \'Id\' arguments should be omitted.',
+                                validator=validate_vault_or_hsm)
+                    else:
+                        c.extra('identifier', options_list=['--id'],
+                                help='Id of the {}. '
+                                     'If specified all other \'Id\' arguments should be omitted.'.format(item),
+                                validator=validate_keyvault_resource_id(item))
+                except ValueError:
+                    pass
+                c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item),
+                           required=False)
+                c.argument('vault_base_url', vault_name_type, required=False,
+                           help='Name of the Key Vault. Required if --id is not specified.')
+                c.argument(item + '_version', required=False)
+
+        for cmd in ['purge', 'recover', 'show-deleted']:
+            with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
+                c.extra('identifier', options_list=['--id'],
+                        help='The recovery id of the {}. '
+                             'If specified all other \'Id\' arguments should be omitted.'.format(item),
+                        validator=validate_key_id('deleted' + item))
+                c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item),
+                           required=False)
+                c.argument('vault_base_url', help='Name of the Vault. Required if --id is not specified.',
+                           required=False)
+                c.argument(item + '_version', required=False)
+
+        for cmd in ['list', 'list-deleted']:
+            with self.argument_context('keyvault {} {}'.format(item, cmd)) as c:
+                c.argument('include_pending', arg_type=get_three_state_flag())
+
+    for scope in ['list', 'list-versions', 'list-deleted']:
+        with self.argument_context(f'keyvault secret {scope}') as c:
+            c.extra('max_page_size', options_list=['--maxresults'], type=int,
+                    help='Maximum number of results to return in a page. '
+                         'If not specified, the service will return up to 25 results.')
+            c.extra('vault_base_url', options_list=['--vault-name'],
+                    help='Name of the Key Vault. Required if --id is not specified')
 
     with self.argument_context('keyvault secret list') as c:
         c.extra('include_managed', arg_type=get_three_state_flag(), default=False,
                 help='Include managed secrets. Default: false')
+
+    with self.argument_context('keyvault secret list-versions') as c:
+        c.extra('name', options_list=['--name', '-n'], required=False, arg_group='Id',
+                help='Name of the secret. Required if --id is not specified.')
+
+    with self.argument_context('keyvault secret set') as c:
+        c.argument('name', options_list=['--name', '-n'], required=True, arg_group='Id',
+                   help='Name of the secret.')
+        c.extra('vault_base_url', vault_name_type, required=True,
+                type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+        c.extra('content_type', options_list=['--description', '--content-type'],
+                   help='Description of the secret contents (e.g. password, connection string, etc)')
+        c.attributes_argument('secret', SecretAttributes, create=True)
+        c.extra('tags', tags_type)
+
+    with self.argument_context('keyvault secret set', arg_group='Content Source') as c:
+        c.argument('value', options_list=['--value'],
+                   help="Plain text secret value. Cannot be used with '--file' or '--encoding'", required=False)
+        c.extra('file_path', options_list=['--file', '-f'], type=file_type,
+                help="Source file for secret. Use in conjunction with '--encoding'", completer=FilesCompleter())
+        c.extra('encoding', arg_type=get_enum_type(secret_encoding_values, default='utf-8'),
+                options_list=['--encoding', '-e'],
+                help='Source file encoding. The value is saved as a tag (`file-encoding=<val>`) '
+                     'and used during download to automatically encode the resulting file.')
+
     # endregion
 
     # region keyvault security-domain

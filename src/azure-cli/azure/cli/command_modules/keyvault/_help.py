@@ -640,6 +640,28 @@ examples:
         az keyvault secret set --name MySecretName --vault-name MyKeyVault --file /path/to/file --encoding MyEncoding
 """
 
+helps['keyvault secret list'] = """
+type: command
+short-summary: List secrets in a specified key vault.
+long-summary: The Get Secrets operation is applicable to the entire vault. However, only the base secret 
+    identifier and its attributes are provided in the response. Individual secret versions are 
+    not listed in the response. This operation requires the secrets/list permission.
+"""
+
+helps['keyvault secret list-versions'] = """
+type: command
+short-summary: List all versions of the specified secret.
+long-summary: The full secret identifier and attributes are provided in the response. No values are 
+    returned for the secrets. This operations requires the secrets/list permission.
+"""
+
+helps['keyvault secret list-deleted'] = """
+type: command
+short-summary: Lists deleted secrets for the specified vault.
+long-summary: The Get Deleted Secrets operation returns the secrets that have been deleted for a vault
+        enabled for soft-delete. This operation requires the secrets/list permission.
+"""
+
 helps['keyvault show'] = """
 type: command
 short-summary: Show details of a Vault or HSM.
