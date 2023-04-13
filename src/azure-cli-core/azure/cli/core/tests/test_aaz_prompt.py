@@ -146,7 +146,7 @@ class TestAAZPromptInput(unittest.TestCase):
         dest_ops = AAZArgActionOperations()
         self.assertEqual(len(dest_ops._ops), 0)
 
-        my_password = '7ndBkS3zKQazD5N3zzstubZq'
+        my_password = '123'
         with mock.patch('getpass.getpass', return_value=my_password):
             action.setup_operations(dest_ops, None)
         dest_ops.apply(v, "password")
@@ -175,14 +175,14 @@ class TestAAZPromptInput(unittest.TestCase):
         dest_ops = AAZArgActionOperations()
         self.assertEqual(len(dest_ops._ops), 0)
 
-        my_password = '7ndBkS3zKQazD5N3zzstubZq'
+        my_password = '123'
         with mock.patch('getpass.getpass', side_effect=[my_password, my_password]):
             action.setup_operations(dest_ops, None)
         dest_ops.apply(v, "password")
         self.assertEqual(v.password, my_password)
 
-        my_password1 = '7ndBkS3zKQazD5N3zzstubZq'
-        my_password2 = 'LTQ9haNMCSGp8p2uQHw2K9xf'
+        my_password1 = '111'
+        my_password2 = '123'
         with self.assertRaises(StopIteration):
             with mock.patch('getpass.getpass', side_effect=[my_password1, my_password2]):
                 action.setup_operations(dest_ops, None)

@@ -125,7 +125,7 @@ class AAZSimpleTypeArgAction(AAZArgAction):
         if data == AAZBlankArgValue:
             if cls._schema._blank == AAZUndefined:
                 raise AAZInvalidValueError("argument value cannot be blank")
-            elif isinstance(cls._schema._blank, AAZPromptInput):
+            if isinstance(cls._schema._blank, AAZPromptInput):
                 try:
                     data = cls._schema._blank()
                 except NoTTYException:
