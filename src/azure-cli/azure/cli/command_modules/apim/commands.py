@@ -10,7 +10,8 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.apim._format import (service_output_format)
 from azure.cli.command_modules.apim._client_factory import (cf_service, cf_api, cf_product, cf_nv, cf_apiops,
                                                             cf_apirelease, cf_apirevision, cf_apiversionset,
-                                                            cf_apischema, cf_ds, cf_graphqlapiresolver, cf_graphqlapiresolverpolicy)
+                                                            cf_apischema, cf_ds, cf_graphqlapiresolver,
+                                                            cf_graphqlapiresolverpolicy)
 
 
 def load_command_table(self, _):
