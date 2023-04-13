@@ -1451,7 +1451,8 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
                         app_command_line=None,
                         ftps_state=None,
                         vnet_route_all_enabled=None,
-                        generic_configurations=None):
+                        generic_configurations=None,
+                        min_replicas=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_application_settings', slot)
@@ -1508,6 +1509,11 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
         setattr(configs, 'scm_ip_security_restrictions', None)
 
     if is_centauri_functionapp(cmd, resource_group_name, name):
+        if min_replicas:
+            configs.enable_additional_properties_sending()
+            existing_properties = configs.serialize()["properties"]
+            configs.additional_properties["properties"] = existing_properties
+            configs.additional_properties["properties"]["minReplicas"] = int(min_replicas)
         return update_configuration_polling(cmd, resource_group_name, name, slot, configs)
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
 
@@ -1661,7 +1667,8 @@ APPSETTINGS_TO_MASK = ['DOCKER_REGISTRY_SERVER_PASSWORD']
 def update_container_settings(cmd, resource_group_name, name, docker_registry_server_url=None,
                               docker_custom_image_name=None, docker_registry_server_user=None,
                               websites_enable_app_service_storage=None, docker_registry_server_password=None,
-                              multicontainer_config_type=None, multicontainer_config_file=None, slot=None):
+                              multicontainer_config_type=None, multicontainer_config_file=None, slot=None,
+                              min_replicas=None):
     settings = []
     if docker_registry_server_url is not None:
         settings.append('DOCKER_REGISTRY_SERVER_URL=' + docker_registry_server_url)
@@ -1696,17 +1703,20 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
     elif multicontainer_config_file or multicontainer_config_type:
         logger.warning('Must change both settings --multicontainer-config-file FILE --multicontainer-config-type TYPE')
 
+    if min_replicas:
+        update_site_configs(cmd, resource_group_name, name, min_replicas=min_replicas)
+
     return _mask_creds_related_appsettings(_filter_for_container_settings(cmd, resource_group_name, name, settings,
                                                                           slot=slot))
 
 
 def update_container_settings_functionapp(cmd, resource_group_name, name, registry_server=None,
                                           image=None, registry_username=None,
-                                          registry_password=None, slot=None):
+                                          registry_password=None, slot=None, min_replicas=None):
     return update_container_settings(cmd, resource_group_name, name, registry_server,
                                      image, registry_username, None,
                                      registry_password, multicontainer_config_type=None,
-                                     multicontainer_config_file=None, slot=slot)
+                                     multicontainer_config_file=None, slot=slot, min_replicas=min_replicas)
 
 
 def _get_acr_cred(cli_ctx, registry_name):
@@ -3619,7 +3629,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        deployment_source_branch='master', deployment_local_git=None,
                        registry_password=None, registry_username=None,
                        image=None, tags=None, assign_identities=None,
-                       role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, environment=None):
+                       role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, environment=None,
+                       min_replicas=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
@@ -3828,6 +3839,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp_def.additional_properties["properties"] = existing_properties
         functionapp_def.additional_properties["properties"]["name"] = name
         functionapp_def.additional_properties["properties"]["managedEnvironmentId"] = managed_environment.id
+        functionapp_def.additional_properties["properties"]["minReplicas"] = int(min_replicas)
 
     # temporary workaround for dotnet-isolated linux consumption apps
     if is_linux and consumption_plan_location is not None and runtime == 'dotnet-isolated':
