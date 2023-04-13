@@ -334,6 +334,7 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")
             c.argument('linux_fx_version', help="The runtime stack used for your linux-based webapp, e.g., \"RUBY|2.5.5\", \"NODE|12LTS\", \"PHP|7.2\", \"DOTNETCORE|2.1\". See https://aka.ms/linux-stacks for more info.")
             c.argument('windows_fx_version', help="A docker image name used for your windows container web app, e.g., microsoft/nanoserver:ltsc2016")
+            c.ignore('min_replicas')
             if scope == 'functionapp':
                 c.ignore('windows_fx_version')
             c.argument('pre_warmed_instance_count', options_list=['--prewarmed-instance-count'],
@@ -367,7 +368,6 @@ subscription than the app service environment, please use the resource ID for --
                        help="config file for multicontainer apps")
             c.argument('show_multicontainer_config', action='store_true',
                        help='shows decoded config if a multicontainer config is set')
-
         with self.argument_context(scope + ' deployment container config') as c:
             c.argument('enable', options_list=['--enable-cd', '-e'], help='enable/disable continuous deployment',
                        arg_type=get_three_state_flag(return_label=True))
@@ -381,6 +381,7 @@ subscription than the app service environment, please use the resource ID for --
                    help='the container registry server username')
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-p'],
                    help='the container registry server password')
+        c.ignore('min_replicas')
 
     with self.argument_context('functionapp config container') as c:
         c.argument('registry_server', options_list=['--registry-server', '-r', c.deprecate(target='--docker-registry-server-url', redirect='--registry-server')],
