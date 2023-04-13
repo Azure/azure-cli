@@ -270,6 +270,13 @@ class AAZUuidArg(AAZStrArg):
         return "GUID/UUID"
 
 
+class AAZPasswordArg(AAZStrArg):
+
+    @property
+    def _type_in_help(self):
+        return "Password"
+
+
 class AAZIntArg(AAZSimpleTypeArg, AAZIntType):
 
     @property

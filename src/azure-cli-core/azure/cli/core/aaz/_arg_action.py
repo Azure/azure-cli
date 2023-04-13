@@ -11,11 +11,13 @@ from argparse import Action
 from collections import OrderedDict
 
 from knack.log import get_logger
+from knack.prompting import NoTTYException
 
 from azure.cli.core import azclierror
 from ._base import AAZUndefined, AAZBlankArgValue
 from ._help import AAZShowHelp
 from ._utils import AAZShortHandSyntaxParser
+from ._prompt import AAZPromptInput
 from .exceptions import AAZInvalidShorthandSyntaxError, AAZInvalidValueError, AAZUnknownFieldError
 
 logger = get_logger(__name__)
@@ -123,7 +125,13 @@ class AAZSimpleTypeArgAction(AAZArgAction):
         if data == AAZBlankArgValue:
             if cls._schema._blank == AAZUndefined:
                 raise AAZInvalidValueError("argument value cannot be blank")
-            data = copy.deepcopy(cls._schema._blank)
+            elif isinstance(cls._schema._blank, AAZPromptInput):
+                try:
+                    data = cls._schema._blank()
+                except NoTTYException:
+                    raise AAZInvalidValueError("argument value cannot be blank in non-interactive mode.")
+            else:
+                data = copy.deepcopy(cls._schema._blank)
 
         if isinstance(data, str):
             # transfer string into correct data
