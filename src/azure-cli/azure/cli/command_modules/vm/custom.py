@@ -1433,14 +1433,14 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
                     public_ip_addr_info = {
                         'id': public_ip_address['id'],
                         'name': public_ip_address['name'],
-                        'ipAddress': public_ip_address['ipAddress'],
-                        'ipAllocationMethod': public_ip_address['publicIPAllocationMethod']
+                        'ipAddress': public_ip_address.get('ipAddress', None),
+                        'ipAllocationMethod': public_ip_address.get('publicIPAllocationMethod', None)
                     }
 
                     try:
                         public_ip_addr_info['zone'] = public_ip_address['zones'][0] \
                             if 'zones' in public_ip_address else None
-                    except (AttributeError, IndexError, TypeError):
+                    except (KeyError, IndexError, TypeError):
                         pass
 
                     network_info['publicIpAddresses'].append(public_ip_addr_info)
