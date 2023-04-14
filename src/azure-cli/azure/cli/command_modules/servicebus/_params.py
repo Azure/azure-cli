@@ -217,7 +217,9 @@ def load_arguments_sb(self, _):
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
         c.argument('authorization_rule_name', arg_type=name_type, help='Name of Namespace AuthorizationRule')
 
-    # Standard to Premium Migration: Region
+    with self.argument_context('servicebus georecovery-alias fail-over') as c:
+        c.extra('parameters', options_list=['--parameters'], deprecate_info=c.deprecate(expiration='2.50.0'))
+# Standard to Premium Migration: Region
 
     with self.argument_context('servicebus migration start') as c:
         c.ignore('config_name')
