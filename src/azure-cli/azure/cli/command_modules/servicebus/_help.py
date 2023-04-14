@@ -72,7 +72,7 @@ type: command
 short-summary: Invokes Service Bus Geo-Disaster Recovery Configuration Alias failover and re-configure the alias to point to the secondary namespace
 examples:
   - name: Invokes Geo-Disaster Recovery Configuration Alias failover and reconfigure the alias to point to the secondary namespace
-    text: az servicebus georecovery-alias fail-over --resource-group myresourcegroup --namespace-name secondarynamespace --alias myaliasname
+    text: az servicebus georecovery-alias fail-over --resource-group myresourcegroup --namespace-name secondarynamespace --alias myaliasname --parameters {FailoverProperties}
 """
 
 helps['servicebus georecovery-alias set'] = """
