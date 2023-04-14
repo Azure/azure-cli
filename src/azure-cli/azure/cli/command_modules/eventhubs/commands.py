@@ -135,6 +135,19 @@ def load_command_table(self, _):
         g.custom_command('remove', 'cli_networkrule_delete', validator=validate_subnet)
         g.custom_command('update', 'cli_networkrule_update')
 
+    with self.command_group('eventhubs namespace network-rule', deprecate_info=self.deprecate(redirect='eventhubs namespace network-rule-set', hide=True)) as g:
+        g.show_command('list', 'get_network_rule_set')
+        g.custom_command('update', 'cli_networkrule_update')
+
+    with self.command_group('eventhubs namespace network-rule') as g:
+        g.command('add', deprecate_info=g.deprecate(redirect='eventhubs namespace network-rule-set ip-rule add' 'eventhubs namespace network-rule-set virtual-network-rule add'))
+
+    with self.command_group('eventhubs namespace network-rule', test_sdk) as g:
+        g.command('remove', deprecate_info=g.deprecate(redirect='eventhubs namespace network-rule-set ip-rule remove' 'eventhubs namespace network-rule-set virtual-network-rule remove'))
+
+    with self.argument_context('eventhubs namespace network-rule add') as c:
+        c.argument('vnet_name', help='We no longer want to support.', deprecate_info = c.deprecate())
+        
 # Identity Region
     with self.command_group('eventhubs namespace identity', custom_command_type=eh_namespace_custom,
                             is_preview=True) as g:
