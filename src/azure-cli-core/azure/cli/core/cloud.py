@@ -652,8 +652,6 @@ def _save_cloud(cloud, overwrite=False, cli_ctx=None):
     config = configparser.ConfigParser()
     config.read(get_cloud_config_file(cli_ctx))
     _config_add_cloud(config, cloud, overwrite=overwrite)
-    if not os.path.isdir(GLOBAL_CONFIG_DIR):
-        os.makedirs(GLOBAL_CONFIG_DIR)
     with open(get_cloud_config_file(cli_ctx), 'w') as configfile:
         config.write(configfile)
 
@@ -667,7 +665,7 @@ def add_cloud(cli_ctx, cloud):
 def update_cloud(cli_ctx, cloud):
     if not _get_cloud(cli_ctx, cloud.name):
         raise CloudNotRegisteredException(cloud.name)
-    _save_cloud(cloud, overwrite=True)
+    _save_cloud(cloud, overwrite=True, cli_ctx=cli_ctx)
 
 
 def remove_cloud(cli_ctx, cloud_name):
