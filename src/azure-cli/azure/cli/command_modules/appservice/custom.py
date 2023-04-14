@@ -3802,7 +3802,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         setattr(site_config, snake_case_prop, value)
 
     if environment is not None:
-        functionapp_def.kind = 'functionapp'
+        functionapp_def.kind = 'functionapp,linux,container,azurecontainerapps'
         functionapp_def.reserved = None
         functionapp_def.name = name
         functionapp_def.https_only = None
