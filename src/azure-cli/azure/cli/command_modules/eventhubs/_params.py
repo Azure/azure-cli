@@ -177,9 +177,9 @@ def load_arguments_eh(self, _):
     for scope in ['eventhubs namespace network-rule add', 'eventhubs namespace network-rule remove']:
         with self.argument_context(scope, resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01') as c:
             c.argument('subnet', arg_group='Virtual Network Rule', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
-            c.argument('ip_mask', arg_group='IP Address Rule', options_list=['--ip-address'], help='IPv4 address or CIDR range - 10.6.0.0/24')
+            c.argument('ip_mask', arg_group='IP Address Rule', options_list=['--ip-address'], help='IPv4 address or CIDR range - 10.6.0.0/24', deprecate_info=c.deprecate(redirect='--ip-rule', expiration='2.50.0'))
             c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
-            c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'], help='Name of the Virtual Network')
+            c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'], help='Name of the Virtual Network', deprecate_info=c.deprecate(expiration='2.50.0'))
 
     with self.argument_context('eventhubs namespace network-rule update', resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01') as c:
         c.argument('public_network_access', options_list=['--public-network-access', '--public-network'], arg_type=get_enum_type(['Enabled', 'Disabled']), help='This determines if traffic is allowed over public network. By default it is enabled. If value is SecuredByPerimeter then Inbound and Outbound communication is controlled by the network security perimeter and profile\' access rules.')
