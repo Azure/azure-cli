@@ -118,10 +118,10 @@ def transform_key_random_output(result, **command_args):
 
 
 def transform_secret_list(result, **command_args):
-    return [transform_secret_properties(secret) for secret in result]
+    return [transform_secret_base_properties(secret) for secret in result]
 
 
-def transform_secret_properties(result):
+def transform_secret_base_properties(result):
     if not isinstance(result, dict):
         ret = {
             "attributes": getattr(result, "_attributes", None),
@@ -141,11 +141,23 @@ def transform_deleted_secret_list(result, **command_args):
 
 def transform_deleted_secret_properties(result):
     if not isinstance(result, dict):
-        ret = transform_secret_properties(getattr(result, "properties", None))
+        ret = transform_secret_base_properties(getattr(result, "properties", None))
         ret.update({
             "deletedDate": getattr(result, "deleted_date", None),
             "recoveryId": getattr(result, "recovery_id", None),
             "scheduledPurgeDate": getattr(result, "scheduled_purge_date", None)
+        })
+        return ret
+    return result
+
+
+def transform_secret_set(result, **command_args):
+    if not isinstance(result, dict):
+        properties = getattr(result, "properties", None)
+        ret = transform_secret_base_properties(properties)
+        ret.update({
+            "kid": getattr(properties, "key_id", None),
+            "value": getattr(result, "value", None)
         })
         return ret
     return result

@@ -615,8 +615,12 @@ def load_arguments(self, _):
         c.extra('vault_base_url', vault_name_type, required=True,
                 type=get_vault_base_url_type(self.cli_ctx), id_part=None)
         c.extra('content_type', options_list=['--description', '--content-type'],
-                   help='Description of the secret contents (e.g. password, connection string, etc)')
-        c.attributes_argument('secret', SecretAttributes, create=True)
+                help='Description of the secret contents (e.g. password, connection string, etc)')
+        c.extra('disabled', help='Create secret in disabled state.', arg_type=get_three_state_flag())
+        c.extra('expires_on', options_list=['--expires'], type=datetime_type,
+                help='Expiration UTC datetime (Y-m-d\'T\'H:M:S\'Z\').')
+        c.extra('not_before', type=datetime_type,
+                help='Key not usable before the provided UTC datetime (Y-m-d\'T\'H:M:S\'Z\').')
         c.extra('tags', tags_type)
 
     with self.argument_context('keyvault secret set', arg_group='Content Source') as c:

@@ -15,7 +15,7 @@ from azure.cli.command_modules.keyvault._transformers import (
     extract_subresource_name, filter_out_managed_resources,
     multi_transformers, transform_key_decryption_output, keep_max_results,
     transform_key_output, transform_key_encryption_output, transform_key_random_output,
-    transform_secret_list, transform_deleted_secret_list)
+    transform_secret_list, transform_deleted_secret_list, transform_secret_set)
 
 from azure.cli.command_modules.keyvault._format import transform_secret_list_table
 
@@ -234,7 +234,8 @@ def load_command_table(self, _):
                            transform=multi_transformers(
                                keep_max_results,
                                transform_deleted_secret_list))
-        g.keyvault_command('set', 'set_secret', validator=process_secret_set_namespace)
+        g.keyvault_command('set', 'set_secret', validator=process_secret_set_namespace,
+                           transform=transform_secret_set)
 
     with self.command_group('keyvault certificate', data_entity.command_type) as g:
         g.keyvault_custom('create',

@@ -149,14 +149,10 @@ def process_secret_set_namespace(cmd, namespace):
     if (content and file_path) or (not content and not file_path):
         raise use_error
 
-    SecretAttributes = cmd.get_models('SecretAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    namespace.secret_attributes = SecretAttributes()
-    if namespace.expires:
-        namespace.secret_attributes.expires = namespace.expires
-    if namespace.disabled:
-        namespace.secret_attributes.enabled = not namespace.disabled
-    if namespace.not_before:
-        namespace.secret_attributes.not_before = namespace.not_before
+    namespace.enabled = not namespace.disabled if namespace.disabled is not None else None
+    del namespace.file_path
+    del namespace.encoding
+    del namespace.disabled
 
     encoding = encoding or 'utf-8'
     if file_path:
