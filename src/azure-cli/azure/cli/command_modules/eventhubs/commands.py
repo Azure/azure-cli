@@ -129,7 +129,7 @@ def load_command_table(self, _):
         g.command('keys list', 'list_keys')
 
 # NetwrokRuleSet Region
-    with self.command_group('eventhubs namespace network-rule', eh_namespace_util, min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
+    with self.command_group('eventhubs namespace network-rule', eh_namespace_util, deprecate_info=self.deprecate(redirect='eventhubs namespace network-rule-set ip-rule/virtual-network-rule add'), min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
         g.custom_command('add', 'cli_networkrule_createupdate', deprecate_info=self.deprecate(redirect='eventhubs namespace network-rule-set ip-rule/virtual-network-rule add'), validator=validate_subnet)
         g.show_command('list', 'get_network_rule_set', deprecate_info=self.deprecate(redirect='eventhubs namespace network-rule-set list'))
         g.custom_command('remove', 'cli_networkrule_delete', deprecate_info=self.deprecate(redirect='eventhubs namespace network-rule-set ip-rule/virtual-network-rule remove'), validator=validate_subnet)
