@@ -138,6 +138,7 @@ def validate_import_feature_key(key):
 
     return True
 
+
 # File <-> List of KeyValue object
 
 def __read_with_appropriate_encoding(file_path, format_):
