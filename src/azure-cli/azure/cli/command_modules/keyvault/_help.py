@@ -659,7 +659,15 @@ helps['keyvault secret list-deleted'] = """
 type: command
 short-summary: Lists deleted secrets for the specified vault.
 long-summary: The Get Deleted Secrets operation returns the secrets that have been deleted for a vault
-        enabled for soft-delete. This operation requires the secrets/list permission.
+    enabled for soft-delete. This operation requires the secrets/list permission.
+"""
+
+helps['keyvault secret set-attributes'] = """
+type: command
+short-summary: Updates the attributes associated with a specified secret in a given key vault.
+long-summary: The UPDATE operation changes specified attributes of an existing stored secret. Attributes
+    that are not specified in the request are left unchanged. The value of a secret itself
+    cannot be changed. This operation requires the secrets/set permission.
 """
 
 helps['keyvault show'] = """

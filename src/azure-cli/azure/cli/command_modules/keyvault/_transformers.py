@@ -121,7 +121,7 @@ def transform_secret_list(result, **command_args):
     return [transform_secret_base_properties(secret) for secret in result]
 
 
-def transform_secret_base_properties(result):
+def transform_secret_base_properties(result, **command_args):
     if not isinstance(result, dict):
         ret = {
             "attributes": getattr(result, "_attributes", None),
@@ -158,6 +158,17 @@ def transform_secret_set(result, **command_args):
         ret.update({
             "kid": getattr(properties, "key_id", None),
             "value": getattr(result, "value", None)
+        })
+        return ret
+    return result
+
+
+def transform_secret_set_attributes(result, **command_args):
+    if not isinstance(result, dict):
+        ret = transform_secret_base_properties(result)
+        ret.update({
+            "kid": getattr(result, "key_id", None),
+            "value": None
         })
         return ret
     return result

@@ -530,9 +530,6 @@ def load_arguments(self, _):
 
     # region KeyVault Secret
 
-    with self.argument_context('keyvault secret set-attributes') as c:
-        c.attributes_argument('secret', SecretAttributes)
-
     with self.argument_context('keyvault secret download') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                    help='File to receive the secret contents.')
@@ -632,6 +629,23 @@ def load_arguments(self, _):
                 options_list=['--encoding', '-e'],
                 help='Source file encoding. The value is saved as a tag (`file-encoding=<val>`) '
                      'and used during download to automatically encode the resulting file.')
+
+    with self.argument_context('keyvault secret set-attributes') as c:
+        c.argument('name', options_list=['--name', '-n'], arg_group='Id', required=False,
+                   help='Name of the secret. Required if --id is not specified.')
+        c.extra('vault_base_url', vault_name_type, required=False,
+                type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+        c.argument('version', options_list=['--version', '-v'],
+                   help='The {} version. If omitted, uses the latest version.'.format(item), default='',
+                   required=False, arg_group='Id', completer=get_keyvault_version_completion_list(item))
+        c.extra('content_type', options_list=['--content-type'],
+                help='Type of the secret value such as a password.')
+        c.extra('enabled', help='Enable the secret.', arg_type=get_three_state_flag())
+        c.extra('expires_on', options_list=['--expires'], type=datetime_type,
+                help='Expiration UTC datetime (Y-m-d\'T\'H:M:S\'Z\').')
+        c.extra('not_before', type=datetime_type,
+                help='Key not usable before the provided UTC datetime (Y-m-d\'T\'H:M:S\'Z\').')
+        c.extra('tags', tags_type)
 
     # endregion
 
