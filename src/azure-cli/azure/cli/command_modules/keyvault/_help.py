@@ -670,6 +670,13 @@ long-summary: The UPDATE operation changes specified attributes of an existing s
     cannot be changed. This operation requires the secrets/set permission.
 """
 
+helps['keyvault secret show'] = """
+type: command
+short-summary: Get a specified secret from a given key vault.
+long-summary: The GET operation is applicable to any secret stored in Azure Key Vault. This operation 
+    requires the secrets/get permission.
+"""
+
 helps['keyvault show'] = """
 type: command
 short-summary: Show details of a Vault or HSM.

@@ -544,14 +544,6 @@ def load_arguments(self, _):
 
     # secret track2
     for item in ['secret']:
-        with self.argument_context('keyvault ' + item, arg_group='Id') as c:
-            c.argument(item + '_name', options_list=['--name', '-n'], help='Name of the {}.'.format(item),
-                       id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
-            c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
-            c.argument(item + '_version', options_list=['--version', '-v'],
-                       help='The {} version. If omitted, uses the latest version.'.format(item), default='',
-                       required=False, completer=get_keyvault_version_completion_list(item))
-
         for cmd in ['backup', 'decrypt', 'delete', 'download', 'encrypt', 'list-versions', 'set-attributes', 'show',
                     'list', 'list-deleted']:
             with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
@@ -568,11 +560,13 @@ def load_arguments(self, _):
                                 validator=validate_keyvault_resource_id(item))
                 except ValueError:
                     pass
-                c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item),
-                           required=False)
-                c.argument('vault_base_url', vault_name_type, required=False,
-                           help='Name of the Key Vault. Required if --id is not specified.')
-                c.argument(item + '_version', required=False)
+                c.argument('name', options_list=['--name', '-n'], required=False,
+                           help='Name of the {}. Required if --id is not specified.'.format(item))
+                c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None,
+                        options_list=['--vault-name'], help='Name of the Key Vault. Required if --id is not specified')
+                c.argument('version', options_list=['--version', '-v'],
+                           help='The {} version. If omitted, uses the latest version.'.format(item), default='',
+                           required=False, arg_group='Id', completer=get_keyvault_version_completion_list(item))
 
         for cmd in ['purge', 'recover', 'show-deleted']:
             with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
@@ -595,30 +589,28 @@ def load_arguments(self, _):
             c.extra('max_page_size', options_list=['--maxresults'], type=int,
                     help='Maximum number of results to return in a page. '
                          'If not specified, the service will return up to 25 results.')
-            c.extra('vault_base_url', options_list=['--vault-name'],
-                    help='Name of the Key Vault. Required if --id is not specified')
 
     with self.argument_context('keyvault secret list') as c:
         c.extra('include_managed', arg_type=get_three_state_flag(), default=False,
                 help='Include managed secrets. Default: false')
 
-    with self.argument_context('keyvault secret list-versions') as c:
-        c.extra('name', options_list=['--name', '-n'], required=False, arg_group='Id',
-                help='Name of the secret. Required if --id is not specified.')
+    for cmd in ['set', 'set-attributes']:
+        with self.argument_context('keyvault secret {}'.format(cmd)) as c:
+            c.extra('content_type', options_list=['--description', '--content-type'],
+                    help='Description of the secret contents (e.g. password, connection string, etc)')
+            c.extra('expires_on', options_list=['--expires'], type=datetime_type,
+                    help='Expiration UTC datetime (Y-m-d\'T\'H:M:S\'Z\').')
+            c.extra('not_before', type=datetime_type,
+                    help='Key not usable before the provided UTC datetime (Y-m-d\'T\'H:M:S\'Z\').')
+            c.extra('tags', tags_type)
+
 
     with self.argument_context('keyvault secret set') as c:
         c.argument('name', options_list=['--name', '-n'], required=True, arg_group='Id',
                    help='Name of the secret.')
-        c.extra('vault_base_url', vault_name_type, required=True,
+        c.extra('vault_base_url', vault_name_type, required=True, arg_group='Id',
                 type=get_vault_base_url_type(self.cli_ctx), id_part=None)
-        c.extra('content_type', options_list=['--description', '--content-type'],
-                help='Description of the secret contents (e.g. password, connection string, etc)')
         c.extra('disabled', help='Create secret in disabled state.', arg_type=get_three_state_flag())
-        c.extra('expires_on', options_list=['--expires'], type=datetime_type,
-                help='Expiration UTC datetime (Y-m-d\'T\'H:M:S\'Z\').')
-        c.extra('not_before', type=datetime_type,
-                help='Key not usable before the provided UTC datetime (Y-m-d\'T\'H:M:S\'Z\').')
-        c.extra('tags', tags_type)
 
     with self.argument_context('keyvault secret set', arg_group='Content Source') as c:
         c.argument('value', options_list=['--value'],
@@ -631,21 +623,9 @@ def load_arguments(self, _):
                      'and used during download to automatically encode the resulting file.')
 
     with self.argument_context('keyvault secret set-attributes') as c:
-        c.argument('name', options_list=['--name', '-n'], arg_group='Id', required=False,
-                   help='Name of the secret. Required if --id is not specified.')
-        c.extra('vault_base_url', vault_name_type, required=False,
-                type=get_vault_base_url_type(self.cli_ctx), id_part=None)
-        c.argument('version', options_list=['--version', '-v'],
-                   help='The {} version. If omitted, uses the latest version.'.format(item), default='',
-                   required=False, arg_group='Id', completer=get_keyvault_version_completion_list(item))
         c.extra('content_type', options_list=['--content-type'],
                 help='Type of the secret value such as a password.')
         c.extra('enabled', help='Enable the secret.', arg_type=get_three_state_flag())
-        c.extra('expires_on', options_list=['--expires'], type=datetime_type,
-                help='Expiration UTC datetime (Y-m-d\'T\'H:M:S\'Z\').')
-        c.extra('not_before', type=datetime_type,
-                help='Key not usable before the provided UTC datetime (Y-m-d\'T\'H:M:S\'Z\').')
-        c.extra('tags', tags_type)
 
     # endregion
 

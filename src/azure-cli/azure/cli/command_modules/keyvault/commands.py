@@ -200,7 +200,6 @@ def load_command_table(self, _):
             g.keyvault_custom('update', 'update_key_rotation_policy')
 
     with self.command_group('keyvault secret', data_entity.command_type) as g:
-        g.keyvault_command('show', 'get_secret', transform=extract_subresource_name())
         g.keyvault_command('show-deleted', 'get_deleted_secret', transform=extract_subresource_name())
         g.keyvault_command('delete', 'delete_secret', transform=extract_subresource_name(), deprecate_info=g.deprecate(
             tag_func=lambda x: '',
@@ -236,6 +235,7 @@ def load_command_table(self, _):
                                transform_deleted_secret_list))
         g.keyvault_command('set', 'set_secret', validator=process_secret_set_namespace, transform=transform_secret_set)
         g.keyvault_command('set-attributes', 'update_secret_properties', transform=transform_secret_set_attributes)
+        g.keyvault_command('show', 'get_secret', transform=transform_secret_set)
 
     with self.command_group('keyvault certificate', data_entity.command_type) as g:
         g.keyvault_custom('create',
