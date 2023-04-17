@@ -1548,6 +1548,9 @@ examples:
   - name: Scale the number of nodes in a datacenter. This is a scale down operation assuming that the create datacenter was done with 3 nodes, followed by a scale up to 6 nodes. Each datacenter should atleast have 3 nodes.
     text: |
       az managed-cassandra datacenter update --resource-group MyResourceGroup --cluster-name MyCluster --data-center-name MyDataCenter --node-count 4
+  - name: Update ldap certificate by passing comma separated list of server certificates:
+    text: |
+      az managed-cassandra datacenter update --resource-group MyResourceGroup --cluster-name MyCluster --ldap-server-certs "path/to/file1,path/to/file2"
 """
 
 helps['managed-cassandra datacenter delete'] = """

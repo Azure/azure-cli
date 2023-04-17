@@ -531,3 +531,33 @@ def _validate_pk_paths_in_cep(path, partition_key_path, policyFormatVersion, enc
                 raise InvalidArgumentValueError(f"Partition key path:{pkPath} is part of "
                                                 "Client Encryption policy with invalid encryption type. "
                                                 "Only deterministic encryption type is supported.")
+
+def validate_server_certificates(ns):
+    """ Extracts multiple comma-separated certificates """
+    if ns.server_certificates is not None:
+        ns.server_certificates = get_certificates(ns.server_certificates)
+
+
+def get_certificates(input_certificates):
+    from azure.mgmt.cosmosdb.models import Certificate
+    certificates = []
+    for item in input_certificates:
+        certificate = get_certificate(item)
+        certificates.append(Certificate(pem=certificate))
+    return certificates
+
+
+def get_certificate(cert):
+    """ Extract certificate from file or from string """
+    from azure.cli.core.util import read_file_content
+    import os
+    certificate = ''
+    if cert is not None:
+        if os.path.exists(cert):
+            certificate = read_file_content(cert)
+        else:
+            certificate = cert
+    else:
+        raise InvalidArgumentValueError("""One of the value provided for the certificates is empty.
+    Please verify there aren't any spaces.""")
+    return certificate
