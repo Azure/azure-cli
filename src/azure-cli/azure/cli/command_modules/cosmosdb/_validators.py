@@ -558,6 +558,5 @@ def get_certificate(cert):
         else:
             certificate = cert
     else:
-        raise InvalidArgumentValueError("""One of the value provided for the certificates is empty.
-    Please verify there aren't any spaces.""")
+        raise InvalidArgumentValueError("""One of the value provided for the certificates is empty. Please verify there aren't any spaces.""")
     return certificate
