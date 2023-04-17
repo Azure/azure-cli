@@ -1162,6 +1162,26 @@ def flexible_server_ad_admin_show(client, resource_group_name, server_name):
         server_name=server_name,
         administrator_name='ActiveDirectory')
 
+def flexible_gtid_reset(client, resource_group_name, server_name, gtid_set, no_wait=False):
+    try:
+        server_object = client.get(resource_group_name, server_name)
+    except Exception as e:
+        raise ResourceNotFoundError(e)
+
+    if server_object.backup.geo_redundant_backup.lower() == "enabled":
+        raise CLIError("GTID reset can't be performed on a Geo-redundancy backup enabled server. Please disable Geo-redundancy to perform GTID reset on the server. "
+                       "You can enable Geo-redundancy option again after GTID reset. GTID reset action invalidates all the available backups and therefore, "
+                       "once Geo-redundancy is enabled again, it may take a day before geo-restore can be performed on the server.")
+
+    user_confirmation("Resetting GTID will invalidate all the automated/on-demand backups that were taken before the reset action and you will not be able "
+                      "to perform PITR (point-in-time-restore) using fastest restore point or by custom restore point if the selected restore time is before"
+                      " the GTID reset time. Do you want to continue?")
+
+    parameters = mysql_flexibleservers.models.ServerGtidSetParameter(
+        gtid_set=gtid_set
+    )
+    return sdk_no_wait(no_wait, client.begin_reset_gtid, resource_group_name, server_name, parameters)
+
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance
 class DbContext(object):
