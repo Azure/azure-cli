@@ -2216,11 +2216,29 @@ def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_m
         deployment_stack_model.template_link = deployment_stacks_template_link
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     else:
-        template_content = (
-            run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
-            if is_bicep_file(template_file)
-            else read_file_content(template_file)
-        )
+        if _is_bicepparam_file_provided(parameters):
+            ensure_bicep_installation(cmd.cli_ctx)
+
+            minimum_supported_version = "0.14.85"
+            if not bicep_version_greater_than_or_equal_to(minimum_supported_version):
+                raise ArgumentUsageError(f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to {minimum_supported_version} or later.")
+            if len(parameters) > 1:
+                raise ArgumentUsageError("Can not use --parameters argument more than once when using a .bicepparam file")
+            bicepparam_file = parameters[0][0]
+            if not is_bicep_file(template_file):
+                raise ArgumentUsageError("Only a .bicep template is allowed with a .bicepparam parameter file")
+
+            build_bicepparam_output = run_bicep_command(cmd.cli_ctx, ["build-params", bicepparam_file, "--bicep-file", template_file, "--stdout"])
+            build_bicepparam_output_json = json.loads(build_bicepparam_output)
+            template_content = build_bicepparam_output_json["templateJson"]
+            bicepparam_json_content = build_bicepparam_output_json["parametersJson"]
+        else:
+            template_content = (
+                run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
+                if is_bicep_file(template_file)
+                else read_file_content(template_file)
+            )
+
         template_obj = _remove_comments_from_json(template_content, file_path=template_file)
         if is_bicep_file(template_file):
             deployment_stack_model.template = json.loads(json.dumps(template_obj))
@@ -2229,9 +2247,14 @@ def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_m
 
     template_param_defs = template_obj.get('parameters', {})
     template_obj['resources'] = template_obj.get('resources', [])
-    parameters = _process_parameters(template_param_defs, parameters) or {}
-    parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters)
-    parameters = json.loads(json.dumps(parameters))
+
+    if _is_bicepparam_file_provided(parameters):
+        parameters = json.loads(bicepparam_json_content).get('parameters', {})
+    else:
+        parameters = _process_parameters(template_param_defs, parameters) or {}
+        parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, False)
+        parameters = json.loads(json.dumps(parameters))
+
     deployment_stack_model.parameters = parameters
 
     return sdk_no_wait(False,rcf.deployment_stacks.begin_create_or_update_at_subscription,name, deployment_stack_model)
@@ -2248,9 +2271,9 @@ def list_deployment_stack_at_subscription(cmd):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     return rcf.deployment_stacks.list_at_subscription()
 
-def delete_deployment_stack_at_subscription(cmd, name=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False):
+def delete_deployment_stack_at_subscription(cmd, name=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-    confirmation = "Are you also sure you want to delete the specified resources: "
+    confirmation = "Are you sure you want to delete this stack"
     delete_list = []
 
     delete_resources_enum = rcf.deployment_stacks.models.UnmanageActionResourceMode.Detach
@@ -2272,9 +2295,14 @@ def delete_deployment_stack_at_subscription(cmd, name=None, id=None, delete_reso
     
     #build confirmation string
     from knack.prompting import prompt_y_n
-    if delete_list:
-        response = prompt_y_n(confirmation + ", ".join(set(delete_list)) + '?')
-        if not response: return None
+    if not yes:
+        if not delete_list:
+            response = prompt_y_n(confirmation + "?")
+            if not response: return None
+        else:
+            confirmation += " and the specified resources: "
+            response = prompt_y_n(confirmation + ", ".join(set(delete_list)) + '?')
+            if not response: return None
 
     if name or id:
         rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
@@ -2390,11 +2418,28 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, deny_se
         deployment_stack_model.template_link = deployment_stacks_template_link
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     else:
-        template_content = (
-            run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
-            if is_bicep_file(template_file)
-            else read_file_content(template_file)
-        )
+        if _is_bicepparam_file_provided(parameters):
+            ensure_bicep_installation(cmd.cli_ctx)
+
+            minimum_supported_version = "0.14.85"
+            if not bicep_version_greater_than_or_equal_to(minimum_supported_version):
+                raise ArgumentUsageError(f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to {minimum_supported_version} or later.")
+            if len(parameters) > 1:
+                raise ArgumentUsageError("Can not use --parameters argument more than once when using a .bicepparam file")
+            bicepparam_file = parameters[0][0]
+            if not is_bicep_file(template_file):
+                raise ArgumentUsageError("Only a .bicep template is allowed with a .bicepparam parameter file")
+
+            build_bicepparam_output = run_bicep_command(cmd.cli_ctx, ["build-params", bicepparam_file, "--bicep-file", template_file, "--stdout"])
+            build_bicepparam_output_json = json.loads(build_bicepparam_output)
+            template_content = build_bicepparam_output_json["templateJson"]
+            bicepparam_json_content = build_bicepparam_output_json["parametersJson"]
+        else:
+            template_content = (
+                run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
+                if is_bicep_file(template_file)
+                else read_file_content(template_file)
+            )
         template_obj = _remove_comments_from_json(template_content, file_path=template_file)
         if is_bicep_file(template_file):
             deployment_stack_model.template = json.loads(json.dumps(template_obj))
@@ -2403,9 +2448,14 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, deny_se
 
     template_param_defs = template_obj.get('parameters', {})
     template_obj['resources'] = template_obj.get('resources', [])
-    parameters = _process_parameters(template_param_defs, parameters) or {}
-    parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters)
-    parameters = json.loads(json.dumps(parameters))
+
+    if _is_bicepparam_file_provided(parameters):
+        parameters = json.loads(bicepparam_json_content).get('parameters', {})
+    else:
+        parameters = _process_parameters(template_param_defs, parameters) or {}
+        parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, False)
+        parameters = json.loads(json.dumps(parameters))
+
     deployment_stack_model.parameters = parameters
 
     return sdk_no_wait(False,rcf.deployment_stacks.begin_create_or_update_at_resource_group,resource_group, name, deployment_stack_model)
@@ -2427,9 +2477,9 @@ def list_deployment_stack_at_resource_group(cmd, resource_group):
         return rcf.deployment_stacks.list_at_resource_group(resource_group)
     raise InvalidArgumentValueError("Please enter the resource group")
 
-def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False):
+def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-    confirmation = "Are you also sure you want to delete the specified resources: "
+    confirmation = "Are you sure you want to delete this stack"
     delete_list = []
 
     delete_resources_enum = rcf.deployment_stacks.models.UnmanageActionResourceMode.Detach
@@ -2451,9 +2501,14 @@ def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group=Non
     
     #build confirmation string
     from knack.prompting import prompt_y_n
-    if delete_list:
-        response = prompt_y_n(confirmation + ", ".join(set(delete_list)) + '?')
-        if not response: return None
+    if not yes:
+        if not delete_list:
+            response = prompt_y_n(confirmation + "?")
+            if not response: return None
+        else:
+            confirmation += " and the specified resources: "
+            response = prompt_y_n(confirmation + ", ".join(set(delete_list)) + '?')
+            if not response: return None
 
     if name and resource_group:
         try:
@@ -2581,11 +2636,29 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
         deployment_stack_model.template_link = deployment_stacks_template_link
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     else:
-        template_content = (
-            run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
-            if is_bicep_file(template_file)
-            else read_file_content(template_file)
-        )
+        if _is_bicepparam_file_provided(parameters):
+            ensure_bicep_installation(cmd.cli_ctx)
+
+            minimum_supported_version = "0.14.85"
+            if not bicep_version_greater_than_or_equal_to(minimum_supported_version):
+                raise ArgumentUsageError(f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to {minimum_supported_version} or later.")
+            if len(parameters) > 1:
+                raise ArgumentUsageError("Can not use --parameters argument more than once when using a .bicepparam file")
+            bicepparam_file = parameters[0][0]
+            if not is_bicep_file(template_file):
+                raise ArgumentUsageError("Only a .bicep template is allowed with a .bicepparam parameter file")
+
+            build_bicepparam_output = run_bicep_command(cmd.cli_ctx, ["build-params", bicepparam_file, "--bicep-file", template_file, "--stdout"])
+            build_bicepparam_output_json = json.loads(build_bicepparam_output)
+            template_content = build_bicepparam_output_json["templateJson"]
+            bicepparam_json_content = build_bicepparam_output_json["parametersJson"]
+        else:
+            template_content = (
+                run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
+                if is_bicep_file(template_file)
+                else read_file_content(template_file)
+            )
+
         template_obj = _remove_comments_from_json(template_content, file_path=template_file)
         if is_bicep_file(template_file):
             deployment_stack_model.template = json.loads(json.dumps(template_obj))
@@ -2594,9 +2667,14 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
     
     template_param_defs = template_obj.get('parameters', {})
     template_obj['resources'] = template_obj.get('resources', [])
-    parameters = _process_parameters(template_param_defs, parameters) or {}
-    parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters)
-    parameters = json.loads(json.dumps(parameters))
+
+    if _is_bicepparam_file_provided(parameters):
+        parameters = json.loads(bicepparam_json_content).get('parameters', {})
+    else:
+        parameters = _process_parameters(template_param_defs, parameters) or {}
+        parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, False)
+        parameters = json.loads(json.dumps(parameters))
+
     deployment_stack_model.parameters = parameters
 
     return sdk_no_wait(False,rcf.deployment_stacks.begin_create_or_update_at_management_group, management_group_id, name, deployment_stack_model)
@@ -2613,9 +2691,9 @@ def list_deployment_stack_at_management_group(cmd, management_group_id):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     return rcf.deployment_stacks.list_at_management_group(management_group_id)
 
-def delete_deployment_stack_at_management_group(cmd, management_group_id, name=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False):
+def delete_deployment_stack_at_management_group(cmd, management_group_id, name=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-    confirmation = "Are you also sure you want to delete the specified resources: "
+    confirmation = "Are you sure you want to delete this stack"
     delete_list = []
 
     delete_resources_enum = rcf.deployment_stacks.models.UnmanageActionResourceMode.Detach
@@ -2637,9 +2715,14 @@ def delete_deployment_stack_at_management_group(cmd, management_group_id, name=N
     
     #build confirmation string
     from knack.prompting import prompt_y_n
-    if delete_list:
-        response = prompt_y_n(confirmation + ", ".join(set(delete_list)) + '?')
-        if not response: return None
+    if not yes:
+        if not delete_list:
+            response = prompt_y_n(confirmation + "?")
+            if not response: return None
+        else:
+            confirmation += " and the specified resources: "
+            response = prompt_y_n(confirmation + ", ".join(set(delete_list)) + '?')
+            if not response: return None
 
     if name or id:
         rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)

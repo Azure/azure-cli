@@ -11,11 +11,13 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --resource-group --template-file --parameters --yes
+      - --name --resource-group --template-file --deny-settings-mode --parameters
+        --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-resource-group000002?api-version=2022-08-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-resource-group000002?api-version=2022-08-01-preview
   response:
     body:
       string: "{\r\n  \"error\": {\r\n    \"code\": \"DeploymentStackResourceNotFound\",\r\n
@@ -29,19 +31,17 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 19:48:54 GMT
+      - Mon, 17 Apr 2023 15:45:20 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: F6503AF849924815A41A080BC2C9EA39 Ref B: BL2AA2030108051 Ref C: 2023-01-09T19:48:54Z'
     status:
       code: 404
       message: Not Found
@@ -69,11 +69,13 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - --name --resource-group --template-file --parameters --yes
+      - --name --resource-group --template-file --deny-settings-mode --parameters
+        --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-resource-group000002?api-version=2022-08-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-resource-group000002?api-version=2022-08-01-preview
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\":
@@ -85,14 +87,14 @@ interactions:
         [],\r\n    \"provisioningState\": \"initializing\",\r\n    \"detachedResources\":
         [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
         \ \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
-        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-01-09T19:48:57.0055215Z\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-04-17T15:45:21.3195176Z\",\r\n
         \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
-        \"User\",\r\n    \"lastModifiedAt\": \"2023-01-09T19:48:57.0055215Z\"\r\n
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-04-17T15:45:21.3195176Z\"\r\n
         \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-resource-group000002\",\r\n
         \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-list-deployment-stack-resource-group000002\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/2c6a4123-2e2a-4662-ab10-7cd947a3de7e?api-version=2022-08-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/209ffe2a-417c-4deb-b607-557221d056cb?api-version=2022-08-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -100,21 +102,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 19:48:56 GMT
+      - Mon, 17 Apr 2023 15:45:20 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1192'
-      x-msedge-ref:
-      - 'Ref A: A621112932D5492C83D563CD381D7BA6 Ref B: BL2AA2030108051 Ref C: 2023-01-09T19:48:55Z'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -130,36 +130,40 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --resource-group --template-file --parameters --yes
+      - --name --resource-group --template-file --deny-settings-mode --parameters
+        --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/2c6a4123-2e2a-4662-ab10-7cd947a3de7e?api-version=2022-08-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/209ffe2a-417c-4deb-b607-557221d056cb?api-version=2022-08-01-preview
   response:
     body:
-      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/2c6a4123-2e2a-4662-ab10-7cd947a3de7e\",\r\n
-        \ \"name\": \"2c6a4123-2e2a-4662-ab10-7cd947a3de7e\",\r\n  \"status\": \"succeeded\"\r\n}"
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/209ffe2a-417c-4deb-b607-557221d056cb\",\r\n
+        \ \"name\": \"209ffe2a-417c-4deb-b607-557221d056cb\",\r\n  \"status\": \"succeeded\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '266'
+      - '260'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 19:49:13 GMT
+      - Mon, 17 Apr 2023 15:45:37 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: E3FAA28E9C664CE79EC53D143D582909 Ref B: BL2AA2030108051 Ref C: 2023-01-09T19:49:14Z'
     status:
       code: 200
       message: OK
@@ -175,17 +179,19 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --resource-group --template-file --parameters --yes
+      - --name --resource-group --template-file --deny-settings-mode --parameters
+        --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-resource-group000002?api-version=2022-08-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-resource-group000002?api-version=2022-08-01-preview
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\":
         \"detach\",\r\n      \"resourceGroups\": \"detach\",\r\n      \"managementGroups\":
-        \"detach\"\r\n    },\r\n    \"deploymentId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-list-deployment-stack-resourc-2023-01-09-19-48-57-14515\",\r\n
-        \   \"duration\": \"PT6.8281691S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \"detach\"\r\n    },\r\n    \"deploymentId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-list-deployment-stack-resourc-2023-04-17-15-45-21-c78c7\",\r\n
+        \   \"duration\": \"PT6.3165835S\",\r\n    \"denySettings\": {\r\n      \"mode\":
         \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
         {\r\n      \"foo\": {\r\n        \"type\": \"String\",\r\n        \"value\":
         \"abc\"\r\n      },\r\n      \"bar\": {\r\n        \"type\": \"String\",\r\n
@@ -195,9 +201,9 @@ interactions:
         [],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
         [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
         \ \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
-        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-01-09T19:48:57.0055215Z\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-04-17T15:45:21.3195176Z\",\r\n
         \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
-        \"User\",\r\n    \"lastModifiedAt\": \"2023-01-09T19:48:57.0055215Z\"\r\n
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-04-17T15:45:21.3195176Z\"\r\n
         \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-resource-group000002\",\r\n
         \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-list-deployment-stack-resource-group000002\"\r\n}"
     headers:
@@ -208,19 +214,21 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 19:49:14 GMT
+      - Mon, 17 Apr 2023 15:45:38 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: 9A0A234BF568433D8E63AE67AFC44DB0 Ref B: BL2AA2030108051 Ref C: 2023-01-09T19:49:14Z'
     status:
       code: 200
       message: OK
@@ -238,16 +246,17 @@ interactions:
       ParameterSetName:
       - --resource-group
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks?api-version=2022-08-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks?api-version=2022-08-01-preview
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"properties\": {\r\n        \"actionOnUnmanage\":
         {\r\n          \"resources\": \"detach\",\r\n          \"resourceGroups\":
         \"detach\",\r\n          \"managementGroups\": \"detach\"\r\n        },\r\n
-        \       \"deploymentId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-list-deployment-stack-resourc-2023-01-09-19-48-57-14515\",\r\n
-        \       \"duration\": \"PT6.8281691S\",\r\n        \"denySettings\": {\r\n
+        \       \"deploymentId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-list-deployment-stack-resourc-2023-04-17-15-45-21-c78c7\",\r\n
+        \       \"duration\": \"PT6.3165835S\",\r\n        \"denySettings\": {\r\n
         \         \"mode\": \"none\",\r\n          \"applyToChildScopes\": false\r\n
         \       },\r\n        \"outputs\": {\r\n          \"foo\": {\r\n            \"type\":
         \"String\",\r\n            \"value\": \"abc\"\r\n          },\r\n          \"bar\":
@@ -258,9 +267,9 @@ interactions:
         [],\r\n        \"provisioningState\": \"succeeded\",\r\n        \"detachedResources\":
         [],\r\n        \"deletedResources\": [],\r\n        \"failedResources\": []\r\n
         \     },\r\n      \"systemData\": {\r\n        \"createdBy\": \"harshpatel@microsoft.com\",\r\n
-        \       \"createdByType\": \"User\",\r\n        \"createdAt\": \"2023-01-09T19:48:57.0055215Z\",\r\n
+        \       \"createdByType\": \"User\",\r\n        \"createdAt\": \"2023-04-17T15:45:21.3195176Z\",\r\n
         \       \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n        \"lastModifiedByType\":
-        \"User\",\r\n        \"lastModifiedAt\": \"2023-01-09T19:48:57.0055215Z\"\r\n
+        \"User\",\r\n        \"lastModifiedAt\": \"2023-04-17T15:45:21.3195176Z\"\r\n
         \     },\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-resource-group000002\",\r\n
         \     \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n      \"name\":
         \"cli-test-list-deployment-stack-resource-group000002\"\r\n    }\r\n  ]\r\n}"
@@ -272,19 +281,21 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 19:49:16 GMT
+      - Mon, 17 Apr 2023 15:45:39 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: C4832B3A5C3F4D398DAE3919E346BCCB Ref B: BL2AA2030108039 Ref C: 2023-01-09T19:49:15Z'
     status:
       code: 200
       message: OK
@@ -302,15 +313,16 @@ interactions:
       ParameterSetName:
       - --name --resource-group --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-resource-group000002?api-version=2022-08-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-resource-group000002?api-version=2022-08-01-preview
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"actionOnUnmanage\": {\r\n      \"resources\":
         \"detach\",\r\n      \"resourceGroups\": \"detach\",\r\n      \"managementGroups\":
-        \"detach\"\r\n    },\r\n    \"deploymentId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-list-deployment-stack-resourc-2023-01-09-19-48-57-14515\",\r\n
-        \   \"duration\": \"PT6.8281691S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \"detach\"\r\n    },\r\n    \"deploymentId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deployments/cli-test-list-deployment-stack-resourc-2023-04-17-15-45-21-c78c7\",\r\n
+        \   \"duration\": \"PT6.3165835S\",\r\n    \"denySettings\": {\r\n      \"mode\":
         \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
         {\r\n      \"foo\": {\r\n        \"type\": \"String\",\r\n        \"value\":
         \"abc\"\r\n      },\r\n      \"bar\": {\r\n        \"type\": \"String\",\r\n
@@ -320,9 +332,9 @@ interactions:
         [],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
         [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
         \ \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
-        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-01-09T19:48:57.0055215Z\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-04-17T15:45:21.3195176Z\",\r\n
         \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
-        \"User\",\r\n    \"lastModifiedAt\": \"2023-01-09T19:48:57.0055215Z\"\r\n
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-04-17T15:45:21.3195176Z\"\r\n
         \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-resource-group000002\",\r\n
         \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-list-deployment-stack-resource-group000002\"\r\n}"
     headers:
@@ -333,19 +345,21 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 19:49:17 GMT
+      - Mon, 17 Apr 2023 15:45:40 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: 06416FED51B04339A0DB28FA88ABFAC0 Ref B: BL2AA2030105019 Ref C: 2023-01-09T19:49:16Z'
     status:
       code: 200
       message: OK
@@ -365,9 +379,10 @@ interactions:
       ParameterSetName:
       - --name --resource-group --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: DELETE
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-resource-group000002?unmanageAction.Resources=detach&unmanageAction.ResourceGroups=detach&api-version=2022-08-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks000001/providers/Microsoft.Resources/deploymentStacks/cli-test-list-deployment-stack-resource-group000002?unmanageAction.Resources=detach&unmanageAction.ResourceGroups=detach&api-version=2022-08-01-preview
   response:
     body:
       string: ''
@@ -377,21 +392,19 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 09 Jan 2023 19:49:18 GMT
+      - Mon, 17 Apr 2023 15:45:41 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14997'
-      x-msedge-ref:
-      - 'Ref A: F6AA20F382C74B6C836AE7647E389CEC Ref B: BL2AA2030105019 Ref C: 2023-01-09T19:49:18Z'
+      - '14999'
     status:
       code: 200
       message: OK

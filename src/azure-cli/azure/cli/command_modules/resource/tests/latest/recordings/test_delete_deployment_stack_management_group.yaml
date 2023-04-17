@@ -11,11 +11,13 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --management-group-id --location --template-file --parameters --yes
+      - --name --management-group-id --location --template-file --deny-settings-mode
+        --parameters --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
   response:
     body:
       string: '{"error":{"code":"ResourceNotFound","message":"The resource ''cli-test-delete-deployment-stack-subscription000001''
@@ -28,21 +30,17 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:27:36 GMT
+      - Mon, 17 Apr 2023 17:38:01 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-failure-cause:
       - gateway
-      x-msedge-ref:
-      - 'Ref A: 3210AA71F59C4F76988B7DE4CBF19DDB Ref B: BL2AA2030105053 Ref C: 2023-01-09T20:27:36Z'
     status:
       code: 404
       message: Not Found
@@ -70,11 +68,13 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - --name --management-group-id --location --template-file --parameters --yes
+      - --name --management-group-id --location --template-file --deny-settings-mode
+        --parameters --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
   response:
     body:
       string: "{\r\n  \"location\": \"westus2\",\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
@@ -88,35 +88,33 @@ interactions:
         \"initializing\",\r\n    \"detachedResources\": [],\r\n    \"deletedResources\":
         [],\r\n    \"failedResources\": []\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\":
         \"harshpatel@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2023-01-09T20:27:37.9893092Z\",\r\n    \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-01-09T20:27:37.9893092Z\"\r\n
-        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
+        \"2023-04-17T17:38:01.8641535Z\",\r\n    \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-04-17T17:38:01.8641535Z\"\r\n
+        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
         \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-delete-deployment-stack-subscription000001\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://api-dogfood.resources.windows-int.net/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/d7467a59-b245-4926-a459-f4b1189606ae?api-version=2022-08-01-preview
+      - https://management.azure.com/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/4682314a-0a43-4f5a-902b-2e17a4d42dd3?api-version=2022-08-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '1219'
+      - '1226'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:27:38 GMT
+      - Mon, 17 Apr 2023 17:38:02 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-tenant-writes:
       - '1198'
-      x-msedge-ref:
-      - 'Ref A: DB1E43F7C0DD4D9B9933BCAABBB82F0A Ref B: BL2AA2030105053 Ref C: 2023-01-09T20:27:37Z'
     status:
       code: 201
       message: Created
@@ -132,36 +130,40 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --management-group-id --location --template-file --parameters --yes
+      - --name --management-group-id --location --template-file --deny-settings-mode
+        --parameters --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/d7467a59-b245-4926-a459-f4b1189606ae?api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/4682314a-0a43-4f5a-902b-2e17a4d42dd3?api-version=2022-08-01-preview
   response:
     body:
-      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/d7467a59-b245-4926-a459-f4b1189606ae\",\r\n
-        \ \"name\": \"d7467a59-b245-4926-a459-f4b1189606ae\",\r\n  \"status\": \"succeeded\"\r\n}"
+      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/4682314a-0a43-4f5a-902b-2e17a4d42dd3\",\r\n
+        \ \"name\": \"4682314a-0a43-4f5a-902b-2e17a4d42dd3\",\r\n  \"status\": \"succeeded\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '215'
+      - '209'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:27:56 GMT
+      - Mon, 17 Apr 2023 17:38:19 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: E0DC64D5232A4A29A5BB7332BB47A89A Ref B: BL2AA2030105053 Ref C: 2023-01-09T20:27:56Z'
     status:
       code: 200
       message: OK
@@ -177,19 +179,21 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --management-group-id --location --template-file --parameters --yes
+      - --name --management-group-id --location --template-file --deny-settings-mode
+        --parameters --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
   response:
     body:
       string: "{\r\n  \"location\": \"westus2\",\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
         {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\": \"detach\",\r\n
         \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-subsc-2023-01-09-20-27-38-2674c\",\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-subsc-2023-04-17-17-38-02-1161e\",\r\n
         \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000\",\r\n
-        \   \"duration\": \"PT13.2806899S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \   \"duration\": \"PT5.194839S\",\r\n    \"denySettings\": {\r\n      \"mode\":
         \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
         {\r\n      \"foo\": {\r\n        \"type\": \"String\",\r\n        \"value\":
         \"abc\"\r\n      },\r\n      \"bar\": {\r\n        \"type\": \"String\",\r\n
@@ -199,32 +203,34 @@ interactions:
         [],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
         [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
         \ \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
-        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-01-09T20:27:37.9893092Z\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-04-17T17:38:01.8641535Z\",\r\n
         \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
-        \"User\",\r\n    \"lastModifiedAt\": \"2023-01-09T20:27:37.9893092Z\"\r\n
-        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-04-17T17:38:01.8641535Z\"\r\n
+        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
         \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-delete-deployment-stack-subscription000001\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1612'
+      - '1617'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:27:56 GMT
+      - Mon, 17 Apr 2023 17:38:19 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: 40737F7394864283B0DF0D2D503424B0 Ref B: BL2AA2030105053 Ref C: 2023-01-09T20:27:56Z'
     status:
       code: 200
       message: OK
@@ -242,17 +248,18 @@ interactions:
       ParameterSetName:
       - --name --management-group-id
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
   response:
     body:
       string: "{\r\n  \"location\": \"westus2\",\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
         {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\": \"detach\",\r\n
         \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-subsc-2023-01-09-20-27-38-2674c\",\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-subsc-2023-04-17-17-38-02-1161e\",\r\n
         \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000\",\r\n
-        \   \"duration\": \"PT13.2806899S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \   \"duration\": \"PT5.194839S\",\r\n    \"denySettings\": {\r\n      \"mode\":
         \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
         {\r\n      \"foo\": {\r\n        \"type\": \"String\",\r\n        \"value\":
         \"abc\"\r\n      },\r\n      \"bar\": {\r\n        \"type\": \"String\",\r\n
@@ -262,32 +269,34 @@ interactions:
         [],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
         [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
         \ \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
-        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-01-09T20:27:37.9893092Z\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-04-17T17:38:01.8641535Z\",\r\n
         \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
-        \"User\",\r\n    \"lastModifiedAt\": \"2023-01-09T20:27:37.9893092Z\"\r\n
-        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-04-17T17:38:01.8641535Z\"\r\n
+        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
         \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-delete-deployment-stack-subscription000001\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1612'
+      - '1617'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:27:59 GMT
+      - Mon, 17 Apr 2023 17:38:20 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: 3F6FFBC0E1F547FBACA88ED8F7D6BBE6 Ref B: BL2AA2030108005 Ref C: 2023-01-09T20:27:57Z'
     status:
       code: 200
       message: OK
@@ -305,17 +314,18 @@ interactions:
       ParameterSetName:
       - --name --management-group-id --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
   response:
     body:
       string: "{\r\n  \"location\": \"westus2\",\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
         {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\": \"detach\",\r\n
         \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-subsc-2023-01-09-20-27-38-2674c\",\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-subsc-2023-04-17-17-38-02-1161e\",\r\n
         \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000\",\r\n
-        \   \"duration\": \"PT13.2806899S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \   \"duration\": \"PT5.194839S\",\r\n    \"denySettings\": {\r\n      \"mode\":
         \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
         {\r\n      \"foo\": {\r\n        \"type\": \"String\",\r\n        \"value\":
         \"abc\"\r\n      },\r\n      \"bar\": {\r\n        \"type\": \"String\",\r\n
@@ -325,32 +335,34 @@ interactions:
         [],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
         [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
         \ \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
-        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-01-09T20:27:37.9893092Z\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-04-17T17:38:01.8641535Z\",\r\n
         \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
-        \"User\",\r\n    \"lastModifiedAt\": \"2023-01-09T20:27:37.9893092Z\"\r\n
-        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-04-17T17:38:01.8641535Z\"\r\n
+        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
         \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-delete-deployment-stack-subscription000001\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1612'
+      - '1617'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:28:01 GMT
+      - Mon, 17 Apr 2023 17:38:20 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: 093F4AEB01C54953B1C871BDDE645966 Ref B: BL2AA2030106003 Ref C: 2023-01-09T20:27:59Z'
     status:
       code: 200
       message: OK
@@ -370,9 +382,10 @@ interactions:
       ParameterSetName:
       - --name --management-group-id --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: DELETE
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?unmanageAction.Resources=detach&unmanageAction.ResourceGroups=detach&api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?unmanageAction.Resources=detach&unmanageAction.ResourceGroups=detach&api-version=2022-08-01-preview
   response:
     body:
       string: ''
@@ -382,21 +395,19 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 09 Jan 2023 20:28:03 GMT
+      - Mon, 17 Apr 2023 17:38:21 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-tenant-deletes:
-      - '14997'
-      x-msedge-ref:
-      - 'Ref A: 860D0E2D413743FF8632EA3AFD972899 Ref B: BL2AA2030106003 Ref C: 2023-01-09T20:28:02Z'
+      - '14999'
     status:
       code: 200
       message: OK
@@ -412,11 +423,13 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --management-group-id --location --template-file --parameters --yes
+      - --name --management-group-id --location --template-file --deny-settings-mode
+        --parameters --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
   response:
     body:
       string: '{"error":{"code":"ResourceNotFound","message":"The resource ''cli-test-delete-deployment-stack-subscription000001''
@@ -429,21 +442,17 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:28:03 GMT
+      - Mon, 17 Apr 2023 17:38:21 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-failure-cause:
       - gateway
-      x-msedge-ref:
-      - 'Ref A: 3F9B48C40D1D438495DC759A25560409 Ref B: BL2AA2030108047 Ref C: 2023-01-09T20:28:03Z'
     status:
       code: 404
       message: Not Found
@@ -471,11 +480,13 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - --name --management-group-id --location --template-file --parameters --yes
+      - --name --management-group-id --location --template-file --deny-settings-mode
+        --parameters --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
   response:
     body:
       string: "{\r\n  \"location\": \"westus2\",\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
@@ -489,35 +500,33 @@ interactions:
         \"initializing\",\r\n    \"detachedResources\": [],\r\n    \"deletedResources\":
         [],\r\n    \"failedResources\": []\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\":
         \"harshpatel@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2023-01-09T20:28:04.6471157Z\",\r\n    \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-01-09T20:28:04.6471157Z\"\r\n
-        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
+        \"2023-04-17T17:38:22.1031246Z\",\r\n    \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-04-17T17:38:22.1031246Z\"\r\n
+        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
         \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-delete-deployment-stack-subscription000001\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://api-dogfood.resources.windows-int.net/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/e52141c6-eb44-41ac-889a-59425de7ab6b?api-version=2022-08-01-preview
+      - https://management.azure.com/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/4abe6145-8cf7-40eb-aa24-b39e0cc48650?api-version=2022-08-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '1219'
+      - '1226'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:28:07 GMT
+      - Mon, 17 Apr 2023 17:38:22 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-tenant-writes:
-      - '1197'
-      x-msedge-ref:
-      - 'Ref A: 3EF16CD74CD743F0BBD5B4B418046C61 Ref B: BL2AA2030108047 Ref C: 2023-01-09T20:28:03Z'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -533,36 +542,40 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --management-group-id --location --template-file --parameters --yes
+      - --name --management-group-id --location --template-file --deny-settings-mode
+        --parameters --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/e52141c6-eb44-41ac-889a-59425de7ab6b?api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/4abe6145-8cf7-40eb-aa24-b39e0cc48650?api-version=2022-08-01-preview
   response:
     body:
-      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/e52141c6-eb44-41ac-889a-59425de7ab6b\",\r\n
-        \ \"name\": \"e52141c6-eb44-41ac-889a-59425de7ab6b\",\r\n  \"status\": \"succeeded\"\r\n}"
+      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/4abe6145-8cf7-40eb-aa24-b39e0cc48650\",\r\n
+        \ \"name\": \"4abe6145-8cf7-40eb-aa24-b39e0cc48650\",\r\n  \"status\": \"succeeded\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '215'
+      - '209'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:28:25 GMT
+      - Mon, 17 Apr 2023 17:38:39 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: 27060F6CBCB248E48F95C8933281D2A1 Ref B: BL2AA2030108047 Ref C: 2023-01-09T20:28:25Z'
     status:
       code: 200
       message: OK
@@ -578,19 +591,21 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --management-group-id --location --template-file --parameters --yes
+      - --name --management-group-id --location --template-file --deny-settings-mode
+        --parameters --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
   response:
     body:
       string: "{\r\n  \"location\": \"westus2\",\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
         {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\": \"detach\",\r\n
         \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-subsc-2023-01-09-20-28-05-82db2\",\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-subsc-2023-04-17-17-38-22-0b308\",\r\n
         \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000\",\r\n
-        \   \"duration\": \"PT15.7867522S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \   \"duration\": \"PT5.4801608S\",\r\n    \"denySettings\": {\r\n      \"mode\":
         \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
         {\r\n      \"foo\": {\r\n        \"type\": \"String\",\r\n        \"value\":
         \"abc\"\r\n      },\r\n      \"bar\": {\r\n        \"type\": \"String\",\r\n
@@ -600,32 +615,34 @@ interactions:
         [],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
         [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
         \ \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
-        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-01-09T20:28:04.6471157Z\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-04-17T17:38:22.1031246Z\",\r\n
         \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
-        \"User\",\r\n    \"lastModifiedAt\": \"2023-01-09T20:28:04.6471157Z\"\r\n
-        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-04-17T17:38:22.1031246Z\"\r\n
+        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
         \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-delete-deployment-stack-subscription000001\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1612'
+      - '1618'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:28:25 GMT
+      - Mon, 17 Apr 2023 17:38:39 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: E69564F073C449B18EB4A639E3B8A01B Ref B: BL2AA2030108047 Ref C: 2023-01-09T20:28:25Z'
     status:
       code: 200
       message: OK
@@ -643,17 +660,18 @@ interactions:
       ParameterSetName:
       - --id --management-group-id --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
   response:
     body:
       string: "{\r\n  \"location\": \"westus2\",\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
         {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\": \"detach\",\r\n
         \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-subsc-2023-01-09-20-28-05-82db2\",\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-subsc-2023-04-17-17-38-22-0b308\",\r\n
         \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000\",\r\n
-        \   \"duration\": \"PT15.7867522S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \   \"duration\": \"PT5.4801608S\",\r\n    \"denySettings\": {\r\n      \"mode\":
         \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
         {\r\n      \"foo\": {\r\n        \"type\": \"String\",\r\n        \"value\":
         \"abc\"\r\n      },\r\n      \"bar\": {\r\n        \"type\": \"String\",\r\n
@@ -663,32 +681,34 @@ interactions:
         [],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
         [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
         \ \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
-        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-01-09T20:28:04.6471157Z\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-04-17T17:38:22.1031246Z\",\r\n
         \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
-        \"User\",\r\n    \"lastModifiedAt\": \"2023-01-09T20:28:04.6471157Z\"\r\n
-        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-04-17T17:38:22.1031246Z\"\r\n
+        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
         \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-delete-deployment-stack-subscription000001\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1612'
+      - '1618'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:28:27 GMT
+      - Mon, 17 Apr 2023 17:38:40 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: 733759EC13184694A10A048B394E91E5 Ref B: BL2AA2030107039 Ref C: 2023-01-09T20:28:26Z'
     status:
       code: 200
       message: OK
@@ -708,9 +728,10 @@ interactions:
       ParameterSetName:
       - --id --management-group-id --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: DELETE
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?unmanageAction.Resources=detach&unmanageAction.ResourceGroups=detach&api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?unmanageAction.Resources=detach&unmanageAction.ResourceGroups=detach&api-version=2022-08-01-preview
   response:
     body:
       string: ''
@@ -720,21 +741,19 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 09 Jan 2023 20:28:28 GMT
+      - Mon, 17 Apr 2023 17:38:40 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-tenant-deletes:
       - '14999'
-      x-msedge-ref:
-      - 'Ref A: 7CD559793C964360A76188777D637A2D Ref B: BL2AA2030107039 Ref C: 2023-01-09T20:28:27Z'
     status:
       code: 200
       message: OK
@@ -750,11 +769,13 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --management-group-id --location --template-file --parameters --yes
+      - --name --management-group-id --location --template-file --deny-settings-mode
+        --parameters --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
   response:
     body:
       string: '{"error":{"code":"ResourceNotFound","message":"The resource ''cli-test-delete-deployment-stack-subscription000001''
@@ -767,21 +788,17 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:28:28 GMT
+      - Mon, 17 Apr 2023 17:38:41 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-failure-cause:
       - gateway
-      x-msedge-ref:
-      - 'Ref A: E74561B3F90D422BAA20DD1FBBCEDA7B Ref B: BL2AA2030105017 Ref C: 2023-01-09T20:28:28Z'
     status:
       code: 404
       message: Not Found
@@ -809,11 +826,13 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - --name --management-group-id --location --template-file --parameters --yes
+      - --name --management-group-id --location --template-file --deny-settings-mode
+        --parameters --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
   response:
     body:
       string: "{\r\n  \"location\": \"westus2\",\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
@@ -826,36 +845,34 @@ interactions:
         [],\r\n    \"provisioningState\": \"initializing\",\r\n    \"detachedResources\":
         [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
         \ \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
-        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-01-09T20:28:29.9203343Z\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-04-17T17:38:41.8208142Z\",\r\n
         \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
-        \"User\",\r\n    \"lastModifiedAt\": \"2023-01-09T20:28:29.9203343Z\"\r\n
-        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-04-17T17:38:41.8208142Z\"\r\n
+        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
         \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-delete-deployment-stack-subscription000001\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://api-dogfood.resources.windows-int.net/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/dddb8ebc-6157-4ba2-88b5-9fdde513dff6?api-version=2022-08-01-preview
+      - https://management.azure.com/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/0d66b16c-6ecd-46ec-922b-dd1c930266b0?api-version=2022-08-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '1194'
+      - '1201'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:28:30 GMT
+      - Mon, 17 Apr 2023 17:38:42 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-tenant-writes:
-      - '1197'
-      x-msedge-ref:
-      - 'Ref A: 0C0AB76A2FE146E1BD497D051C537B2B Ref B: BL2AA2030105017 Ref C: 2023-01-09T20:28:28Z'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -871,36 +888,40 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --management-group-id --location --template-file --parameters --yes
+      - --name --management-group-id --location --template-file --deny-settings-mode
+        --parameters --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/dddb8ebc-6157-4ba2-88b5-9fdde513dff6?api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/0d66b16c-6ecd-46ec-922b-dd1c930266b0?api-version=2022-08-01-preview
   response:
     body:
-      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/dddb8ebc-6157-4ba2-88b5-9fdde513dff6\",\r\n
-        \ \"name\": \"dddb8ebc-6157-4ba2-88b5-9fdde513dff6\",\r\n  \"status\": \"succeeded\"\r\n}"
+      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/0d66b16c-6ecd-46ec-922b-dd1c930266b0\",\r\n
+        \ \"name\": \"0d66b16c-6ecd-46ec-922b-dd1c930266b0\",\r\n  \"status\": \"succeeded\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '215'
+      - '209'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:28:47 GMT
+      - Mon, 17 Apr 2023 17:38:59 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: 6B937A70873840A0ABCFA6AFB43C0880 Ref B: BL2AA2030105017 Ref C: 2023-01-09T20:28:47Z'
     status:
       code: 200
       message: OK
@@ -916,19 +937,21 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --management-group-id --location --template-file --parameters --yes
+      - --name --management-group-id --location --template-file --deny-settings-mode
+        --parameters --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
   response:
     body:
       string: "{\r\n  \"location\": \"westus2\",\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
         {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\": \"detach\",\r\n
         \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-subsc-2023-01-09-20-28-30-68383\",\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-subsc-2023-04-17-17-38-42-ca5e3\",\r\n
         \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000\",\r\n
-        \   \"duration\": \"PT10.3988032S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \   \"duration\": \"PT6.7207023S\",\r\n    \"denySettings\": {\r\n      \"mode\":
         \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
         {},\r\n    \"parameters\": {\r\n      \"name\": {\r\n        \"value\": \"cli-test-resource-one000002\"\r\n
         \     }\r\n    },\r\n    \"resources\": [\r\n      {\r\n        \"status\":
@@ -936,32 +959,34 @@ interactions:
         \     }\r\n    ],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
         [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
         \ \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
-        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-01-09T20:28:29.9203343Z\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-04-17T17:38:41.8208142Z\",\r\n
         \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
-        \"User\",\r\n    \"lastModifiedAt\": \"2023-01-09T20:28:29.9203343Z\"\r\n
-        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-04-17T17:38:41.8208142Z\"\r\n
+        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
         \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-delete-deployment-stack-subscription000001\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1625'
+      - '1631'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:28:47 GMT
+      - Mon, 17 Apr 2023 17:38:59 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: 2AE018C64E04495A9DCE32BAAA98BA5A Ref B: BL2AA2030105017 Ref C: 2023-01-09T20:28:48Z'
     status:
       code: 200
       message: OK
@@ -979,17 +1004,18 @@ interactions:
       ParameterSetName:
       - --name --management-group-id --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
   response:
     body:
       string: "{\r\n  \"location\": \"westus2\",\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
         {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\": \"detach\",\r\n
         \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-subsc-2023-01-09-20-28-30-68383\",\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-subsc-2023-04-17-17-38-42-ca5e3\",\r\n
         \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000\",\r\n
-        \   \"duration\": \"PT10.3988032S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \   \"duration\": \"PT6.7207023S\",\r\n    \"denySettings\": {\r\n      \"mode\":
         \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
         {},\r\n    \"parameters\": {\r\n      \"name\": {\r\n        \"value\": \"cli-test-resource-one000002\"\r\n
         \     }\r\n    },\r\n    \"resources\": [\r\n      {\r\n        \"status\":
@@ -997,32 +1023,34 @@ interactions:
         \     }\r\n    ],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
         [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
         \ \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
-        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-01-09T20:28:29.9203343Z\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-04-17T17:38:41.8208142Z\",\r\n
         \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
-        \"User\",\r\n    \"lastModifiedAt\": \"2023-01-09T20:28:29.9203343Z\"\r\n
-        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-04-17T17:38:41.8208142Z\"\r\n
+        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
         \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-delete-deployment-stack-subscription000001\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1625'
+      - '1631'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:28:48 GMT
+      - Mon, 17 Apr 2023 17:39:00 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: 8837C790FFA748B4A386981745B0C2AB Ref B: BL2AA2030109027 Ref C: 2023-01-09T20:28:48Z'
     status:
       code: 200
       message: OK
@@ -1042,9 +1070,10 @@ interactions:
       ParameterSetName:
       - --name --management-group-id --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: DELETE
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?unmanageAction.Resources=detach&unmanageAction.ResourceGroups=detach&api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?unmanageAction.Resources=detach&unmanageAction.ResourceGroups=detach&api-version=2022-08-01-preview
   response:
     body:
       string: ''
@@ -1054,21 +1083,19 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 09 Jan 2023 20:28:50 GMT
+      - Mon, 17 Apr 2023 17:39:00 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-tenant-deletes:
       - '14999'
-      x-msedge-ref:
-      - 'Ref A: 11EDA6077E424C93B592C8C62DF5717A Ref B: BL2AA2030109027 Ref C: 2023-01-09T20:28:49Z'
     status:
       code: 200
       message: OK
@@ -1086,9 +1113,10 @@ interactions:
       ParameterSetName:
       - -n
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/21.2.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-resource-one000002?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-resource-one000002?api-version=2022-09-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-one000002","name":"cli-test-resource-one000002","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}}'
@@ -1100,19 +1128,17 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:28:51 GMT
+      - Mon, 17 Apr 2023 17:39:01 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: 30A16A532E8D4FC8B2F464B9FAECAFC3 Ref B: BL2AA2030109047 Ref C: 2023-01-09T20:28:50Z'
     status:
       code: 200
       message: OK
@@ -1128,12 +1154,13 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --management-group-id --location --template-file --parameters --delete-resources
-        --delete-resource-groups --yes
+      - --name --management-group-id --location --template-file --deny-settings-mode
+        --parameters --delete-resources --delete-resource-groups --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
   response:
     body:
       string: '{"error":{"code":"ResourceNotFound","message":"The resource ''cli-test-delete-deployment-stack-subscription000001''
@@ -1146,21 +1173,17 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:28:50 GMT
+      - Mon, 17 Apr 2023 17:39:01 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-failure-cause:
       - gateway
-      x-msedge-ref:
-      - 'Ref A: D8DC2ED77A744A43A4B11974AB9364EF Ref B: BL2AA2030110033 Ref C: 2023-01-09T20:28:51Z'
     status:
       code: 404
       message: Not Found
@@ -1188,12 +1211,13 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - --name --management-group-id --location --template-file --parameters --delete-resources
-        --delete-resource-groups --yes
+      - --name --management-group-id --location --template-file --deny-settings-mode
+        --parameters --delete-resources --delete-resource-groups --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
   response:
     body:
       string: "{\r\n  \"location\": \"westus2\",\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
@@ -1206,36 +1230,34 @@ interactions:
         [],\r\n    \"provisioningState\": \"initializing\",\r\n    \"detachedResources\":
         [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
         \ \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
-        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-01-09T20:28:52.5271807Z\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-04-17T17:39:02.240622Z\",\r\n
         \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
-        \"User\",\r\n    \"lastModifiedAt\": \"2023-01-09T20:28:52.5271807Z\"\r\n
-        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-04-17T17:39:02.240622Z\"\r\n  },\r\n
+        \ \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
         \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-delete-deployment-stack-subscription000001\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://api-dogfood.resources.windows-int.net/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/f35276e6-82be-454e-82a3-647d974997af?api-version=2022-08-01-preview
+      - https://management.azure.com/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/77f608ba-a67b-408b-8dc8-c3e8ce664463?api-version=2022-08-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '1194'
+      - '1199'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:28:53 GMT
+      - Mon, 17 Apr 2023 17:39:02 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-tenant-writes:
-      - '1196'
-      x-msedge-ref:
-      - 'Ref A: FE73FA73D1B5428F80A73CAC6D5137B9 Ref B: BL2AA2030110033 Ref C: 2023-01-09T20:28:52Z'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -1251,37 +1273,40 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --management-group-id --location --template-file --parameters --delete-resources
-        --delete-resource-groups --yes
+      - --name --management-group-id --location --template-file --deny-settings-mode
+        --parameters --delete-resources --delete-resource-groups --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/f35276e6-82be-454e-82a3-647d974997af?api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/77f608ba-a67b-408b-8dc8-c3e8ce664463?api-version=2022-08-01-preview
   response:
     body:
-      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/f35276e6-82be-454e-82a3-647d974997af\",\r\n
-        \ \"name\": \"f35276e6-82be-454e-82a3-647d974997af\",\r\n  \"status\": \"deploying\"\r\n}"
+      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/77f608ba-a67b-408b-8dc8-c3e8ce664463\",\r\n
+        \ \"name\": \"77f608ba-a67b-408b-8dc8-c3e8ce664463\",\r\n  \"status\": \"succeeded\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '215'
+      - '209'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:29:10 GMT
+      - Mon, 17 Apr 2023 17:39:19 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: 40756D236F744B5F965A798A6D51D6E2 Ref B: BL2AA2030110033 Ref C: 2023-01-09T20:29:10Z'
     status:
       code: 200
       message: OK
@@ -1297,66 +1322,21 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --management-group-id --location --template-file --parameters --delete-resources
-        --delete-resource-groups --yes
+      - --name --management-group-id --location --template-file --deny-settings-mode
+        --parameters --delete-resources --delete-resource-groups --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/f35276e6-82be-454e-82a3-647d974997af?api-version=2022-08-01-preview
-  response:
-    body:
-      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/f35276e6-82be-454e-82a3-647d974997af\",\r\n
-        \ \"name\": \"f35276e6-82be-454e-82a3-647d974997af\",\r\n  \"status\": \"succeeded\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '215'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 09 Jan 2023 20:29:41 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-msedge-ref:
-      - 'Ref A: AE1A6D7FEC4844E0A1BD3AE486254203 Ref B: BL2AA2030110033 Ref C: 2023-01-09T20:29:40Z'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - stack mg create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --name --management-group-id --location --template-file --parameters --delete-resources
-        --delete-resource-groups --yes
-      User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
-    method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
   response:
     body:
       string: "{\r\n  \"location\": \"westus2\",\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
         {\r\n      \"resources\": \"delete\",\r\n      \"resourceGroups\": \"delete\",\r\n
         \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-subsc-2023-01-09-20-28-52-0c2bf\",\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-subsc-2023-04-17-17-39-02-226f2\",\r\n
         \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000\",\r\n
-        \   \"duration\": \"PT25.6123146S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \   \"duration\": \"PT6.6871116S\",\r\n    \"denySettings\": {\r\n      \"mode\":
         \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
         {},\r\n    \"parameters\": {\r\n      \"name\": {\r\n        \"value\": \"cli-test-resource-two000003\"\r\n
         \     }\r\n    },\r\n    \"resources\": [\r\n      {\r\n        \"status\":
@@ -1364,32 +1344,34 @@ interactions:
         \     }\r\n    ],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
         [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
         \ \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
-        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-01-09T20:28:52.5271807Z\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-04-17T17:39:02.240622Z\",\r\n
         \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
-        \"User\",\r\n    \"lastModifiedAt\": \"2023-01-09T20:28:52.5271807Z\"\r\n
-        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-04-17T17:39:02.240622Z\"\r\n  },\r\n
+        \ \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
         \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-delete-deployment-stack-subscription000001\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1625'
+      - '1629'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:29:42 GMT
+      - Mon, 17 Apr 2023 17:39:19 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: E0750A5F7A1D42AD9C5D6038BD9C3528 Ref B: BL2AA2030110033 Ref C: 2023-01-09T20:29:41Z'
     status:
       code: 200
       message: OK
@@ -1407,17 +1389,18 @@ interactions:
       ParameterSetName:
       - --name --management-group-id --delete-resources --delete-resource-groups --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?api-version=2022-08-01-preview
   response:
     body:
       string: "{\r\n  \"location\": \"westus2\",\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
         {\r\n      \"resources\": \"delete\",\r\n      \"resourceGroups\": \"delete\",\r\n
         \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-subsc-2023-01-09-20-28-52-0c2bf\",\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-delete-deployment-stack-subsc-2023-04-17-17-39-02-226f2\",\r\n
         \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000\",\r\n
-        \   \"duration\": \"PT25.6123146S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \   \"duration\": \"PT6.6871116S\",\r\n    \"denySettings\": {\r\n      \"mode\":
         \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
         {},\r\n    \"parameters\": {\r\n      \"name\": {\r\n        \"value\": \"cli-test-resource-two000003\"\r\n
         \     }\r\n    },\r\n    \"resources\": [\r\n      {\r\n        \"status\":
@@ -1425,32 +1408,34 @@ interactions:
         \     }\r\n    ],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
         [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
         \ \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
-        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-01-09T20:28:52.5271807Z\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-04-17T17:39:02.240622Z\",\r\n
         \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
-        \"User\",\r\n    \"lastModifiedAt\": \"2023-01-09T20:28:52.5271807Z\"\r\n
-        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-04-17T17:39:02.240622Z\"\r\n  },\r\n
+        \ \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001\",\r\n
         \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-delete-deployment-stack-subscription000001\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1625'
+      - '1629'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:29:43 GMT
+      - Mon, 17 Apr 2023 17:39:21 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: BEAF87A145DB4E508198D348F2578A31 Ref B: BL2AA2030109045 Ref C: 2023-01-09T20:29:42Z'
     status:
       code: 200
       message: OK
@@ -1470,35 +1455,34 @@ interactions:
       ParameterSetName:
       - --name --management-group-id --delete-resources --delete-resource-groups --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: DELETE
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/AzGovBlueprint/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?unmanageAction.Resources=delete&unmanageAction.ResourceGroups=delete&api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-delete-deployment-stack-subscription000001?unmanageAction.Resources=delete&unmanageAction.ResourceGroups=delete&api-version=2022-08-01-preview
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://api-dogfood.resources.windows-int.net/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/80010876-c509-4f2a-9340-ae6b13a179b2?unmanageAction.Resources=delete&unmanageAction.ResourceGroups=delete&api-version=2022-08-01-preview
+      - https://management.azure.com/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/877653bc-7484-4ae4-8eef-b8df98fb0a13?unmanageAction.Resources=delete&unmanageAction.ResourceGroups=delete&api-version=2022-08-01-preview
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Mon, 09 Jan 2023 20:29:45 GMT
+      - Mon, 17 Apr 2023 17:39:21 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-tenant-deletes:
-      - '14998'
-      x-msedge-ref:
-      - 'Ref A: A5DACC68A49249F584B2304A5F8F1E6C Ref B: BL2AA2030109045 Ref C: 2023-01-09T20:29:43Z'
+      - '14999'
     status:
       code: 202
       message: Accepted
@@ -1516,34 +1500,37 @@ interactions:
       ParameterSetName:
       - --name --management-group-id --delete-resources --delete-resource-groups --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/80010876-c509-4f2a-9340-ae6b13a179b2?unmanageAction.Resources=delete&unmanageAction.ResourceGroups=delete&api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/877653bc-7484-4ae4-8eef-b8df98fb0a13?unmanageAction.Resources=delete&unmanageAction.ResourceGroups=delete&api-version=2022-08-01-preview
   response:
     body:
-      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/80010876-c509-4f2a-9340-ae6b13a179b2\",\r\n
-        \ \"name\": \"80010876-c509-4f2a-9340-ae6b13a179b2\",\r\n  \"status\": \"deleting\"\r\n}"
+      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/877653bc-7484-4ae4-8eef-b8df98fb0a13\",\r\n
+        \ \"name\": \"877653bc-7484-4ae4-8eef-b8df98fb0a13\",\r\n  \"status\": \"deleting\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '214'
+      - '208'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:30:02 GMT
+      - Mon, 17 Apr 2023 17:39:38 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: 247778B4ED984A63B575FC53051970BE Ref B: BL2AA2030109045 Ref C: 2023-01-09T20:30:02Z'
     status:
       code: 200
       message: OK
@@ -1561,34 +1548,37 @@ interactions:
       ParameterSetName:
       - --name --management-group-id --delete-resources --delete-resource-groups --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/80010876-c509-4f2a-9340-ae6b13a179b2?unmanageAction.Resources=delete&unmanageAction.ResourceGroups=delete&api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/877653bc-7484-4ae4-8eef-b8df98fb0a13?unmanageAction.Resources=delete&unmanageAction.ResourceGroups=delete&api-version=2022-08-01-preview
   response:
     body:
-      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/80010876-c509-4f2a-9340-ae6b13a179b2\",\r\n
-        \ \"name\": \"80010876-c509-4f2a-9340-ae6b13a179b2\",\r\n  \"status\": \"deleting\"\r\n}"
+      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/877653bc-7484-4ae4-8eef-b8df98fb0a13\",\r\n
+        \ \"name\": \"877653bc-7484-4ae4-8eef-b8df98fb0a13\",\r\n  \"status\": \"deleting\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '214'
+      - '208'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:30:32 GMT
+      - Mon, 17 Apr 2023 17:40:08 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: 344CEA66F84E4FB39BF539A724953AF7 Ref B: BL2AA2030109045 Ref C: 2023-01-09T20:30:32Z'
     status:
       code: 200
       message: OK
@@ -1606,34 +1596,37 @@ interactions:
       ParameterSetName:
       - --name --management-group-id --delete-resources --delete-resource-groups --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/80010876-c509-4f2a-9340-ae6b13a179b2?unmanageAction.Resources=delete&unmanageAction.ResourceGroups=delete&api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/877653bc-7484-4ae4-8eef-b8df98fb0a13?unmanageAction.Resources=delete&unmanageAction.ResourceGroups=delete&api-version=2022-08-01-preview
   response:
     body:
-      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/80010876-c509-4f2a-9340-ae6b13a179b2\",\r\n
-        \ \"name\": \"80010876-c509-4f2a-9340-ae6b13a179b2\",\r\n  \"status\": \"deleting\"\r\n}"
+      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/877653bc-7484-4ae4-8eef-b8df98fb0a13\",\r\n
+        \ \"name\": \"877653bc-7484-4ae4-8eef-b8df98fb0a13\",\r\n  \"status\": \"deleting\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '214'
+      - '208'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:31:03 GMT
+      - Mon, 17 Apr 2023 17:40:39 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: C6BDFA18182C4FE082A710F3B67FD8DD Ref B: BL2AA2030109045 Ref C: 2023-01-09T20:31:03Z'
     status:
       code: 200
       message: OK
@@ -1651,34 +1644,37 @@ interactions:
       ParameterSetName:
       - --name --management-group-id --delete-resources --delete-resource-groups --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/80010876-c509-4f2a-9340-ae6b13a179b2?unmanageAction.Resources=delete&unmanageAction.ResourceGroups=delete&api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/877653bc-7484-4ae4-8eef-b8df98fb0a13?unmanageAction.Resources=delete&unmanageAction.ResourceGroups=delete&api-version=2022-08-01-preview
   response:
     body:
-      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/80010876-c509-4f2a-9340-ae6b13a179b2\",\r\n
-        \ \"name\": \"80010876-c509-4f2a-9340-ae6b13a179b2\",\r\n  \"status\": \"deleting\"\r\n}"
+      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/877653bc-7484-4ae4-8eef-b8df98fb0a13\",\r\n
+        \ \"name\": \"877653bc-7484-4ae4-8eef-b8df98fb0a13\",\r\n  \"status\": \"deleting\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '214'
+      - '208'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:31:33 GMT
+      - Mon, 17 Apr 2023 17:41:09 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: B139609589D148EDB14763AE9760C1A4 Ref B: BL2AA2030109045 Ref C: 2023-01-09T20:31:33Z'
     status:
       code: 200
       message: OK
@@ -1696,79 +1692,37 @@ interactions:
       ParameterSetName:
       - --name --management-group-id --delete-resources --delete-resource-groups --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/80010876-c509-4f2a-9340-ae6b13a179b2?unmanageAction.Resources=delete&unmanageAction.ResourceGroups=delete&api-version=2022-08-01-preview
+    uri: https://management.azure.com/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/877653bc-7484-4ae4-8eef-b8df98fb0a13?unmanageAction.Resources=delete&unmanageAction.ResourceGroups=delete&api-version=2022-08-01-preview
   response:
     body:
-      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/80010876-c509-4f2a-9340-ae6b13a179b2\",\r\n
-        \ \"name\": \"80010876-c509-4f2a-9340-ae6b13a179b2\",\r\n  \"status\": \"deleting\"\r\n}"
+      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/877653bc-7484-4ae4-8eef-b8df98fb0a13\",\r\n
+        \ \"name\": \"877653bc-7484-4ae4-8eef-b8df98fb0a13\",\r\n  \"status\": \"succeeded\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '214'
+      - '209'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:32:04 GMT
+      - Mon, 17 Apr 2023 17:41:39 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: 741FB0C1F7184F5DA157F84A085DDAD3 Ref B: BL2AA2030109045 Ref C: 2023-01-09T20:32:03Z'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - stack mg delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --name --management-group-id --delete-resources --delete-resource-groups --yes
-      User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
-    method: GET
-    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/80010876-c509-4f2a-9340-ae6b13a179b2?unmanageAction.Resources=delete&unmanageAction.ResourceGroups=delete&api-version=2022-08-01-preview
-  response:
-    body:
-      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westcentralus/deploymentStackOperationStatus/80010876-c509-4f2a-9340-ae6b13a179b2\",\r\n
-        \ \"name\": \"80010876-c509-4f2a-9340-ae6b13a179b2\",\r\n  \"status\": \"succeeded\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '215'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 09 Jan 2023 20:32:34 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-msedge-ref:
-      - 'Ref A: 35B27AABA526426CB1BE00C8A3CA7ECF Ref B: BL2AA2030109045 Ref C: 2023-01-09T20:32:34Z'
     status:
       code: 200
       message: OK
@@ -1786,9 +1740,10 @@ interactions:
       ParameterSetName:
       - -n
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/21.2.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-resource-one000002?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-resource-one000002?api-version=2022-09-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-one000002","name":"cli-test-resource-one000002","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}}'
@@ -1800,19 +1755,17 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:32:34 GMT
+      - Mon, 17 Apr 2023 17:41:40 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: 7234C32DF057483FB6C6B75FEA2DD131 Ref B: BL2AA2030105025 Ref C: 2023-01-09T20:32:34Z'
     status:
       code: 200
       message: OK
@@ -1828,33 +1781,33 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/21.2.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups?api-version=2022-09-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-stackrg2","name":"my-stackrg2","type":"Microsoft.Resources/resourceGroups","location":"centralus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DeploymentScriptsRunnersStaticResources-eastus2","name":"DeploymentScriptsRunnersStaticResources-eastus2","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dantedtestrg2","name":"dantedtestrg2","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dantedtestrg1","name":"dantedtestrg1","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacksp2o7hnb3mjkt7cqg7k566iyyqid3tv35sdlu2vvib4rvwcud5","name":"cli_test_deployment_stacksp2o7hnb3mjkt7cqg7k566iyyqid3tv35sdlu2vvib4rvwcud5","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2022-09-16T19:47:36Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twodg67fzd3hhvrwr7igfrrw","name":"cli-test-cli_test_deployment_stacks-twodg67fzd3hhvrwr7igfrrw","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DanteDTestRGuglfab7hvugei","name":"DanteDTestRGuglfab7hvugei","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1","name":"rg1","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg3","name":"rg3","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-oneoxdogyemduxnicdnpasboxxehj3xkwirs532vly","name":"cli-test-resource-oneoxdogyemduxnicdnpasboxxehj3xkwirs532vly","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twoovrmddjn3kqbcy3eveejknvwm5cvp6oooexsdcq","name":"cli-test-resource-twoovrmddjn3kqbcy3eveejknvwm5cvp6oooexsdcq","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threemflcnrp5h2woxk7x5dfjmuxjqqhvwe6jh24br","name":"cli-test-resource-threemflcnrp5h2woxk7x5dfjmuxjqqhvwe6jh24br","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twodag5h25lik2j7wcvhhdts","name":"cli-test-cli_test_deployment_stacks-twodag5h25lik2j7wcvhhdts","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twoh6qzvze5mxzam7dhngnb4","name":"cli-test-cli_test_deployment_stacks-twoh6qzvze5mxzam7dhngnb4","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twopq4avso5d2hsidmo7ynwp","name":"cli-test-cli_test_deployment_stacks-twopq4avso5d2hsidmo7ynwp","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twolnbkidtfl3yajdad23mom","name":"cli-test-cli_test_deployment_stacks-twolnbkidtfl3yajdad23mom","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twoqw4twrlopyi5rfoq65fam","name":"cli-test-cli_test_deployment_stacks-twoqw4twrlopyi5rfoq65fam","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twor3pgvg5ytczt53ykxnnwq","name":"cli-test-cli_test_deployment_stacks-twor3pgvg5ytczt53ykxnnwq","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-one7h777xrubanjjumpm6qyv4ffxgepntyzxcunfyp","name":"cli-test-resource-one7h777xrubanjjumpm6qyv4ffxgepntyzxcunfyp","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-onejay5ygeztumhdrwrnai36vay4omk3x4qtzmiqfa","name":"cli-test-resource-onejay5ygeztumhdrwrnai36vay4omk3x4qtzmiqfa","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-onedow3se262un5kjedqyqegqggdkzso67brnp42lp","name":"cli-test-resource-onedow3se262un5kjedqyqegqggdkzso67brnp42lp","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-onefrueqoblj7zoosobmsbnblogllhyw54ejugl5sw","name":"cli-test-resource-onefrueqoblj7zoosobmsbnblogllhyw54ejugl5sw","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twokcip7oyo6re5otlyyetvhy6nvbp4746abmaq435","name":"cli-test-resource-twokcip7oyo6re5otlyyetvhy6nvbp4746abmaq435","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-three5nncix2dbada3eecfr3witrvbp7imsmbftrsg","name":"cli-test-resource-three5nncix2dbada3eecfr3witrvbp7imsmbftrsg","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/delete_all_rg","name":"delete_all_rg","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twonfnbmfmbhmgdxq4th5cca","name":"cli-test-cli_test_deployment_stacks-twonfnbmfmbhmgdxq4th5cca","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twouya52nzgvotamiob44nbj","name":"cli-test-cli_test_deployment_stacks-twouya52nzgvotamiob44nbj","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-two5uihrzn2e6w4vjoujz2dr","name":"cli-test-cli_test_deployment_stacks-two5uihrzn2e6w4vjoujz2dr","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twotqwmfbqb3dtjyqrca32lb","name":"cli-test-cli_test_deployment_stacks-twotqwmfbqb3dtjyqrca32lb","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twotqzzmv5bb4hqd3u2i7m46","name":"cli-test-cli_test_deployment_stacks-twotqzzmv5bb4hqd3u2i7m46","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twoe2gdwsvtohcximqbacitk","name":"cli-test-cli_test_deployment_stacks-twoe2gdwsvtohcximqbacitk","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-two4sdufgfjbyk46w7dqlhtz","name":"cli-test-cli_test_deployment_stacks-two4sdufgfjbyk46w7dqlhtz","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twokbqonyvh5su5la2dk7qne","name":"cli-test-cli_test_deployment_stacks-twokbqonyvh5su5la2dk7qne","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twotxjyzloxtb6gbkxorrgqp","name":"cli-test-cli_test_deployment_stacks-twotxjyzloxtb6gbkxorrgqp","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-oner4cro3bh6drqxspmtrsum5ot5kzpssvmv7qfi5m","name":"cli-test-resource-oner4cro3bh6drqxspmtrsum5ot5kzpssvmv7qfi5m","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twoc3asukmklifbap4ya6cu7","name":"cli-test-cli_test_deployment_stacks-twoc3asukmklifbap4ya6cu7","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-one4klmb5r7vykpzvyumkdjjdhzph7ui65uj4gjimt","name":"cli-test-resource-one4klmb5r7vykpzvyumkdjjdhzph7ui65uj4gjimt","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twoy7b4szdbpifltnxf22dxf","name":"cli-test-cli_test_deployment_stacks-twoy7b4szdbpifltnxf22dxf","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-onedyp4op3ybf4uq6ts4u4wyqgzrbircz5eb4ramdm","name":"cli-test-resource-onedyp4op3ybf4uq6ts4u4wyqgzrbircz5eb4ramdm","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twobtx62sv7im6aic2hl3bda","name":"cli-test-cli_test_deployment_stacks-twobtx62sv7im6aic2hl3bda","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-one6k3kud3pkls3j3mdmxiooei5apwxzst5yg7qanr","name":"cli-test-resource-one6k3kud3pkls3j3mdmxiooei5apwxzst5yg7qanr","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-two3r4b7myqshkgqtegax6ff","name":"cli-test-cli_test_deployment_stacks-two3r4b7myqshkgqtegax6ff","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-onehhzzxwxerox2av276cqjkpaz2bit2qbhibx5bud","name":"cli-test-resource-onehhzzxwxerox2av276cqjkpaz2bit2qbhibx5bud","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-two72nzd4e5jtbmifaj5kqlm","name":"cli-test-cli_test_deployment_stacks-two72nzd4e5jtbmifaj5kqlm","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-one2oxdsip3kipedtig5jlf4iu3do745nvjehxiium","name":"cli-test-resource-one2oxdsip3kipedtig5jlf4iu3do745nvjehxiium","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-one6pg5ng42e6ydrpr6rwup6vxdrketvevtrkhb4oy","name":"cli-test-resource-one6pg5ng42e6ydrpr6rwup6vxdrketvevtrkhb4oy","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twovk7vhmqsn4g4ykt72zxf2wbjj2nor6tofun2y5r","name":"cli-test-resource-twovk7vhmqsn4g4ykt72zxf2wbjj2nor6tofun2y5r","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threetbapykbpa5y2n6wogtkk4mruvnjzv2fuetkld","name":"cli-test-resource-threetbapykbpa5y2n6wogtkk4mruvnjzv2fuetkld","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-one6acvxbjb3q35ol7vxaloq7ol35zxlxgzoa2c5va","name":"cli-test-resource-one6acvxbjb3q35ol7vxaloq7ol35zxlxgzoa2c5va","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twousa54ctize3x4lwzs2p5ei7kf4rtt4z3ybxtmcu","name":"cli-test-resource-twousa54ctize3x4lwzs2p5ei7kf4rtt4z3ybxtmcu","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DanteDTestRGOnlyuglfab7hvugei","name":"DanteDTestRGOnlyuglfab7hvugei","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/majastrz-stack","name":"majastrz-stack","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shared-sql-dantetest","name":"shared-sql-dantetest","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shared-web-dantetest","name":"shared-web-dantetest","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-oneo5s7agiqozionocy4ajh74vipuw4za55abpzmuy","name":"cli-test-resource-oneo5s7agiqozionocy4ajh74vipuw4za55abpzmuy","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-oneoqnosii4sts2kcyw7roucyvst2rumhhs2exmarw","name":"cli-test-resource-oneoqnosii4sts2kcyw7roucyvst2rumhhs2exmarw","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twogxrsdotfcy53edxe6qygmrryi37elkts73qthqk","name":"cli-test-resource-twogxrsdotfcy53edxe6qygmrryi37elkts73qthqk","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rjwSink","name":"rjwSink","type":"Microsoft.Resources/resourceGroups","location":"westcentralus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dante-testing2","name":"dante-testing2","type":"Microsoft.Resources/resourceGroups","location":"centralus","tags":{},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/majastrz-stack2","name":"majastrz-stack2","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/majastrz-stack2-extra","name":"majastrz-stack2-extra","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/majastrz-stack3","name":"majastrz-stack3","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestRGuglfab7hvugei","name":"StacksTestRGuglfab7hvugei","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-oneex4zux3fns6nmfv5cj37hz52kxbysgzlyvcaxuo","name":"cli-test-resource-oneex4zux3fns6nmfv5cj37hz52kxbysgzlyvcaxuo","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twol5zxjzug6cmtrf2mbuwkgp45jslhhxmbhntrjyh","name":"cli-test-resource-twol5zxjzug6cmtrf2mbuwkgp45jslhhxmbhntrjyh","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-two2k54r3odljbzbx2pcjydq62kr4kpgu4vmqqpvkv","name":"cli-test-resource-two2k54r3odljbzbx2pcjydq62kr4kpgu4vmqqpvkv","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threeunxffou5lmf475ivdqghy4lyn3nb32b7a2j5l","name":"cli-test-resource-threeunxffou5lmf475ivdqghy4lyn3nb32b7a2j5l","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/harshpatel","name":"harshpatel","type":"Microsoft.Resources/resourceGroups","location":"eastus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/keyVaultResourceGroup","name":"keyVaultResourceGroup","type":"Microsoft.Resources/resourceGroups","location":"eastus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shared-sql","name":"shared-sql","type":"Microsoft.Resources/resourceGroups","location":"eastus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shared-web","name":"shared-web","type":"Microsoft.Resources/resourceGroups","location":"eastus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/UnitTest-eus2euap-6-221012T232253","name":"UnitTest-eus2euap-6-221012T232253","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"RunnerCompleted":"true"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dante-testing","name":"dante-testing","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/danted-shared-web","name":"danted-shared-web","type":"Microsoft.Resources/resourceGroups","location":"eastus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/danted-shared-sql","name":"danted-shared-sql","type":"Microsoft.Resources/resourceGroups","location":"eastus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bmoore-eastus2","name":"bmoore-eastus2","type":"Microsoft.Resources/resourceGroups","location":"eastus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/gokulRG","name":"gokulRG","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/GokulLocTest1","name":"GokulLocTest1","type":"Microsoft.Resources/resourceGroups","location":"eastus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/GokulLocTest2","name":"GokulLocTest2","type":"Microsoft.Resources/resourceGroups","location":"eastus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threee3tl6e43kiw7j73lbxxx23nvuyufftjb4csvq","name":"cli-test-resource-threee3tl6e43kiw7j73lbxxx23nvuyufftjb4csvq","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-one2aj4kjjsfmntizgfsdnscdmgmxlvxvwcv6xttqb","name":"cli-test-resource-one2aj4kjjsfmntizgfsdnscdmgmxlvxvwcv6xttqb","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twohwnawwueamfighnj7fo6d2265pn7ukwmtrf3ztk","name":"cli-test-resource-twohwnawwueamfighnj7fo6d2265pn7ukwmtrf3ztk","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threex7eh5q5eeheqc74pkr6t6d3n5lj5xnlxncog6","name":"cli-test-resource-threex7eh5q5eeheqc74pkr6t6d3n5lj5xnlxncog6","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-one000002","name":"cli-test-resource-one000002","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/.rjwStartWithPeriod","name":".rjwStartWithPeriod","type":"Microsoft.Resources/resourceGroups","location":"northeurope","properties":{"provisioningState":"Succeeded"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/OULD-REPRO-1-WEU","name":"OULD-REPRO-1-WEU","type":"Microsoft.Resources/resourceGroups","location":"westeurope","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-southcentralus","name":"cloud-shell-storage-southcentralus","type":"Microsoft.Resources/resourceGroups","location":"southcentralus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/pstestBugBashRG","name":"pstestBugBashRG","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","tags":{"Note":"subscription
+        level deployment"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tarun","name":"tarun","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tarun-canary","name":"tarun-canary","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","tags":{},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/harshpatel_canary","name":"harshpatel_canary","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dantedteststackrg1","name":"dantedteststackrg1","type":"Microsoft.Resources/resourceGroups","location":"eastus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/angperez-templatespecs-rg","name":"angperez-templatespecs-rg","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DefaultResourceGroup-CUS","name":"DefaultResourceGroup-CUS","type":"Microsoft.Resources/resourceGroups","location":"centralus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Gokul-TestRG4","name":"Gokul-TestRG4","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cloud-shell-storage-eastus","name":"cloud-shell-storage-eastus","type":"Microsoft.Resources/resourceGroups","location":"eastus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/harshpatel3","name":"harshpatel3","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DefaultResourceGroup-EUS","name":"DefaultResourceGroup-EUS","type":"Microsoft.Resources/resourceGroups","location":"eastus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mslearn","name":"mslearn","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"o":""},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/danted-1234rg1","name":"danted-1234rg1","type":"Microsoft.Resources/resourceGroups","location":"eastus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/danted1234rg1","name":"danted1234rg1","type":"Microsoft.Resources/resourceGroups","location":"eastus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ant-test","name":"ant-test","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/keyVaultResourceGroup","name":"keyVaultResourceGroup","type":"Microsoft.Resources/resourceGroups","location":"eastus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/angperez-stacks-rg","name":"angperez-stacks-rg","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chodavid-bicepCdn5","name":"chodavid-bicepCdn5","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bhsubratestrg","name":"bhsubratestrg","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bicepbuild","name":"bicepbuild","type":"Microsoft.Resources/resourceGroups","location":"eastus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg2","name":"test-rg2","type":"Microsoft.Resources/resourceGroups","location":"eastus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg1","name":"test-rg1","type":"Microsoft.Resources/resourceGroups","location":"eastus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/filiz-rg-canadaeast","name":"filiz-rg-canadaeast","type":"Microsoft.Resources/resourceGroups","location":"canadaeast","tags":{},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG","name":"NetworkWatcherRG","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shenglol-test-rg","name":"shenglol-test-rg","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"foo":"bar"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ps_test_subscription_deployment","name":"ps_test_subscription_deployment","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TS-SDKTest-2568-RG","name":"TS-SDKTest-2568-RG","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TS-SDKTest-3011-RG","name":"TS-SDKTest-3011-RG","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TS-SDKTest-4655-RG","name":"TS-SDKTest-4655-RG","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TS-SDKTest-780-RG","name":"TS-SDKTest-780-RG","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specsnpkhcs67yfcx2z32zlpxwyr6stya56htdsgitnjjpetuplvi2peu","name":"cli_test_template_specsnpkhcs67yfcx2z32zlpxwyr6stya56htdsgitnjjpetuplvi2peu","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-09-20T19:13:32Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specsqezevhjxhxyuf5eytiiebu7ntnhyptjuepydmud7jvnfznv3vlms","name":"cli_test_template_specsqezevhjxhxyuf5eytiiebu7ntnhyptjuepydmud7jvnfznv3vlms","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-09-20T19:13:46Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/adotfrank-rg","name":"adotfrank-rg","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/nullrefrepro","name":"nullrefrepro","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dantestacks","name":"dantestacks","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dante-testing","name":"dante-testing","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DanteDTestRGOnlyiyrmpdcyfhgl6","name":"DanteDTestRGOnlyiyrmpdcyfhgl6","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/StacksTestRGiyrmpdcyfhgl6","name":"StacksTestRGiyrmpdcyfhgl6","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/angperez-test-rg2","name":"angperez-test-rg2","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/angperez-test-rg1","name":"angperez-test-rg1","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/muhausmantesting","name":"muhausmantesting","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testIcM","name":"testIcM","type":"Microsoft.Resources/resourceGroups","location":"westus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/harshpatel","name":"harshpatel","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"displayname":"resource-group"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/filiz-test-rg","name":"filiz-test-rg","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/filiz-test","name":"filiz-test","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacksgdoyb6oqjjf7llvccbl7uiaidoic5d5a3leasb4ud5hho6qch","name":"cli_test_deployment_stacksgdoyb6oqjjf7llvccbl7uiaidoic5d5a3leasb4ud5hho6qch","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2021-10-29T17:18:54Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks22mxhfop24r67pqybvuqfcp6bexlpzfn4mpqxl2ixfsw5wqnn","name":"cli_test_deployment_stacks22mxhfop24r67pqybvuqfcp6bexlpzfn4mpqxl2ixfsw5wqnn","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2021-10-29T17:27:13Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacksedvrs7lhimx4g6iwaq3evulkvvtlqbh2h5znk23x6oyogc73i","name":"cli_test_deployment_stacksedvrs7lhimx4g6iwaq3evulkvvtlqbh2h5znk23x6oyogc73i","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2021-10-29T17:41:33Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacksurkjqsrfgnmp5hb323ans2bpipuvms7l5yaxlzads4rbxxngp","name":"cli_test_deployment_stacksurkjqsrfgnmp5hb323ans2bpipuvms7l5yaxlzads4rbxxngp","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2021-11-03T14:31:44Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacksm3cms5sq2sos347xkg66k6daclgdkkfkjq4ru6jztoawmrjn7","name":"cli_test_deployment_stacksm3cms5sq2sos347xkg66k6daclgdkkfkjq4ru6jztoawmrjn7","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2021-11-22T20:12:49Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks7efbyppgialzhqlszfpwwiwaa2w7eb4ao7cf6ghp4xlqlxtyb","name":"cli_test_deployment_stacks7efbyppgialzhqlszfpwwiwaa2w7eb4ao7cf6ghp4xlqlxtyb","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2021-11-22T20:12:49Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stackslrqcpuhsifkln5c7tbwp2pc3544ohcjacvu3wxcczvfvkif2y","name":"cli_test_deployment_stackslrqcpuhsifkln5c7tbwp2pc3544ohcjacvu3wxcczvfvkif2y","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2021-11-23T17:52:29Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stackslijrl2yikztpsqui7cyrklw73l6zzxdcmwrvwylne6zc5dzi6","name":"cli_test_deployment_stackslijrl2yikztpsqui7cyrklw73l6zzxdcmwrvwylne6zc5dzi6","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2021-11-23T17:52:29Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stackshwa3fsjseyi2qhhyfpy2xwgui4cmsu6ug5z4e22lfrvzn5mkh","name":"cli_test_deployment_stackshwa3fsjseyi2qhhyfpy2xwgui4cmsu6ug5z4e22lfrvzn5mkh","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2021-11-23T17:56:39Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacksbd7yqhtygwhjfvhje2k33jwvisrqrdknownf7gkgghxmdlzcj","name":"cli_test_deployment_stacksbd7yqhtygwhjfvhje2k33jwvisrqrdknownf7gkgghxmdlzcj","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2021-11-23T19:25:55Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stackscvvuymep3xs5vdi7af4ghsbaelecyn3tyquip633gxb2ujbqv","name":"cli_test_deployment_stackscvvuymep3xs5vdi7af4ghsbaelecyn3tyquip633gxb2ujbqv","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2021-11-23T19:25:58Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacksoyuwwolptbl5dzp5jiccb6u4jqcfwy4ofzz2r5gie7jrn7fgy","name":"cli_test_deployment_stacksoyuwwolptbl5dzp5jiccb6u4jqcfwy4ofzz2r5gie7jrn7fgy","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2021-11-24T19:17:04Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stackslghrsvxgph4ugwdzgobvc2ah6gulazckc3dg2jcoi7a52yzfk","name":"cli_test_deployment_stackslghrsvxgph4ugwdzgobvc2ah6gulazckc3dg2jcoi7a52yzfk","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2021-11-24T19:19:40Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacksr52emj76lo3figtjoynnsk7lbfktwp3y4wvv5igpdt3p2m2fk","name":"cli_test_deployment_stacksr52emj76lo3figtjoynnsk7lbfktwp3y4wvv5igpdt3p2m2fk","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2021-11-24T19:19:40Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stackswfa7gczxzcozjk4f6vvylnjudtoatzpkjxsikkcuwtbilv7qp","name":"cli_test_deployment_stackswfa7gczxzcozjk4f6vvylnjudtoatzpkjxsikkcuwtbilv7qp","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2021-11-24T19:29:11Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacksfkf453h7lbsd5mbtyjrp2vbuz5qzyidcbzkykbjrtm66gftfa","name":"cli_test_deployment_stacksfkf453h7lbsd5mbtyjrp2vbuz5qzyidcbzkykbjrtm66gftfa","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2021-12-02T17:53:27Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stackejj6dtaruk3y44i6pvq5osj7arw2aiyo6rnbqqktto6jpmaejp","name":"cli_test_deployment_stackejj6dtaruk3y44i6pvq5osj7arw2aiyo6rnbqqktto6jpmaejp","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2021-12-02T17:53:28Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stack7zlhwhjdvqphddtc4zal543i54gazlxqmikdo3uzhbb6d65gps","name":"cli_test_deployment_stack7zlhwhjdvqphddtc4zal543i54gazlxqmikdo3uzhbb6d65gps","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2021-12-15T19:10:37Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stack6kffnuk42aacanguwfgdgteyugmvmeysrpu7fh5v7io6vbvy63","name":"cli_test_deployment_stack6kffnuk42aacanguwfgdgteyugmvmeysrpu7fh5v7io6vbvy63","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2022-01-05T15:53:35Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stackss73tyg6td57jpnui57k5ikhj3eqw4tgowr7el4pupjw2c7sz5","name":"cli_test_deployment_stackss73tyg6td57jpnui57k5ikhj3eqw4tgowr7el4pupjw2c7sz5","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2022-01-05T15:53:35Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stackskzho2wispnfdriylvz6h6c3bikkhyuqgioqcoo4xootuiy2pe","name":"cli_test_deployment_stackskzho2wispnfdriylvz6h6c3bikkhyuqgioqcoo4xootuiy2pe","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2022-01-31T20:46:47Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stackvl4rgq4rwtv7t4dgfe2q4ebtxz7xi6r7ezif3f2fp7k5itnw7o","name":"cli_test_deployment_stackvl4rgq4rwtv7t4dgfe2q4ebtxz7xi6r7ezif3f2fp7k5itnw7o","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2022-01-31T20:46:47Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stackvna5a2negmadlxngegguazzv5iq2bxzk5lxnyeaxyenjngxbz4","name":"cli_test_deployment_stackvna5a2negmadlxngegguazzv5iq2bxzk5lxnyeaxyenjngxbz4","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2022-01-31T20:49:45Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacksbogrdivds5fzas5rhs3yscsssefa7nu2rpnb2654nnb7vnqvt","name":"cli_test_deployment_stacksbogrdivds5fzas5rhs3yscsssefa7nu2rpnb2654nnb7vnqvt","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2022-01-31T21:09:28Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stackszx3nmndhn7ss2dpzvophxv5hmfqh3kwf4cn5nkfyinqxne2de","name":"cli_test_deployment_stackszx3nmndhn7ss2dpzvophxv5hmfqh3kwf4cn5nkfyinqxne2de","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2022-01-31T21:15:36Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks3qoopf63q7hfhda7jhkvdccq55gqamwegz62hgswzhowbrkp4","name":"cli_test_deployment_stacks3qoopf63q7hfhda7jhkvdccq55gqamwegz62hgswzhowbrkp4","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2022-04-11T17:06:14Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stackszfo4cmvgbq2yaelkogayikxvaxxkkwnd2uri5oi7kudysnbb4","name":"cli_test_deployment_stackszfo4cmvgbq2yaelkogayikxvaxxkkwnd2uri5oi7kudysnbb4","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2022-04-11T17:09:18Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/harshpatel2","name":"harshpatel2","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ps7866","name":"ps7866","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacksxp7ecvpgn5xyndnewdr3ytooudlyaahzosiq2276qoyzwao7z","name":"cli_test_deployment_stacksxp7ecvpgn5xyndnewdr3ytooudlyaahzosiq2276qoyzwao7z","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2022-04-27T17:07:36Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacksve4qoz2eg63px43me4iqz7bp7r3q7umsw2luty3brobozxogn","name":"cli_test_deployment_stacksve4qoz2eg63px43me4iqz7bp7r3q7umsw2luty3brobozxogn","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2022-04-27T17:07:36Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks4zpm55i6rwytsnrcmdkye4iodsad372bxc6zw3eaqo2tzz2p3","name":"cli_test_deployment_stacks4zpm55i6rwytsnrcmdkye4iodsad372bxc6zw3eaqo2tzz2p3","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2022-04-27T17:13:20Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacksslyyhquklzkcddasmif7zf5elsyolvq2znikh5erb4oofa5h5","name":"cli_test_deployment_stacksslyyhquklzkcddasmif7zf5elsyolvq2znikh5erb4oofa5h5","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2022-04-27T17:13:20Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stack2kjnrpo5gcth7n24wq7jl6jkd4qo5qtggrfmpk23w4wjukcsmz","name":"cli_test_deployment_stack2kjnrpo5gcth7n24wq7jl6jkd4qo5qtggrfmpk23w4wjukcsmz","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2022-04-27T17:16:28Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/stuartko_rg","name":"stuartko_rg","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-onen4ytj7yzoebeqrf5yftftj4sjahqet2dxdawbmw","name":"cli-test-resource-onen4ytj7yzoebeqrf5yftftj4sjahqet2dxdawbmw","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twoqipw52dulekd3qdoyzeq7edws5qgaqmxqecwrsk","name":"cli-test-resource-twoqipw52dulekd3qdoyzeq7edws5qgaqmxqecwrsk","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-three7yjf3zzjny7g6ufpvo5aloqb2g4hnbjrofhsh","name":"cli-test-resource-three7yjf3zzjny7g6ufpvo5aloqb2g4hnbjrofhsh","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/trackedHP","name":"trackedHP","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-one3qukzninsre7gakhzpgynrycmdbheazhbxdzw2g","name":"cli-test-resource-one3qukzninsre7gakhzpgynrycmdbheazhbxdzw2g","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-two7tpdv5s5tgalentu7xorxiubxuffpc5l6nw57qy","name":"cli-test-resource-two7tpdv5s5tgalentu7xorxiubxuffpc5l6nw57qy","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threea3d5r7nzhkvoixzb5sjpipo3w7rlag73lec7n","name":"cli-test-resource-threea3d5r7nzhkvoixzb5sjpipo3w7rlag73lec7n","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-two5g24wmoef6ewkt23fevvo","name":"cli-test-cli_test_deployment_stacks-two5g24wmoef6ewkt23fevvo","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-onef2lphlficcocjcbxq5eyu4l2w6beqeyhsnjhrdv","name":"cli-test-resource-onef2lphlficcocjcbxq5eyu4l2w6beqeyhsnjhrdv","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twodabxt6g3a26gzarjwnsbz3uxno2ozxubqwltabe","name":"cli-test-resource-twodabxt6g3a26gzarjwnsbz3uxno2ozxubqwltabe","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threezqcaypl3ofrdoozl5ofhddgkqqt2belptgfqh","name":"cli-test-resource-threezqcaypl3ofrdoozl5ofhddgkqqt2belptgfqh","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twonq327r37e3w25eu3jivzv","name":"cli-test-cli_test_deployment_stacks-twonq327r37e3w25eu3jivzv","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-one3xdlub7rmcpfaajwrreujtuxavtrubkkyekhhij","name":"cli-test-resource-one3xdlub7rmcpfaajwrreujtuxavtrubkkyekhhij","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twok5rfg7m7sls5ez2sezgzkwracelp734h45ud6di","name":"cli-test-resource-twok5rfg7m7sls5ez2sezgzkwracelp734h45ud6di","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threekbjij5yotjb33nuv3qew77setbhogsuxre7hm","name":"cli-test-resource-threekbjij5yotjb33nuv3qew77setbhogsuxre7hm","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twoupr5yxpsyjyq4irp2yioz","name":"cli-test-cli_test_deployment_stacks-twoupr5yxpsyjyq4irp2yioz","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-two6u2nqhw6jus43pfkv4jdesy2qhqv2ftaf6zq22a","name":"cli-test-resource-two6u2nqhw6jus43pfkv4jdesy2qhqv2ftaf6zq22a","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threeynixjm6yfumpo4o3z5mdpnf6ljdbjcasg7zbr","name":"cli-test-resource-threeynixjm6yfumpo4o3z5mdpnf6ljdbjcasg7zbr","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/psBicepTest","name":"psBicepTest","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stackscqfklc2h43lmmmqa6cfsxln2rzvkqxbzv3pak43zmthoi7cg7","name":"cli_test_deployment_stackscqfklc2h43lmmmqa6cfsxln2rzvkqxbzv3pak43zmthoi7cg7","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2022-10-05T15:41:01Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-oneyppnh72zvbwsxnto2vu4t6zx5koej2sfk4bvf3b","name":"cli-test-resource-oneyppnh72zvbwsxnto2vu4t6zx5koej2sfk4bvf3b","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twosiimb77a6glwjmg2colo2jw5zy2hnt5amj336ex","name":"cli-test-resource-twosiimb77a6glwjmg2colo2jw5zy2hnt5amj336ex","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threerlz2cytji522ssba2duhckmn3iisoskbhlj4n","name":"cli-test-resource-threerlz2cytji522ssba2duhckmn3iisoskbhlj4n","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twofb6rmuejolcwwvtgmhptx","name":"cli-test-cli_test_deployment_stacks-twofb6rmuejolcwwvtgmhptx","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-ones6k25azcqvlhdznfxg4czp533igf5gmhfpt3h2z","name":"cli-test-resource-ones6k25azcqvlhdznfxg4czp533igf5gmhfpt3h2z","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twowgwfzsa7qcssbvtnrmeidpd73ru6i5fu2wa5kz2","name":"cli-test-resource-twowgwfzsa7qcssbvtnrmeidpd73ru6i5fu2wa5kz2","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threel4oet364b6mn76vetlcdlibqbzwbn4jl7zvfx","name":"cli-test-resource-threel4oet364b6mn76vetlcdlibqbzwbn4jl7zvfx","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twocniw2b2nis2vx44lmi6lz","name":"cli-test-cli_test_deployment_stacks-twocniw2b2nis2vx44lmi6lz","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twomruuvwqi6oivnz4scscicjiwz4hv5cxacneq6rh","name":"cli-test-resource-twomruuvwqi6oivnz4scscicjiwz4hv5cxacneq6rh","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threejs677nudu33wu3cyp3m7iytpg7xryullpncjf","name":"cli-test-resource-threejs677nudu33wu3cyp3m7iytpg7xryullpncjf","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ps4737","name":"ps4737","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chodavid-bicepCdn4","name":"chodavid-bicepCdn4","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twokbjmj4fqqdjrrzgt7ngate7e6m2mhrzmffygj2q","name":"cli-test-resource-twokbjmj4fqqdjrrzgt7ngate7e6m2mhrzmffygj2q","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threepjpvtybrbcp6elvs3fxdtbfr2kiqlbfdxvkzd","name":"cli-test-resource-threepjpvtybrbcp6elvs3fxdtbfr2kiqlbfdxvkzd","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twoy4v4lfq6rerm7pav3it35dwl5rpwqqmesnymprc","name":"cli-test-resource-twoy4v4lfq6rerm7pav3it35dwl5rpwqqmesnymprc","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threeaina3qkvuqtzmip4mu2trvjd57eejjh3shosy","name":"cli-test-resource-threeaina3qkvuqtzmip4mu2trvjd57eejjh3shosy","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twodzqqrlhdhcclx2o454ewnk3ikbklbdouyqszfi7","name":"cli-test-resource-twodzqqrlhdhcclx2o454ewnk3ikbklbdouyqszfi7","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threes2mj3oglgi3yeecngiiuwwynl3locd3epbif5","name":"cli-test-resource-threes2mj3oglgi3yeecngiiuwwynl3locd3epbif5","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twotg4xlvuqlv2aq2fvyyo5rtwktzof2n7a23pcvpc","name":"cli-test-resource-twotg4xlvuqlv2aq2fvyyo5rtwktzof2n7a23pcvpc","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threeaiqocuxuyleidfoq4rli6vhfrp5qi5uhm6por","name":"cli-test-resource-threeaiqocuxuyleidfoq4rli6vhfrp5qi5uhm6por","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-one72a4bkszpojj5yj6bh3w7z53pci5xx35td45cpz","name":"cli-test-resource-one72a4bkszpojj5yj6bh3w7z53pci5xx35td45cpz","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twowputu4dcob22cxuszt6x2ao7td5mtlcduxapptq","name":"cli-test-resource-twowputu4dcob22cxuszt6x2ao7td5mtlcduxapptq","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threeb6gfdxmamw6a7n3ivqgzqizvu74seebvzxaqm","name":"cli-test-resource-threeb6gfdxmamw6a7n3ivqgzqizvu74seebvzxaqm","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twoup54poyi422jwoinm5yzb","name":"cli-test-cli_test_deployment_stacks-twoup54poyi422jwoinm5yzb","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twocx74jtv6geoiz6ged5nilkfzzsoklvswyt7dx3w","name":"cli-test-resource-twocx74jtv6geoiz6ged5nilkfzzsoklvswyt7dx3w","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threevcsu6tklkw5wo3v7mp2vxb3qyya2grkxdar7j","name":"cli-test-resource-threevcsu6tklkw5wo3v7mp2vxb3qyya2grkxdar7j","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twoixod65ohcgp7em3k5j5f7","name":"cli-test-cli_test_deployment_stacks-twoixod65ohcgp7em3k5j5f7","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/storageAccountTest","name":"storageAccountTest","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/stuartko_migration_tests","name":"stuartko_migration_tests","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/stuartko_migrationtests","name":"stuartko_migrationtests","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ps9769","name":"ps9769","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ps147","name":"ps147","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ps6367","name":"ps6367","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ps7960","name":"ps7960","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ps5934","name":"ps5934","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ps3764","name":"ps3764","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twoy7mihfwfxfcst6cqqab4pmmg4vlmrzwsrguxv5g","name":"cli-test-resource-twoy7mihfwfxfcst6cqqab4pmmg4vlmrzwsrguxv5g","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threebgddl6jlhvoth7iogei6j4nq4wyeruq7cxxdg","name":"cli-test-resource-threebgddl6jlhvoth7iogei6j4nq4wyeruq7cxxdg","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twoxcqfldkbzl5g3v36do4lr","name":"cli-test-cli_test_deployment_stacks-twoxcqfldkbzl5g3v36do4lr","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twolpwqdohhmfvicmbxgb25a","name":"cli-test-cli_test_deployment_stacks-twolpwqdohhmfvicmbxgb25a","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-two6ag6wpd7qo7mdhhjs2wl2","name":"cli-test-cli_test_deployment_stacks-two6ag6wpd7qo7mdhhjs2wl2","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twox4fz56oyupizzqe3fof4u","name":"cli-test-cli_test_deployment_stacks-twox4fz56oyupizzqe3fof4u","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twospjckbzmk3lkct7p36plb","name":"cli-test-cli_test_deployment_stacks-twospjckbzmk3lkct7p36plb","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twogdqlqabha4upyx7ip2ycw","name":"cli-test-cli_test_deployment_stacks-twogdqlqabha4upyx7ip2ycw","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-two2hpliyuimjaoegmwazwad","name":"cli-test-cli_test_deployment_stacks-two2hpliyuimjaoegmwazwad","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-onemizu5d65rmygbuzhu2rkrirbpmpvpviwwirdg3b","name":"cli-test-resource-onemizu5d65rmygbuzhu2rkrirbpmpvpviwwirdg3b","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twomhpyskemwx5z2xtsnm2byvbferbmcvhkmp5ztmb","name":"cli-test-resource-twomhpyskemwx5z2xtsnm2byvbferbmcvhkmp5ztmb","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threegstrm7mrxknyiflutabdf7hj53t5tbypulfrf","name":"cli-test-resource-threegstrm7mrxknyiflutabdf7hj53t5tbypulfrf","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-onevufdrwrfc6xsnxmtacg76xuu4uyuadhunvcwzru","name":"cli-test-resource-onevufdrwrfc6xsnxmtacg76xuu4uyuadhunvcwzru","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twofphyhx277gxikawmtgsasx4rrayx2jk4t3im3kl","name":"cli-test-resource-twofphyhx277gxikawmtgsasx4rrayx2jk4t3im3kl","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-three2s5rzswo5fg26daiesvfdilklquseyvk2vrsy","name":"cli-test-resource-three2s5rzswo5fg26daiesvfdilklquseyvk2vrsy","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-onerben4mtwapsuteft42wiqes34hloazszrib6h2w","name":"cli-test-resource-onerben4mtwapsuteft42wiqes34hloazszrib6h2w","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twovzzf73dlo67jlorugh4c7dx5jw6xylflgoqwn7n","name":"cli-test-resource-twovzzf73dlo67jlorugh4c7dx5jw6xylflgoqwn7n","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twoejgifxclqzq47rcwte7wcyllfk23drsqwazs5c2","name":"cli-test-resource-twoejgifxclqzq47rcwte7wcyllfk23drsqwazs5c2","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-three4umj4r2yxltfeq4mmq77h43rcrmkvjrm633ae","name":"cli-test-resource-three4umj4r2yxltfeq4mmq77h43rcrmkvjrm633ae","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twoyoqtqxvv44jl47ezs6gya","name":"cli-test-cli_test_deployment_stacks-twoyoqtqxvv44jl47ezs6gya","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twodrktubwz4gswsbsd3stxh6bocr6uwls2o66e6jr","name":"cli-test-resource-twodrktubwz4gswsbsd3stxh6bocr6uwls2o66e6jr","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threewta726jyzgfw5zkp7rcbcrsib7wtzkq6jhdwx","name":"cli-test-resource-threewta726jyzgfw5zkp7rcbcrsib7wtzkq6jhdwx","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twosmiudpkorb5rkxiore36x","name":"cli-test-cli_test_deployment_stacks-twosmiudpkorb5rkxiore36x","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stackshz4aqxj4p4nhq6vi7uaeawgwq4nqo266ux7yqxtlfgqj7eis4","name":"cli_test_deployment_stackshz4aqxj4p4nhq6vi7uaeawgwq4nqo266ux7yqxtlfgqj7eis4","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2023-04-14T13:50:54Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-oneogbofrqnwa525ptwquuputz5k6g4adi7qczik6q","name":"cli-test-resource-oneogbofrqnwa525ptwquuputz5k6g4adi7qczik6q","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twovogufniwoaesgkbpi6rn5qav7uxvmmvktrapbnv","name":"cli-test-resource-twovogufniwoaesgkbpi6rn5qav7uxvmmvktrapbnv","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twoniu265op3264k373r5mz7quvu6kkgrxm762jmxx","name":"cli-test-resource-twoniu265op3264k373r5mz7quvu6kkgrxm762jmxx","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threey7vdz7oyxkympdkuy7lq73lkd3hvsb6fmxic2","name":"cli-test-resource-threey7vdz7oyxkympdkuy7lq73lkd3hvsb6fmxic2","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-twoglncu3yrj3k4r5jussgmd","name":"cli-test-cli_test_deployment_stacks-twoglncu3yrj3k4r5jussgmd","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twollafko2553pobetiefftokxjil7gjjoc4hadgyw","name":"cli-test-resource-twollafko2553pobetiefftokxjil7gjjoc4hadgyw","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threeevhucqtpajzvq3uwtc5ayimospmugbw5dgk5f","name":"cli-test-resource-threeevhucqtpajzvq3uwtc5ayimospmugbw5dgk5f","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_stacks57fj3mkge2mk5d5kufrhjwliwhhpeb3vgwpz55kpweb6jnekh","name":"cli_test_deployment_stacks57fj3mkge2mk5d5kufrhjwliwhhpeb3vgwpz55kpweb6jnekh","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2023-04-14T14:41:13Z"},"properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-cli_test_deployment_stacks-tworgrrk7257scfgu7ytadg6","name":"cli-test-cli_test_deployment_stacks-tworgrrk7257scfgu7ytadg6","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-two4tuw2id4ceqlc2445qxvs5revg3ymmvnfevnqzr","name":"cli-test-resource-two4tuw2id4ceqlc2445qxvs5revg3ymmvnfevnqzr","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-three5ikrvtw3qvhtlxpokovmviig6dbzgkfredab5","name":"cli-test-resource-three5ikrvtw3qvhtlxpokovmviig6dbzgkfredab5","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-onew4h5kz7nfjnej4fkbubug7lbxkzcuppprgaajze","name":"cli-test-resource-onew4h5kz7nfjnej4fkbubug7lbxkzcuppprgaajze","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-twouy7ad2gpgwfdy6pjs5fgm7pnkq2juccbxanssso","name":"cli-test-resource-twouy7ad2gpgwfdy6pjs5fgm7pnkq2juccbxanssso","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-threedajvrvod3mhwxvzosuhajhwpzcmnka6bjoipq","name":"cli-test-resource-threedajvrvod3mhwxvzosuhajhwpzcmnka6bjoipq","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-resource-one000002","name":"cli-test-resource-one000002","type":"Microsoft.Resources/resourceGroups","location":"westus2","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TemplateSpecsCli5","name":"TemplateSpecsCli5","type":"Microsoft.Resources/resourceGroups","location":"australiaeast","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ps3636","name":"ps3636","type":"Microsoft.Resources/resourceGroups","location":"westcentralus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/OuldTest","name":"OuldTest","type":"Microsoft.Resources/resourceGroups","location":"westcentralus","properties":{"provisioningState":"Succeeded"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/GokulTestDeleteAfter","name":"GokulTestDeleteAfter","type":"Microsoft.Resources/resourceGroups","location":"westcentralus","properties":{"provisioningState":"Succeeded"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '24525'
+      - '56175'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 09 Jan 2023 20:32:35 GMT
+      - Mon, 17 Apr 2023 17:41:41 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: F767A5722E3241CCAF76986980741432 Ref B: BL2AA2030107019 Ref C: 2023-01-09T20:32:36Z'
     status:
       code: 200
       message: OK
@@ -1874,9 +1827,10 @@ interactions:
       ParameterSetName:
       - --name --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/21.2.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: DELETE
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-resource-one000002?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-resource-one000002?api-version=2022-09-01
   response:
     body:
       string: ''
@@ -1886,23 +1840,19 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 09 Jan 2023 20:32:40 GMT
+      - Mon, 17 Apr 2023 17:41:43 GMT
       expires:
       - '-1'
       location:
-      - https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6MkRURVNUOjJEUkVTT1VSQ0U6MkRPTkVaTUQyNkpBWjVWTVgzVVg0TFZDT3w0MDBBQjE0MENFQTJEOURBLVdFU1RVUzIiLCJqb2JMb2NhdGlvbiI6Indlc3R1czIifQ?api-version=2021-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6MkRURVNUOjJEUkVTT1VSQ0U6MkRPTkVNSkVDUTJOSUoyTDJZS0RUVE9FWXxBMDAzQzNBRTg1OTlBMzhDLVdFU1RVUzIiLCJqb2JMb2NhdGlvbiI6Indlc3R1czIifQ?api-version=2022-09-01
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14996'
-      x-msedge-ref:
-      - 'Ref A: 55C2A7CC7EDC4FB89402EA5CEB2C80A6 Ref B: BL2AA2030105019 Ref C: 2023-01-09T20:32:36Z'
+      - '14999'
     status:
       code: 202
       message: Accepted
@@ -1920,9 +1870,10 @@ interactions:
       ParameterSetName:
       - --name --yes
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-resource/21.2.0 Python/3.9.13 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6MkRURVNUOjJEUkVTT1VSQ0U6MkRPTkVaTUQyNkpBWjVWTVgzVVg0TFZDT3w0MDBBQjE0MENFQTJEOURBLVdFU1RVUzIiLCJqb2JMb2NhdGlvbiI6Indlc3R1czIifQ?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6MkRURVNUOjJEUkVTT1VSQ0U6MkRPTkVNSkVDUTJOSUoyTDJZS0RUVE9FWXxBMDAzQzNBRTg1OTlBMzhDLVdFU1RVUzIiLCJqb2JMb2NhdGlvbiI6Indlc3R1czIifQ?api-version=2022-09-01
   response:
     body:
       string: ''
@@ -1932,19 +1883,15 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 09 Jan 2023 20:32:56 GMT
+      - Mon, 17 Apr 2023 17:41:58 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-msedge-ref:
-      - 'Ref A: D7475B5039A440A8AA7F4951106812C2 Ref B: BL2AA2030105019 Ref C: 2023-01-09T20:32:56Z'
     status:
       code: 200
       message: OK

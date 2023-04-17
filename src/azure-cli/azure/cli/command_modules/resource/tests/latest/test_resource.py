@@ -2154,6 +2154,8 @@ class DeploymentStacksTest(ScenarioTest):
             'template-file-spec': os.path.join(curr_dir, 'simple_template_spec.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
             'bicep-file': os.path.join(curr_dir, 'bicep_simple_template.bicep').replace('\\', '\\\\'),
+            'bicep-file-storage':os.path.join(curr_dir, 'data\\bicepparam\\storage_account_template.bicep').replace('\\', '\\\\'),
+            'bicep-param-file':os.path.join(curr_dir, 'data\\bicepparam\\storage_account_params.bicepparam').replace('\\', '\\\\'),
             'template-file-rg': os.path.join(curr_dir, 'simple_template_resource_group.json').replace('\\', '\\\\'),
             'track-rg-file': os.path.join(curr_dir, 'tracked_resource_group.json').replace('\\', '\\\\'),
             'template-spec-name': template_spec_name,
@@ -2277,11 +2279,13 @@ class DeploymentStacksTest(ScenarioTest):
         #confirm rg resource1 has been removed from azure
         self.cmd('group list', checks=self.check("length([?name=='{resource-one}'])", 0))
 
-        # cleanup - delete resource group two
-        self.cmd('group delete --name {resource-group-two} --yes')
+        #test bicep param file
+        self.cmd('stack sub create --name {name} --location {location} --deployment-resource-group {resource-group-two} --template-file "{bicep-file-storage}" -p "{bicep-param-file}" --deny-settings-mode "none" --delete-all --yes', checks=self.check('provisioningState', 'succeeded'))
+
+        self.cmd('stack sub delete --name {name} --yes')
 
         # cleanup - delete resource group two
-        self.cmd('stack sub delete --name {name} --yes')
+        self.cmd('group delete --name {resource-group-two} --yes')
 
     def test_show_deployment_stack_subscription(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -2308,7 +2312,6 @@ class DeploymentStacksTest(ScenarioTest):
         # cleanup 
         self.cmd('stack sub delete --name {name} --yes')
         
-    #test again
     @AllowLargeResponse(4096)
     def test_list_deployment_stack_subscription(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -2505,6 +2508,8 @@ class DeploymentStacksTest(ScenarioTest):
             'template-file-spec': os.path.join(curr_dir, 'simple_template_spec.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
             'bicep-file': os.path.join(curr_dir, 'bicep_simple_template.bicep').replace('\\', '\\\\'),
+            'bicep-file-storage':os.path.join(curr_dir, 'data\\bicepparam\\storage_account_template.bicep').replace('\\', '\\\\'),
+            'bicep-param-file':os.path.join(curr_dir, 'data\\bicepparam\\storage_account_params.bicepparam').replace('\\', '\\\\'),
             'track-rg-file': os.path.join(curr_dir, 'tracked_resource_group.json').replace('\\', '\\\\'),
             'template-spec-name': template_spec_name,
             'template-spec-version': "v1",
@@ -2609,7 +2614,11 @@ class DeploymentStacksTest(ScenarioTest):
         #confirm rg resource1 has been removed from azure
         self.cmd('group list', checks=self.check("length([?name=='{resource-one}'])", 0))
 
-        # cleanup - delete resource group two
+        self.cmd('stack group delete -g {resource-group-two} --name {name} --yes')
+
+        #test bicep param file
+        self.cmd('stack group create --name {name} -g {resource-group-two} --template-file "{bicep-file-storage}" -p "{bicep-param-file}" --deny-settings-mode "none" --delete-all --yes', checks=self.check('provisioningState', 'succeeded'))
+
         self.cmd('stack group delete -g {resource-group-two} --name {name} --yes')
 
         # cleanup - delete resource group two
@@ -2829,6 +2838,8 @@ class DeploymentStacksTest(ScenarioTest):
             'template-file-spec': os.path.join(curr_dir, 'simple_template_spec.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
             'bicep-file': os.path.join(curr_dir, 'bicep_simple_template.bicep').replace('\\', '\\\\'),
+            'bicep-file-storage':os.path.join(curr_dir, 'data\\bicepparam\\storage_account_template.bicep').replace('\\', '\\\\'),
+            'bicep-param-file':os.path.join(curr_dir, 'data\\bicepparam\\storage_account_params.bicepparam').replace('\\', '\\\\'),
             'template-file-rg': os.path.join(curr_dir, 'simple_template_resource_group.json').replace('\\', '\\\\'),
             'track-rg-file': os.path.join(curr_dir, 'tracked_resource_group.json').replace('\\', '\\\\'),
             'template-spec-name': template_spec_name,
@@ -2840,7 +2851,7 @@ class DeploymentStacksTest(ScenarioTest):
             'resource-three': resource_three,
             'resource-type-specs': "Microsoft.Resources/templateSpecs",
             'actual-mg': self.create_random_name('azure-cli-management', 30),
-            'mg': "AzGovBlueprint"
+            'mg': "AzBlueprintAssignTest"
         })
         # create mg
         #self.cmd('account management-group create --name {mg}', checks=[])
@@ -2898,7 +2909,7 @@ class DeploymentStacksTest(ScenarioTest):
             'location': location,
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
-            'mg': "AzGovBlueprint",
+            'mg': "AzBlueprintAssignTest",
             'actual-mg':self.create_random_name('azure-cli-management', 30)
         })
 
@@ -2944,7 +2955,7 @@ class DeploymentStacksTest(ScenarioTest):
             'resource-three': resource_three,
             'resource-group-two': resource_group_two,
             'resource-type-specs': "Microsoft.Resources/templateSpecs",
-            'mg': "AzGovBlueprint",
+            'mg': "AzBlueprintAssignTest",
             'actual-mg':self.create_random_name('azure-cli-management', 30)
         })
 
@@ -3000,7 +3011,7 @@ class DeploymentStacksTest(ScenarioTest):
             'location': location,
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
-            'mg': "AzGovBlueprint",
+            'mg': "AzBlueprintAssignTest",
             'actual-mg':self.create_random_name('azure-cli-management', 30)
         })
 
@@ -3033,7 +3044,7 @@ class DeploymentStacksTest(ScenarioTest):
             'location': location,
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
-            'mg': "AzGovBlueprint",
+            'mg': "AzBlueprintAssignTest",
             'actual-mg':self.create_random_name('azure-cli-management', 30)
         })
 
