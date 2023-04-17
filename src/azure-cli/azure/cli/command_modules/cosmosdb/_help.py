@@ -1447,7 +1447,7 @@ examples:
   - name: Update External Seed Nodes of a given cluster.
     text: |
       az managed-cassandra cluster update --resource-group MyResourceGroup --cluster-name MyCluster --external-seed-nodes 127.0.0.1 127.0.0.2
-  - name: Update External Gossip Certificates of a given cluster. Certs can be passed in as strings or the file locations.
+  - name: Update External Gossip Certificates of a given cluster. Certs can be passed in as file locations.
     text: |
       az managed-cassandra cluster update --resource-group MyResourceGroup --cluster-name MyCluster --external-gossip-certificates C:/MyFolder/test.pem BeginCert-MLXCF-EndCert
 """
