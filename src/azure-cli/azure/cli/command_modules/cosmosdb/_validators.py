@@ -548,7 +548,7 @@ def get_certificates(input_certificates):
 
 
 def get_certificate(cert):
-    """ Extract certificate from file or from string """
+    """ Extract certificate from file"""
     from azure.cli.core.util import read_file_content
     import os
     certificate = ''
@@ -556,7 +556,6 @@ def get_certificate(cert):
         if os.path.exists(cert):
             certificate = read_file_content(cert)
         else:
-            certificate = cert
-    else:
-        raise InvalidArgumentValueError("""One of the value provided for the certificates is empty. Please verify there aren't any spaces.""")
+            raise InvalidArgumentValueError("""File does not exist in the path provided.""")
+
     return certificate
