@@ -238,6 +238,7 @@ def load_command_table(self, _):
                                'with the same name within this key vault until the secret has been purged from the '
                                'soft-deleted state. Please see the following documentation for additional guidance.'
                                '\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview'))
+        g.keyvault_command('purge', 'purge_deleted_secret')
 
     with self.command_group('keyvault certificate', data_entity.command_type) as g:
         g.keyvault_custom('create',

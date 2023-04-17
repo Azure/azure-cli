@@ -684,6 +684,16 @@ long-summary: The Get Deleted Secret operation returns the specified deleted sec
     attributes. This operation requires the secrets/get permission.
 """
 
+helps['keyvault secret purge'] = """
+type: command
+short-summary: Permanently deletes the specified secret.
+long-summary: The purge deleted secret operation removes the secret permanently, without the possibility
+    of recovery. This operation can only be enabled on a soft-delete enabled vault. This
+    operation requires the secrets/purge permission.
+"""
+
+
+
 helps['keyvault show'] = """
 type: command
 short-summary: Show details of a Vault or HSM.
