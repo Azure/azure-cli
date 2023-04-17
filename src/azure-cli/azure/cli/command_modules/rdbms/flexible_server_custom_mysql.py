@@ -1162,7 +1162,8 @@ def flexible_server_ad_admin_show(client, resource_group_name, server_name):
         server_name=server_name,
         administrator_name='ActiveDirectory')
 
-def flexible_gtid_reset(client, resource_group_name, server_name, gtid_set, no_wait=False):
+
+def flexible_gtid_reset(client, resource_group_name, server_name, gtid_set, no_wait=False, yes=False):
     try:
         server_object = client.get(resource_group_name, server_name)
     except Exception as e:
@@ -1175,7 +1176,7 @@ def flexible_gtid_reset(client, resource_group_name, server_name, gtid_set, no_w
 
     user_confirmation("Resetting GTID will invalidate all the automated/on-demand backups that were taken before the reset action and you will not be able "
                       "to perform PITR (point-in-time-restore) using fastest restore point or by custom restore point if the selected restore time is before"
-                      " the GTID reset time. Do you want to continue?")
+                      " the GTID reset time. Do you want to continue?", yes=yes)
 
     parameters = mysql_flexibleservers.models.ServerGtidSetParameter(
         gtid_set=gtid_set

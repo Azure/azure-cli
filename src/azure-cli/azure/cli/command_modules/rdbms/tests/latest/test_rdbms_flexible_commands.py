@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import os
 import time
+import uuid
 
 from datetime import datetime, timedelta, tzinfo
 from time import sleep
@@ -130,6 +131,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_georestore_update_mgmt(self, resource_group):
         self._test_flexible_server_georestore_update_mgmt('mysql', resource_group)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_gtid_reset(self, resource_group):
+        self._test_flexible_server_gtid_reset('mysql', resource_group)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
@@ -948,6 +954,56 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if database_engine == 'mysql':
             main_tests(True)
         main_tests(False)
+
+    def _test_flexible_server_gtid_reset(self, database_engine, resource_group):
+        if database_engine == 'postgres':
+            location = self.postgres_location
+        elif database_engine == 'mysql':
+            location = self.mysql_location
+
+        source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access none --tier {} --sku-name {}'
+                 .format(database_engine, resource_group, source_server, location, 'GeneralPurpose', 'Standard_D2ds_v4'))
+        
+        self.cmd('{} flexible-server show -g {} -n {}'
+                 .format(database_engine, resource_group, source_server),
+                 checks=[JMESPathCheck('backup.geoRedundantBackup', 'Disabled')])
+        
+        # update server paramters to enable gtid
+        source = 'user-override'
+        parameter_name = 'enforce_gtid_consistency'
+        self.cmd('{} flexible-server parameter set --name {} -v {} --source {} -s {} -g {}'
+                 .format(database_engine, parameter_name, 'ON', source, source_server, resource_group),
+                 checks=[JMESPathCheck('value', 'ON'), JMESPathCheck('source', source), JMESPathCheck('name', parameter_name)])
+
+        parameter_name = 'gtid_mode'
+        self.cmd('{} flexible-server parameter set --name {} -v {} --source {} -s {} -g {}'
+                 .format(database_engine, parameter_name, 'OFF_PERMISSIVE', source, source_server, resource_group),
+                 checks=[JMESPathCheck('value', 'OFF_PERMISSIVE'), JMESPathCheck('source', source), JMESPathCheck('name', parameter_name)])
+        
+        self.cmd('{} flexible-server parameter set --name {} -v {} --source {} -s {} -g {}'
+                 .format(database_engine, parameter_name, 'ON_PERMISSIVE', source, source_server, resource_group),
+                 checks=[JMESPathCheck('value', 'ON_PERMISSIVE'), JMESPathCheck('source', source), JMESPathCheck('name', parameter_name)])
+        
+        self.cmd('{} flexible-server parameter set --name {} -v {} --source {} -s {} -g {}'
+                 .format(database_engine, parameter_name, 'ON', source, source_server, resource_group),
+                 checks=[JMESPathCheck('value', 'ON'), JMESPathCheck('source', source), JMESPathCheck('name', parameter_name)])
+
+        # set gtid string to source server
+        self.cmd('{} flexible-server gtid reset --resource-group {} --server-name {} --gtid-set {} --yes'
+                 .format(database_engine, resource_group, source_server, str(uuid.uuid4()).upper() + ":1"), expect_failure=False)
+
+        # udpate server geo-redundant-backup to enable
+        self.cmd('{} flexible-server update -g {} -n {} --geo-redundant-backup Enabled'
+                 .format(database_engine, resource_group, source_server),
+                 checks=[JMESPathCheck('backup.geoRedundantBackup', 'Enabled')])
+        
+        self.cmd('{} flexible-server gtid reset --resource-group {} --server-name {} --gtid-set {} --yes'
+                 .format(database_engine, resource_group, source_server, str(uuid.uuid4()).upper() + ":1"), expect_failure=True)
+        
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, source_server))
+
 
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):

@@ -773,6 +773,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('gtid_set', arg_type=gtid_set_arg_type)
                 c.argument('resource_group_name', arg_type=resource_group_name_type)
                 c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+                c.argument('yes', arg_type=yes_arg_type)
 
         handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type)
 
