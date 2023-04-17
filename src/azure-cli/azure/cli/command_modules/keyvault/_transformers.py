@@ -172,3 +172,18 @@ def transform_secret_set_attributes(result, **command_args):
         })
         return ret
     return result
+
+
+def transform_secret_show_deleted(result, **command_args):
+    if not isinstance(result, dict):
+        properties = getattr(result, "properties", None)
+        ret = transform_secret_base_properties(properties)
+        ret.update({
+            "kid": getattr(properties, "key_id", None),
+            "value": None,
+            "deletedDate": getattr(result, "deleted_date", None),
+            "recoveryId": getattr(result, "recovery_id", None),
+            "scheduledPurgeDate": getattr(result, "scheduled_purge_date", None)
+        })
+        return ret
+    return result

@@ -573,12 +573,13 @@ def load_arguments(self, _):
                 c.extra('identifier', options_list=['--id'],
                         help='The recovery id of the {}. '
                              'If specified all other \'Id\' arguments should be omitted.'.format(item),
-                        validator=validate_key_id('deleted' + item))
-                c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item),
-                           required=False)
-                c.argument('vault_base_url', help='Name of the Vault. Required if --id is not specified.',
-                           required=False)
-                c.argument(item + '_version', required=False)
+                        validator=validate_keyvault_resource_id(item))
+                c.argument('name', options_list=['--name', '-n'], required=False,
+                           help='Name of the {}. Required if --id is not specified.'.format(item))
+                c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None,
+                        options_list=['--vault-name'], required=False,
+                        help='Name of the Vault. Required if --id is not specified.')
+                c.argument('version', required=False)
 
         for cmd in ['list', 'list-deleted']:
             with self.argument_context('keyvault {} {}'.format(item, cmd)) as c:

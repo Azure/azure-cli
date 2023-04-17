@@ -677,6 +677,13 @@ long-summary: The GET operation is applicable to any secret stored in Azure Key 
     requires the secrets/get permission.
 """
 
+helps['keyvault secret show-deleted'] = """
+type: command
+short-summary: Gets the specified deleted secret.
+long-summary: The Get Deleted Secret operation returns the specified deleted secret along with its
+    attributes. This operation requires the secrets/get permission.
+"""
+
 helps['keyvault show'] = """
 type: command
 short-summary: Show details of a Vault or HSM.
