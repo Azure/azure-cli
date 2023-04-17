@@ -26,6 +26,11 @@ def load_command_table(self, _):
     eh_namespace_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.eventhubs.Operation.NamespaceCustomFile#{}',
     )
+
+    eh_eventhub_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.eventhubs.Operation.EventHubEntity#{}',
+    )
+
     eh_event_hub_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventhub.operations#EventHubsOperations.{}',
         client_factory=event_hub_mgmt_client_factory,
@@ -66,12 +71,11 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_private_endpoint_connection', confirmation=True, validator=validate_private_endpoint_connection_id)
 
 # EventHub Region
-    with self.command_group('eventhubs eventhub', eh_event_hub_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=event_hub_mgmt_client_factory) as g:
-        g.custom_command('create', 'cli_eheventhub_create')
-        g.show_command('show', 'get')
-        g.command('list', 'list_by_namespace')
-        g.command('delete', 'delete')
-        g.generic_update_command('update', custom_func_name='cli_eheventhub_update')
+    from .Operation.EventHubEntity import EventHubEntityUpdate
+    self.command_table['eventhubs eventhub update'] = EventHubEntityUpdate(loader=self)
+    with self.command_group('eventhubs eventhub', custom_command_type=eh_eventhub_custom,
+                            is_preview=True) as g:
+        g.custom_command('create', 'cli_eventhub_create')
 
 # DisasterRecoveryConfigs Region
     with self.command_group('eventhubs georecovery-alias', eh_geodr_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=disaster_recovery_mgmt_client_factory) as g:
