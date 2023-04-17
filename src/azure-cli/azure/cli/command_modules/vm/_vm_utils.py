@@ -554,7 +554,7 @@ def trusted_launch_warning_log(namespace, generation_version, features):
     if not generation_version:
         return
 
-    log_message = 'Starting Build Event (05-23), onwards "az vm/vmss create" command will deploy Gen2-Trusted ' \
+    log_message = 'Ignite 2023 onwards "az vm/vmss create" command will deploy Gen2-Trusted ' \
                   'Launch VM by default. To know more about the default change and Trusted Launch, ' \
                   'please visit https://aka.ms/TLaD'
 

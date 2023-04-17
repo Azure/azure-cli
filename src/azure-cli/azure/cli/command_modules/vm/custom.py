@@ -340,7 +340,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         raise RequiredArgumentMissingError(
             'usage error: --upload-size-bytes should be used together with --upload-type')
 
-    log_message = 'Starting Build Event (05-23), onwards "az disk create" command will deploy Gen2-Trusted Launch VM ' \
+    log_message = 'Ignite 2023 onwards "az disk create" command will deploy Gen2-Trusted Launch VM ' \
                   'by default. To know more about the default change and Trusted Launch, ' \
                   'please visit https://aka.ms/TLaD'
     if image_reference is not None:
