@@ -240,7 +240,7 @@ def load_arguments_sb(self, _):
             c.argument('subnet', arg_group='Virtual Network Rule', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
             c.argument('ip_mask', arg_group='IP Address Rule', options_list=['--ip-address'], help='IPv4 address or CIDR range.', deprecate_info=c.deprecate(redirect='--ip-rule', expiration='2.49.0'))
             c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
-            c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'], help='Name of the Virtual Network', deprecate_info=c.deprecate(expiration='2..0'))
+            c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'], help='Name of the Virtual Network', deprecate_info=c.deprecate(expiration='2.49.0'))
 
     with self.argument_context('servicebus namespace network-rule update', resource_type=ResourceType.MGMT_SERVICEBUS,
                                min_api='2017-04-01') as c:
