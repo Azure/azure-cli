@@ -1664,7 +1664,8 @@ APPSETTINGS_TO_MASK = ['DOCKER_REGISTRY_SERVER_PASSWORD']
 def update_container_settings(cmd, resource_group_name, name, docker_registry_server_url=None,
                               docker_custom_image_name=None, docker_registry_server_user=None,
                               websites_enable_app_service_storage=None, docker_registry_server_password=None,
-                              multicontainer_config_type=None, multicontainer_config_file=None, slot=None, min_replicas=None):
+                              multicontainer_config_type=None, multicontainer_config_file=None,
+                              slot=None, min_replicas=None):
     settings = []
     if docker_registry_server_url is not None:
         settings.append('DOCKER_REGISTRY_SERVER_URL=' + docker_registry_server_url)
