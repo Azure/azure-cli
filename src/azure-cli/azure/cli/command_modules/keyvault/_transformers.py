@@ -187,3 +187,10 @@ def transform_secret_show_deleted(result, **command_args):
         })
         return ret
     return result
+
+
+def transform_secret_delete(result, **command_args):
+    if not isinstance(result, dict):
+        ret = transform_secret_show_deleted(result.result())
+        return ret
+    return result
