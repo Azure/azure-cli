@@ -815,6 +815,10 @@ examples:
   - name: Create a deployment at resource group scope from a bicep template and a bicepparam parameter file
     text: >
         az deployment group create --resource-group testrg --template-file azuredeploy.bicep --parameters parameters.bicepparam
+  - name: Create a deployment at resource group across tenants
+    text: >
+        az deployment group create --resource-group testrg --name rollout01 \\
+            --template-file azuredeploy.json --parameters @myparameters.json --aux-tenants auxiliary_tenant01 auxiliary_tenant02
 """
 
 helps['deployment group what-if'] = """
