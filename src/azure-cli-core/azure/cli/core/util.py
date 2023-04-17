@@ -314,7 +314,7 @@ def get_latest_from_github(package_path='azure-cli'):
 
 
 def _update_latest_from_github(versions):
-    if not check_connectivity(max_retries=0):
+    if not check_connectivity(url='https://raw.githubusercontent.com', max_retries=0):
         return versions, False
     success = True
     for pkg in ['azure-cli-core', 'azure-cli-telemetry']:
@@ -851,7 +851,7 @@ def find_child_collection(parent, *args, **kwargs):
     return collection
 
 
-def check_connectivity(url='https://raw.githubusercontent.com', max_retries=5, timeout=1):
+def check_connectivity(url='https://azure.microsoft.com', max_retries=5, timeout=1):
     import requests
     import timeit
     start = timeit.default_timer()
