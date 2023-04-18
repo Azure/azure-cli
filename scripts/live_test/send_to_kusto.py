@@ -89,7 +89,6 @@ def generate_csv_file():
 
 def send_to_kusto():
     logger.info('Start send csv data to kusto db for {TARGET}'.format(TARGET=TARGET))
-    start_time = time.time()
     kcsb = KustoConnectionStringBuilder.with_aad_application_key_authentication(KUSTO_CLUSTER, KUSTO_CLIENT_ID, KUSTO_CLIENT_SECRET, KUSTO_TENANT_ID)
     # The authentication method will be taken from the chosen KustoConnectionStringBuilder.
     client = QueuedIngestClient(kcsb)
@@ -106,27 +105,6 @@ def send_to_kusto():
     result = client.ingest_from_file(f"/mnt/vss/_work/1/{TARGET}.csv", ingestion_properties=ingestion_props)
     # Inspect the result for useful information, such as source_id and blob_url
     print(repr(result))
-    qs = KustoIngestStatusQueues(client)
-    MAX_BACKOFF = 180
-    backoff = 1
-    while True:
-        if qs.success.is_empty() and qs.failure.is_empty():
-            time.sleep(backoff)
-            backoff = min(backoff * 2, MAX_BACKOFF)
-            logger.info("No new messages. backing off for {} seconds".format(backoff))
-            continue
-        backoff = 1
-        success_messages = qs.success.pop(10)
-        failure_messages = qs.failure.pop(10)
-        if success_messages:
-            logger.info(f"SUCCESS : {success_messages}")
-            break
-        if failure_messages:
-            logger.error(f"FAILURE : {failure_messages}")
-            break
-    end_time = time.time()
-    total_time = end_time - start_time
-    logger.info("Execution time: {} seconds.".format(total_time))
     logger.info('Finsh send csv data to kusto db for {}.'.format(TARGET))
 
 if __name__ == '__main__':
