@@ -123,26 +123,31 @@ def cli_namespace_exists(client, name):
 
 
 # Eventhub Region
-def cli_eheventhub_create(cmd, client, resource_group_name, namespace_name, event_hub_name, message_retention_in_days=None, partition_count=None, status=None,
-                          enabled=None, skip_empty_archives=None, capture_interval_seconds=None, capture_size_limit_bytes=None, destination_name=None, storage_account_resource_id=None, blob_container=None, archive_name_format=None):
+def cli_eheventhub_create(cmd, client, resource_group_name, namespace_name, event_hub_name, partition_count=None, status=None,
+                          enabled=None, skip_empty_archives=None, capture_interval_seconds=None, capture_size_limit_bytes=None, destination_name=None, storage_account_resource_id=None,
+                          blob_container=None, archive_name_format=None, cleanup_policy="Delete", retention_time_in_hours=None, tombstone_retention_time_in_hours=None):
     # from azure.mgmt.eventhub.models import Eventhub, CaptureDescription, Destination, EncodingCaptureDescription
     Eventhub = cmd.get_models('Eventhub', resource_type=ResourceType.MGMT_EVENTHUB)
     CaptureDescription = cmd.get_models('CaptureDescription', resource_type=ResourceType.MGMT_EVENTHUB)
     Destination = cmd.get_models('Destination', resource_type=ResourceType.MGMT_EVENTHUB)
+    retentiondescription = cmd.get_models('RetentionDescription', resource_type=ResourceType.MGMT_EVENTHUB)
     EncodingCaptureDescription = cmd.get_models('EncodingCaptureDescription', resource_type=ResourceType.MGMT_EVENTHUB)
 
     eventhubparameter1 = Eventhub()
 
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
-        if message_retention_in_days:
-            logger.warning('Parameter --message-retention would be deprecated in a future release and would be replaced by --retention-time-in-hours.')
-            eventhubparameter1.message_retention_in_days = message_retention_in_days
 
         if partition_count:
             eventhubparameter1.partition_count = partition_count
 
         if status:
             eventhubparameter1.status = status
+
+        eventhubparameter1.retention_description = retentiondescription(
+                cleanup_policy = cleanup_policy,
+                retention_time_in_hours=retention_time_in_hours,
+                tombstone_retention_time_in_hours=tombstone_retention_time_in_hours
+            )
 
         if enabled is not None and enabled is True:
             eventhubparameter1.capture_description = CaptureDescription(
@@ -157,6 +162,7 @@ def cli_eheventhub_create(cmd, client, resource_group_name, namespace_name, even
                     blob_container=blob_container,
                     archive_name_format=archive_name_format)
             )
+    print(eventhubparameter1.retention_description)
     return client.create_or_update(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
@@ -164,16 +170,16 @@ def cli_eheventhub_create(cmd, client, resource_group_name, namespace_name, even
         parameters=eventhubparameter1)
 
 
-def cli_eheventhub_update(cmd, instance, message_retention_in_days=None, partition_count=None, status=None,
+def cli_eheventhub_update(cmd, instance, retention_time_in_hours=None, partition_count=None, status=None,
                           enabled=None, skip_empty_archives=None, capture_interval_seconds=None,
                           capture_size_limit_bytes=None, destination_name=None, storage_account_resource_id=None,
                           blob_container=None, archive_name_format=None):
-    capturedescription, destination, encodingcapturedescription = cmd.get_models('CaptureDescription', 'Destination', 'EncodingCaptureDescription')
+    capturedescription, destination, encodingcapturedescription, retentiondescription = cmd.get_models('CaptureDescription', 'Destination', 'EncodingCaptureDescription', 'RetentionDescription')
 
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
-        if message_retention_in_days is not None:
-            logger.warning('Parameter --message-retention would be deprecated in a future release and would be replaced by --retention-time-in-hours.')
-            instance.message_retention_in_days = message_retention_in_days
+
+        if retention_time_in_hours:
+            instance.retention_description.retention_time_in_hours = retention_time_in_hours
 
         if partition_count:
             instance.partition_count = partition_count

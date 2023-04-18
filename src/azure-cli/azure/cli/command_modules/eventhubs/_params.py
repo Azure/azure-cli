@@ -65,7 +65,7 @@ def load_arguments_eh(self, _):
 
     for scope in ['eventhubs eventhub update', 'eventhubs eventhub create']:
         with self.argument_context(scope) as c:
-            c.argument('message_retention_in_days', options_list=['--message-retention'], type=int, help='Number of days to retain events for this Event Hub, value should be 1 to 7 days and depends on Namespace sku. if Namespace sku is Basic than value should be one and is Manadatory parameter. Namespace sku is standard value should be 1 to 7 days, default is 7 days and is optional parameter', deprecate_info=c.deprecate(hide=True, expiration='2.49.0'))
+            c.argument('retention_time_in_hours', arg_group='Retention-Description', options_list=['--retention-time', '--retention-time-in-hours'], type=int, help='Number of hours to retain the events for this Event Hub. This value is only used when cleanupPolicy is Delete. If cleanupPolicy is Compaction the returned value of this property is Long.MaxValue')
             c.argument('partition_count', type=int, help='Number of partitions created for the Event Hub. By default, allowed values are 2-32. Lower value of 1 is supported with Kafka enabled namespaces. In presence of a custom quota, the upper limit will match the upper limit of the quota.')
             c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled']), help='Status of Eventhub')
             c.argument('enabled', options_list=['--enable-capture'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether capture is enabled.')
@@ -76,6 +76,10 @@ def load_arguments_eh(self, _):
             c.argument('storage_account_resource_id', arg_group='Capture-Destination', validator=validate_storageaccount, options_list=['--storage-account'], help='Name (if within same resource group and not of type Classic Storage) or ARM id of the storage account to be used to create the blobs')
             c.argument('blob_container', arg_group='Capture-Destination', help='Blob container Name')
             c.argument('archive_name_format', arg_group='Capture-Destination', help='Blob naming convention for archive, e.g. {Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}. Here all the parameters (Namespace,EventHub .. etc) are mandatory irrespective of order')
+
+    with self.argument_context('eventhubs eventhub create') as c:
+        c.argument('tombstone_retention_time_in_hours', arg_group='Retention-Description', options_list=['--tombstone-retention-time-in-hours', '-t'], help='Number of hours to retain the tombstone markers of a compacted Event Hub. This value is only used when cleanupPolicy is Compaction. Consumer must complete reading the tombstone marker within this specified amount of time if consumer begins from starting offset to ensure they get a valid snapshot for the specific key described by the tombstone marker within the compacted Event Hub.')
+        c.argument('cleanup_policy', arg_group='Retention-Description', options_list=['--cleanup-policy'], help='Enumerates the possible values for cleanup policy.')
 
     with self.argument_context('eventhubs eventhub list') as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
