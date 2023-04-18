@@ -231,25 +231,32 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_dns_zone', client_factory=cf_dns_mgmt_zones)
         g.generic_update_command('update', custom_func_name='update_dns_zone')
 
-    with self.command_group('network dns record-set') as g:
-        g.custom_command('list', 'list_dns_record_set', client_factory=cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output)
-
     api_version = str(get_api_version(self.cli_ctx, ResourceType.MGMT_NETWORK_DNS))
     api_version = api_version.replace('-', '_')
     dns_doc_string = 'azure.mgmt.dns.v' + api_version + '.operations#RecordSetsOperations.create_or_update'
 
-    supported_records = ['a', 'aaaa', 'mx', 'ns', 'ptr', 'srv', 'txt']
-    if self.supported_api_version(resource_type=ResourceType.MGMT_NETWORK_DNS, min_api='2018-02-01'):
-        supported_records.append('caa')
+    supported_records = ['a', 'aaaa', 'mx', 'ns', 'ptr', 'srv', 'txt', 'caa']
     for record in supported_records:
         with self.command_group('network dns record-set {}'.format(record), network_dns_record_set_sdk, resource_type=ResourceType.MGMT_NETWORK_DNS) as g:
             g.show_command('show', 'get', transform=transform_dns_record_set_output)
             g.command('delete', 'delete', confirmation=True)
-            g.custom_command('list', 'list_dns_record_set', client_factory=cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output, table_transformer=transform_dns_record_set_table_output)
+            g.custom_command('list', 'list_dns_record_set', transform=transform_dns_record_set_output, table_transformer=transform_dns_record_set_table_output)
             g.custom_command('create', 'create_dns_record_set', transform=transform_dns_record_set_output, doc_string_source=dns_doc_string)
             g.custom_command('add-record', 'add_dns_{}_record'.format(record), transform=transform_dns_record_set_output)
             g.custom_command('remove-record', 'remove_dns_{}_record'.format(record), transform=transform_dns_record_set_output)
-            g.generic_update_command('update', custom_func_name='update_dns_record_set', transform=transform_dns_record_set_output)
+
+    from .operations.dns import RecordSetAUpdate as DNSRecordSetAUpdate, RecordSetAAAAUpdate as DNSRecordSetAAAAUpdate, \
+        RecordSetMXUpdate as DNSRecordSetMXUpdate, RecordSetNSUpdate as DNSRecordSetNSUpdate, \
+        RecordSetPTRUpdate as DNSRecordSetPTRUpdate, RecordSetSRVUpdate as DNSRecordSetSRVUpdate, \
+        RecordSetTXTUpdate as DNSRecordSetTXTUpdate, RecordSetCAAUpdate as DNSRecordSetCAAUpdate
+    self.command_table["network dns record-set a update"] = DNSRecordSetAUpdate(loader=self)
+    self.command_table["network dns record-set aaaa update"] = DNSRecordSetAAAAUpdate(loader=self)
+    self.command_table["network dns record-set mx update"] = DNSRecordSetMXUpdate(loader=self)
+    self.command_table["network dns record-set ns update"] = DNSRecordSetNSUpdate(loader=self)
+    self.command_table["network dns record-set ptr update"] = DNSRecordSetPTRUpdate(loader=self)
+    self.command_table["network dns record-set srv update"] = DNSRecordSetSRVUpdate(loader=self)
+    self.command_table["network dns record-set txt update"] = DNSRecordSetTXTUpdate(loader=self)
+    self.command_table["network dns record-set caa update"] = DNSRecordSetCAAUpdate(loader=self)
 
     with self.command_group('network dns record-set soa', network_dns_record_set_sdk) as g:
         g.show_command('show', 'get', transform=transform_dns_record_set_output)
@@ -266,31 +273,40 @@ def load_command_table(self, _):
 
     # region ExpressRoutes
     with self.command_group('network express-route'):
-        from azure.cli.command_modules.network.custom import ExpressRouteCreate, ExpressRouteUpdate
+        from .custom import ExpressRouteCreate, ExpressRouteUpdate
         self.command_table['network express-route create'] = ExpressRouteCreate(loader=self)
         self.command_table['network express-route update'] = ExpressRouteUpdate(loader=self)
 
+    with self.command_group('network express-route gateway'):
+        from .custom import ExpressRouteGatewayCreate, ExpressRouteGatewayUpdate
+        self.command_table['network express-route gateway create'] = ExpressRouteGatewayCreate(loader=self)
+        self.command_table['network express-route gateway update'] = ExpressRouteGatewayUpdate(loader=self)
+
     with self.command_group('network express-route gateway connection'):
-        from azure.cli.command_modules.network.custom import ExpressRouteConnectionUpdate, ExpressRouteConnectionCreate
+        from .custom import ExpressRouteConnectionUpdate, ExpressRouteConnectionCreate
         self.command_table['network express-route gateway connection create'] = ExpressRouteConnectionCreate(loader=self)
         self.command_table['network express-route gateway connection update'] = ExpressRouteConnectionUpdate(loader=self)
 
     with self.command_group('network express-route peering'):
-        from azure.cli.command_modules.network.custom import ExpressRoutePeeringCreate, ExpressRoutePeeringUpdate
+        from .custom import ExpressRoutePeeringCreate, ExpressRoutePeeringUpdate
         self.command_table['network express-route peering create'] = ExpressRoutePeeringCreate(loader=self)
         self.command_table['network express-route peering update'] = ExpressRoutePeeringUpdate(loader=self)
 
+    with self.command_group('network express-route peering connection'):
+        from .custom import ExpressRoutePeeringConnectionCreate
+        self.command_table['network express-route peering connection create'] = ExpressRoutePeeringConnectionCreate(loader=self)
+
     with self.command_group('network express-route port') as g:
-        from azure.cli.command_modules.network.custom import ExpressRoutePortCreate
+        from .custom import ExpressRoutePortCreate
         self.command_table['network express-route port create'] = ExpressRoutePortCreate(loader=self)
         g.custom_command('generate-loa', 'download_generated_loa_as_pdf')
 
     with self.command_group('network express-route port identity'):
-        from azure.cli.command_modules.network.custom import ExpressRoutePortIdentityAssign
+        from .custom import ExpressRoutePortIdentityAssign
         self.command_table['network express-route port identity assign'] = ExpressRoutePortIdentityAssign(loader=self)
 
     with self.command_group('network express-route port link'):
-        from azure.cli.command_modules.network.custom import ExpressRoutePortLinkUpdate
+        from .custom import ExpressRoutePortLinkUpdate
         self.command_table['network express-route port link update'] = ExpressRoutePortLinkUpdate(loader=self)
     # endregion
 
@@ -545,7 +561,7 @@ def load_command_table(self, _):
         self.command_table["network watcher flow-log delete"] = NwFlowLogDelete(loader=self)
         g.custom_show_command('show', 'show_nw_flow_logging', validator=process_nw_flow_log_show_namespace)
 
-    with self.command_group('network watcher troubleshooting') as g:
+    with self.command_group('network watcher troubleshooting'):
         from .operations.watcher import NwTroubleshootingStart, NwTroubleshootingShow
         self.command_table["network watcher troubleshooting start"] = NwTroubleshootingStart(loader=self)
         self.command_table["network watcher troubleshooting show"] = NwTroubleshootingShow(loader=self)
@@ -553,7 +569,7 @@ def load_command_table(self, _):
 
     # region PublicIPAddresses
     public_ip_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$Address:ipAddress, AddressVersion:publicIpAddressVersion, AllocationMethod:publicIpAllocationMethod, IdleTimeoutInMinutes:idleTimeoutInMinutes, ProvisioningState:provisioningState}'
-    public_ip_show_table_transform = public_ip_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ' if self.supported_api_version(min_api='2017-06-01') else ' ')
+    public_ip_show_table_transform = public_ip_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ')
 
     with self.command_group('network public-ip') as g:
         from .aaz.latest.network.public_ip import List, Show
@@ -695,4 +711,27 @@ def load_command_table(self, _):
         g.custom_command('delete', 'remove_private_endpoint_connection', confirmation=True)
         g.custom_show_command('show', 'show_private_endpoint_connection')
         g.custom_command('list', 'list_private_endpoint_connection')
+    # endregion
+
+    # region NatGateway
+    from .operations.nat import GatewayCreate as NATGatewayCreate, GatewayUpdate as NATGatewayUpdate
+    self.command_table["network nat gateway create"] = NATGatewayCreate(loader=self)
+    self.command_table["network nat gateway update"] = NATGatewayUpdate(loader=self)
+    # endregion
+
+    # region SecurityPartnerProvider
+    from .custom import SecurityPartnerProviderCreate, SecurityPartnerProviderUpdate
+    self.command_table["network security-partner-provider create"] = SecurityPartnerProviderCreate(loader=self)
+    self.command_table["network security-partner-provider update"] = SecurityPartnerProviderUpdate(loader=self)
+    # endregion
+
+    # region VirtualAppliance
+    from .custom import VirtualApplianceCreate, VirtualApplianceUpdate
+    self.command_table["network virtual-appliance create"] = VirtualApplianceCreate(loader=self)
+    self.command_table["network virtual-appliance update"] = VirtualApplianceUpdate(loader=self)
+    # endregion
+
+    # region CustomIp
+    from .custom import CustomIpPrefixUpdate
+    self.command_table["network custom-ip prefix update"] = CustomIpPrefixUpdate(loader=self)
     # endregion

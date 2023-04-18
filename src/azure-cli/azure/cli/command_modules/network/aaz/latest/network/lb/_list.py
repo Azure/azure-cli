@@ -2206,6 +2206,7 @@ class _ListHelper:
         properties.public_ip_prefix = AAZObjectType(
             serialized_name="publicIPPrefix",
         )
+        cls._build_schema_sub_resource_read(properties.public_ip_prefix)
         properties.resource_guid = AAZStrType(
             serialized_name="resourceGuid",
             flags={"read_only": True},
@@ -2219,12 +2220,10 @@ class _ListHelper:
         ddos_settings.ddos_protection_plan = AAZObjectType(
             serialized_name="ddosProtectionPlan",
         )
+        cls._build_schema_sub_resource_read(ddos_settings.ddos_protection_plan)
         ddos_settings.protection_mode = AAZStrType(
             serialized_name="protectionMode",
         )
-
-        ddos_protection_plan = _schema_public_ip_address_read.properties.ddos_settings.ddos_protection_plan
-        ddos_protection_plan.id = AAZStrType()
 
         dns_settings = _schema_public_ip_address_read.properties.dns_settings
         dns_settings.domain_name_label = AAZStrType(
@@ -2305,9 +2304,6 @@ class _ListHelper:
 
         zones = _schema_public_ip_address_read.properties.nat_gateway.zones
         zones.Element = AAZStrType()
-
-        public_ip_prefix = _schema_public_ip_address_read.properties.public_ip_prefix
-        public_ip_prefix.id = AAZStrType()
 
         sku = _schema_public_ip_address_read.sku
         sku.name = AAZStrType()

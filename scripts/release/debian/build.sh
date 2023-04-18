@@ -46,7 +46,7 @@ $PYTHON_SRC_DIR/*/configure --srcdir $PYTHON_SRC_DIR/* --prefix $WORKDIR/python_
 make
 make install
 
-$WORKDIR/python_env/bin/python3 -m pip install --upgrade pip
+$WORKDIR/python_env/bin/python3 -m pip install --upgrade pip setuptools
 
 export PATH=$PATH:$WORKDIR/python_env/bin
 

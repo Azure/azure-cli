@@ -186,4 +186,8 @@ class Wait(AAZWaitCommand):
             return cls._schema_on_200
 
 
+class _WaitHelper:
+    """Helper class for Wait"""
+
+
 __all__ = ["Wait"]

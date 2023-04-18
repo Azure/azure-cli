@@ -1044,12 +1044,10 @@ def copy_blob(cmd, client, source_url, metadata=None, **kwargs):
                                                source_offset=0, **params)
             return transform_response_with_bytearray(res)
     if kwargs.get('tier') is not None:
-        src_properties = src_client.get_blob_properties()
-        BlobType = cmd.get_models('_models#BlobType')
         tier = kwargs.pop('tier')
-        if src_properties.blob_type == BlobType.BlockBlob:
+        try:
             kwargs["standard_blob_tier"] = getattr(StandardBlobTier, tier)
-        elif src_properties.blob_type == BlobType.PageBlob:
+        except AttributeError:
             PremiumPageBlobTier = cmd.get_models('_models#PremiumPageBlobTier')
             kwargs["premium_page_blob_tier"] = getattr(PremiumPageBlobTier, tier)
     return client.start_copy_from_url(source_url=source_url, metadata=metadata, incremental_copy=False, **kwargs)

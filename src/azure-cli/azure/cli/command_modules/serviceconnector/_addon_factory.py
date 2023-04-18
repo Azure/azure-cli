@@ -129,7 +129,7 @@ class AddonBase:
             return {'auth_type': 'systemAssignedIdentity'}
 
         # Override the method when default auth type is not system identity
-        raise CLIInternalError('The method get_auth_info should be overridded '
+        raise CLIInternalError('The method get_auth_info should be overridden '
                                'when default auth type is not system identity.')
 
     def rollback(self, cnt=None):
@@ -145,7 +145,7 @@ class AddonBase:
 
         # deletion should be in reverse order
         for index in range(cnt - 1, -1, -1):
-            # apply parmeters to format the command
+            # apply parameters to format the command
             cmd = deletion_steps[index].format(**self._params)
             try:
                 run_cli_cmd(cmd)
@@ -171,7 +171,7 @@ class AddonBase:
         return params
 
     def _retrive_source_rg(self):
-        '''Retrive the resource group name in source resource id
+        '''Retrieve the resource group name in source resource id
         '''
         if not is_valid_resource_id(self._source_id):
             raise InvalidArgumentValueError('The source resource id is invalid: {}'.format(self._source_id))
@@ -180,7 +180,7 @@ class AddonBase:
         return segments.get('resource_group')
 
     def _retrive_source_loc(self):
-        '''Retrive the location of source resource group
+        '''Retrieve the location of source resource group
         '''
         rg = self._retrive_source_rg()
         output = run_cli_cmd('az group show -n {} -o json'.format(rg))
