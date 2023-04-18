@@ -562,13 +562,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
         instance.storage.auto_grow = auto_grow
 
     if public_access:
-        # set the public_access here only when public_access's lower class equals 'disabled' and 'enabled'
-        if str(public_access).lower() == 'Disabled'.lower():
-            instance.network.public_network_access = 'Disabled'
-        elif str(public_access).lower() == 'Enabled'.lower():
-            instance.network.public_network_access = 'Enabled'
-        else:
-            raise CLIError('Invalid public_access value for updating. Allowed values are Enabled or Disabled.')
+        instance.network.public_network_access = public_access
 
     params = ServerForUpdate(sku=instance.sku,
                              storage=instance.storage,

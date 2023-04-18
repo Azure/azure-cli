@@ -363,7 +363,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='Availability zone into which to provision the resource.'
         )
 
-        public_access_arg_type = CLIArgumentType(
+        public_access_update_arg_type = CLIArgumentType(
+            options_list=['--public-access'],
+            help='Enable or disable the public access on a server.',
+            arg_type = get_enum_type(['Enabled', 'Disabled'])
+        )
+
+        public_access_create_arg_type = CLIArgumentType(
             options_list=['--public-access'],
             help='Determines the public access. Enter single or range of IP addresses to be included in the allowed list of IPs. '
                  'IP address ranges must be dash-separated and not contain any spaces. '
@@ -508,7 +514,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('administrator_login', default=generate_username(), arg_type=administrator_login_arg_type)
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
             c.argument('high_availability', arg_type=high_availability_arg_type, default="Disabled")
-            c.argument('public_access', arg_type=public_access_arg_type)
+            c.argument('public_access', arg_type=public_access_create_arg_type)
             c.argument('vnet', arg_type=vnet_arg_type)
             c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
             c.argument('subnet', arg_type=subnet_arg_type)
@@ -593,7 +599,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
                 c.argument('backup_byok_key', arg_type=backup_key_arg_type)
                 c.argument('disable_data_encryption', arg_type=disable_data_encryption_arg_type)
-                c.argument('public_access', arg_type=public_access_arg_type)
+                c.argument('public_access', arg_type=public_access_update_arg_type)
             elif command_group == 'postgres':
                 c.argument('backup_retention', arg_type=pg_backup_retention_arg_type)
                 c.argument('active_directory_auth', arg_type=active_directory_auth_arg_type)
