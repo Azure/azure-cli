@@ -33,7 +33,7 @@ BUILDID = sys.argv[8]
 
 def generate_csv_file():
     data = []
-    with open('acr.report.parallel.html') as file:
+    with open(f'/mnt/vss/_work/1/{TARGET}.report.parallel.html') as file:
         bs = BeautifulSoup(file, "html.parser")
         environment = bs.find(id="environment")
         PythonVersion = environment.find(string="Python").findNext('td').text
@@ -83,7 +83,7 @@ def send_to_kusto():
     )
 
     # ingest from file
-    result = client.ingest_from_file(f"{TARGET}.csv", ingestion_properties=ingestion_props)
+    result = client.ingest_from_file(f"/mnt/vss/_work/1/{TARGET}.csv", ingestion_properties=ingestion_props)
     # Inspect the result for useful information, such as source_id and blob_url
     logger.info(repr(result))
 
