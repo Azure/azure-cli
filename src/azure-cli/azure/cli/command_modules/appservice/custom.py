@@ -1703,7 +1703,7 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
     elif multicontainer_config_file or multicontainer_config_type:
         logger.warning('Must change both settings --multicontainer-config-file FILE --multicontainer-config-type TYPE')
 
-    if min_replicas != None or max_replicas != None:
+    if min_replicas is not None or max_replicas is not None:
         update_site_configs(cmd, resource_group_name, name, min_replicas=min_replicas, max_replicas=max_replicas)
 
     return _mask_creds_related_appsettings(_filter_for_container_settings(cmd, resource_group_name, name, settings,
@@ -3642,10 +3642,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if environment is None and bool(plan) == bool(consumption_plan_location):
         raise MutuallyExclusiveArgumentError("usage error: You must specify one of these parameter "
                                              "--plan NAME_OR_ID | --consumption-plan-location LOCATION")
-    if ((min_replicas != None or max_replicas != None) and environment == None):
-        raise RequiredArgumentMissingError("usage error: parameters --min-replicas and --max-replicas must be used with "
-                                           "parameter --environment, please provide the name of the container "
-                                           "app environment using --environment.")
+    if ((min_replicas is not None or max_replicas is not None) and environment is None):
+        raise RequiredArgumentMissingError("usage error: parameters --min-replicas and --max-replicas must be "
+                                           "used with parameter --environment, please provide the name "
+                                           "of the container app environment using --environment.")
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair = cmd.get_models('SiteConfig', 'NameValuePair')
     disable_app_insights = (disable_app_insights == "true")
