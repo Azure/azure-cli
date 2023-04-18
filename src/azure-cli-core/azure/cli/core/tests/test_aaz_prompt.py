@@ -22,10 +22,6 @@ from azure.cli.core.aaz._prompt import AAZPromptInput, AAZPromptPasswordInput
 
 class TestAAZPromptInput(unittest.TestCase):
 
-    # @mock.patch('sys.stdin.isatty', return_value=False)
-    # def test_no_tty_should_raise_exception(self, _):
-    #     pass
-
     @mock.patch('sys.stdin.isatty', return_value=True)
     def test_prompt_input(self, _):
         from azure.cli.core.aaz._arg import AAZStrArg, AAZArgumentsSchema
@@ -65,18 +61,17 @@ class TestAAZPromptInput(unittest.TestCase):
         dest_ops = AAZArgActionOperations()
         self.assertEqual(len(dest_ops._ops), 0)
 
-        expected_result = '1'
+        action.setup_operations(dest_ops, None)
 
+        expected_result = '1'
         with mock.patch('knack.prompting._input', return_value=expected_result):
-            action.setup_operations(dest_ops, None)
-        dest_ops.apply(v, "prompt_arg")
+            dest_ops.apply(v, "prompt_arg")
         self.assertEqual(v.prompt_arg, "Monday")
 
         expected_result = '100'
         with self.assertRaisesRegex(azclierror.InvalidArgumentValueError, f"unrecognized value '{expected_result}' from choices"):
             with mock.patch('knack.prompting._input', return_value=expected_result):
-                action.setup_operations(dest_ops, None)
-
+                dest_ops.apply(v, "prompt_arg")
 
     @mock.patch('sys.stdin.isatty', return_value=False)
     def test_no_tty_prompt_input(self, _):
@@ -117,11 +112,12 @@ class TestAAZPromptInput(unittest.TestCase):
         dest_ops = AAZArgActionOperations()
         self.assertEqual(len(dest_ops._ops), 0)
 
-        expected_result = '1'
+        action.setup_operations(dest_ops, None)
 
+        expected_result = '1'
         with self.assertRaisesRegex(aazerror.AAZInvalidValueError, f"argument value cannot be blank in non-interactive mode."):
             with mock.patch('knack.prompting._input', return_value=expected_result):
-                action.setup_operations(dest_ops, None)
+                dest_ops.apply(v, "prompt_arg")
 
     @mock.patch('sys.stdin.isatty', return_value=True)
     def test_pass_prompt_input(self, _):
@@ -146,10 +142,11 @@ class TestAAZPromptInput(unittest.TestCase):
         dest_ops = AAZArgActionOperations()
         self.assertEqual(len(dest_ops._ops), 0)
 
+        action.setup_operations(dest_ops, None)
+
         my_password = '123'
         with mock.patch('getpass.getpass', return_value=my_password):
-            action.setup_operations(dest_ops, None)
-        dest_ops.apply(v, "password")
+            dest_ops.apply(v, "password")
         self.assertEqual(v.password, my_password)
 
     @mock.patch('sys.stdin.isatty', return_value=True)
@@ -175,14 +172,15 @@ class TestAAZPromptInput(unittest.TestCase):
         dest_ops = AAZArgActionOperations()
         self.assertEqual(len(dest_ops._ops), 0)
 
+        action.setup_operations(dest_ops, None)
+
         my_password = '123'
         with mock.patch('getpass.getpass', side_effect=[my_password, my_password]):
-            action.setup_operations(dest_ops, None)
-        dest_ops.apply(v, "password")
+            dest_ops.apply(v, "password")
         self.assertEqual(v.password, my_password)
 
         my_password1 = '111'
         my_password2 = '123'
         with self.assertRaises(StopIteration):
             with mock.patch('getpass.getpass', side_effect=[my_password1, my_password2]):
-                action.setup_operations(dest_ops, None)
+                dest_ops.apply(v, "password")

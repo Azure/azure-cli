@@ -21,6 +21,7 @@ from ._arg_fmt import AAZObjectArgFormat, AAZListArgFormat, AAZDictArgFormat, AA
     AAZSubscriptionIdArgFormat, AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZUuidFormat, AAZDateFormat, \
     AAZTimeFormat, AAZDateTimeFormat, AAZDurationFormat, AAZFileArgTextFormat
 from .exceptions import AAZUnregisteredArg
+from ._prompt import AAZPromptInput
 
 # pylint: disable=redefined-builtin, protected-access, too-few-public-methods
 
@@ -134,6 +135,12 @@ class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
 
         if self._blank != AAZUndefined:
             arg.nargs = '?'
+            if isinstance(self._blank, AAZPromptInput):
+                short_summary = arg.type.settings.get('help', None) or ''
+                if short_summary:
+                    short_summary += '  '
+                short_summary += self._blank.help_message
+                arg.help = short_summary
 
         cli_ctx = kwargs.get('cli_ctx', None)
         if cli_ctx is None:

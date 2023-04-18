@@ -15,6 +15,10 @@ class AAZPromptInput:
     def __call__(self, *args, **kwargs):
         return prompt(msg=self._msg, help_string=self._help_string)
 
+    @property
+    def help_message(self):
+        return "If value is blank it's asked from the tty."
+
 
 class AAZPromptPasswordInput(AAZPromptInput):
 
