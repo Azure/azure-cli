@@ -365,8 +365,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         public_access_update_arg_type = CLIArgumentType(
             options_list=['--public-access'],
-            help='Enable or disable the public access on a server.',
-            arg_type = get_enum_type(['Enabled', 'Disabled'])
+            arg_type=get_enum_type(['Enabled', 'Disabled']),
+            help='Enable or disable the public access on a server.'
         )
 
         public_access_create_arg_type = CLIArgumentType(
