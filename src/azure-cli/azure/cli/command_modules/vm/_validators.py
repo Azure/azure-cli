@@ -1668,7 +1668,7 @@ def process_vmss_create_namespace(cmd, namespace):
     if namespace.orchestration_mode is None:
         namespace.orchestration_mode = uniform_str
         logger.warning(
-            'Starting Ignite (Nov) 2023, the "az vmss create" command will use the new default orchestration mode: Flexible. '
+            'Starting Ignite (November) 2023, the "az vmss create" command will use the new default orchestration mode: Flexible. '
             'To learn more about Flexible Orchestration mode, '
             'please visit https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes.')  # pylint: disable=line-too-long
 
