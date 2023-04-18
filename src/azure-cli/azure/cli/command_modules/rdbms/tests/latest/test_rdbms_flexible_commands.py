@@ -1602,12 +1602,12 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
   
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
-    def test_mysql_flexible_server_public_access_mgmt_ruilong(self, resource_group):
-        self._test_mysql_flexible_server_public_access_mgmt('mysql', resource_group)
+    def test_mysql_flexible_server_public_access_custom(self, resource_group):
+        self._test_mysql_flexible_server_public_access_custom('mysql', resource_group)
 
-    def _test_mysql_flexible_server_public_access_mgmt(self, database_engine, resource_group):
+    def _test_mysql_flexible_server_public_access_custom(self, database_engine, resource_group):
 
-        location = 'centraluseuap'
+        location = mysql_paired_location
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         server_name_2 = self.create_random_name(SERVER_NAME_PREFIX + '2', SERVER_NAME_MAX_LENGTH)
         api_version = '2022-09-30-preview'
