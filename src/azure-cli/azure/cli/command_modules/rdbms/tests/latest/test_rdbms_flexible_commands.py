@@ -1599,6 +1599,37 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=postgres_location)
     def test_flexible_server_vnet_mgmt_validator(self, resource_group):
         self._test_flexible_server_vnet_mgmt_validator(resource_group)
+  
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_public_access_mgmt_ruilong(self, resource_group):
+        self._test_mysql_flexible_server_public_access_mgmt('mysql', resource_group)
+
+    def _test_mysql_flexible_server_public_access_mgmt(self, database_engine, resource_group):
+
+        location = 'centraluseuap'
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        server_name_2 = self.create_random_name(SERVER_NAME_PREFIX + '2', SERVER_NAME_MAX_LENGTH)
+        api_version = '2022-09-30-preview'
+
+        result = self.cmd('{} flexible-server create --public-access Enabled -g {} -n {} -l {} --iops 50 --storage-size 100 --sku-name Standard_B1ms --tier Burstable'
+                 .format(database_engine, resource_group, server_name, location)).get_output_in_json()
+
+        self.cmd('resource show --id {} --api-version {}'.format(result['id'], api_version),
+                          checks=[JMESPathCheck('properties.network.publicNetworkAccess', 'Enabled')])
+
+        result = self.cmd('{} flexible-server create --public-access Disabled -g {} -n {} -l {} --iops 50 --storage-size 100 --sku-name Standard_B1ms --tier Burstable'
+                 .format(database_engine, resource_group, server_name_2, location)).get_output_in_json()
+
+        self.cmd('resource show --id {} --api-version {}'.format(result['id'], api_version),
+                          checks=[JMESPathCheck('properties.network.publicNetworkAccess', 'Disabled')])
+        
+        self.cmd('{} flexible-server update -g {} -n {} --public-access Enabled'
+                 .format(database_engine, resource_group, server_name_2))
+        
+        # delete server
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name_2))
 
     def _test_flexible_server_vnet_mgmt_existing_supplied_subnetid(self, database_engine, resource_group):
 
