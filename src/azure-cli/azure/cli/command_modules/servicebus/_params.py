@@ -208,6 +208,9 @@ def load_arguments_sb(self, _):
     with self.argument_context('servicebus georecovery-alias list') as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
 
+    with self.argument_context('servicebus georecovery-alias fail-over') as c:
+        c.argument('parameters', options_list=['--parameters'], deprecate_info=c.deprecate(expiration='2.49.0'), help='Parameters required to create an Alias(Disaster Recovery configuration). Is either a FailoverProperties type or a IO type. Default value is None.')
+
     with self.argument_context('servicebus georecovery-alias authorization-rule list') as c:
         c.argument('alias', options_list=['--alias', '-a'], help='Name of Geo-Disaster Recovery Configuration Alias')
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
@@ -217,7 +220,7 @@ def load_arguments_sb(self, _):
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
         c.argument('authorization_rule_name', arg_type=name_type, help='Name of Namespace AuthorizationRule')
 
-    # Standard to Premium Migration: Region
+# Standard to Premium Migration: Region
 
     with self.argument_context('servicebus migration start') as c:
         c.ignore('config_name')

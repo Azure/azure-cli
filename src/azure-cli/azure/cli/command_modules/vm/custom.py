@@ -1433,14 +1433,14 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
                     public_ip_addr_info = {
                         'id': public_ip_address['id'],
                         'name': public_ip_address['name'],
-                        'ipAddress': public_ip_address['ipAddress'],
-                        'ipAllocationMethod': public_ip_address['publicIPAllocationMethod']
+                        'ipAddress': public_ip_address.get('ipAddress', None),
+                        'ipAllocationMethod': public_ip_address.get('publicIPAllocationMethod', None)
                     }
 
                     try:
                         public_ip_addr_info['zone'] = public_ip_address['zones'][0] \
                             if 'zones' in public_ip_address else None
-                    except (AttributeError, IndexError, TypeError):
+                    except (KeyError, IndexError, TypeError):
                         pass
 
                     network_info['publicIpAddresses'].append(public_ip_addr_info)
@@ -4480,14 +4480,6 @@ def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities=None):
 # endregion
 
 
-# region image galleries
-def list_image_galleries(cmd, resource_group_name=None):
-    client = _compute_client_factory(cmd.cli_ctx)
-    if resource_group_name:
-        return client.galleries.list_by_resource_group(resource_group_name)
-    return client.galleries.list()
-
-
 # from azure.mgmt.compute.models import Gallery, SharingProfile
 def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, permissions=None,
                            soft_delete=None, publisher_uri=None, publisher_contact=None, eula=None,
@@ -5130,12 +5122,6 @@ def create_disk_access(cmd, client, resource_group_name, disk_access_name, locat
     disk_access = DiskAccess(location=location, tags=tags)
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name, disk_access_name, disk_access)
-
-
-def list_disk_accesses(cmd, client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list()
 
 
 def set_disk_access(cmd, client, parameters, resource_group_name, disk_access_name, tags=None, no_wait=False):

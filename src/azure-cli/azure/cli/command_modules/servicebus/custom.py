@@ -105,6 +105,8 @@ def cli_georecovery_alias_create(cmd, client, resource_group_name, namespace_nam
             'partner_namespace': partner_namespace,
             'alternate_name': alternate_name,
         }
+        logger.warning(
+            'the argument parameters from georecovery-alias fail-over cmdlets will be remove in future release.')
         return client.create_or_update(resource_group_name=resource_group_name, namespace_name=namespace_name,
                                        alias=alias, parameters=parameters)
 
