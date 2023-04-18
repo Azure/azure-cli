@@ -28,7 +28,7 @@ jobs:
   displayName: Live Test Python 3.8
   timeoutInMinutes: 0
   strategy:
-    maxParallel: 30
+    maxParallel: 10
     matrix:
       acr:
         Target: acr
@@ -527,6 +527,12 @@ jobs:
           git commit -m "Upload recording files"
           git push origin $(USER_BRANCH_EXT)
         fi
+        # send data to kusto db
+        if [[ ("$(USER_TARGET)" == "ALL" || "$(USER_TARGET)" == "all" || "$(USER_TARGET)" == "") ]]; then
+          echo "Send data to kusto db!"
+          pip install azure-kusto-data azure-kusto-ingest bs4
+          python /mnt/vss/_work/1/s/scripts/live_test/send_to_kusto.py "$(KUSTO_CLUSTER)" "$(KUSTO_CLIENT_ID)" "$(KUSTO_CLIENT_SECRET)" "$(KUSTO_TENANT_ID)" "$(KUSTO_DATABASE)" "$(KUSTO_TABLE)" "$(Target)" "$(Build.BuildId)" 
+        fi
 
       condition: and(succeededOrFailed(), eq(variables.Match, '1'))
     - task: PublishTestResults@2
@@ -559,6 +565,12 @@ jobs:
       inputs:
         PathtoPublish: '/mnt/vss/_work/1/$(Target).report.parallel.html'
         ArtifactName: '$(Target).report.parallel.html'
+        publishLocation: 'Container'
+    - task: PublishBuildArtifacts@1
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+      inputs:
+        PathtoPublish: '/mnt/vss/_work/1/$(Target).csv'
+        ArtifactName: '$(Target).csv'
         publishLocation: 'Container'
 
 - job: SendEmail
@@ -598,22 +610,3 @@ jobs:
         echo "send email to grid"
         python /mnt/vss/_work/1/s/scripts/live_test/sendemail.py "$(SENDGRID_KEY)" "$(Build.BuildId)" "$(USER_REPO)" "$(USER_BRANCH)" "$(USER_TARGET)" "$(USER_LIVE)" "$(System.ArtifactsDirectory)" "$(Build.RequestedForEmail)" "$(ACCOUNT_KEY)" "$commit_id" "$(DB_PWD)" "$(DB_USER)" "$(DB_HOST)" "$(DB_PORT)" "$(DB_SCHEME)"
         # python /mnt/vss/_work/1/s/scripts/live_test/upload.py "$(System.ArtifactsDirectory)" "$(ACCOUNT_KEY)" "$(USER_LIVE)"
-    - bash: |
-        set -o errexit
-        az -v
-        echo "login to user azureclilivetest"
-        az login -u azureclilivetest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
-        echo "set account"
-        az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
-        echo "clean resource"
-        if [[ "$(USER_LIVE)" == "--live" && ("$(USER_TARGET)" == "ALL" || "$(USER_TARGET)" == "all" || "$(USER_TARGET)" == "" || "$(USER_TARGET)" == "main" || "$(USER_TARGET)" == "extensions") ]]; then
-          python /mnt/vss/_work/1/s/scripts/live_test/clean.py
-        fi
-#    - task: AzureCLI@2
-#      inputs:
-#        azureSubscription: 'AzureSDKTest(0b1f6471-1bf0-4dda-aec3-cb9272f09590)'
-#        scriptType: 'bash'
-#        scriptLocation: 'inlineScript'
-#        inlineScript: |
-#          az storage container create -n `date +%Y%m%d%H%M%S` --account-name clitestresultstac --account-key $(ACCOUNT_KEY)
-#          #az storage blob upload -f -c -n

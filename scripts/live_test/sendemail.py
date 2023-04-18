@@ -201,45 +201,6 @@ def write_db(container, testdata):
     logger.warning('Exit write_db()')
 
 
-# def send_email(html_content):
-#     logger.warning('Enter send_email()')
-#     from sendgrid import SendGridAPIClient
-#     logger.warning('Sending email...')
-#
-#     data = {
-#         "personalizations": [
-#             {
-#                 "to": [],
-#                 "subject": "Test results of Azure CLI"
-#             }
-#         ],
-#         "from": {
-#             "email": "azclibot@microsoft.com"
-#         },
-#         "content": [
-#             {
-#                 "type": "text/html",
-#                 "value": html_content
-#             }
-#         ]
-#     }
-#
-#     if REQUESTED_FOR_EMAIL != '':
-#         data['personalizations'][0]['to'].append({'email': REQUESTED_FOR_EMAIL})
-#     if USER_TARGET == '' and USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_LIVE == '--live' and REQUESTED_FOR_EMAIL == '':
-#         data['personalizations'][0]['to'].append({'email': 'AzPyCLI@microsoft.com'})
-#         data['personalizations'][0]['to'].append({'email': 'antcliTest@microsoft.com'})
-#     logger.warning(data)
-#
-#     sendgrid_key = sys.argv[1]
-#     sg = SendGridAPIClient(sendgrid_key)
-#     response = sg.send(data)
-#     logger.warning(response.status_code)
-#     logger.warning(response.body)
-#     logger.warning(response.headers)
-#     logger.warning('Exit send_email()')
-
-
 def send_email(html_content):
     logger.warning('Sending email...')
     from azure.communication.email import EmailClient
