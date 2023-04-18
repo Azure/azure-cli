@@ -64,7 +64,7 @@ def generate_csv_file():
             StartDateTime = (datetime.datetime.now() - datetime.timedelta(seconds=int(float(Duration)))).strftime("%Y-%m-%d %H:%M:%S")
             data.append([Source, BuildId, OSVersion, PythonVersion, Module, Name, Description, StartDateTime, EndDateTime, IsSuccess, Errors, ExtendedProperties])
         
-    with open('acr.csv', mode='w', newline='') as file:
+    with open(f'/mnt/vss/_work/1/{TARGET}.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerows(data)
 
