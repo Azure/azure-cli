@@ -1548,45 +1548,30 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
     def _test_mysql_flexible_server_public_access_mgmt(self, database_engine, resource_group):
 
-        location = 'northeurope'
+        location = 'centraluseuap'
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         server_name_2 = self.create_random_name(SERVER_NAME_PREFIX + '2', SERVER_NAME_MAX_LENGTH)
+        api_version = '2022-09-30-preview'
 
-        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 50 --storage-size 100 --sku-name Standard_B1ms --tier Burstable'
-                 .format(database_engine, resource_group, server_name, location))
+        result = self.cmd('{} flexible-server create --public-access Enabled -g {} -n {} -l {} --iops 50 --storage-size 100 --sku-name Standard_B1ms --tier Burstable'
+                 .format(database_engine, resource_group, server_name, location)).get_output_in_json()
 
-        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
-                          checks=[JMESPathCheck('network.publicNetworkAccess', 'Enabled')]).get_output_in_json()
+        self.cmd('resource show --id {} --api-version {}'.format(result['id'], api_version),
+                          checks=[JMESPathCheck('properties.network.publicNetworkAccess', 'Enabled')])
+
+        result = self.cmd('{} flexible-server create --public-access Disabled -g {} -n {} -l {} --iops 50 --storage-size 100 --sku-name Standard_B1ms --tier Burstable'
+                 .format(database_engine, resource_group, server_name_2, location)).get_output_in_json()
+
+        self.cmd('resource show --id {} --api-version {}'.format(result['id'], api_version),
+                          checks=[JMESPathCheck('properties.network.publicNetworkAccess', 'Disabled')])
         
-        self.cmd('{} flexible-server create --public-access Disabled -g {} -n {} -l {} --iops 50 --storage-size 100 --sku-name Standard_B1ms --tier Burstable'
-                 .format(database_engine, resource_group, server_name_2, location))
-
-        # self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
-        #                   checks=[JMESPathCheck('network.publicNetworkAccess', 'Disabled')]).get_output_in_json()
+        self.cmd('{} flexible-server update -g {} -n {} --public-access Enabled'
+                 .format(database_engine, resource_group, server_name_2))
         
-        # self.cmd('{} flexible-server create --public-access Disabled -g {} -n {} -l {} --iops 50 --storage-size 200 --sku-name Standard_D16ds_v4 --tier GeneralPurpose'
-        #          .format(database_engine, resource_group, server_name_2, location))
-        # self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
-        #                   checks=[JMESPathCheck('network.publicNetworkAccess', 'Disabled')]).get_output_in_json()
+        # delete server
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name_2))
 
-        # self.cmd('{} flexible-server update -g {} -n {} --public-access Disabled'
-        #          .format(database_engine, resource_group, server_name))
-
-        # self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
-        #                   checks=[JMESPathCheck('network.publicNetworkAccess', 'Disabled')]).get_output_in_json()
-
-        # self.cmd('{} flexible-server update -g {} -n {} --auto-scale-iops Disabled'
-        #          .format(database_engine, resource_group, server_name))
-
-        # self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
-        #                   checks=[JMESPathCheck('storage.autoIoScaling', 'Disabled')]).get_output_in_json()
-
-        # self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --auto-scale-iops Enabled --storage-size 200 --sku-name Standard_D16ds_v4 --tier GeneralPurpose'
-        #          .format(database_engine, resource_group, server_name_2, location))
-
-        # self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name_2),
-        #                   checks=[JMESPathCheck('storage.autoIoScaling', 'Enabled')]).get_output_in_json()
-        
     def _test_flexible_server_vnet_mgmt_existing_supplied_subnetid(self, database_engine, resource_group):
 
         # flexible-server create
