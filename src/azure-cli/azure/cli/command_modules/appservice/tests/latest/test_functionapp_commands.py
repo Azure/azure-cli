@@ -736,7 +736,7 @@ class FunctionAppManagedEnvironment(LiveScenarioTest):
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
-    def test_functionapp_create_with_min_replicas(self, resource_group, storage_account):
+    def test_functionapp_create_with_replicas(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
         managed_environment_name = self.create_random_name(
@@ -756,7 +756,8 @@ class FunctionAppManagedEnvironment(LiveScenarioTest):
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
 
         self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
-            JMESPathCheck('siteConfig.minimumElasticInstanceCount', 1)])
+            JMESPathCheck('siteConfig.minimumElasticInstanceCount', 1)
+            JMESPathCheck('siteConfig.functionAppScaleLimit', 10)])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -776,7 +777,7 @@ class FunctionAppManagedEnvironment(LiveScenarioTest):
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
-    def test_functionapp_container_config_set_min_replicas(self, resource_group, storage_account):
+    def test_functionapp_container_config_set_replicas(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
         managed_environment_name = self.create_random_name(
@@ -795,11 +796,12 @@ class FunctionAppManagedEnvironment(LiveScenarioTest):
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
         
-        self.cmd('functionapp config container set -g {} -n {} --min-replicas 1'
+        self.cmd('functionapp config container set -g {} -n {} --min-replicas 1 --max-replicas 10'
                  .format(resource_group, functionapp_name))
 
         self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
-            JMESPathCheck('siteConfig.minimumElasticInstanceCount', 1)])
+            JMESPathCheck('siteConfig.minimumElasticInstanceCount', 1)
+            JMESPathCheck('siteConfig.functionAppScaleLimit', 10)])
 
 
 class FunctionAppOnWindowsWithRuntime(ScenarioTest):
