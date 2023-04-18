@@ -470,6 +470,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='Whether password authentication is enabled.'
         )
 
+        gtid_set_arg_type = CLIArgumentType(
+            options_list=['--gtid-set'],
+            help='A GTID set is a set comprising one or more single GTIDs or ranges of GTIDs. '
+                 'A GTID is represented as a pair of coordinates, separated by a colon character (:), as shown: source_id:transaction_id'
+        )
+
         with self.argument_context('{} flexible-server'.format(command_group)) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
             c.argument('server_name', arg_type=server_name_arg_type)
@@ -761,6 +767,14 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Azure AD administrator user or group.')
             c.argument('principal_type', options_list=['--type', '-t'], default='User', arg_type=get_enum_type(['User', 'Group', 'ServicePrincipal', 'Unknown']), help='Type of the Azure AD administrator.')
             c.argument('identity', help='Name or ID of identity used for AAD Authentication.', validator=validate_identity)
+
+        # GTID
+        if command_group == 'mysql':
+            with self.argument_context('{} flexible-server gtid reset'.format(command_group)) as c:
+                c.argument('gtid_set', arg_type=gtid_set_arg_type)
+                c.argument('resource_group_name', arg_type=resource_group_name_type)
+                c.argument('server_name', id_part=None, options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+                c.argument('yes', arg_type=yes_arg_type)
 
         handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type)
 
