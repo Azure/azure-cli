@@ -446,7 +446,7 @@ def public_access_validator(ns):
                 val == 'all' or val == 'none' or (len(val.split('-')) == 1 and _validate_ip(val)) or
                 (len(val.split('-')) == 2 and _validate_ip(val))):
             raise CLIError('incorrect usage: --public-access. '
-                           'Acceptable values are \'all\', \'none\',\'<startIP>\' and '
+                           'Acceptable values are \'Disabled\', \'Enabled\', \'all\', \'none\',\'<startIP>\' and '
                            '\'<startIP>-<destinationIP>\' where startIP and destinationIP ranges from '
                            '0.0.0.0 to 255.255.255.255')
         if len(val.split('-')) == 2:
