@@ -8,17 +8,24 @@ from azure.kusto.data.data_format import DataFormat
 from azure.kusto.ingest import (
     IngestionProperties,
     QueuedIngestClient,
+    ReportLevel,
 )
+from azure.kusto.ingest.status import KustoIngestStatusQueues
 from bs4 import BeautifulSoup
 import csv
 import datetime
 import logging
 import os
 import sys
+import time
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+logger.addHandler(ch)
 
-# # authenticate with AAD application.
+# authenticate with AAD application.
 KUSTO_CLUSTER = sys.argv[1]
 KUSTO_CLIENT_ID = sys.argv[2]
 KUSTO_CLIENT_SECRET = sys.argv[3]
@@ -60,7 +67,7 @@ def generate_csv_file():
                         for content in contents:
                             if content.name == 'br':
                                 Errors += '\n'
-                            if not content.name:
+                            elif not content.name:
                                 Errors += content
                             else:
                                 logger.warning(content.name)
@@ -73,7 +80,7 @@ def generate_csv_file():
 
     data.extend(_get_data(parallel_file))
     data.extend(_get_data(sequential_file))
-        
+
     with open(f'/mnt/vss/_work/1/{TARGET}.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerows(data)
@@ -81,25 +88,46 @@ def generate_csv_file():
 
 
 def send_to_kusto():
-    logger.warning('Start send csv data to kusto db for {TARGET}'.format(TARGET=TARGET))
+    logger.info('Start send csv data to kusto db for {TARGET}'.format(TARGET=TARGET))
+    start_time = time.time()
     kcsb = KustoConnectionStringBuilder.with_aad_application_key_authentication(KUSTO_CLUSTER, KUSTO_CLIENT_ID, KUSTO_CLIENT_SECRET, KUSTO_TENANT_ID)
     # The authentication method will be taken from the chosen KustoConnectionStringBuilder.
     client = QueuedIngestClient(kcsb)
 
     # there are a lot of useful properties, make sure to go over docs and check them out
     ingestion_props = IngestionProperties(
-
         database=KUSTO_DATABASE,
         table=KUSTO_TABLE,
         data_format=DataFormat.CSV,
+        report_level=ReportLevel.FailuresAndSuccesses
     )
 
     # ingest from file
     result = client.ingest_from_file(f"/mnt/vss/_work/1/{TARGET}.csv", ingestion_properties=ingestion_props)
     # Inspect the result for useful information, such as source_id and blob_url
-    print(f'Finsh send csv data to kusto db for {TARGET}.')
     print(repr(result))
-
+    qs = KustoIngestStatusQueues(client)
+    MAX_BACKOFF = 180
+    backoff = 1
+    while True:
+        if qs.success.is_empty() and qs.failure.is_empty():
+            time.sleep(backoff)
+            backoff = min(backoff * 2, MAX_BACKOFF)
+            logger.info("No new messages. backing off for {} seconds".format(backoff))
+            continue
+        backoff = 1
+        success_messages = qs.success.pop(10)
+        failure_messages = qs.failure.pop(10)
+        if success_messages:
+            logger.info(f"SUCCESS : {success_messages}")
+            break
+        if failure_messages:
+            logger.error(f"FAILURE : {failure_messages}")
+            break
+    end_time = time.time()
+    total_time = end_time - start_time
+    logger.info("Execution time: {} seconds.".format(total_time))
+    logger.info('Finsh send csv data to kusto db for {}.'.format(TARGET))
 
 if __name__ == '__main__':
     generate_csv_file()

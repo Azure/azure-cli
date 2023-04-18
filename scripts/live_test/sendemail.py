@@ -12,6 +12,10 @@ import test_data
 import traceback
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+logger.addHandler(ch)
 
 SENDGRID_KEY = sys.argv[1]
 BUILD_ID = sys.argv[2]
