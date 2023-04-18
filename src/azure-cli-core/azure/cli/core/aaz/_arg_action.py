@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=protected-access
+# pylint: disable=protected-access, too-few-public-methods
 
 import copy
 import os
@@ -148,8 +148,7 @@ class AAZSimpleTypeArgAction(AAZArgAction):
                 # Postpone the prompt input when apply the operation.
                 # In order not to break the logic of displaying help or validating other parameters.
                 return AAZPromptInputOperation(prompt=cls._schema._blank, action_cls=cls)
-            else:
-                data = copy.deepcopy(cls._schema._blank)
+            data = copy.deepcopy(cls._schema._blank)
 
         if isinstance(data, str):
             # transfer string into correct data
