@@ -597,8 +597,9 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     deployment_status_url = scm_url + '/api/deployments/latest'
 
     import urllib3
-    authorization = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
-    headers = authorization
+    # authorization = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
+    headers = {}
+    headers['authorization'] = 'Bearer {}'.format(_get_bearer_token(cmd.cli_ctx))
     headers['Content-Type'] = 'application/octet-stream'
     headers['Cache-Control'] = 'no-cache'
     headers['User-Agent'] = get_az_user_agent()
@@ -2594,14 +2595,24 @@ def show_deployment_log(cmd, resource_group, name, slot=None, deployment_id=None
         return response.json()
     return []
 
+def _get_bearer_token(cli_ctx):
+    from azure.cli.core._profile import Profile
+    profile = Profile(cli_ctx=cli_ctx)
+    credential, _, _ = profile.get_login_credentials()
+    bearer_token = credential.get_token().token
+    return bearer_token
 
 def list_deployment_logs(cmd, resource_group, name, slot=None):
     scm_url = _get_scm_url(cmd, resource_group, name, slot)
     deployment_log_url = '{}/api/deployments/'.format(scm_url)
     username, password = _get_site_credential(cmd.cli_ctx, resource_group, name, slot)
 
-    import urllib3
-    headers = urllib3.util.make_headers(basic_auth='{}:{}'.format(username, password))
+    # import urllib3
+    # headers = urllib3.util.make_headers(basic_auth='{}:{}'.format(username, password))
+    bearer_token = _get_bearer_token(cmd.cli_ctx)
+    headers = {}
+    headers['authorization'] = 'Bearer {}'.format(bearer_token)
+
 
     import requests
     response = requests.get(deployment_log_url, headers=headers)
