@@ -314,7 +314,7 @@ def get_latest_from_github(package_path='azure-cli'):
 
 
 def _update_latest_from_github(versions):
-    if not check_connectivity(max_retries=0):
+    if not check_connectivity(url='https://raw.githubusercontent.com', max_retries=0):
         return versions, False
     success = True
     for pkg in ['azure-cli-core', 'azure-cli-telemetry']:
