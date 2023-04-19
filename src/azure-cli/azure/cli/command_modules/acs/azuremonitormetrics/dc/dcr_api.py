@@ -44,7 +44,6 @@ def create_dcr(cmd, mac_region, azure_monitor_workspace_resource_id, cluster_sub
         headers = ['User-Agent=azuremonitormetrics.create_dcr']
         send_raw_request(cmd.cli_ctx, "PUT",
                          dcr_url, body=dcr_creation_body, headers=headers)
-        error = None
         return dcr_resource_id
     except CLIError as error:
         raise error

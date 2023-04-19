@@ -625,6 +625,7 @@ def sanitize_resource_id(resource_id):
     return resource_id.lower()
 
 
+# pylint:disable=line-too-long
 def validate_azuremonitorworkspaceresourceid(namespace):
     resource_id = namespace.azure_monitor_workspace_resource_id
     if resource_id is None:
@@ -634,6 +635,7 @@ def validate_azuremonitorworkspaceresourceid(namespace):
         raise ArgumentUsageError("--azure-monitor-workspace-resource-id not in the correct format. It should match `/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/microsoft.monitor/accounts/<resourceName>`")
 
 
+# pylint:disable=line-too-long
 def validate_grafanaresourceid(namespace):
     resource_id = namespace.grafana_resource_id
     if resource_id is None:

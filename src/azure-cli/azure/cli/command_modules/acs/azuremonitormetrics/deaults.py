@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from knack.util import CLIError
 
+
 def get_default_region(cmd):
     cloud_name = cmd.cli_ctx.cloud.name
     if cloud_name.lower() == 'azurechinacloud':

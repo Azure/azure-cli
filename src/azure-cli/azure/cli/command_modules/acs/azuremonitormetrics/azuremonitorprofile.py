@@ -35,12 +35,11 @@ def link_azure_monitor_profile_artifacts(cmd, client, cluster_subscription, clus
 
 
 def unlink_azure_monitor_profile_artifacts(cmd, cluster_subscription, cluster_resource_group_name, cluster_name, cluster_region):
-    ################ CHECK IF DCR IS LINKED WITH ANOTHER DCRA ##############################################
     # Remove DC* if prometheus is enabled
     dc_objects_list = get_dc_objects_list(cmd, cluster_region, cluster_subscription, cluster_resource_group_name, cluster_name)
     delete_dc_objects_if_prometheus_enabled(cmd, dc_objects_list, cluster_subscription, cluster_resource_group_name, cluster_name)
     # Delete rules (Conflict({"error":{"code":"InvalidResourceLocation","message":"The resource 'NodeRecordingRulesRuleGroup-<clustername>' already exists in location 'eastus2' in resource group '<clustername>'. A resource with the same name cannot be created in location 'eastus'. Please select a new resource name."}})
-    delete_rules(cmd,  cluster_subscription, cluster_resource_group_name, cluster_name)
+    delete_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster_name)
 
 
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements,line-too-long
@@ -74,7 +73,7 @@ def ensure_azure_monitor_profile_prerequisites(
         )
     else:
         # Check if already onboarded
-        if create_flow == False:
+        if create_flow is False:
             check_azuremonitormetrics_profile(cmd, cluster_subscription, cluster_resource_group_name, cluster_name)
         # Do RP registrations if required
         rp_registrations(cmd, cluster_subscription)

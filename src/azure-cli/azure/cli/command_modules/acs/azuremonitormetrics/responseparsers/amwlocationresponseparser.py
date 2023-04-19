@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from typing import List
 
+
 def parseResourceProviderResponseForLocations(resourceProviderResponse):
     supportedLocationMap = {}
     if not resourceProviderResponse.get('resourceTypes'):

@@ -33,7 +33,6 @@ def create_dcra(cmd, cluster_region, cluster_subscription, cluster_resource_grou
         headers = ['User-Agent=azuremonitormetrics.create_dcra']
         send_raw_request(cmd.cli_ctx, "PUT", association_url,
                          body=association_body, headers=headers)
-        error = None
         return dcra_resource_id
     except CLIError as error:
         raise error

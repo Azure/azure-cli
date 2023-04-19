@@ -25,7 +25,7 @@ def addon_put(cmd, client, cluster_subscription, cluster_resource_group_name, cl
     if "azureMonitorProfile" in json_response["properties"]:
         if "metrics" in json_response["properties"]["azureMonitorProfile"]:
             if json_response["properties"]["azureMonitorProfile"]["metrics"]["enabled"] is False:
-                ## What if enabled doesn't exist
+                # What if enabled doesn't exist
                 json_response["properties"]["azureMonitorProfile"]["metrics"]["enabled"] = True
     try:
         headers = ['User-Agent=azuremonitormetrics.addon_put']

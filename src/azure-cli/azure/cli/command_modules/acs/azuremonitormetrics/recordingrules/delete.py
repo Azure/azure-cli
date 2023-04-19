@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.command_modules.acs.azuremonitormetrics.constants import RULES_API
 
+
 def delete_rule(cmd, cluster_subscription, cluster_resource_group_name, default_rule_group_name):
     from azure.cli.core.util import send_raw_request
     default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(

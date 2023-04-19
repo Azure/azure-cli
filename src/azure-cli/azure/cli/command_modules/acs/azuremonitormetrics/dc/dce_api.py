@@ -23,7 +23,6 @@ def create_dce(cmd, cluster_subscription, cluster_resource_group_name, cluster_n
         headers = ['User-Agent=azuremonitormetrics.create_dce']
         send_raw_request(cmd.cli_ctx, "PUT",
                          dce_url, body=dce_creation_body, headers=headers)
-        error = None
         return dce_resource_id
     except CLIError as error:
         raise error

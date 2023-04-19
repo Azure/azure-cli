@@ -8,6 +8,7 @@ from azure.cli.command_modules.acs.azuremonitormetrics.constants import (
 )
 from azure.cli.command_modules.acs.azuremonitormetrics.deaults import get_default_region
 
+
 # DCR = 64, DCE = 44, DCRA = 64
 # All DC* object names should end only in alpha numeric (after `length` trim)
 # DCE remove underscore from cluster name
@@ -23,6 +24,7 @@ def sanitize_name(name, type, length):
         return ""
     return name[0:lastIndexAlphaNumeric + 1]
 
+
 def get_default_dce_name(cmd, mac_region, cluster_name):
     region = get_default_region(cmd)
     if mac_region in MapToClosestMACRegion:
@@ -37,5 +39,3 @@ def get_default_dcra_name(cmd, cluster_region, cluster_name):
         region = MapToClosestMACRegion[cluster_region]
     default_dcra_name = "ContainerInsightsMetricsExtension-" + region + "-" + cluster_name
     return sanitize_name(default_dcra_name, DC_TYPE.DCRA, 64)
-
-

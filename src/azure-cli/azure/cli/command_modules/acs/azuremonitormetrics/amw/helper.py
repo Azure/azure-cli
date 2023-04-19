@@ -11,6 +11,7 @@ from azure.core.exceptions import HttpResponseError
 from azure.cli.command_modules.acs._client_factory import get_resources_client
 from knack.util import CLIError
 
+
 def get_amw_region(cmd, azure_monitor_workspace_resource_id):
     # region of MAC can be different from region of RG so find the location of the azure_monitor_workspace_resource_id
     amw_subscription_id = azure_monitor_workspace_resource_id.split("/")[2]

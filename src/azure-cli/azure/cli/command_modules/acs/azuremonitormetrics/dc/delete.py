@@ -6,6 +6,7 @@ import json
 from azure.cli.command_modules.acs.azuremonitormetrics.constants import DC_API
 from knack.util import CLIError
 
+
 def get_dce_from_dcr(cmd, dcrId):
     from azure.cli.core.util import send_raw_request
     armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager

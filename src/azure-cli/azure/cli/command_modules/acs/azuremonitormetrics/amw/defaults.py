@@ -8,6 +8,7 @@ from azure.cli.command_modules.acs.azuremonitormetrics.responseparsers.amwlocati
 from azure.cli.command_modules.acs.azuremonitormetrics.constants import RP_LOCATION_API
 from knack.util import CLIError
 
+
 def get_supported_rp_locations(cmd, rp_name):
     from azure.cli.core.util import send_raw_request
     supported_locations = []
@@ -18,6 +19,7 @@ def get_supported_rp_locations(cmd, rp_name):
     data = json.loads(r.text)
     supported_locations = parseResourceProviderResponseForLocations(data)
     return supported_locations
+
 
 def get_default_mac_region(cmd, cluster_region):
     supported_locations = get_supported_rp_locations(cmd, 'Microsoft.Monitor')
