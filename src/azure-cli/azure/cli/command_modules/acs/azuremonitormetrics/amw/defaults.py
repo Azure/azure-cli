@@ -16,14 +16,10 @@ def get_supported_rp_locations(cmd, rp_name):
     return supported_locations
 
 def get_default_mac_region(cmd, cluster_region):
-    global first_supported_region
-    if first_supported_region is not None and len(first_supported_region) != 0:
-        return first_supported_region
     supported_locations = get_supported_rp_locations(cmd, 'Microsoft.Monitor')
     if cluster_region in supported_locations:
         return cluster_region
     if len(supported_locations) > 0:
-        first_supported_region = supported_locations[0]
         return supported_locations[0]
     cloud_name = cmd.cli_ctx.cloud.name
     if cloud_name.lower() == 'azurechinacloud':
