@@ -4505,7 +4505,10 @@ def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, perm
         gallery.sharing_profile.community_gallery_info = community_gallery_info
 
     if soft_delete is not None:
-        gallery.soft_delete_policy.is_soft_delete_enabled = soft_delete
+        if gallery.soft_delete_policy:
+            gallery.soft_delete_policy.is_soft_delete_enabled = soft_delete
+        else:
+            gallery.soft_delete_policy = {'is_soft_delete_enabled': soft_delete}
 
     client = _compute_client_factory(cmd.cli_ctx)
 
