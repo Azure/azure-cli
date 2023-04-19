@@ -3637,11 +3637,14 @@ def get_vmss_modified(cmd, resource_group_name, name, instance_id=None):
     if instance_id is not None:
         vms = client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id)
         # To avoid unnecessary permission check of image
-        vms.storage_profile.image_reference = None
+        if hasattr(vms, "storage_profile") and vms.storage_profile:
+            vms.storage_profile.image_reference = None
         return vms
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, name)
     # To avoid unnecessary permission check of image
-    vmss.virtual_machine_profile.storage_profile.image_reference = None
+    if hasattr(vmss, "virtual_machine_profile") and vmss.virtual_machine_profile \
+            and vmss.virtual_machine_profile.storage_profile:
+        vmss.virtual_machine_profile.storage_profile.image_reference = None
     return vmss
 
 
@@ -4505,7 +4508,10 @@ def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, perm
         gallery.sharing_profile.community_gallery_info = community_gallery_info
 
     if soft_delete is not None:
-        gallery.soft_delete_policy.is_soft_delete_enabled = soft_delete
+        if gallery.soft_delete_policy:
+            gallery.soft_delete_policy.is_soft_delete_enabled = soft_delete
+        else:
+            gallery.soft_delete_policy = {'is_soft_delete_enabled': soft_delete}
 
     client = _compute_client_factory(cmd.cli_ctx)
 

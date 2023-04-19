@@ -231,6 +231,7 @@ def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_nam
     NWRuleSetIpRules = cmd.get_models('NWRuleSetIpRules', resource_type=ResourceType.MGMT_SERVICEBUS)
     netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
 
+    logger.warning('This version will be depracated & latest version will release in breaking change release.')
     if netwrokruleset.virtual_network_rules is None:
         netwrokruleset.virtual_network_rules = []
 
