@@ -1,14 +1,15 @@
 import json
 from azure.cli.command_modules.acs.azuremonitormetrics.deaults import get_default_region
 from azure.cli.command_modules.acs.azuremonitormetrics.responseparsers.amwlocationresponseparser import parseResourceProviderResponseForLocations
-
+from azure.cli.command_modules.acs.azuremonitormetrics.constants import RP_LOCATION_API
 from knack.util import CLIError
 
 def get_supported_rp_locations(cmd, rp_name):
     from azure.cli.core.util import send_raw_request
     supported_locations = []
     headers = ['User-Agent=azuremonitormetrics.get_supported_rp_locations']
-    association_url = f"https://management.azure.com/providers/{rp_name}?api-version={RP_LOCATION_API}"
+    armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
+    association_url = f"{armendpoint}/providers/{rp_name}?api-version={RP_LOCATION_API}"
     r = send_raw_request(cmd.cli_ctx, "GET", association_url, headers=headers)
     data = json.loads(r.text)
     supported_locations = parseResourceProviderResponseForLocations(data)

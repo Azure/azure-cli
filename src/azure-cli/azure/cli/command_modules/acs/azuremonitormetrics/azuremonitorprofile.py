@@ -13,17 +13,10 @@ from azure.cli.command_modules.acs.azuremonitormetrics.helper import check_azure
 from azure.cli.command_modules.acs.azuremonitormetrics.recordingrules.create import create_rules
 from azure.cli.command_modules.acs.azuremonitormetrics.recordingrules.delete import delete_rules
 from knack.util import CLIError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 
-from azure.cli.core.azclierror import (
-    InvalidArgumentValueError,
-)
-from .._client_factory import get_resources_client, get_resource_groups_client
-from azure.core.exceptions import HttpResponseError
-
-first_supported_region = ""
-
-def link_azure_monitor_profile_artifacts(cmd, cluster_subscription, cluster_resource_group_name, cluster_name, cluster_region, raw_parameters, create_flow):
+def link_azure_monitor_profile_artifacts(cmd, client, cluster_subscription, cluster_resource_group_name, cluster_name, cluster_region, raw_parameters, create_flow):
     # MAC creation if required
     azure_monitor_workspace_resource_id, azure_monitor_workspace_location = get_azure_monitor_workspace_resource(cmd, cluster_subscription, cluster_region, raw_parameters)
     # DCE creation
@@ -38,7 +31,7 @@ def link_azure_monitor_profile_artifacts(cmd, cluster_subscription, cluster_reso
     create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster_name, azure_monitor_workspace_resource_id, azure_monitor_workspace_location, raw_parameters)
     # if aks cluster create flow -> do a PUT on the AKS cluster to enable the addon
     if create_flow:
-        addon_put(cmd, cluster_subscription, cluster_resource_group_name, cluster_name)
+        addon_put(cmd, client, cluster_subscription, cluster_resource_group_name, cluster_name)
 
 
 def unlink_azure_monitor_profile_artifacts(cmd, cluster_subscription, cluster_resource_group_name, cluster_name, cluster_region):
@@ -87,6 +80,7 @@ def ensure_azure_monitor_profile_prerequisites(
         rp_registrations(cmd, cluster_subscription)
         link_azure_monitor_profile_artifacts(
             cmd,
+            client,
             cluster_subscription,
             cluster_resource_group_name,
             cluster_name,

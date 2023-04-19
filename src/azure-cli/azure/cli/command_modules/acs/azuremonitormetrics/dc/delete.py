@@ -1,7 +1,12 @@
 
+import json
+from azure.cli.command_modules.acs.azuremonitormetrics.constants import DC_API
+from knack.util import CLIError
+
 def get_dce_from_dcr(cmd, dcrId):
     from azure.cli.core.util import send_raw_request
-    association_url = f"https://management.azure.com{dcrId}?api-version={DC_API}"
+    armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
+    association_url = f"{armendpoint}{dcrId}?api-version={DC_API}"
     headers = ['User-Agent=azuremonitormetrics.get_dce_from_dcr']
     r = send_raw_request(cmd.cli_ctx, "GET", association_url, headers=headers)
     data = json.loads(r.text)
@@ -16,7 +21,8 @@ def get_dc_objects_list(cmd, cluster_region, cluster_subscription, cluster_resou
             cluster_resource_group_name,
             cluster_name
         )
-        association_url = f"https://management.azure.com{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations?api-version={DC_API}"
+        armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
+        association_url = f"{armendpoint}{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations?api-version={DC_API}"
         headers = ['User-Agent=azuremonitormetrics.get_dcra']
         r = send_raw_request(cmd.cli_ctx, "GET", association_url, headers=headers)
         data = json.loads(r.text)
@@ -38,22 +44,24 @@ def delete_dc_objects_if_prometheus_enabled(cmd, dc_objects_list, cluster_subscr
         cluster_name
     )
     for item in dc_objects_list:
-        association_url = f"https://management.azure.com{item['dataCollectionRuleId']}?api-version={DC_API}"
+        armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
+        association_url = f"{armendpoint}{item['dataCollectionRuleId']}?api-version={DC_API}"
         try:
             headers = ['User-Agent=azuremonitormetrics.get_dcr_if_prometheus_enabled']
             r = send_raw_request(cmd.cli_ctx, "GET", association_url, headers=headers)
             data = json.loads(r.text)
             if 'microsoft-prometheusmetrics' in [stream.lower() for stream in data['properties']['dataFlows'][0]['streams']]:
                 # delete DCRA
-                url = f"https://management.azure.com{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{item['name']}?api-version={DC_API}"
+                armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
+                url = f"{armendpoint}{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{item['name']}?api-version={DC_API}"
                 headers = ['User-Agent=azuremonitormetrics.delete_dcra']
                 send_raw_request(cmd.cli_ctx, "DELETE", url, headers=headers)
                 # delete DCR
-                url = f"https://management.azure.com{item['dataCollectionRuleId']}?api-version={DC_API}"
+                url = f"{armendpoint}{item['dataCollectionRuleId']}?api-version={DC_API}"
                 headers = ['User-Agent=azuremonitormetrics.delete_dcr']
                 send_raw_request(cmd.cli_ctx, "DELETE", url, headers=headers)
                 # delete DCE
-                url = f"https://management.azure.com{item['dceId']}?api-version={DC_API}"
+                url = f"{armendpoint}{item['dceId']}?api-version={DC_API}"
                 headers = ['User-Agent=azuremonitormetrics.delete_dce']
                 send_raw_request(cmd.cli_ctx, "DELETE", url, headers=headers)
         except CLIError as e:

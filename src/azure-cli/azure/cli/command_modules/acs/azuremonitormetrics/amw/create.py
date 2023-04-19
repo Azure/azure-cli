@@ -27,7 +27,8 @@ def create_default_mac(cmd, cluster_subscription, cluster_region):
     else:
         resource_groups.create_or_update(default_resource_group_name, {"location": default_mac_region})
     association_body = json.dumps({"location": default_mac_region, "properties": {}})
-    association_url = f"https://management.azure.com{azure_monitor_workspace_resource_id}?api-version={MAC_API}"
+    armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
+    association_url = f"{armendpoint}{azure_monitor_workspace_resource_id}?api-version={MAC_API}"
     try:
         headers = ['User-Agent=azuremonitormetrics.create_default_mac']
         send_raw_request(cmd.cli_ctx, "PUT", association_url,

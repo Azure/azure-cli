@@ -25,7 +25,6 @@ import zipfile
 from distutils.version import StrictVersion
 from urllib.error import URLError
 from urllib.request import urlopen
-from azure.cli.command_modules.acs.azuremonitormetrics.azuremonitorprofile import ensure_azure_monitor_profile_prerequisites
 
 import colorama
 import requests

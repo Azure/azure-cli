@@ -1,9 +1,7 @@
 import json
 from azure.cli.command_modules.acs.azuremonitormetrics.constants import DC_API
 from azure.cli.command_modules.acs.azuremonitormetrics.dc.defaults import get_default_dcra_name
-from azure.cli.core.azclierror import (
-    CLIError
-)
+from knack.util import CLIError
 
 
 def create_dcra(cmd, cluster_region, cluster_subscription, cluster_resource_group_name, cluster_name, dcr_resource_id):
@@ -25,7 +23,8 @@ def create_dcra(cmd, cluster_region, cluster_subscription, cluster_resource_grou
                                        "dataCollectionRuleId": dcr_resource_id,
                                        "description": "Promtheus data collection association between DCR, DCE and target AKS resource"
                                    }})
-    association_url = f"https://management.azure.com{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{dcra_name}?api-version={DC_API}"
+    armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
+    association_url = f"{armendpoint}{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{dcra_name}?api-version={DC_API}"
     try:
         headers = ['User-Agent=azuremonitormetrics.create_dcra']
         send_raw_request(cmd.cli_ctx, "PUT", association_url,

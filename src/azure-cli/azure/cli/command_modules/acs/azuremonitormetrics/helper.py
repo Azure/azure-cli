@@ -20,7 +20,9 @@ def sanitize_resource_id(resource_id):
 
 def post_request(cmd, subscription_id, rp_name, headers):
     from azure.cli.core.util import send_raw_request
-    customUrl = "https://management.azure.com/subscriptions/{0}/providers/{1}/register?api-version={2}".format(
+    armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
+    customUrl = "{0}/subscriptions/{1}/providers/{2}/register?api-version={3}".format(
+        armendpoint,
         subscription_id,
         rp_name,
         RP_API,
@@ -36,7 +38,9 @@ def rp_registrations(cmd, subscription_id):
     # Get list of RP's for RP's subscription
     try:
         headers = ['User-Agent=azuremonitormetrics.get_mac_sub_list']
-        customUrl = "https://management.azure.com/subscriptions/{0}/providers?api-version={1}&$select=namespace,registrationstate".format(
+        armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
+        customUrl = "{0}/subscriptions/{1}/providers?api-version={2}&$select=namespace,registrationstate".format(
+            armendpoint,
             subscription_id,
             RP_API
         )
@@ -74,7 +78,8 @@ def rp_registrations(cmd, subscription_id):
 
 def check_azuremonitormetrics_profile(cmd, cluster_subscription, cluster_resource_group_name, cluster_name):
     from azure.cli.core.util import send_raw_request
-    feature_check_url = f"https://management.azure.com/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/providers/Microsoft.ContainerService/managedClusters/{cluster_name}?api-version={AKS_CLUSTER_API}"
+    armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
+    feature_check_url = f"{armendpoint}/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/providers/Microsoft.ContainerService/managedClusters/{cluster_name}?api-version={AKS_CLUSTER_API}"
     try:
         headers = ['User-Agent=azuremonitormetrics.check_azuremonitormetrics_profile']
         r = send_raw_request(cmd.cli_ctx, "GET", feature_check_url,

@@ -6,7 +6,8 @@ from knack.util import CLIError
 def get_recording_rules_template(cmd, azure_monitor_workspace_resource_id):
     from azure.cli.core.util import send_raw_request
     headers = ['User-Agent=azuremonitormetrics.get_recording_rules_template']
-    url = f"https://management.azure.com{azure_monitor_workspace_resource_id}/providers/microsoft.alertsManagement/alertRuleRecommendations?api-version={ALERTS_API}"
+    armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
+    url = f"{armendpoint}{azure_monitor_workspace_resource_id}/providers/microsoft.alertsManagement/alertRuleRecommendations?api-version={ALERTS_API}"
     r = send_raw_request(cmd.cli_ctx, "GET", url, headers=headers)
     data = json.loads(r.text)
     return data['value']
@@ -51,7 +52,8 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
         cluster_resource_group_name,
         default_rule_group_name
     )
-    url = "https://management.azure.com{0}?api-version={1}".format(
+    url = "{0}{1}?api-version={2}".format(
+        cmd.cli_ctx.cloud.endpoints.resource_manager,
         default_rule_group_id,
         RULES_API
     )
@@ -63,7 +65,8 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
         cluster_resource_group_name,
         default_rule_group_name
     )
-    url = "https://management.azure.com{0}?api-version={1}".format(
+    url = "{0}{1}?api-version={2}".format(
+        cmd.cli_ctx.cloud.endpoints.resource_manager,
         default_rule_group_id,
         RULES_API
     )
@@ -78,7 +81,8 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
             cluster_resource_group_name,
             default_rule_group_name
         )
-        url = "https://management.azure.com{0}?api-version={1}".format(
+        url = "{0}{1}?api-version={2}".format(
+            cmd.cli_ctx.cloud.endpoints.resource_manager,
             default_rule_group_id,
             RULES_API
         )
@@ -90,7 +94,8 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
             cluster_resource_group_name,
             default_rule_group_name
         )
-        url = "https://management.azure.com{0}?api-version={1}".format(
+        url = "{0}{1}?api-version={2}".format(
+            cmd.cli_ctx.cloud.endpoints.resource_manager,
             default_rule_group_id,
             RULES_API
         )

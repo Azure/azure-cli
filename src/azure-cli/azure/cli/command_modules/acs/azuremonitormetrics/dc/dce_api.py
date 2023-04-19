@@ -10,7 +10,8 @@ def create_dce(cmd, cluster_subscription, cluster_resource_group_name, cluster_n
     dce_name = get_default_dce_name(cmd, mac_region, cluster_name)
     dce_resource_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Insights/dataCollectionEndpoints/{2}".format(cluster_subscription, cluster_resource_group_name, dce_name)
     try:
-        dce_url = f"https://management.azure.com{dce_resource_id}?api-version={DC_API}"
+        armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
+        dce_url = f"{armendpoint}{dce_resource_id}?api-version={DC_API}"
         dce_creation_body = json.dumps({"name": dce_name,
                                         "location": mac_region,
                                         "kind": "Linux",

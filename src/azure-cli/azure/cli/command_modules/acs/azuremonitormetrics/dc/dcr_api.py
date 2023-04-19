@@ -34,7 +34,8 @@ def create_dcr(cmd, mac_region, azure_monitor_workspace_resource_id, cluster_sub
                                         "description": "DCR description",
                                         "destinations": {
                                             "monitoringAccounts": [{"accountResourceId": azure_monitor_workspace_resource_id, "name": "MonitoringAccount1"}]}}})
-    dcr_url = f"https://management.azure.com{dcr_resource_id}?api-version={DC_API}"
+    armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
+    dcr_url = f"{armendpoint}{dcr_resource_id}?api-version={DC_API}"
     try:
         headers = ['User-Agent=azuremonitormetrics.create_dcr']
         send_raw_request(cmd.cli_ctx, "PUT",

@@ -2,7 +2,7 @@ from azure.core import CaseInsensitiveEnumMeta
 from enum import Enum
 from six import with_metaclass
 
-AKS_CLUSTER_API = "2023-01-01" # "2023-01-01"
+AKS_CLUSTER_API = "2023-01-01"
 MAC_API = "2023-04-03"
 DC_API = "2022-06-01"
 GRAFANA_API = "2022-08-01"

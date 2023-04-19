@@ -17,7 +17,8 @@ def link_grafana_instance(cmd, raw_parameters, azure_monitor_workspace_resource_
         if grafana_resource_id is None or grafana_resource_id == "":
             return GrafanaLink.NOPARAMPROVIDED
         grafana_resource_id = sanitize_resource_id(grafana_resource_id)
-        grafanaURI = "https://management.azure.com{0}?api-version={1}".format(
+        grafanaURI = "{0}{1}?api-version={2}".format(
+            cmd.cli_ctx.cloud.endpoints.resource_manager,
             grafana_resource_id,
             GRAFANA_API
         )
@@ -29,7 +30,8 @@ def link_grafana_instance(cmd, raw_parameters, azure_monitor_workspace_resource_
     # Add Role Assignment
     try:
         MonitoringDataReader = "b0d8363b-8ddd-447d-831f-62ca05bff136"
-        roleDefinitionURI = "https://management.azure.com{0}/providers/Microsoft.Authorization/roleAssignments/{1}?api-version={2}".format(
+        roleDefinitionURI = "{0}{1}/providers/Microsoft.Authorization/roleAssignments/{2}?api-version={3}".format(
+            cmd.cli_ctx.cloud.endpoints.resource_manager,
             azure_monitor_workspace_resource_id,
             uuid.uuid4(),
             GRAFANA_ROLE_ASSIGNMENT_API
@@ -60,7 +62,8 @@ def link_grafana_instance(cmd, raw_parameters, azure_monitor_workspace_resource_
     if amwIntegrations != [] and azure_monitor_workspace_resource_id in json.dumps(amwIntegrations).lower():
         return GrafanaLink.ALREADYPRESENT
     try:
-        grafanaURI = "https://management.azure.com{0}?api-version={1}".format(
+        grafanaURI = "{0}{1}?api-version={2}".format(
+            cmd.cli_ctx.cloud.endpoints.resource_manager,
             grafana_resource_id,
             GRAFANA_API
         )

@@ -8,7 +8,8 @@ def delete_rule(cmd, cluster_subscription, cluster_resource_group_name, default_
         default_rule_group_name
     )
     headers = ['User-Agent=azuremonitormetrics.delete_rule.' + default_rule_group_name]
-    url = "https://management.azure.com{0}?api-version={1}".format(
+    url = "{0}{1}?api-version={2}".format(
+        cmd.cli_ctx.cloud.endpoints.resource_manager,
         default_rule_group_id,
         RULES_API
     )
