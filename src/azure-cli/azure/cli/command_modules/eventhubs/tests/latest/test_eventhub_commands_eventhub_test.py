@@ -38,15 +38,18 @@ class EHEventhubCURDScenarioTest(ScenarioTest):
             'messageretentionindays': 4,
             'partitioncount': 4,
             'destinationname': 'EventHubArchive.AzureBlockBlob',
-            'storageaccount': '',
-            'blobcontainer': 'container01',
+            'storageaccount': self.create_random_name(prefix='storageehnscli', length=20),
+            'containername': 'container0011',
             'archinvenameformat': '{Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}'
         })
 
-        # updated teh Storageaccount ID
-        subid = self.cmd('account show --query id -otsv').output.replace('\n', '')
-        storageaccountid = '/subscriptions/' + subid + '/resourcegroups/shubham-rg/providers/Microsoft.Storage/storageAccounts/testingsdkeventhubnew'
-        self.kwargs.update({'storageaccount': storageaccountid})
+        storage_account = self.cmd(
+            'storage account create -n {storageaccount} -g {rg} -l westus --sku Standard_LRS').get_output_in_json()
+
+        self.kwargs.update({'storageid': storage_account['id']})
+
+        container = self.cmd(
+            'storage container create -n {containername} -g {rg} --account-name {storageaccount}').get_output_in_json()
 
         # Create Namespace
         self.cmd(
@@ -68,13 +71,12 @@ class EHEventhubCURDScenarioTest(ScenarioTest):
 
         # update Eventhub
         self.cmd(
-            'eventhubs eventhub update --resource-group {rg} --namespace-name {namespacename} --name {eventhubname} --partition-count {partitioncount} --message-retention {messageretentionindays}',
+            'eventhubs eventhub update --resource-group {rg} --namespace-name {namespacename} --name {eventhubname} --partition-count {partitioncount} ',
             checks=[self.check('name', self.kwargs['eventhubname'])])
 
         # update Eventhub
         self.cmd(
-            'eventhubs eventhub update --resource-group {rg} --namespace-name {namespacename} --name {eventhubname} --enable-capture {isautoinflateenabled} --skip-empty-archives {isautoinflateenabled} --capture-interval 120 --capture-size-limit 10485763 --destination-name {destinationname} --storage-account {storageaccount} --blob-container {blobcontainer} --archive-name-format {archinvenameformat} ',
-            checks=[self.check('name', self.kwargs['eventhubname'])])
+            'eventhubs eventhub update --resource-group {rg} --namespace-name {namespacename} --name {eventhubname} --enable-capture true --skip-empty-archives true --capture-interval 120 --capture-size-limit 10485763 --destination-name {destinationname} --storage-account {storageid} --blob-container {containername} --archive-name-format {archinvenameformat} ')
 
         # Eventhub List
         listeventhub = self.cmd('eventhubs eventhub list --resource-group {rg} --namespace-name {namespacename}').output
