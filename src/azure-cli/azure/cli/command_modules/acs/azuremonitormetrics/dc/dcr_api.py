@@ -1,3 +1,7 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
 import json
 from azure.cli.command_modules.acs.azuremonitormetrics.constants import MapToClosestMACRegion
 from azure.cli.command_modules.acs.azuremonitormetrics.dc.defaults import get_default_region, sanitize_name
