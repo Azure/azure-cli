@@ -162,7 +162,6 @@ def cli_eheventhub_create(cmd, client, resource_group_name, namespace_name, even
                     blob_container=blob_container,
                     archive_name_format=archive_name_format)
             )
-    print(eventhubparameter1.retention_description)
     return client.create_or_update(
         resource_group_name=resource_group_name,
         namespace_name=namespace_name,
@@ -174,12 +173,11 @@ def cli_eheventhub_update(cmd, instance, retention_time_in_hours=None, partition
                           enabled=None, skip_empty_archives=None, capture_interval_seconds=None,
                           capture_size_limit_bytes=None, destination_name=None, storage_account_resource_id=None,
                           blob_container=None, archive_name_format=None):
-    capturedescription, destination, encodingcapturedescription, retentiondescription = cmd.get_models('CaptureDescription', 'Destination', 'EncodingCaptureDescription', 'RetentionDescription')
+    capturedescription, destination, encodingcapturedescription = cmd.get_models('CaptureDescription', 'Destination', 'EncodingCaptureDescription')
 
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
 
-        if retention_time_in_hours and not instance.retention_description.retention_time_in_hours:
-            instance.retention_description = retentiondescription()
+        if retention_time_in_hours:
             instance.retention_description.retention_time_in_hours = retention_time_in_hours
 
         if partition_count:
