@@ -64,7 +64,6 @@ class TunnelServer:
         logger.info('Finished initialization')
 
     def create_auth(self):
-        from base64 import b64encode
         auth_string = f"Bearer {self.auth_token}"
         # auth_string = auth_string.decode('utf-8')
         return auth_string
@@ -138,7 +137,7 @@ class TunnelServer:
             self.client, _address = self.sock.accept()
             self.client.settimeout(60 * 60)
             host = 'wss://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx')
-            basic_auth_header = [auth_string]
+            basic_auth_header = [f"Authorization: {auth_string}"]
             if self.instance is not None:
                 basic_auth_header.append('Cookie: ARRAffinity=' + self.instance)
             cli_logger = get_logger()  # get CLI logger which has the level set through command lines
