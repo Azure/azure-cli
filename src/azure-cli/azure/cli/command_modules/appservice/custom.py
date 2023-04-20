@@ -1308,7 +1308,7 @@ def validate_app_settings_in_scm(cmd, resource_group_name, name, slot=None,
     return True
 
 
-@retryable_method(3, 5)
+@retryable_method(retries=3, interval_sec=5)
 def _get_app_settings_from_scm(cmd, resource_group_name, name, slot=None):
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     settings_url = '{}/api/settings'.format(scm_url)
