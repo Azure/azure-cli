@@ -4818,10 +4818,6 @@ def get_tunnel(cmd, resource_group_name, name, port=None, slot=None, instance=No
     if not is_linux:
         raise ValidationError("Only Linux App Service Plans supported, Found a Windows App Service Plan")
 
-    profiles = list_publish_profiles(cmd, resource_group_name, name, slot)
-    profile_user_name = next(p['userName'] for p in profiles)
-    profile_user_password = next(p['userPWD'] for p in profiles)
-
     if port is None:
         port = 0  # Will auto-select a free port from 1024-65535
         logger.info('No port defined, creating on random free port')
@@ -4838,7 +4834,7 @@ def get_tunnel(cmd, resource_group_name, name, port=None, slot=None, instance=No
 
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
 
-    tunnel_server = TunnelServer('127.0.0.1', port, scm_url, profile_user_name, profile_user_password, instance)
+    tunnel_server = TunnelServer('127.0.0.1', port, scm_url, _get_bearer_token(cmd.cli_ctx), instance)
     _ping_scm_site(cmd, resource_group_name, name, instance=instance)
 
     _wait_for_webapp(tunnel_server)
