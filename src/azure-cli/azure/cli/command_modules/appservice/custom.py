@@ -1317,7 +1317,7 @@ def validate_app_settings_in_scm(cmd, resource_group_name, name, slot=None,
     return True
 
 
-@retryable_method(3, 5)
+@retryable_method(retries=3, interval_sec=5)
 def _get_app_settings_from_scm(cmd, resource_group_name, name, slot=None):
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     settings_url = '{}/api/settings'.format(scm_url)
@@ -1329,7 +1329,7 @@ def _get_app_settings_from_scm(cmd, resource_group_name, name, slot=None):
     }
 
     import requests
-    response = requests.get(settings_url, headers=headers, auth=(username, password), timeout=3)
+    response = requests.get(settings_url, headers=headers, auth=(username, password), timeout=30)
 
     return response.json() or {}
 
@@ -3802,7 +3802,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         setattr(site_config, snake_case_prop, value)
 
     if environment is not None:
-        functionapp_def.kind = 'functionapp'
+        functionapp_def.kind = 'functionapp,linux,container,azurecontainerapps'
         functionapp_def.reserved = None
         functionapp_def.name = name
         functionapp_def.https_only = None
