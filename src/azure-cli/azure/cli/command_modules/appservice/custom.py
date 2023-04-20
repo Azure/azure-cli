@@ -586,7 +586,6 @@ def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, 
 
 def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None):
     logger.warning("Getting scm site credentials for zip deployment")
-    user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
 
     try:
         scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
@@ -596,27 +595,19 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     zip_url = scm_url + '/api/zipdeploy?isAsync=true'
     deployment_status_url = scm_url + '/api/deployments/latest'
 
-    import urllib3
-    authorization = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
-    headers = authorization
-    headers['Content-Type'] = 'application/octet-stream'
-    headers['Cache-Control'] = 'no-cache'
-    headers['User-Agent'] = get_az_user_agent()
-    headers['x-ms-client-request-id'] = cmd.cli_ctx.data['headers']['x-ms-client-request-id']
-    import requests
     import os
-    from azure.cli.core.util import should_disable_connection_verify
     # Read file content
+
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
         zip_content = fs.read()
         logger.warning("Starting zip deployment. This operation can take a while to complete ...")
-        res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
+        res = send_raw_request(cmd.cli_ctx, "POST", zip_url, body=zip_content,
+                               resource=cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
         logger.warning("Deployment endpoint responded with status code %d", res.status_code)
 
     # check the status of async deployment
     if res.status_code == 202:
-        response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
-                                                authorization, timeout)
+        response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url, timeout)
         return response
 
     # check if there's an ongoing process
@@ -4050,15 +4041,13 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
     return [geo_region for geo_region in web_client_geo_regions if geo_region.name in providers_client_locations_list]
 
 
-def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, authorization, timeout=None):
-    import requests
-    from azure.cli.core.util import should_disable_connection_verify
+def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, timeout=None):
     total_trials = (int(timeout) // 2) if timeout else 450
     num_trials = 0
     while num_trials < total_trials:
         time.sleep(2)
-        response = requests.get(deployment_status_url, headers=authorization,
-                                verify=not should_disable_connection_verify())
+        response = send_raw_request(cmd.cli_ctx, "GET", deployment_status_url,
+                                    resource=cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
         try:
             res_dict = response.json()
         except json.decoder.JSONDecodeError:
@@ -4991,27 +4980,6 @@ def _get_onedeploy_status_url(params):
     return scm_url + '/api/deployments/latest'
 
 
-def _get_basic_headers(params):
-    import urllib3
-
-    user_name, password = _get_site_credential(params.cmd.cli_ctx, params.resource_group_name,
-                                               params.webapp_name, params.slot)
-
-    if params.src_path:
-        content_type = 'application/octet-stream'
-    elif params.src_url:
-        content_type = 'application/json'
-    else:
-        raise CLIError('Unable to determine source location of the artifact being deployed')
-
-    headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
-    headers['Cache-Control'] = 'no-cache'
-    headers['User-Agent'] = get_az_user_agent()
-    headers['Content-Type'] = content_type
-
-    return headers
-
-
 def _get_onedeploy_request_body(params):
     import os
 
@@ -5062,12 +5030,12 @@ def _make_onedeploy_request(params):
 
     # Build the request body, headers, API URL and status URL
     body = _get_onedeploy_request_body(params)
-    headers = _get_basic_headers(params)
     deploy_url = _build_onedeploy_url(params)
     deployment_status_url = _get_onedeploy_status_url(params)
 
     logger.info("Deployment API: %s", deploy_url)
-    response = requests.post(deploy_url, data=body, headers=headers, verify=not should_disable_connection_verify())
+    response = send_raw_request(params.cmd.cli_ctx, "POST", deploy_url, body=body,
+                               resource=params.cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
 
     # For debugging purposes only, you can change the async deployment into a sync deployment by polling the API status
     # For that, set poll_async_deployment_for_debugging=True
@@ -5079,7 +5047,7 @@ def _make_onedeploy_request(params):
         if poll_async_deployment_for_debugging:
             logger.info('Polling the status of async deployment')
             response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
-                                                         deployment_status_url, headers, params.timeout)
+                                                         deployment_status_url, params.timeout)
             logger.info('Async deployment complete. Server response: %s', response_body)
         return response_body
 
