@@ -14,7 +14,7 @@ Release History
 
 **Compute**
 
-* Fix #26118: `az vm list-ip-addresses`: KeyError when attributes missing in public IP address (#26135)
+* Fix #26118: `az vm list-ip-addresses`: Fix the KeyError when attributes missing in public IP address (#26135)
 * Fix #26164: `az vmss update`: Fix unexpected error while running the update instance protection command on VMSS flex instances (#26174)
 * Fix #26185: `az sig update`: Fix issues that `is_soft_delete_enabled` may not exist (#26188)
 * `az vm host resize`: Add new command to support resizing dedicated host (#26189)
