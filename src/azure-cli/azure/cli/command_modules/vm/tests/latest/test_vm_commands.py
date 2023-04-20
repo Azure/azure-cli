@@ -6777,7 +6777,8 @@ class DedicatedHostScenarioTest(ScenarioTest):
 
         self.kwargs['resize-sku'] = self.cmd('vm host list-host-resize-options --name {host} --host-group {host-group} -g {rg}').get_output_in_json()[0]
 
-        self.cmd('vm host group resize -n {host} --host-group {host-group} -g {rg} --sku {resize-sku}', checks=[
+        self.cmd('vm host resize -n {host} --host-group {host-group} -g {rg} --sku {resize-sku}', checks=[
+            self.check('sku.name', '{resize-sku}')
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_host_ultra_ssd_')
