@@ -6775,7 +6775,7 @@ class DedicatedHostScenarioTest(ScenarioTest):
         self.cmd('vm host group create -n {host-group} -c 1 -g {rg}')
         self.cmd('vm host create -n {host} --host-group {host-group} -d 0 -g {rg} --sku DSv3-Type1')
 
-        self.kwargs['resize-sku'] = self.cmd('vm host list-host-resize-options --name {host} --host-group {host-group} -g {rg}').get_output_in_json()[0]
+        self.kwargs['resize-sku'] = self.cmd('vm host list-resize-options --name {host} --host-group {host-group} -g {rg}').get_output_in_json()[0]
 
         self.cmd('vm host resize -n {host} --host-group {host-group} -g {rg} --sku {resize-sku}', checks=[
             self.check('sku.name', '{resize-sku}')

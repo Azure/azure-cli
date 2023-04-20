@@ -71,7 +71,7 @@ class Resize(AAZCommand):
         _args_schema.sku = AAZStrArg(
             options=["--sku"],
             arg_group="Sku",
-            help="Dedicated host size for resizing. Available dedicated host sizes for resizing could be listed by run 'az vm host list-host-resize-options'.",
+            help="Dedicated host size for resizing. Available dedicated host sizes for resizing could be listed by running 'az vm host list-resize-options'.",
         )
         return cls._args_schema
 

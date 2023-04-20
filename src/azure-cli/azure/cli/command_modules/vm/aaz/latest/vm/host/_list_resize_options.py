@@ -12,13 +12,13 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "vm host list-host-resize-options",
+    "vm host list-resize-options",
 )
-class ListHostResizeOptions(AAZCommand):
+class ListResizeOptions(AAZCommand):
     """List all available dedicated host sizes to which the specified dedicated host can be resized. NOTE: The dedicated host sizes provided can be used to only scale up the existing dedicated host.
 
     :example: List all available dedicated host sizes to which the specified dedicated host can be resized.
-        az vm host list-host-resize-options --host-group MyHostGroup --name MyHost --resource-group MyResourceGroup
+        az vm host list-resize-options --host-group MyHostGroup --name MyHost --resource-group MyResourceGroup
     """
 
     _aaz_info = {
@@ -177,8 +177,8 @@ class ListHostResizeOptions(AAZCommand):
             return cls._schema_on_200
 
 
-class _ListHostResizeOptionsHelper:
-    """Helper class for ListHostResizeOptions"""
+class _ListResizeOptionsHelper:
+    """Helper class for ListResizeOptions"""
 
 
-__all__ = ["ListHostResizeOptions"]
+__all__ = ["ListResizeOptions"]
