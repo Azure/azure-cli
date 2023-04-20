@@ -1312,16 +1312,8 @@ def validate_app_settings_in_scm(cmd, resource_group_name, name, slot=None,
 def _get_app_settings_from_scm(cmd, resource_group_name, name, slot=None):
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     settings_url = '{}/api/settings'.format(scm_url)
-    username, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
-    headers = {
-        'Content-Type': 'application/octet-stream',
-        'Cache-Control': 'no-cache',
-        'User-Agent': get_az_user_agent()
-    }
-
-    import requests
-    response = requests.get(settings_url, headers=headers, auth=(username, password), timeout=30)
-
+    response = send_raw_request(cmd.cli_ctx, "GET", settings_url,
+                                resource=cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
     return response.json() or {}
 
 
@@ -2718,7 +2710,6 @@ def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
     if provider:
         streaming_url += ('/' + provider.lstrip('/'))
 
-    user, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
     t = threading.Thread(target=_get_log, args=(streaming_url, cmd.cli_ctx))
     t.daemon = True
     t.start()
