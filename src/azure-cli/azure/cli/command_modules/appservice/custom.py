@@ -2719,7 +2719,7 @@ def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
         streaming_url += ('/' + provider.lstrip('/'))
 
     user, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
-    t = threading.Thread(target=_get_log, args=(streaming_url, user, password))
+    t = threading.Thread(target=_get_log, args=(streaming_url, cmd.cli_ctx))
     t.daemon = True
     t.start()
 
@@ -2730,8 +2730,7 @@ def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
 def download_historical_logs(cmd, resource_group_name, name, log_file=None, slot=None):
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     url = scm_url.rstrip('/') + '/dump'
-    user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
-    _get_log(url, user_name, password, log_file)
+    _get_log(url, cmd.cli_ctx, log_file)
     logger.warning('Downloaded logs to %s', log_file)
 
 
@@ -2741,7 +2740,15 @@ def _get_site_credential(cli_ctx, resource_group_name, name, slot=None):
     return (creds.publishing_user_name, creds.publishing_password)
 
 
-def _get_log(url, user_name, password, log_file=None):
+def _get_bearer_token(cli_ctx):
+    from azure.cli.core._profile import Profile
+    profile = Profile(cli_ctx=cli_ctx)
+    credential, _, _ = profile.get_login_credentials()
+    bearer_token = credential.get_token().token
+    return bearer_token
+
+
+def _get_log(url, cli_ctx, log_file=None):
     import urllib3
     try:
         import urllib3.contrib.pyopenssl
@@ -2750,7 +2757,8 @@ def _get_log(url, user_name, password, log_file=None):
         pass
 
     http = get_pool_manager(url)
-    headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
+    headers = urllib3.util.make_headers()
+    headers["authorization"] = f'Bearer {_get_bearer_token(cli_ctx)}'
     r = http.request(
         'GET',
         url,
@@ -5015,12 +5023,6 @@ def _update_artifact_type(params):
 
 
 def _make_onedeploy_request(params):
-    import requests
-
-    from azure.cli.core.util import (
-        should_disable_connection_verify,
-    )
-
     # Build the request body, headers, API URL and status URL
     body = _get_onedeploy_request_body(params)
     deploy_url = _build_onedeploy_url(params)
