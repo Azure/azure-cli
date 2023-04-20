@@ -4797,14 +4797,14 @@ def _ping_scm_site(cmd, resource_group, name, instance=None):
     #  wake up kudu, by making an SCM call
     import requests
     #  work around until the timeout limits issue for linux is investigated & fixed
-    user_name, password = _get_site_credential(cmd.cli_ctx, resource_group, name)
     scm_url = _get_scm_url(cmd, resource_group, name)
     import urllib3
-    authorization = urllib3.util.make_headers(basic_auth='{}:{}'.format(user_name, password))
+    headers = urllib3.util.make_headers()
+    headers["authorization"] = f'Bearer {_get_bearer_token(cmd.cli_ctx)}'
     cookies = {}
     if instance is not None:
         cookies['ARRAffinity'] = instance
-    requests.get(scm_url + '/api/settings', headers=authorization, verify=not should_disable_connection_verify(),
+    requests.get(scm_url + '/api/settings', headers=headers, verify=not should_disable_connection_verify(),
                  cookies=cookies)
 
 
@@ -4817,10 +4817,6 @@ def get_tunnel(cmd, resource_group_name, name, port=None, slot=None, instance=No
     is_linux = webapp.reserved
     if not is_linux:
         raise ValidationError("Only Linux App Service Plans supported, Found a Windows App Service Plan")
-
-    profiles = list_publish_profiles(cmd, resource_group_name, name, slot)
-    profile_user_name = next(p['userName'] for p in profiles)
-    profile_user_password = next(p['userPWD'] for p in profiles)
 
     if port is None:
         port = 0  # Will auto-select a free port from 1024-65535
@@ -4838,7 +4834,7 @@ def get_tunnel(cmd, resource_group_name, name, port=None, slot=None, instance=No
 
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
 
-    tunnel_server = TunnelServer('127.0.0.1', port, scm_url, profile_user_name, profile_user_password, instance)
+    tunnel_server = TunnelServer('127.0.0.1', port, scm_url, _get_bearer_token(cmd.cli_ctx), instance)
     _ping_scm_site(cmd, resource_group_name, name, instance=instance)
 
     _wait_for_webapp(tunnel_server)
