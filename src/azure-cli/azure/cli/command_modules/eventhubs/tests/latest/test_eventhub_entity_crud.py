@@ -90,9 +90,9 @@ class EHNamespaceEntityCURDScenarioTest(ScenarioTest):
             '--destination-name {destinationname} --storage-account {storageid} --blob-container {containername} --archive-name-format {archinvenameformat}').get_output_in_json()
 
         self.cmd(
-            'eventhubs eventhub update --resource-group {rg} --namespace-name {namespacename} --name {eventhubname} --enable-capture --skip-empty-archives {isautoinflateenabled} '
+            'eventhubs eventhub update --resource-group {rg} --namespace-name {namespacename} --name {eventhubname2} --enable-capture --skip-empty-archives {isautoinflateenabled} '
             '--capture-interval 120 --capture-size-limit 10485763 --destination-name {destinationname} --storage-account {storageaccount} --blob-container {blobcontainer} --archive-name-format {archinvenameformat} ',
-            checks=[self.check('name', self.kwargs['eventhubname'])])
+            checks=[self.check('name', self.kwargs['eventhubname2'])])
         self.assertEqual(eh2['name'], self.kwargs['eventhubname2'])
         self.assertEqual(eh2['partitionCount'], 15)
         self.assertEqual(eh2['captureDescription']['enabled'], True)

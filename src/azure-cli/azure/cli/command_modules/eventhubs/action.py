@@ -57,7 +57,7 @@ class ConstructPolicy(argparse._AppendAction):
         super(ConstructPolicy, self).__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
-        from azure.mgmt.eventhub.v2022_01_01_preview.models import ThrottlingPolicy
+        from azure.mgmt.eventhub.v2022_10_01_preview.models import ThrottlingPolicy
         from azure.cli.core import CLIError
         from azure.cli.core.azclierror import InvalidArgumentValueError
         from azure.cli.command_modules.eventhubs.constants import INCOMING_BYTES, INCOMING_MESSAGES, OUTGOING_MESSAGES, OUTGOING_BYTES

@@ -144,10 +144,10 @@ def cli_eheventhub_create(cmd, client, resource_group_name, namespace_name, even
             eventhubparameter1.status = status
 
         eventhubparameter1.retention_description = retentiondescription(
-                cleanup_policy = cleanup_policy,
-                retention_time_in_hours=retention_time_in_hours,
-                tombstone_retention_time_in_hours=tombstone_retention_time_in_hours
-            )
+            cleanup_policy=cleanup_policy,
+            retention_time_in_hours=retention_time_in_hours,
+            tombstone_retention_time_in_hours=tombstone_retention_time_in_hours
+        )
 
         if enabled is not None and enabled is True:
             eventhubparameter1.capture_description = CaptureDescription(
@@ -178,7 +178,8 @@ def cli_eheventhub_update(cmd, instance, retention_time_in_hours=None, partition
 
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
 
-        if retention_time_in_hours:
+        if retention_time_in_hours and not instance.retention_description.retention_time_in_hours:
+            instance.retention_description = retentiondescription()
             instance.retention_description.retention_time_in_hours = retention_time_in_hours
 
         if partition_count:
