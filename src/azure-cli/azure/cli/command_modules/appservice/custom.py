@@ -43,7 +43,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
     ConfiguredDefaultSetter, sdk_no_wait
-from azure.cli.core.util import get_az_user_agent, send_raw_request, get_file_json
+from azure.cli.core.util import send_raw_request, get_file_json
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.azclierror import (InvalidArgumentValueError, MutuallyExclusiveArgumentError, ResourceNotFoundError,
                                        RequiredArgumentMissingError, ValidationError, CLIInternalError,
@@ -5021,7 +5021,7 @@ def _make_onedeploy_request(params):
 
     logger.info("Deployment API: %s", deploy_url)
     response = send_raw_request(params.cmd.cli_ctx, "POST", deploy_url, body=body,
-                               resource=params.cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
+                                resource=params.cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
 
     # For debugging purposes only, you can change the async deployment into a sync deployment by polling the API status
     # For that, set poll_async_deployment_for_debugging=True
