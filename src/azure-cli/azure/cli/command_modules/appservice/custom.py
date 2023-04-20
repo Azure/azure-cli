@@ -597,8 +597,8 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     deployment_status_url = scm_url + '/api/deployments/latest'
 
     import urllib3
-    # authorization = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
-    headers = {}
+    authorization = urllib3.util.make_headers()
+    headers = authorization
     headers['authorization'] = 'Bearer {}'.format(_get_bearer_token(cmd.cli_ctx))
     headers['Content-Type'] = 'application/octet-stream'
     headers['Cache-Control'] = 'no-cache'
