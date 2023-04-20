@@ -2551,19 +2551,15 @@ def show_diagnostic_settings(cmd, resource_group_name, name, slot=None):
 
 
 def show_deployment_log(cmd, resource_group, name, slot=None, deployment_id=None):
-    import urllib3
-    import requests
-
     scm_url = _get_scm_url(cmd, resource_group, name, slot)
-    username, password = _get_site_credential(cmd.cli_ctx, resource_group, name, slot)
-    headers = urllib3.util.make_headers(basic_auth='{}:{}'.format(username, password))
 
     deployment_log_url = ''
     if deployment_id:
         deployment_log_url = '{}/api/deployments/{}/log'.format(scm_url, deployment_id)
     else:
         deployments_url = '{}/api/deployments/'.format(scm_url)
-        response = requests.get(deployments_url, headers=headers)
+        response = send_raw_request(cmd.cli_ctx, "GET", deployments_url,
+                                    resource=cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
 
         if response.status_code != 200:
             raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(
@@ -2578,7 +2574,8 @@ def show_deployment_log(cmd, resource_group, name, slot=None, deployment_id=None
             deployment_log_url = sorted_logs[0].get('log_url', '')
 
     if deployment_log_url:
-        response = requests.get(deployment_log_url, headers=headers)
+        response = send_raw_request(cmd.cli_ctx, "GET", deployment_log_url,
+                                    resource=cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
         if response.status_code != 200:
             raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(
                 deployment_log_url, response.status_code, response.reason))
@@ -2589,13 +2586,9 @@ def show_deployment_log(cmd, resource_group, name, slot=None, deployment_id=None
 def list_deployment_logs(cmd, resource_group, name, slot=None):
     scm_url = _get_scm_url(cmd, resource_group, name, slot)
     deployment_log_url = '{}/api/deployments/'.format(scm_url)
-    username, password = _get_site_credential(cmd.cli_ctx, resource_group, name, slot)
 
-    import urllib3
-    headers = urllib3.util.make_headers(basic_auth='{}:{}'.format(username, password))
-
-    import requests
-    response = requests.get(deployment_log_url, headers=headers)
+    response = send_raw_request(cmd.cli_ctx, "GET", deployment_log_url,
+                                resource=cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
 
     if response.status_code != 200:
         raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(
