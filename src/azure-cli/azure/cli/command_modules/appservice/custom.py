@@ -2755,22 +2755,20 @@ def get_bearer_token(cli_ctx):
     return bearer_token
 
 
-# TODO check if ftp allowed is needed
 def basic_auth_supported(cli_ctx, name, resource_group_name, slot=None):
     return _generic_site_operation(cli_ctx, resource_group_name, name, 'get_scm_allowed', slot).allow
 
 
 # auth with basic auth if available
-# TODO remove debug logging
 def get_scm_site_headers(cli_ctx, name, resource_group_name, slot=None, additional_headers=None):
     import urllib3
 
     if basic_auth_supported(cli_ctx, name, resource_group_name, slot):
-        logger.warning("[AUTH]: basic")
+        logger.info("[AUTH]: basic")
         username, password = _get_site_credential(cli_ctx, resource_group_name, name, slot)
         headers = urllib3.util.make_headers(basic_auth=f"{username}:{password}")
     else:
-        logger.warning("[AUTH]: AAD")
+        logger.info("[AUTH]: AAD")
         headers = urllib3.util.make_headers()
         headers["Authorization"] = f"Bearer {get_bearer_token(cli_ctx)}"
     headers['User-Agent'] = get_az_user_agent()
