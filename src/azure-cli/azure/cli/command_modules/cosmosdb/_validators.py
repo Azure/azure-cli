@@ -532,6 +532,7 @@ def _validate_pk_paths_in_cep(path, partition_key_path, policyFormatVersion, enc
                                                 "Client Encryption policy with invalid encryption type. "
                                                 "Only deterministic encryption type is supported.")
 
+
 def validate_server_certificates(ns):
     """ Extracts multiple comma-separated certificates """
     if ns.server_certificates is not None:
