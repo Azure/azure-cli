@@ -43,7 +43,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
     ConfiguredDefaultSetter, sdk_no_wait
-from azure.cli.core.util import send_raw_request, get_file_json
+from azure.cli.core.util import get_az_user_agent, send_raw_request, get_file_json
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.azclierror import (InvalidArgumentValueError, MutuallyExclusiveArgumentError, ResourceNotFoundError,
                                        RequiredArgumentMissingError, ValidationError, CLIInternalError,
@@ -68,7 +68,7 @@ from .utils import (_normalize_sku,
                     _normalize_location,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
                     get_resource_if_exists, repo_url_to_name, get_token,
-                    app_service_plan_exists, is_centauri_functionapp, get_scm_site_headers)
+                    app_service_plan_exists, is_centauri_functionapp)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -2739,6 +2739,48 @@ def download_historical_logs(cmd, resource_group_name, name, log_file=None, slot
     headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group_name, slot)
     _get_log(url, headers, log_file)
     logger.warning('Downloaded logs to %s', log_file)
+
+
+def _get_site_credential(cli_ctx, resource_group_name, name, slot=None):
+    creds = _generic_site_operation(cli_ctx, resource_group_name, name, 'begin_list_publishing_credentials', slot)
+    creds = creds.result()
+    return (creds.publishing_user_name, creds.publishing_password)
+
+
+def get_bearer_token(cli_ctx):
+    from azure.cli.core._profile import Profile
+    profile = Profile(cli_ctx=cli_ctx)
+    credential, _, _ = profile.get_login_credentials()
+    bearer_token = credential.get_token().token
+    return bearer_token
+
+
+# TODO check if ftp allowed is needed
+def basic_auth_supported(cli_ctx, name, resource_group_name, slot=None):
+    return _generic_site_operation(cli_ctx, resource_group_name, name, 'get_scm_allowed', slot).allow
+
+
+# auth with basic auth if available
+# TODO remove debug logging
+def get_scm_site_headers(cli_ctx, name, resource_group_name, slot=None, additional_headers=None):
+    import urllib3
+
+    if basic_auth_supported(cli_ctx, name, resource_group_name, slot):
+        logger.warning("[AUTH]: basic")
+        username, password = _get_site_credential(cli_ctx, resource_group_name, name, slot)
+        headers = urllib3.util.make_headers(basic_auth=f"{username}:{password}")
+    else:
+        logger.warning("[AUTH]: AAD")
+        headers = urllib3.util.make_headers()
+        headers["Authorization"] = f"Bearer {get_bearer_token(cli_ctx)}"
+    headers['User-Agent'] = get_az_user_agent()
+    headers['x-ms-client-request-id'] = cli_ctx.data['headers']['x-ms-client-request-id']
+    # allow setting Content-Type, Cache-Control, etc. headers
+    if additional_headers:
+        for k, v in additional_headers.items():
+            headers[k] = v
+
+    return headers
 
 
 def _get_log(url, headers, log_file=None):
