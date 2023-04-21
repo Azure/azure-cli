@@ -56,6 +56,7 @@ from azure.mgmt.cosmosdb.models import (
     AnalyticalStorageConfiguration,
     RestoreParameters,
     ContinuousModeBackupPolicy,
+    ContinuousModeProperties,
     ContinuousBackupRestoreLocation,
     CreateMode,
     ManagedServiceIdentityUserAssignedIdentity,
@@ -127,6 +128,7 @@ def cli_cosmosdb_create(cmd,
                         default_identity=None,
                         analytical_storage_schema_type=None,
                         backup_policy_type=None,
+                        continuous_tier=None,
                         databases_to_restore=None,
                         gremlin_databases_to_restore=None,
                         tables_to_restore=None,
@@ -175,6 +177,7 @@ def cli_cosmosdb_create(cmd,
                                     restore_timestamp=restore_timestamp_utc,
                                     analytical_storage_schema_type=analytical_storage_schema_type,
                                     backup_policy_type=backup_policy_type,
+                                    continuous_tier=continuous_tier,
                                     backup_interval=backup_interval,
                                     backup_redundancy=backup_redundancy,
                                     assign_identity=assign_identity,
@@ -217,6 +220,7 @@ def _create_database_account(client,
                              assign_identity=None,
                              default_identity=None,
                              backup_policy_type=None,
+                             continuous_tier=None,
                              analytical_storage_schema_type=None,
                              databases_to_restore=None,
                              gremlin_databases_to_restore=None,
@@ -288,6 +292,15 @@ def _create_database_account(client,
             backup_policy.periodic_mode_properties = periodic_mode_properties
         elif backup_policy_type.lower() == 'continuous':
             backup_policy = ContinuousModeBackupPolicy()
+            if continuous_tier is not None:
+                continuous_mode_properties = ContinuousModeProperties(
+                    tier=continuous_tier
+                )
+            else:
+                continuous_mode_properties = ContinuousModeProperties(
+                    tier='Continuous30Days'
+                )
+            backup_policy.continuous_mode_properties = continuous_mode_properties
         else:
             raise CLIError('backup-policy-type argument is invalid.')
     elif backup_interval is not None or backup_retention is not None or backup_redundancy is not None:
@@ -386,7 +399,8 @@ def cli_cosmosdb_update(client,
                         backup_redundancy=None,
                         default_identity=None,
                         analytical_storage_schema_type=None,
-                        backup_policy_type=None):
+                        backup_policy_type=None,
+                        continuous_tier=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
 
@@ -443,6 +457,22 @@ def cli_cosmosdb_update(client,
     elif backup_policy_type is not None and backup_policy_type.lower() == 'continuous':
         if isinstance(existing.backup_policy, PeriodicModeBackupPolicy):
             backup_policy = ContinuousModeBackupPolicy()
+            if continuous_tier is not None:
+                continuous_mode_properties = ContinuousModeProperties(
+                    tier=continuous_tier
+                )
+            else:
+                continuous_mode_properties = ContinuousModeProperties(
+                    tier='Continuous30Days'
+                )
+            backup_policy.continuous_mode_properties = continuous_mode_properties
+        else:
+            backup_policy = existing.backup_policy
+            if continuous_tier is not None:
+                continuous_mode_properties = ContinuousModeProperties(
+                    tier=continuous_tier
+                )
+                backup_policy.continuous_mode_properties = continuous_mode_properties
 
     analytical_storage_configuration = None
     if analytical_storage_schema_type is not None:
