@@ -68,7 +68,7 @@ from .utils import (_normalize_sku,
                     _normalize_location,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
                     get_resource_if_exists, repo_url_to_name, get_token,
-                    app_service_plan_exists, is_centauri_functionapp)
+                    app_service_plan_exists, is_centauri_functionapp, get_scm_site_headers)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -595,19 +595,25 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     zip_url = scm_url + '/api/zipdeploy?isAsync=true'
     deployment_status_url = scm_url + '/api/deployments/latest'
 
+    additional_headers = {"Content-Type": "application/octet-stream", "Cache-Control": "no-cache"}
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group_name, slot,
+                                   additional_headers=additional_headers)
+
     import os
+    import requests
+    from azure.cli.core.util import should_disable_connection_verify
     # Read file content
 
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
         zip_content = fs.read()
         logger.warning("Starting zip deployment. This operation can take a while to complete ...")
-        res = send_raw_request(cmd.cli_ctx, "POST", zip_url, body=zip_content,
-                               resource=cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
+        res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
         logger.warning("Deployment endpoint responded with status code %d", res.status_code)
 
     # check the status of async deployment
     if res.status_code == 202:
-        response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url, timeout)
+        response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
+                                                headers, timeout)
         return response
 
     # check if there's an ongoing process
@@ -1308,14 +1314,18 @@ def validate_app_settings_in_scm(cmd, resource_group_name, name, slot=None,
     return True
 
 
-@retryable_method(retries=3, interval_sec=5)
 def _get_app_settings_from_scm(cmd, resource_group_name, name, slot=None):
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     settings_url = '{}/api/settings'.format(scm_url)
-    response = send_raw_request(cmd.cli_ctx, "GET", settings_url,
-                                resource=cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
-    return response.json() or {}
+    additional_headers = {
+        'Content-Type': 'application/octet-stream',
+        'Cache-Control': 'no-cache',
+    }
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group_name, slot, additional_headers=additional_headers)
 
+    import requests
+    response = requests.get(settings_url, headers=headers, timeout=30)
+    return response.json() or {}
 
 def get_connection_strings(cmd, resource_group_name, name, slot=None):
     result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_connection_strings', slot)
@@ -2543,15 +2553,16 @@ def show_diagnostic_settings(cmd, resource_group_name, name, slot=None):
 
 
 def show_deployment_log(cmd, resource_group, name, slot=None, deployment_id=None):
+    import requests
     scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
 
     deployment_log_url = ''
     if deployment_id:
         deployment_log_url = '{}/api/deployments/{}/log'.format(scm_url, deployment_id)
     else:
         deployments_url = '{}/api/deployments/'.format(scm_url)
-        response = send_raw_request(cmd.cli_ctx, "GET", deployments_url,
-                                    resource=cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
+        response = requests.get(deployments_url, headers=headers)
 
         if response.status_code != 200:
             raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(
@@ -2566,8 +2577,7 @@ def show_deployment_log(cmd, resource_group, name, slot=None, deployment_id=None
             deployment_log_url = sorted_logs[0].get('log_url', '')
 
     if deployment_log_url:
-        response = send_raw_request(cmd.cli_ctx, "GET", deployment_log_url,
-                                    resource=cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
+        response = requests.get(deployment_log_url, headers=headers)
         if response.status_code != 200:
             raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(
                 deployment_log_url, response.status_code, response.reason))
@@ -2576,11 +2586,13 @@ def show_deployment_log(cmd, resource_group, name, slot=None, deployment_id=None
 
 
 def list_deployment_logs(cmd, resource_group, name, slot=None):
+    import requests
+
     scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
     deployment_log_url = '{}/api/deployments/'.format(scm_url)
 
-    response = send_raw_request(cmd.cli_ctx, "GET", deployment_log_url,
-                                resource=cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
+    response = requests.get(deployment_log_url, headers=headers)
 
     if response.status_code != 200:
         raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(
@@ -2710,7 +2722,8 @@ def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
     if provider:
         streaming_url += ('/' + provider.lstrip('/'))
 
-    t = threading.Thread(target=_get_log, args=(streaming_url, cmd.cli_ctx))
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group_name, slot)
+    t = threading.Thread(target=_get_log, args=(streaming_url, headers))
     t.daemon = True
     t.start()
 
@@ -2721,25 +2734,12 @@ def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
 def download_historical_logs(cmd, resource_group_name, name, log_file=None, slot=None):
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     url = scm_url.rstrip('/') + '/dump'
-    _get_log(url, cmd.cli_ctx, log_file)
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group_name, slot)
+    _get_log(url, headers, log_file)
     logger.warning('Downloaded logs to %s', log_file)
 
 
-def _get_site_credential(cli_ctx, resource_group_name, name, slot=None):
-    creds = _generic_site_operation(cli_ctx, resource_group_name, name, 'begin_list_publishing_credentials', slot)
-    creds = creds.result()
-    return (creds.publishing_user_name, creds.publishing_password)
-
-
-def _get_bearer_token(cli_ctx):
-    from azure.cli.core._profile import Profile
-    profile = Profile(cli_ctx=cli_ctx)
-    credential, _, _ = profile.get_login_credentials()
-    bearer_token = credential.get_token().token
-    return bearer_token
-
-
-def _get_log(url, cli_ctx, log_file=None):
+def _get_log(url, headers, log_file=None):
     import urllib3
     try:
         import urllib3.contrib.pyopenssl
@@ -2748,8 +2748,6 @@ def _get_log(url, cli_ctx, log_file=None):
         pass
 
     http = get_pool_manager(url)
-    headers = urllib3.util.make_headers()
-    headers["authorization"] = f'Bearer {_get_bearer_token(cli_ctx)}'
     r = http.request(
         'GET',
         url,
@@ -4033,13 +4031,16 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
     return [geo_region for geo_region in web_client_geo_regions if geo_region.name in providers_client_locations_list]
 
 
-def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, timeout=None):
+def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, headers, timeout=None):
+    import requests
+    from azure.cli.core.util import should_disable_connection_verify
+
     total_trials = (int(timeout) // 2) if timeout else 450
     num_trials = 0
     while num_trials < total_trials:
         time.sleep(2)
-        response = send_raw_request(cmd.cli_ctx, "GET", deployment_status_url,
-                                    resource=cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
+        response = requests.get(deployment_status_url, headers=headers,
+                                verify=not should_disable_connection_verify())
         try:
             res_dict = response.json()
         except json.decoder.JSONDecodeError:
@@ -4798,9 +4799,7 @@ def _ping_scm_site(cmd, resource_group, name, instance=None):
     import requests
     #  work around until the timeout limits issue for linux is investigated & fixed
     scm_url = _get_scm_url(cmd, resource_group, name)
-    import urllib3
-    headers = urllib3.util.make_headers()
-    headers["authorization"] = f'Bearer {_get_bearer_token(cmd.cli_ctx)}'
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group)
     cookies = {}
     if instance is not None:
         cookies['ARRAffinity'] = instance
@@ -4833,8 +4832,11 @@ def get_tunnel(cmd, resource_group_name, name, port=None, slot=None, instance=No
             raise ValidationError("The provided instance '{}' is not valid for this webapp.".format(instance))
 
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group_name, slot)
+    # basic & bearer auth use different capitalization for whatever reason
+    auth_string = headers.get("authorization") or headers.get("Authorization")
 
-    tunnel_server = TunnelServer('127.0.0.1', port, scm_url, _get_bearer_token(cmd.cli_ctx), instance)
+    tunnel_server = TunnelServer('127.0.0.1', port, scm_url, auth_string, instance)
     _ping_scm_site(cmd, resource_group_name, name, instance=instance)
 
     _wait_for_webapp(tunnel_server)
@@ -5010,14 +5012,17 @@ def _update_artifact_type(params):
 
 
 def _make_onedeploy_request(params):
+    import requests
+    from azure.cli.core.util import should_disable_connection_verify
+
     # Build the request body, headers, API URL and status URL
     body = _get_onedeploy_request_body(params)
     deploy_url = _build_onedeploy_url(params)
     deployment_status_url = _get_onedeploy_status_url(params)
+    headers = get_scm_site_headers(params.cmd.cli_ctx, params.webapp_name, params.resource_group_name, params.slot)
 
     logger.info("Deployment API: %s", deploy_url)
-    response = send_raw_request(params.cmd.cli_ctx, "POST", deploy_url, body=body,
-                                resource=params.cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
+    response = requests.post(deploy_url, data=body, headers=headers, verify=not should_disable_connection_verify())
 
     # For debugging purposes only, you can change the async deployment into a sync deployment by polling the API status
     # For that, set poll_async_deployment_for_debugging=True
@@ -5029,7 +5034,7 @@ def _make_onedeploy_request(params):
         if poll_async_deployment_for_debugging:
             logger.info('Polling the status of async deployment')
             response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
-                                                         deployment_status_url, params.timeout)
+                                                         deployment_status_url, headers, params.timeout)
             logger.info('Async deployment complete. Server response: %s', response_body)
         return response_body
 

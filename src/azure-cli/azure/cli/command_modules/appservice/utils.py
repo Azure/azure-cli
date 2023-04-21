@@ -13,13 +13,14 @@ from knack.log import get_logger
 
 from azure.cli.core.azclierror import (RequiredArgumentMissingError, ValidationError, ResourceNotFoundError)
 from azure.cli.core.commands.parameters import get_subscription_locations
-from azure.cli.core.util import should_disable_connection_verify, send_raw_request
+from azure.cli.core.util import should_disable_connection_verify, send_raw_request, get_az_user_agent
 from azure.cli.core.commands.client_factory import get_subscription_id
 
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from ._client_factory import web_client_factory
 from ._constants import LOGICAPP_KIND, FUNCTIONAPP_KIND
+from ._appservice_utils import _generic_site_operation
 
 logger = get_logger(__name__)
 
@@ -304,3 +305,43 @@ def is_webapp(app):
     if app is None or app.kind is None:
         return False
     return not is_logicapp(app) and not is_functionapp(app) and "app" in app.kind
+
+
+# TODO check if ftp allowed is needed
+def basic_auth_supported(cli_ctx, name, resource_group_name, slot=None):
+    return _generic_site_operation(cli_ctx, resource_group_name, name, 'get_scm_allowed', slot).allow
+
+
+def _get_site_credential(cli_ctx, resource_group_name, name, slot=None):
+    creds = _generic_site_operation(cli_ctx, resource_group_name, name, 'begin_list_publishing_credentials', slot)
+    creds = creds.result()
+    return (creds.publishing_user_name, creds.publishing_password)
+
+
+def get_bearer_token(cli_ctx):
+    from azure.cli.core._profile import Profile
+    profile = Profile(cli_ctx=cli_ctx)
+    credential, _, _ = profile.get_login_credentials()
+    bearer_token = credential.get_token().token
+    return bearer_token
+
+
+# auth with basic auth if available
+# TODO remove debug logging
+def get_scm_site_headers(cli_ctx, name, resource_group_name, slot=None, additional_headers=None):
+    if basic_auth_supported(cli_ctx, name, resource_group_name, slot):
+        logger.warning("[AUTH]: basic")
+        username, password = _get_site_credential(cli_ctx, resource_group_name, name, slot)
+        headers = urllib3.util.make_headers(basic_auth=f"{username}:{password}")
+    else:
+        logger.warning("[AUTH]: AAD")
+        headers = urllib3.util.make_headers()
+        headers["Authorization"] = f"Bearer {get_bearer_token(cli_ctx)}"
+    headers['User-Agent'] = get_az_user_agent()
+    headers['x-ms-client-request-id'] = cli_ctx.data['headers']['x-ms-client-request-id']
+    # allow setting Content-Type, Cache-Control, etc. headers
+    if additional_headers:
+        for k, v in additional_headers.items():
+            headers[k] = v
+
+    return headers

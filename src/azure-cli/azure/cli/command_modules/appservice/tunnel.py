@@ -39,7 +39,7 @@ class TunnelWebSocket(WebSocket):
 
 # pylint: disable=no-member,too-many-instance-attributes,bare-except,no-self-use
 class TunnelServer:
-    def __init__(self, local_addr, local_port, remote_addr, auth_token, instance):
+    def __init__(self, local_addr, local_port, remote_addr, auth_string, instance):
         self.local_addr = local_addr
         self.local_port = local_port
         if self.local_port != 0 and not self.is_port_open():
@@ -48,7 +48,7 @@ class TunnelServer:
             self.remote_addr = remote_addr[8:]
         else:
             self.remote_addr = remote_addr
-        self.auth_token = auth_token
+        self.auth_string = auth_string
         self.instance = instance
         self.client = None
         self.ws = None
@@ -62,11 +62,6 @@ class TunnelServer:
             self.local_port = self.sock.getsockname()[1]
             logger.info('Auto-selecting port: %s', self.local_port)
         logger.info('Finished initialization')
-
-    def create_auth(self):
-        auth_string = f"Bearer {self.auth_token}"
-        # auth_string = auth_string.decode('utf-8')
-        return auth_string
 
     def is_port_open(self):
         is_port_open = False
@@ -88,7 +83,7 @@ class TunnelServer:
             pass
 
         headers = urllib3.util.make_headers()
-        headers["authorization"] = f'Bearer {self.auth_token}'
+        headers["authorization"] = self.auth_string
         url = 'https://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx?GetStatus&GetStatusAPIVer=2')
         http = get_pool_manager(url)
         if self.instance is not None:
@@ -132,12 +127,11 @@ class TunnelServer:
     def _listen(self):
         self.sock.listen(100)
         index = 0
-        auth_string = self.create_auth()
         while True:
             self.client, _address = self.sock.accept()
             self.client.settimeout(60 * 60)
             host = 'wss://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx')
-            basic_auth_header = [f"Authorization: {auth_string}"]
+            basic_auth_header = [f"Authorization: {self.auth_string}"]
             if self.instance is not None:
                 basic_auth_header.append('Cookie: ARRAffinity=' + self.instance)
             cli_logger = get_logger()  # get CLI logger which has the level set through command lines
