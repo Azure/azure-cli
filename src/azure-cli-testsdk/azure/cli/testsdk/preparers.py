@@ -73,7 +73,10 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             return {self.parameter_name: self.dev_setting_name,
                     self.parameter_name_for_location: self.dev_setting_location}
 
-        tags = {'product': 'azurecli', 'cause': 'automation', 'date': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')}
+        tags = {'product': 'azurecli',
+                'cause': 'automation test',
+                'date': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                'test': self.test_class_instance._testMethodName}
         if 'ENV_JOB_NAME' in os.environ:
             tags['job'] = os.environ['ENV_JOB_NAME']
         tags = ' '.join(['{}={}'.format(key, value) for key, value in tags.items()])
