@@ -3841,7 +3841,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
         managed_environment = get_managed_environment(cmd, resource_group_name, environment)
         location = managed_environment.location
-        functionapp_def.location = location
+        functionapp_def.location = 'eastasia(stage)'
 
         functionapp_def.enable_additional_properties_sending()
         existing_properties = functionapp_def.serialize()["properties"]
@@ -3963,7 +3963,7 @@ def try_create_application_insights(cmd, functionapp):
 
     ai_resource_group_name = functionapp.resource_group
     ai_name = functionapp.name
-    ai_location = functionapp.location
+    ai_location = 'eastasia'
 
     app_insights_client = get_mgmt_service_client(cmd.cli_ctx, ApplicationInsightsManagementClient)
     ai_properties = {
