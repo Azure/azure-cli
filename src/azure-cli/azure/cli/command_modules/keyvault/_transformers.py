@@ -194,3 +194,11 @@ def transform_secret_delete(result, **command_args):
         ret = transform_secret_show_deleted(result.result())
         return ret
     return result
+
+
+def transform_secret_recover(result, **command_args):
+    if not isinstance(result, dict):
+        ret = transform_secret_set_attributes(result.result())
+        return ret
+    return result
+

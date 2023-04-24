@@ -16,7 +16,7 @@ from azure.cli.command_modules.keyvault._transformers import (
     multi_transformers, transform_key_decryption_output, keep_max_results,
     transform_key_output, transform_key_encryption_output, transform_key_random_output,
     transform_secret_list, transform_deleted_secret_list, transform_secret_set,
-    transform_secret_set_attributes, transform_secret_show_deleted, transform_secret_delete)
+    transform_secret_set_attributes, transform_secret_show_deleted, transform_secret_delete, transform_secret_recover)
 
 from azure.cli.command_modules.keyvault._format import transform_secret_list_table
 
@@ -200,7 +200,6 @@ def load_command_table(self, _):
             g.keyvault_custom('update', 'update_key_rotation_policy')
 
     with self.command_group('keyvault secret', data_entity.command_type) as g:
-        g.keyvault_command('recover', 'recover_deleted_secret', transform=extract_subresource_name())
         g.keyvault_custom('download', 'download_secret')
         g.keyvault_custom('backup', 'backup_secret',
                           doc_string_source=data_entity.operations_docs_tmpl.format('backup_secret'))
@@ -238,6 +237,7 @@ def load_command_table(self, _):
                                'soft-deleted state. Please see the following documentation for additional guidance.'
                                '\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview'))
         g.keyvault_command('purge', 'purge_deleted_secret')
+        g.keyvault_command('recover', 'begin_recover_deleted_secret', transform=transform_secret_recover)
 
     with self.command_group('keyvault certificate', data_entity.command_type) as g:
         g.keyvault_custom('create',

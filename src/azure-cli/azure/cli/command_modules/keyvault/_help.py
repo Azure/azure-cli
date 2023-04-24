@@ -692,6 +692,13 @@ long-summary: The purge deleted secret operation removes the secret permanently,
     operation requires the secrets/purge permission.
 """
 
+helps['keyvault secret recover'] = """
+type: command
+short-summary: Recovers the deleted secret to the latest version.
+long-summary: Recovers the deleted secret in the specified vault. This operation can only be performed on
+        a soft-delete enabled vault. This operation requires the secrets/recover permission.
+"""
+
 
 
 helps['keyvault show'] = """
