@@ -87,7 +87,7 @@ def storage_fs_directory_copy(cmd, source, destination, recursive=None, **kwargs
 
 
 def storage_blob_sync(cmd, client, source, destination, delete_destination='true', exclude_pattern=None,
-                      include_pattern=None, exclude_path=None):
+                      include_pattern=None, exclude_path=None, extra_options=None):
     azcopy = _azcopy_blob_client(cmd, client)
     flags = []
     if delete_destination is not None:
@@ -98,6 +98,8 @@ def storage_blob_sync(cmd, client, source, destination, delete_destination='true
         flags.append('--exclude-pattern=' + exclude_pattern)
     if exclude_path is not None:
         flags.append('--exclude-path=' + exclude_path)
+    if extra_options is not None:
+        flags.extend(extra_options)
 
     sas_token = client.sas_token
 

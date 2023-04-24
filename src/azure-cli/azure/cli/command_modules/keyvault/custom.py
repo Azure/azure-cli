@@ -698,6 +698,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
                                             KeyPermissions.delete,
                                             KeyPermissions.list,
                                             KeyPermissions.update,
+                                            KeyPermissions.IMPORT,
                                             KeyPermissions.backup,
                                             KeyPermissions.restore,
                                             KeyPermissions.recover],
@@ -714,6 +715,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
                                           CertificatePermissions.list,
                                           CertificatePermissions.delete,
                                           CertificatePermissions.create,
+                                          CertificatePermissions.IMPORT,
                                           CertificatePermissions.update,
                                           CertificatePermissions.managecontacts,
                                           CertificatePermissions.getissuers,
@@ -2639,4 +2641,37 @@ def check_name_availability(cmd, client, name, resource_type='hsm'):
     CheckNameAvailabilityParameters = cmd.get_models('CheckMhsmNameAvailabilityParameters')
     check_name = CheckNameAvailabilityParameters(name=name)
     return client.check_mhsm_name_availability(check_name)
+# endregion
+
+
+# region mhsm regions
+def add_hsm_region(cmd, client, resource_group_name, name, region_name, no_wait=False):
+    MHSMGeoReplicatedRegion = cmd.get_models('MHSMGeoReplicatedRegion', resource_type=ResourceType.MGMT_KEYVAULT)
+
+    hsm = client.get(resource_group_name=resource_group_name, name=name)
+    existing_regions = hsm.properties.regions or []
+    for existing_region in existing_regions:
+        if region_name == existing_region.name:
+            logger.warning("%s has already existed", region_name)
+            return hsm
+    existing_regions.append(MHSMGeoReplicatedRegion(name=region_name))
+    hsm.properties.regions = existing_regions
+    return sdk_no_wait(no_wait, client.begin_update,
+                       resource_group_name=resource_group_name,
+                       name=name,
+                       parameters=hsm)
+
+
+def remove_hsm_region(client, resource_group_name, name, region_name, no_wait=False):
+    hsm = client.get(resource_group_name=resource_group_name, name=name)
+    existing_regions = hsm.properties.regions or []
+    for existing_region in existing_regions:
+        if region_name == existing_region.name:
+            existing_regions.remove(existing_region)
+            hsm.properties.regions = existing_regions
+            return sdk_no_wait(no_wait, client.begin_update,
+                               resource_group_name=resource_group_name,
+                               name=name, parameters=hsm)
+    logger.warning("%s doesn't exist", region_name)
+    return hsm
 # endregion

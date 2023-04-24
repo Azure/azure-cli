@@ -704,6 +704,18 @@ class NetworkPublicIpPrefix(ScenarioTest):
             ]
         )
 
+    @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix_with_ip_tags', location='eastus2')
+    def test_network_public_ip_prefix_with_ip_tags(self, resource_group):
+        self.kwargs.update({
+            'prefix': 'prefix1',
+            'ip_tags': 'RoutingPreference=Internet'
+        })
+        # Test prefix create with param --ip-tags
+        self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30 --ip-tags {ip_tags}',
+                 checks=[
+                     self.check('ipTags[0].ipTagType', 'RoutingPreference'),
+                     self.check('ipTags[0].tag', 'Internet')])
+
 
 class NetworkMultiIdsShowScenarioTest(ScenarioTest):
     @live_only()
@@ -3479,7 +3491,10 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
         self.kwargs['lb'] = 'lb1'
         self.cmd('network cross-region-lb create -g {rg} -n {lb}')
 
-        self.cmd('network cross-region-lb rule create -g {rg} --lb-name {lb} -n rule2 --frontend-port 60 --backend-port 60 --protocol tcp')
+        self.cmd('network cross-region-lb rule create -g {rg} --lb-name {lb} -n rule2 --frontend-port 60 --backend-port 60 --protocol tcp',
+                 checks=[
+                     self.check('enableTcpReset', False),
+                     self.check('idleTimeoutInMinutes', 4)])
         self.cmd('network cross-region-lb address-pool create -g {rg} --lb-name {lb} -n bap1')
         self.cmd('network cross-region-lb address-pool create -g {rg} --lb-name {lb} -n bap2')
         self.cmd('network cross-region-lb rule create -g {rg} --lb-name {lb} -n rule1 --frontend-ip-name LoadBalancerFrontEnd --frontend-port 40 --backend-pool-name bap1 --backend-port 40 --protocol tcp')
@@ -4255,6 +4270,32 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
                 self.check("ipConfigurations[1].name", "ipconfig2"),
                 self.check("ipConfigurations[0].applicationSecurityGroups[0].id", "{asg_id}"),
                 self.check("ipConfigurations[1].applicationSecurityGroups[0].id", "{asg_id}"),
+            ]
+        )
+
+    @ResourceGroupPreparer(name_prefix="cli_test_multiple_ipconfigs_update_with_shorthand_", location="westus")
+    def test_multiple_ipconfigs_remove_by_shorthand(self):
+        self.kwargs.update({
+            "nic": self.create_random_name("nic-", 8),
+            "vnet": self.create_random_name("vnet-", 12),
+            "subnet": self.create_random_name("subnet-", 12),
+        })
+
+        self.cmd("network vnet create -n {vnet} -g {rg} --subnet-name {subnet}")
+        self.cmd("network nic create -n {nic} -g {rg} --vnet-name {vnet} --subnet {subnet}")
+
+        # `ipconfg1` implicitly created
+        self.cmd("network nic ip-config create -n ipconfig2 -g {rg} --nic-name {nic}")
+        self.cmd("network nic ip-config create -n ipconfig3 -g {rg} --nic-name {nic}")
+        self.cmd("network nic ip-config create -n ipconfig4 -g {rg} --nic-name {nic}")
+        self.cmd("network nic ip-config create -n ipconfig5 -g {rg} --nic-name {nic}")
+
+        self.cmd(
+            "network nic update -n {nic} -g {rg} --ip-configurations [1]=null [2]=null [4]=null",
+            checks=[
+                self.check("ipConfigurations | length(@)", 2),
+                self.check("ipConfigurations[0].name", "ipconfig1"),
+                self.check("ipConfigurations[1].name", "ipconfig4"),
             ]
         )
 

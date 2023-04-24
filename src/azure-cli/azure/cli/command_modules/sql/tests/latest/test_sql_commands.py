@@ -5881,6 +5881,44 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                  .format(resource_group_1, managed_instance_name_1, database_name),
                  expect_failure=True)
 
+    @ManagedInstancePreparer(parameter_name="mi")
+    def test_sql_midb_ledger(self, mi, rg):
+        managed_instance_name = mi
+        resource_group = rg
+        
+        database_name_one = "cliautomationmidb01"
+        database_name_two = "cliautomationmidb02"
+
+        # test sql mi db is created with ledger off by default
+        self.cmd('sql midb create -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, database_name_one),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one),
+                     JMESPathCheck('isLedgerOn', False)])
+
+        self.cmd('sql midb show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, database_name_one),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one),
+                     JMESPathCheck('isLedgerOn', False)])
+
+        # test sql mi db with ledger on
+        self.cmd('sql midb create -g {} --mi {} -n {} --ledger-on'
+                 .format(resource_group, managed_instance_name, database_name_two),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('isLedgerOn', True)])
+
+        self.cmd('sql midb show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, database_name_two),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('isLedgerOn', True)])
+
 
 class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
     # This MI AAD test needs special AD setup, please contact MI AAD team for new recording.
@@ -6671,6 +6709,50 @@ class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
                  .format(resource_group, server, db_name),
                  checks=[JMESPathCheck('state', 'Disabled')])
 
+class SqlManagedLedgerDigestUploadsScenarioTest(ScenarioTest):
+    def _get_storage_endpoint(self, storage_account, resource_group):
+        return self.cmd('storage account show -g {} -n {}'
+                        ' --query primaryEndpoints.blob'
+                        .format(resource_group, storage_account)).get_output_in_json()
+
+    @ManagedInstancePreparer(parameter_name="mi")
+    def test_sql_mi_ledger(self, mi, rg):
+        db_name = self.create_random_name("sqlledgermidb", 20)
+        endpoint = "https://mi-test.confidential-ledger.azure.com"
+        managed_instance_name = mi
+        resource_group = rg
+
+        # create database
+        self.cmd('sql midb create -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, db_name))
+
+        # validate ledger digest uploads is disabled by default
+        self.cmd('sql midb ledger-digest-uploads show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, db_name),
+                 checks=[JMESPathCheck('state', 'Disabled')])
+
+        # enable uploads to ACL dummy instance
+        self.cmd('sql midb ledger-digest-uploads enable -g {} --mi {} -n {} --endpoint {}'
+                 .format(resource_group, managed_instance_name, db_name, endpoint))
+
+        time.sleep(2)
+
+        # validate setting through show command
+        self.cmd('sql midb ledger-digest-uploads show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, db_name),
+                 checks=[JMESPathCheck('state', 'Enabled'),
+                         JMESPathCheck('digestStorageEndpoint', endpoint)])
+
+        # disable ledger digest uploads
+        self.cmd('sql midb ledger-digest-uploads disable -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, db_name))
+
+        time.sleep(2)
+
+        # validate setting through show command
+        self.cmd('sql midb ledger-digest-uploads show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, db_name),
+                 checks=[JMESPathCheck('state', 'Disabled')])
 
 class SqlManagedInstanceEndpointCertificateScenarioTest(ScenarioTest):
     @AllowLargeResponse()
@@ -6972,9 +7054,9 @@ class SqlManagedInstanceDatabaseRecoverTest(ScenarioTest):
         self.kwargs.update({
             'recoverable_db': recoverable_db['id']
         })
-        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db3 -r {recoverable_db}',
+        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db4 -r {recoverable_db}',
                 checks=[
-                    JMESPathCheck('name', "recovered_db3")])
+                    JMESPathCheck('name', "recovered_db4")])
 
 
 class SqlManagedInstanceZoneRedundancyScenarioTest(ScenarioTest):
@@ -7071,7 +7153,7 @@ class SqlManagedInstanceServerConfigurationOptionTest(ScenarioTest):
                     checks=[JMESPathCheck('length(@)', 0)])
 
         # upsert config option
-        self.cmd('sql mi server-configuration-option create -g {rg} --instance-name {mi} --name {option_name} --value {option_value}')
+        self.cmd('sql mi server-configuration-option set -g {rg} --instance-name {mi} --name {option_name} --value {option_value}')
 
         # show config option
         opt = self.cmd('sql mi server-configuration-option show -g {rg} --instance-name {mi} --name {option_name}',
@@ -7099,7 +7181,7 @@ class SqlManagedInstanceServerConfigurationOptionTest(ScenarioTest):
                         ]).get_output_in_json()
 
         # delete config option
-        self.cmd('sql mi server-configuration-option update -g {rg} --instance-name {mi} -n {option_name} --value 0')
+        self.cmd('sql mi server-configuration-option set -g {rg} --instance-name {mi} -n {option_name} --value 0')
 
         # list 0 config options
         self.cmd('sql mi server-configuration-option list -g {rg} --instance-name {mi}',

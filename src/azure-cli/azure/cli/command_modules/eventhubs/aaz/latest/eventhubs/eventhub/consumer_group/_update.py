@@ -12,29 +12,25 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "sql mi server-configuration-option update",
+    "eventhubs eventhub consumer-group update",
 )
 class Update(AAZCommand):
-    """Update managed instance server configuration option.
-
-    :example: Update server configuration option on ManagedInstance_1 in ResourceGroup_1
-        az sql mi server-configuration-option update -g 'ResourceGroup_1' --mi 'ManagedInstance_1' --name allowPolybaseExport --value 0
+    """Update an Event Hubs consumer group as a nested resource within a Namespace.
     """
 
     _aaz_info = {
-        "version": "2022-08-01-preview",
+        "version": "2022-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/serverconfigurationoptions/{}", "2022-08-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}/consumergroups/{}", "2022-01-01-preview"],
         ]
     }
-
-    AZ_SUPPORT_NO_WAIT = True
 
     AZ_SUPPORT_GENERIC_UPDATE = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_lro_poller(self._execute_operations, self._output)
+        self._execute_operations()
+        return self._output()
 
     _args_schema = None
 
@@ -47,41 +43,59 @@ class Update(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.managed_instance_name = AAZStrArg(
-            options=["--mi", "--instance-name", "--managed-instance", "--managed-instance-name"],
-            help="Name of the managed instance.",
+        _args_schema.consumer_group_name = AAZStrArg(
+            options=["-n", "--name", "--consumer-group-name"],
+            help="The consumer group name",
+            required=True,
+            id_part="child_name_2",
+            fmt=AAZStrArgFormat(
+                max_length=50,
+                min_length=1,
+            ),
+        )
+        _args_schema.eventhub_name = AAZStrArg(
+            options=["--eventhub-name"],
+            help="The Event Hub name",
+            required=True,
+            id_part="child_name_1",
+            fmt=AAZStrArgFormat(
+                max_length=256,
+                min_length=1,
+            ),
+        )
+        _args_schema.namespace_name = AAZStrArg(
+            options=["--namespace-name"],
+            help="The Namespace name",
             required=True,
             id_part="name",
+            fmt=AAZStrArgFormat(
+                max_length=50,
+                min_length=6,
+            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
-        )
-        _args_schema.server_configuration_option_name = AAZStrArg(
-            options=["-n", "--name", "--server-configuration-option-name"],
-            help="Name of the server configuration option.",
-            required=True,
-            id_part="child_name_1",
-            enum={"allowPolybaseExport": "allowPolybaseExport"},
         )
 
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.server_configuration_option_value = AAZIntArg(
-            options=["--value", "--server-configuration-option-value"],
+        _args_schema.user_metadata = AAZStrArg(
+            options=["--user-metadata"],
             arg_group="Properties",
-            help="Value of the server configuration option.",
+            help="User Metadata is a placeholder to store user-defined string data with maximum length 1024. e.g. it can be used to store descriptive data, such as list of teams and their contact information also user-defined configuration settings can be stored.",
+            nullable=True,
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.ServerConfigurationOptionsGet(ctx=self.ctx)()
+        self.ConsumerGroupsGet(ctx=self.ctx)()
         self.pre_instance_update(self.ctx.vars.instance)
         self.InstanceUpdateByJson(ctx=self.ctx)()
         self.InstanceUpdateByGeneric(ctx=self.ctx)()
         self.post_instance_update(self.ctx.vars.instance)
-        yield self.ServerConfigurationOptionsCreateOrUpdate(ctx=self.ctx)()
+        self.ConsumerGroupsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -104,7 +118,7 @@ class Update(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class ServerConfigurationOptionsGet(AAZHttpOperation):
+    class ConsumerGroupsGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -118,7 +132,7 @@ class Update(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/serverConfigurationOptions/{serverConfigurationOptionName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventHub/namespaces/{namespaceName}/eventhubs/{eventHubName}/consumergroups/{consumerGroupName}",
                 **self.url_parameters
             )
 
@@ -128,21 +142,25 @@ class Update(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "managedInstanceName", self.ctx.args.managed_instance_name,
+                    "consumerGroupName", self.ctx.args.consumer_group_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "eventHubName", self.ctx.args.eventhub_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "namespaceName", self.ctx.args.namespace_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
                     "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "serverConfigurationOptionName", self.ctx.args.server_configuration_option_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -156,7 +174,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-08-01-preview",
+                    "api-version", "2022-01-01-preview",
                     required=True,
                 ),
             }
@@ -187,41 +205,25 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _UpdateHelper._build_schema_server_configuration_option_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_consumer_group_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
-    class ServerConfigurationOptionsCreateOrUpdate(AAZHttpOperation):
+    class ConsumerGroupsCreateOrUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [202]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
             if session.http_response.status_code in [200]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
+                return self.on_200(session)
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/serverConfigurationOptions/{serverConfigurationOptionName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventHub/namespaces/{namespaceName}/eventhubs/{eventHubName}/consumergroups/{consumerGroupName}",
                 **self.url_parameters
             )
 
@@ -231,21 +233,25 @@ class Update(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "managedInstanceName", self.ctx.args.managed_instance_name,
+                    "consumerGroupName", self.ctx.args.consumer_group_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "eventHubName", self.ctx.args.eventhub_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "namespaceName", self.ctx.args.namespace_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
                     "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "serverConfigurationOptionName", self.ctx.args.server_configuration_option_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -259,7 +265,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-08-01-preview",
+                    "api-version", "2022-01-01-preview",
                     required=True,
                 ),
             }
@@ -302,7 +308,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _UpdateHelper._build_schema_server_configuration_option_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_consumer_group_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -321,7 +327,7 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("serverConfigurationOptionValue", AAZIntType, ".server_configuration_option_value", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("userMetadata", AAZStrType, ".user_metadata")
 
             return _instance_value
 
@@ -337,47 +343,81 @@ class Update(AAZCommand):
 class _UpdateHelper:
     """Helper class for Update"""
 
-    _schema_server_configuration_option_read = None
+    _schema_consumer_group_read = None
 
     @classmethod
-    def _build_schema_server_configuration_option_read(cls, _schema):
-        if cls._schema_server_configuration_option_read is not None:
-            _schema.id = cls._schema_server_configuration_option_read.id
-            _schema.name = cls._schema_server_configuration_option_read.name
-            _schema.properties = cls._schema_server_configuration_option_read.properties
-            _schema.type = cls._schema_server_configuration_option_read.type
+    def _build_schema_consumer_group_read(cls, _schema):
+        if cls._schema_consumer_group_read is not None:
+            _schema.id = cls._schema_consumer_group_read.id
+            _schema.location = cls._schema_consumer_group_read.location
+            _schema.name = cls._schema_consumer_group_read.name
+            _schema.properties = cls._schema_consumer_group_read.properties
+            _schema.system_data = cls._schema_consumer_group_read.system_data
+            _schema.type = cls._schema_consumer_group_read.type
             return
 
-        cls._schema_server_configuration_option_read = _schema_server_configuration_option_read = AAZObjectType()
+        cls._schema_consumer_group_read = _schema_consumer_group_read = AAZObjectType()
 
-        server_configuration_option_read = _schema_server_configuration_option_read
-        server_configuration_option_read.id = AAZStrType(
+        consumer_group_read = _schema_consumer_group_read
+        consumer_group_read.id = AAZStrType(
             flags={"read_only": True},
         )
-        server_configuration_option_read.name = AAZStrType(
+        consumer_group_read.location = AAZStrType(
             flags={"read_only": True},
         )
-        server_configuration_option_read.properties = AAZObjectType(
+        consumer_group_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        consumer_group_read.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
-        server_configuration_option_read.type = AAZStrType(
+        consumer_group_read.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
+        )
+        consumer_group_read.type = AAZStrType(
             flags={"read_only": True},
         )
 
-        properties = _schema_server_configuration_option_read.properties
-        properties.provisioning_state = AAZStrType(
-            serialized_name="provisioningState",
+        properties = _schema_consumer_group_read.properties
+        properties.created_at = AAZStrType(
+            serialized_name="createdAt",
             flags={"read_only": True},
         )
-        properties.server_configuration_option_value = AAZIntType(
-            serialized_name="serverConfigurationOptionValue",
-            flags={"required": True},
+        properties.updated_at = AAZStrType(
+            serialized_name="updatedAt",
+            flags={"read_only": True},
+        )
+        properties.user_metadata = AAZStrType(
+            serialized_name="userMetadata",
         )
 
-        _schema.id = cls._schema_server_configuration_option_read.id
-        _schema.name = cls._schema_server_configuration_option_read.name
-        _schema.properties = cls._schema_server_configuration_option_read.properties
-        _schema.type = cls._schema_server_configuration_option_read.type
+        system_data = _schema_consumer_group_read.system_data
+        system_data.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
+
+        _schema.id = cls._schema_consumer_group_read.id
+        _schema.location = cls._schema_consumer_group_read.location
+        _schema.name = cls._schema_consumer_group_read.name
+        _schema.properties = cls._schema_consumer_group_read.properties
+        _schema.system_data = cls._schema_consumer_group_read.system_data
+        _schema.type = cls._schema_consumer_group_read.type
 
 
 __all__ = ["Update"]

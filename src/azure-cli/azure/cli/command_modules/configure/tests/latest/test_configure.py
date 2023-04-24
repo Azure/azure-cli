@@ -26,6 +26,9 @@ class TestConfigure(unittest.TestCase):
 
 class ConfigureGlobalDefaultsTest(ScenarioTest):
 
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, random_config_dir=True, **kwargs)
+
     def setUp(self):
         self.local_dir = tempfile.mkdtemp()
 

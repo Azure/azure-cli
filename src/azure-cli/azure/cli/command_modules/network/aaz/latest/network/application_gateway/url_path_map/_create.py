@@ -63,19 +63,19 @@ class Create(AAZCommand):
         )
         _args_schema.default_address_pool = AAZStrArg(
             options=["--default-address-pool"],
-            help="Name or ID of the default backend address pool, if different from `--address-pool`.",
+            help="Name or ID of the default backend address pool. It is mandatory unless target type is redirection.",
         )
         _args_schema.default_http_settings = AAZStrArg(
             options=["--default-http-settings"],
-            help="Name or ID of the default HTTP settings, if different from `--http-settings`.",
+            help="Name or ID of the default HTTP settings. It is mandatory unless target type is redirection.",
         )
         _args_schema.default_redirect_config = AAZStrArg(
             options=["--default-redirect-config"],
-            help="Name or ID of the default redirect configuration. If different from `--redirect-config`.",
+            help="Name or ID of the default redirect configuration.",
         )
         _args_schema.default_rewrite_rule_set = AAZStrArg(
             options=["--default-rewrite-rule-set"],
-            help="Name or ID of the default rewrite rule set, if different from `--rewrite-rule-set`.",
+            help="Name or ID of the default rewrite rule set.",
         )
 
         # define Arg Group "Parameters.properties.urlPathMaps[]"

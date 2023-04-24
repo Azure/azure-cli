@@ -401,7 +401,9 @@ def aks_create(
     nat_gateway_idle_timeout=None,
     outbound_type=None,
     network_plugin=None,
+    network_plugin_mode=None,
     network_policy=None,
+    network_dataplane=None,
     auto_upgrade_channel=None,
     cluster_autoscaler_profile=None,
     uptime_sla=False,
@@ -438,11 +440,14 @@ def aks_create(
     disable_disk_driver=False,
     disable_file_driver=False,
     enable_blob_driver=None,
+    enable_workload_identity=False,
     disable_snapshot_controller=False,
     enable_azure_keyvault_kms=False,
     azure_keyvault_kms_key_id=None,
     azure_keyvault_kms_key_vault_network_access=None,
     azure_keyvault_kms_key_vault_resource_id=None,
+    enable_image_cleaner=False,
+    image_cleaner_interval_hours=None,
     enable_keda=False,
     # addons
     enable_addons=None,
@@ -536,6 +541,8 @@ def aks_update(
     tags=None,
     disable_local_accounts=False,
     enable_local_accounts=False,
+    network_plugin_mode=None,
+    pod_cidr=None,
     load_balancer_managed_outbound_ip_count=None,
     load_balancer_managed_outbound_ipv6_count=None,
     load_balancer_outbound_ips=None,
@@ -578,6 +585,8 @@ def aks_update(
     disable_file_driver=False,
     enable_blob_driver=None,
     disable_blob_driver=None,
+    enable_workload_identity=False,
+    disable_workload_identity=False,
     enable_snapshot_controller=False,
     disable_snapshot_controller=False,
     enable_azure_keyvault_kms=False,
@@ -585,6 +594,9 @@ def aks_update(
     azure_keyvault_kms_key_id=None,
     azure_keyvault_kms_key_vault_network_access=None,
     azure_keyvault_kms_key_vault_resource_id=None,
+    enable_image_cleaner=False,
+    disable_image_cleaner=False,
+    image_cleaner_interval_hours=None,
     http_proxy_config=None,
     enable_keda=False,
     disable_keda=False,
@@ -1463,11 +1475,18 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None, base_sr
 # Note: the results returned here may be inaccurate if the installed python is translated (e.g. by Rosetta)
 def get_arch_for_cli_binary():
     arch = platform.machine().lower()
-    # default arch
-    formatted_arch = "amd64"
-    # set to "arm64" when the detection value contains the word "arm"
-    if "arm" in arch:
+    if "amd64" in arch or "x86_64" in arch:
+        formatted_arch = "amd64"
+    elif "armv8" in arch or "aarch64" in arch:
         formatted_arch = "arm64"
+    else:
+        raise CLIInternalError(
+            "Unsupported architecture: '{}'. Currently only supports downloading the binary "
+            "of arm64/amd64 architecture for linux/darwin/windows platform, please download "
+            "the corresponding binary for other platforms or architectures by yourself".format(
+                arch
+            )
+        )
     logger.warning(
         "The detected architecture is '%s', which will be regarded as '%s' and "
         "the corresponding binary will be downloaded. "

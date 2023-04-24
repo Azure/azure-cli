@@ -12,27 +12,26 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "sql mi server-configuration-option create",
+    "eventhubs namespace authorization-rule show",
 )
-class Create(AAZCommand):
-    """Create managed instance server configuration option.
+class Show(AAZCommand):
+    """Get an AuthorizationRule for a Namespace by rule name.
 
-    :example: Create server configuration option on ManagedInstance_1 in ResourceGroup_1
-        az mi server-configuration-option create -g 'ResourceGroup_1' --mi 'ManagedInstance_1' --name 'allowPolybaseExport' --value '1'
+    :example: Shows the details of Authorizationrule
+        az eventhubs namespace authorization-rule update --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --rights Send
     """
 
     _aaz_info = {
-        "version": "2022-08-01-preview",
+        "version": "2018-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/serverconfigurationoptions/{}", "2022-08-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/authorizationrules/{}", "2018-01-01-preview"],
         ]
     }
 
-    AZ_SUPPORT_NO_WAIT = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_lro_poller(self._execute_operations, self._output)
+        self._execute_operations()
+        return self._output()
 
     _args_schema = None
 
@@ -45,34 +44,33 @@ class Create(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.managed_instance_name = AAZStrArg(
-            options=["--mi", "--instance-name", "--managed-instance", "--managed-instance-name"],
-            help="Name of the managed instance.",
+        _args_schema.authorization_rule_name = AAZStrArg(
+            options=["-n", "--name", "--authorization-rule-name"],
+            help="The authorization rule name.",
             required=True,
+            id_part="child_name_1",
+            fmt=AAZStrArgFormat(
+                min_length=1,
+            ),
+        )
+        _args_schema.namespace_name = AAZStrArg(
+            options=["--namespace-name"],
+            help="The Namespace name",
+            required=True,
+            id_part="name",
+            fmt=AAZStrArgFormat(
+                max_length=50,
+                min_length=6,
+            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
-        )
-        _args_schema.server_configuration_option_name = AAZStrArg(
-            options=["-n", "--name", "--server-configuration-option-name"],
-            help="Name of the server configuration option.",
-            required=True,
-            enum={"allowPolybaseExport": "allowPolybaseExport"},
-        )
-
-        # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.server_configuration_option_value = AAZIntArg(
-            options=["--value", "--server-configuration-option-value"],
-            arg_group="Properties",
-            help="Value of the server configuration option.",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.ServerConfigurationOptionsCreateOrUpdate(ctx=self.ctx)()
+        self.NamespacesGetAuthorizationRule(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -87,43 +85,27 @@ class Create(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class ServerConfigurationOptionsCreateOrUpdate(AAZHttpOperation):
+    class NamespacesGetAuthorizationRule(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [202]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
             if session.http_response.status_code in [200]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
+                return self.on_200(session)
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/serverConfigurationOptions/{serverConfigurationOptionName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventHub/namespaces/{namespaceName}/authorizationRules/{authorizationRuleName}",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "PUT"
+            return "GET"
 
         @property
         def error_format(self):
@@ -133,15 +115,15 @@ class Create(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "managedInstanceName", self.ctx.args.managed_instance_name,
+                    "authorizationRuleName", self.ctx.args.authorization_rule_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "namespaceName", self.ctx.args.namespace_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
                     "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "serverConfigurationOptionName", self.ctx.args.server_configuration_option_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -155,7 +137,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-08-01-preview",
+                    "api-version", "2018-01-01-preview",
                     required=True,
                 ),
             }
@@ -165,28 +147,10 @@ class Create(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
-
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                typ=AAZObjectType,
-                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
-            )
-            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-
-            properties = _builder.get(".properties")
-            if properties is not None:
-                properties.set_prop("serverConfigurationOptionValue", AAZIntType, ".server_configuration_option_value", typ_kwargs={"flags": {"required": True}})
-
-            return self.serialize_content(_content_value)
 
         def on_200(self, session):
             data = self.deserialize_http_content(session)
@@ -220,20 +184,18 @@ class Create(AAZCommand):
             )
 
             properties = cls._schema_on_200.properties
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.server_configuration_option_value = AAZIntType(
-                serialized_name="serverConfigurationOptionValue",
+            properties.rights = AAZListType(
                 flags={"required": True},
             )
+
+            rights = cls._schema_on_200.properties.rights
+            rights.Element = AAZStrType()
 
             return cls._schema_on_200
 
 
-class _CreateHelper:
-    """Helper class for Create"""
+class _ShowHelper:
+    """Helper class for Show"""
 
 
-__all__ = ["Create"]
+__all__ = ["Show"]
