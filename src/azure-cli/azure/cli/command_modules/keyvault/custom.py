@@ -1483,16 +1483,16 @@ def update_key_rotation_policy(cmd, client, value, key_name=None):
 
 
 # region KeyVault Secret
-def download_secret(client, file_path, vault_base_url=None, secret_name=None, encoding=None,
-                    secret_version='', identifier=None):  # pylint: disable=unused-argument
+def download_secret(client, file_path, vault_base_url=None, name=None, encoding=None,
+                    version='', identifier=None):  # pylint: disable=unused-argument
     """ Download a secret from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
 
-    secret = client.get_secret(vault_base_url, secret_name, secret_version)
+    secret = client.get_secret(name, version)
 
     if not encoding:
-        encoding = secret.tags.get('file-encoding', 'utf-8') if secret.tags else 'utf-8'
+        encoding = secret.properties.tags.get('file-encoding', 'utf-8') if secret.properties.tags else 'utf-8'
 
     secret_value = secret.value
 

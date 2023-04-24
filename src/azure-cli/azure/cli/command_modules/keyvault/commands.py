@@ -200,7 +200,6 @@ def load_command_table(self, _):
             g.keyvault_custom('update', 'update_key_rotation_policy')
 
     with self.command_group('keyvault secret', data_entity.command_type) as g:
-        g.keyvault_custom('download', 'download_secret')
         g.keyvault_custom('backup', 'backup_secret',
                           doc_string_source=data_entity.operations_docs_tmpl.format('backup_secret'))
         g.keyvault_custom('restore', 'restore_secret',
@@ -238,6 +237,7 @@ def load_command_table(self, _):
                                '\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview'))
         g.keyvault_command('purge', 'purge_deleted_secret')
         g.keyvault_command('recover', 'begin_recover_deleted_secret', transform=transform_secret_recover)
+        g.keyvault_custom('download', 'download_secret')
 
     with self.command_group('keyvault certificate', data_entity.command_type) as g:
         g.keyvault_custom('create',
