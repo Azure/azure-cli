@@ -1521,10 +1521,10 @@ def backup_secret(client, file_path, name=None):  # pylint: disable=unused-argum
         output.write(backup)
 
 
-def restore_secret(client, vault_base_url, file_path):
+def restore_secret(client, file_path):
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
-    return client.restore_secret(vault_base_url, data)
+    return client.restore_secret_backup(data)
 # endregion
 
 

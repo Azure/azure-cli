@@ -199,19 +199,14 @@ def load_command_table(self, _):
             g.keyvault_command('show', 'get_key_rotation_policy', )
             g.keyvault_custom('update', 'update_key_rotation_policy')
 
-    with self.command_group('keyvault secret', data_entity.command_type) as g:
-        g.keyvault_custom('restore', 'restore_secret',
-                          doc_string_source=data_entity.operations_docs_tmpl.format('restore_secret'),
-                          transform=extract_subresource_name())
-
     # secret track2
     with self.command_group('keyvault secret', data_secret_entity.command_type) as g:
         g.keyvault_custom('list', "list_secret",
-                           transform=multi_transformers(
+                          transform=multi_transformers(
                                filter_out_managed_resources,
                                keep_max_results,
                                transform_secret_list),
-                           table_transformer=transform_secret_list_table)
+                          table_transformer=transform_secret_list_table)
         g.keyvault_command('list-versions', 'list_properties_of_secret_versions',
                            transform=multi_transformers(
                                keep_max_results,
@@ -237,6 +232,7 @@ def load_command_table(self, _):
         g.keyvault_command('recover', 'begin_recover_deleted_secret', transform=transform_secret_recover)
         g.keyvault_custom('download', 'download_secret')
         g.keyvault_custom('backup', 'backup_secret')
+        g.keyvault_custom('restore', 'restore_secret', transform=transform_secret_set_attributes)
 
     with self.command_group('keyvault certificate', data_entity.command_type) as g:
         g.keyvault_custom('create',

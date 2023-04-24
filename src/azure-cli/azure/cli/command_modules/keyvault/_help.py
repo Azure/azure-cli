@@ -706,6 +706,13 @@ long-summary: Requests that a backup of the specified secret be downloaded to th
     the secret will be downloaded. This operation requires the secrets/backup permission.
 """
 
+helps['keyvault secret restore'] = """
+type: command
+short-summary: Restores a backed up secret to a vault.
+long-summary: Restores a backed up secret, and all its versions, to a vault. This operation requires the
+        secrets/restore permission.
+"""
+
 
 
 helps['keyvault show'] = """

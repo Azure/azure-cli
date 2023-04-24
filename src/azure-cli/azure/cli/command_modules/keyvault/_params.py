@@ -624,6 +624,9 @@ def load_arguments(self, _):
             c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                        help='File to receive the secret contents.')
 
+    with self.argument_context('keyvault secret restore') as c:
+        c.extra('vault_base_url', vault_name_type, required=True, arg_group='Id',
+                type=get_vault_base_url_type(self.cli_ctx), id_part=None)
     # endregion
 
     # region keyvault security-domain
