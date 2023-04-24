@@ -528,14 +528,7 @@ def load_arguments(self, _):
                    help='The rotation policy file definition as JSON, or a path to a file containing JSON policy definition.')
     # endregion
 
-    # region KeyVault Secret
-
-    for scope in ['backup', 'restore']:
-        with self.argument_context('keyvault secret {}'.format(scope)) as c:
-            c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
-                       help='File to receive the secret contents.')
-
-    # secret track2
+    # region KeyVault Secret track2
     for item in ['secret']:
         for cmd in ['backup', 'decrypt', 'delete', 'download', 'encrypt', 'list-versions', 'set-attributes', 'show',
                     'list', 'list-deleted']:
@@ -622,11 +615,14 @@ def load_arguments(self, _):
         c.extra('enabled', help='Enable the secret.', arg_type=get_three_state_flag())
 
     with self.argument_context('keyvault secret download') as c:
-        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
-                   help='File to receive the secret contents.')
         c.argument('encoding', arg_type=get_enum_type(secret_encoding_values), options_list=['--encoding', '-e'],
                    help="Encoding of the secret. By default, will look for the 'file-encoding' tag on the secret. "
                         "Otherwise will assume 'utf-8'.", default=None)
+
+    for scope in ['download', 'backup', 'restore']:
+        with self.argument_context('keyvault secret {}'.format(scope)) as c:
+            c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
+                       help='File to receive the secret contents.')
 
     # endregion
 

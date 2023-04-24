@@ -696,7 +696,14 @@ helps['keyvault secret recover'] = """
 type: command
 short-summary: Recovers the deleted secret to the latest version.
 long-summary: Recovers the deleted secret in the specified vault. This operation can only be performed on
-        a soft-delete enabled vault. This operation requires the secrets/recover permission.
+    a soft-delete enabled vault. This operation requires the secrets/recover permission.
+"""
+
+helps['keyvault secret backup'] = """
+type: command
+short-summary: Backs up the specified secret.
+long-summary: Requests that a backup of the specified secret be downloaded to the client. All versions of
+    the secret will be downloaded. This operation requires the secrets/backup permission.
 """
 
 
