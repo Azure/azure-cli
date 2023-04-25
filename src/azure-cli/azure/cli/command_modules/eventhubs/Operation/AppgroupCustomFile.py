@@ -61,18 +61,13 @@ def cli_add_appgroup_policy(cmd, resource_group_name, namespace_name, applicatio
         "namespace_name": namespace_name,
         "application_group_name": application_group_name
     })
-    print(application_group["policies"])
-    print(throttling_policy_config)
-    #[{'name': 'policy4', 'type': 'ThrottlingPolicy', 'metricId': 'OutgoingBytes', 'rateLimitThreshold': 10500}]
-    #[{'name': 'policy5', 'metric_id': 'IncomingBytes', 'rate_limit_threshold': 10500}]
     policy_obejct = []
-    for obj in throttling_policy_config:
-        policy_obejct.append(create_app_group_policy_object(obj))
     for obj in application_group["policies"]:
         policy = create_app_group_policy_object(obj)
-        if policy not in policy_obejct:
-            policy_obejct.append(policy)
-    print(policy_obejct)
+        policy_obejct.append(policy)
+    for obj in throttling_policy_config:
+       if obj not in policy_obejct:
+            policy_obejct.append(create_app_group_policy_object(obj))
     return Update(cli_ctx=cmd.cli_ctx)(command_args={
             "resource_group": resource_group_name,
             "namespace_name": namespace_name,
@@ -81,7 +76,7 @@ def cli_add_appgroup_policy(cmd, resource_group_name, namespace_name, applicatio
         })
 
 
-def cli_remove_appgroup_policy(cmd, resource_group_name, namespace_name, application_group_name, throttling_policy_config):
+def cli_remove_appgroup_policy(cmd, resource_group_name, namespace_name, application_group_name, policy):
     from azure.cli.core import CLIError
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.application_group import Update
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.application_group import Show
@@ -90,13 +85,15 @@ def cli_remove_appgroup_policy(cmd, resource_group_name, namespace_name, applica
         "namespace_name": namespace_name,
         "application_group_name": application_group_name
     })
-    print(throttling_policy_config)
-    print(application_group["policies"])
     policy_object = []
-    for i in throttling_policy_config:
+    for i in policy:
+        semaphor = 0
         for j in application_group["policies"]:
             if i["name"] == j["name"]:
                 application_group["policies"].remove(j)
+                semaphor = 1
+        if (semaphor == 0):
+            raise CLIError('The following policy was not found: Name: '+ i["name"])
     for col in application_group["policies"]:
         policy_object.append(create_app_group_policy_object(col))
     return Update(cli_ctx=cmd.cli_ctx)(command_args={
