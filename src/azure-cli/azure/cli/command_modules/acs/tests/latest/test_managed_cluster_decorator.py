@@ -8815,6 +8815,42 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             identity=ground_truth_identity_5,
         )
         self.assertEqual(mc_5, ground_truth_mc_5)
+        # custom value
+        dec_6 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_managed_identity": True,
+                "assign_identity": "test_assign_identity",
+                "yes": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        user_assigned_identity_6 = {
+            "original_test_assign_identity": self.models.ManagedServiceIdentityUserAssignedIdentitiesValue()
+        }
+        identity_6 = self.models.ManagedClusterIdentity(
+            type="UserAssigned",
+            user_assigned_identities=user_assigned_identity_6,
+        )
+        mc_6 = self.models.ManagedCluster(
+            location="test_location",
+            identity=identity_6,
+        )
+        dec_6.context.attach_mc(mc_6)
+        dec_6.update_identity(mc_6)
+        ground_truth_user_assigned_identity_6 = {
+            "test_assign_identity": self.models.ManagedServiceIdentityUserAssignedIdentitiesValue()
+        }
+        ground_truth_identity_6 = self.models.ManagedClusterIdentity(
+            type="UserAssigned",
+            user_assigned_identities=ground_truth_user_assigned_identity_6,
+        )
+        ground_truth_mc_6 = self.models.ManagedCluster(
+            location="test_location",
+            identity=ground_truth_identity_6,
+        )
+        self.assertEqual(mc_6, ground_truth_mc_6)
 
     def test_ensure_azure_keyvault_secrets_provider_addon_profile(self):
         # custom
