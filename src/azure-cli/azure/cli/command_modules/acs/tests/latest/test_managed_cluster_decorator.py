@@ -1783,8 +1783,9 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             DecoratorMode.CREATE,
         )
-        # overwrite warning
-        self.assertEqual(ctx_3.get_network_plugin(), "azure")
+
+        with self.assertRaises(InvalidArgumentValueError):
+            self.assertEqual(ctx_3.get_network_plugin(), "azure")
 
     def test_mc_get_network_dataplane(self):
         # Default, not set.
