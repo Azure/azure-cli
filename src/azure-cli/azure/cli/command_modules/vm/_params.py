@@ -360,6 +360,13 @@ def load_arguments(self, _):
     with self.argument_context('image builder validator add', min_api='2022-02-14') as c:
         c.argument('dis_on_failure', options_list=['--continue-distribute-on-failure', '--dis-on-failure'], arg_type=get_three_state_flag(), help="If validation fails and this parameter is set to false, output image(s) will not be distributed.")
         c.argument('source_validation_only', arg_type=get_three_state_flag(), help="If this parameter is set to true, the image specified in the 'source' section will directly be validated. No separate build will be run to generate and then validate a customized image.")
+
+    with self.argument_context('image builder optimizer add', min_api='2022-07-01') as c:
+        c.argument('type', get_enum_type(['vmBoot']), help='The type of optimizer added.')
+        c.argument('state', get_enum_type(['Enabled', 'Disabled']), help='Enabling this field will improve VM boot time by optimizing the final customized image output.')
+
+    with self.argument_context('image builder optimizer remove', min_api='2022-07-01') as c:
+        c.argument('type', get_enum_type(['vmBoot']), help='The type of optimizer added. Known values is: "vmBoot".')
     # endregion
 
     # region AvailabilitySets

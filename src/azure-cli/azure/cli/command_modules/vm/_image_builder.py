@@ -408,7 +408,7 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
                                                 ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
                                                 ImageTemplateManagedImageDistributor,
                                                 ImageTemplateSharedImageDistributor, ImageTemplateIdentity,
-                                                ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties,  # pylint: disable=line-too-long
+                                                UserAssignedIdentity,  # pylint: disable=line-too-long
                                                 ImageTemplateVmProfile, VirtualNetworkConfig)
 
     if image_template is not None:
@@ -495,7 +495,7 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
             if not is_valid_resource_id(ide):
                 ide = resource_id(subscription=subscription_id, resource_group=resource_group_name,
                                   namespace='Microsoft.ManagedIdentity', type='userAssignedIdentities', name=ide)
-            user_assigned_identities[ide] = ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties()  # pylint: disable=line-too-long
+            user_assigned_identities[ide] = UserAssignedIdentity()  # pylint: disable=line-too-long
         identity_body = ImageTemplateIdentity(type='UserAssigned', user_assigned_identities=user_assigned_identities)
 
     # VM profile
@@ -528,7 +528,7 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
 
 def assign_template_identity(cmd, client, resource_group_name, image_template_name, user_assigned=None):
     from azure.mgmt.imagebuilder.models import (ImageTemplateIdentity, ImageTemplateUpdateParameters,
-                                                ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties)  # pylint: disable=line-too-long
+                                                UserAssignedIdentity)
 
     from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
 
@@ -551,7 +551,7 @@ def assign_template_identity(cmd, client, resource_group_name, image_template_na
 
         updated_user_assigned = list(existing_user_identities.union(add_user_assigned))
 
-        default_user_identity = ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties()  # pylint: disable=line-too-long
+        default_user_identity = UserAssignedIdentity()  # pylint: disable=line-too-long
         user_assigned_identities = dict.fromkeys(updated_user_assigned, default_user_identity)
 
         image_template_identity = ImageTemplateIdentity(type='UserAssigned',
@@ -844,4 +844,61 @@ def show_template_validator(cmd, client, resource_group_name, image_template_nam
                                          image_template_name=image_template_name)
     return existing_image_template.validate
 
+
+def add_template_optimizer(cmd, client, resource_group_name, image_template_name, type=None, state=None):
+    _require_defer(cmd)
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
+
+    from azure.mgmt.imagebuilder.models import ImageTemplatePropertiesOptimize, ImageTemplatePropertiesOptimizeVmBoot
+
+    if type == "vmBoot":
+        vm_boot = ImageTemplatePropertiesOptimizeVmBoot(state=state)
+        image_template_properties_optimize = ImageTemplatePropertiesOptimize(vm_boot=vm_boot)
+        existing_image_template.optimize = image_template_properties_optimize
+
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update,
+                      parameters=existing_image_template, resource_group_name=resource_group_name,
+                      image_template_name=image_template_name)
+
+
+def remove_template_optimizer(cmd, client, resource_group_name, image_template_name, type=None):
+    _require_defer(cmd)
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
+
+    if not existing_image_template.optimize:
+        raise ResourceNotFoundError("No optimize existing in this image template, no need to remove.")
+
+    if type == "vmBoot":
+        existing_image_template.optimize.vm_boot = None
+
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
+                      resource_group_name=resource_group_name, image_template_name=image_template_name)
+
+
+def clear_template_optimizer(cmd, client, resource_group_name, image_template_name):
+    _require_defer(cmd)
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
+
+    if not existing_image_template.optimize:
+        raise ResourceNotFoundError("No optimize existing in this image template, no need to clear.")
+
+    existing_image_template.optimize = None
+
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
+                      resource_group_name=resource_group_name, image_template_name=image_template_name)
+
+
+def show_template_optimizer(cmd, client, resource_group_name, image_template_name):
+    _require_defer(cmd)
+
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
+    return existing_image_template.optimize
 # endregion
