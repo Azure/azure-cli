@@ -2800,7 +2800,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westcentralus')
     def test_aks_control_plane_user_assigned_identity(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -2814,6 +2814,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'location': resource_group_location,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters',
             'identity_resource_id': self.generate_user_assigned_identity_resource_id(resource_group),
+            # used to test update one identity to another
+            'another_identity_resource_id': self.generate_user_assigned_identity_resource_id(resource_group),
             'vnet_subnet_id': self.generate_vnet_subnet_id(resource_group)
         })
 
@@ -2897,6 +2899,27 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # show again
         self.cmd('aks show -g {resource_group} -n {name}', checks=[
             self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        # update identity
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                '--enable-managed-identity --assign-identity={another_identity_resource_id} ' \
+                '--yes'
+        self.cmd(update_cmd, checks=[
+            self.exists('identity'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('identity.type', "UserAssigned")
+        ])
+
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('type', '{resource_type}'),
+            self.check('name', '{name}'),
+            self.check(
+                "identity.userAssignedIdentities | keys(@) | contains(@, '{}')".format(
+                    self.kwargs.get("another_identity_resource_id")
+                ),
+                True,
+            )
         ])
 
         # delete

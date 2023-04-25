@@ -6465,8 +6465,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         self._ensure_mc(mc)
 
         current_identity_type = "spn"
+        current_user_assigned_identity = ""
         if mc.identity is not None:
             current_identity_type = mc.identity.type.casefold()
+            if mc.identity.user_assigned_identities is not None and len(mc.identity.user_assigned_identities) > 0:
+                current_user_assigned_identity = list(mc.identity.user_assigned_identities.keys())[0]
 
         goal_identity_type = current_identity_type
         assign_identity = self.context.get_assign_identity()
@@ -6476,7 +6479,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             else:
                 goal_identity_type = "userassigned"
 
-        if current_identity_type != goal_identity_type:
+        is_update_identity = ((current_identity_type != goal_identity_type) or
+                              (current_identity_type == goal_identity_type and
+                              current_identity_type == "userassigned" and
+                              current_user_assigned_identity != assign_identity))
+        if is_update_identity:
             if current_identity_type == "spn":
                 msg = (
                     "Your cluster is using service principal, and you are going to update "
@@ -6486,12 +6493,18 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     "until you upgrade your agentpool.\n"
                     "Are you sure you want to perform this operation?"
                 ).format(goal_identity_type)
-            else:
+            elif current_identity_type != goal_identity_type:
                 msg = (
                     "Your cluster is already using {} managed identity, and you are going to "
                     "update the cluster to use {} managed identity.\n"
                     "Are you sure you want to perform this operation?"
                 ).format(current_identity_type, goal_identity_type)
+            else:
+                msg = (
+                    "Your cluster is already using userassigned managed identity, current control plane identity is {},"
+                    "and you are going to update the cluster identity to {}.\n"
+                    "Are you sure you want to perform this operation?"
+                ).format(current_user_assigned_identity, assign_identity)
             # gracefully exit if user does not confirm
             if not self.context.get_yes() and not prompt_y_n(msg, default="n"):
                 raise DecoratorEarlyExitException
