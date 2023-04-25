@@ -4759,6 +4759,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
                 self.mc and
+                hasattr(self.mc, "azure_monitor_profile") and
                 self.mc.azure_monitor_profile and
                 self.mc.azure_monitor_profile.metrics
             ):
