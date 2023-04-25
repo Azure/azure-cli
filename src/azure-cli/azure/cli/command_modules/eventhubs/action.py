@@ -99,6 +99,7 @@ class ConstructPolicyName(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
         super(ConstructPolicyName, self).__call__(parser, namespace, action, option_string)
+
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         from azure.cli.core import CLIError
         from azure.cli.core.azclierror import InvalidArgumentValueError

@@ -7,8 +7,8 @@
 def create_app_group_policy_object(col):
     policy_object = {}
     policy_object.update({
-            "name": col["name"],
-            "type": "ThrottlingPolicy",
+        "name": col["name"],
+        "type": "ThrottlingPolicy",
     })
 
     if "rateLimitThreshold" in col and "metricId" in col:
@@ -66,14 +66,14 @@ def cli_add_appgroup_policy(cmd, resource_group_name, namespace_name, applicatio
         policy = create_app_group_policy_object(obj)
         policy_obejct.append(policy)
     for obj in throttling_policy_config:
-       if obj not in policy_obejct:
+        if obj not in policy_obejct:
             policy_obejct.append(create_app_group_policy_object(obj))
     return Update(cli_ctx=cmd.cli_ctx)(command_args={
-            "resource_group": resource_group_name,
-            "namespace_name": namespace_name,
-            "application_group_name": application_group_name,
-            "policies": policy_obejct
-        })
+        "resource_group": resource_group_name,
+        "namespace_name": namespace_name,
+        "application_group_name": application_group_name,
+        "policies": policy_obejct
+    })
 
 
 def cli_remove_appgroup_policy(cmd, resource_group_name, namespace_name, application_group_name, policy):
@@ -92,8 +92,8 @@ def cli_remove_appgroup_policy(cmd, resource_group_name, namespace_name, applica
             if i["name"] == j["name"]:
                 application_group["policies"].remove(j)
                 semaphor = 1
-        if (semaphor == 0):
-            raise CLIError('The following policy was not found: Name: '+ i["name"])
+        if semaphor == 0:
+            raise CLIError('The following policy was not found: Name: ' + i["name"])
     for col in application_group["policies"]:
         policy_object.append(create_app_group_policy_object(col))
     return Update(cli_ctx=cmd.cli_ctx)(command_args={
