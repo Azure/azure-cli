@@ -145,6 +145,7 @@ class Update(AAZCommand):
         _element = cls._args_schema.backend_address_pools.Element
         _element.id = AAZStrArg(
             options=["id"],
+            help="Resource ID.",
             nullable=True,
         )
         return cls._args_schema

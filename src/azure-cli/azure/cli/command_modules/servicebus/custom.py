@@ -97,111 +97,6 @@ def cli_namespace_exists(cmd, client, name):
         return client.check_name_availability(parameters={'name': name})
 
 
-# Rule Region
-def cli_rules_create(cmd, client, resource_group_name, namespace_name, topic_name, subscription_name, rule_name,
-                     action_sql_expression=None, action_compatibility_level=None, action_requires_preprocessing=None,
-                     filter_sql_expression=None, filter_requires_preprocessing=None, correlation_id=None,
-                     message_id=None, to=None, reply_to=None, label=None, session_id=None, reply_to_session_id=None,
-                     content_type=None, requires_preprocessing=None, filter_type=None, tags=None):
-
-    Rule = cmd.get_models('Rule', resource_type=ResourceType.MGMT_SERVICEBUS)
-    Action = cmd.get_models('Action', resource_type=ResourceType.MGMT_SERVICEBUS)
-    SqlFilter = cmd.get_models('SqlFilter', resource_type=ResourceType.MGMT_SERVICEBUS)
-    CorrelationFilter = cmd.get_models('CorrelationFilter', resource_type=ResourceType.MGMT_SERVICEBUS)
-    parameters = Rule()
-
-    if filter_type:
-        parameters.filter_type = filter_type
-
-    if filter_type == 'SqlFilter' or filter_type is None:
-        parameters.sql_filter = SqlFilter(
-            sql_expression=filter_sql_expression,
-            requires_preprocessing=filter_requires_preprocessing)
-
-    if filter_type == 'CorrelationFilter':
-        parameters.correlation_filter = CorrelationFilter(
-            properties=tags,
-            correlation_id=correlation_id,
-            to=to,
-            message_id=message_id,
-            reply_to=reply_to,
-            label=label,
-            session_id=session_id,
-            reply_to_session_id=reply_to_session_id,
-            content_type=content_type,
-            requires_preprocessing=requires_preprocessing)
-
-    if action_sql_expression or action_compatibility_level or action_requires_preprocessing:
-        parameters.action = Action(
-            sql_expression=action_sql_expression,
-            compatibility_level=action_compatibility_level,
-            requires_preprocessing=action_requires_preprocessing
-        )
-    return client.create_or_update(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        topic_name=topic_name,
-        subscription_name=subscription_name,
-        rule_name=rule_name,
-        parameters=parameters)
-
-
-# Rule Region
-def cli_rules_update(cmd, instance,
-                     action_sql_expression=None, action_compatibility_level=None, action_requires_preprocessing=None,
-                     filter_sql_expression=None, filter_requires_preprocessing=None, correlation_id=None,
-                     message_id=None, to=None, reply_to=None, label=None, session_id=None, reply_to_session_id=None,
-                     content_type=None, requires_preprocessing=None, tags=None):
-
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        if action_sql_expression:
-            instance.action.sql_expression = action_sql_expression
-
-        if action_compatibility_level:
-            instance.action.compatibility_level = action_compatibility_level
-
-    if action_requires_preprocessing is not None:
-        instance.action.requires_preprocessing = action_requires_preprocessing
-
-    if filter_sql_expression:
-        instance.sql_filter.sql_expression = filter_sql_expression
-
-    if filter_requires_preprocessing is not None:
-        instance.sql_filter.requires_preprocessing = filter_requires_preprocessing
-
-    if correlation_id:
-        instance.correlation_filter.correlation_id = correlation_id
-
-    if tags:
-        instance.correlation_filter.properties = tags
-
-    if to:
-        instance.correlation_filter.to = to
-
-    if message_id:
-        instance.correlation_filter.message_id = message_id
-
-    if reply_to:
-        instance.correlation_filter.reply_to = reply_to
-
-    if label:
-        instance.correlation_filter.label = label
-
-    if session_id:
-        instance.correlation_filter.session_id = session_id
-
-    if reply_to_session_id:
-        instance.correlation_filter.reply_to_session_id = reply_to_session_id
-
-    if content_type:
-        instance.correlation_filter.content_type = content_type
-
-    if requires_preprocessing is not None:
-        instance.correlation_filter.requires_preprocessing = requires_preprocessing
-
-    return instance
-
-
 # DisasterRecoveryConfigs Region
 def cli_georecovery_alias_create(cmd, client, resource_group_name, namespace_name, alias,
                                  partner_namespace, alternate_name=None):
@@ -210,6 +105,8 @@ def cli_georecovery_alias_create(cmd, client, resource_group_name, namespace_nam
             'partner_namespace': partner_namespace,
             'alternate_name': alternate_name,
         }
+        logger.warning(
+            'the argument parameters from georecovery-alias fail-over cmdlets will be remove in future release.')
         return client.create_or_update(resource_group_name=resource_group_name, namespace_name=namespace_name,
                                        alias=alias, parameters=parameters)
 
@@ -334,6 +231,7 @@ def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_nam
     NWRuleSetIpRules = cmd.get_models('NWRuleSetIpRules', resource_type=ResourceType.MGMT_SERVICEBUS)
     netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
 
+    logger.warning('This version will be depracated & latest version will release in breaking change release.')
     if netwrokruleset.virtual_network_rules is None:
         netwrokruleset.virtual_network_rules = []
 
@@ -405,56 +303,6 @@ def cli_returnnsdetails(cmd, resource_group_name, namespace_name, max_size_in_me
                                                                             40960, 81920]:
         raise CLIError(
             '--max-size on Premium sku namespace only supports upto [1024, 2048, 3072, 4096, 5120, 10240, 20480, 40960, 81920] GB')
-
-
-# Private Endpoint
-def _update_private_endpoint_connection_status(cmd, client, resource_group_name, namespace_name,
-                                               private_endpoint_connection_name, is_approved=True, description=None):
-    from azure.core.exceptions import HttpResponseError
-    import time
-
-    PrivateEndpointServiceConnectionStatus = cmd.get_models('PrivateLinkConnectionStatus')
-
-    private_endpoint_connection = client.get(resource_group_name=resource_group_name, namespace_name=namespace_name,
-                                             private_endpoint_connection_name=private_endpoint_connection_name)
-
-    old_status = private_endpoint_connection.private_link_service_connection_state.status
-    if description:
-        private_endpoint_connection.private_link_service_connection_state.description = description
-
-    if old_status != "Approved" or not is_approved:
-        private_endpoint_connection.private_link_service_connection_state.status = PrivateEndpointServiceConnectionStatus.APPROVED\
-            if is_approved else PrivateEndpointServiceConnectionStatus.REJECTED
-        try:
-            private_endpoint_connection = client.create_or_update(resource_group_name=resource_group_name,
-                                                                  namespace_name=namespace_name,
-                                                                  private_endpoint_connection_name=private_endpoint_connection_name,
-                                                                  parameters=private_endpoint_connection)
-        except HttpResponseError as ex:
-            if 'Operation returned an invalid status ''Accepted''' in ex.message:
-                time.sleep(30)
-                private_endpoint_connection = client.get(resource_group_name=resource_group_name,
-                                                         namespace_name=namespace_name,
-                                                         private_endpoint_connection_name=private_endpoint_connection_name)
-
-    return private_endpoint_connection
-
-
-def approve_private_endpoint_connection(cmd, client, resource_group_name, namespace_name,
-                                        private_endpoint_connection_name, description=None):
-
-    return _update_private_endpoint_connection_status(
-        cmd, client, resource_group_name=resource_group_name, namespace_name=namespace_name, is_approved=True,
-        private_endpoint_connection_name=private_endpoint_connection_name, description=description
-    )
-
-
-def reject_private_endpoint_connection(cmd, client, resource_group_name, namespace_name, private_endpoint_connection_name,
-                                       description=None):
-    return _update_private_endpoint_connection_status(
-        cmd, client, resource_group_name=resource_group_name, namespace_name=namespace_name, is_approved=False,
-        private_endpoint_connection_name=private_endpoint_connection_name, description=description
-    )
 
 
 def cli_add_identity(cmd, client, resource_group_name, namespace_name, system_assigned=None, user_assigned=None):

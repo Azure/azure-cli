@@ -181,7 +181,7 @@ def auto_register(func, *args, **kwargs):
         if ex.error and ex.error.code == 'SubscriptionNotRegistered':
             if register_provider():
                 return func(*args, **kwargs_backup)
-            raise CLIInternalError('Registeration failed, please manually run command '
+            raise CLIInternalError('Registration failed, please manually run command '
                                    '`az provider register -n Microsoft.ServiceLinker` to register the provider.')
         # target subscription is not registered, raw check
         if ex.error and ex.error.code == 'UnauthorizedResourceAccess' and 'not registered' in ex.error.message:
@@ -193,7 +193,7 @@ def auto_register(func, *args, **kwargs):
                 if not provider_is_registered(target_subs):
                     if register_provider(target_subs):
                         return func(*args, **kwargs_backup)
-                    raise CLIInternalError('Registeration failed, please manually run command '
+                    raise CLIInternalError('Registration failed, please manually run command '
                                            '`az provider register -n Microsoft.ServiceLinker --subscription {}` '
                                            'to register the provider.'.format(target_subs))
         raise ex

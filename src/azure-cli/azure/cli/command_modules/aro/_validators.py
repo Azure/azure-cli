@@ -158,11 +158,14 @@ def validate_subnet(key):
         if parts['child_type_1'].lower() != 'subnets':
             raise InvalidArgumentValueError(f"--{key.replace('_', '-')} child type '{subnet}' must equal subnets.")
 
-        client = get_mgmt_service_client(
-            cmd.cli_ctx, ResourceType.MGMT_NETWORK)
+        from .aaz.latest.network.vnet.subnet import Show
+
         try:
-            client.subnets.get(parts['resource_group'],
-                               parts['name'], parts['child_name_1'])
+            Show(cli_ctx=cmd.cli_ctx)(command_args={
+                "name": parts['child_name_1'],
+                "vnet_name": parts['name'],
+                "resource_group": parts['resource_group']
+            })
         except Exception as err:
             if isinstance(err, ResourceNotFoundError):
                 raise InvalidArgumentValueError(

@@ -46,12 +46,13 @@ $PYTHON_SRC_DIR/*/configure --srcdir $PYTHON_SRC_DIR/* --prefix $WORKDIR/python_
 make
 make install
 
-$WORKDIR/python_env/bin/python3 -m pip install --upgrade pip
+$WORKDIR/python_env/bin/python3 -m pip install --upgrade pip setuptools
 
 export PATH=$PATH:$WORKDIR/python_env/bin
 
 find ${WORKDIR}/src/ -name setup.py -type f | xargs -I {} dirname {} | grep -v azure-cli-testsdk | xargs pip3 install --no-deps
 pip3 install -r ${WORKDIR}/src/azure-cli/requirements.py3.$(uname).txt
+$WORKDIR/python_env/bin/python3 ${WORKDIR}/scripts/trim_sdk.py
 
 # Create create directory for debian build
 mkdir -p $WORKDIR/debian

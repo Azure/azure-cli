@@ -229,7 +229,6 @@ if __name__ == "__main__":
         'azure.mgmt.keyvault',
         'azure.mgmt.storage',
         'azure.mgmt.compute',
-        'azure.mgmt.network',
         'azure.mgmt.monitor',
         'azure.mgmt.rdbms'
         'azure.mgmt.loganalytics',
