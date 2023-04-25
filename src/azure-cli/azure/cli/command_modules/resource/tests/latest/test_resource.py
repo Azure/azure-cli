@@ -4102,6 +4102,22 @@ class BicepRestoreTest(LiveScenarioTest):
             os.remove(out_path)
 
 
+class BicepFormatTest(LiveScenarioTest):
+    def test_format(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        bf = os.path.join(curr_dir, 'storage_account_deploy.bicep').replace('\\', '\\\\')
+        out_file = os.path.join(curr_dir, 'storage_account_deploy.formatted.bicep').replace('\\', '\\\\')
+        self.kwargs.update({
+            'bf': bf,
+            'out_file': out_file,
+        })
+
+        self.cmd('az bicep format --file {bf} --outfile {out_file} --newline lf --indent-kind space --indent-size 2 --insert-final-newline')
+
+        if os.path.exists(out_file):
+            os.remove(out_file)
+
+
 class DeploymentWithBicepScenarioTest(LiveScenarioTest):
     def setup(self):
         super.setup()
