@@ -493,7 +493,7 @@ jobs:
         az -v
         # az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
         az login -u azureclilivetest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
-        az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
+        az account set -s $(AZURECLITESTSUBSCRIPTIONID)
 
         # Clean resources
         python /mnt/vss/_work/1/s/scripts/live_test/clean_policy.py
@@ -606,7 +606,7 @@ jobs:
         echo "login to user azureclilivetest"
         az login -u azureclilivetest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
         echo "set account"
-        az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
+        az account set -s $(AZURECLITESTSUBSCRIPTIONID)
         echo "send email to grid"
         python /mnt/vss/_work/1/s/scripts/live_test/sendemail.py "$(SENDGRID_KEY)" "$(Build.BuildId)" "$(USER_REPO)" "$(USER_BRANCH)" "$(USER_TARGET)" "$(USER_LIVE)" "$(System.ArtifactsDirectory)" "$(Build.RequestedForEmail)" "$(ACCOUNT_KEY)" "$commit_id" "$(DB_PWD)" "$(DB_USER)" "$(DB_HOST)" "$(DB_PORT)" "$(DB_SCHEME)"
         # python /mnt/vss/_work/1/s/scripts/live_test/upload.py "$(System.ArtifactsDirectory)" "$(ACCOUNT_KEY)" "$(USER_LIVE)"
