@@ -752,5 +752,5 @@ short-summary: Removes an application group policy from the existing policies. T
 examples:
   - name: Removes a throttling policy from an application group myAppGroup.
     text: |
-        az eventhubs namespace application-group policy remove --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --policy name=policy1 
+        az eventhubs namespace application-group policy remove --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --policy name=policy1
 """
