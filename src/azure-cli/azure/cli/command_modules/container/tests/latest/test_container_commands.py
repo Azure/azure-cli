@@ -873,6 +873,8 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                              'containers[0].resources.requests.cpu', cpu),
                          self.check(
                              'containers[0].resources.requests.memoryInGb', memory),
+                         self.exists('containers[0].securityContext'),
+                         self.check('containers[0].securityContext.privileged', False),
                          self.check('sku', sku),
                          self.exists('confidentialComputeProperties.ccePolicy')])
         # Test show
@@ -889,6 +891,8 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                              'containers[0].resources.requests.cpu', cpu),
                          self.check(
                              'containers[0].resources.requests.memoryInGb', memory),
+                         self.exists('containers[0].securityContext'),
+                         self.check('containers[0].securityContext.privileged', False),
                          self.check('sku', sku),
                          self.exists('confidentialComputeProperties.ccePolicy')])
 
