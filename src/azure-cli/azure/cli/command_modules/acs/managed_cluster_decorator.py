@@ -6018,7 +6018,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     self.context.external_functions.add_monitoring_role_assignment(
                         cluster, cluster_resource_id, self.cmd
                     )
-            else:
+            elif self.context.raw_param.get("enable_addons") is not None:
                 # Create the DCR Association here
                 addon_consts = self.context.get_addon_consts()
                 CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
@@ -7064,10 +7064,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         # monitoring addon
         monitoring_addon_enabled = self.context.get_intermediate("monitoring_addon_enabled", default_value=False)
-        if ((self.context.raw_param.get("enable_addons") is not None or
-             self.context.raw_param.get("disable_addons") is not None) and
-             monitoring_addon_enabled
-             ):
+        if monitoring_addon_enabled:
             enable_msi_auth_for_monitoring = self.context.get_enable_msi_auth_for_monitoring()
             if not enable_msi_auth_for_monitoring:
                 # add cluster spn/msi Monitoring Metrics Publisher role assignment to publish metrics to MDM
@@ -7086,7 +7083,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     self.context.external_functions.add_monitoring_role_assignment(
                         cluster, cluster_resource_id, self.cmd
                     )
-            else:
+            elif (
+                self.context.raw_param.get("enable_addons") is not None or
+                self.context.raw_param.get("disable_addons") is not None
+            ):
                 # Create the DCR Association here
                 addon_consts = self.context.get_addon_consts()
                 CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
