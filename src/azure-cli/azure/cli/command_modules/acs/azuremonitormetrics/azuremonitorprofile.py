@@ -61,8 +61,8 @@ def ensure_azure_monitor_profile_prerequisites(
     if cloud_name.lower() == "azureusgovernment":
         grafana_resource_id = raw_parameters.get("grafana_resource_id")
         if grafana_resource_id is not None:
-          if grafana_resource_id != "":
-            raise InvalidArgumentValueError("Azure US Government cloud does not support Azure Managed Grarfana yet. Please follow this documenation for enabling it via the public cloud : aka.ms/ama-grafana-link-ff")
+            if grafana_resource_id != "":
+                raise InvalidArgumentValueError("Azure US Government cloud does not support Azure Managed Grarfana yet. Please follow this documenation for enabling it via the public cloud : aka.ms/ama-grafana-link-ff")
 
     if (remove_azuremonitormetrics):
         unlink_azure_monitor_profile_artifacts(
