@@ -34,9 +34,9 @@ def get_k8s_versions(cli_ctx, location):
     from azure.cli.command_modules.acs._client_factory import cf_container_services
     from jmespath import search
 
-    results = cf_container_services(cli_ctx).list_orchestrators(location, resource_type='managedClusters').as_dict()
+    results = cf_managed_clusters(cli_ctx).list_kubernetes_versions(location).as_dict()
     # Flatten all the "orchestrator_version" fields into one array
-    return search('orchestrators[*].orchestrator_version', results)
+    return search("values[*].patchVersions.keys(@)[]", results)
 
 
 @Completer

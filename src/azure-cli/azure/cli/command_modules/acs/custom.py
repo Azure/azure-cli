@@ -1729,7 +1729,7 @@ def aks_rotate_certs(cmd, client, resource_group_name, name, no_wait=True):
 
 
 def aks_get_versions(cmd, client, location):
-    return client.list_orchestrators(location, resource_type='managedClusters')
+    return client.list_kubernetes_versions(location)
 
 
 def aks_runcommand(cmd, client, resource_group_name, name, command_string="", command_files=None, no_wait=False):
