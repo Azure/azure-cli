@@ -2127,12 +2127,15 @@ class AKSManagedClusterContext(BaseAKSContext):
         # read the original value passed by the command
         network_plugin_mode = self.raw_param.get("network_plugin_mode")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.network_profile and
-            self.mc.network_profile.network_plugin_mode is not None
-        ):
-            network_plugin_mode = self.mc.network_profile.network_plugin_mode
+
+        # if create, try and read from the mc object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.network_profile and
+                self.mc.network_profile.network_plugin_mode is not None
+            ):
+                network_plugin_mode = self.mc.network_profile.network_plugin_mode
 
         if enable_validation:
             # todo(tyler-lloyd) do we need any validation?
@@ -2184,12 +2187,10 @@ class AKSManagedClusterContext(BaseAKSContext):
             network_plugin_mode = self._get_network_plugin_mode(enable_validation=False)
             if network_plugin:
                 if network_plugin == "azure" and pod_cidr and network_plugin_mode != "overlay":
-                    logger.warning(
-                        'The provided pod CIDR "%s" will be overwritten with the node subnet CIDR. '
-                        'To use a pod CIDR, please specify network plugin mode `overlay` or '
-                        'use network plugin `kubenet`. For more information about Azure CNI '
-                        'Overlay please see https://aka.ms/aks/azure-cni-overlay. This warning '
-                        'will become an error in the Build sprint release.', pod_cidr
+                    raise InvalidArgumentValueError(
+                        "Please specify network plugin mode `overlay` when using --pod-cidr or "
+                        "use network plugin `kubenet`. For more information about Azure CNI "
+                        "Overlay please see https://aka.ms/aks/azure-cni-overlay"
                     )
             else:
                 if (
@@ -2266,8 +2267,10 @@ class AKSManagedClusterContext(BaseAKSContext):
         # read the original value passed by the command
         pod_cidr = self.raw_param.get("pod_cidr")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if network_profile and network_profile.pod_cidr is not None:
-            pod_cidr = network_profile.pod_cidr
+        # pod_cidr is allowed to be updated so only read from mc object during creates
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if network_profile and network_profile.pod_cidr is not None:
+                pod_cidr = network_profile.pod_cidr
 
         # service_cidr
         # read the original value passed by the command
@@ -6543,6 +6546,28 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.auto_upgrade_profile.upgrade_channel = auto_upgrade_channel
         return mc
 
+    def update_network_plugin_settings(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update network plugin settings of network profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        network_plugin_mode = self.context.get_network_plugin_mode()
+        if network_plugin_mode:
+            mc.network_profile.network_plugin_mode = network_plugin_mode
+
+        (
+            pod_cidr,
+            _,
+            _,
+            _,
+            _
+        ) = self.context.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
+        if pod_cidr:
+            mc.network_profile.pod_cidr = pod_cidr
+        return mc
+
     def update_http_proxy_config(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up http proxy config for the ManagedCluster object.
 
@@ -6561,8 +6586,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         self._ensure_mc(mc)
 
         current_identity_type = "spn"
+        current_user_assigned_identity = ""
         if mc.identity is not None:
             current_identity_type = mc.identity.type.casefold()
+            if mc.identity.user_assigned_identities is not None and len(mc.identity.user_assigned_identities) > 0:
+                current_user_assigned_identity = list(mc.identity.user_assigned_identities.keys())[0]
 
         goal_identity_type = current_identity_type
         assign_identity = self.context.get_assign_identity()
@@ -6572,7 +6600,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             else:
                 goal_identity_type = "userassigned"
 
-        if current_identity_type != goal_identity_type:
+        is_update_identity = ((current_identity_type != goal_identity_type) or
+                              (current_identity_type == goal_identity_type and
+                              current_identity_type == "userassigned" and
+                              current_user_assigned_identity != assign_identity))
+        if is_update_identity:
             if current_identity_type == "spn":
                 msg = (
                     "Your cluster is using service principal, and you are going to update "
@@ -6582,12 +6614,18 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     "until you upgrade your agentpool.\n"
                     "Are you sure you want to perform this operation?"
                 ).format(goal_identity_type)
-            else:
+            elif current_identity_type != goal_identity_type:
                 msg = (
                     "Your cluster is already using {} managed identity, and you are going to "
                     "update the cluster to use {} managed identity.\n"
                     "Are you sure you want to perform this operation?"
                 ).format(current_identity_type, goal_identity_type)
+            else:
+                msg = (
+                    "Your cluster is already using userassigned managed identity, current control plane identity is {},"
+                    "and you are going to update the cluster identity to {}.\n"
+                    "Are you sure you want to perform this operation?"
+                ).format(current_user_assigned_identity, assign_identity)
             # gracefully exit if user does not confirm
             if not self.context.get_yes() and not prompt_y_n(msg, default="n"):
                 raise DecoratorEarlyExitException
@@ -6997,6 +7035,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_api_server_access_profile(mc)
         # update windows profile
         mc = self.update_windows_profile(mc)
+        # update network plugin settings
+        mc = self.update_network_plugin_settings(mc)
         # update aad profile
         mc = self.update_aad_profile(mc)
         # update oidc issuer profile

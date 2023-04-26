@@ -79,7 +79,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_DATABOXEDGE = ('azure.mgmt.databoxedge', 'DataBoxEdgeManagementClient')
     MGMT_CUSTOMLOCATION = ('azure.mgmt.extendedlocation', 'CustomLocations')
     MGMT_CONTAINERSERVICE = ('azure.mgmt.containerservice', 'ContainerServiceClient')
-    MGMT_APPCONFIGURATION = ('azure.mgmt.appconfiguration', 'AppConfigurationManagementClient')
     MGMT_APPCONTAINERS = ('azure.mgmt.appcontainers', 'ContainerAppsAPIClient')
 
     # the "None" below will stay till a command module fills in the type so "get_mgmt_service_client"
@@ -207,7 +206,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_STORAGE_BLOB: '2021-06-08',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2021-08-06',
-        ResourceType.DATA_STORAGE_FILESHARE: '2021-06-08',
+        ResourceType.DATA_STORAGE_FILESHARE: '2022-11-02',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_SERVICEBUS: '2022-10-01-preview',
@@ -253,12 +252,9 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2022-09-04',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2023-02-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2023-03-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
-        }),
-        ResourceType.MGMT_APPCONFIGURATION: SDKProfile('2022-05-01', {
-            'replicas': '2022-03-01-preview'
         }),
         ResourceType.MGMT_APPCONTAINERS: '2022-10-01',
     },

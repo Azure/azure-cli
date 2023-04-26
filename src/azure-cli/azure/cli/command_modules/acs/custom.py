@@ -548,6 +548,8 @@ def aks_update(
     tags=None,
     disable_local_accounts=False,
     enable_local_accounts=False,
+    network_plugin_mode=None,
+    pod_cidr=None,
     load_balancer_managed_outbound_ip_count=None,
     load_balancer_managed_outbound_ipv6_count=None,
     load_balancer_outbound_ips=None,
@@ -1488,11 +1490,18 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None, base_sr
 # Note: the results returned here may be inaccurate if the installed python is translated (e.g. by Rosetta)
 def get_arch_for_cli_binary():
     arch = platform.machine().lower()
-    # default arch
-    formatted_arch = "amd64"
-    # set to "arm64" when the detection value contains the word "arm"
-    if "arm" in arch:
+    if "amd64" in arch or "x86_64" in arch:
+        formatted_arch = "amd64"
+    elif "armv8" in arch or "aarch64" in arch:
         formatted_arch = "arm64"
+    else:
+        raise CLIInternalError(
+            "Unsupported architecture: '{}'. Currently only supports downloading the binary "
+            "of arm64/amd64 architecture for linux/darwin/windows platform, please download "
+            "the corresponding binary for other platforms or architectures by yourself".format(
+                arch
+            )
+        )
     logger.warning(
         "The detected architecture is '%s', which will be regarded as '%s' and "
         "the corresponding binary will be downloaded. "

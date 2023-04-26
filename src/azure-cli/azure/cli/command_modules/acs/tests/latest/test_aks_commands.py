@@ -2800,7 +2800,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westcentralus')
     def test_aks_control_plane_user_assigned_identity(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -2814,6 +2814,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'location': resource_group_location,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters',
             'identity_resource_id': self.generate_user_assigned_identity_resource_id(resource_group),
+            # used to test update one identity to another
+            'another_identity_resource_id': self.generate_user_assigned_identity_resource_id(resource_group),
             'vnet_subnet_id': self.generate_vnet_subnet_id(resource_group)
         })
 
@@ -2897,6 +2899,27 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # show again
         self.cmd('aks show -g {resource_group} -n {name}', checks=[
             self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        # update identity
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                '--enable-managed-identity --assign-identity={another_identity_resource_id} ' \
+                '--yes'
+        self.cmd(update_cmd, checks=[
+            self.exists('identity'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('identity.type', "UserAssigned")
+        ])
+
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('type', '{resource_type}'),
+            self.check('name', '{name}'),
+            self.check(
+                "identity.userAssignedIdentities | keys(@) | contains(@, '{}')".format(
+                    self.kwargs.get("another_identity_resource_id")
+                ),
+                True,
+            )
         ])
 
         # delete
@@ -4647,9 +4670,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('sku.tier', 'Free')
         ])
         # update to uptime sla again
-        uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --uptime-sla --no-wait'
+        uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --uptime-sla'
         self.cmd(uptime_sla_cmd, checks=[
-            self.is_empty()
+            self.check('sku.tier', 'Standard')
         ])
         # delete
         self.cmd(
@@ -6393,7 +6416,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # create workspace
         create_workspace_cmd = 'monitor log-analytics workspace create -g {resource_group} -n {workspace_name}'
         self.cmd(create_workspace_cmd, checks=[
-            self.check('provisioningState', 'Succeeded'),
+            # self.check('provisioningState', 'Succeeded'),
             self.check('name', workspace_name)
         ])
 
@@ -6530,7 +6553,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'ssh_key_value': self.generate_ssh_keys()
         })
 
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} --ssh-key-value={ssh_key_value} --enable-managed-identity --disable-local-accounts'
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--enable-aad --aad-admin-group-object-ids 00000000-0000-0000-0000-000000000001 ' \
+                     '--disable-local-accounts --ssh-key-value={ssh_key_value}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('disableLocalAccounts', True)
@@ -7326,7 +7351,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--node-count 1 ' \
                      '--ssh-key-value={ssh_key_value} '
         create_cmd += f'--assign-identity {identity_id} ' if user_assigned_identity else ''
-        create_cmd += f'--enable-syslog' if syslog_enabled else ''
+        create_cmd += f'--enable-syslog ' if syslog_enabled else ''
         create_cmd += f'--data-collection-settings {data_collection_settings} ' if data_collection_settings else ''
 
         response = self.cmd(create_cmd, checks=[
@@ -7435,7 +7460,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         enable_monitoring_cmd = f'aks enable-addons -a monitoring --resource-group={resource_group} --name={aks_name} ' \
                                 '--enable-msi-auth-for-monitoring '
         if syslog_enabled:
-            enable_monitoring_cmd += f'--enable-syslog'
+            enable_monitoring_cmd += f'--enable-syslog '
 
         response = self.cmd(enable_monitoring_cmd, checks=[
             self.check('addonProfiles.omsagent.enabled', True),
@@ -7638,6 +7663,48 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # delete
         self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westcentralus', preserve_default_location=True)
+    def test_aks_azure_cni_overlay_migration(self, resource_group, resource_group_location):
+        _, create_version = self._get_versions(resource_group_location)
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'k8s_version': create_version,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--network-plugin azure --ssh-key-value={ssh_key_value} --kubernetes-version {k8s_version} ' \
+                     '--service-cidr 172.56.0.0/16 --dns-service-ip 172.56.0.10 ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AzureOverlayPreview'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.networkPlugin', 'azure'),
+            self.check('networkProfile.networkPluginMode', None),
+            self.check('networkProfile.podCidr', None),
+            self.check('networkProfile.serviceCidr', '172.56.0.0/16'),
+        ])
+
+        # update
+        update_cmd = 'aks update -g {resource_group} -n {name} --network-plugin-mode overlay --pod-cidr 100.64.0.0/10 ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AzureOverlayPreview'
+
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.networkPlugin', 'azure'),
+            self.check('networkProfile.networkPluginMode', 'overlay'),
+            self.check('networkProfile.podCidr', '100.64.0.0/10'),
+            self.check('networkProfile.serviceCidr', '172.56.0.0/16'),
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')

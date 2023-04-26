@@ -180,7 +180,7 @@ class AAZCommand(CLICommand):
         super().update_argument(param_name, argtype)
 
     @staticmethod
-    def deserialize_output(value, client_flatten=True):
+    def deserialize_output(value, client_flatten=True, secret_hidden=True):
         """ Deserialize output of a command.
         """
         if not isinstance(value, AAZBaseValue):
@@ -191,7 +191,7 @@ class AAZCommand(CLICommand):
             if result == AAZUndefined:
                 return result
 
-            if client_flatten and isinstance(schema, AAZObjectType):
+            if isinstance(schema, AAZObjectType):
                 # handle client flatten in result
                 disc_schema = schema.get_discriminator(result)
                 new_result = {}
@@ -205,7 +205,11 @@ class AAZCommand(CLICommand):
                         # get k_schema from discriminator definition
                         k_schema = disc_schema[k]
 
-                    if k_schema._flags.get('client_flatten', False):
+                    if secret_hidden and k_schema._flags.get('secret', False):
+                        # hidden secret properties in output
+                        continue
+
+                    if client_flatten and k_schema._flags.get('client_flatten', False):
                         # flatten k when there are client_flatten flag in it's schema
                         assert isinstance(k_schema, AAZObjectType) and isinstance(v, dict)
                         for sub_k, sub_v in v.items():

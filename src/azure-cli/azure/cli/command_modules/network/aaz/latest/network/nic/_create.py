@@ -124,7 +124,7 @@ class Create(AAZCommand):
         _args_schema.ip_configurations = AAZListArg(
             options=["--ip-configurations"],
             arg_group="Properties",
-            help="A list of IPConfigurations of the network interface.",
+            help="List of IP configurations of the network interface.",
         )
         _args_schema.nsg = AAZObjectArg(
             options=["--nsg"],
