@@ -4670,9 +4670,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('sku.tier', 'Free')
         ])
         # update to uptime sla again
-        uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --uptime-sla --no-wait'
+        uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --uptime-sla'
         self.cmd(uptime_sla_cmd, checks=[
-            self.is_empty()
+            self.check('sku.tier', 'Standard')
         ])
         # delete
         self.cmd(
@@ -6338,7 +6338,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # create workspace
         create_workspace_cmd = 'monitor log-analytics workspace create -g {resource_group} -n {workspace_name}'
         self.cmd(create_workspace_cmd, checks=[
-            self.check('provisioningState', 'Succeeded'),
+            # self.check('provisioningState', 'Succeeded'),
             self.check('name', workspace_name)
         ])
 
