@@ -182,6 +182,10 @@ def cf_private_endpoint(cli_ctx, _):
     return storage_client_factory(cli_ctx).private_endpoint_connections
 
 
+def cf_network_security_perimeter(cli_ctx, _):
+    return storage_client_factory(cli_ctx).network_security_perimeter_configurations
+
+
 def cf_mgmt_encryption_scope(cli_ctx, _):
     return storage_client_factory(cli_ctx).encryption_scopes
 
