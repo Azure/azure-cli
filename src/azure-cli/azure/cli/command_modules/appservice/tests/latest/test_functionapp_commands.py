@@ -756,7 +756,7 @@ class FunctionAppManagedEnvironment(LiveScenarioTest):
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
 
         self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
-            JMESPathCheck('siteConfig.minimumElasticInstanceCount', 1)
+            JMESPathCheck('siteConfig.minimumElasticInstanceCount', 1),
             JMESPathCheck('siteConfig.functionAppScaleLimit', 10)])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
@@ -800,7 +800,7 @@ class FunctionAppManagedEnvironment(LiveScenarioTest):
                  .format(resource_group, functionapp_name))
 
         self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
-            JMESPathCheck('siteConfig.minimumElasticInstanceCount', 1)
+            JMESPathCheck('siteConfig.minimumElasticInstanceCount', 1),
             JMESPathCheck('siteConfig.functionAppScaleLimit', 10)])
 
 
