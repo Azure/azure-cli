@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.48.1
+++++++
+
+**App Service**
+
+* Hotfix: Use basic auth with SCM sites if supported, else use AAD auth (#26229)
+
 2.48.0
 ++++++
 

@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.48.1
+++++++
+* No changes
+
 2.48.0
 ++++++
 * `aaz`: Support hidden secret properties of response in output (#26102)
