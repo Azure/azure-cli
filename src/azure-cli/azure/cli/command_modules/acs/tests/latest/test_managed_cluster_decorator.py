@@ -7226,8 +7226,12 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSManagedClusterCreateDecorator(
             self.cmd,
             self.client,
-            {"resource_group_name": "test_rg_name", "name": "test_name", "enable_msi_auth_for_monitoring": True,
-             "enable_addons": "monitoring"},
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_msi_auth_for_monitoring": True,
+                "enable_addons": "monitoring"
+            },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
         monitoring_addon_profile_2 = self.models.ManagedClusterAddonProfile(
@@ -9707,8 +9711,12 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSManagedClusterUpdateDecorator(
             self.cmd,
             self.client,
-            {"resource_group_name": "test_rg_name", "name": "test_name", "enable_msi_auth_for_monitoring": True,
-            "enable_addons": "monitoring"g},
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_msi_auth_for_monitoring": True,
+                "enable_addons": "monitoring"
+            },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
         monitoring_addon_profile_2 = self.models.ManagedClusterAddonProfile(
