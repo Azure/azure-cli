@@ -2896,8 +2896,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_azconfig_snapshot_mgmt(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='SnapshotStore', length=24)
-        snapshot_name = self.create_random_name(prefix='Snapshot', length=24)
-
+        snapshot_name = "TestSnapshot"
         store_location = 'swedencentral'
         sku = 'standard'
 
@@ -2948,7 +2947,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
 
         # Create a snapshot of all key-values that begin with the prefix 'Test'
         filter_dict = { "key": "Test*", "label": dev_label }
-        retention_period = 180 # Set retention period of 3 mins 
+        retention_period = 3600 # Set retention period of 1 hour 
         self.kwargs.update({
             'filter': '\'{}\''.format(json.dumps(filter_dict)),
             'retention_period': retention_period

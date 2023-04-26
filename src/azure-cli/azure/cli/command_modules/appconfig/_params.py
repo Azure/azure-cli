@@ -25,7 +25,8 @@ from ._validators import (validate_appservice_name_or_id, validate_snapshot_quer
                           validate_key, validate_feature, validate_feature_key,
                           validate_identity, validate_auth_mode,
                           validate_resolve_keyvault, validate_export_profile, validate_import_profile,
-                          validate_strict_import, validate_export_as_reference, validate_snapshot_filters)
+                          validate_strict_import, validate_export_as_reference, validate_snapshot_filters,
+                          validate_snapshot_retention_period)
 
 
 def load_arguments(self, _):
@@ -352,7 +353,7 @@ def load_arguments(self, _):
         c.argument('snapshot_name', arg_type=snapshot_name_arg_type)
         c.argument('filters', arg_type=snapshot_filter_arg_type)
         c.argument('composition_type', arg_type=get_enum_type(["all", "group_by_key"]), help='Composition type used in building app configuration snapshots.')
-        c.argument('retention_period', type=int, help='Duration in seconds for which a snapshot can remain archived before expiry. A snapshot can be archived for a maximum of 7 days (604,800s) for free tier stores and 90 days (7,776,000s) for standard tier stores.')
+        c.argument('retention_period', type=int, validator=validate_snapshot_retention_period, help='Duration in seconds for which a snapshot can remain archived before expiry. A snapshot can be archived for a maximum of 7 days (604,800s) for free tier stores and 90 days (7,776,000s) for standard tier stores. If specified, retention period must be at least 1 hour (3600s)')
         c.argument('tags', arg_type=tags_type, help="Space-separated tags: key[=value] [key[=value] ...].")
 
     with self.argument_context('appconfig snapshot show') as c:

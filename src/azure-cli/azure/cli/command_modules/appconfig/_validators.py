@@ -354,3 +354,7 @@ def validate_snapshot_filters(namespace):
                 raise InvalidArgumentValueError("Parameter must be an escaped JSON object. {} is not a valid JSON object.".format(filter_param))
 
         namespace.filters = filter_parameters
+
+def validate_snapshot_retention_period(namespace):
+    if namespace.retention_period and namespace.retention_period < 3600:
+        raise InvalidArgumentValueError("Retention period must be at least 1 hour.")
