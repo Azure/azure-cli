@@ -13,8 +13,6 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
-logger.warning('.')
-
 
 # Namespace Region
 def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard', capacity=None,
@@ -124,33 +122,6 @@ def cli_namespace_exists(client, name):
     return client.check_name_availability(parameters={'name': name})
 
 
-# Namespace Authorization rule:
-def cli_namespaceautho_create(client, resource_group_name, namespace_name, name, rights=None):
-    from azure.cli.command_modules.eventhubs._utils import accessrights_converter
-    return client.create_or_update_authorization_rule(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        authorization_rule_name=name,
-        parameters={'rights': accessrights_converter(rights)}
-    )
-
-
-def cli_autho_update(cmd, instance, rights):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2021-06-01-preview'):
-        from azure.cli.command_modules.eventhubs._utils import accessrights_converter
-        instance.rights = accessrights_converter(rights)
-    return instance
-
-
-def cli_keys_renew(client, resource_group_name, namespace_name, name, key_type, key=None):
-    return client.regenerate_keys(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        authorization_rule_name=name,
-        parameters={'key_type': key_type, 'key': key}
-    )
-
-
 # Eventhub Region
 def cli_eheventhub_create(cmd, client, resource_group_name, namespace_name, event_hub_name, message_retention_in_days=None, partition_count=None, status=None,
                           enabled=None, skip_empty_archives=None, capture_interval_seconds=None, capture_size_limit_bytes=None, destination_name=None, storage_account_resource_id=None, blob_container=None, archive_name_format=None):
@@ -235,28 +206,6 @@ def cli_eheventhub_update(cmd, instance, message_retention_in_days=None, partiti
                 instance.capture_description.skip_empty_archives = skip_empty_archives
 
     return instance
-
-
-# Eventhub Authorizationrule
-def cli_eventhubautho_create(client, resource_group_name, namespace_name, event_hub_name, name, rights=None):
-    from azure.cli.command_modules.eventhubs._utils import accessrights_converter
-    return client.create_or_update_authorization_rule(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        event_hub_name=event_hub_name,
-        authorization_rule_name=name,
-        parameters={'rights': accessrights_converter(rights)}
-    )
-
-
-def cli_eventhub_keys_renew(client, resource_group_name, namespace_name, event_hub_name, name, key_type, key=None):
-    return client.regenerate_keys(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        event_hub_name=event_hub_name,
-        authorization_rule_name=name,
-        parameters={'key_type': key_type, 'key': key}
-    )
 
 
 # GeoDR region
@@ -449,7 +398,9 @@ def cli_remove_appgroup_policy(client, resource_group_name, namespace_name, appl
     from azure.cli.core import CLIError
 
     appGroup = client.get(resource_group_name, namespace_name, application_group_name)
-
+    logger.warning(
+        'This operation will do removals based on policy name. Will not accept metric-id,rate-limit-threshold in the future in future release.'
+        'Also throttling_policy_config parameter will replace with "policy" in same future release.')
     if appGroup.policies:
         for policy_object in throttling_policy_config:
             if policy_object in appGroup.policies:

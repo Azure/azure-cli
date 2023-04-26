@@ -74,9 +74,9 @@ class RecordsCollection:
 
     def _get_push_interval_config(self):
         config = CLIConfig(config_dir=self._config_dir)
-        threshold = config.getint('telemetry', 'push_interval_in_hours', fallback=24)
-        # the threshold for push telemetry can't be less than 1 hour, default value is 24 hours
-        return threshold if threshold >= 1 else 24
+        threshold = config.getint('telemetry', 'push_interval_in_hours', fallback=6)
+        # the threshold for push telemetry can't be less than 1 hour, default value is 6 hours
+        return threshold if threshold >= 1 else 6
 
     def _read_file(self, path):
         """ Read content of a telemetry cache file and parse them into records. """
