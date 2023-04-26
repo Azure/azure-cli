@@ -95,7 +95,6 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         self.live_only_execute(self.cli_ctx, template.format(self.location, name))
 
         self.test_class_instance.kwargs[self.key] = name
-        import pdb;pdb.set_trace()
         return {self.parameter_name: name, self.parameter_name_for_location: self.location}
 
     def remove_resource(self, name, **kwargs):
