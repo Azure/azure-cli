@@ -14,10 +14,13 @@ def get_dce_from_dcr(cmd, dcrId):
     headers = ['User-Agent=azuremonitormetrics.get_dce_from_dcr']
     r = send_raw_request(cmd.cli_ctx, "GET", association_url, headers=headers)
     data = json.loads(r.text)
-    return data['properties']['dataCollectionEndpointId']
+    if 'dataCollectionEndpointId' in data['properties']:
+        return str(data['properties']['dataCollectionEndpointId'])
+    else:
+        return ""
 
 
-def get_dc_objects_list(cmd, cluster_region, cluster_subscription, cluster_resource_group_name, cluster_name):
+def get_dc_objects_list(cmd, cluster_subscription, cluster_resource_group_name, cluster_name):
     try:
         from azure.cli.core.util import send_raw_request
         cluster_resource_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.ContainerService/managedClusters/{2}".format(
@@ -32,8 +35,9 @@ def get_dc_objects_list(cmd, cluster_region, cluster_subscription, cluster_resou
         data = json.loads(r.text)
         dc_object_array = []
         for item in data['value']:
-            dce_id = get_dce_from_dcr(cmd, item['properties']['dataCollectionRuleId'])
-            dc_object_array.append({'name': item['name'], 'dataCollectionRuleId': item['properties']['dataCollectionRuleId'], 'dceId': dce_id})
+            if 'properties' in item and 'dataCollectionRuleId' in item['properties']:
+                dce_id = get_dce_from_dcr(cmd, item['properties']['dataCollectionRuleId'])
+                dc_object_array.append({'name': item['name'], 'dataCollectionRuleId': item['properties']['dataCollectionRuleId'], 'dceId': dce_id})
         return dc_object_array
     except CLIError as e:
         error = e

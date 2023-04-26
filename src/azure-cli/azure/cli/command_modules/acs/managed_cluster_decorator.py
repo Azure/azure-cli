@@ -7064,7 +7064,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         # monitoring addon
         monitoring_addon_enabled = self.context.get_intermediate("monitoring_addon_enabled", default_value=False)
-        if monitoring_addon_enabled:
+        if ((self.context.raw_param.get("enable_addons") is not None or
+             self.context.raw_param.get("disable_addons") is not None) and
+             monitoring_addon_enabled
+             ):
             enable_msi_auth_for_monitoring = self.context.get_enable_msi_auth_for_monitoring()
             if not enable_msi_auth_for_monitoring:
                 # add cluster spn/msi Monitoring Metrics Publisher role assignment to publish metrics to MDM

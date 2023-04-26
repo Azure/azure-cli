@@ -36,7 +36,7 @@ def link_azure_monitor_profile_artifacts(cmd, client, cluster_subscription, clus
 
 def unlink_azure_monitor_profile_artifacts(cmd, cluster_subscription, cluster_resource_group_name, cluster_name, cluster_region):
     # Remove DC* if prometheus is enabled
-    dc_objects_list = get_dc_objects_list(cmd, cluster_region, cluster_subscription, cluster_resource_group_name, cluster_name)
+    dc_objects_list = get_dc_objects_list(cmd, cluster_subscription, cluster_resource_group_name, cluster_name)
     delete_dc_objects_if_prometheus_enabled(cmd, dc_objects_list, cluster_subscription, cluster_resource_group_name, cluster_name)
     # Delete rules (Conflict({"error":{"code":"InvalidResourceLocation","message":"The resource 'NodeRecordingRulesRuleGroup-<clustername>' already exists in location 'eastus2' in resource group '<clustername>'. A resource with the same name cannot be created in location 'eastus'. Please select a new resource name."}})
     delete_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster_name)
@@ -60,7 +60,8 @@ def ensure_azure_monitor_profile_prerequisites(
 
     if cloud_name.lower() == "azureusgovernment":
         grafana_resource_id = raw_parameters.get("grafana_resource_id")
-        if grafana_resource_id is not None or grafana_resource_id != "":
+        if grafana_resource_id is not None:
+          if grafana_resource_id != "":
             raise InvalidArgumentValueError("Azure US Government cloud does not support Azure Managed Grarfana yet. Please follow this documenation for enabling it via the public cloud : aka.ms/ama-grafana-link-ff")
 
     if (remove_azuremonitormetrics):
