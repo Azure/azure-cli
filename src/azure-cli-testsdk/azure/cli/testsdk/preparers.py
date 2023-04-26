@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import sys
 from datetime import datetime
 
 from .scenario_tests import AbstractPreparer, SingleValueReplacer
@@ -72,11 +73,17 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             self.test_class_instance.kwargs[self.key] = self.dev_setting_name
             return {self.parameter_name: self.dev_setting_name,
                     self.parameter_name_for_location: self.dev_setting_location}
-
+        test_class_path = sys.modules[self.test_class_instance.__module__].__file__.split(os.sep)
+        if 'command_modules' in test_class_path:
+            index_of_module = test_class_path.index('command_modules') + 1
+        else:
+            index_of_module = test_class_path.index('src') + 1
+        module = test_class_path[index_of_module]
         tags = {'product': 'azurecli',
                 'cause': 'automation test',
                 'date': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'test': self.test_class_instance._testMethodName}
+                'test': self.test_class_instance._testMethodName,
+                'module': module}
         if 'ENV_JOB_NAME' in os.environ:
             tags['job'] = os.environ['ENV_JOB_NAME']
         tags = ' '.join(['{}={}'.format(key, value) for key, value in tags.items()])
@@ -88,6 +95,7 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         self.live_only_execute(self.cli_ctx, template.format(self.location, name))
 
         self.test_class_instance.kwargs[self.key] = name
+        import pdb;pdb.set_trace()
         return {self.parameter_name: name, self.parameter_name_for_location: self.location}
 
     def remove_resource(self, name, **kwargs):
