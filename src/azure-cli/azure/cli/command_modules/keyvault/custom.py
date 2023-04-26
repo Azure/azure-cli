@@ -1530,25 +1530,20 @@ def restore_secret(client, file_path):
 
 # region KeyVault Certificate
 # pylint: disable=inconsistent-return-statements
-def create_certificate(cmd, client, vault_base_url, certificate_name, certificate_policy,
-                       disabled=False, tags=None, validity=None):
-    CertificateAttributes = cmd.get_models('CertificateAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    cert_attrs = CertificateAttributes(enabled=not disabled)
+def create_certificate(client, certificate_name, policy,
+                       disabled=False, tags=None):
     logger.info("Starting long-running operation 'keyvault certificate create'")
 
-    if validity is not None:
-        certificate_policy['x509_certificate_properties']['validity_in_months'] = validity
+    client.begin_create_certificate(
+        certificate_name=certificate_name, policy=policy, enabled=not disabled, tags=tags)
 
-    client.create_certificate(
-        vault_base_url, certificate_name, certificate_policy, cert_attrs, tags)
-
-    if certificate_policy['issuer_parameters']['name'].lower() == 'unknown':
+    if policy.issuer_name.lower() == 'unknown':
         # return immediately for a pending certificate
-        return client.get_certificate_operation(vault_base_url, certificate_name)
+        return client.get_certificate_operation(certificate_name)
 
     # otherwise loop until the certificate creation is complete
     while True:
-        check = client.get_certificate_operation(vault_base_url, certificate_name)
+        check = client.get_certificate_operation(certificate_name)
         if check.status != 'inProgress':
             logger.info(
                 "Long-running operation 'keyvault certificate create' finished with result %s.",

@@ -202,3 +202,26 @@ def transform_secret_recover(result, **command_args):
         return ret
     return result
 
+
+def transform_certificate_create(result, **command_args):
+    if not isinstance(result, dict):
+        import base64
+        ret = {
+            "cancellationRequested": getattr(result, "cancellation_requested", None),
+            "csr": getattr(result, "csr", None),
+            "error": getattr(result, "error", None),
+            "id": getattr(result, "id", None),
+            "issuerParameters": {
+                "certificateTransparency": getattr(result, "certificate_transparency", None),
+                "certificateType": getattr(result, "certificate_type", None),
+                "name": getattr(result, "issuer_name", None)
+            },
+            "name": getattr(result, "name", None),
+            "requestId": getattr(result, "request_id", None),
+            "status": getattr(result, "status", None),
+            "statusDetails": getattr(result, "status_details", None),
+            "target": getattr(result, "target", None)
+        }
+        ret["csr"] = base64.b64encode(ret["csr"]).decode('utf-8') if ret.get("csr") else None
+        return ret
+    return result

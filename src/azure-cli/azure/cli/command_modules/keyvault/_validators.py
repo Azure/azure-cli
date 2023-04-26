@@ -740,3 +740,79 @@ def validate_encryption(ns):
 
 def validate_decryption(ns):
     ns.value = base64.b64decode(ns.value)
+
+# pylint: disable=line-too-long
+def process_certificate_policy(cmd, ns):
+    CertificatePolicy = cmd.loader.get_sdk('CertificatePolicy', mod='_models',
+                                           resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES)
+    CertificateAttributes = cmd.loader.get_sdk('CertificateAttributes', mod='_generated_models',
+                                        resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES)
+    LifetimeAction = cmd.loader.get_sdk('LifetimeAction', mod='_models',
+                                           resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES)
+    policy = getattr(ns, 'policy', None)
+    if not isinstance(policy, dict):
+        raise CLIError('incorrect usage: policy should be an JSON encoded string '
+                       'or can use @{file} to load from a file(e.g.@my_policy.json).')
+
+    issuer_name = subject = exportable = key_type = key_size = reuse_key = key_curve_name = enhanced_key_usage \
+        = key_usage = content_type = validity_in_months = certificate_type = certificate_transparency = san_emails \
+        = san_dns_names = san_user_principal_names = None
+
+    attributes = policy.get('attributes')
+    if attributes:
+        attributes = CertificateAttributes(
+            enabled=attributes.get('enabled'),
+            not_before=attributes.get('not_before'),
+            expires=attributes.get('expires_on'),
+        )
+
+    issuer_parameters = policy.get('issuer_parameters')
+    if issuer_parameters:
+        issuer_name = issuer_parameters.get('name')
+        certificate_type = issuer_parameters.get('certificate_type')
+        certificate_transparency = issuer_parameters.get('certificate_transparency')
+
+    key_properties = policy.get('key_properties')
+    if key_properties:
+        exportable = key_properties.get('exportable')
+        key_type = key_properties.get('key_type')
+        key_size = key_properties.get('key_size')
+        reuse_key = key_properties.get('reuse_key')
+        key_curve_name = key_properties.get('curve')
+
+    if policy.get('lifetime_actions'):
+        lifetime_actions = [
+            LifetimeAction(
+                action=item['action'].get('action_type') if item.get('action') else None,
+                lifetime_percentage=item['trigger'].get('lifetime_percentage') if item.get('trigger') else None,
+                days_before_expiry=item['trigger'].get('days_before_expiry') if item.get('trigger') else None
+            )
+            for item in policy.get('lifetime_actions')]
+
+    secret_properties = policy.get('secret_properties')
+    if secret_properties:
+        content_type = secret_properties.get('content_type')
+
+    x509_certificate_properties = policy.get('x509_certificate_properties')
+    if x509_certificate_properties:
+        subject = x509_certificate_properties.get('subject')
+        enhanced_key_usage = x509_certificate_properties.get('ekus')
+        subject_alternative_names = x509_certificate_properties.get('subject_alternative_names')
+        if subject_alternative_names:
+            san_emails = subject_alternative_names.get('emails')
+            san_user_principal_names = subject_alternative_names.get('upns')
+            san_dns_names = subject_alternative_names.get('dns_names')
+        key_usage = x509_certificate_properties.get('key_usage')
+        validity_in_months = x509_certificate_properties.get('validity_in_months')
+
+    validity_in_months = getattr(ns, 'validity', validity_in_months)
+    del ns.validity
+
+    policyObj = CertificatePolicy(issuer_name=issuer_name, subject=subject, attributes=attributes,
+                                  exportable=exportable, key_type=key_type, key_size=key_size, reuse_key=reuse_key,
+                                  key_curve_name=key_curve_name, enhanced_key_usage=enhanced_key_usage,
+                                  key_usage=key_usage, content_type=content_type, validity_in_months=validity_in_months,
+                                  lifetime_actions=lifetime_actions, certificate_type=certificate_type,
+                                  certificate_transparency=certificate_transparency, san_emails=san_emails,
+                                  san_dns_names=san_dns_names, san_user_principal_names=san_user_principal_names)
+    ns.policy = policyObj

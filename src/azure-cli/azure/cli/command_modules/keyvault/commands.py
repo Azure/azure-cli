@@ -16,7 +16,8 @@ from azure.cli.command_modules.keyvault._transformers import (
     multi_transformers, transform_key_decryption_output, keep_max_results,
     transform_key_output, transform_key_encryption_output, transform_key_random_output,
     transform_secret_list, transform_deleted_secret_list, transform_secret_set,
-    transform_secret_set_attributes, transform_secret_show_deleted, transform_secret_delete, transform_secret_recover)
+    transform_secret_set_attributes, transform_secret_show_deleted, transform_secret_delete, transform_secret_recover,
+    transform_certificate_create)
 
 from azure.cli.command_modules.keyvault._format import transform_secret_list_table
 
@@ -235,10 +236,6 @@ def load_command_table(self, _):
         g.keyvault_custom('restore', 'restore_secret', transform=transform_secret_set_attributes)
 
     with self.command_group('keyvault certificate', data_entity.command_type) as g:
-        g.keyvault_custom('create',
-                          'create_certificate',
-                          doc_string_source=data_entity.operations_docs_tmpl.format('create_certificate'),
-                          transform=extract_subresource_name())
         g.keyvault_command('list', 'get_certificates',
                            transform=multi_transformers(
                                keep_max_results,
@@ -291,6 +288,10 @@ def load_command_table(self, _):
         g.keyvault_custom('list', 'list_certificate_issuer_admins', transform=keep_max_results)
         g.keyvault_custom('add', 'add_certificate_issuer_admin')
         g.keyvault_custom('delete', 'delete_certificate_issuer_admin')
+
+    # certificate track2
+    with self.command_group('keyvault certificate', data_certificate_entity.command_type) as g:
+        g.keyvault_custom('create', 'create_certificate', transform=transform_certificate_create)
 
     if not is_azure_stack_profile(self):
         with self.command_group('keyvault role', data_access_control_entity.command_type):
