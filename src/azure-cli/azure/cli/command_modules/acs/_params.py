@@ -284,12 +284,12 @@ def load_arguments(self, _):
         c.argument('host_group_id', validator=validate_host_group_id)
         c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
         # azure monitor profile
-        c.argument('enable_azuremonitormetrics', action='store_true', is_preview=True)
-        c.argument('azure_monitor_workspace_resource_id', validator=validate_azuremonitorworkspaceresourceid, is_preview=True)
-        c.argument('ksm_metric_labels_allow_list', is_preview=True)
-        c.argument('ksm_metric_annotations_allow_list', is_preview=True)
-        c.argument('grafana_resource_id', validator=validate_grafanaresourceid, is_preview=True)
-        c.argument('enable_windows_recording_rules', action='store_true', is_preview=True)
+        c.argument('enable_azuremonitormetrics', action='store_true')
+        c.argument('azure_monitor_workspace_resource_id', validator=validate_azuremonitorworkspaceresourceid)
+        c.argument('ksm_metric_labels_allow_list')
+        c.argument('ksm_metric_annotations_allow_list')
+        c.argument('grafana_resource_id', validator=validate_grafanaresourceid)
+        c.argument('enable_windows_recording_rules', action='store_true')
         # misc
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
@@ -371,13 +371,13 @@ def load_arguments(self, _):
         c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels,
                    help='space-separated labels: key[=value] [key[=value] ...]. See https://aka.ms/node-labels for syntax of labels.')
         # azure monitor profile
-        c.argument('enable_azuremonitormetrics', action='store_true', is_preview=True)
-        c.argument('azure_monitor_workspace_resource_id', validator=validate_azuremonitorworkspaceresourceid, is_preview=True)
-        c.argument('ksm_metric_labels_allow_list', is_preview=True)
-        c.argument('ksm_metric_annotations_allow_list', is_preview=True)
-        c.argument('grafana_resource_id', validator=validate_grafanaresourceid, is_preview=True)
-        c.argument('enable_windows_recording_rules', action='store_true', is_preview=True)
-        c.argument('disable_azuremonitormetrics', action='store_true', is_preview=True)
+        c.argument('enable_azuremonitormetrics', action='store_true')
+        c.argument('azure_monitor_workspace_resource_id', validator=validate_azuremonitorworkspaceresourceid)
+        c.argument('ksm_metric_labels_allow_list')
+        c.argument('ksm_metric_annotations_allow_list')
+        c.argument('grafana_resource_id', validator=validate_grafanaresourceid)
+        c.argument('enable_windows_recording_rules', action='store_true')
+        c.argument('disable_azuremonitormetrics', action='store_true')
         # misc
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
