@@ -68,8 +68,9 @@ def load_arguments(self, _):
         c.argument('sku_capacity', type=int, help='The number of deployed units of the SKU.')
         c.argument('enable_managed_identity', arg_type=get_three_state_flag(),
                    help='Create a managed identity for the API Management service to access other Azure resources. Only meant to be used for Consumption SKU Service.')
-        c.argument('public_network_access', arg_type=get_three_state_flag(),
-                   help='Whether or not public endpoint access is allowed for this API Management service. If set to true, private endpoints are the exclusive access method.')
+        c.argument('public_network_access',
+                   help='Whether or not public endpoint access is allowed for this API Management service. If set to Disabled, private endpoints are the exclusive access method.',
+                   choices=['Enabled', 'Disabled'])
         c.argument('disable_gateway', arg_type=get_three_state_flag(),
                    help='Disable gateway in the master region. Only valid for an Api Management service deployed in multiple locations.')
 
@@ -87,8 +88,9 @@ def load_arguments(self, _):
         c.argument('sku_capacity', type=int, help='The number of deployed units of the SKU.')
         c.argument('enable_managed_identity', arg_type=get_three_state_flag(),
                    help='Create a managed identity for the API Management service to access other Azure resources. Only meant to be used for Consumption SKU Service.')
-        c.argument('public_network_access', arg_type=get_three_state_flag(),
-                   help='Whether or not public endpoint access is allowed for this API Management service. If set to true, private endpoints are the exclusive access method.')
+        c.argument('public_network_access',
+                   help='Whether or not public endpoint access is allowed for this API Management service. If set to Disabled, private endpoints are the exclusive access method.',
+                   choices=['Enabled', 'Disabled'])
         c.argument('disable_gateway', arg_type=get_three_state_flag(),
                    help='Disable gateway in the master region. Only valid for an Api Management service deployed in multiple locations.')
 
