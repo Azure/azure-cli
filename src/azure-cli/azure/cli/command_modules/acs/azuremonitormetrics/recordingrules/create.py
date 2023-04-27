@@ -7,6 +7,7 @@ from azure.cli.command_modules.acs.azuremonitormetrics.constants import ALERTS_A
 from knack.util import CLIError
 
 
+# pylint: disable=line-too-long
 def get_recording_rules_template(cmd, azure_monitor_workspace_resource_id):
     from azure.cli.core.util import send_raw_request
     headers = ['User-Agent=azuremonitormetrics.get_recording_rules_template']
@@ -17,6 +18,7 @@ def get_recording_rules_template(cmd, azure_monitor_workspace_resource_id):
     return data['value']
 
 
+# pylint: disable=line-too-long
 def put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, i):
     from azure.cli.core.util import send_raw_request
     body = json.dumps({
@@ -46,6 +48,7 @@ def put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, a
         raise error
 
 
+# pylint: disable=line-too-long
 def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster_name, azure_monitor_workspace_resource_id, mac_region, raw_parameters):
     # with urllib.request.urlopen("https://defaultrulessc.blob.core.windows.net/defaultrules/ManagedPrometheusDefaultRecordingRules.json") as url:
     #     default_rules_template = json.loads(url.read().decode())

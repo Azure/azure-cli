@@ -4,7 +4,9 @@
 # --------------------------------------------------------------------------------------------
 import json
 from azure.cli.command_modules.acs.azuremonitormetrics.deaults import get_default_region
-from azure.cli.command_modules.acs.azuremonitormetrics.responseparsers.amwlocationresponseparser import parseResourceProviderResponseForLocations
+from azure.cli.command_modules.acs.azuremonitormetrics.responseparsers.amwlocationresponseparser import (
+    parseResourceProviderResponseForLocations
+)
 from azure.cli.command_modules.acs.azuremonitormetrics.constants import RP_LOCATION_API
 from knack.util import CLIError
 

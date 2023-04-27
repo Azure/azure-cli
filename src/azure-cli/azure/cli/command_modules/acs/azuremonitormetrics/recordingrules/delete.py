@@ -7,11 +7,12 @@ from azure.cli.command_modules.acs.azuremonitormetrics.constants import RULES_AP
 
 def delete_rule(cmd, cluster_subscription, cluster_resource_group_name, default_rule_group_name):
     from azure.cli.core.util import send_raw_request
-    default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
-        cluster_subscription,
-        cluster_resource_group_name,
-        default_rule_group_name
-    )
+    default_rule_group_id = \
+        "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
+            cluster_subscription,
+            cluster_resource_group_name,
+            default_rule_group_name
+        )
     headers = ['User-Agent=azuremonitormetrics.delete_rule.' + default_rule_group_name]
     url = "{0}{1}?api-version={2}".format(
         cmd.cli_ctx.cloud.endpoints.resource_manager,
@@ -22,7 +23,27 @@ def delete_rule(cmd, cluster_subscription, cluster_resource_group_name, default_
 
 
 def delete_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster_name):
-    delete_rule(cmd, cluster_subscription, cluster_resource_group_name, "NodeRecordingRulesRuleGroup-{0}".format(cluster_name))
-    delete_rule(cmd, cluster_subscription, cluster_resource_group_name, "KubernetesRecordingRulesRuleGroup-{0}".format(cluster_name))
-    delete_rule(cmd, cluster_subscription, cluster_resource_group_name, "NodeRecordingRulesRuleGroup-Win-{0}".format(cluster_name))
-    delete_rule(cmd, cluster_subscription, cluster_resource_group_name, "NodeAndKubernetesRecordingRulesRuleGroup-Win-{0}".format(cluster_name))
+    delete_rule(
+        cmd,
+        cluster_subscription,
+        cluster_resource_group_name,
+        "NodeRecordingRulesRuleGroup-{0}".format(cluster_name)
+    )
+    delete_rule(
+        cmd,
+        cluster_subscription,
+        cluster_resource_group_name,
+        "KubernetesRecordingRulesRuleGroup-{0}".format(cluster_name)
+    )
+    delete_rule(
+        cmd,
+        cluster_subscription,
+        cluster_resource_group_name,
+        "NodeRecordingRulesRuleGroup-Win-{0}".format(cluster_name)
+    )
+    delete_rule(
+        cmd,
+        cluster_subscription,
+        cluster_resource_group_name,
+        "NodeAndKubernetesRecordingRulesRuleGroup-Win-{0}".format(cluster_name)
+    )

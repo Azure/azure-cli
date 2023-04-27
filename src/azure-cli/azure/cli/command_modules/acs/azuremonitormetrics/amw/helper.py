@@ -2,14 +2,11 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import json
 from azure.cli.command_modules.acs.azuremonitormetrics.amw.create import create_default_mac
 from azure.cli.command_modules.acs.azuremonitormetrics.constants import MAC_API
 from azure.cli.command_modules.acs.azuremonitormetrics.helper import sanitize_resource_id
-from azure.cli.core.azclierror import ClientRequestError
-from azure.core.exceptions import HttpResponseError
 from azure.cli.command_modules.acs._client_factory import get_resources_client
-from knack.util import CLIError
+from azure.core.exceptions import HttpResponseError
 
 
 def get_amw_region(cmd, azure_monitor_workspace_resource_id):
@@ -27,7 +24,11 @@ def get_amw_region(cmd, azure_monitor_workspace_resource_id):
 def get_azure_monitor_workspace_resource(cmd, cluster_subscription, cluster_region, raw_parameters):
     azure_monitor_workspace_resource_id = raw_parameters.get("azure_monitor_workspace_resource_id")
     if azure_monitor_workspace_resource_id is None or azure_monitor_workspace_resource_id == "":
-        azure_monitor_workspace_resource_id, azure_monitor_workspace_location = create_default_mac(cmd, cluster_subscription, cluster_region)
+        azure_monitor_workspace_resource_id, azure_monitor_workspace_location = create_default_mac(
+            cmd,
+            cluster_subscription,
+            cluster_region
+        )
     else:
         azure_monitor_workspace_resource_id = sanitize_resource_id(azure_monitor_workspace_resource_id)
         azure_monitor_workspace_location = get_amw_region(cmd, azure_monitor_workspace_resource_id)

@@ -6082,7 +6082,6 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             # Create the DC* objects, AMW, recording rules and grafana link here
             self.context.external_functions.ensure_azure_monitor_profile_prerequisites(
                 self.cmd,
-                self.client,
                 self.context.get_subscription_id(),
                 self.context.get_resource_group_name(),
                 self.context.get_name(),
@@ -6991,7 +6990,6 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         ):
             self.context.external_functions.ensure_azure_monitor_profile_prerequisites(
                 self.cmd,
-                self.client,
                 self.context.get_subscription_id(),
                 self.context.get_resource_group_name(),
                 self.context.get_name(),

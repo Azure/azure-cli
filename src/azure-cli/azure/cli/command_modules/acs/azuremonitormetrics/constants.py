@@ -2,9 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from azure.core import CaseInsensitiveEnumMeta
 from enum import Enum
-from six import with_metaclass
 
 AKS_CLUSTER_API = "2023-01-01"
 MAC_API = "2023-04-03"
@@ -70,7 +68,7 @@ MapToClosestMACRegion = {
 }
 
 
-class GrafanaLink(with_metaclass(CaseInsensitiveEnumMeta, str, Enum)):
+class GrafanaLink(Enum):
     """
     Status of Grafana link to the Prometheus Addon
     """
@@ -80,7 +78,7 @@ class GrafanaLink(with_metaclass(CaseInsensitiveEnumMeta, str, Enum)):
     NOPARAMPROVIDED = "NOPARAMPROVIDED"
 
 
-class DC_TYPE(with_metaclass(CaseInsensitiveEnumMeta, str, Enum)):
+class DC_TYPE(Enum):
     """
     Types of DC* objects
     """

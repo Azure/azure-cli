@@ -44,12 +44,19 @@ def link_grafana_instance(cmd, raw_parameters, azure_monitor_workspace_resource_
             azure_monitor_workspace_resource_id,
             MonitoringDataReader
         )
-        association_body = json.dumps({"properties": {"roleDefinitionId": roleDefinitionId, "principalId": servicePrincipalId}})
+        association_body = json.dumps({
+            "properties": {
+                "roleDefinitionId": roleDefinitionId,
+                "principalId": servicePrincipalId
+            }
+        })
         headers = ['User-Agent=azuremonitormetrics.add_role_assignment']
         send_raw_request(cmd.cli_ctx, "PUT", roleDefinitionURI, body=association_body, headers=headers)
     except CLIError as e:
         if e.response.status_code != 409:
-            erroString = "Role Assingment failed. Please manually assign the `Monitoring Data Reader` role to the Azure Monitor Workspace ({0}) for the Azure Managed Grafana System Assigned Managed Identity ({1})".format(
+            erroString = "Role Assingment failed. Please manually assign the `Monitoring Data Reader` role\
+                to the Azure Monitor Workspace ({0}) for the Azure Managed Grafana\
+                System Assigned Managed Identity ({1})".format(
                 azure_monitor_workspace_resource_id,
                 servicePrincipalId
             )
@@ -71,7 +78,9 @@ def link_grafana_instance(cmd, raw_parameters, azure_monitor_workspace_resource_
             grafana_resource_id,
             GRAFANA_API
         )
-        targetGrafanaArmPayload["properties"]["grafanaIntegrations"]["azureMonitorWorkspaceIntegrations"].append({"azureMonitorWorkspaceResourceId": azure_monitor_workspace_resource_id})
+        targetGrafanaArmPayload["properties"]["grafanaIntegrations"]["azureMonitorWorkspaceIntegrations"].append({
+            "azureMonitorWorkspaceResourceId": azure_monitor_workspace_resource_id
+        })
         targetGrafanaArmPayload = json.dumps(targetGrafanaArmPayload)
         headers = ['User-Agent=azuremonitormetrics.setup_amw_grafana_integration', 'Content-Type=application/json']
         send_raw_request(cmd.cli_ctx, "PUT", grafanaURI, body=targetGrafanaArmPayload, headers=headers)

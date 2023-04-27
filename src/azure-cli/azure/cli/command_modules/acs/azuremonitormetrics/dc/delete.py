@@ -16,18 +16,19 @@ def get_dce_from_dcr(cmd, dcrId):
     data = json.loads(r.text)
     if 'dataCollectionEndpointId' in data['properties']:
         return str(data['properties']['dataCollectionEndpointId'])
-    else:
-        return ""
+    return ""
 
 
+# pylint: disable=line-too-long
 def get_dc_objects_list(cmd, cluster_subscription, cluster_resource_group_name, cluster_name):
     try:
         from azure.cli.core.util import send_raw_request
-        cluster_resource_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.ContainerService/managedClusters/{2}".format(
-            cluster_subscription,
-            cluster_resource_group_name,
-            cluster_name
-        )
+        cluster_resource_id = \
+            "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.ContainerService/managedClusters/{2}".format(
+                cluster_subscription,
+                cluster_resource_group_name,
+                cluster_name
+            )
         armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
         association_url = f"{armendpoint}{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations?api-version={DC_API}"
         headers = ['User-Agent=azuremonitormetrics.get_dcra']
@@ -44,6 +45,7 @@ def get_dc_objects_list(cmd, cluster_subscription, cluster_resource_group_name, 
         raise CLIError(error)
 
 
+# pylint: disable=line-too-long
 def delete_dc_objects_if_prometheus_enabled(cmd, dc_objects_list, cluster_subscription, cluster_resource_group_name, cluster_name):
     from azure.cli.core.util import send_raw_request
     cluster_resource_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.ContainerService/managedClusters/{2}".format(

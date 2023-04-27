@@ -4,14 +4,14 @@
 # --------------------------------------------------------------------------------------------
 import json
 from azure.cli.command_modules.acs.azuremonitormetrics.constants import AKS_CLUSTER_API
-from azure.cli.core.profiles import ResourceType
 from azure.cli.core.azclierror import (
     UnknownError,
     CLIError
 )
 
 
-def addon_put(cmd, client, cluster_subscription, cluster_resource_group_name, cluster_name):
+# pylint: disable=line-too-long
+def addon_put(cmd, cluster_subscription, cluster_resource_group_name, cluster_name):
     from azure.cli.core.util import send_raw_request
     armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
     feature_check_url = f"{armendpoint}/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/providers/Microsoft.ContainerService/managedClusters/{cluster_name}?api-version={AKS_CLUSTER_API}"
