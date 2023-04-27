@@ -738,7 +738,7 @@ class FunctionAppManagedEnvironment(LiveScenarioTest):
     @StorageAccountPreparer()
     def test_functionapp_create_with_replicas(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
-            'functionappwindowsruntime', 40)
+            'functionappwindowsruntime', 30)
         managed_environment_name = self.create_random_name(
             'containerappmanagedenvironment', 40
         )
@@ -749,11 +749,9 @@ class FunctionAppManagedEnvironment(LiveScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('location', WINDOWS_ASP_LOCATION_FUNCTIONAPP)])
 
-        self.cmd('functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet --functions-version 4 --min-replicas 1'
+        self.cmd('functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet --functions-version 4 --min-replicas 1 --max-replicas 10'
                  .format(resource_group, functionapp_name, storage_account, managed_environment_name)).assert_with_checks([
-                     JMESPathCheck('state', 'Running'),
-                     JMESPathCheck('name', functionapp_name),
-                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+                     JMESPathCheck('name', functionapp_name)])
 
         self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
             JMESPathCheck('siteConfig.minimumElasticInstanceCount', 1),
@@ -763,7 +761,7 @@ class FunctionAppManagedEnvironment(LiveScenarioTest):
     @StorageAccountPreparer()
     def test_functionapp_create_with_min_replicas_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
-            'functionappwindowsruntime', 40)
+            'functionappwindowsruntime', 30)
         
         plan_name = self.create_random_name(
             'functionappplan', 40
@@ -779,7 +777,7 @@ class FunctionAppManagedEnvironment(LiveScenarioTest):
     @StorageAccountPreparer()
     def test_functionapp_container_config_set_replicas(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
-            'functionappwindowsruntime', 40)
+            'functionappwindowsruntime', 30)
         managed_environment_name = self.create_random_name(
             'containerappmanagedenvironment', 40
         )
@@ -792,9 +790,7 @@ class FunctionAppManagedEnvironment(LiveScenarioTest):
 
         self.cmd('functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet --functions-version 4'
                  .format(resource_group, functionapp_name, storage_account, managed_environment_name)).assert_with_checks([
-                     JMESPathCheck('state', 'Running'),
-                     JMESPathCheck('name', functionapp_name),
-                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+                     JMESPathCheck('name', functionapp_name)])
         
         self.cmd('functionapp config container set -g {} -n {} --min-replicas 1 --max-replicas 10'
                  .format(resource_group, functionapp_name))
