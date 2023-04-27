@@ -37,6 +37,7 @@ def post_request(cmd, subscription_id, rp_name, headers):
         raise CLIError(e)
 
 
+# pylint: disable=line-too-long
 def rp_registrations(cmd, subscription_id):
     from azure.cli.core.util import send_raw_request
     # Get list of RP's for RP's subscription
@@ -80,6 +81,7 @@ def rp_registrations(cmd, subscription_id):
         post_request(cmd, subscription_id, "microsoft.dashboard", headers)
 
 
+# pylint: disable=line-too-long
 def check_azuremonitormetrics_profile(cmd, cluster_subscription, cluster_resource_group_name, cluster_name):
     from azure.cli.core.util import send_raw_request
     armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
