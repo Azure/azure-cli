@@ -15,7 +15,7 @@ from msrest import Serializer
 import json
 
 from ._constants import SnapshotConstants
-from ._snapshotmodels import Snapshot, SnapshotListResult, OperationStatusResponse
+from ._snapshotmodels import Snapshot, SnapshotListResult, OperationStatusResponse, BadSnapshotRequestException
 
 
 class ProvisioningStatus:
@@ -32,6 +32,7 @@ class RequestMethod:
 
 
 _ERROR_MAP = {
+    400: BadSnapshotRequestException,
     401: ClientAuthenticationError,
     404: ResourceNotFoundError,
     409: ResourceExistsError,
