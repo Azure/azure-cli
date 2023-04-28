@@ -6012,7 +6012,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(deploy_azfw_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('name', fw_name),
-            self.check('additionalProperties[0].Network.DNS.EnableProxy', 'true') # pending verification
+            self.check('additionalProperties.\"Network.DNS.EnableProxy\"', 'true')
         ])
 
         # configure Firewall IP Config
