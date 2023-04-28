@@ -252,7 +252,7 @@ class IoTHubTest(ScenarioTest):
         storage_batch_frequency = 100
         storage_file_name_format = '{iothub}/{partition}/{YYYY}/{MM}/{DD}/{HH}/{mm}'
         # Test 'az iot hub routing-endpoint create'
-        self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} -c "{6}"'
+        x = self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} -c "{6}"'
                  .format(hub, rg, endpoint_name, endpoint_type, rg, subscription_id, ehConnectionString),
                  checks=[self.check('length(eventHubs[*])', 1),
                          self.check('eventHubs[0].resourceGroup', rg),
