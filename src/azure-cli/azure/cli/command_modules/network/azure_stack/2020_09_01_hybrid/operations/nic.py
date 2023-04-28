@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument
 from azure.cli.core.aaz import AAZResourceIdArgFormat, has_value, AAZListArg, AAZResourceIdArg, \
-    AAZStrArg, AAZListArgFormat
+    AAZStrArg
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
 from knack.log import get_logger
 

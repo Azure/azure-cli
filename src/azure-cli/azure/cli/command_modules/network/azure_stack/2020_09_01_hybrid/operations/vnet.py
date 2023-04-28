@@ -72,7 +72,7 @@ class VNetCreate(_VNet.Create):
 class VNetUpdate(_VNet.Update):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArgFormat, AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         # handle detach logic
         args_schema.ddos_protection_plan._fmt = AAZResourceIdArgFormat(
