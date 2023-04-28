@@ -1075,7 +1075,7 @@ class HTTPSettingsCreate(_HTTPSettingsCreate):
 class HTTPSettingsUpdate(_HTTPSettingsUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZListArgFormat, AAZIntArg, AAZIntArgFormat, AAZResourceIdArg, AAZResourceIdArgFormat
+        from azure.cli.core.aaz import AAZListArg, AAZIntArg, AAZIntArgFormat, AAZResourceIdArg, AAZResourceIdArgFormat
 
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.auth_certs = AAZListArg(

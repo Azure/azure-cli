@@ -12,14 +12,6 @@ from ._util import import_aaz_by_profile
 logger = get_logger(__name__)
 
 
-class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-    def __call__(self, ctx, value):
-        if value._data == "":
-            logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-            value._data = None
-        return super().__call__(ctx, value)
-
-
 _LBFrontendIP = import_aaz_by_profile("network.lb.frontend_ip")
 
 
@@ -77,10 +69,10 @@ class LBFrontendIPUpdate(_LBFrontendIP.Update):
             options=['--vnet-name'],
             help="The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id)."
         )
-        args_schema.subnet._fmt = EmptyResourceIdArgFormat(
+        args_schema.subnet._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{vnet_name}/subnets/{}",
         )
-        args_schema.public_ip_address._fmt = EmptyResourceIdArgFormat(
+        args_schema.public_ip_address._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIPAddresses/{}",
         )
 
@@ -144,7 +136,7 @@ class LBInboundNatPoolUpdate(_LBInboundNatPool.Update):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.frontend_ip_name._fmt = EmptyResourceIdArgFormat(
+        args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
         )
 
@@ -257,7 +249,7 @@ class LBRuleUpdate(_LBRule.Update):
         args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
         )
-        args_schema.probe_name._fmt = EmptyResourceIdArgFormat(
+        args_schema.probe_name._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/probes/{}"
         )
 
