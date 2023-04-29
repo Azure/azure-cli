@@ -9,11 +9,14 @@ import time
 from types import SimpleNamespace
 from typing import Dict, List, Optional, Tuple, TypeVar, Union
 
+from azure.mgmt.containerservice.models import KubernetesSupportPlan
+
 from azure.cli.command_modules.acs._consts import (
     CONST_LOAD_BALANCER_SKU_BASIC,
     CONST_LOAD_BALANCER_SKU_STANDARD,
     CONST_MANAGED_CLUSTER_SKU_TIER_FREE,
     CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD,
+    CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM,
     CONST_OUTBOUND_TYPE_LOAD_BALANCER,
     CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
@@ -4043,6 +4046,10 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self._get_cluster_autoscaler_profile()
 
+    def _get_k8s_support_plan(self, enable_validation: bool = False) -> KubernetesSupportPlan :
+        support_plan = self.raw_param.get("kubernetes_support_plan")
+        return support_plan
+
     def _get_uptime_sla(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of uptime_sla.
 
@@ -6225,16 +6232,23 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
+        # Premium without LTS is ok (not vice versa)
+        if self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM:
+            mc.sku = self.models.ManagedClusterSKU(
+                name="Base",
+                tier=CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM
+            )
+
         if self.context.get_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
             mc.sku = self.models.ManagedClusterSKU(
                 name="Base",
-                tier="Standard"
+                tier=CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD
             )
 
         if self.context.get_no_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_FREE:
             mc.sku = self.models.ManagedClusterSKU(
                 name="Base",
-                tier="Free"
+                tier=CONST_MANAGED_CLUSTER_SKU_TIER_FREE
             )
         return mc
 
@@ -6353,6 +6367,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         enable_windows_gmsa = self.context.get_enable_windows_gmsa()
 
         if any([enable_ahub, disable_ahub, windows_admin_password, enable_windows_gmsa]) and not mc.windows_profile:
+            # seems we know the error
             raise UnknownError(
                 "Encounter an unexpected error while getting windows profile from the cluster in the process of update."
             )
@@ -6705,6 +6720,19 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def update_k8s_support_plan(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update supportPlan for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        support_plan = self.context.get_k8s_support_plan()
+
+        if support_plan == KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT and not mc.sku.tier == CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM:
+            raise CLIError("Long term support is only available for premium tier clusters.")
+
+        return mc
+
     def update_azure_keyvault_kms(self, mc: ManagedCluster) -> ManagedCluster:
         """Update security profile azureKeyvaultKms for the ManagedCluster object.
 
@@ -6898,6 +6926,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_http_proxy_config(mc)
         # update workload autoscaler profile
         mc = self.update_workload_auto_scaler_profile(mc)
+        # update kubernetes support plan
+        mc = self.update_k8s_support_plan(mc)
         return mc
 
     def check_is_postprocessing_required(self, mc: ManagedCluster) -> bool:
