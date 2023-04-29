@@ -93,7 +93,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     def _get_versions_by_location(self, location):
         versions = self.cmd(
-            "az aks get-versions -l {} --query 'orchestrators[].orchestratorVersion'".format(location)).get_output_in_json()
+            "az aks get-versions -l {} --query 'values[*].patchVersions.keys(@)[]'".format(location)).get_output_in_json()
         # sort by semantic version, from newest to oldest
         versions = sorted(versions, key=version_to_tuple, reverse=True)
         return versions
@@ -696,7 +696,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # show k8s versions
         self.cmd('aks get-versions -l {location}', checks=[
-            self.exists('orchestrators[*].orchestratorVersion')
+            self.exists('values[*].patchVersions.keys(@)[]')
         ])
 
         # show k8s versions in table format
@@ -3216,7 +3216,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # show k8s versions
         self.cmd('aks get-versions -l {location}', checks=[
-            self.exists('orchestrators[*].orchestratorVersion')
+            self.exists('values[*].patchVersions.keys(@)[]')
         ])
 
         # show k8s versions in table format
