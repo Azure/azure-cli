@@ -6482,6 +6482,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         is_update_identity = ((current_identity_type != goal_identity_type) or
                               (current_identity_type == goal_identity_type and
                               current_identity_type == "userassigned" and
+                              assign_identity is not None and
                               current_user_assigned_identity != assign_identity))
         if is_update_identity:
             if current_identity_type == "spn":
