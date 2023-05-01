@@ -13,7 +13,7 @@ def load_arguments_eh(self, _):
         get_location_type, get_three_state_flag, get_resource_name_completion_list
     from azure.cli.core.commands.validators import get_default_location_from_resource_group
     from azure.cli.command_modules.eventhubs._completers import get_eventhubs_command_completion_list
-    from azure.cli.command_modules.eventhubs._validator import validate_storageaccount, validate_partner_namespace, validate_rights
+    from azure.cli.command_modules.eventhubs._validator import validate_storageaccount, validate_partner_namespace
     from knack.arguments import CLIArgumentType
     from azure.cli.core.profiles import ResourceType
     (SkuName, TlsVersion) = self.get_models('SkuName', 'TlsVersion', resource_type=ResourceType.MGMT_EVENTHUB)
