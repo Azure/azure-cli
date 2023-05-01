@@ -96,3 +96,4 @@ WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
 }
 
 DEFAULT_CENTAURI_IMAGE = 'azurefunctionstest.azurecr.io/azure-functions/dotnet7-quickstart-demo:1.0'
+ACR_IMAGE_SUFFIX = ".azurecr.io"
