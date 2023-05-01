@@ -395,8 +395,8 @@ subscription than the app service environment, please use the resource ID for --
                    help='the container registry server username')
         c.argument('registry_password', options_list=['--registry-password', '-p', c.deprecate(target='--docker-registry-server-password', redirect='--registry-password')],
                    help='the container registry server password')
-        c.argument('min_replicas', options_list=['--min-replicas'], type=int, help="The minimum number of replicas when create funtion app on container app", is_preview=True)
-        c.argument('max_replicas', options_list=['--max-replicas'], type=int, help="The maximum number of replicas when create funtion app on container app", is_preview=True)
+        c.argument('min_replicas', type=int, help="The minimum number of replicas when create funtion app on container app", is_preview=True)
+        c.argument('max_replicas', type=int, help="The maximum number of replicas when create funtion app on container app", is_preview=True)
 
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -733,8 +733,8 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('registry_username', options_list=['--registry-username', '-d', c.deprecate(target='--docker-registry-server-user', redirect='--registry-username')], help='The container registry server username.')
         c.argument('registry_password', options_list=['--registry-password', '-w', c.deprecate(target='--docker-registry-server-password', redirect='--registry-password')],
                    help='The container registry server password. Required for private registries.')
-        c.argument('min_replicas', options_list=['--min-replicas'], type=int, help="The minimum number of replicas when create funtion app on container app", is_preview=True)
-        c.argument('max_replicas', options_list=['--max-replicas'], type=int, help="The maximum number of replicas when create funtion app on container app", is_preview=True)
+        c.argument('min_replicas', type=int, help="The minimum number of replicas when create funtion app on container app", is_preview=True)
+        c.argument('max_replicas', type=int, help="The maximum number of replicas when create funtion app on container app", is_preview=True)
 
     with self.argument_context('functionapp cors credentials') as c:
         c.argument('enable', help='enable/disable access-control-allow-credentials', arg_type=get_three_state_flag())
