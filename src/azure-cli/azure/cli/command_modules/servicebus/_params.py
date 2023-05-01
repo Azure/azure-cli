@@ -8,7 +8,7 @@
 from azure.cli.core.commands.parameters import tags_type, get_enum_type, resource_group_name_type, name_type,\
     get_location_type, get_three_state_flag, get_resource_name_completion_list
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from azure.cli.command_modules.servicebus.action import AlertAddEncryption
+from azure.cli.command_modules.servicebus.action import AlertAddEncryption, AlertAddIpRule, AlertAddVirtualNetwork
 from azure.cli.core.profiles import ResourceType
 
 
@@ -232,24 +232,19 @@ def load_arguments_sb(self, _):
             c.argument('namespace_name', arg_type=name_type, help='Name of Standard Namespace')
 
 # Region Namespace NetworkRuleSet
-    with self.argument_context('servicebus namespace network-rule') as c:
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
-
+    with self.argument_context('servicebus namespace network-rule-set') as c:
+        c.argument('namespace_name', options_list=['--namespace-name', '--name', '-n'], id_part=None,
+                   help='Name of the Namespace')
     for scope in ['servicebus namespace network-rule-set ip-rule add', 'servicebus namespace network-rule-set ip-rule remove']:
         with self.argument_context(scope) as c:
-            c.argument('action', arg_group='IP Address Rule', options_list=['--action'],
-                       arg_type=get_enum_type(['Allow']), help='Action of the IP rule')
-            c.argument('ip_mask', arg_group='IP Address Rule', options_list=['--ip-address'], help='IPv4 address or CIDR range.')
-            c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
-
-    for scope in ['servicebus namespace network-rule virtual-network-rule add', 'servicebus namespace network-rule virtual-network-rule remove']:
+            c.argument('ip_rule', action=AlertAddIpRule, nargs='+', help='List VirtualNetwork Rules.')
+            c.argument('namespace_name', options_list=['--namespace-name', '--name', '-n'], id_part=None,
+                       help='Name of the Namespace')
+    for scope in ['servicebus namespace network-rule-set virtual-network-rule add', 'servicebus namespace network-rule-set virtual-network-rule remove']:
         with self.argument_context(scope) as c:
-            c.argument('ignore_missing_vnet_service_endpoint', arg_group='Virtual Network Rule', options_list=['--ignore-missing-endpoint', '--missing-endpoint'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
-            c.argument('subnet', arg_group='Virtual Network Rule', options_list=['--subnet'],
-                       help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
-            c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'],
-                    help='Name of the Virtual Network')
-            c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+            c.argument('namespace_name', options_list=['--namespace-name', '--name', '-n'], id_part=None,
+                       help='Name of the Namespace')
+            c.argument('subnet', action=AlertAddVirtualNetwork, nargs='+', help='List VirtualNetwork Rules.')
 
 # Private end point connection
     with self.argument_context('servicebus namespace private-endpoint-connection') as c:
