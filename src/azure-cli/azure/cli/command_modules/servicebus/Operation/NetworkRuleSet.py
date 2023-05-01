@@ -11,7 +11,7 @@
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-return-statements
 
-def add_network_rule_set_ip_rule(cmd, resource_group_name, namespace_name, ip_address, action='Allow'):
+def add_network_rule_set_ip_rule(cmd, resource_group_name, namespace_name, ip_rule=None):
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace.network_rule_set import Update
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace.network_rule_set import Show
 
@@ -26,11 +26,15 @@ def add_network_rule_set_ip_rule(cmd, resource_group_name, namespace_name, ip_ad
             "action": i["action"]
         }
         ip_rule_list.append(ip_dict)
-
-    ip_rule_list.append({
-        "ip_address": ip_address,
-        "action": action
-    })
+    for i in ip_rule:
+        rule = {
+            "ip_address": i["ip-address"],
+            "action": i["action"]
+        }
+        if rule not in ip_rule_list:
+            ip_rule_list.append(rule)
+        else:
+            raise CLIError('Duplicate Ip-rules Found.')
     command_args_dict = {
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
@@ -39,7 +43,7 @@ def add_network_rule_set_ip_rule(cmd, resource_group_name, namespace_name, ip_ad
     return Update(cli_ctx=cmd.cli_ctx)(command_args=command_args_dict)
 
 
-def remove_network_rule_set_ip_rule(cmd, resource_group_name, namespace_name, ip_address):
+def remove_network_rule_set_ip_rule(cmd, resource_group_name, namespace_name, ip_rule=None):
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace.network_rule_set import Update
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace.network_rule_set import Show
     servicebus_ip_rule = Show(cli_ctx=cmd.cli_ctx)(command_args={
@@ -54,9 +58,10 @@ def remove_network_rule_set_ip_rule(cmd, resource_group_name, namespace_name, ip
         }
         ip_rule_list.append(ip_rule_dict)
 
-    for i in ip_rule_list:
-        if i['ip_address'] == ip_address:
-            ip_rule_list.remove(i)
+    for i in ip_rule:
+        for j in ip_rule_list:
+            if i['ip-address'] == j["ip_address"]:
+                ip_rule_list.remove(j)
     command_args_dict = {
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
