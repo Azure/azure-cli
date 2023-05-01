@@ -73,13 +73,6 @@ def load_command_table(self, _):
         g.show_command('show', 'get_authorization_rule')
         g.command('keys list', 'list_keys')
 
-# MigrationConfigs Region
-    with self.command_group('servicebus migration', sb_migration_util, client_factory=migration_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
-        g.custom_command('start', 'cli_migration_start')
-        g.custom_show_command('show', 'cli_migration_show')
-        g.custom_command('complete', 'cli_migration_complete')
-        g.custom_command('abort', 'revert')
-
 # NetwrokRuleSet Region
     with self.command_group('servicebus namespace network-rule', sb_namespace_util, deprecate_info=self.deprecate(redirect='servicebus namespace network-rule-set'), client_factory=namespaces_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
         g.custom_command('add', 'cli_networkrule_createupdate', deprecate_info=self.deprecate(redirect='servicebus namespace network-rule-set ip-rule/virtual-network-rule add'),

@@ -220,20 +220,6 @@ def load_arguments_sb(self, _):
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
         c.argument('authorization_rule_name', arg_type=name_type, help='Name of Namespace AuthorizationRule')
 
-# Standard to Premium Migration: Region
-
-    with self.argument_context('servicebus migration start') as c:
-        c.ignore('config_name')
-        c.argument('namespace_name', arg_type=name_type, help='Name of Standard Namespace used as source of the migration')
-        # c.argument('config_name', options_list=['--config-name'], id_part=None, help='Name of configuration. Should always be "$default"')
-        c.argument('target_namespace', options_list=['--target-namespace'], validator=validate_target_namespace, help='Name (if within the same resource group) or ARM Id of empty Premium Service Bus namespace name that will be target of the migration')
-        c.argument('post_migration_name', options_list=['--post-migration-name'], help='Post migration name is the name that can be used to connect to standard namespace after migration is complete.')
-
-    for scope in ['show', 'complete', 'abort']:
-        with self.argument_context('servicebus migration {}'.format(scope)) as c:
-            c.ignore('config_name')
-            c.argument('namespace_name', arg_type=name_type, help='Name of Standard Namespace')
-
 # Region Namespace NetworkRuleSet
     with self.argument_context('servicebus namespace network-rule') as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
