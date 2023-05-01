@@ -92,11 +92,6 @@ def cli_namespace_list(cmd, client, resource_group_name=None):
         return client.list()
 
 
-def cli_namespace_exists(cmd, client, name):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        return client.check_name_availability(parameters={'name': name})
-
-
 # DisasterRecoveryConfigs Region
 def cli_georecovery_alias_create(cmd, client, resource_group_name, namespace_name, alias,
                                  partner_namespace, alternate_name=None):
