@@ -477,7 +477,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     def _get_versions(self, location):
         """Return the previous and current Kubernetes minor release versions, such as ("1.11.6", "1.12.4")."""
         versions = self.cmd(
-            "az aks get-versions -l westus2 --query 'orchestrators[].orchestratorVersion'").get_output_in_json()
+            "az aks get-versions -l westus2 --query 'values[*].patchVersions.keys(@)[]'").get_output_in_json()
         # sort by semantic version, from newest to oldest
         versions = sorted(versions, key=version_to_tuple, reverse=True)
         upgrade_version = versions[0]
