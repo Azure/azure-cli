@@ -79,11 +79,11 @@ def load_arguments(self, _):
 
     with self.argument_context('container create', arg_group='Confidential Container Group') as c:
         c.argument('cce_policy', help="The CCE policy for the confidential container group")
-        c.argument('allow_privilege_escalation', help="Allow the container group to run with escalated privileges")
-        c.argument('privileged', help="Specifies whether this container should run in prvileged mode")
-        c.argument('run_as', help="Run as a particular user")
-        c.argument('run_as_group', help="Run as a particular user group")
-        c.argument('seccomp_profile', help="Base46 encoded seccomp profile")
+        c.argument('allow_privilege_escalation', help="Allows whether a process can gain more privileges than its parent process.")
+        c.argument('privileged', help='The flag to determine if the contianer permissions is elevated to Privileged', action='store_true')
+        c.argument('run_as_user', help="Sets the User GID for the container")
+        c.argument('run_as_group', help="Sets the User UID for the container")
+        c.argument('seccomp_profile', help="A base64 encoded string containing the contents of the JSON in the seccomp profile")
         c.argument('add_capabilities', type=str, nargs='+', help="A List of security context capabilities to be added")
         c.argument('drop_capabilities', type=str, nargs='+', help="A List of security context capabilities to be dropped")
 
