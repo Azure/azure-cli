@@ -156,7 +156,7 @@ def load_arguments_eh(self, _):
         c.argument('authorization_rule_name', arg_type=name_type, help='Name of Namespace AuthorizationRule')
 
 # Region Namespace NetworkRuleSet
-    with self.argument_context('eventhubs namespace network-rule') as c:
+    with self.argument_context('eventhubs namespace network-rule-set') as c:
         c.argument('namespace_name', options_list=['--namespace-name', '--name', '-n'], id_part=None, help='Name of the Namespace')
 
     for scope in ['eventhubs namespace network-rule-set ip-rule add', 'eventhubs namespace network-rule-set ip-rule remove']:
