@@ -3652,7 +3652,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        consumption_plan_location=None, app_insights=None, app_insights_key=None,
                        disable_app_insights=None, deployment_source_url=None,
                        deployment_source_branch='master', deployment_local_git=None,
-                       registry_server=None,registry_password=None, registry_username=None,
+                       registry_server=None, registry_password=None, registry_username=None,
                        image=None, tags=None, assign_identities=None,
                        role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
                        environment=None, min_replicas=None, max_replicas=None):

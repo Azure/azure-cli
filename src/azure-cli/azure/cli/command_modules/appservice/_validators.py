@@ -371,11 +371,13 @@ def validate_staticsite_link_function(cmd, namespace):
     if list(functions):
         raise ValidationError("Cannot have more than one user provided function app associated with a Static Web App")
 
+
 def validate_functionapp(cmd, namespace):
     validate_vnet_integration(cmd, namespace)
     validate_registry_server(namespace)
     validate_registry_user(namespace)
     validate_registry_pass(namespace)
+
 
 # TODO consider combining with validate_add_vnet
 def validate_vnet_integration(cmd, namespace):
@@ -508,22 +510,22 @@ def validate_centauri_delete_function(cmd, namespace):
 
 
 def validate_registry_server(namespace):
-    if namespace.environment:
-        if namespace.registry_server:
-            if not namespace.registry_username or not namespace.registry_password:
-                if ACR_IMAGE_SUFFIX not in namespace.registry_server:
-                    raise ValidationError("Usage error: --registry-server, --registry-password and --registry-username are required together if not using Azure Container Registry")
+    if namespace.environment and namespace.registry_server:
+        if not namespace.registry_username or not namespace.registry_password:
+            if ACR_IMAGE_SUFFIX not in namespace.registry_server:
+                raise ValidationError("Usage error: --registry-server, --registry-password and"
+                                      " --registry-username are required together if not using Azure Container Registry")  # pylint: disable=line-too-long
 
 
 def validate_registry_user(namespace):
-    if namespace.environment:
-        if namespace.registry_username:
-            if not namespace.registry_server or (not namespace.registry_password and ACR_IMAGE_SUFFIX not in namespace.registry_server):
-                raise ValidationError("Usage error: --registry-server, --registry-password and --registry-username are required together if not using Azure Container Registry")
+    if namespace.environment and namespace.registry_username:
+        if not namespace.registry_server or (not namespace.registry_password and ACR_IMAGE_SUFFIX not in namespace.registry_server):  # pylint: disable=line-too-long
+            raise ValidationError("Usage error: --registry-server, --registry-password and"
+                                  " --registry-username are required together if not using Azure Container Registry")
 
 
 def validate_registry_pass(namespace):
-    if namespace.environment:
-        if namespace.registry_password:
-            if not namespace.registry_server or (not namespace.registry_username and ACR_IMAGE_SUFFIX not in namespace.registry_server):
-                raise ValidationError("Usage error: --registry-server, --registry-password and --registry-username are required together if not using Azure Container Registry")
+    if namespace.environment and namespace.registry_password:
+        if not namespace.registry_server or (not namespace.registry_username and ACR_IMAGE_SUFFIX not in namespace.registry_server):  # pylint: disable=line-too-long
+            raise ValidationError("Usage error: --registry-server, --registry-password and"
+                                  " --registry-username are required together if not using Azure Container Registry")
