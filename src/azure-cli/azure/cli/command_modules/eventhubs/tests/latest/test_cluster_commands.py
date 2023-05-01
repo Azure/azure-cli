@@ -25,8 +25,8 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
             'rg': self.create_random_name(prefix='rg-cluster-', length=20),
             'clustername': self.create_random_name(prefix='eventhubs-clus1-', length=20),
             'namespacename': self.create_random_name(prefix='eventhubs-nscli', length=20),
-            'tags': {'tag1=value1'},
-            'tags2': {'tag2=value2'},
+            'tags': '{tag1:value1}',
+            'tags2': '{tag2:value2}',
             'capacity': 1,
             'sku': 'Standard',
             'tier': 'Standard'
@@ -35,7 +35,7 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         # Create Cluster
         # Created test-migration resource group for cluster cmdlets to monitor the cluster to save the cost.
         # Same resource group can be used to rerun the test or you can change the resource-group by replacing test-migration.
-        self.cmd('eventhubs cluster create --resource-group test-migration --name {clustername} --location eastus --tags tag1=value1',
+        self.cmd('eventhubs cluster create --resource-group test-migration --name {clustername} --location eastus --tags {tags}',
                  checks=[self.check('name', self.kwargs['clustername'])])
 
         # Get Cluster
@@ -52,7 +52,7 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         self.assertGreater(len(listnsclusterresult), 0)
 
         # update cluster
-        self.cmd('eventhubs cluster update --resource-group test-migration --name {clustername} --tags tag2=value2',
+        self.cmd('eventhubs cluster update --resource-group test-migration --name {clustername} --tags {tags2}',
                  checks=[self.check('tags', {'tag2': 'value2'})])
 
         # Get cluster created in the resourcegroup
@@ -61,7 +61,7 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
 
         # Delete cluster
         # commented as the cluster can be deleted only after 4 hours
-        # self.cmd('eventhubs cluster delete --resource-group test-migration --name {clustername}')
+        self.cmd('eventhubs cluster delete --resource-group test-migration --name {clustername} --yes')
 
     @AllowLargeResponse()
     def test_eh_self_serve_cluster(self):
@@ -74,9 +74,6 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
             'sku': 'Standard',
             'tier': 'Standard'
         })
-
-        # create Resource group
-        self.cmd('az group create --resource-group test-migration --location {loc}')
 
         # Create Cluster
         self.cmd(
@@ -118,4 +115,4 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
 
         # Delete cluster
         # commented as the cluster can be deleted only after 4 hours
-        # self.cmd('eventhubs cluster delete --resource-group test-migration --name {clustername}')
+        self.cmd('eventhubs cluster delete --resource-group test-migration --name {clustername} --yes')

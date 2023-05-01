@@ -1214,6 +1214,8 @@ examples:
     text: az storage blob sync -c mycontainer -s "path/to/file" -d NewBlob
   - name: Sync a directory to a container.
     text: az storage blob sync -c mycontainer --account-name mystorageccount --account-key 00000000 -s "path/to/directory"
+  - name: Sync a directory to a container with azcopy options pass-through (in this case capping the upload bandwith to 20 MBit/s).
+    text: az storage blob sync -c mycontainer --account-name mystorageccount --account-key 00000000 -s "path/to/directory" -- --cap-mbps=20
 """
 
 helps['storage blob upload'] = """
