@@ -6,8 +6,8 @@
 # AZURE CLI ServiceBus - NAMESPACE TEST DEFINITIONS
 
 import time
-
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
+from knack.util import CLIError
 
 
 # pylint: disable=line-too-long

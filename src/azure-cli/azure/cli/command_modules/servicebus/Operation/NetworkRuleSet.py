@@ -14,7 +14,7 @@
 def add_network_rule_set_ip_rule(cmd, resource_group_name, namespace_name, ip_rule=None):
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace.network_rule_set import Update
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace.network_rule_set import Show
-
+    from azure.cli.core import CLIError
     servicebus_ip_rule = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "namespace_name": namespace_name
@@ -73,6 +73,7 @@ def remove_network_rule_set_ip_rule(cmd, resource_group_name, namespace_name, ip
 def add_virtual_network_rule(cmd, resource_group_name, namespace_name, subnet=None):
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace.network_rule_set import Update
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace.network_rule_set import Show
+    from azure.cli.core import CLIError
     servicebus_nw_rule = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "namespace_name": namespace_name
