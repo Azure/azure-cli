@@ -586,7 +586,6 @@ def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, 
 
 def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None):
     logger.warning("Getting scm site credentials for zip deployment")
-    user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
 
     try:
         scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
@@ -596,17 +595,15 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     zip_url = scm_url + '/api/zipdeploy?isAsync=true'
     deployment_status_url = scm_url + '/api/deployments/latest'
 
-    import urllib3
-    authorization = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
-    headers = authorization
-    headers['Content-Type'] = 'application/octet-stream'
-    headers['Cache-Control'] = 'no-cache'
-    headers['User-Agent'] = get_az_user_agent()
-    headers['x-ms-client-request-id'] = cmd.cli_ctx.data['headers']['x-ms-client-request-id']
-    import requests
+    additional_headers = {"Content-Type": "application/octet-stream", "Cache-Control": "no-cache"}
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group_name, slot,
+                                   additional_headers=additional_headers)
+
     import os
+    import requests
     from azure.cli.core.util import should_disable_connection_verify
     # Read file content
+
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
         zip_content = fs.read()
         logger.warning("Starting zip deployment. This operation can take a while to complete ...")
@@ -616,7 +613,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     # check the status of async deployment
     if res.status_code == 202:
         response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
-                                                authorization, timeout)
+                                                headers, timeout)
         return response
 
     # check if there's an ongoing process
@@ -1318,20 +1315,18 @@ def validate_app_settings_in_scm(cmd, resource_group_name, name, slot=None,
     return True
 
 
-@retryable_method(3, 5)
+@retryable_method(retries=3, interval_sec=5)
 def _get_app_settings_from_scm(cmd, resource_group_name, name, slot=None):
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     settings_url = '{}/api/settings'.format(scm_url)
-    username, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
-    headers = {
+    additional_headers = {
         'Content-Type': 'application/octet-stream',
         'Cache-Control': 'no-cache',
-        'User-Agent': get_az_user_agent()
     }
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group_name, slot, additional_headers=additional_headers)
 
     import requests
-    response = requests.get(settings_url, headers=headers, auth=(username, password), timeout=3)
-
+    response = requests.get(settings_url, headers=headers, timeout=30)
     return response.json() or {}
 
 
@@ -2561,12 +2556,9 @@ def show_diagnostic_settings(cmd, resource_group_name, name, slot=None):
 
 
 def show_deployment_log(cmd, resource_group, name, slot=None, deployment_id=None):
-    import urllib3
     import requests
-
     scm_url = _get_scm_url(cmd, resource_group, name, slot)
-    username, password = _get_site_credential(cmd.cli_ctx, resource_group, name, slot)
-    headers = urllib3.util.make_headers(basic_auth='{}:{}'.format(username, password))
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
 
     deployment_log_url = ''
     if deployment_id:
@@ -2597,14 +2589,12 @@ def show_deployment_log(cmd, resource_group, name, slot=None, deployment_id=None
 
 
 def list_deployment_logs(cmd, resource_group, name, slot=None):
-    scm_url = _get_scm_url(cmd, resource_group, name, slot)
-    deployment_log_url = '{}/api/deployments/'.format(scm_url)
-    username, password = _get_site_credential(cmd.cli_ctx, resource_group, name, slot)
-
-    import urllib3
-    headers = urllib3.util.make_headers(basic_auth='{}:{}'.format(username, password))
-
     import requests
+
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
+    deployment_log_url = '{}/api/deployments/'.format(scm_url)
+
     response = requests.get(deployment_log_url, headers=headers)
 
     if response.status_code != 200:
@@ -2735,8 +2725,8 @@ def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
     if provider:
         streaming_url += ('/' + provider.lstrip('/'))
 
-    user, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
-    t = threading.Thread(target=_get_log, args=(streaming_url, user, password))
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group_name, slot)
+    t = threading.Thread(target=_get_log, args=(streaming_url, headers))
     t.daemon = True
     t.start()
 
@@ -2747,8 +2737,8 @@ def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
 def download_historical_logs(cmd, resource_group_name, name, log_file=None, slot=None):
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     url = scm_url.rstrip('/') + '/dump'
-    user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
-    _get_log(url, user_name, password, log_file)
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group_name, slot)
+    _get_log(url, headers, log_file)
     logger.warning('Downloaded logs to %s', log_file)
 
 
@@ -2758,7 +2748,41 @@ def _get_site_credential(cli_ctx, resource_group_name, name, slot=None):
     return (creds.publishing_user_name, creds.publishing_password)
 
 
-def _get_log(url, user_name, password, log_file=None):
+def get_bearer_token(cli_ctx):
+    from azure.cli.core._profile import Profile
+    profile = Profile(cli_ctx=cli_ctx)
+    credential, _, _ = profile.get_login_credentials()
+    bearer_token = credential.get_token().token
+    return bearer_token
+
+
+def basic_auth_supported(cli_ctx, name, resource_group_name, slot=None):
+    return _generic_site_operation(cli_ctx, resource_group_name, name, 'get_scm_allowed', slot).allow
+
+
+# auth with basic auth if available
+def get_scm_site_headers(cli_ctx, name, resource_group_name, slot=None, additional_headers=None):
+    import urllib3
+
+    if basic_auth_supported(cli_ctx, name, resource_group_name, slot):
+        logger.info("[AUTH]: basic")
+        username, password = _get_site_credential(cli_ctx, resource_group_name, name, slot)
+        headers = urllib3.util.make_headers(basic_auth=f"{username}:{password}")
+    else:
+        logger.info("[AUTH]: AAD")
+        headers = urllib3.util.make_headers()
+        headers["Authorization"] = f"Bearer {get_bearer_token(cli_ctx)}"
+    headers['User-Agent'] = get_az_user_agent()
+    headers['x-ms-client-request-id'] = cli_ctx.data['headers']['x-ms-client-request-id']
+    # allow setting Content-Type, Cache-Control, etc. headers
+    if additional_headers:
+        for k, v in additional_headers.items():
+            headers[k] = v
+
+    return headers
+
+
+def _get_log(url, headers, log_file=None):
     import urllib3
     try:
         import urllib3.contrib.pyopenssl
@@ -2767,7 +2791,6 @@ def _get_log(url, user_name, password, log_file=None):
         pass
 
     http = get_pool_manager(url)
-    headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
     r = http.request(
         'GET',
         url,
@@ -3803,7 +3826,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         setattr(site_config, snake_case_prop, value)
 
     if environment is not None:
-        functionapp_def.kind = 'functionapp'
+        functionapp_def.kind = 'functionapp,linux,container,azurecontainerapps'
         functionapp_def.reserved = None
         functionapp_def.name = name
         functionapp_def.https_only = None
@@ -4051,14 +4074,15 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
     return [geo_region for geo_region in web_client_geo_regions if geo_region.name in providers_client_locations_list]
 
 
-def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, authorization, timeout=None):
+def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, headers, timeout=None):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
+
     total_trials = (int(timeout) // 2) if timeout else 450
     num_trials = 0
     while num_trials < total_trials:
         time.sleep(2)
-        response = requests.get(deployment_status_url, headers=authorization,
+        response = requests.get(deployment_status_url, headers=headers,
                                 verify=not should_disable_connection_verify())
         try:
             res_dict = response.json()
@@ -4817,14 +4841,12 @@ def _ping_scm_site(cmd, resource_group, name, instance=None):
     #  wake up kudu, by making an SCM call
     import requests
     #  work around until the timeout limits issue for linux is investigated & fixed
-    user_name, password = _get_site_credential(cmd.cli_ctx, resource_group, name)
     scm_url = _get_scm_url(cmd, resource_group, name)
-    import urllib3
-    authorization = urllib3.util.make_headers(basic_auth='{}:{}'.format(user_name, password))
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group)
     cookies = {}
     if instance is not None:
         cookies['ARRAffinity'] = instance
-    requests.get(scm_url + '/api/settings', headers=authorization, verify=not should_disable_connection_verify(),
+    requests.get(scm_url + '/api/settings', headers=headers, verify=not should_disable_connection_verify(),
                  cookies=cookies)
 
 
@@ -4837,10 +4859,6 @@ def get_tunnel(cmd, resource_group_name, name, port=None, slot=None, instance=No
     is_linux = webapp.reserved
     if not is_linux:
         raise ValidationError("Only Linux App Service Plans supported, Found a Windows App Service Plan")
-
-    profiles = list_publish_profiles(cmd, resource_group_name, name, slot)
-    profile_user_name = next(p['userName'] for p in profiles)
-    profile_user_password = next(p['userPWD'] for p in profiles)
 
     if port is None:
         port = 0  # Will auto-select a free port from 1024-65535
@@ -4857,8 +4875,11 @@ def get_tunnel(cmd, resource_group_name, name, port=None, slot=None, instance=No
             raise ValidationError("The provided instance '{}' is not valid for this webapp.".format(instance))
 
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group_name, slot)
+    # basic & bearer auth use different capitalization for whatever reason
+    auth_string = headers.get("authorization") or headers.get("Authorization")
 
-    tunnel_server = TunnelServer('127.0.0.1', port, scm_url, profile_user_name, profile_user_password, instance)
+    tunnel_server = TunnelServer('127.0.0.1', port, scm_url, auth_string, instance)
     _ping_scm_site(cmd, resource_group_name, name, instance=instance)
 
     _wait_for_webapp(tunnel_server)
@@ -4992,27 +5013,6 @@ def _get_onedeploy_status_url(params):
     return scm_url + '/api/deployments/latest'
 
 
-def _get_basic_headers(params):
-    import urllib3
-
-    user_name, password = _get_site_credential(params.cmd.cli_ctx, params.resource_group_name,
-                                               params.webapp_name, params.slot)
-
-    if params.src_path:
-        content_type = 'application/octet-stream'
-    elif params.src_url:
-        content_type = 'application/json'
-    else:
-        raise CLIError('Unable to determine source location of the artifact being deployed')
-
-    headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
-    headers['Cache-Control'] = 'no-cache'
-    headers['User-Agent'] = get_az_user_agent()
-    headers['Content-Type'] = content_type
-
-    return headers
-
-
 def _get_onedeploy_request_body(params):
     import os
 
@@ -5056,16 +5056,13 @@ def _update_artifact_type(params):
 
 def _make_onedeploy_request(params):
     import requests
-
-    from azure.cli.core.util import (
-        should_disable_connection_verify,
-    )
+    from azure.cli.core.util import should_disable_connection_verify
 
     # Build the request body, headers, API URL and status URL
     body = _get_onedeploy_request_body(params)
-    headers = _get_basic_headers(params)
     deploy_url = _build_onedeploy_url(params)
     deployment_status_url = _get_onedeploy_status_url(params)
+    headers = get_scm_site_headers(params.cmd.cli_ctx, params.webapp_name, params.resource_group_name, params.slot)
 
     logger.info("Deployment API: %s", deploy_url)
     response = requests.post(deploy_url, data=body, headers=headers, verify=not should_disable_connection_verify())

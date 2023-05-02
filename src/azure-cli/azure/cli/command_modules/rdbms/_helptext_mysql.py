@@ -703,3 +703,16 @@ examples:
   - name: Wait for the Active Directory administrator to be deleted.
     text: az mysql flexible-server ad-admin wait -g testgroup -s testsvr --deleted
 """
+
+helps['mysql flexible-server gtid'] = """
+type: group
+short-summary: Manage GTID on a server.
+"""
+
+helps['mysql flexible-server gtid reset'] = """
+type: command
+short-summary: Resets GTID on a server.
+examples:
+  - name: Resets GTID '3E11FA47-71CA-11E1-9E33-C80AA9429562:23' on server 'testsvr'.
+    text: az mysql flexible-server gtid reset -g testgroup -s testsvr --gtid-set 3E11FA47-71CA-11E1-9E33-C80AA9429562:23
+"""
