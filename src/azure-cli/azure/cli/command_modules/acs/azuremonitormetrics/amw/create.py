@@ -43,7 +43,6 @@ def create_default_mac(cmd, cluster_subscription, cluster_region):
         headers = ['User-Agent=azuremonitormetrics.create_default_mac']
         send_raw_request(cmd.cli_ctx, "PUT", association_url,
                          body=association_body, headers=headers)
-        print(f"Created Azure Monitor Workspace (stores prometheus metrics) : {azure_monitor_workspace_resource_id}")
         return azure_monitor_workspace_resource_id, default_mac_region
     except CLIError as e:
         raise e

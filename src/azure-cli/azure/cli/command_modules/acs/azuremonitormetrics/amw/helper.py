@@ -32,4 +32,5 @@ def get_azure_monitor_workspace_resource(cmd, cluster_subscription, cluster_regi
     else:
         azure_monitor_workspace_resource_id = sanitize_resource_id(azure_monitor_workspace_resource_id)
         azure_monitor_workspace_location = get_amw_region(cmd, azure_monitor_workspace_resource_id)
+    print(f"Using Azure Monitor Workspace (stores prometheus metrics) : {azure_monitor_workspace_resource_id}")
     return azure_monitor_workspace_resource_id, azure_monitor_workspace_location.lower()
