@@ -19,7 +19,7 @@ def get_recording_rules_template(cmd, azure_monitor_workspace_resource_id):
 
 
 # pylint: disable=line-too-long
-def put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, i):
+def put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, enable_rules, i):
     from azure.cli.core.util import send_raw_request
     body = json.dumps({
         "id": default_rule_group_id,
@@ -30,17 +30,21 @@ def put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, a
             "scopes": [
                 azure_monitor_workspace_resource_id
             ],
-            "enabled": True,
+            "enabled": enable_rules,
             "clusterName": cluster_name,
             "interval": "PT1M",
             "rules": default_rules_template[i]["properties"]["rulesArmTemplate"]["resources"][0]["properties"]["rules"]
         }
     })
+    rule_group_text = "Disabled"
+    if enable_rules is True:
+        rule_group_text = "Enabled"
     for _ in range(3):
         try:
             headers = ['User-Agent=azuremonitormetrics.put_rules.' + default_rule_group_name]
             send_raw_request(cmd.cli_ctx, "PUT", url,
                              body=body, headers=headers)
+            print(f"Created rule group ({rule_group_text}) : {default_rule_group_id}")
             break
         except CLIError as e:
             error = e
@@ -64,7 +68,7 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
         default_rule_group_id,
         RULES_API
     )
-    put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, 0)
+    put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, True, 0)
 
     default_rule_group_name = "KubernetesRecordingRulesRuleGroup-{0}".format(cluster_name)
     default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
@@ -77,33 +81,35 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
         default_rule_group_id,
         RULES_API
     )
-    put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, 1)
+    put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, True, 1)
 
     enable_windows_recording_rules = raw_parameters.get("enable_windows_recording_rules")
 
-    if enable_windows_recording_rules is True:
-        default_rule_group_name = "NodeRecordingRulesRuleGroup-Win-{0}".format(cluster_name)
-        default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
-            cluster_subscription,
-            cluster_resource_group_name,
-            default_rule_group_name
-        )
-        url = "{0}{1}?api-version={2}".format(
-            cmd.cli_ctx.cloud.endpoints.resource_manager,
-            default_rule_group_id,
-            RULES_API
-        )
-        put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, 2)
+    if enable_windows_recording_rules is not True:
+        enable_windows_recording_rules = False
 
-        default_rule_group_name = "NodeAndKubernetesRecordingRulesRuleGroup-Win-{0}".format(cluster_name)
-        default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
-            cluster_subscription,
-            cluster_resource_group_name,
-            default_rule_group_name
-        )
-        url = "{0}{1}?api-version={2}".format(
-            cmd.cli_ctx.cloud.endpoints.resource_manager,
-            default_rule_group_id,
-            RULES_API
-        )
-        put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, 3)
+    default_rule_group_name = "NodeRecordingRulesRuleGroup-Win-{0}".format(cluster_name)
+    default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
+        cluster_subscription,
+        cluster_resource_group_name,
+        default_rule_group_name
+    )
+    url = "{0}{1}?api-version={2}".format(
+        cmd.cli_ctx.cloud.endpoints.resource_manager,
+        default_rule_group_id,
+        RULES_API
+    )
+    put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, enable_windows_recording_rules, 2)
+
+    default_rule_group_name = "NodeAndKubernetesRecordingRulesRuleGroup-Win-{0}".format(cluster_name)
+    default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
+        cluster_subscription,
+        cluster_resource_group_name,
+        default_rule_group_name
+    )
+    url = "{0}{1}?api-version={2}".format(
+        cmd.cli_ctx.cloud.endpoints.resource_manager,
+        default_rule_group_id,
+        RULES_API
+    )
+    put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, enable_windows_recording_rules, 3)
