@@ -68,7 +68,6 @@ from knack.arguments import CLIArgumentType
 # pylint: disable=line-too-long,too-many-statements
 
 # candidates for enumeration, no longer maintained
-orchestrator_types = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
 regions_in_preview = [
     "canadacentral",
     "canadaeast",
@@ -125,6 +124,8 @@ auto_upgrade_channels = [
     CONST_NODE_IMAGE_UPGRADE_CHANNEL,
     CONST_NONE_UPGRADE_CHANNEL,
 ]
+
+kubernetes_support_plan = [KubernetesSupportPlan.KUBERNETES_OFFICIAL, KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT]
 
 dev_space_endpoint_types = ['Public', 'Private', 'None']
 
@@ -222,7 +223,8 @@ def load_arguments(self, _):
         c.argument('attach_acr', acr_arg_type)
         c.argument('skip_subnet_role_assignment', action='store_true')
         c.argument('node_resource_group')
-        c.argument('kubernetes_support_plan', arg_type=c._cmd.get_models('KubernetesSupportPlan'), default=KubernetesSupportPlan.KUBERNETES_OFFICIAL)
+        # ideally I want to use arg_type=self.get_models 
+        c.argument('kubernetes_support_plan', arg_type=get_enum_type(kubernetes_support_plan), default=KubernetesSupportPlan.KUBERNETES_OFFICIAL)
         c.argument('enable_defender', action='store_true')
         c.argument('defender_config', validator=validate_defender_config_parameter)
         c.argument('disable_disk_driver', action='store_true')
