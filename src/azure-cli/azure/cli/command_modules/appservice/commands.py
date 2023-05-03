@@ -372,7 +372,7 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp deployment user', webclient_sdk) as g:
         g.custom_command('set', 'set_deployment_user', exception_handler=ex_handler_factory())
-        g.show_command('show', 'get_publishing_user')
+        g.custom_show_command('show', 'get_publishing_user')
 
     with self.command_group('functionapp deployment') as g:
         g.custom_command('list-publishing-profiles', 'list_publish_profiles')

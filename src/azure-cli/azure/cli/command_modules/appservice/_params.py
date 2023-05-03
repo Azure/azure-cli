@@ -1100,6 +1100,7 @@ subscription than the app service environment, please use the resource ID for --
                    help="Validation method for the custom domain.",
                    arg_type=get_enum_type(["cname-delegation", "dns-txt-token"]))
     with self.argument_context('staticwebapp appsettings') as c:
+        c.argument('environment_name', help="Name of the environment of static site")
         c.argument('setting_pairs', options_list=['--setting-names'],
                    help="Space-separated app settings in 'key=value' format. ",
                    nargs='*')

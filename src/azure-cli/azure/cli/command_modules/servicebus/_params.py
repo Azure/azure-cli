@@ -185,7 +185,7 @@ def load_arguments_sb(self, _):
         c.argument('topic_name', options_list=['--topic-name'], id_part=None, help='Name of Topic')
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
 
-    # Geo DR - Disaster Recovery Configs - Alias  : Region
+# Geo DR - Disaster Recovery Configs - Alias  : Region
     with self.argument_context('servicebus georecovery-alias set') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='Name of Namespace')
@@ -193,7 +193,7 @@ def load_arguments_sb(self, _):
         c.argument('partner_namespace', required=True, options_list=['--partner-namespace'], validator=validate_partner_namespace, help='Name (if within the same resource group) or ARM Id of Primary/Secondary Service Bus  namespace name, which is part of GEO DR pairing')
         c.argument('alternate_name', help='Alternate Name (Post failover) for Primary Namespace, when Namespace name and Alias name are same')
 
-    # Standard to Premium Migration: Region
+# Standard to Premium Migration: Region
 
     with self.argument_context('servicebus migration start') as c:
         c.ignore('config_name')
