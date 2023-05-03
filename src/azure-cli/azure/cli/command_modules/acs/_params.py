@@ -56,7 +56,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_ppg, validate_priority, validate_registry_name,
     validate_snapshot_id, validate_snapshot_name, validate_spot_max_price,
     validate_ssh_key, validate_taints, validate_vm_set_type,
-    validate_vnet_subnet_id)
+    validate_vnet_subnet_id, validate_k8s_support_plan)
 from azure.mgmt.containerservice.models import KubernetesSupportPlan
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
@@ -125,7 +125,7 @@ auto_upgrade_channels = [
     CONST_NONE_UPGRADE_CHANNEL,
 ]
 
-kubernetes_support_plan = [KubernetesSupportPlan.KUBERNETES_OFFICIAL, KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT]
+k8s_support_plans = [KubernetesSupportPlan.KUBERNETES_OFFICIAL, KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT]
 
 dev_space_endpoint_types = ['Public', 'Private', 'None']
 
@@ -223,8 +223,7 @@ def load_arguments(self, _):
         c.argument('attach_acr', acr_arg_type)
         c.argument('skip_subnet_role_assignment', action='store_true')
         c.argument('node_resource_group')
-        # ideally I want to use arg_type=self.get_models 
-        c.argument('kubernetes_support_plan', arg_type=get_enum_type(kubernetes_support_plan), default=KubernetesSupportPlan.KUBERNETES_OFFICIAL)
+        c.argument('kubernetes_support_plan', arg_type=get_enum_type(k8s_support_plans), validator=validate_k8s_support_plan, default=KubernetesSupportPlan.KUBERNETES_OFFICIAL)
         c.argument('enable_defender', action='store_true')
         c.argument('defender_config', validator=validate_defender_config_parameter)
         c.argument('disable_disk_driver', action='store_true')
@@ -319,6 +318,7 @@ def load_arguments(self, _):
         c.argument('aad_tenant_id')
         c.argument('aad_admin_group_object_ids')
         c.argument('enable_oidc_issuer', action='store_true')
+        c.argument('kubernetes_support_plan', arg_type=get_enum_type(k8s_support_plans), validator=validate_k8s_support_plan)
         c.argument('windows_admin_password')
         c.argument('enable_ahub', action='store_true')
         c.argument('disable_ahub', action='store_true')

@@ -4680,6 +4680,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return edge_zone
 
+
     def get_node_resource_group(self) -> Union[str, None]:
         """Obtain the value of node_resource_group.
 
@@ -4694,6 +4695,24 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return node_resource_group
+
+    def get_k8s_support_plan(self) -> Union[str, None]:
+        """Obtain the value of kubernetes_support_plan.
+
+        :return: string or None
+        """
+        # default to None
+        support_plan = None
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if self.mc and self.mc.support_plan is not None:
+            support_plan = self.mc.support_plan
+
+        # if specified by customer, use the specified value
+        support_plan = self.raw_param.get("kubernetes_support_plan")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return support_plan
 
     def get_yes(self) -> bool:
         """Obtain the value of yes.
@@ -5748,7 +5767,13 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         if self.context.get_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
             mc.sku = self.models.ManagedClusterSKU(
                 name="Base",
-                tier="Standard"
+                tier=CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD
+            )
+        
+        if self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM:
+            mc.sku = self.models.ManagedClusterSKU(
+                name="Base",
+                tier=CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM
             )
         return mc
 
@@ -5775,6 +5800,20 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         self._ensure_mc(mc)
 
         mc.node_resource_group = self.context.get_node_resource_group()
+        return mc
+
+    def set_up_k8s_support_plan(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up supportPlan for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        support_plan = self.context.get_k8s_support_plan()
+        if support_plan == KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT:
+            if mc == None or mc.sku == None or mc.sku.tier != CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM:
+                raise AzCLIError("Long term support is only available for premium tier clusters.")
+
+        mc.support_plan = support_plan
         return mc
 
     def construct_mc_profile_default(self, bypass_restore_defaults: bool = False) -> ManagedCluster:
@@ -5842,6 +5881,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_http_proxy_config(mc)
         # set up workload autoscaler profile
         mc = self.set_up_workload_auto_scaler_profile(mc)
+        # setup k8s support plan
+        mc = self.set_up_k8s_support_plan(mc)
 
         # DO NOT MOVE: keep this at the bottom, restore defaults
         if not bypass_restore_defaults:
@@ -6727,10 +6768,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         self._ensure_mc(mc)
 
         support_plan = self.context.get_k8s_support_plan()
+        if support_plan == KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT:
+            if mc == None or mc.sku == None or mc.sku.tier != CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM:
+                raise AzCLIError("Long term support is only available for premium tier clusters.")
 
-        if support_plan == KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT and not mc.sku.tier == CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM:
-            raise CLIError("Long term support is only available for premium tier clusters.")
-
+        mc.support_plan = support_plan
         return mc
 
     def update_azure_keyvault_kms(self, mc: ManagedCluster) -> ManagedCluster:
