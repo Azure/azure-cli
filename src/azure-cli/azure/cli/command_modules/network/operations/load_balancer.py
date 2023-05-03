@@ -949,7 +949,8 @@ class CrossRegionLoadBalancerRuleCreate(_LBRuleCreate):
             arg_group="Properties",
             help="ID or name of the backend address pools. If only one exists, omit to use as default."
         )
-
+        args_schema.idle_timeout_in_minutes._default = 4
+        args_schema.enable_tcp_reset._default = False
         args_schema.protocol._required = True
         args_schema.frontend_port._required = True
         args_schema.backend_port._required = True
