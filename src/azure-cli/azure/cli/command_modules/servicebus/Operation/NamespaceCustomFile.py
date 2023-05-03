@@ -332,7 +332,7 @@ def delete_private_endpoint_connection(cmd, resource_group_name, namespace_name,
 
 def set_georecovery_alias(cmd, resource_group_name, namespace_name, alias,
                           partner_namespace, alternate_name=None):
-    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.georecovery_alias import Update
+    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.georecovery_alias import Create
     command_arg_dict = {
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
@@ -340,4 +340,4 @@ def set_georecovery_alias(cmd, resource_group_name, namespace_name, alias,
         "alternate_name": alternate_name,
         "alias": alias
     }
-    return Update(cli_ctx=cmd.cli_ctx)(command_args=command_arg_dict)
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=command_arg_dict)

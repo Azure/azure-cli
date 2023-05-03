@@ -13,7 +13,6 @@ from azure.cli.core.profiles import ResourceType
 
 def load_command_table(self, _):
     from azure.cli.command_modules.servicebus._client_factory import (namespaces_mgmt_client_factory,
-                                                                      disaster_recovery_mgmt_client_factory,
                                                                       migration_mgmt_client_factory)
 
     sb_namespace_util = CliCommandType(
@@ -24,11 +23,6 @@ def load_command_table(self, _):
     sb_namespace_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.servicebus.Operation.NamespaceCustomFile#{}',
     )
-
-    sb_geodr_util = CliCommandType(
-        operations_tmpl='azure.mgmt.servicebus.operations#DisasterRecoveryConfigsOperations.{}',
-        client_factory=disaster_recovery_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_SERVICEBUS)
 
     sb_migration_util = CliCommandType(
         operations_tmpl='azure.mgmt.servicebus.operations#MigrationConfigsOperations.{}',
