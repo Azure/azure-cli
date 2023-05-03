@@ -14,7 +14,6 @@ from azure.cli.core.profiles import ResourceType
 def load_command_table(self, _):
     from azure.cli.command_modules.eventhubs._client_factory import (namespaces_mgmt_client_factory,
                                                                      event_hub_mgmt_client_factory,
-                                                                     disaster_recovery_mgmt_client_factory,
                                                                      schema_registry_mgmt_client_factory,
                                                                      application_group_mgmt_client_factory)
 
@@ -29,11 +28,6 @@ def load_command_table(self, _):
     eh_event_hub_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventhub.operations#EventHubsOperations.{}',
         client_factory=event_hub_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_EVENTHUB)
-
-    eh_geodr_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventhub.operations#DisasterRecoveryConfigsOperations.{}',
-        client_factory=disaster_recovery_mgmt_client_factory,
         resource_type=ResourceType.MGMT_EVENTHUB)
 
     eh_schema_registry_util = CliCommandType(
