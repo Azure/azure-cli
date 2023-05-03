@@ -1446,7 +1446,10 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
                         app_command_line=None,
                         ftps_state=None,
                         vnet_route_all_enabled=None,
-                        generic_configurations=None):
+                        generic_configurations=None,
+                        always_ready_instances=None,
+                        maximum_instances=None,
+                        instance_size=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_application_settings', slot)
@@ -1501,6 +1504,18 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
     if not updating_ip_security_restrictions:
         setattr(configs, 'ip_security_restrictions', None)
         setattr(configs, 'scm_ip_security_restrictions', None)
+
+    if always_ready_instances:
+        setattr(configs, 'minimum_elastic_instance_count', always_ready_instances)
+
+    if maximum_instances:
+        setattr(configs, 'function_app_scale_limit', maximum_instances)
+
+    if instance_size:
+        client = web_client_factory(cmd.cli_ctx)
+        functionapp_def = client.web_apps.get(resource_group_name, name)
+        functionapp_def.container_size = instance_size
+        _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update', slot, functionapp_def)
 
     if is_centauri_functionapp(cmd, resource_group_name, name):
         return update_configuration_polling(cmd, resource_group_name, name, slot, configs)
@@ -3642,7 +3657,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        deployment_source_branch='master', deployment_local_git=None,
                        registry_password=None, registry_username=None,
                        image=None, tags=None, assign_identities=None,
-                       role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, environment=None):
+                       role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, environment=None,
+                       always_ready_instances=None, maximum_instances=None, instance_size=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
@@ -3851,6 +3867,15 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp_def.additional_properties["properties"] = existing_properties
         functionapp_def.additional_properties["properties"]["name"] = name
         functionapp_def.additional_properties["properties"]["managedEnvironmentId"] = managed_environment.id
+
+    if always_ready_instances:
+        site_config.minimum_elastic_instance_count = always_ready_instances
+
+    if maximum_instances:
+        site_config.function_app_scale_limit = maximum_instances
+
+    if instance_size:
+        functionapp_def.container_size = instance_size
 
     # temporary workaround for dotnet-isolated linux consumption apps
     if is_linux and consumption_plan_location is not None and runtime == 'dotnet-isolated':
