@@ -97,6 +97,9 @@ TARGET_RESOURCES_USERTOKEN = [RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible,
 # The target resources could be set to connection string
 TARGET_RESOURCES_CONNECTION_STRING = [RESOURCE.Sql, RESOURCE.Mysql, RESOURCE.MysqlFlexible, RESOURCE.Postgres, RESOURCE.PostgresFlexible]
 
+# The target resources to be deprecated
+TARGET_RESOURCES_DEPRECATED = [RESOURCE.Sql, RESOURCE.Postgres]
+
 # The dict defines the resource id pattern of source resources.
 SOURCE_RESOURCES = {
     RESOURCE.WebApp: '/subscriptions/{subscription}/resourceGroups/{source_resource_group}/providers/Microsoft.Web/sites/{site}',

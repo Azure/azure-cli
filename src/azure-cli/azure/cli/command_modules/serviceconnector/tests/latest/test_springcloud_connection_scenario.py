@@ -15,7 +15,7 @@ from azure.cli.command_modules.serviceconnector._resource_config import (
     SOURCE_RESOURCES,
     TARGET_RESOURCES
 )
-from ._test_utils import CredentialReplacer
+from ._test_utils import CredentialReplacer, UserMICredentialReplacer
 
 
 # @unittest.skip('Need spring-cloud and spring extension installed')
@@ -24,7 +24,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
     def __init__(self, method_name):
         super(SpringCloudConnectionScenarioTest, self).__init__(
             method_name,
-            recording_processors=[CredentialReplacer()]
+            recording_processors=[CredentialReplacer(), UserMICredentialReplacer()]
         )
 
     # @record_only
@@ -81,7 +81,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             'spring': 'servicelinker-springcloud',
             'app': 'cosmoscassandra',
             'deployment': 'default',
-            'account': 'servicelinker-cassandra-cosmos',
+            'account': 'servicelinker-cassandra-cosmos1',
             'key_space': 'coredb'
         })
 
@@ -755,9 +755,9 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         connections = self.cmd(
             'spring-cloud connection list --source-id {}'.format(source_id),
             checks = [
-                self.check('length(@)', 2),
-                self.check('[1].authInfo.authType', 'secret'),
-                self.check('[1].clientType', 'java')
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'secret'),
+                self.check('[0].clientType', 'java')
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
@@ -1330,9 +1330,9 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         connections = self.cmd(
             'spring connection list --source-id {}'.format(source_id),
             checks = [
-                self.check('length(@)', 2),
-                self.check('[1].authInfo.authType', 'userAssignedIdentity'),
-                self.check('[1].clientType', 'java')
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'userAssignedIdentity'),
+                self.check('[0].clientType', 'java')
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
