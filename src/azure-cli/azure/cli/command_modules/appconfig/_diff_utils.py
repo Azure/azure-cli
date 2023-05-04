@@ -130,6 +130,9 @@ def __print_diff(diff_output, level, indent=None, show_update_diff=True):
 
 
 def get_serializer(level):
+    '''
+    Helper method that returns a serializer method called in formatting a string representation of a key-value.
+    '''
     source_modes = ("appconfig", "appservice", "file")
     kvset_modes = ("kvset", "restore")
     
@@ -140,7 +143,8 @@ def get_serializer(level):
 
         if isinstance(obj, dict):
             return json.JSONEncoder().default(obj)
-
+        
+        # Feature flag format: {"feature": <feature-name>, "state": <on/off>, "conditions": <conditions-dict>}
         if is_feature_flag(obj):
             feature = map_keyvalue_to_featureflag(obj)
             # name
@@ -156,14 +160,14 @@ def get_serializer(level):
 
         res = {'key': obj.key, 'value': obj.value, "content_type": obj.content_type}
 
-        # import/export key, value, and tags (same level as key-value)
+        # import/export key, value, content_type and tags (same level as key-value): {"key": <key>, "value": <value>, "content_type": <content_type>, "AppService:SlotSetting": <true/false>}
         if level == 'appservice':
-            # Explicitly assign slot settings for comparison.
+
             if obj.tags:
                 slot_setting = obj.tags.get(AppServiceConstants.APPSVC_SLOT_SETTING_KEY, 'false')
                 res[AppServiceConstants.APPSVC_SLOT_SETTING_KEY] = slot_setting
 
-        # import/export key, value, content-type, and tags (as a sub group)
+        # import/export key, value, content-type, and tags (as a sub group): {"key": <key>, "value": <value>, "content_type": <content_type>, "tags": <tags_dict>}
         elif level == 'appconfig':
             # tags
             tag_json = {}
@@ -175,14 +179,14 @@ def get_serializer(level):
         return res
 
     def serialize_kvset(kv):
-        if level == "kvset":
+        if level == "kvset": # File import with kvset profile
             kv_json = {
                 'key': kv.key,
                 'value': kv.value,
                 'label': kv.label,
                 'content_type': kv.content_type
             }
-        else:
+        else: # Restore preview format
             kv_json = {
                 'key': kv.key,
                 'value': kv.value,
