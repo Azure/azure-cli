@@ -14,7 +14,7 @@ from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccou
     BackupPolicyPatch, VolumePatchPropertiesDataProtection, AccountEncryption, KeyVaultProperties, EncryptionIdentity, AuthorizeRequest, \
     BreakReplicationRequest, PoolChangeRequest, VolumeRevert, Backup, BackupPatch, LdapSearchScopeOpt, SubvolumeInfo, \
     SubvolumePatchRequest, SnapshotRestoreFiles, PlacementKeyValuePairs, VolumeGroupMetaData, VolumeGroupDetails, \
-    VolumeGroupVolumeProperties, VolumeQuotaRule, VolumeQuotaRulePatch
+    VolumeGroupVolumeProperties, VolumeQuotaRule, VolumeQuotaRulePatch, ManagedServiceIdentity
 from azure.mgmt.netapp.models._net_app_management_client_enums import EncryptionKeySource
 from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -46,7 +46,7 @@ def _update_mapper(existing, new, keys):
 # ---- ACCOUNT ----
 # account update - active_directory is amended with subgroup commands
 def create_account(cmd, client, account_name, resource_group_name, location=None, tags=None, encryption=None, key_source='Microsoft.NetApp', key_vault_uri=None,
-                   key_name=None, key_vault_resource_id=None, user_assigned_identity=None,
+                   key_name=None, key_vault_resource_id=None, identity_type=None, user_assigned_identity=None,
                    no_wait=False):
     location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
 
@@ -55,11 +55,14 @@ def create_account(cmd, client, account_name, resource_group_name, location=None
 
     if key_source is not None and key_source == EncryptionKeySource.MICROSOFT_KEY_VAULT:
         keyVaultProperties = KeyVaultProperties(key_vault_uri=key_vault_uri, key_name=key_name, key_vault_resource_id=key_vault_resource_id)
-        identity = EncryptionIdentity(user_assigned_identity=user_assigned_identity)
-        account_encryption = AccountEncryption(key_source=key_source, key_vault_properties=keyVaultProperties, identity=identity)
+        encryptionIdentity = EncryptionIdentity(user_assigned_identity=user_assigned_identity)
+        account_encryption = AccountEncryption(key_source=key_source, key_vault_properties=keyVaultProperties, identity=encryptionIdentity)
+        accountIdentity = ManagedServiceIdentity(type=identity_type, user_assigned_identities={user_assigned_identity: {}})
     else:
         account_encryption = None
-    body = NetAppAccount(location=location, tags=tags, encryption=account_encryption)
+        accountIdentity = None
+        
+    body = NetAppAccount(location=location, tags=tags, encryption=account_encryption, identity=accountIdentity)
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, account_name, body)
 
 
@@ -70,7 +73,8 @@ def add_active_directory(instance, username, password, domain, dns,
                          smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None, site=None,
                          server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
                          security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None,
-                         administrators=None, encrypt_dc_conn=None, user_dn=None, group_dn=None, group_filter=None):
+                         administrators=None, encrypt_dc_conn=None, user_dn=None, group_dn=None, group_filter=None,
+                         preferred_servers_for_ldap_client=None):
     ldap_search_scope = LdapSearchScopeOpt(user_dn=user_dn,
                                            group_dn=group_dn,
                                            group_membership_filter=group_filter)
@@ -83,7 +87,8 @@ def add_active_directory(instance, username, password, domain, dns,
                                        ldap_over_tls=ldap_over_tls,
                                        allow_local_nfs_users_with_ldap=allow_local_ldap_users,
                                        administrators=administrators, encrypt_dc_connections=encrypt_dc_conn,
-                                       ldap_search_scope=ldap_search_scope)
+                                       ldap_search_scope=ldap_search_scope,
+                                       preferred_servers_for_ldap_client=preferred_servers_for_ldap_client)
     active_directories.append(active_directory)
     body = NetAppAccountPatch(active_directories=active_directories)
     _update_mapper(instance, body, ['active_directories'])
@@ -157,7 +162,7 @@ def patch_account(instance, tags=None, encryption=None, key_source=None, key_vau
     if key_source is not None and key_source == EncryptionKeySource.MICROSOFT_KEY_VAULT:
         keyVaultProperties = KeyVaultProperties(key_vault_uri=key_vault_uri, key_name=key_name, key_vault_resource_id=key_vault_resource_id)
         identity = EncryptionIdentity(user_assigned_identity=user_assigned_identity)
-        account_encryption = AccountEncryption(key_source=key_source, key_vault_properties=keyVaultProperties, identity=identity)
+        account_encryption = AccountEncryption(key_source=key_source, key_vault_properties=keyVaultProperties, identity=identity)        
     else:
         account_encryption = None
     body = NetAppAccountPatch(tags=tags, encryption=account_encryption)
@@ -211,7 +216,7 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
                   unix_permissions=None, is_def_quota_enabled=None, default_user_quota=None,
                   default_group_quota=None, avs_data_store=None, network_features=None, enable_subvolumes=None,
                   zones=None, kv_private_endpoint_id=None, delete_base_snapshot=None, smb_access_based_enumeration=None,
-                  smb_non_browsable=None, no_wait=False):
+                  smb_non_browsable=None, no_wait=False, is_large_volume=False):
     location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
     subs_id = get_subscription_id(cmd.cli_ctx)
 
@@ -282,7 +287,7 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         snapshot = VolumeSnapshotProperties(snapshot_policy_id=snapshot_policy_id)
     if backup_policy_id is not None:
         backup = VolumeBackupProperties(backup_policy_id=backup_policy_id, policy_enforced=policy_enforced,
-                                        vault_id=vault_id, backup_enabled=backup_enabled)
+                                        backup_enabled=backup_enabled)
     if replication is not None or snapshot is not None or backup is not None:
         data_protection = VolumePropertiesDataProtection(replication=replication, snapshot=snapshot, backup=backup)
 
@@ -321,7 +326,8 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         key_vault_private_endpoint_resource_id=kv_private_endpoint_id,
         delete_base_snapshot=delete_base_snapshot,
         smb_access_based_enumeration=smb_access_based_enumeration,
-        smb_non_browsable=smb_non_browsable)
+        smb_non_browsable=smb_non_browsable,
+        is_large_volume=is_large_volume)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, account_name, pool_name, volume_name, body)
 
@@ -335,8 +341,8 @@ def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, 
     backup = None
     snapshot = None
     # if vault_id is not None:
-    if any(x is not None for x in [vault_id, backup_policy_id, backup_enabled, policy_enforced]):
-        backup = VolumeBackupProperties(vault_id=vault_id, backup_enabled=backup_enabled,
+    if any(x is not None for x in [backup_policy_id, backup_enabled, policy_enforced]):
+        backup = VolumeBackupProperties(backup_enabled=backup_enabled,
                                         backup_policy_id=backup_policy_id, policy_enforced=policy_enforced)
         logger.debug("ANF Log: backup set")
 
@@ -496,23 +502,43 @@ def create_snapshot_policy(cmd, client, resource_group_name, account_name, snaps
     return client.create(resource_group_name, account_name, snapshot_policy_name, body)
 
 
-def patch_snapshot_policy(cmd, client, resource_group_name, account_name, snapshot_policy_name, location=None,
+# def patch_snapshot_policy(cmd, client, resource_group_name, account_name, snapshot_policy_name, location=None,
+#                           hourly_snapshots=None, hourly_minute=None,
+#                           daily_snapshots=None, daily_minute=None, daily_hour=None,
+#                           weekly_snapshots=None, weekly_minute=None, weekly_hour=None, weekly_day=None,
+#                           monthly_snapshots=None, monthly_minute=None, monthly_hour=None, monthly_days=None,
+#                           enabled=False, no_wait=False, tags=None):
+#     location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
+#     body = SnapshotPolicyPatch(        
+#         hourly_schedule=HourlySchedule(snapshots_to_keep=hourly_snapshots, minute=hourly_minute),
+#         daily_schedule=DailySchedule(snapshots_to_keep=daily_snapshots, minute=daily_minute, hour=daily_hour),
+#         weekly_schedule=WeeklySchedule(snapshots_to_keep=weekly_snapshots, minute=weekly_minute,
+#                                        hour=weekly_hour, day=weekly_day),
+#         monthly_schedule=MonthlySchedule(snapshots_to_keep=monthly_snapshots, minute=monthly_minute,
+#                                          hour=monthly_hour, days_of_month=monthly_days),
+#         enabled=enabled, tags=None)
+
+#     _update_mapper(cmd, body, ['tags'])
+#     return sdk_no_wait(no_wait, client.begin_update, resource_group_name, account_name, snapshot_policy_name, body)
+
+def patch_snapshot_policy(instance, 
                           hourly_snapshots=None, hourly_minute=None,
                           daily_snapshots=None, daily_minute=None, daily_hour=None,
                           weekly_snapshots=None, weekly_minute=None, weekly_hour=None, weekly_day=None,
                           monthly_snapshots=None, monthly_minute=None, monthly_hour=None, monthly_days=None,
-                          enabled=False, no_wait=False):
-    location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
-    body = SnapshotPolicyPatch(
-        location=location,
+                          enabled=False, no_wait=False, tags=None):
+    #location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
+    body = SnapshotPolicyPatch(        
         hourly_schedule=HourlySchedule(snapshots_to_keep=hourly_snapshots, minute=hourly_minute),
         daily_schedule=DailySchedule(snapshots_to_keep=daily_snapshots, minute=daily_minute, hour=daily_hour),
         weekly_schedule=WeeklySchedule(snapshots_to_keep=weekly_snapshots, minute=weekly_minute,
                                        hour=weekly_hour, day=weekly_day),
         monthly_schedule=MonthlySchedule(snapshots_to_keep=monthly_snapshots, minute=monthly_minute,
                                          hour=monthly_hour, days_of_month=monthly_days),
-        enabled=enabled)
-    return sdk_no_wait(no_wait, client.begin_update, resource_group_name, account_name, snapshot_policy_name, body)
+        enabled=enabled, tags=tags)
+
+    _update_mapper(instance, body, ['tags'])
+    return body
 
 
 # ---- VOLUME BACKUPS ----
@@ -591,11 +617,12 @@ def create_volume_quota_rule(cmd, client, resource_group_name, account_name, poo
                        volume_quota_rule_name, body)
 
 
-def update_volume_quota_rule(instance, quota_size=None, quota_type=None, quota_target=None):
+def update_volume_quota_rule(instance, quota_size=None, quota_type=None, quota_target=None, tags=None):
     body = VolumeQuotaRulePatch(
         quota_size_in_ki_bs=quota_size,
         quota_type=quota_type,
-        quota_target=quota_target
+        quota_target=quota_target,
+        tags=tags
     )
     _update_mapper(instance, body, ['quota_size_in_ki_bs', 'quota_type', 'quota_target'])
     return body

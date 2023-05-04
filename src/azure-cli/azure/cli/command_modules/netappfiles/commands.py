@@ -339,11 +339,13 @@ def load_snapshots_policies_command_groups(self, netappfiles_snapshot_policies_s
         g.command('list', 'list')
         g.command('volumes', 'list_volumes')
         g.command('delete', 'begin_delete', supports_no_wait=True)
-        g.custom_command('update', 'patch_snapshot_policy',
-                         client_factory=snapshot_policies_mgmt_client_factory,
-                         supports_no_wait=True,
-                         doc_string_source='azure.mgmt.netapp.models#SnapshotPolicyPatch',
-                         exception_handler=netappfiles_exception_handler)
+        g.generic_update_command('update',
+                                 setter_name='begin_update',                                 
+                                 custom_func_name='patch_snapshot_policy',
+                                 supports_no_wait=True,
+                                 setter_arg_name='body',
+                                 doc_string_source='azure.mgmt.netapp.models#SnapshotPolicyPatch',
+                                 exception_handler=netappfiles_exception_handler)        
         g.custom_command('create', 'create_snapshot_policy',
                          client_factory=snapshot_policies_mgmt_client_factory,
                          doc_string_source='azure.mgmt.netapp.models#SnapshotPolicy',
