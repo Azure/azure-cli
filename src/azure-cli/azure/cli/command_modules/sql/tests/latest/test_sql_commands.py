@@ -3531,6 +3531,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='clitest-EPVBS', location='eastus2euap')
     @SqlServerPreparer(name_prefix='clitest-EPVBS', location='eastus2euap')
+    @unittest.skip('Cannot record yet due to pending MS deployment')
     @AllowLargeResponse()
     def test_sql_elastic_pools_preferred_enclave_type_mgmt(self, resource_group, resource_group_location, server):
         pool_name_one = "cliautomationpool1"
