@@ -103,9 +103,8 @@ def load_arguments(self, _):
             c.argument('tenant_id', arg_group=repository_arg_group, help='The tenant id used to connect Azure devops')
             c.argument('last_commit_id', arg_group=repository_arg_group, help='The last commit ID.')
             c.argument('user_assigned_identity_id', options_list=['--uami-id'], nargs='+', help='The list of User-assigned Managed Identity Id for workspace.')
-            c.argument('user_assigned_identity_in_encryption', options_list=['--uami-id-encrypt'], help='User assigned identity resource Id used in Workspace Encryption')
-            c.argument('use_system_assigned_identity_in_encryption', options_list=['--use-sami'], arg_type=get_enum_type([True, False]), help='Whether use System assigned identity in Workspace Encryption')
-            c.argument('key_identifier', help='The customer-managed key used to encrypt all data at rest in the workspace. Key identifier should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.', options_list=['--key-identifier', '--cmk'])
+            c.argument('user_assigned_identity_in_encryption', options_list=['--uami-id-in-encrypt'], help='User assigned identity resource Id used in Workspace Encryption')
+            c.argument('use_system_assigned_identity_in_encryption', options_list=['--use-sami-in-encrypt'], arg_type=get_enum_type([True, False]), help='Whether use System assigned identity in Workspace Encryption')
 
     with self.argument_context('synapse workspace create') as c:
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
@@ -120,6 +119,7 @@ def load_arguments(self, _):
                    help='The flag indicates whether enable managed virtual network.')
         c.argument('prevent_data_exfiltration', arg_type=get_three_state_flag(),
                    help='The flag indicates whether enable data exfiltration.', options_list=['--prevent-exfiltration', '--prevent-data-exfiltration'])
+        c.argument('key_identifier', help='The customer-managed key used to encrypt all data at rest in the workspace. Key identifier should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.', options_list=['--key-identifier', '--cmk'])
         c.argument('managed_resource_group_name', options_list=['--managed-rg-name'],
                    help=' Workspace managed resource group. The resource group name uniquely identifies the resource group within the user subscriptionId.')
 
