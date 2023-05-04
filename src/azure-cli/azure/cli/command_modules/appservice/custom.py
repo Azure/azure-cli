@@ -1513,9 +1513,10 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
 
     if instance_size:
         client = web_client_factory(cmd.cli_ctx)
-        functionapp_def = client.web_apps.get(resource_group_name, name)
-        functionapp_def.container_size = instance_size
-        _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update', slot, functionapp_def)
+        webapp = client.web_apps.get(resource_group_name, name)
+        Site = cmd.get_models('Site')
+        updated_webapp = Site(container_size=instance_size, location=webapp.location)
+        _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update', slot, updated_webapp)
 
     if is_centauri_functionapp(cmd, resource_group_name, name):
         return update_configuration_polling(cmd, resource_group_name, name, slot, configs)
