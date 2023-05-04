@@ -39,17 +39,6 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
     managed_virtual_network_settings = None
     tenant_ids_list = None
     workspace_repository_configuration = None
-    if user_assigned_identity_in_encryption and use_system_assigned_identity_in_encryption is True:
-        from azure.cli.core.azclierror import InvalidArgumentValueError
-        err_msg = '--use-sami should be False when --uami-id-encrypt is not None'
-        recommendation = '--use-sami False'
-        raise InvalidArgumentValueError(err_msg, recommendation)
-
-    if user_assigned_identity_in_encryption is None and use_system_assigned_identity_in_encryption is False:
-        from azure.cli.core.azclierror import InvalidArgumentValueError
-        err_msg = '--use-sami should be True when --uami-id-encrypt is None'
-        recommendation = '--use-sami True'
-        raise InvalidArgumentValueError(err_msg, recommendation)
 
     if key_identifier is not None:
         workspace_key_detail = WorkspaceKeyDetails(name=key_name, key_vault_url=key_identifier)
@@ -110,7 +99,7 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
 
 # pylint: disable=too-many-locals,disable=too-many-branches,disable=too-many-statements
 def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin_login_password=None,
-                     allowed_aad_tenant_ids=None, tags=None, key_identifier=None, repository_type=None, host_name=None, account_name=None,
+                     allowed_aad_tenant_ids=None, tags=None, key_name=None, repository_type=None, host_name=None, account_name=None,
                      collaboration_branch=None, repository_name=None, root_folder=None, project_name=None, last_commit_id=None, tenant_id=None,
                      user_assigned_identity_id=None, user_assigned_identity_in_encryption=None, user_assigned_identity_action=None,
                      use_system_assigned_identity_in_encryption=None, no_wait=False):
@@ -119,48 +108,22 @@ def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin
     workspace_repository_configuration = None
     existing_ws = client.get(resource_group_name, workspace_name)
 
-    if user_assigned_identity_in_encryption and use_system_assigned_identity_in_encryption is True:
-        from azure.cli.core.azclierror import InvalidArgumentValueError
-        err_msg = '--use-sami should be False when --uami-id-encrypt is not None'
-        recommendation = '--use-sami False'
-        raise InvalidArgumentValueError(err_msg, recommendation)
-
-    if user_assigned_identity_in_encryption is None and use_system_assigned_identity_in_encryption is False:
-        from azure.cli.core.azclierror import InvalidArgumentValueError
-        err_msg = '--use-sami should be True when --uami-id-encrypt is None'
-        recommendation = '--use-sami True'
-        raise InvalidArgumentValueError(err_msg, recommendation)
-
     if existing_ws.encryption.double_encryption_enabled is False:
         encryption = existing_ws.encryption
-
     else:
-        if key_identifier:
-            workspace_key_detail = WorkspaceKeyDetails(name="default", key_vault_url=key_identifier)
+        if key_name:
+            workspace_key_detail = WorkspaceKeyDetails(name=key_name,key_vault_url=existing_ws.encryption.cmk.key.keyVaultUrl)
         else:
             workspace_key_detail = existing_ws.encryption.cmk.key
 
-        if user_assigned_identity_in_encryption:
+        if user_assigned_identity_in_encryption or use_system_assigned_identity_in_encryption:
             kek_identity = KekIdentityProperties(userAssignedIdentity=user_assigned_identity_in_encryption,
-                                                 useSystemAssignedIdentity=False)
-        elif user_assigned_identity_in_encryption is None and use_system_assigned_identity_in_encryption is True:
-            kek_identity = KekIdentityProperties(userAssignedIdentity=None,
                                                  useSystemAssignedIdentity=use_system_assigned_identity_in_encryption)
         else:
             kek_identity = existing_ws.encryption.cmk.kek_identity
 
         encryption = EncryptionDetails(cmk=CustomerManagedKeyDetails(key=workspace_key_detail,
-                                                                     kek_identity=kek_identity))
-    if user_assigned_identity_id and user_assigned_identity_action is None:
-        from azure.cli.core.azclierror import RequiredArgumentMissingError
-        err_msg = 'user_assigned_identity_action argument is missing'
-        recommendation = 'provide user assigned identity action by --user-assigned-identity-action'
-        raise RequiredArgumentMissingError(err_msg, recommendation)
-    if user_assigned_identity_action and user_assigned_identity_id is None:
-        from azure.cli.core.azclierror import RequiredArgumentMissingError
-        err_msg = 'user_assigned_identity_id argument is missing'
-        recommendation = 'provide user assigned identity id by --user-assigned-identity-id'
-        raise RequiredArgumentMissingError(err_msg, recommendation)
+                                                                 kek_identity=kek_identity))
 
     existing_identity = existing_ws.identity
     keysList = list(existing_identity.user_assigned_identities.keys())
@@ -182,6 +145,7 @@ def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin
         userAssignedIdentities = UserAssignedManagedIdentity()
         userAssignedIdentitiesdict = dict.fromkeys(user_assigned_identity_id, userAssignedIdentities)
         identity = ManagedIdentity(type=identity_type, user_assigned_identities=userAssignedIdentitiesdict)
+
     if user_assigned_identity_id is None:
         identity = existing_identity
     if allowed_aad_tenant_ids and '' in allowed_aad_tenant_ids:

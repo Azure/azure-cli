@@ -3142,7 +3142,6 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('type', 'Microsoft.Synapse/workspaces'),
                 self.check('provisioningState', 'Succeeded'),
                 self.check('identity.type','SystemAssigned,UserAssigned'),
-                #self.check('identity.userAssignedIdentities[0]')
                 self.check('keys(identity.userAssignedIdentities)[0]', '{uami_id1}'),
                 self.check('keys(identity.userAssignedIdentities)[1]', '{uami_id2}')
             ])
