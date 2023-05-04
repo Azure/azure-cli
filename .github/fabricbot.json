@@ -3568,6 +3568,83 @@
                 {
                   "name": "titleContains",
                   "parameters": {
+                    "titlePattern": "[Aa]z network dns",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "[Aa]z network dns",
+                    "isRegex": true
+                  }
+                }
+              ]
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "isAction",
+                  "parameters": {
+                    "action": "opened"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Network - DNS"
+            }
+          },
+          {
+            "name": "addMilestone",
+            "parameters": {
+              "groupId": "",
+              "milestoneName": "Backlog"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Service Attention"
+            }
+          }
+        ],
+        "taskName": "[Network DNS] auto assign labels and users based on issue description."
+      },
+      "disabled": false
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
                     "titlePattern": "[Aa]z network",
                     "isRegex": true
                   }
@@ -3589,6 +3666,35 @@
                   "parameters": {
                     "action": "opened"
                   }
+                }
+              ]
+            },
+            {
+              "operator": "and",
+              "operands": [
+                {
+                  "operator": "not",
+                  "operands": [
+                    {
+                      "name": "titleContains",
+                      "parameters": {
+                        "isRegex": true,
+                        "titlePattern": "az network dns"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "operator": "not",
+                  "operands": [
+                    {
+                      "name": "bodyContains",
+                      "parameters": {
+                        "isRegex": true,
+                        "bodyPattern": "az network dns"
+                      }
+                    }
+                  ]
                 }
               ]
             }
