@@ -3613,6 +3613,21 @@ def get_app_insights_key(cli_ctx, resource_group, name):
     return appinsights.instrumentation_key
 
 
+def create_flex_app_service_plan(cmd, resource_group_name, name, location, is_linux):
+    SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
+    client = web_client_factory(cmd.cli_ctx)
+    sku_def = SkuDescription(tier="FlexConsumption", name="FL1", size="FL", family="FL")
+    plan_def = AppServicePlan(
+        location=location,
+        sku=sku_def,
+        reserved=(is_linux or None),
+        kind="functionapp",
+        name=name
+    )
+    poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
+    return LongRunningOperation(cmd.cli_ctx)(poller)
+
+
 def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux, sku, number_of_workers=None,
                                         max_burst=None, location=None, tags=None, zone_redundant=False):
     SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
@@ -3651,6 +3666,16 @@ def is_plan_elastic_premium(cmd, plan_info):
     return False
 
 
+def is_exactly_one_true(*args):
+    found = False
+    for i in args:
+        if bool(i):
+            if found:
+                return False
+            found = True
+    return found
+
+
 def create_functionapp(cmd, resource_group_name, name, storage_account, plan=None,
                        os_type=None, functions_version=None, runtime=None, runtime_version=None,
                        consumption_plan_location=None, app_insights=None, app_insights_key=None,
@@ -3659,7 +3684,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        registry_password=None, registry_username=None,
                        image=None, tags=None, assign_identities=None,
                        role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, environment=None,
-                       always_ready_instances=None, maximum_instances=None, instance_size=None):
+                       always_ready_instances=None, maximum_instances=None, instance_size=None,
+                       flexconsumption_location=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
@@ -3667,9 +3693,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functions_version = '3'
     if deployment_source_url and deployment_local_git:
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
-    if environment is None and bool(plan) == bool(consumption_plan_location):
+    if environment is None and not is_exactly_one_true(plan, consumption_plan_location, flexconsumption_location):
         raise MutuallyExclusiveArgumentError("usage error: You must specify one of these parameter "
-                                             "--plan NAME_OR_ID | --consumption-plan-location LOCATION")
+                                             "--plan NAME_OR_ID | --consumption-plan-location LOCATION |"
+                                             " --flexconsumption-location LOCATION")
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair = cmd.get_models('SiteConfig', 'NameValuePair')
     disable_app_insights = (disable_app_insights == "true")
@@ -3736,6 +3763,19 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         is_linux = bool(plan_info.reserved)
         functionapp_def.server_farm_id = plan
         functionapp_def.location = location
+
+    elif flexconsumption_location:
+        locations = list_flexconsumption_locations(cmd)
+        location = next((loc for loc in locations if loc['name'].lower() == flexconsumption_location.lower()), None)
+        if location is None:
+            raise ValidationError("Location is invalid. Use: az functionapp list-flexconsumption-locations")
+        is_linux = bool(os_type and os_type.lower() == LINUX_OS_NAME)
+        # Following the same plan name format as the backend
+        plan_name = "{}{}FlexPlan".format(flexconsumption_location, os_type)
+        plan_info = create_flex_app_service_plan(
+            cmd, resource_group_name, plan_name, flexconsumption_location, is_linux)
+        functionapp_def.server_farm_id = plan_info.id
+        functionapp_def.location = flexconsumption_location
 
     if environment is not None:
         if consumption_plan_location is not None:
@@ -4081,6 +4121,17 @@ def list_consumption_locations(cmd):
     client = web_client_factory(cmd.cli_ctx)
     regions = client.list_geo_regions(sku='Dynamic')
     return [{'name': x.name.lower().replace(' ', '')} for x in regions]
+
+
+def list_flexconsumption_locations(cmd):
+    return [
+        {
+            "name": "eastus",
+        },
+        {
+            "name": "northeurope"
+        }
+    ]
 
 
 def list_locations(cmd, sku, linux_workers_enabled=None):

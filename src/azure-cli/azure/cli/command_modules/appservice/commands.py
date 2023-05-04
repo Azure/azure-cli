@@ -328,6 +328,7 @@ def load_command_table(self, _):
         g.custom_command('start', 'start_webapp')
         g.custom_command('restart', 'restart_webapp')
         g.custom_command('list-consumption-locations', 'list_consumption_locations')
+        g.custom_command('list-flexconsumption-locations', 'list_flexconsumption_locations')
         g.custom_command('identity assign', 'assign_identity')
         g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
