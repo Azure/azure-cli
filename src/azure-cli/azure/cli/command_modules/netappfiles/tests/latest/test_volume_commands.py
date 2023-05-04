@@ -501,3 +501,15 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         # add another export policy with same rule_index, should result in validation error
         with self.assertRaisesRegex(ValidationError, "Rule index 3 already exist"):
             self.cmd("netappfiles volume export-policy add -g {rg} -a %s -p %s -v %s --allowed-clients '1.2.3.0/24' --rule-index 3 --unix-read-only true --unix-read-write false --cifs false --nfsv3 true --nfsv41 false" % (account_name, pool_name, volume_name)).get_output_in_json()
+
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
+    def test_break_file_locks(self):
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)        
+
+        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}')
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+
+        # call breakFileLocks
+        self.cmd("az netappfiles volume break-file-locks -g {rg} -a %s -p %s -v %s -y" % (account_name, pool_name, volume_name))

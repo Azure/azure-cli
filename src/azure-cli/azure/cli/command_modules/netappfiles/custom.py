@@ -14,7 +14,7 @@ from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccou
     BackupPolicyPatch, VolumePatchPropertiesDataProtection, AccountEncryption, KeyVaultProperties, EncryptionIdentity, AuthorizeRequest, \
     BreakReplicationRequest, PoolChangeRequest, VolumeRevert, Backup, BackupPatch, LdapSearchScopeOpt, SubvolumeInfo, \
     SubvolumePatchRequest, SnapshotRestoreFiles, PlacementKeyValuePairs, VolumeGroupMetaData, VolumeGroupDetails, \
-    VolumeGroupVolumeProperties, VolumeQuotaRule, VolumeQuotaRulePatch, ManagedServiceIdentity
+    VolumeGroupVolumeProperties, VolumeQuotaRule, VolumeQuotaRulePatch, ManagedServiceIdentity, BreakFileLocksRequest
 from azure.mgmt.netapp.models._net_app_management_client_enums import EncryptionKeySource
 from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -61,7 +61,7 @@ def create_account(cmd, client, account_name, resource_group_name, location=None
     else:
         account_encryption = None
         accountIdentity = None
-        
+
     body = NetAppAccount(location=location, tags=tags, encryption=account_encryption, identity=accountIdentity)
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, account_name, body)
 
@@ -162,7 +162,7 @@ def patch_account(instance, tags=None, encryption=None, key_source=None, key_vau
     if key_source is not None and key_source == EncryptionKeySource.MICROSOFT_KEY_VAULT:
         keyVaultProperties = KeyVaultProperties(key_vault_uri=key_vault_uri, key_name=key_name, key_vault_resource_id=key_vault_resource_id)
         identity = EncryptionIdentity(user_assigned_identity=user_assigned_identity)
-        account_encryption = AccountEncryption(key_source=key_source, key_vault_properties=keyVaultProperties, identity=identity)        
+        account_encryption = AccountEncryption(key_source=key_source, key_vault_properties=keyVaultProperties, identity=identity)
     else:
         account_encryption = None
     body = NetAppAccountPatch(tags=tags, encryption=account_encryption)
@@ -206,7 +206,7 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
                   vnet, location=None, subnet='default', service_level=None, protocol_types=None, volume_type=None,
                   endpoint_type=None, replication_schedule=None, remote_volume_resource_id=None, tags=None,
                   snapshot_id=None, snapshot_policy_id=None, backup_policy_id=None, backup_enabled=None, backup_id=None,
-                  policy_enforced=None, vault_id=None, kerberos_enabled=None, security_style=None, throughput_mibps=None,
+                  policy_enforced=None, kerberos_enabled=None, security_style=None, throughput_mibps=None,
                   kerberos5_r=None, kerberos5_rw=None, kerberos5i_r=None,
                   kerberos5i_rw=None, kerberos5p_r=None, kerberos5p_rw=None,
                   has_root_access=None, snapshot_dir_visible=None,
@@ -333,7 +333,7 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
 
 
 # -- volume update
-def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, vault_id=None, backup_enabled=None,
+def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, backup_enabled=None,
                  backup_policy_id=None, policy_enforced=None, throughput_mibps=None, snapshot_policy_id=None,
                  is_def_quota_enabled=None, default_user_quota=None, default_group_quota=None, unix_permissions=None,
                  cool_access=None, coolness_period=None):
@@ -374,6 +374,12 @@ def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, 
 def volume_revert(client, resource_group_name, account_name, pool_name, volume_name, snapshot_id, no_wait=False):
     body = VolumeRevert(snapshot_id=snapshot_id)
     return sdk_no_wait(no_wait, client.begin_revert, resource_group_name, account_name, pool_name, volume_name, body)
+
+
+# -- volume break-file-lock
+def break_file_locks(client, resource_group_name, account_name, pool_name, volume_name, client_ip=None, no_wait=False):
+    body = BreakFileLocksRequest(client_ip=client_ip, confirm_running_disruptive_operation=True)
+    return sdk_no_wait(no_wait, client.begin_break_file_locks, resource_group_name, account_name, pool_name, volume_name, body)
 
 
 # -- change pool
@@ -502,33 +508,13 @@ def create_snapshot_policy(cmd, client, resource_group_name, account_name, snaps
     return client.create(resource_group_name, account_name, snapshot_policy_name, body)
 
 
-# def patch_snapshot_policy(cmd, client, resource_group_name, account_name, snapshot_policy_name, location=None,
-#                           hourly_snapshots=None, hourly_minute=None,
-#                           daily_snapshots=None, daily_minute=None, daily_hour=None,
-#                           weekly_snapshots=None, weekly_minute=None, weekly_hour=None, weekly_day=None,
-#                           monthly_snapshots=None, monthly_minute=None, monthly_hour=None, monthly_days=None,
-#                           enabled=False, no_wait=False, tags=None):
-#     location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
-#     body = SnapshotPolicyPatch(        
-#         hourly_schedule=HourlySchedule(snapshots_to_keep=hourly_snapshots, minute=hourly_minute),
-#         daily_schedule=DailySchedule(snapshots_to_keep=daily_snapshots, minute=daily_minute, hour=daily_hour),
-#         weekly_schedule=WeeklySchedule(snapshots_to_keep=weekly_snapshots, minute=weekly_minute,
-#                                        hour=weekly_hour, day=weekly_day),
-#         monthly_schedule=MonthlySchedule(snapshots_to_keep=monthly_snapshots, minute=monthly_minute,
-#                                          hour=monthly_hour, days_of_month=monthly_days),
-#         enabled=enabled, tags=None)
-
-#     _update_mapper(cmd, body, ['tags'])
-#     return sdk_no_wait(no_wait, client.begin_update, resource_group_name, account_name, snapshot_policy_name, body)
-
-def patch_snapshot_policy(instance, 
+def patch_snapshot_policy(instance,
                           hourly_snapshots=None, hourly_minute=None,
                           daily_snapshots=None, daily_minute=None, daily_hour=None,
                           weekly_snapshots=None, weekly_minute=None, weekly_hour=None, weekly_day=None,
                           monthly_snapshots=None, monthly_minute=None, monthly_hour=None, monthly_days=None,
-                          enabled=False, no_wait=False, tags=None):
-    #location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
-    body = SnapshotPolicyPatch(        
+                          enabled=False, tags=None):
+    body = SnapshotPolicyPatch(
         hourly_schedule=HourlySchedule(snapshots_to_keep=hourly_snapshots, minute=hourly_minute),
         daily_schedule=DailySchedule(snapshots_to_keep=daily_snapshots, minute=daily_minute, hour=daily_hour),
         weekly_schedule=WeeklySchedule(snapshots_to_keep=weekly_snapshots, minute=weekly_minute,
