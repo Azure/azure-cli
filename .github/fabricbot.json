@@ -4389,14 +4389,14 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "[Aa]z iot",
+                    "titlePattern": "\\b([Ii][Oo][Tt])\\b",
                     "isRegex": true
                   }
                 },
                 {
                   "name": "bodyContains",
                   "parameters": {
-                    "bodyPattern": "[Aa]z iot",
+                    "bodyPattern": "\\b([Ii][Oo][Tt])\\b",
                     "isRegex": true
                   }
                 }
@@ -5180,13 +5180,15 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "az container"
+                    "titlePattern": "az \\b(container)\\b",
+                    "isRegex": true
                   }
                 },
                 {
                   "name": "bodyContains",
                   "parameters": {
-                    "bodyPattern": "az container"
+                    "bodyPattern": "az \\b(container)\\b",
+                    "isRegex": true
                   }
                 }
               ]
@@ -5227,6 +5229,77 @@
             "name": "addLabel",
             "parameters": {
               "label": "CXP Attention"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "PullRequestResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isAction",
+              "parameters": {
+                "action": "opened"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "az \\b(container)\\b",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "az \\b(container)\\b",
+                    "isRegex": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "pull_request",
+        "eventNames": [
+          "pull_request",
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[container] Auto assign labels and reviewers based on PR title/description.",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "zhoxing-ms"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "yanzhudd"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "zhoxing-ms"
             }
           }
         ]
@@ -5325,6 +5398,12 @@
             "name": "addLabel",
             "parameters": {
               "label": "Functions"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+            "label": "CXP Attention"
             }
           }
         ]
@@ -7037,6 +7116,13 @@
                     "titlePattern": "\\b([Ii][Oo][Tt])\\b",
                     "isRegex": true
                   }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "\\b([Ii][Oo][Tt])\\b",
+                    "isRegex": true
+                  }
                 }
               ]
             }
@@ -7065,7 +7151,7 @@
           {
             "name": "requestReviewer",
             "parameters": {
-              "reviewer": "wangzelin007"
+              "reviewer": "yanzhudd"
             }
           },
           {
@@ -7234,6 +7320,12 @@
             "name": "requestReviewer",
             "parameters": {
               "reviewer": "jsntcy"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "avanigupta"
             }
           },
           {
