@@ -61,6 +61,13 @@ examples:
           --image debian --secrets "$vm_secrets"
 """
 
+helps['keyvault certificate list'] = """
+type: command
+short-summary: List certificates in a specified key vault.
+long-summary: The GetCertificates operation returns the set of certificates resources in the specified key
+        vault. This operation requires the certificates/list permission.
+"""
+
 helps['keyvault certificate download'] = """
 type: command
 short-summary: Download the public portion of a Key Vault certificate.

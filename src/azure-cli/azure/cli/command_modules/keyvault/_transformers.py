@@ -206,9 +206,10 @@ def transform_secret_recover(result, **command_args):
 def transform_certificate_create(result, **command_args):
     if not isinstance(result, dict):
         import base64
+        csr = getattr(result, "csr", None)
         ret = {
             "cancellationRequested": getattr(result, "cancellation_requested", None),
-            "csr": getattr(result, "csr", None),
+            "csr": base64.b64encode(csr).decode('utf-8') if csr else None,
             "error": getattr(result, "error", None),
             "id": getattr(result, "id", None),
             "issuerParameters": {
@@ -222,6 +223,32 @@ def transform_certificate_create(result, **command_args):
             "statusDetails": getattr(result, "status_details", None),
             "target": getattr(result, "target", None)
         }
-        ret["csr"] = base64.b64encode(ret["csr"]).decode('utf-8') if ret.get("csr") else None
+        return ret
+    return result
+
+def transform_certificate_list(result, **command_args):
+    return [transform_certificate_base_properties(certificate) for certificate in result]
+
+
+def transform_certificate_base_properties(result):
+    import base64
+    if not isinstance(result, dict):
+        x509_thumbprint = getattr(result, "x509_thumbprint", None)
+        ret = {
+            "attributes": {
+                "created": getattr(result, "created_on", None),
+                "enabled": getattr(result, "enabled", None),
+                "expires": getattr(result, "expires_on", None),
+                "notBefore": getattr(result, "not_before", None),
+                "recoveryLevel": getattr(result, "recovery_level", None),
+                "updated": getattr(result, "updated_on", None)
+            },
+            "id": getattr(result, "id", None),
+            "name": getattr(result, "name", None),
+            "subject": "",
+            "tags": getattr(result, "tags", None),
+            "x509Thumbprint": base64.b64encode(x509_thumbprint).decode('utf-8') if x509_thumbprint else None,
+            "x509ThumbprintHex": x509_thumbprint.hex().upper()
+        }
         return ret
     return result

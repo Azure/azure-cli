@@ -568,15 +568,11 @@ def load_arguments(self, _):
                         help='Name of the Vault. Required if --id is not specified.')
                 c.argument('version', required=False)
 
-        for cmd in ['list', 'list-deleted']:
-            with self.argument_context('keyvault {} {}'.format(item, cmd)) as c:
-                c.argument('include_pending', arg_type=get_three_state_flag())
-
-    for scope in ['list', 'list-versions', 'list-deleted']:
-        with self.argument_context(f'keyvault secret {scope}') as c:
-            c.extra('max_page_size', options_list=['--maxresults'], type=int,
-                    help='Maximum number of results to return in a page. '
-                         'If not specified, the service will return up to 25 results.')
+        for scope in ['list', 'list-versions', 'list-deleted']:
+            with self.argument_context('keyvault {} {}'.format(item, scope)) as c:
+                c.extra('max_page_size', options_list=['--maxresults'], type=int,
+                        help='Maximum number of results to return in a page. '
+                             'If not specified, the service will return up to 25 results.')
 
     with self.argument_context('keyvault secret list') as c:
         c.extra('include_managed', arg_type=get_three_state_flag(), default=False,
@@ -858,13 +854,13 @@ def load_arguments(self, _):
         c.argument('admin_last_name')
         c.argument('admin_email')
         c.argument('admin_phone')
-
-    for item in ['list', 'list-deleted', 'list-versions']:
-        with self.argument_context('keyvault certificate {}'.format(item)) as c:
-            c.argument('maxresults', options_list=['--maxresults'], type=int)
     # endregion
 
     # region KeyVault Certificate track2
+    for cmd in ['list', 'list-deleted']:
+        with self.argument_context('keyvault certificate {}'.format(item, cmd)) as c:
+            c.extra('include_pending', arg_type=get_three_state_flag())
+
     # with self.argument_context('keyvault certificate') as c:
     #     c.argument('validity', type=int,
     #                help='Number of months the certificate is valid for. Overrides the value specified with --policy/-p')
