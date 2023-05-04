@@ -223,7 +223,7 @@ def load_arguments(self, _):
         c.argument('attach_acr', acr_arg_type)
         c.argument('skip_subnet_role_assignment', action='store_true')
         c.argument('node_resource_group')
-        c.argument('kubernetes_support_plan', arg_type=get_enum_type(k8s_support_plans), validator=validate_k8s_support_plan, default=KubernetesSupportPlan.KUBERNETES_OFFICIAL)
+        c.argument('kubernetes_support_plan', arg_type=get_enum_type(k8s_support_plans), validator=validate_k8s_support_plan)
         c.argument('enable_defender', action='store_true')
         c.argument('defender_config', validator=validate_defender_config_parameter)
         c.argument('disable_disk_driver', action='store_true')
