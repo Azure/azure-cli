@@ -78,9 +78,11 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         if 'command_modules' in test_class_path:
             index_of_module = test_class_path.index('command_modules') + 1
         # get index of the extension name for extension repo
-        else:
+        elif 'src' in test_class_path:
             index_of_module = test_class_path.index('src') + 1
-        module = test_class_path[index_of_module]
+        else:
+            index_of_module = -1
+        module = test_class_path[index_of_module] if index_of_module >= 0 else 'unknown'
         tags = {'product': 'azurecli',
                 'cause': 'automation test',
                 'date': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
