@@ -74,8 +74,10 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             return {self.parameter_name: self.dev_setting_name,
                     self.parameter_name_for_location: self.dev_setting_location}
         test_class_path = sys.modules[self.test_class_instance.__module__].__file__.split(os.sep)
+        # get index of the module name for main repo
         if 'command_modules' in test_class_path:
             index_of_module = test_class_path.index('command_modules') + 1
+        # get index of the extension name for extension repo
         else:
             index_of_module = test_class_path.index('src') + 1
         module = test_class_path[index_of_module]
