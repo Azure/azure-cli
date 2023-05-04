@@ -1,3 +1,10 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
+# pylint: disable=line-too-long, too-few-public-methods
+
 import json
 
 from knack.util import CLIError
@@ -70,8 +77,8 @@ class KVComparer:
     def _try_parse_json_value(value_string):
         try:
             return json.loads(value_string)
-        
-        except:
+
+        except Exception:  # pylint: disable=broad-except
             return value_string
 
     @classmethod
@@ -85,11 +92,11 @@ class KVComparer:
                 if getattr(kv1, field, "") != getattr(kv2, field, ""):
                     return False
         return True
-    
+
 
 def print_preview(diff, level, yes=False, strict=False, title="", indent=None, show_update_diff=True):
     if not yes:
-        logger.warning('\n---------------- {} Preview ----------------'.format(title.title()))
+        logger.warning('\n---------------- %s Preview ----------------', title.title())
 
     if not strict and diff == {}:
         logger.warning('Source is empty. No changes will be made.')
@@ -135,7 +142,7 @@ def get_serializer(level):
     '''
     source_modes = ("appconfig", "appservice", "file")
     kvset_modes = ("kvset", "restore")
-    
+
     if level not in source_modes and level not in kvset_modes:
         raise CLIError("Invalid argument '{}' supplied. level argument should be on of the following: {}".format(level, source_modes + kvset_modes))
 
@@ -143,7 +150,7 @@ def get_serializer(level):
 
         if isinstance(obj, dict):
             return json.JSONEncoder().default(obj)
-        
+
         # Feature flag format: {"feature": <feature-name>, "state": <on/off>, "conditions": <conditions-dict>}
         if is_feature_flag(obj):
             feature = map_keyvalue_to_featureflag(obj)
@@ -179,14 +186,14 @@ def get_serializer(level):
         return res
 
     def serialize_kvset(kv):
-        if level == "kvset": # File import with kvset profile
+        if level == "kvset":  # File import with kvset profile
             kv_json = {
                 'key': kv.key,
                 'value': kv.value,
                 'label': kv.label,
                 'content_type': kv.content_type
             }
-        else: # Restore preview format
+        else:  # Restore preview format
             kv_json = {
                 'key': kv.key,
                 'value': kv.value,

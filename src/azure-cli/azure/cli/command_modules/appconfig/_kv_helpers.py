@@ -32,9 +32,7 @@ from ._diff_utils import get_serializer, KVComparer, print_preview, __print_diff
 from ._utils import prep_label_filter_for_url_encoding, is_json_content_type
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
-from ._featuremodels import (map_featureflag_to_keyvalue,
-                            is_feature_flag,
-                            FeatureFlagValue)
+from ._featuremodels import (map_featureflag_to_keyvalue, is_feature_flag, FeatureFlagValue)
 
 logger = get_logger(__name__)
 FEATURE_MANAGEMENT_KEYWORDS = ["FeatureManagement", "featureManagement", "feature_management", "feature-management"]
@@ -513,7 +511,7 @@ def __export_kvset_to_file(file_path, keyvalues, yes):
     kvset_serializer = get_serializer("kvset")
     kvset = [kvset_serializer(keyvalue) for keyvalue in keyvalues]
     obj = {KVSetConstants.KVSETRootElementName: kvset}
-    
+
     updates = {JsonDiff.ADD: kvset}
     print_preview(updates, level="kvset", yes=yes, title="KVSet", indent=2, show_update_diff=False)
 
@@ -526,7 +524,7 @@ def __export_kvset_to_file(file_path, keyvalues, yes):
         raise FileOperationError("Failed to export key-values to file. " + str(exception))
 
 
-def __print_restore_preview(diff, yes): 
+def __print_restore_preview(diff, yes):
     if not yes:
         logger.warning('\n---------------- Restore Preview ----------------')
 
@@ -538,7 +536,7 @@ def __print_restore_preview(diff, yes):
         __print_diff(diff, "restore", indent=2, show_update_diff=False)
 
     logger.warning("")  # printing an empty line for formatting purpose
- 
+
     return True
 
 
@@ -843,14 +841,13 @@ def __import_kvset_from_file(client, path, strict, yes):
     if not yes:
         user_confirmation('Do you want to continue?\n')
 
-
     for config_setting in diff.get(JsonDiff.DELETE, []):
         __delete_configuration_setting_from_config_store(client, config_setting)
 
     # Create joint iterable from added and updated kvs
     kvset_to_import_iter = chain(
         diff.get(JsonDiff.ADD, []),
-        (update["new"] for update in diff.get(JsonDiff.UPDATE, []))) # The value of diff update property is of the form List[{"new": KeyValue, "old": KeyValue}]
+        (update["new"] for update in diff.get(JsonDiff.UPDATE, [])))  # The value of diff update property is of the form List[{"new": KeyValue, "old": KeyValue}]
 
     for config_setting in kvset_to_import_iter:
         __write_configuration_setting_to_config_store(client, config_setting)

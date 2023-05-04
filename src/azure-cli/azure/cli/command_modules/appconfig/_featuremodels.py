@@ -327,6 +327,7 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
 
 
 def is_feature_flag(kv):
+    # pylint: disable=line-too-long
     '''
     Helper function used to determine if a key-value is a feature flag
     '''

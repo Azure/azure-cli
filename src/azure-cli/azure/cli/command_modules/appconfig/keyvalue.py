@@ -9,7 +9,7 @@ import json
 import time
 import sys
 
-from itertools import chain, filterfalse
+from itertools import chain
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -24,7 +24,7 @@ from azure.core.exceptions import (HttpResponseError,
 import azure.cli.core.azclierror as CLIErrors
 
 from ._constants import (FeatureFlagConstants, KeyVaultConstants,
-                         SearchFilterOptions, StatusCodes, 
+                         SearchFilterOptions, StatusCodes,
                          ImportExportProfiles, CompareFieldsMap,
                          JsonDiff)
 from ._models import (convert_configurationsetting_to_keyvalue, convert_keyvalue_to_configurationsetting)
@@ -156,7 +156,7 @@ def import_config(cmd,
         preserve_labels=source == "appconfig" and preserve_labels,
         label=label,
         content_type=content_type)
-    
+
     kv_diff = kv_comparer.compare(dest_kvs=dest_kvs, strict=strict)
     need_kv_change = print_preview(kv_diff, source, yes=yes, strict=strict, title="Key Values")
 
@@ -194,7 +194,7 @@ def import_config(cmd,
         kvs_to_delete = chain(
             kv_diff.get(JsonDiff.DELETE, []),
             ff_diff.get(JsonDiff.DELETE, []))
-        
+
         for kv in kvs_to_delete:
             __delete_configuration_setting_from_config_store(azconfig_client, kv)
 
@@ -332,7 +332,7 @@ def export_config(cmd,
     ff_diff = {}
     if src_features:
         ff_comparer = KVComparer(
-            src_kvs=__convert_featureflag_list_to_keyvalue_list(src_features), 
+            src_kvs=__convert_featureflag_list_to_keyvalue_list(src_features),
             compare_fields=CompareFieldsMap[destination],
             preserve_labels=destination == "appconfig" and preserve_labels,
             label=dest_label)

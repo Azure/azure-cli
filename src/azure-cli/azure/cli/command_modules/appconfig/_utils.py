@@ -190,6 +190,7 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     return azconfig_client
 
+
 def is_json_content_type(content_type):
     if not content_type:
         return False
