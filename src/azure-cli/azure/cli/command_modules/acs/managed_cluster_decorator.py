@@ -5767,13 +5767,13 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         if self.context.get_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
             mc.sku = self.models.ManagedClusterSKU(
                 name="Base",
-                tier=CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD
+                tier="Standard"
             )
         
         if self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM:
             mc.sku = self.models.ManagedClusterSKU(
                 name="Base",
-                tier=CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM
+                tier="Premium"
             )
         return mc
 
@@ -6277,19 +6277,19 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         if self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM:
             mc.sku = self.models.ManagedClusterSKU(
                 name="Base",
-                tier=CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM
+                tier="Premium"
             )
 
         if self.context.get_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
             mc.sku = self.models.ManagedClusterSKU(
                 name="Base",
-                tier=CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD
+                tier="Standard"
             )
 
         if self.context.get_no_uptime_sla() or self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_FREE:
             mc.sku = self.models.ManagedClusterSKU(
                 name="Base",
-                tier=CONST_MANAGED_CLUSTER_SKU_TIER_FREE
+                tier="Free"
             )
         return mc
 
