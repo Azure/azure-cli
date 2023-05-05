@@ -56,12 +56,14 @@ from azure.mgmt.iothub.models import (IotHubSku,
 from azure.mgmt.iothubprovisioningservices.models import (CertificateBodyDescription,
                                                           ProvisioningServiceDescription,
                                                           IotDpsPropertiesDescription,
+                                                          IotDpsPropertiesDescriptionDpsFailoverDescription,
                                                           IotHubDefinitionDescription,
                                                           IotDpsSkuInfo,
                                                           IotDpsSku,
                                                           OperationInputs as DpsOperationInputs,
                                                           SharedAccessSignatureAuthorizationRuleAccessRightsDescription,
-                                                          VerificationCodeRequest)
+                                                          VerificationCodeRequest,
+                                                          CustomerInitiatedFailoverInput)
 
 
 from azure.mgmt.iotcentral.models import (AppSkuInfo,
@@ -112,16 +114,55 @@ def iot_dps_get(client, dps_name, resource_group_name=None):
     return client.iot_dps_resource.get(dps_name, resource_group_name)
 
 
-def iot_dps_create(cmd, client, dps_name, resource_group_name, location=None, sku=IotDpsSku.s1.value, unit=1, tags=None, enable_data_residency=None):
+def iot_dps_create(cmd, client, dps_name, resource_group_name, location=None,
+                   sku=IotDpsSku.s1.value,
+                   unit=1,
+                   tags=None,
+                   system_identity=None,
+                   user_identities=None,
+                   identity_role=None,
+                   identity_scopes=None,
+                   enable_data_residency=None,
+                   enable_customer_intiated_failover=None,
+                   failover_region=None):
     cli_ctx = cmd.cli_ctx
     _check_dps_name_availability(client.iot_dps_resource, dps_name)
     location = _ensure_location(cli_ctx, resource_group_name, location)
-    dps_property = IotDpsPropertiesDescription(enable_data_residency=enable_data_residency)
+
+    if bool(enable_customer_intiated_failover) ^ bool(failover_region):
+        raise RequiredArgumentMissingError('TODO See what is minimum needed for customer initiated failover.')
+    dps_failover_description = IotDpsPropertiesDescriptionDpsFailoverDescription(failover_region=failover_region)
+    dps_property = IotDpsPropertiesDescription(enable_data_residency=enable_data_residency,
+                                               enable_customer_intiated_failover=enable_customer_intiated_failover,
+                                               dps_failover_description=dps_failover_description)
     dps_description = ProvisioningServiceDescription(location=location,
                                                      properties=dps_property,
                                                      sku=IotDpsSkuInfo(name=sku, capacity=unit),
                                                      tags=tags)
-    return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description)
+
+    if (system_identity or user_identities):
+        dps_description.identity = _build_identity(system=bool(system_identity), identities=user_identities)
+    if bool(identity_role) ^ bool(identity_scopes):
+        raise RequiredArgumentMissingError('At least one scope (--scopes) and one role (--role) required for system-assigned managed identity role assignment')
+
+    def identity_assignment(lro):
+        try:
+            from azure.cli.core.commands.arm import assign_identity
+            instance = lro.resource().as_dict()
+            identity = instance.get("identity")
+            if identity:
+                principal_id = identity.get("principal_id")
+                if principal_id:
+                    dps_description.identity.principal_id = principal_id
+                    for scope in identity_scopes:
+                        assign_identity(cmd.cli_ctx, lambda: dps_description, lambda hub: dps_description, identity_role=identity_role, identity_scope=scope)
+        except CloudError as e:
+            raise e
+
+    create = client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description)
+    if identity_role and identity_scopes:
+        create.add_done_callback(identity_assignment)
+    return create
 
 
 def iot_dps_update(client, dps_name, parameters, resource_group_name=None, tags=None):
@@ -403,6 +444,105 @@ def iot_dps_certificate_verify(client, dps_name, certificate_name, certificate_p
         raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
     request = VerificationCodeRequest(certificate=certificate)
     return client.dps_certificate.verify_certificate(certificate_name, etag, resource_group_name, dps_name, request)
+
+
+# DPS Identity Methods
+def iot_dps_identity_assign(cmd, client, dps_name, system_identity=None, user_identities=None, identity_role=None, identity_scopes=None, resource_group_name=None):
+    resource_group_name = _ensure_dps_resource_group_name(client, resource_group_name, dps_name)
+
+    def getter():
+        return iot_dps_get(cmd, client, dps_name, resource_group_name)
+
+    def setter(dps):
+
+        if user_identities and not dps.identity.user_assigned_identities:
+            dps.identity.user_assigned_identities = {}
+        if user_identities:
+            for identity in user_identities:
+                dps.identity.user_assigned_identities[identity] = dps.identity.user_assigned_identities.get(identity, {}) if dps.identity.user_assigned_identities else {}
+
+        has_system_identity = dps.identity.type in [IdentityType.system_assigned_user_assigned.value, IdentityType.system_assigned.value]
+
+        if system_identity or has_system_identity:
+            dps.identity.type = IdentityType.system_assigned_user_assigned.value if dps.identity.user_assigned_identities else IdentityType.system_assigned.value
+        else:
+            dps.identity.type = IdentityType.user_assigned.value if dps.identity.user_assigned_identities else IdentityType.none.value
+
+        poller = client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps, {'IF-MATCH': hub.etag})
+        return LongRunningOperation(cmd.cli_ctx)(poller)
+
+    if bool(identity_role) ^ bool(identity_scopes):
+        raise RequiredArgumentMissingError('At least one scope (--scopes) and one role (--role) required for system-managed identity role assignment.')
+    if not system_identity and not user_identities:
+        raise RequiredArgumentMissingError('No identities provided to assign. Please provide system (--system) or user-assigned identities (--user).')
+    if identity_role and identity_scopes:
+        from azure.cli.core.commands.arm import assign_identity
+        for scope in identity_scopes:
+            dps = assign_identity(cmd.cli_ctx, getter, setter, identity_role=identity_role, identity_scope=scope)
+        return dps.identity
+    result = setter(getter())
+    return result.identity
+
+
+def iot_dps_identity_show(cmd, client, dps_name, resource_group_name=None):
+    resource_group_name = _ensure_dps_resource_group_name(client, resource_group_name, dps_name)
+    dps = iot_dps_get(cmd, client, dps_name, resource_group_name)
+    return dps.identity
+
+
+def iot_dps_identity_remove(cmd, client, dps_name, system_identity=None, user_identities=None, resource_group_name=None):
+    resource_group_name = _ensure_dps_resource_group_name(client, resource_group_name, dps_name)
+    dps = iot_dps_get(cmd, client, dps_name, resource_group_name)
+    dps_identity = dps.identity
+
+    if not system_identity and user_identities is None:
+        raise RequiredArgumentMissingError('No identities provided to remove. Please provide system (--system) or user-assigned identities (--user).')
+    # Turn off system managed identity
+    if system_identity:
+        if dps_identity.type not in [
+                IdentityType.system_assigned.value,
+                IdentityType.system_assigned_user_assigned.value
+        ]:
+            raise ArgumentUsageError('DPS {} is not currently using a system-assigned identity'.format(dps_name))
+        dps_identity.type = IdentityType.user_assigned if dps.identity.type in [IdentityType.user_assigned.value, IdentityType.system_assigned_user_assigned.value] else IdentityType.none.value
+
+    if user_identities:
+        # loop through user_identities to remove
+        for identity in user_identities:
+            if not dps_identity.user_assigned_identities[identity]:
+                raise ArgumentUsageError('DPS {0} is not currently using a user-assigned identity with id: {1}'.format(dps_name, identity))
+            del dps_identity.user_assigned_identities[identity]
+        if not dps_identity.user_assigned_identities:
+            del dps_identity.user_assigned_identities
+    elif isinstance(user_identities, list):
+        del dps_identity.user_assigned_identities
+
+    if dps_identity.type in [
+            IdentityType.system_assigned.value,
+            IdentityType.system_assigned_user_assigned.value
+    ]:
+        dps_identity.type = IdentityType.system_assigned_user_assigned.value if getattr(dps_identity, 'user_assigned_identities', None) else IdentityType.system_assigned.value
+    else:
+        dps_identity.type = IdentityType.user_assigned.value if getattr(dps_identity, 'user_assigned_identities', None) else IdentityType.none.value
+
+    dps.identity = dps_identity
+    if not getattr(dps.identity, 'user_assigned_identities', None):
+        dps.identity.user_assigned_identities = None
+    poller = client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps, {'IF-MATCH': dps.etag})
+    lro = LongRunningOperation(cmd.cli_ctx)(poller)
+    return lro.identity
+
+
+# DPS Failover
+def iot_dps_manual_failover(cmd, client, dps_name, resource_group_name=None, no_wait=False):
+    dps = iot_dps_get(cmd, client, dps_name, resource_group_name)
+    resource_group_name = dps.additional_properties['resourcegroup']
+    failover_region = next(x.location for x in dps.properties.locations if x.role.lower() == 'secondary')
+    failover_input = CustomerInitiatedFailoverInput(failover_region=failover_region)
+    if no_wait:
+        return client.iot_dps_resource.failover(dps_name, resource_group_name, failover_input)
+    LongRunningOperation(cmd.cli_ctx)(client.iot_dps.failover(dps_name, resource_group_name, failover_input))
+    return iot_dps_get(cmd, client, dps_name, resource_group_name)
 
 
 # CUSTOM METHODS
