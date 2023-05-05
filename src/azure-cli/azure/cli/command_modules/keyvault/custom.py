@@ -742,7 +742,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
         "vaultName": {"value": vault_name},
         "location": {"value": location},
         "enabledForDeployment": {"value": enabled_for_deployment},
-        "enabledForDiskEncryption": {"value": enabled_for_deployment},
+        "enabledForDiskEncryption": {"value": enabled_for_disk_encryption},
         "enabledForTemplateDeployment": {"value": enabled_for_template_deployment},
         "enablePurgeProtection": {"value": enable_purge_protection},
         "enableRbacAuthorization": {"value": enable_rbac_authorization},
@@ -757,18 +757,31 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
         "tags": {"value": tags},
     }
 
+    import requests
+    import json
+    arm_template = requests.get("https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/modules/Microsoft.KeyVault/vaults/1.0/azuredeploy.json")
+    deploy_template = json.loads(arm_template.content)
+    if enabled_for_deployment is None:
+        deploy_template["resources"][0]["properties"]["enabledForDeployment"] = None
+    if enabled_for_disk_encryption is None:
+        deploy_template["resources"][0]["properties"]["enabledForDiskEncryption"] = None
+    if enabled_for_template_deployment is None:
+        deploy_template["resources"][0]["properties"]["enabledForTemplateDeployment"] = None
+    if enable_purge_protection is None:
+        deploy_template["resources"][0]["properties"]["enablePurgeProtection"] = None
+    if enable_rbac_authorization is None:
+        deploy_template["resources"][0]["properties"]["enableRbacAuthorization"] = None
+
     from azure.cli.core.util import random_string
     from azure.cli.core.commands import LongRunningOperation
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     deploy_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
-    TemplateLink = cmd.get_models('TemplateLink', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-    template_link = TemplateLink(uri="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/modules/Microsoft.KeyVault/vaults/1.0/azuredeploy.json")
     deployment_name = 'keyvault_deploy_' + random_string(32)
 
     if what_if:
         DeploymentWhatIfProperties = cmd.get_models('DeploymentWhatIfProperties',
                                                     resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-        properties = DeploymentWhatIfProperties(template_link=template_link,
+        properties = DeploymentWhatIfProperties(template=deploy_template,
                                                 parameters=deploy_parameters,
                                                 mode='incremental')
         DeploymentWhatIf = cmd.get_models('DeploymentWhatIf', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
@@ -776,7 +789,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
         return sdk_no_wait(no_wait, deploy_client.begin_what_if, resource_group_name, deployment_name, deployment_what_if)
 
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-    properties = DeploymentProperties(template_link=template_link, parameters=deploy_parameters, mode='incremental')
+    properties = DeploymentProperties(template=deploy_template, parameters=deploy_parameters, mode='incremental')
     Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     deployment = Deployment(properties=properties)
     deployment_poller = deploy_client.begin_create_or_update(resource_group_name, deployment_name, deployment)
