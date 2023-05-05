@@ -83,6 +83,13 @@ long-summary: Possible only if vault is soft-delete enabled.  Requires certifica
         recovery or purging. This operation includes deletion-specific information.
 """
 
+helps['keyvault certificate show'] = """
+type: command
+short-summary: Gets information about a certificate.
+long-summary:  Gets information about a specific certificate. This operation requires the certificates/get
+        permission.
+"""
+
 helps['keyvault certificate download'] = """
 type: command
 short-summary: Download the public portion of a Key Vault certificate.
