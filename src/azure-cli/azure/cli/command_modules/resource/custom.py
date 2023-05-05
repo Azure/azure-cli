@@ -3254,7 +3254,7 @@ def create_lock(cmd, lock_name, level,
     :type notes: str
     """
     ManagementLockObject = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_LOCKS, 'ManagementLockObject', mod='models')
-    parameters = ManagementLockObject(level=level, notes=notes, name=lock_name)
+    parameters = ManagementLockObject(level=level, notes=notes)
 
     lock_client = _resource_lock_client_factory(cmd.cli_ctx)
     lock_resource = _extract_lock_params(resource_group, resource_provider_namespace,
