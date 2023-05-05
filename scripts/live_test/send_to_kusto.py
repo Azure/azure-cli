@@ -60,22 +60,22 @@ def generate_csv_file():
                 for result in results.find_all('tbody'):
                     Name = result.find('td', {'class': 'col-name'}).text.split('::')[2]
                     Duration = result.find('td', {'class': 'col-duration'}).text
-                    IsSuccess = result.find('td', {'class': 'col-result'}).text
-                    if IsSuccess == 'Failed':
+                    Status = result.find('td', {'class': 'col-result'}).text
+                    if Status == 'Failed':
                         contents = result.find('td', {'class': 'extra'}).find('div', {'class': 'log'}).contents
-                        Errors = ''
+                        Details = ''
                         for content in contents:
                             if content.name == 'br':
-                                Errors += '\n'
+                                Details += '\n'
                             elif not content.name:
-                                Errors += content
+                                Details += content
                             else:
                                 logger.warning(content.name)
                     else:
-                        Errors = ''
+                        Details = ''
                     EndDateTime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     StartDateTime = (datetime.datetime.now() - datetime.timedelta(seconds=int(float(Duration)))).strftime("%Y-%m-%d %H:%M:%S")
-                    data.append([Source, BuildId, OSVersion, PythonVersion, Module, Name, Description, StartDateTime, EndDateTime, IsSuccess, Errors, ExtendedProperties])
+                    data.append([Source, BuildId, OSVersion, PythonVersion, Module, Name, Description, StartDateTime, EndDateTime, Status, Details, ExtendedProperties])
         return data
 
     data.extend(_get_data(parallel_file))
