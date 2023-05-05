@@ -6347,9 +6347,11 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             '--enable-managed-identity', '--enable-azuremonitormetrics --enable-windows-recording-rules',
             '--ssh-key-value={ssh_key_value} --node-vm-size={node_vm_size}',
         ])
+        # azuremonitor metrics will be set to false after initial creation command as its in the
+        # postprocessing step that we do an update to enable it. This behavior is expected.
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('azureMonitorProfile.metrics.enabled', True),
+            self.check('azureMonitorProfile.metrics.enabled', False),
         ])
 
         # delete
