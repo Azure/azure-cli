@@ -15,7 +15,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck, live_only)
 from azure.cli.testsdk.checkers import JMESPathCheckNotExists, JMESPathPatternCheck
-from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError, ArgumentUsageError
+from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError, ArgumentUsageError, RequiredArgumentMissingError
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -733,6 +733,71 @@ class FunctionAppManagedEnvironment(LiveScenarioTest):
         with self.assertRaises(ValidationError):
             self.cmd('functionapp config show -g {} -n {}'
             .format(resource_group, functionapp_name))
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_create_with_replicas(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionappwindowsruntime', 30)
+        managed_environment_name = self.create_random_name(
+            'containerappmanagedenvironment', 40
+        )
+
+        self.cmd('containerapp env create --name {} --resource-group {} --location {}'
+        .format(managed_environment_name, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).assert_with_checks([
+                     JMESPathCheck('name', managed_environment_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('location', WINDOWS_ASP_LOCATION_FUNCTIONAPP)])
+
+        self.cmd('functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet --functions-version 4 --min-replicas 1 --max-replicas 10'
+                 .format(resource_group, functionapp_name, storage_account, managed_environment_name)).assert_with_checks([
+                     JMESPathCheck('name', functionapp_name)])
+
+        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
+            JMESPathCheck('siteConfig.minimumElasticInstanceCount', 1),
+            JMESPathCheck('siteConfig.functionAppScaleLimit', 10)])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_create_with_min_replicas_error(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionappwindowsruntime', 30)
+        
+        plan_name = self.create_random_name(
+            'functionappplan', 40
+        )
+
+        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux --location {}'.format(resource_group, plan_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+
+        with self.assertRaises(RequiredArgumentMissingError):
+            self.cmd('functionapp create -g {} -n {} -p {} -s {} --runtime dotnet --functions-version 4 --min-replicas 1'
+                    .format(resource_group, functionapp_name, plan_name, storage_account))
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_container_config_set_replicas(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionappwindowsruntime', 30)
+        managed_environment_name = self.create_random_name(
+            'containerappmanagedenvironment', 40
+        )
+
+        self.cmd('containerapp env create --name {} --resource-group {} --location {}'
+        .format(managed_environment_name, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).assert_with_checks([
+                     JMESPathCheck('name', managed_environment_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('location', WINDOWS_ASP_LOCATION_FUNCTIONAPP)])
+
+        self.cmd('functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet --functions-version 4'
+                 .format(resource_group, functionapp_name, storage_account, managed_environment_name)).assert_with_checks([
+                     JMESPathCheck('name', functionapp_name)])
+        
+        self.cmd('functionapp config container set -g {} -n {} --min-replicas 1 --max-replicas 10'
+                 .format(resource_group, functionapp_name))
+
+        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
+            JMESPathCheck('siteConfig.minimumElasticInstanceCount', 1),
+            JMESPathCheck('siteConfig.functionAppScaleLimit', 10)])
 
 
 class FunctionAppOnWindowsWithRuntime(ScenarioTest):

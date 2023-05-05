@@ -1446,7 +1446,9 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
                         app_command_line=None,
                         ftps_state=None,
                         vnet_route_all_enabled=None,
-                        generic_configurations=None):
+                        generic_configurations=None,
+                        min_replicas=None,
+                        max_replicas=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_application_settings', slot)
@@ -1503,6 +1505,10 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
         setattr(configs, 'scm_ip_security_restrictions', None)
 
     if is_centauri_functionapp(cmd, resource_group_name, name):
+        if min_replicas is not None:
+            setattr(configs, 'minimum_elastic_instance_count', min_replicas)
+        if max_replicas is not None:
+            setattr(configs, 'function_app_scale_limit', max_replicas)
         return update_configuration_polling(cmd, resource_group_name, name, slot, configs)
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
 
@@ -1656,7 +1662,8 @@ APPSETTINGS_TO_MASK = ['DOCKER_REGISTRY_SERVER_PASSWORD']
 def update_container_settings(cmd, resource_group_name, name, docker_registry_server_url=None,
                               docker_custom_image_name=None, docker_registry_server_user=None,
                               websites_enable_app_service_storage=None, docker_registry_server_password=None,
-                              multicontainer_config_type=None, multicontainer_config_file=None, slot=None):
+                              multicontainer_config_type=None, multicontainer_config_file=None,
+                              slot=None, min_replicas=None, max_replicas=None):
     settings = []
     if docker_registry_server_url is not None:
         settings.append('DOCKER_REGISTRY_SERVER_URL=' + docker_registry_server_url)
@@ -1691,17 +1698,21 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
     elif multicontainer_config_file or multicontainer_config_type:
         logger.warning('Must change both settings --multicontainer-config-file FILE --multicontainer-config-type TYPE')
 
+    if min_replicas is not None or max_replicas is not None:
+        update_site_configs(cmd, resource_group_name, name, min_replicas=min_replicas, max_replicas=max_replicas)
+
     return _mask_creds_related_appsettings(_filter_for_container_settings(cmd, resource_group_name, name, settings,
                                                                           slot=slot))
 
 
 def update_container_settings_functionapp(cmd, resource_group_name, name, registry_server=None,
                                           image=None, registry_username=None,
-                                          registry_password=None, slot=None):
+                                          registry_password=None, slot=None, min_replicas=None, max_replicas=None):
     return update_container_settings(cmd, resource_group_name, name, registry_server,
                                      image, registry_username, None,
                                      registry_password, multicontainer_config_type=None,
-                                     multicontainer_config_file=None, slot=slot)
+                                     multicontainer_config_file=None, slot=slot,
+                                     min_replicas=min_replicas, max_replicas=max_replicas)
 
 
 def _get_acr_cred(cli_ctx, registry_name):
@@ -3642,7 +3653,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        deployment_source_branch='master', deployment_local_git=None,
                        registry_password=None, registry_username=None,
                        image=None, tags=None, assign_identities=None,
-                       role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, environment=None):
+                       role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
+                       environment=None, min_replicas=None, max_replicas=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
@@ -3653,6 +3665,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if environment is None and bool(plan) == bool(consumption_plan_location):
         raise MutuallyExclusiveArgumentError("usage error: You must specify one of these parameter "
                                              "--plan NAME_OR_ID | --consumption-plan-location LOCATION")
+    if ((min_replicas is not None or max_replicas is not None) and environment is None):
+        raise RequiredArgumentMissingError("usage error: parameters --min-replicas and --max-replicas must be "
+                                           "used with parameter --environment, please provide the name "
+                                           "of the container app environment using --environment.")
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair = cmd.get_models('SiteConfig', 'NameValuePair')
     disable_app_insights = (disable_app_insights == "true")
@@ -3841,6 +3857,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         site_config.linux_fx_version = _format_fx_version(image)
         site_config.http20_enabled = None
         site_config.local_my_sql_enabled = None
+        if min_replicas is not None:
+            site_config.minimum_elastic_instance_count = min_replicas
+        if max_replicas is not None:
+            site_config.function_app_scale_limit = max_replicas
 
         managed_environment = get_managed_environment(cmd, resource_group_name, environment)
         location = managed_environment.location
