@@ -647,7 +647,7 @@ parameters:
   - name: --snapshot-dir-visible
     short-summary: If enabled (true) the volume will contain a read-only .snapshot directory which provides access to each of the volume's snapshots (default to true).
   - name: --security-style
-    short-summary: The security style of volume
+    short-summary: The security style of volume, default unix, defaults to ntfs for dual protocol or CIFS protocol
   - name: --kerberos5-r
     short-summary: Kerberos5 Read only access
   - name: --kerberos5-rw

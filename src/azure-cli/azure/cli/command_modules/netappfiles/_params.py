@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long, disable=too-many-statements
 from azure.cli.core.commands.parameters import tags_type, resource_group_name_type, get_enum_type, get_three_state_flag
-from azure.mgmt.netapp.models._net_app_management_client_enums import EncryptionKeySource, SmbAccessBasedEnumeration, SmbNonBrowsable, ManagedServiceIdentityType
+from azure.mgmt.netapp.models._net_app_management_client_enums import EncryptionKeySource, SmbAccessBasedEnumeration, SmbNonBrowsable, ManagedServiceIdentityType, SecurityStyle
 from knack.arguments import CLIArgumentType
 
 
@@ -104,6 +104,8 @@ def load_volume_arguments(self, account_name_type, pool_name_type, volume_name_t
         c.argument('cool_access', arg_type=get_three_state_flag())
         c.argument('is_def_quota_enabled', arg_type=get_three_state_flag())
         c.argument('has_root_access', help="Vol Has root access to volume", arg_type=get_three_state_flag())
+        c.argument('snapshot_dir_visible', arg_type=get_three_state_flag())
+        c.argument('security_style', arg_type=get_enum_type(SecurityStyle), help='The security style of volume, default unix, defaults to ntfs for dual protocol or CIFS protocol')
 
     with self.argument_context('netappfiles volume create') as c:
         c.argument('zones', nargs="+")
