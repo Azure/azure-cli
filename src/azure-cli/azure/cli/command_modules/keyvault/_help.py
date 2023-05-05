@@ -68,6 +68,13 @@ long-summary: The GetCertificates operation returns the set of certificates reso
         vault. This operation requires the certificates/list permission.
 """
 
+helps['keyvault certificate list-versions'] = """
+type: command
+short-summary: List the versions of a certificate.
+long-summary: The GetCertificateVersions operation returns the versions of a certificate in the specified
+        key vault. This operation requires the certificates/list permission.
+"""
+
 helps['keyvault certificate download'] = """
 type: command
 short-summary: Download the public portion of a Key Vault certificate.

@@ -292,6 +292,10 @@ def load_command_table(self, _):
                            transform=multi_transformers(
                                keep_max_results,
                                transform_certificate_list))
+        g.keyvault_command('list-versions', 'list_properties_of_certificate_versions',
+                           transform=multi_transformers(
+                               keep_max_results,
+                               transform_certificate_list))
 
     if not is_azure_stack_profile(self):
         with self.command_group('keyvault role', data_access_control_entity.command_type):

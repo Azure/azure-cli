@@ -547,8 +547,12 @@ def load_arguments(self, _):
                                 validator=validate_keyvault_resource_id(item))
                 except ValueError:
                     pass
-                c.argument('name', options_list=['--name', '-n'], required=False,
-                           help='Name of the {}. Required if --id is not specified.'.format(item))
+                if item == 'secret':
+                    c.argument('name', options_list=['--name', '-n'], required=False,
+                        help='Name of the {}. Required if --id is not specified.'.format(item))
+                elif item == 'certificate':
+                    c.argument('{}_name'.format(item), options_list=['--name', '-n'], required=False,
+                            help='Name of the {}. Required if --id is not specified.'.format(item))
                 c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None,
                         options_list=['--vault-name'], help='Name of the Key Vault. Required if --id is not specified')
                 c.argument('version', options_list=['--version', '-v'],
