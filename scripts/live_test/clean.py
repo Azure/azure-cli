@@ -6,7 +6,6 @@
 
 # Clean Azure resources automatically
 # version 1.0
-import datetime
 import json
 import os
 import subprocess
