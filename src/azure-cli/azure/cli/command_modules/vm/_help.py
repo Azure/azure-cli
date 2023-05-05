@@ -3815,3 +3815,6 @@ helps['restore-point collection wait'] = """
         text: |-
                az restore-point collection wait --resource-group "myResourceGroup" --collection-name "rpcName" --deleted
 """
+
+--public-ip-address
+Name of the public IP address when creating one (default) or referencing an existing one. Can also reference an existing public IP by ID or specify "" for None ('""' in Azure CLI using PowerShell or --% operator). For Azure CLI using powershell core edition 7.3.4, specify '' or "" (--public-ip-address '' or --public-ip-address "")
