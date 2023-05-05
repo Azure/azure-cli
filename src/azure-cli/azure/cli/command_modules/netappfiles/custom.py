@@ -54,15 +54,15 @@ def create_account(cmd, client, account_name, resource_group_name, location=None
         key_source = encryption
 
     if key_source is not None and key_source == EncryptionKeySource.MICROSOFT_KEY_VAULT:
-        keyVaultProperties = KeyVaultProperties(key_vault_uri=key_vault_uri, key_name=key_name, key_vault_resource_id=key_vault_resource_id)
-        encryptionIdentity = EncryptionIdentity(user_assigned_identity=user_assigned_identity)
-        account_encryption = AccountEncryption(key_source=key_source, key_vault_properties=keyVaultProperties, identity=encryptionIdentity)
-        accountIdentity = ManagedServiceIdentity(type=identity_type, user_assigned_identities={user_assigned_identity: {}})
+        key_vault_properties = KeyVaultProperties(key_vault_uri=key_vault_uri, key_name=key_name, key_vault_resource_id=key_vault_resource_id)
+        encryption_identity = EncryptionIdentity(user_assigned_identity=user_assigned_identity)
+        account_encryption = AccountEncryption(key_source=key_source, key_vault_properties=key_vault_properties, identity=encryption_identity)
+        account_identity = ManagedServiceIdentity(type=identity_type, user_assigned_identities={user_assigned_identity: {}})
     else:
         account_encryption = None
-        accountIdentity = None
+        account_identity = None
 
-    body = NetAppAccount(location=location, tags=tags, encryption=account_encryption, identity=accountIdentity)
+    body = NetAppAccount(location=location, tags=tags, encryption=account_encryption, identity=account_identity)
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, account_name, body)
 
 
