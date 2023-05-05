@@ -6,6 +6,7 @@
 """
 Generate index.html of testing results HTML pages.
 """
+import datetime
 import traceback
 import os
 import re
@@ -95,7 +96,7 @@ def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COM
     """
 
     live = 'True' if USER_LIVE == '--live' else 'False'
-    date = container.split('-')[0]
+    date = datetime.date.today()
 
     content += """
     <p>

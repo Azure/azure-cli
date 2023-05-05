@@ -104,9 +104,7 @@ def upload_files(container):
         for name in files:
             if name.endswith('html') or name.endswith('json'):
                 fullpath = os.path.join(root, name)
-                cmd = 'az storage blob upload -f {} -c {} -n {} --account-name clitestresultstac --account-key {}'.format(ACCOUNT_KEY)
-                cmd = cmd.format(fullpath, container, name)
-                logger.warning('Running: ' + cmd)
+                cmd = 'az storage blob upload -f {} -c {} -n {} --account-name clitestresultstac --account-key {}'.format(fullpath, container, name, ACCOUNT_KEY)
                 os.system(cmd)
 
     logger.warning('Exit upload_files()')
