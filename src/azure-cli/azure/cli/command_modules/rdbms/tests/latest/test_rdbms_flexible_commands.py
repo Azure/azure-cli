@@ -1327,7 +1327,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
 
     postgres_location = 'eastus'
 
-    @AllowLargeResponse()
+    @AllowLargeResponse
     @ResourceGroupPreparer(location=postgres_location)
     def test_postgres_flexible_server_replica_mgmt(self, resource_group):
         self._test_flexible_server_replica_mgmt('postgres', resource_group, True)
@@ -1452,7 +1452,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                           checks=[JMESPathCheck('replicationRole', primary_role)] + master_vnet_check).get_output_in_json()
 
         # test replica create
-        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --zone 2 {}'
+        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --zone 2 {} --public-access Disabled'
                  .format(database_engine, resource_group, replicas[0], result['id'], replica_vnet_args[0]),
                  checks=[
                      JMESPathCheck('name', replicas[0]),
@@ -1462,7 +1462,8 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('sku.name', result['sku']['name']),
                      JMESPathCheck('replicationRole', replica_role),
                      JMESPathCheck('sourceServerResourceId', result['id']),
-                     JMESPathCheck('replicaCapacity', '0')] + replica_vnet_check[0])
+                     JMESPathCheck('replicaCapacity', '0'),
+                     JMESPathCheck('network.publicNetworkAccess', 'Disabled')] + replica_vnet_check[0])
 
         # test replica list
         self.cmd('{} flexible-server replica list -g {} --name {}'
@@ -1600,10 +1601,75 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
     def test_flexible_server_vnet_mgmt_validator(self, resource_group):
         self._test_flexible_server_vnet_mgmt_validator(resource_group)
   
+    @pytest.mark.mysql_regression
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_public_access_custom(self, resource_group):
         self._test_mysql_flexible_server_public_access_custom('mysql', resource_group)
+
+    @pytest.mark.mysql_regression
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_public_access_restore(self, resource_group):
+        self._test_mysql_flexible_server_public_access_restore('mysql', resource_group)
+
+    @pytest.mark.mysql_regression
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_public_access_georestore(self, resource_group):
+        self._test_mysql_flexible_server_public_access_georestore('mysql', resource_group)
+    
+    def _test_mysql_flexible_server_public_access_georestore(self, database_engine, resource_group):
+        location = 'northeurope'
+        paired_location = 'westeurope'
+        server_name_soure_restore = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        server_name_target_restore = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        api_version = '2022-09-30-preview'
+
+         #Test restore server
+        result = self.cmd('{} flexible-server create --geo-redundant-backup Enabled --public-access Enabled -g {} -n {} -l {} --iops 50 --storage-size 100 --sku-name Standard_B1ms --tier Burstable'
+                 .format(database_engine, resource_group, server_name_soure_restore, location)).get_output_in_json()
+        
+        restore_server = self.cmd('resource show --id {} --api-version {}'.format(result['id'], api_version)).get_output_in_json()
+        
+        print(restore_server)
+        current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
+        earliest_restore_time = restore_server['properties']['backup']['earliestRestoreDate']
+        seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
+        print(current_time)
+        print(seconds_to_wait)
+        time.sleep(max(0, seconds_to_wait) + 180)
+
+        target_server = self.cmd('{} flexible-server geo-restore -g {} -n {} --source-server {} --public-access Disabled --location {}'
+                 .format(database_engine, resource_group, server_name_target_restore, server_name_soure_restore, paired_location)).get_output_in_json()
+
+        self.cmd('resource show --id {} --api-version {}'.format(target_server['id'], api_version),
+                          checks=[JMESPathCheck('properties.network.publicNetworkAccess', 'Disabled')])
+
+    def _test_mysql_flexible_server_public_access_restore(self, database_engine, resource_group):
+        location = 'northeurope'
+        server_name_soure_restore = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        server_name_target_restore = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        api_version = '2022-09-30-preview'
+
+         #Test restore server
+        result = self.cmd('{} flexible-server create --public-access Enabled -g {} -n {} -l {} --iops 50 --storage-size 100 --sku-name Standard_B1ms --tier Burstable'
+                 .format(database_engine, resource_group, server_name_soure_restore, location)).get_output_in_json()
+        
+        restore_server = self.cmd('resource show --id {} --api-version {}'.format(result['id'], api_version)).get_output_in_json()
+        
+        current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
+        earliest_restore_time = restore_server['properties']['backup']['earliestRestoreDate']
+        seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
+        print(current_time)
+        print(seconds_to_wait)
+        time.sleep(max(0, seconds_to_wait) + 180)
+
+        target_server = self.cmd('{} flexible-server restore -g {} -n {} --source-server {} --public-access Disabled'
+                 .format(database_engine, resource_group, server_name_target_restore, server_name_soure_restore)).get_output_in_json()
+
+        self.cmd('resource show --id {} --api-version {}'.format(target_server['id'], api_version),
+                          checks=[JMESPathCheck('properties.network.publicNetworkAccess', 'Disabled')])
 
     def _test_mysql_flexible_server_public_access_custom(self, database_engine, resource_group):
 
@@ -1612,18 +1678,21 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         server_name_2 = self.create_random_name(SERVER_NAME_PREFIX + '2', SERVER_NAME_MAX_LENGTH)
         api_version = '2022-09-30-preview'
 
+        #Test create server with public access enabled
         result = self.cmd('{} flexible-server create --public-access Enabled -g {} -n {} -l {} --iops 50 --storage-size 100 --sku-name Standard_B1ms --tier Burstable'
                  .format(database_engine, resource_group, server_name, location)).get_output_in_json()
 
         self.cmd('resource show --id {} --api-version {}'.format(result['id'], api_version),
                           checks=[JMESPathCheck('properties.network.publicNetworkAccess', 'Enabled')])
 
+        #Test create server with public access disabled
         result = self.cmd('{} flexible-server create --public-access Disabled -g {} -n {} -l {} --iops 50 --storage-size 100 --sku-name Standard_B1ms --tier Burstable'
                  .format(database_engine, resource_group, server_name_2, location)).get_output_in_json()
 
         self.cmd('resource show --id {} --api-version {}'.format(result['id'], api_version),
                           checks=[JMESPathCheck('properties.network.publicNetworkAccess', 'Disabled')])
         
+        #Test update server
         self.cmd('{} flexible-server update -g {} -n {} --public-access Enabled'
                  .format(database_engine, resource_group, server_name_2))
         
