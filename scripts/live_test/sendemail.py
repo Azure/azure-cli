@@ -27,18 +27,11 @@ ARTIFACT_DIR = sys.argv[7]
 REQUESTED_FOR_EMAIL = sys.argv[8]
 ACCOUNT_KEY = sys.argv[9]
 COMMIT_ID = sys.argv[10]
-DB_PWD = sys.argv[11]
-DB_USER = sys.argv[12]
-DB_HOST = sys.argv[13]
-DB_PORT = sys.argv[14]
-DB_SCHEME = sys.argv[15]
 
 
 def main():
     logger.warning('Enter main()')
 
-    logger.warning(sys.argv)
-    logger.warning(SENDGRID_KEY)
     logger.warning(BUILD_ID)
     logger.warning(USER_REPO)
     logger.warning(USER_BRANCH)
@@ -46,9 +39,7 @@ def main():
     logger.warning(USER_LIVE)
     logger.warning(ARTIFACT_DIR)
     logger.warning(REQUESTED_FOR_EMAIL)
-    logger.warning(ACCOUNT_KEY)
     logger.warning(COMMIT_ID)
-    logger.warning(DB_PWD)
 
     # Upload results to storage account, container
     container = ''
@@ -67,7 +58,7 @@ def main():
     try:
         # Generate index.html
         container_url = 'https://clitestresultstac.blob.core.windows.net/' + container
-        html_content = generate_index.generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_TARGET)
+        html_content = generate_index.generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_TARGET, ACCOUNT_KEY)
         # Send email
         send_email(html_content)
     except Exception:
@@ -113,96 +104,12 @@ def upload_files(container):
         for name in files:
             if name.endswith('html') or name.endswith('json'):
                 fullpath = os.path.join(root, name)
-                cmd = 'az storage blob upload -f {} -c {} -n {} --account-name clitestresultstac'
+                cmd = 'az storage blob upload -f {} -c {} -n {} --account-name clitestresultstac --account-key {}'.format(ACCOUNT_KEY)
                 cmd = cmd.format(fullpath, container, name)
                 logger.warning('Running: ' + cmd)
                 os.system(cmd)
 
     logger.warning('Exit upload_files()')
-
-
-def write_db(container, testdata):
-    """
-    Insert data to database.
-    Sql statements to create table:
-    USE clidb;
-    CREATE TABLE `t1` (
-      `id` int(11) NOT NULL AUTO_INCREMENT,
-      `repr` varchar(30) DEFAULT NULL COMMENT 'date_time_random6digits',
-      `repo` varchar(200) DEFAULT NULL COMMENT 'Repo URL',
-      `branch` varchar(200) DEFAULT NULL COMMENT 'Branch name',
-      `commit` varchar(50) DEFAULT NULL COMMENT 'Commit ID',
-      `target` varchar(2000) DEFAULT NULL COMMENT 'Target modules to test. Splited by space, Empty string represents all modules',
-      `live` tinyint(1) DEFAULT NULL COMMENT 'Live run or not',
-      `user` varchar(50) DEFAULT NULL COMMENT 'User (email address) who triggers the run',
-      `pass` int(11) DEFAULT NULL COMMENT 'Number of passed tests',
-      `fail` int(11) DEFAULT NULL COMMENT 'Number of failed tests',
-      `rate` varchar(50) DEFAULT NULL COMMENT 'Pass rate',
-      `detail` varchar(10000) DEFAULT NULL COMMENT 'Detail',
-      `container` varchar(200) DEFAULT NULL COMMENT 'Container URL',
-      `date` varchar(10) DEFAULT NULL COMMENT 'Date. E.g. 20200801',
-      `time` varchar(10) DEFAULT NULL COMMENT 'Time. E.g. 183000',
-      PRIMARY KEY (`id`),
-      UNIQUE KEY `repr` (`repr`)
-    );
-    """
-    logger.warning('Enter write_db()')
-    logger.warning('container {}'.format(container))
-    logger.warning('testdata {}'.format(testdata))
-    import mysql.connector
-    logger.warning('Connect DB...')
-    # Connect
-    cnx = mysql.connector.connect(user=DB_USER,
-                                  password=DB_PWD,
-                                  host=DB_HOST,
-                                  port=DB_PORT,
-                                  database=DB_SCHEME,
-                                  connection_timeout=30)
-    logger.warning('Connect DB Success')
-    cursor = cnx.cursor()
-    sql = 'INSERT INTO t1 (repr, repo, branch, commit, target, live, user, pass, fail, rate, detail, container, date, time) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);'
-    logger.warning(sql)
-    repr = container
-    repo = USER_REPO
-    branch = USER_BRANCH
-    commit = COMMIT_ID
-    target = USER_TARGET
-    live = 1 if USER_LIVE == '--live' else 0
-    user = REQUESTED_FOR_EMAIL
-    pass0 = testdata.total[1]
-    fail = testdata.total[2]
-    rate = testdata.total[3]
-    detail = str(testdata.modules)
-    container_url = 'https://clitestresultstac.blob.core.windows.net/{}/index.html'.format(container)
-    upload_time = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
-    date, time = upload_time.split('-')[0], upload_time.split('-')[1]
-    data = (repr, repo, branch, commit, target, live, user, pass0, fail, rate, detail, container_url, date, time)
-    logger.warning(data)
-    cursor.execute(sql, data)
-
-    # Make sure data is committed to the database
-    cnx.commit()
-
-    # Insert into t2
-    sql = 'SELECT id FROM t1 WHERE repr = %s'
-    cursor.execute(sql, (repr,))
-    id0 = None
-    for value in cursor:
-        id0 = value[0]
-    if id0:
-        for module, passed, failed, rate in testdata.modules:
-            sql = 'INSERT INTO t2 (module, pass, fail, rate, ref_id) VALUES (%s, %s, %s, %s, %s)'
-            data = (module, passed, failed, rate, id0)
-            logger.warning(sql)
-            logger.warning(data)
-            cursor.execute(sql, data)
-        cnx.commit()
-
-    # Close
-    cursor.close()
-    cnx.close()
-
-    logger.warning('Exit write_db()')
 
 
 def send_email(html_content):
