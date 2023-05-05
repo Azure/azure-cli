@@ -98,7 +98,7 @@ TARGET_RESOURCES_USERTOKEN = [RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible,
 TARGET_RESOURCES_CONNECTION_STRING = [RESOURCE.Sql, RESOURCE.Mysql, RESOURCE.MysqlFlexible, RESOURCE.Postgres, RESOURCE.PostgresFlexible]
 
 # The target resources to be deprecated
-TARGET_RESOURCES_DEPRECATED = [RESOURCE.Sql, RESOURCE.Postgres]
+TARGET_RESOURCES_DEPRECATED = [RESOURCE.Mysql, RESOURCE.Postgres]
 
 # The dict defines the resource id pattern of source resources.
 SOURCE_RESOURCES = {
