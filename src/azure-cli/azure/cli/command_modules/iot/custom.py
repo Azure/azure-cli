@@ -123,22 +123,23 @@ def iot_dps_create(cmd, client, dps_name, resource_group_name, location=None,
                    identity_role=None,
                    identity_scopes=None,
                    enable_data_residency=None,
-                   enable_customer_intiated_failover=None,
+                   enable_customer_initiated_failover=None,
                    failover_region=None):
     cli_ctx = cmd.cli_ctx
     _check_dps_name_availability(client.iot_dps_resource, dps_name)
     location = _ensure_location(cli_ctx, resource_group_name, location)
 
-    if bool(enable_customer_intiated_failover) ^ bool(failover_region):
+    if bool(enable_customer_initiated_failover) ^ bool(failover_region):
         raise RequiredArgumentMissingError('TODO See what is minimum needed for customer initiated failover.')
     dps_failover_description = IotDpsPropertiesDescriptionDpsFailoverDescription(failover_region=failover_region)
     dps_property = IotDpsPropertiesDescription(enable_data_residency=enable_data_residency,
-                                               enable_customer_intiated_failover=enable_customer_intiated_failover,
+                                               enable_customer_initiated_failover=enable_customer_initiated_failover,
                                                dps_failover_description=dps_failover_description)
     dps_description = ProvisioningServiceDescription(location=location,
                                                      properties=dps_property,
                                                      sku=IotDpsSkuInfo(name=sku, capacity=unit),
                                                      tags=tags)
+    import pdb; pdb.set_trace()
 
     if (system_identity or user_identities):
         dps_description.identity = _build_identity(system=bool(system_identity), identities=user_identities)
