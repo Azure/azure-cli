@@ -202,7 +202,8 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
         backup_name = self.create_random_name(prefix='cli-backup-', length=24)
         self.create_backup(account_name, pool_name, volume_name, backup_name)
-
+        
+        self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
         # volume update
         volume = self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --backup-enabled %s" %
                           (account_name, pool_name, volume_name, False)).get_output_in_json()
