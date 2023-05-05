@@ -35,6 +35,7 @@ KUSTO_DATABASE = sys.argv[5]
 KUSTO_TABLE = sys.argv[6]
 TARGET = sys.argv[7]
 BUILDID = sys.argv[8]
+USER_TARGET = sys.argv[9]
 
 
 def generate_csv_file():
@@ -88,24 +89,26 @@ def generate_csv_file():
 
 
 def send_to_kusto():
-    logger.info('Start send csv data to kusto db for {TARGET}'.format(TARGET=TARGET))
-    kcsb = KustoConnectionStringBuilder.with_aad_application_key_authentication(KUSTO_CLUSTER, KUSTO_CLIENT_ID, KUSTO_CLIENT_SECRET, KUSTO_TENANT_ID)
-    # The authentication method will be taken from the chosen KustoConnectionStringBuilder.
-    client = QueuedIngestClient(kcsb)
+    if USER_TARGET in ['ALL', 'all', '']:
+        logger.info('Start send csv data to kusto db for {TARGET}'.format(TARGET=TARGET))
+        kcsb = KustoConnectionStringBuilder.with_aad_application_key_authentication(KUSTO_CLUSTER, KUSTO_CLIENT_ID, KUSTO_CLIENT_SECRET, KUSTO_TENANT_ID)
+        # The authentication method will be taken from the chosen KustoConnectionStringBuilder.
+        client = QueuedIngestClient(kcsb)
 
-    # there are a lot of useful properties, make sure to go over docs and check them out
-    ingestion_props = IngestionProperties(
-        database=KUSTO_DATABASE,
-        table=KUSTO_TABLE,
-        data_format=DataFormat.CSV,
-        report_level=ReportLevel.FailuresAndSuccesses
-    )
+        # there are a lot of useful properties, make sure to go over docs and check them out
+        ingestion_props = IngestionProperties(
+            database=KUSTO_DATABASE,
+            table=KUSTO_TABLE,
+            data_format=DataFormat.CSV,
+            report_level=ReportLevel.FailuresAndSuccesses
+        )
 
-    # ingest from file
-    result = client.ingest_from_file(f"/mnt/vss/_work/1/{TARGET}.csv", ingestion_properties=ingestion_props)
-    # Inspect the result for useful information, such as source_id and blob_url
-    print(repr(result))
-    logger.info('Finsh send csv data to kusto db for {}.'.format(TARGET))
+        # ingest from file
+        result = client.ingest_from_file(f"/mnt/vss/_work/1/{TARGET}.csv", ingestion_properties=ingestion_props)
+        # Inspect the result for useful information, such as source_id and blob_url
+        print(repr(result))
+        logger.info('Finsh send csv data to kusto db for {}.'.format(TARGET))
+
 
 if __name__ == '__main__':
     generate_csv_file()

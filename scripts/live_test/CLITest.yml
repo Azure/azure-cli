@@ -492,8 +492,8 @@ jobs:
 
         az -v
         # az login -u azureclilivetest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
+        # az account set -s $(AZURECLITESTSUBSCRIPTIONID)?
         az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTTENANTID)
-        az account set -s $(AZURECLITESTSUBSCRIPTIONID)
 
         # Clean resources
         python /mnt/vss/_work/1/s/scripts/live_test/clean_policy.py
@@ -527,12 +527,10 @@ jobs:
           git commit -m "Upload recording files"
           git push origin $(USER_BRANCH_EXT)
         fi
-        # send data to kusto db
-        if [[ ("$(USER_TARGET)" == "ALL" || "$(USER_TARGET)" == "all" || "$(USER_TARGET)" == "") ]]; then
-          echo "Send data to kusto db!"
-          pip install azure-kusto-data azure-kusto-ingest bs4
-          python /mnt/vss/_work/1/s/scripts/live_test/send_to_kusto.py "$(KUSTO_CLUSTER)" "$(KUSTO_CLIENT_ID)" "$(KUSTO_CLIENT_SECRET)" "$(KUSTO_TENANT_ID)" "$(KUSTO_DATABASE)" "$(KUSTO_TABLE)" "$(Target)" "$(Build.BuildId)" 
-        fi
+
+        echo "Send data to kusto db!"
+        pip install azure-kusto-data azure-kusto-ingest bs4
+        python /mnt/vss/_work/1/s/scripts/live_test/send_to_kusto.py "$(KUSTO_CLUSTER)" "$(KUSTO_CLIENT_ID)" "$(KUSTO_CLIENT_SECRET)" "$(KUSTO_TENANT_ID)" "$(KUSTO_DATABASE)" "$(KUSTO_TABLE)" "$(Target)" "$(Build.BuildId)" "$(USER_TARGET)"
 
       condition: and(succeededOrFailed(), eq(variables.Match, '1'))
     - task: PublishTestResults@2
@@ -606,9 +604,9 @@ jobs:
         az -v
         echo "login to user azureclilivetest"
         # az login -u $(AZURECLITESTUSER) -p $(AZURECLITESTPASSWORD)
+        # az account set -s $(AZURECLITESTSUBSCRIPTIONID)
         az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTTENANTID)
         echo "set account"
-        az account set -s $(AZURECLITESTSUBSCRIPTIONID)
         echo "send email to grid"
         python /mnt/vss/_work/1/s/scripts/live_test/sendemail.py "$(SENDGRID_KEY)" "$(Build.BuildId)" "$(USER_REPO)" "$(USER_BRANCH)" "$(USER_TARGET)" "$(USER_LIVE)" "$(System.ArtifactsDirectory)" "$(Build.RequestedForEmail)" "$(ACCOUNT_KEY)" "$commit_id" "$(DB_PWD)" "$(DB_USER)" "$(DB_HOST)" "$(DB_PORT)" "$(DB_SCHEME)"
         python /mnt/vss/_work/1/s/scripts/live_test/clean.py
