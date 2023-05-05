@@ -118,7 +118,7 @@ class AroScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
 
         with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
-            self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=list-cred')
+            self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=get-admin-kubeconfig')
 
         try:
             self.cmd('aro get-admin-kubeconfig -g {rg} -n {name} --subscription {subscription} -f {temp_kubeconfig_path}')
