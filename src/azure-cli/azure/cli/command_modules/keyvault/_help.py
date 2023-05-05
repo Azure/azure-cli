@@ -75,6 +75,14 @@ long-summary: The GetCertificateVersions operation returns the versions of a cer
         key vault. This operation requires the certificates/list permission.
 """
 
+helps['keyvault certificate list-deleted'] = """
+type: command
+short-summary: Lists the currently-recoverable deleted certificates.
+long-summary: Possible only if vault is soft-delete enabled.  Requires certificates/get/list permission.
+        Retrieves the certificates in the current vault which are in a deleted state and ready for
+        recovery or purging. This operation includes deletion-specific information.
+"""
+
 helps['keyvault certificate download'] = """
 type: command
 short-summary: Download the public portion of a Key Vault certificate.

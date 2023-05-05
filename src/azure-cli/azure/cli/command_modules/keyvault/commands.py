@@ -17,7 +17,7 @@ from azure.cli.command_modules.keyvault._transformers import (
     transform_key_output, transform_key_encryption_output, transform_key_random_output,
     transform_secret_list, transform_deleted_secret_list, transform_secret_set,
     transform_secret_set_attributes, transform_secret_show_deleted, transform_secret_delete, transform_secret_recover,
-    transform_certificate_create, transform_certificate_list)
+    transform_certificate_create, transform_certificate_list, transform_certificate_list_deleted)
 
 from azure.cli.command_modules.keyvault._format import transform_secret_list_table
 
@@ -236,14 +236,6 @@ def load_command_table(self, _):
         g.keyvault_custom('restore', 'restore_secret', transform=transform_secret_set_attributes)
 
     with self.command_group('keyvault certificate', data_entity.command_type) as g:
-        g.keyvault_command('list-versions', 'get_certificate_versions',
-                           transform=multi_transformers(
-                               keep_max_results,
-                               extract_subresource_name()))
-        g.keyvault_command('list-deleted', 'get_deleted_certificates',
-                           transform=multi_transformers(
-                               keep_max_results,
-                               extract_subresource_name()))
         g.keyvault_command('show', 'get_certificate', transform=extract_subresource_name())
         g.keyvault_command('show-deleted', 'get_deleted_certificate', transform=extract_subresource_name())
         g.keyvault_command('delete', 'delete_certificate', deprecate_info=g.deprecate(
@@ -296,6 +288,10 @@ def load_command_table(self, _):
                            transform=multi_transformers(
                                keep_max_results,
                                transform_certificate_list))
+        g.keyvault_command('list-deleted', 'list_deleted_certificates',
+                           transform=multi_transformers(
+                               keep_max_results,
+                               transform_certificate_list_deleted))
 
     if not is_azure_stack_profile(self):
         with self.command_group('keyvault role', data_access_control_entity.command_type):

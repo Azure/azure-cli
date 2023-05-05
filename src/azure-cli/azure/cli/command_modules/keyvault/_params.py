@@ -529,7 +529,7 @@ def load_arguments(self, _):
                    help='The rotation policy file definition as JSON, or a path to a file containing JSON policy definition.')
     # endregion
 
-    # region KeyVault Secret track2
+    # region KeyVault Secret Certificate shared track2
     for item in ['secret', 'certificate']:
         for cmd in ['backup', 'decrypt', 'delete', 'download', 'encrypt', 'list-versions', 'set-attributes', 'show',
                     'list', 'list-deleted']:
@@ -861,14 +861,6 @@ def load_arguments(self, _):
     # endregion
 
     # region KeyVault Certificate track2
-    for cmd in ['list', 'list-deleted']:
-        with self.argument_context('keyvault certificate {}'.format(item, cmd)) as c:
-            c.extra('include_pending', arg_type=get_three_state_flag())
-
-    # with self.argument_context('keyvault certificate') as c:
-    #     c.argument('validity', type=int,
-    #                help='Number of months the certificate is valid for. Overrides the value specified with --policy/-p')
-
     with self.argument_context('keyvault certificate create') as c:
         c.argument('certificate_name', options_list=['--name', '-n'], required=True, arg_group='Id',
                    help='Name of the certificate.')
@@ -883,6 +875,11 @@ def load_arguments(self, _):
             c.argument('policy', options_list=['--policy', '-p'],
                        help='JSON encoded policy definition. Use @{file} to load from a file(e.g. @my_policy.json).',
                        type=get_json_object, validator=process_certificate_policy)
+
+    for cmd in ['list', 'list-deleted']:
+        with self.argument_context('keyvault certificate {}'.format(cmd)) as c:
+            c.extra('include_pending', arg_type=get_three_state_flag(),
+                    help='Specifies whether to include certificates which are not completely provisioned.')
     # endregion
 
     # region KeyVault Role

@@ -226,11 +226,12 @@ def transform_certificate_create(result, **command_args):
         return ret
     return result
 
+
 def transform_certificate_list(result, **command_args):
-    return [transform_certificate_base_properties(certificate) for certificate in result]
+    return [transform_certificate_properties(certificate) for certificate in result]
 
 
-def transform_certificate_base_properties(result):
+def transform_certificate_properties(result):
     import base64
     if not isinstance(result, dict):
         x509_thumbprint = getattr(result, "x509_thumbprint", None)
@@ -250,5 +251,22 @@ def transform_certificate_base_properties(result):
             "x509Thumbprint": base64.b64encode(x509_thumbprint).decode('utf-8') if x509_thumbprint else None,
             "x509ThumbprintHex": x509_thumbprint.hex().upper()
         }
+        return ret
+    return result
+
+
+def transform_certificate_list_deleted(result, **command_args):
+    return [transform_deleted_certificate(certificate) for certificate in result]
+
+
+def transform_deleted_certificate(result):
+    if not isinstance(result, dict):
+        ret = transform_certificate_properties(getattr(result, "properties", None))
+        ret.update({
+            "deletedDate": getattr(result, "deleted_on", None),
+            "recoveryId": getattr(result, "recovery_id", None),
+            "scheduledPurgeDate": getattr(result, "scheduled_purge_date", None)
+        })
+        del ret["subject"]
         return ret
     return result
