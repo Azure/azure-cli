@@ -20,9 +20,9 @@ class Delete(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-02-01-preview",
+        "version": "2022-08-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}", "2022-02-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}", "2022-08-01-preview"],
         ]
     }
 
@@ -44,7 +44,7 @@ class Delete(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.distributed_availability_group_name = AAZStrArg(
-            options=["-n", "--name", "--distributed-availability-group-name"],
+            options=["-n", "--link", "--name", "--distributed-availability-group-name"],
             help="Distributed availability group name.",
             required=True,
             id_part="child_name_1",
@@ -61,7 +61,17 @@ class Delete(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         yield self.DistributedAvailabilityGroupsDelete(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
 
     class DistributedAvailabilityGroupsDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -140,7 +150,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-02-01-preview",
+                    "api-version", "2022-08-01-preview",
                     required=True,
                 ),
             }
@@ -151,6 +161,10 @@ class Delete(AAZCommand):
 
         def on_204(self, session):
             pass
+
+
+class _DeleteHelper:
+    """Helper class for Delete"""
 
 
 __all__ = ["Delete"]

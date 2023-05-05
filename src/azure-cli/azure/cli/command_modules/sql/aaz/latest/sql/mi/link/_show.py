@@ -19,9 +19,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-02-01-preview",
+        "version": "2022-08-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}", "2022-02-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}", "2022-08-01-preview"],
         ]
     }
 
@@ -42,7 +42,7 @@ class Show(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.distributed_availability_group_name = AAZStrArg(
-            options=["-n", "--name", "--distributed-availability-group-name"],
+            options=["-n", "--link", "--name", "--distributed-availability-group-name"],
             help="Distributed availability group name.",
             required=True,
             id_part="child_name_1",
@@ -59,7 +59,17 @@ class Show(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         self.DistributedAvailabilityGroupsGet(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -117,7 +127,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-02-01-preview",
+                    "api-version", "2022-08-01-preview",
                     required=True,
                 ),
             }
@@ -168,6 +178,10 @@ class Show(AAZCommand):
                 serialized_name="distributedAvailabilityGroupId",
                 flags={"read_only": True},
             )
+            properties.instance_role = AAZStrType(
+                serialized_name="instanceRole",
+                flags={"read_only": True},
+            )
             properties.last_hardened_lsn = AAZStrType(
                 serialized_name="lastHardenedLsn",
                 flags={"read_only": True},
@@ -201,6 +215,10 @@ class Show(AAZCommand):
             )
 
             return cls._schema_on_200
+
+
+class _ShowHelper:
+    """Helper class for Show"""
 
 
 __all__ = ["Show"]

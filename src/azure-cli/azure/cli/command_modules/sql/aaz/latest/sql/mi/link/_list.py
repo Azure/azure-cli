@@ -19,9 +19,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-02-01-preview",
+        "version": "2022-08-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups", "2022-02-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups", "2022-08-01-preview"],
         ]
     }
 
@@ -51,7 +51,17 @@ class List(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         self.DistributedAvailabilityGroupsListByInstance(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
@@ -106,7 +116,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-02-01-preview",
+                    "api-version", "2022-08-01-preview",
                     required=True,
                 ),
             }
@@ -148,9 +158,7 @@ class List(AAZCommand):
             )
 
             value = cls._schema_on_200.value
-            value.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
+            value.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element
             _element.id = AAZStrType(
@@ -160,7 +168,7 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
             _element.properties = AAZObjectType(
-                flags={"client_flatten": True, "read_only": True},
+                flags={"client_flatten": True},
             )
             _element.type = AAZStrType(
                 flags={"read_only": True},
@@ -169,6 +177,10 @@ class List(AAZCommand):
             properties = cls._schema_on_200.value.Element.properties
             properties.distributed_availability_group_id = AAZStrType(
                 serialized_name="distributedAvailabilityGroupId",
+                flags={"read_only": True},
+            )
+            properties.instance_role = AAZStrType(
+                serialized_name="instanceRole",
                 flags={"read_only": True},
             )
             properties.last_hardened_lsn = AAZStrType(
@@ -181,19 +193,15 @@ class List(AAZCommand):
             )
             properties.primary_availability_group_name = AAZStrType(
                 serialized_name="primaryAvailabilityGroupName",
-                flags={"read_only": True},
             )
             properties.replication_mode = AAZStrType(
                 serialized_name="replicationMode",
-                flags={"read_only": True},
             )
             properties.secondary_availability_group_name = AAZStrType(
                 serialized_name="secondaryAvailabilityGroupName",
-                flags={"read_only": True},
             )
             properties.source_endpoint = AAZStrType(
                 serialized_name="sourceEndpoint",
-                flags={"read_only": True},
             )
             properties.source_replica_id = AAZStrType(
                 serialized_name="sourceReplicaId",
@@ -201,7 +209,6 @@ class List(AAZCommand):
             )
             properties.target_database = AAZStrType(
                 serialized_name="targetDatabase",
-                flags={"read_only": True},
             )
             properties.target_replica_id = AAZStrType(
                 serialized_name="targetReplicaId",
@@ -209,6 +216,10 @@ class List(AAZCommand):
             )
 
             return cls._schema_on_200
+
+
+class _ListHelper:
+    """Helper class for List"""
 
 
 __all__ = ["List"]
