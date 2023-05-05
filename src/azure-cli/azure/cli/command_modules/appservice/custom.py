@@ -990,8 +990,9 @@ def show_app(cmd, resource_group_name, name, slot=None):
                                                                                                  resource_group_name))
     app.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration',
                                               slot)
-    _rename_server_farm_props(app)
-    _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
+    if not is_centauri_functionapp(cmd, resource_group_name, name):
+        _rename_server_farm_props(app)
+        _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
     return app
 
 
