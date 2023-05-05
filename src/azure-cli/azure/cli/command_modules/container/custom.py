@@ -232,11 +232,11 @@ def create_container(cmd,
         confidential_compute_properties = ConfidentialComputeProperties(cce_policy=cce_policy)
         security_context_capabilities = SecurityContextCapabilitiesDefinition(add=add_capabilities, drop=drop_capabilities)
         security_context = SecurityContextDefinition(privileged=privileged,
-                allow_privilege_escalation=allow_privilege_escalation,
-                capabilities=security_context_capabilities,
-                run_as_group=run_as_group,
-                run_as_user=run_as_user,
-                seccomp_profile=seccomp_profile)
+                                                     allow_privilege_escalation=allow_privilege_escalation,
+                                                     capabilities=security_context_capabilities,
+                                                     run_as_group=run_as_group,
+                                                     run_as_user=run_as_user,
+                                                     seccomp_profile=seccomp_profile)
 
     container = Container(name=name,
                           image=image,
