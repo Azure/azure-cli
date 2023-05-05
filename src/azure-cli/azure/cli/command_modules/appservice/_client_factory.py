@@ -59,6 +59,13 @@ def appcontainers_client_factory(cli_ctx, api_version=None, **_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_APPCONTAINERS, api_version=api_version)
 
 
+def resource_groups_factory(cli_ctx, subscription_id=None):
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                   subscription_id=subscription_id)
+
+
 def cf_plans(cli_ctx, _):
     return web_client_factory(cli_ctx).app_service_plans
 

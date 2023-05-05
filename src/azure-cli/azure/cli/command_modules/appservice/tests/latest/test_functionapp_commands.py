@@ -221,12 +221,19 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         storage_account_id2 = self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(
             storage2, resource_group2, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()['id']
 
+        result = self.cmd('functionapp list').get_output_in_json()
+        count = len(result)
+
         self.cmd('functionapp create -g {} -n {} -p {} -s {} --functions-version 4'.format(resource_group, functionapp_name, plan, storage), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', functionapp_name),
             JMESPathCheck('hostNames[0]',
                           functionapp_name + '.azurewebsites.net')
         ])
+
+        result = self.cmd('functionapp list').get_output_in_json()
+        self.assertEquals(len(result), count + 1)
+
         self.cmd('functionapp create -g {} -n {} -p {} -s {} --functions-version 4'.format(resource_group2,
                                                                      functionapp_name2, plan_id, storage_account_id2))
         self.cmd(

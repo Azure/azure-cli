@@ -54,7 +54,7 @@ from .tunnel import TunnelServer
 
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
 from ._client_factory import (web_client_factory, ex_handler_factory, providers_client_factory,
-                              appcontainers_client_factory)
+                              appcontainers_client_factory, resource_groups_factory)
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
 from .utils import (_normalize_sku,
                     get_sku_tier,
@@ -997,11 +997,19 @@ def show_app(cmd, resource_group_name, name, slot=None):
 
 
 def _list_app(cli_ctx, resource_group_name=None):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cli_ctx)
     client = web_client_factory(cli_ctx)
+    rg_client = resource_groups_factory(cli_ctx, subscription_id)
     if resource_group_name:
         result = list(client.web_apps.list_by_resource_group(resource_group_name))
     else:
-        result = list(client.web_apps.list())
+        resource_groups = rg_client.resource_groups.list()
+        result = []
+        for resource_group in resource_groups:
+            function_apps = list(client.web_apps.list_by_resource_group(resource_group.name))
+            for function_app in function_apps:
+                result.append(function_app)
     for webapp in result:
         _rename_server_farm_props(webapp)
     return result
