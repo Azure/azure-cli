@@ -341,7 +341,7 @@ def transform_certificate_policy(policy, id):
             },
             "x509CertificateProperties": {
                 "basic_constraints": {
-                    "ca": False
+                    "ca": getattr(policy, "ca", False)
                 },
                 "ekus": getattr(policy, "enhanced_key_usage", None),
                 "keyUsage": getattr(policy, "key_usage", None),
