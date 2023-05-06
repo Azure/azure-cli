@@ -1575,6 +1575,7 @@ def log_windows_post_installation_manual_steps_warning(install_dir, binary_name)
 
 
 def validate_install_location(install_location: str, exe_name: str) -> None:
+    # check if the installation path is a directory
     if os.path.isdir(install_location):
         from azure.cli.command_modules.acs._params import _get_default_install_location
         raise InvalidArgumentValueError(
@@ -1582,6 +1583,15 @@ def validate_install_location(install_location: str, exe_name: str) -> None:
             'including the binary filename e.g. "{}".'.format(
                 install_location, _get_default_install_location(exe_name)
             )
+        )
+    # check if the binary filename in installation path is correct
+    binary_name = os.path.basename(install_location)
+    if binary_name != exe_name:
+        logger.error(
+            'The binary filename "%s" in install location does not match '
+            'the expected binary name "%s".',
+            binary_name,
+            exe_name,
         )
 
 
@@ -1612,20 +1622,25 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
     base_url = source_url + f"/{{}}/bin/{{}}/{arch}/{{}}"
 
     # ensure installation directory exists
-    validate_install_location(install_location, "kubectl")
     install_dir, cli = os.path.dirname(
         install_location), os.path.basename(install_location)
     if not os.path.exists(install_dir):
         os.makedirs(install_dir)
 
     if system == 'Windows':
-        file_url = base_url.format(client_version, 'windows', 'kubectl.exe')
+        binary_name = 'kubectl.exe'
+        file_url = base_url.format(client_version, 'windows', binary_name)
     elif system == 'Linux':
-        file_url = base_url.format(client_version, 'linux', 'kubectl')
+        binary_name = 'kubectl'
+        file_url = base_url.format(client_version, 'linux', binary_name)
     elif system == 'Darwin':
-        file_url = base_url.format(client_version, 'darwin', 'kubectl')
+        binary_name = 'kubectl'
+        file_url = base_url.format(client_version, 'darwin', binary_name)
     else:
         raise UnknownError("Unsupported system '{}'.".format(system))
+
+    # validate install location
+    validate_install_location(install_location, binary_name)
 
     logger.warning('Downloading client to "%s" from "%s"', install_location, file_url)
     try:
@@ -1670,7 +1685,6 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
     file_url = base_url.format(client_version)
 
     # ensure installation directory exists
-    validate_install_location(install_location, "kubelogin")
     install_dir, cli = os.path.dirname(
         install_location), os.path.basename(install_location)
     if not os.path.exists(install_dir):
@@ -1687,6 +1701,9 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
         sub_dir, binary_name = f'darwin_{arch}', 'kubelogin'
     else:
         raise UnknownError("Unsupported system '{}'.".format(system))
+
+    # validate install location
+    validate_install_location(install_location, binary_name)
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         try:
