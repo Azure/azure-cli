@@ -565,8 +565,12 @@ def load_arguments(self, _):
                         help='The recovery id of the {}. '
                              'If specified all other \'Id\' arguments should be omitted.'.format(item),
                         validator=validate_keyvault_resource_id(item))
-                c.argument('name', options_list=['--name', '-n'], required=False,
-                           help='Name of the {}. Required if --id is not specified.'.format(item))
+                if item == 'secret':
+                    c.argument('name', options_list=['--name', '-n'], required=False,
+                        help='Name of the {}. Required if --id is not specified.'.format(item))
+                elif item == 'certificate':
+                    c.argument('{}_name'.format(item), options_list=['--name', '-n'], required=False,
+                        help='Name of the {}. Required if --id is not specified.'.format(item))
                 c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None,
                         options_list=['--vault-name'], required=False,
                         help='Name of the Vault. Required if --id is not specified.')

@@ -282,10 +282,10 @@ def transform_certificate_show(result, **command_args):
             "contentType": getattr(result, "content_type", None),
             "kid": getattr(result, "key_id", None),
             "pending": {
-                "id": '/'.join(id.split('/')[:-1]+['pending']) if id else None
+                "id": '/'.join(id.split('/')[:-1] + ['pending']) if id else None
             },
             "policy": transform_certificate_policy(policy=getattr(result, "policy", None),
-                                                   id='/'.join(id.split('/')[:-1]+['policy'])),
+                                                   id='/'.join(id.split('/')[:-1] + ['policy'])),
             "sid": getattr(result, "secret_id", None)
         })
         del ret["subject"]
@@ -352,3 +352,15 @@ def transform_certificate_policy(policy, id):
         }
         return policy
     return policy
+
+
+def transform_certificate_show_deleted(result, **command_args):
+    if not isinstance(result, dict):
+        ret = transform_certificate_show(result)
+        ret.update({
+            "deletedDate": getattr(result, "deleted_on", None),
+            "recoveryId": getattr(result, "recovery_id", None),
+            "scheduledPurgeDate": getattr(result, "scheduled_purge_date", None)
+        })
+        return ret
+    return result
