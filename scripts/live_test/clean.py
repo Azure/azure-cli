@@ -6,11 +6,13 @@
 
 # Clean Azure resources automatically
 # version 1.0
+import datetime
 import json
 import os
 import subprocess
 import time
 from tqdm import tqdm
+
 
 def main():
     print('Azure cli resource clean up: version 1.0')
@@ -19,7 +21,9 @@ def main():
     clean_storage()
     clean_servicebus()
     clean_backup()
+    clean_deleted_keyvault()
     get_remaining_tests()
+
 
 def clean_lock():
     print('Clean lock')
@@ -271,6 +275,27 @@ def clean_backup():
         print(cmd)
         result = os.popen(cmd).read()
         print(result)
+
+
+def clean_deleted_keyvault():
+    cmd = ['az', 'keyvault', 'list-deleted', '--query', '[][name, properties.scheduledPurgeDate, type]']
+    print(cmd)
+    out = subprocess.run(cmd, capture_output=True)
+    deleted_keyvaults = json.loads(out.stdout)
+    count = 0
+    for name, scheduledPurgeDate, keyvault_type in tqdm(deleted_keyvaults):
+        if scheduledPurgeDate <= datetime.datetime.now().isoformat():
+            if keyvault_type == 'Microsoft.KeyVault/deletedVaults':
+                cmd = ['az', 'keyvault', 'purge', '--name', name]
+            elif keyvault_type == 'Microsoft.KeyVault/deletedManagedHSMs':
+                cmd = ['az', 'keyvault', 'purge', '--hsm-name', name]
+            else:
+                continue
+            print(cmd)
+            count += 1
+            out = subprocess.run(cmd, capture_output=True)
+            print(out.stdout)
+    print(count)
 
 
 def get_remaining_tests():
