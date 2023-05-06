@@ -242,6 +242,7 @@ class AAZCommand(CLICommand):
             polling = next(polling_generator)
             if polling and self.AZ_SUPPORT_LRO_CONTINUE:
                 self.ctx.cache_continuation_token(polling)
+                logger.warning("The continuation token is cached locally. You can use `--lro-continue` for polling.")
             return None
         return AAZLROPoller(polling_generator=polling_generator, result_callback=extract_result)
 
