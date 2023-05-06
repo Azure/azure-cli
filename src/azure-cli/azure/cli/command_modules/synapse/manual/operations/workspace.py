@@ -112,7 +112,7 @@ def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin
         encryption = existing_ws.encryption
     else:
         if key_name:
-            workspace_key_detail = WorkspaceKeyDetails(name=key_name,key_vault_url=existing_ws.encryption.cmk.key.keyVaultUrl)
+            workspace_key_detail = WorkspaceKeyDetails(name=key_name, key_vault_url=existing_ws.encryption.cmk.key.keyVaultUrl)
         else:
             workspace_key_detail = existing_ws.encryption.cmk.key
 
@@ -122,8 +122,7 @@ def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin
         else:
             kek_identity = existing_ws.encryption.cmk.kek_identity
 
-        encryption = EncryptionDetails(cmk=CustomerManagedKeyDetails(key=workspace_key_detail,
-                                                                 kek_identity=kek_identity))
+        encryption = EncryptionDetails(cmk=CustomerManagedKeyDetails(key=workspace_key_detail, kek_identity=kek_identity))
 
     existing_identity = existing_ws.identity
     keysList = list(existing_identity.user_assigned_identities.keys())

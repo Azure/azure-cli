@@ -37,7 +37,8 @@ examples:
         az synapse workspace create --name testworkspace --resource-group rg \\
           --storage-account testadlsgen2 --file-system testfilesystem \\
           --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US" \\
-          --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname} --key-name testcmk
+          --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname} --key-name testcmk \\
+          --uami-id-in-encrypt {your-uami-resourceid} --use-sami-in-encrypt false
   - name: Create a Synapse workspace connecting to azure devops
     text: |-
         az synapse workspace create --name testworkspace --resource-group rg \\
@@ -54,7 +55,6 @@ examples:
   - name: Create a Synapse workspace with user assigned managed identity
     text: |-
         az synapse workspace create --name testworkspace --resource-group rg \\
-          --managed-rg-name managedrg \\
           --storage-account testadlsgen2 --file-system testfilesystem \\
           --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US" \\
           --uami-id "{your-first-uami-resourceid}" "{your-second-uami-resourceid}"
