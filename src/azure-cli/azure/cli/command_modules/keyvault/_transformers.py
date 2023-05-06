@@ -371,3 +371,10 @@ def transform_certificate_delete(result, **command_args):
         ret = transform_certificate_show_deleted(result.result())
         return ret
     return result
+
+
+def transform_certificate_recover(result, **command_args):
+    if not isinstance(result, dict):
+        ret = transform_certificate_show(result.result())
+        return ret
+    return result
