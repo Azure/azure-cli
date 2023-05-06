@@ -3775,6 +3775,7 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
 
 
 def publish_bicep_file(cmd, file, target, documentationUri=None):
+    ensure_bicep_installation(cmd.cli_ctx)
     minimum_supported_version = "0.4.1008"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["publish", file, "--target", target]
