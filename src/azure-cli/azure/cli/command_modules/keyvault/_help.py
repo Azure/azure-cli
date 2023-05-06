@@ -98,6 +98,15 @@ long-summary: Deletes all versions of a certificate object along with its associ
         operation requires the certificates/delete permission.
 """
 
+helps['keyvault certificate purge'] = """
+type: command
+short-summary: Permanently deletes the specified deleted certificate.
+long-summary: The PurgeDeletedCertificate operation performs an irreversible deletion of the specified
+        certificate, without possibility for recovery. The operation is not available if the
+        recovery level does not specify 'Purgeable'. This operation requires the certificate/purge
+        permission.
+"""
+
 helps['keyvault certificate download'] = """
 type: command
 short-summary: Download the public portion of a Key Vault certificate.

@@ -237,7 +237,6 @@ def load_command_table(self, _):
         g.keyvault_custom('restore', 'restore_secret', transform=transform_secret_set_attributes)
 
     with self.command_group('keyvault certificate', data_entity.command_type) as g:
-        g.keyvault_command('purge', 'purge_deleted_certificate')
         g.keyvault_command('recover', 'recover_deleted_certificate', transform=extract_subresource_name())
         g.keyvault_command('set-attributes', 'update_certificate', transform=extract_subresource_name())
         g.keyvault_custom('import', 'import_certificate', transform=extract_subresource_name())
@@ -293,6 +292,7 @@ def load_command_table(self, _):
                                    'documentation for additional guidance.\n'
                                    'https://docs.microsoft.com/azure/key-vault/general/soft-delete-overview'),
                            transform=transform_certificate_delete)
+        g.keyvault_command('purge', 'purge_deleted_certificate')
 
     if not is_azure_stack_profile(self):
         with self.command_group('keyvault role', data_access_control_entity.command_type):
