@@ -90,6 +90,14 @@ long-summary:  Gets information about a specific certificate. This operation req
         permission.
 """
 
+helps['keyvault certificate delete'] = """
+type: command
+short-summary: Deletes a certificate from a specified key vault.
+long-summary: Deletes all versions of a certificate object along with its associated policy. Delete
+        certificate cannot be used to remove individual versions of a certificate object. This
+        operation requires the certificates/delete permission.
+"""
+
 helps['keyvault certificate download'] = """
 type: command
 short-summary: Download the public portion of a Key Vault certificate.
