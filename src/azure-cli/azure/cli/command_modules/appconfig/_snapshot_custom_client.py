@@ -197,8 +197,8 @@ def build_put_snapshot_request(
     request_body["filters"] = filters
 
     if composition_type is not None:
-        if composition_type not in ("all", "group_by_key"):
-            raise ValueError("Value should either be 'all' or 'group_by_key'.")
+        if composition_type not in ("key", "key_label"):
+            raise ValueError("Value should either be 'key' or 'key_label'.")
 
         request_body["composition_type"] = composition_type
 

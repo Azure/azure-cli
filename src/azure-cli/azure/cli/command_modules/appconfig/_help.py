@@ -611,7 +611,7 @@ helps['appconfig snapshot create'] = """
             az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\\"key\\":\\"abc*\\"}' --retention-period 3600
         - name: Create a snapshot of all keys starting with 'app/' and no label as default, then override the key-values with keys with the label 'prod' if they exist.
           text:
-            az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\\"key\\":\\"app/*\\"}' '{\\"key\\":\\"app/*\\", \\"label\\":\\"prod\\"}' --composition-type 'group_by_key'
+            az appconfig snapshot create -s MySnapshot -n MyAppConfiguration --filters '{\\"key\\":\\"app/*\\"}' '{\\"key\\":\\"app/*\\", \\"label\\":\\"prod\\"}' --composition-type 'key'
     """
 
 helps['appconfig snapshot show'] = """
