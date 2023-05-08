@@ -14,8 +14,7 @@ from azure.core.tracing.common import with_current_context
 from azure.core.tracing.decorator import distributed_trace
 # import LROPoller in main thread to resolve import deadlock between threads in python 3.10.10
 # reference https://github.com/psf/requests/issues/2925 and https://github.com/Azure/azure-cli/issues/26272
-from msrest.polling.poller import LROPoller  # pylint: disable=unused-import
-
+import requests
 
 _LOGGER = logging.getLogger(__name__)
 
