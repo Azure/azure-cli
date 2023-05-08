@@ -806,7 +806,8 @@ def process_certificate_policy(cmd, ns):
         validity_in_months = x509_certificate_properties.get('validity_in_months')
 
     validity_in_months = getattr(ns, 'validity', validity_in_months)
-    del ns.validity
+    if hasattr(ns, 'validity'):
+        del ns.validity
 
     policyObj = CertificatePolicy(issuer_name=issuer_name, subject=subject, attributes=attributes,
                                   exportable=exportable, key_type=key_type, key_size=key_size, reuse_key=reuse_key,

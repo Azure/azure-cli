@@ -107,6 +107,14 @@ long-summary: The PurgeDeletedCertificate operation performs an irreversible del
         permission.
 """
 
+helps['keyvault certificate set-attributes'] = """
+type: command
+short-summary: Updates the specified attributes associated with the given certificate.
+long-summary: The UpdateCertificate operation applies the specified update on the given certificate; the
+        only elements updated are the certificate's attributes. This operation requires the
+        certificates/update permission.
+"""
+
 helps['keyvault certificate download'] = """
 type: command
 short-summary: Download the public portion of a Key Vault certificate.

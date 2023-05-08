@@ -2679,3 +2679,12 @@ def list_secret(client, **kwargs):
     return result
 
 # endregion
+
+
+def set_attributes_certificate(client, certificate_name, version=None, policy=None, **kwargs):
+    if policy:
+        client.update_certificate_policy(certificate_name=certificate_name, policy=policy)
+    if kwargs.get('enabled') is not None or kwargs.get('tags') is not None:
+        return client.update_certificate_properties(certificate_name=certificate_name, version=version, **kwargs)
+    else:
+        return client.get_certificate(certificate_name=certificate_name)
