@@ -747,13 +747,6 @@ def load_arguments(self, _):
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                    help='Local certificate backup from which to restore certificate.')
 
-    with self.argument_context('keyvault certificate import') as c:
-        c.argument('certificate_data', options_list=['--file', '-f'], completer=FilesCompleter(),
-                   help='PKCS12 file or PEM file containing the certificate and private key.',
-                   type=certificate_type)
-        c.argument('password', help="If the private key in certificate is encrypted, the password used for encryption.")
-        c.extra('disabled', arg_type=get_three_state_flag(), help='Import the certificate in disabled state.')
-
     with self.argument_context('keyvault certificate download') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                    help='File to receive the binary certificate contents.')
@@ -817,18 +810,32 @@ def load_arguments(self, _):
                    help='JSON encoded policy definition. Use @{file} to load from a file(e.g. @my_policy.json).',
                    type=get_json_object, validator=process_certificate_policy)
 
-    for item in ['set-attributes', 'import']:
-        with self.argument_context('keyvault certificate ' + item) as c:
-            c.extra('enabled', help='Enable the certificate.', arg_type=get_three_state_flag())
-            c.extra('policy', options_list=['--policy', '-p'],
-                       help='JSON encoded policy definition. Use @{file} to load from a file(e.g. @my_policy.json).',
-                       type=get_json_object, validator=process_certificate_policy)
-            c.extra('tags', tags_type)
+    with self.argument_context('keyvault certificate set-attributes') as c:
+        c.extra('enabled', help='Enable the certificate.', arg_type=get_three_state_flag())
+        c.extra('policy', options_list=['--policy', '-p'],
+                   help='JSON encoded policy definition. Use @{file} to load from a file(e.g. @my_policy.json).',
+                   type=get_json_object, validator=process_certificate_policy)
+        c.extra('tags', tags_type)
 
     for cmd in ['list', 'list-deleted']:
         with self.argument_context('keyvault certificate {}'.format(cmd)) as c:
             c.extra('include_pending', arg_type=get_three_state_flag(),
                     help='Specifies whether to include certificates which are not completely provisioned.')
+
+    with self.argument_context('keyvault certificate import') as c:
+        c.argument('certificate_name', options_list=['--name', '-n'], required=True, arg_group='Id',
+                   help='Name of the certificate.')
+        c.argument('vault_base_url', vault_name_type, required=True, arg_group='Id',
+                type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+        c.argument('certificate_data', options_list=['--file', '-f'], completer=FilesCompleter(),
+                   help='PKCS12 file or PEM file containing the certificate and private key.',
+                   type=certificate_type)
+        c.argument('password', help="If the private key in certificate is encrypted, the password used for encryption.")
+        c.extra('disabled', arg_type=get_three_state_flag(), help='Import the certificate in disabled state.')
+        c.extra('policy', options_list=['--policy', '-p'],
+                help='JSON encoded policy definition. Use @{file} to load from a file(e.g. @my_policy.json).',
+                type=get_json_object, validator=process_certificate_policy)
+        c.extra('tags', tags_type)
     # endregion
 
     # region KeyVault Role
