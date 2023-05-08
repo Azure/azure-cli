@@ -514,18 +514,18 @@ def validate_registry_server(namespace):
         if not namespace.registry_username or not namespace.registry_password:
             if ACR_IMAGE_SUFFIX not in namespace.registry_server:
                 raise RequiredArgumentMissingError("Usage error: --registry-server, --registry-password and"
-                                      " --registry-username are required together if not using Azure Container Registry")  # pylint: disable=line-too-long
+                                                   " --registry-username are required together if not using Azure Container Registry")  # pylint: disable=line-too-long
 
 
 def validate_registry_user(namespace):
     if namespace.environment and namespace.registry_username:
         if not namespace.registry_server or (not namespace.registry_password and ACR_IMAGE_SUFFIX not in namespace.registry_server):  # pylint: disable=line-too-long
             raise RequiredArgumentMissingError("Usage error: --registry-server, --registry-password and"
-                                  " --registry-username are required together if not using Azure Container Registry")
+                                               " --registry-username are required together if not using Azure Container Registry")
 
 
 def validate_registry_pass(namespace):
     if namespace.environment and namespace.registry_password:
         if not namespace.registry_server or (not namespace.registry_username and ACR_IMAGE_SUFFIX not in namespace.registry_server):  # pylint: disable=line-too-long
             raise RequiredArgumentMissingError("Usage error: --registry-server, --registry-password and"
-                                  " --registry-username are required together if not using Azure Container Registry")
+                                               " --registry-username are required together if not using Azure Container Registry")
