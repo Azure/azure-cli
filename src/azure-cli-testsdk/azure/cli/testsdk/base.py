@@ -217,14 +217,21 @@ class LocalContextScenarioTest(ScenarioTest):
 @live_only()
 class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
 
-    def __init__(self, method_name):
+    def __init__(self, method_name, random_config_dir=False):
         super(LiveScenarioTest, self).__init__(method_name)
-        self.cli_ctx = get_dummy_cli()
+        self.cli_ctx = get_dummy_cli(random_config_dir=random_config_dir)
+        self.random_config_dir = random_config_dir
         self.kwargs = {}
         self.test_resources_count = 0
 
     def setUp(self):
         patch_main_exception_handler(self)
+
+    def tearDown(self):
+        if self.random_config_dir:
+            from azure.cli.core.util import rmtree_with_retry
+            rmtree_with_retry(self.cli_ctx.config.config_dir)
+        super(LiveScenarioTest, self).tearDown()
 
     def cmd(self, command, checks=None, expect_failure=False):
         command = self._apply_kwargs(command)
