@@ -242,7 +242,7 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         rules = []
         isNfs41 = False
         isNfs3 = False
-        
+
         if rule_index is None:
             rule_index = 1
 
@@ -255,7 +255,7 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         if "NFSv3" in protocol_types:
             isNfs3 = True
         if "CIFS" in protocol_types:
-            cifs = True            
+            cifs = True
 
         export_policy = ExportPolicyRule(rule_index=rule_index, unix_read_only=unix_read_only,
                                          unix_read_write=unix_read_write, cifs=cifs,

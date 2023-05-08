@@ -803,7 +803,7 @@ examples:
 
 helps['netappfiles volume replication resume'] = """
 type: command
-short-summary: Resync a volume replication for the specified destination volume. The replication process is resumed from source to destination.
+short-summary: Resync a volume replication for the specified destination volume. The replication process is resumed from source to destination. If any quota rules exists on destination volume  they will be overwritten with source volume's quota rules
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
