@@ -540,6 +540,7 @@ class CommandIndex:
         if cli_ctx:
             self.version = __version__
             self.cloud_profile = cli_ctx.cloud.profile
+        self.cli_ctx = cli_ctx
 
     def get(self, args):
         """Get the corresponding module and extension list of a command.
@@ -549,8 +550,6 @@ class CommandIndex:
         """
         # If the command index version or cloud profile doesn't match those of the current command,
         # invalidate the command index.
-        from azure.cli.core.util import is_autocomplete
-
         index_version = self.INDEX[self._COMMAND_INDEX_VERSION]
         cloud_profile = self.INDEX[self._COMMAND_INDEX_CLOUD_PROFILE]
         if not (index_version and index_version == self.version and
@@ -570,7 +569,7 @@ class CommandIndex:
         # Check the command index for (command: [module]) mapping, like
         # "network": ["azure.cli.command_modules.natgateway", "azure.cli.command_modules.network", "azext_firewall"]
         index_modules_extensions = index.get(top_command)
-        if not index_modules_extensions and is_autocomplete():
+        if not index_modules_extensions and self.cli_ctx.data['completer_active']:
             # If user type `az acco`, command begin with `acco` will be matched.
             logger.debug("In autocomplete mode, load command begin with: '%s'", top_command)
             index_modules_extensions = []
