@@ -860,6 +860,12 @@ type: command
 short-summary: List available locations for running function apps.
 """
 
+
+helps['functionapp list-flexconsumption-locations'] = """
+type: command
+short-summary: List available locations for running function apps on Flex App Service plans.
+"""
+
 helps['functionapp plan'] = """
 type: group
 short-summary: Manage App Service Plans for an Azure Function

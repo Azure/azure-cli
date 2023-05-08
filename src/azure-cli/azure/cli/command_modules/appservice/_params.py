@@ -736,7 +736,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('always_ready_instances', type=int, options_list=['--always-ready-instances'], help="The number of pre-allocated instances.", is_preview=True)
         c.argument('maximum_instances', type=int, options_list=['--maximum-instances'], help="The maximum number of instances.", is_preview=True)
         c.argument('instance_size', type=int, options_list=['--instance-size'], help="The size of instances.", is_preview=True)
-        c.argument('flexconsumption_location', options_list=['--flexconsumption-location'],
+        c.argument('flexconsumption_location', options_list=['--flexconsumption-location', '-f'],
                    help="Geographic location where function app will be hosted. Use `az functionapp list-flexconsumption-locations` to view available locations.", is_preview=True)
 
     with self.argument_context('functionapp cors credentials') as c:
