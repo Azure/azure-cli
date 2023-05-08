@@ -814,7 +814,7 @@ class FunctionAppManagedEnvironment(LiveScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('location', WINDOWS_ASP_LOCATION_FUNCTIONAPP)])
 
-        with self.assertRaises(ValidationError):   
+        with self.assertRaises(RequiredArgumentMissingError):   
             self.cmd('functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet \
                     --functions-version 4 --image nginx --registry-server docker.io'
                     .format(resource_group, functionapp_name, storage_account, managed_environment_name))
@@ -834,7 +834,7 @@ class FunctionAppManagedEnvironment(LiveScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('location', WINDOWS_ASP_LOCATION_FUNCTIONAPP)])
 
-        with self.assertRaises(ValidationError):   
+        with self.assertRaises(RequiredArgumentMissingError):   
             self.cmd('functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet \
                     --functions-version 4 --image nginx --registry-username azfunctest'
                     .format(resource_group, functionapp_name, storage_account, managed_environment_name))
@@ -854,7 +854,7 @@ class FunctionAppManagedEnvironment(LiveScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('location', WINDOWS_ASP_LOCATION_FUNCTIONAPP)])
 
-        with self.assertRaises(ValidationError):   
+        with self.assertRaises(RequiredArgumentMissingError):   
             self.cmd('functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet \
                     --functions-version 4 --image nginx  --registry-password 123'
                     .format(resource_group, functionapp_name, storage_account, managed_environment_name))
