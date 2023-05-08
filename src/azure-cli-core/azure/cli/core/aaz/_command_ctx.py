@@ -172,7 +172,7 @@ class AAZCommandCtx:
         continuation_token = polling.get_continuation_token()
         expires_at = int(time.time()) + 24*60*60
         self.command_config.set_value(section, "continuation_token", continuation_token)
-        self.command_config.set_value(section, "expires_at", expires_at)
+        self.command_config.set_value(section, "expires_at", str(expires_at))
 
     def get_command_cache_section(self, command_name, method, url):
         method = method.upper()
