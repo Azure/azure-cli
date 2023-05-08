@@ -5,6 +5,9 @@ parameters:
   - name: CLIExtensionRepoPath
     type: string
     default: ''
+  - name: EnableCompactAAZ
+    type: boolean
+    default: false
 steps:
   - bash: |
       set -ev
@@ -23,6 +26,11 @@ steps:
       fi
       # This helps detect issues in CI if a used SDK API version is deleted by the below script.
       python $CLI_REPO_PATH/scripts/trim_sdk.py
+      # This helps detect issues in CI if aaz compacted
+      echo EnableCompactAAZ: ${{ parameters.EnableCompactAAZ }}
+      if [ "${{ parameters.EnableCompactAAZ }}" == 'True' ]; then
+        python $CLI_REPO_PATH/scripts/compact_aaz.py
+      fi
     displayName: 'azdev setup'
     env:
       CLI_REPO_PATH: ${{ parameters.CLIRepoPath }}

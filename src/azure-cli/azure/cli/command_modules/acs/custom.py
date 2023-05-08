@@ -73,6 +73,7 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
     AzureInternalError,
+    ClientRequestError,
     CLIInternalError,
     FileOperationError,
     InvalidArgumentValueError,
@@ -400,10 +401,13 @@ def aks_create(
     nat_gateway_idle_timeout=None,
     outbound_type=None,
     network_plugin=None,
+    network_plugin_mode=None,
     network_policy=None,
+    network_dataplane=None,
     auto_upgrade_channel=None,
     cluster_autoscaler_profile=None,
     uptime_sla=False,
+    tier=None,
     fqdn_subdomain=None,
     api_server_authorized_ip_ranges=None,
     enable_private_cluster=False,
@@ -436,11 +440,14 @@ def aks_create(
     disable_disk_driver=False,
     disable_file_driver=False,
     enable_blob_driver=None,
+    enable_workload_identity=False,
     disable_snapshot_controller=False,
     enable_azure_keyvault_kms=False,
     azure_keyvault_kms_key_id=None,
     azure_keyvault_kms_key_vault_network_access=None,
     azure_keyvault_kms_key_vault_resource_id=None,
+    enable_image_cleaner=False,
+    image_cleaner_interval_hours=None,
     enable_keda=False,
     # addons
     enable_addons=None,
@@ -494,6 +501,20 @@ def aks_create(
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
 
+    # validation for existing cluster
+    existing_mc = None
+    try:
+        existing_mc = client.get(resource_group_name, name)
+    # pylint: disable=broad-except
+    except Exception as ex:
+        logger.debug("failed to get cluster, error: %s", ex)
+    if existing_mc:
+        raise ClientRequestError(
+            f"The cluster '{name}' under resource group '{resource_group_name}' already exists. "
+            "Please use command 'az aks update' to update the existing cluster, "
+            "or select a different cluster name to create a new cluster."
+        )
+
     # decorator pattern
     from azure.cli.command_modules.acs.managed_cluster_decorator import AKSManagedClusterCreateDecorator
     aks_create_decorator = AKSManagedClusterCreateDecorator(
@@ -520,6 +541,8 @@ def aks_update(
     tags=None,
     disable_local_accounts=False,
     enable_local_accounts=False,
+    network_plugin_mode=None,
+    pod_cidr=None,
     load_balancer_managed_outbound_ip_count=None,
     load_balancer_managed_outbound_ipv6_count=None,
     load_balancer_outbound_ips=None,
@@ -532,6 +555,7 @@ def aks_update(
     cluster_autoscaler_profile=None,
     uptime_sla=False,
     no_uptime_sla=False,
+    tier=None,
     api_server_authorized_ip_ranges=None,
     enable_public_fqdn=False,
     disable_public_fqdn=False,
@@ -561,6 +585,8 @@ def aks_update(
     disable_file_driver=False,
     enable_blob_driver=None,
     disable_blob_driver=None,
+    enable_workload_identity=False,
+    disable_workload_identity=False,
     enable_snapshot_controller=False,
     disable_snapshot_controller=False,
     enable_azure_keyvault_kms=False,
@@ -568,6 +594,9 @@ def aks_update(
     azure_keyvault_kms_key_id=None,
     azure_keyvault_kms_key_vault_network_access=None,
     azure_keyvault_kms_key_vault_resource_id=None,
+    enable_image_cleaner=False,
+    disable_image_cleaner=False,
+    image_cleaner_interval_hours=None,
     http_proxy_config=None,
     enable_keda=False,
     disable_keda=False,
@@ -1446,15 +1475,22 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None, base_sr
 # Note: the results returned here may be inaccurate if the installed python is translated (e.g. by Rosetta)
 def get_arch_for_cli_binary():
     arch = platform.machine().lower()
-    # default arch
-    formatted_arch = "amd64"
-    # set to "arm64" when the detection value contains the word "arm"
-    if "arm" in arch:
+    if "amd64" in arch or "x86_64" in arch:
+        formatted_arch = "amd64"
+    elif "armv8" in arch or "aarch64" in arch:
         formatted_arch = "arm64"
+    else:
+        raise CLIInternalError(
+            "Unsupported architecture: '{}'. Currently only supports downloading the binary "
+            "of arm64/amd64 architecture for linux/darwin/windows platform, please download "
+            "the corresponding binary for other platforms or architectures by yourself".format(
+                arch
+            )
+        )
     logger.warning(
-        "The detected architecture is '%s', which will be regarded as '%s' and "
-        "the corresponding binary will be downloaded. "
-        "If there is any problem, please download the appropriate binary by yourself.",
+        'The detected architecture of current device is "%s", and the binary for "%s" '
+        'will be downloaded. If the detectiton is wrong, please download and install '
+        'the binary corresponding to the appropriate architecture.',
         arch,
         formatted_arch,
     )
@@ -1538,6 +1574,27 @@ def log_windows_post_installation_manual_steps_warning(install_dir, binary_name)
     )
 
 
+def validate_install_location(install_location: str, exe_name: str) -> None:
+    # check if the installation path is a directory
+    if os.path.isdir(install_location):
+        from azure.cli.command_modules.acs._params import _get_default_install_location
+        raise InvalidArgumentValueError(
+            'The installation location "{}" is a directory. Please specify a path '
+            'including the binary filename e.g. "{}".'.format(
+                install_location, _get_default_install_location(exe_name)
+            )
+        )
+    # check if the binary filename in installation path is correct
+    binary_name = os.path.basename(install_location)
+    if binary_name != exe_name:
+        logger.error(
+            'The binary filename "%s" in install location does not match '
+            'the expected binary name "%s".',
+            binary_name,
+            exe_name,
+        )
+
+
 # install kubectl
 def k8s_install_kubectl(cmd, client_version='latest', install_location=None, source_url=None, arch=None):
     """
@@ -1551,8 +1608,9 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
             source_url = 'https://mirror.azure.cn/kubernetes/kubectl'
 
     if client_version == 'latest':
-        context = _ssl_context()
-        version = urlopen(source_url + '/stable.txt', context=context).read()
+        latest_version_url = source_url + '/stable.txt'
+        logger.warning('No version specified, will get the latest version of kubectl from "%s"', latest_version_url)
+        version = urlopen(source_url + '/stable.txt', context=_ssl_context()).read()
         client_version = version.decode('UTF-8').strip()
     else:
         client_version = "v%s" % client_version
@@ -1570,16 +1628,21 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
         os.makedirs(install_dir)
 
     if system == 'Windows':
-        file_url = base_url.format(client_version, 'windows', 'kubectl.exe')
+        binary_name = 'kubectl.exe'
+        file_url = base_url.format(client_version, 'windows', binary_name)
     elif system == 'Linux':
-        file_url = base_url.format(client_version, 'linux', 'kubectl')
+        binary_name = 'kubectl'
+        file_url = base_url.format(client_version, 'linux', binary_name)
     elif system == 'Darwin':
-        file_url = base_url.format(client_version, 'darwin', 'kubectl')
+        binary_name = 'kubectl'
+        file_url = base_url.format(client_version, 'darwin', binary_name)
     else:
         raise UnknownError("Unsupported system '{}'.".format(system))
 
-    logger.warning('Downloading client to "%s" from "%s"',
-                   install_location, file_url)
+    # validate install location
+    validate_install_location(install_location, binary_name)
+
+    logger.warning('Downloading client to "%s" from "%s"', install_location, file_url)
     try:
         _urlretrieve(file_url, install_location)
         os.chmod(install_location,
@@ -1609,11 +1672,11 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
             source_url = 'https://mirror.azure.cn/kubernetes/kubelogin'
 
     if client_version == 'latest':
-        context = _ssl_context()
         latest_release_url = 'https://api.github.com/repos/Azure/kubelogin/releases/latest'
         if cloud_name.lower() == 'azurechinacloud':
             latest_release_url = 'https://mirror.azure.cn/kubernetes/kubelogin/latest'
-        latest_release = urlopen(latest_release_url, context=context).read()
+        logger.warning('No version specified, will get the latest version of kubelogin from "%s"', latest_release_url)
+        latest_release = urlopen(latest_release_url, context=_ssl_context()).read()
         client_version = json.loads(latest_release)['tag_name'].strip()
     else:
         client_version = "v%s" % client_version
@@ -1639,6 +1702,9 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
     else:
         raise UnknownError("Unsupported system '{}'.".format(system))
 
+    # validate install location
+    validate_install_location(install_location, binary_name)
+
     with tempfile.TemporaryDirectory() as tmp_dir:
         try:
             download_path = os.path.join(tmp_dir, 'kubelogin.zip')
@@ -1650,6 +1716,7 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
                 'Connection error while attempting to download client ({})'.format(ex))
         _unzip(download_path, tmp_dir)
         download_path = os.path.join(tmp_dir, 'bin', sub_dir, binary_name)
+        logger.warning('Moving binary to "%s" from "%s"', install_location, download_path)
         shutil.move(download_path, install_location)
     os.chmod(install_location, os.stat(install_location).st_mode |
              stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
@@ -2246,6 +2313,52 @@ def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
                        "use 'aks nodepool list' to get current node pool list".format(nodepool_name))
 
     return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, cluster_name, nodepool_name)
+
+
+def aks_agentpool_operation_abort(cmd,
+                                  client,
+                                  resource_group_name,
+                                  cluster_name,
+                                  nodepool_name,
+                                  no_wait=False):
+    PowerState = cmd.get_models(
+        "PowerState",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="agent_pools",
+    )
+
+    agentpool_exists = False
+    instances = client.list(resource_group_name, cluster_name)
+    for agentpool_profile in instances:
+        if agentpool_profile.name.lower() == nodepool_name.lower():
+            agentpool_exists = True
+            break
+    if not agentpool_exists:
+        raise InvalidArgumentValueError(
+            "Node pool {} doesnt exist, use 'aks nodepool list' to get current node pool list".format(nodepool_name))
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    power_state = PowerState(code="Running")
+    instance.power_state = power_state
+    return sdk_no_wait(no_wait, client.begin_abort_latest_operation, resource_group_name, cluster_name, nodepool_name)
+
+
+def aks_operation_abort(cmd,   # pylint: disable=unused-argument
+                        client,
+                        resource_group_name,
+                        name,
+                        no_wait=False):
+    PowerState = cmd.get_models(
+        "PowerState",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="managed_clusters",
+    )
+
+    instance = client.get(resource_group_name, name)
+    power_state = PowerState(code="Running")
+    if instance is None:
+        raise InvalidArgumentValueError("Cluster {} doesnt exist, use 'aks list' to get current cluster list".format(name))
+    instance.power_state = power_state
+    return sdk_no_wait(no_wait, client.begin_abort_latest_operation, resource_group_name, name)
 
 
 def aks_agentpool_show(cmd, client, resource_group_name, cluster_name, nodepool_name):

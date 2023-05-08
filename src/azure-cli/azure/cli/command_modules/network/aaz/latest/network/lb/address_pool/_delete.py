@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 class Delete(AAZCommand):
-    """Delete the specified load balancer backend address pool.
+    """Delete an address pool.
 
     :example: Delete an address pool.
         az network lb address-pool delete -g MyResourceGroup --lb-name MyLb -n MyAddressPool
@@ -44,7 +44,7 @@ class Delete(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.address_pool_name = AAZStrArg(
             options=["-n", "--name", "--address-pool-name"],
-            help="The name of the backend address pool. If only one exists, omit to use as default.",
+            help="The name of the backend address pool.",
             required=True,
             id_part="child_name_1",
         )

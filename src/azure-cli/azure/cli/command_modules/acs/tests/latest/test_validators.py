@@ -529,6 +529,28 @@ class TestValidateAzureKeyVaultKmsKeyId(unittest.TestCase):
             validators.validate_azure_keyvault_kms_key_id(namespace)
         self.assertEqual(str(cm.exception), err)
 
+class ImageCleanerNamespace:
+    def __init__(
+        self,
+        enable_image_cleaner=False,
+        disable_image_cleaner=False,
+        image_cleaner_interval_hours=None,
+    ):
+        self.enable_image_cleaner = enable_image_cleaner 
+        self.disable_image_cleaner = disable_image_cleaner 
+        self.image_cleaner_interval_hours = image_cleaner_interval_hours 
+
+class TestValidateImageCleanerEnableDiasble(unittest.TestCase):
+    def test_invalid_image_cleaner_enable_disable_not_existing_together(self):
+        namespace = ImageCleanerNamespace(
+            enable_image_cleaner=True,
+            disable_image_cleaner=True,
+        )
+        err = 'Cannot specify --enable-image-cleaner and --disable-image-cleaner at the same time.'
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_image_cleaner_enable_disable_mutually_exclusive(namespace)
+        self.assertEqual(str(cm.exception), err)
 
 class AzureKeyVaultKmsKeyVaultResourceIdNamespace:
 

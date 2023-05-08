@@ -54,10 +54,6 @@ class Create(AAZCommand):
             help="Virtual network gateway name.",
             required=True,
         )
-        _args_schema.id = AAZStrArg(
-            options=["--id"],
-            help="Resource ID.",
-        )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
             help="Root certificate name.",
@@ -327,7 +323,6 @@ class Create(AAZCommand):
                 self.ctx.args,
                 typ=AAZObjectType
             )
-            _builder.set_prop("id", AAZStrType, ".id")
             _builder.set_prop("name", AAZStrType, ".name")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 

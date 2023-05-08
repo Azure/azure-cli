@@ -1176,7 +1176,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # create spark pool
         spark_pool = self.cmd('az synapse spark pool create --name {spark-pool} --spark-version {spark-version}'
-                              ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size Medium'
+                              ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size XLarge'
                               ' --spark-config-file-path "{file}"',
                               checks=[
                                   self.check('name', self.kwargs['spark-pool']),

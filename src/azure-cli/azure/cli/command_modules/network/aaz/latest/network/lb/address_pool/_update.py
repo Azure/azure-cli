@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "network lb address-pool update",
 )
 class Update(AAZCommand):
-    """Update a load balancer backend address pool.
+    """Update an address pool.
 
     :example: Update all backend addresses in the address pool using shorthand syntax
         az network lb address-pool update -g MyResourceGroup --lb-name MyLb -n MyAddressPool --vnet MyVnetResource --backend-addresses "[{name:addr1,ip-address:10.0.0.1},{name:addr2,ip-address:10.0.0.2,subnet:subnetName}]"
@@ -58,7 +58,7 @@ class Update(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.address_pool_name = AAZStrArg(
             options=["-n", "--name", "--address-pool-name"],
-            help="The name of the backend address pool. If only one exists, omit to use as default.",
+            help="The name of the backend address pool.",
             required=True,
             id_part="child_name_1",
         )

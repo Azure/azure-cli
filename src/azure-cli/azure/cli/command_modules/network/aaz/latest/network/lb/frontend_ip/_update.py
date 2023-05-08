@@ -907,8 +907,8 @@ class _UpdateHelper:
 
         _elements = _builder.get(".properties.ipTags[]")
         if _elements is not None:
-            _elements.set_prop("ipTagType", AAZStrType, "@PublicIPAddress_update.ip_tags.[].ip_tag_type")
-            _elements.set_prop("tag", AAZStrType, "@PublicIPAddress_update.ip_tags.[].tag")
+            _elements.set_prop("ipTagType", AAZStrType, ".ip_tag_type")
+            _elements.set_prop("tag", AAZStrType, ".tag")
 
         nat_gateway = _builder.get(".properties.natGateway")
         if nat_gateway is not None:

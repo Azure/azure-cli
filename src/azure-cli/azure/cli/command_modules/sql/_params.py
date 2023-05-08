@@ -214,7 +214,7 @@ ledger_on_param_type = CLIArgumentType(
 
 preferred_enclave_param_type = CLIArgumentType(
     options_list=['--preferred-enclave-type'],
-    help='Create a database configured with Default or VBS preferred enclave type. ',
+    help='Specifies type of enclave for this resource.',
     arg_type=get_enum_type(AlwaysEncryptedEnclaveType))
 
 database_assign_identity_param_type = CLIArgumentType(
@@ -644,7 +644,11 @@ def _configure_db_dw_create_params(
 
     # collation and max_size_bytes are ignored when restoring because their values are determined by
     # the source db.
-    if create_mode in [CreateMode.restore, CreateMode.point_in_time_restore]:
+    if create_mode in [
+            CreateMode.restore,
+            CreateMode.point_in_time_restore,
+            CreateMode.RECOVERY,
+            CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP]:
         arg_ctx.ignore('collation', 'max_size_bytes')
 
     if engine == Engine.dw:
@@ -1255,6 +1259,7 @@ def load_arguments(self, _):
                    help='If true, will only return the latest backup for each database')
 
     with self.argument_context('sql db ltr-backup restore') as c:
+        _configure_db_dw_create_params(c, Engine.db, CreateMode.RESTORE_LONG_TERM_RETENTION_BACKUP)
         c.argument('target_database_name',
                    options_list=['--dest-database'],
                    required=True,
@@ -1275,24 +1280,6 @@ def load_arguments(self, _):
                    required=True,
                    help='The resource id of the long term retention backup to be restored. '
                    'Use \'az sql db ltr-backup show\' or \'az sql db ltr-backup list\' for backup id.')
-
-        c.argument('requested_backup_storage_redundancy',
-                   required=False,
-                   arg_type=backup_storage_redundancy_param_type)
-
-        c.argument('high_availability_replica_count',
-                   required=False,
-                   arg_type=read_replicas_param_type)
-
-        c.argument('zone_redundant',
-                   required=False,
-                   arg_type=zone_redundant_param_type)
-
-        c.argument('service_objective',
-                   options_list=['--service-objective', '--service-level-objective'],
-                   required=False,
-                   arg_group=sku_arg_group,
-                   help='The name of the service objective for the restored database.')
 
         c.argument('assign_identity',
                    arg_type=database_assign_identity_param_type)
@@ -1348,6 +1335,7 @@ def load_arguments(self, _):
                    help='Retrieves all requested geo-redundant backups under this resource group.')
 
     with self.argument_context('sql db geo-backup restore') as c:
+        _configure_db_dw_create_params(c, Engine.db, CreateMode.RECOVERY)
         c.argument('target_database_name',
                    options_list=['--dest-database'],
                    required=True,
@@ -1368,24 +1356,6 @@ def load_arguments(self, _):
                    required=True,
                    help='The resource id of the geo-redundant backup to be restored. '
                    'Use \'az sql db geo-backup list\' or \'az sql db geo-backup show\' for backup id.')
-
-        c.argument('requested_backup_storage_redundancy',
-                   required=False,
-                   arg_type=backup_storage_redundancy_param_type)
-
-        c.argument('high_availability_replica_count',
-                   required=False,
-                   arg_type=read_replicas_param_type)
-
-        c.argument('zone_redundant',
-                   required=False,
-                   arg_type=zone_redundant_param_type)
-
-        c.argument('service_objective',
-                   options_list=['--service-objective', '--service-level-objective'],
-                   required=False,
-                   arg_group=sku_arg_group,
-                   help='The name of the service objective for the restored database.')
 
         c.argument('assign_identity',
                    arg_type=database_assign_identity_param_type)
@@ -1522,6 +1492,9 @@ def load_arguments(self, _):
         c.argument('high_availability_replica_count',
                    arg_type=read_replicas_param_type)
 
+        c.argument('preferred_enclave_type',
+                   arg_type=preferred_enclave_param_type)
+
     with self.argument_context('sql elastic-pool create') as c:
         # Create args that will be used to build up the ElasticPool object
         create_args_for_complex_type(
@@ -1534,6 +1507,7 @@ def load_arguments(self, _):
                 'zone_redundant',
                 'maintenance_configuration_id',
                 'high_availability_replica_count',
+                'preferred_enclave_type',
             ])
 
         # Create args that will be used to build up the ElasticPoolPerDatabaseSettings object
@@ -1593,6 +1567,9 @@ def load_arguments(self, _):
 
         c.argument('storage_mb',
                    help='Storage limit for the elastic pool in MB.')
+
+        c.argument('preferred_enclave_type',
+                   help='Type of enclave to be configured for the elastic pool.')
 
     #####
     #           sql elastic-pool op
@@ -2017,6 +1994,13 @@ def load_arguments(self, _):
         c.argument('kid',
                    arg_type=kid_param_type,
                    required=True)
+    #####
+    #           sql server refresh-external-governance-status
+    #####
+    with self.argument_context('sql server refresh-external-governance-status') as c:
+        c.argument('server_name',
+                   arg_type=server_param_type)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
 
     #####
     #           sql server tde-key
@@ -2451,6 +2435,7 @@ def load_arguments(self, _):
             c, 'parameters', ManagedDatabase, [
                 'collation',
                 'tags',
+                'is_ledger_on'
             ])
 
         c.argument('tags', arg_type=tags_type)
@@ -2459,6 +2444,10 @@ def load_arguments(self, _):
                    required=False,
                    help='The collation of the Azure SQL Managed Database collation to use, '
                    'e.g.: SQL_Latin1_General_CP1_CI_AS or Latin1_General_100_CS_AS_SC')
+
+        c.argument('is_ledger_on',
+                   required=False,
+                   arg_type=ledger_on_param_type)
 
     with self.argument_context('sql midb update') as c:
         create_args_for_complex_type(
@@ -2709,6 +2698,15 @@ def load_arguments(self, _):
                    required=False,
                    options_list=['--last-backup-name', '--last-bn'],
                    help='The name of the last backup to restore.')
+
+    ######
+    #           sql midb ledger-digest-uploads
+    ######
+    with self.argument_context('sql midb ledger-digest-uploads enable') as c:
+        c.argument('endpoint',
+                   options_list=['--endpoint'],
+                   help='The endpoint of a digest storage, '
+                   'which can be either an Azure Blob storage or a ledger in Azure Confidential Ledger.')
 
     ###############################################
     #                sql virtual cluster          #
