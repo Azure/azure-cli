@@ -632,7 +632,7 @@ def validate_azuremonitorworkspaceresourceid(namespace):
         return
     resource_id = sanitize_resource_id(resource_id)
     if (bool(re.match(r'/subscriptions/.*/resourcegroups/.*/providers/microsoft.monitor/accounts/.*', resource_id))) is False:
-        raise ArgumentUsageError("--azure-monitor-workspace-resource-id not in the correct format. It should match `/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/microsoft.monitor/accounts/<resourceName>`")
+        raise InvalidArgumentValueError("--azure-monitor-workspace-resource-id not in the correct format. It should match `/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/microsoft.monitor/accounts/<resourceName>`")
 
 
 # pylint:disable=line-too-long
@@ -642,4 +642,4 @@ def validate_grafanaresourceid(namespace):
         return
     resource_id = sanitize_resource_id(resource_id)
     if (bool(re.match(r'/subscriptions/.*/resourcegroups/.*/providers/microsoft.dashboard/grafana/.*', resource_id))) is False:
-        raise ArgumentUsageError("--grafana-resource-id not in the correct format. It should match `/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/microsoft.dashboard/grafana/<resourceName>`")
+        raise InvalidArgumentValueError("--grafana-resource-id not in the correct format. It should match `/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/microsoft.dashboard/grafana/<resourceName>`")
