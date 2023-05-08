@@ -937,19 +937,13 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                 name=name
             )
             cloud_name = cmd.cli_ctx.cloud.name
-            # For monitoring addon, Metrics role assignement doesnt require in case of MSI auth
-            if not enable_msi_auth_for_monitoring and cloud_name.lower() == 'azurecloud':
-                # mdm metrics supported only in Azure Public cloud so add the role assignment only in this cloud
-                add_monitoring_role_assignment(
-                    result, cluster_resource_id, cmd)
-
-            if enable_msi_auth_for_monitoring and cloud_name.lower() != 'azurecloud':
+            if enable_msi_auth_for_monitoring and (cloud_name.lower() == 'ussec' or cloud_name.lower() == 'usnat'):
                 try:
                     get_user_assigned_identity_by_resource_id(cluster_resource_id)
                 except InvalidArgumentValueError:
                     enable_msi_auth_for_monitoring = False
                     # raise ArgumentUsageError("--enable_msi_auth_for_monitoring are only support in public cloud.")
-                    # logger.warning("--enable_msi_auth_for_monitoring are only support in public cloud.")
+                    logger.warning("--enable_msi_auth_for_monitoring are not supported in airgap clouds.")
 
         if ingress_appgw_addon_enabled:
             add_ingress_appgw_addon_role_assignment(result, cmd)
