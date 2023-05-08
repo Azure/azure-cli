@@ -1477,7 +1477,7 @@ def get_arch_for_cli_binary():
     arch = platform.machine().lower()
     if "amd64" in arch or "x86_64" in arch:
         formatted_arch = "amd64"
-    elif "armv8" in arch or "aarch64" in arch:
+    elif "armv8" in arch or "aarch64" in arch or "arm64" in arch:
         formatted_arch = "arm64"
     else:
         raise CLIInternalError(
