@@ -8,6 +8,7 @@
 from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import InvalidArgumentValueError
 import os
+import time
 from urllib.parse import urlparse, urlunparse
 from azure.cli.core._environment import get_config_dir
 from knack.config import _ConfigFile
@@ -138,6 +139,14 @@ class AAZCommandCtx:
         ensure_dir(config_dir)
         config_path = os.path.join(config_dir, "command_cache.json")
         config = _ConfigFile(config_dir=config_dir, config_path=config_path)
+        # clean up expired section
+        now = time.time()
+        clean_sections = []
+        for section in config.sections():
+            if config.has_option(section, "expires_at") and config.getfloat(section, "expires_at") < now:
+                clean_sections.append(section)
+        for section in clean_sections:
+            config.remove_section(section)
         return config
 
     @property
@@ -155,14 +164,15 @@ class AAZCommandCtx:
         except (configparser.NoSectionError, configparser.NoOptionError):
             raise InvalidArgumentValueError(
                 "Cannot find cached continuation token for the long-running operation: --lro-continue")
-        self.command_config.remove_option(section, "continuation_token")
         return continuation_token
 
     def cache_continuation_token(self, polling):
         request = polling._initial_response.http_request
         section = self.get_command_cache_section(self._cli_ctx.data['command'], request.method, request.url)
         continuation_token = polling.get_continuation_token()
+        expires_at = int(time.time()) + 24*60*60
         self.command_config.set_value(section, "continuation_token", continuation_token)
+        self.command_config.set_value(section, "expires_at", expires_at)
 
     def get_command_cache_section(self, command_name, method, url):
         method = method.upper()
