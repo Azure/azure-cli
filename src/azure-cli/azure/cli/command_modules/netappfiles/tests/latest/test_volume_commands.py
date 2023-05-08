@@ -365,14 +365,6 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
                      (account_name, pool_name, volume_name, RG_LOCATION, VOLUME_DEFAULT, file_path, vnet_name,
                       subnet_name, protocol_types, tag, rule_index, unix_read_only, unix_read_write, cifs))
 
-        # Error when rule-index not set on NFSv4.1
-        with self.assertRaises(ValidationError):
-            self.cmd("az netappfiles volume create -g {rg} -a %s -p %s -v %s -l %s %s --file-path %s --vnet %s "
-                     "--subnet %s --protocol-types %s --tags %s --unix-read-only %s --unix-read-write %s --cifs %s "
-                     "--allowed-clients %s" %
-                     (account_name, pool_name, volume_name, RG_LOCATION, VOLUME_DEFAULT, file_path, vnet_name,
-                      subnet_name, protocol_types, tag, unix_read_only, unix_read_write, cifs, allowed_clients))
-
         volume = self.cmd("az netappfiles volume create -g {rg} -a %s -p %s -v %s -l %s %s --file-path %s --vnet %s "
                           "--subnet %s --protocol-types %s --tags %s --rule-index %s --unix-read-only %s "
                           "--unix-read-write %s --cifs %s --allowed-clients %s" %
