@@ -137,7 +137,7 @@ def _get_deployment_resource_objects(cmd, template_obj, includeNested=False):
     if 'resources' in template_obj:
         resources = template_obj['resources']
         for resource in resources:
-            if (str(resource['type']) == 'Microsoft.Resources/deployments') is True:
+            if 'type' in resource and resource['type'] == 'Microsoft.Resources/deployments':
                 immediate_deployment_resources.append(resource)
     results = []
     for deployment_resource_obj in immediate_deployment_resources:
