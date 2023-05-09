@@ -1435,7 +1435,7 @@ def _get_linux_multicontainer_encoded_config_from_file(file_name):
 # for any modifications to the non-optional parameters, adjust the reflection logic accordingly
 # in the method
 # pylint: disable=unused-argument
-def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_workers=None, linux_fx_version=None,
+def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_workers=None, linux_fx_version=None,  # pylint: disable=too-many-statements,too-many-branches
                         windows_fx_version=None, pre_warmed_instance_count=None, php_version=None,
                         python_version=None, net_framework_version=None, power_shell_version=None,
                         java_version=None, java_container=None, java_container_version=None,
@@ -3710,7 +3710,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         raise MutuallyExclusiveArgumentError("usage error: You must specify one of these parameter "
                                              "--plan NAME_OR_ID | --consumption-plan-location LOCATION |"
                                              " --flexconsumption-location LOCATION")
-    
+
     if ((min_replicas is not None or max_replicas is not None) and environment is None):
         raise RequiredArgumentMissingError("usage error: parameters --min-replicas and --max-replicas must be "
                                            "used with parameter --environment, please provide the name "
