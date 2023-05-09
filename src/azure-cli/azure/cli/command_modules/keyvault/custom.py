@@ -1575,14 +1575,12 @@ def _asn1_to_iso8601(asn1_date):
     return dateutil.parser.parse(asn1_date)
 
 
-def download_certificate(client, file_path, vault_base_url=None, certificate_name=None,
-                         identifier=None, encoding='PEM', certificate_version=''):  # pylint: disable=unused-argument
+def download_certificate(client, file_path, certificate_name=None, encoding='PEM', version=''):
     """ Download a certificate from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
 
-    cert = client.get_certificate(
-        vault_base_url, certificate_name, certificate_version).cer
+    cert = client.get_certificate_version(certificate_name, version).cer
 
     try:
         with open(file_path, 'wb') as f:
