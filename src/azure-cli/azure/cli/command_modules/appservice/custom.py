@@ -2619,16 +2619,16 @@ def list_deployment_logs(cmd, resource_group, name, slot=None):
     return response.json() or []
 
 
-def config_slot_auto_swap(cmd, resource_group_name, webapp, slot, auto_swap_slot=None, disable=None):
+def config_slot_auto_swap(cmd, resource_group_name, name, slot, auto_swap_slot=None, disable=None):
     client = web_client_factory(cmd.cli_ctx)
-    site_config = client.web_apps.get_configuration_slot(resource_group_name, webapp, slot)
+    site_config = client.web_apps.get_configuration_slot(resource_group_name, name, slot)
     site_config.auto_swap_slot_name = '' if disable else (auto_swap_slot or 'production')
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp, 'update_configuration', slot, site_config)
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, site_config)
 
 
-def list_slots(cmd, resource_group_name, webapp):
+def list_slots(cmd, resource_group_name, name):
     client = web_client_factory(cmd.cli_ctx)
-    slots = list(client.web_apps.list_slots(resource_group_name, webapp))
+    slots = list(client.web_apps.list_slots(resource_group_name, name))
     for slot in slots:
         slot.name = slot.name.split('/')[-1]
         setattr(slot, 'app_service_plan', parse_resource_id(slot.server_farm_id)['name'])
@@ -2636,7 +2636,7 @@ def list_slots(cmd, resource_group_name, webapp):
     return slots
 
 
-def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, preserve_vnet=None, action='swap'):
+def swap_slot(cmd, resource_group_name, name, slot, target_slot=None, preserve_vnet=None, action='swap'):
     client = web_client_factory(cmd.cli_ctx)
     # Default isPreserveVnet to 'True' if preserve_vnet is 'None'
     isPreserveVnet = preserve_vnet if preserve_vnet is not None else 'true'
@@ -2645,26 +2645,26 @@ def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, preserve
     CsmSlotEntity = cmd.get_models('CsmSlotEntity')
     slot_swap_entity = CsmSlotEntity(target_slot=target_slot or 'production', preserve_vnet=isPreserveVnet)
     if action == 'swap':
-        poller = client.web_apps.begin_swap_slot(resource_group_name, webapp, slot, slot_swap_entity)
+        poller = client.web_apps.begin_swap_slot(resource_group_name, name, slot, slot_swap_entity)
         return poller
     if action == 'preview':
         if slot is None:
-            result = client.web_apps.apply_slot_config_to_production(resource_group_name, webapp, slot_swap_entity)
+            result = client.web_apps.apply_slot_config_to_production(resource_group_name, name, slot_swap_entity)
         else:
-            result = client.web_apps.apply_slot_configuration_slot(resource_group_name, webapp, slot, slot_swap_entity)
+            result = client.web_apps.apply_slot_configuration_slot(resource_group_name, name, slot, slot_swap_entity)
         return result
     # we will reset both source slot and target slot
     if target_slot is None:
-        client.web_apps.reset_production_slot_config(resource_group_name, webapp)
+        client.web_apps.reset_production_slot_config(resource_group_name, name)
     else:
-        client.web_apps.reset_slot_configuration_slot(resource_group_name, webapp, target_slot)
+        client.web_apps.reset_slot_configuration_slot(resource_group_name, name, target_slot)
     return None
 
 
-def delete_slot(cmd, resource_group_name, webapp, slot):
+def delete_slot(cmd, resource_group_name, name, slot):
     client = web_client_factory(cmd.cli_ctx)
     # TODO: once swagger finalized, expose other parameters like: delete_all_slots, etc...
-    client.web_apps.delete_slot(resource_group_name, webapp, slot)
+    client.web_apps.delete_slot(resource_group_name, name, slot)
 
 
 def set_traffic_routing(cmd, resource_group_name, name, distribution):
@@ -3680,7 +3680,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        os_type=None, functions_version=None, runtime=None, runtime_version=None,
                        consumption_plan_location=None, app_insights=None, app_insights_key=None,
                        disable_app_insights=None, deployment_source_url=None,
-                       deployment_source_branch='master', deployment_local_git=None,
+                       deployment_source_branch=None, deployment_local_git=None,
                        registry_password=None, registry_username=None,
                        image=None, tags=None, assign_identities=None,
                        role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, environment=None,
@@ -3697,6 +3697,30 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         raise MutuallyExclusiveArgumentError("usage error: You must specify one of these parameter "
                                              "--plan NAME_OR_ID | --consumption-plan-location LOCATION |"
                                              " --flexconsumption-location LOCATION")
+
+    if flexconsumption_location is not None:
+        if image is not None:
+            raise ArgumentUsageError(
+                '--image is not a valid input for Azure Functions on Flex App Service plans. '
+                'Please try again without the --image parameter.')
+
+        if deployment_local_git is not None:
+            raise ArgumentUsageError(
+                '--deployment-local-git is not a valid input for Azure Functions on Flex App Service plans. '
+                'Please try again without the --deployment-local-git parameter.')
+
+        if deployment_source_url is not None:
+            raise ArgumentUsageError(
+                '--deployment-source-url is not a valid input for Azure Functions on Flex App Service plans. '
+                'Please try again without the --deployment-source-url parameter.')
+
+        if deployment_source_branch is not None:
+            raise ArgumentUsageError(
+                '--deployment-source-branch is not a valid input for Azure Functions on Flex App Service plans. '
+                'Please try again without the --deployment-source-branch parameter.')
+
+    deployment_source_branch = deployment_source_branch or 'master'
+
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair = cmd.get_models('SiteConfig', 'NameValuePair')
     disable_app_insights = (disable_app_insights == "true")
