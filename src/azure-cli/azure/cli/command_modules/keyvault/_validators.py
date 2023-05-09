@@ -818,3 +818,8 @@ def process_certificate_policy(cmd, ns):
                                   certificate_transparency=certificate_transparency, san_emails=san_emails,
                                   san_dns_names=san_dns_names, san_user_principal_names=san_user_principal_names)
     ns.policy = policyObj
+
+def process_certificate_import(ns):
+    if ns.disabled is not None:
+        ns.enabled = not ns.disabled
+    del ns.disabled

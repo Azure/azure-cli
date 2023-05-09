@@ -27,7 +27,8 @@ from azure.cli.command_modules.keyvault._validators import (
     validate_vault_or_hsm, validate_key_id, validate_sas_definition_id, validate_storage_account_id,
     validate_storage_disabled_attribute, validate_deleted_vault_or_hsm_name, validate_encryption, validate_decryption,
     validate_vault_name_and_hsm_name, set_vault_base_url, validate_keyvault_resource_id,
-    process_hsm_name, KeyEncryptionDataType, process_key_release_policy, process_certificate_policy)
+    process_hsm_name, KeyEncryptionDataType, process_key_release_policy, process_certificate_policy,
+    process_certificate_import)
 
 # CUSTOM CHOICE LISTS
 
@@ -827,11 +828,12 @@ def load_arguments(self, _):
                    help='Name of the certificate.')
         c.extra('vault_base_url', vault_name_type, required=True, arg_group='Id',
                 type=get_vault_base_url_type(self.cli_ctx), id_part=None)
-        c.argument('certificate_data', options_list=['--file', '-f'], completer=FilesCompleter(),
+        c.argument('certificate_bytes', options_list=['--file', '-f'], completer=FilesCompleter(),
                    help='PKCS12 file or PEM file containing the certificate and private key.',
                    type=certificate_type)
-        c.argument('password', help="If the private key in certificate is encrypted, the password used for encryption.")
-        c.extra('disabled', arg_type=get_three_state_flag(), help='Import the certificate in disabled state.')
+        c.extra('password', help="If the private key in certificate is encrypted, the password used for encryption.")
+        c.extra('disabled', arg_type=get_three_state_flag(), help='Import the certificate in disabled state.',
+                validator=process_certificate_import)
         c.extra('policy', options_list=['--policy', '-p'],
                 help='JSON encoded policy definition. Use @{file} to load from a file(e.g. @my_policy.json).',
                 type=get_json_object, validator=process_certificate_policy)

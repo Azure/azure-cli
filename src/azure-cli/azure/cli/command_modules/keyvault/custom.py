@@ -1575,19 +1575,6 @@ def _asn1_to_iso8601(asn1_date):
     return dateutil.parser.parse(asn1_date)
 
 
-def import_certificate(cmd, client, certificate_name, certificate_data,
-                       disabled=False, password=None, policy=None, tags=None):
-    logger.info("Starting 'keyvault certificate import'")
-    result = client.import_certificate(certificate_name=certificate_name,
-                                       certificate_bytes=certificate_data,
-                                       enabled=not disabled,
-                                       policy=policy,
-                                       tags=tags,
-                                       password=password)
-    logger.info("Finished 'keyvault certificate import'")
-    return result
-
-
 def download_certificate(client, file_path, vault_base_url=None, certificate_name=None,
                          identifier=None, encoding='PEM', certificate_version=''):  # pylint: disable=unused-argument
     """ Download a certificate from a KeyVault. """
