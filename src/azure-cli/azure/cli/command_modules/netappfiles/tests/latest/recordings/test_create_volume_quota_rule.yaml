@@ -1,7 +1,7 @@
 interactions:
 - request:
-    body: '{"location": "westcentralus", "tags": {}, "properties": {"addressSpace":
-      {"addressPrefixes": ["10.5.0.0/16"]}, "dhcpOptions": {}}}'
+    body: '{"location": "westcentralus", "properties": {"addressSpace": {"addressPrefixes":
+      ["10.5.0.0/16"]}, "enableDdosProtection": false, "enableVmProtection": false}}'
     headers:
       Accept:
       - application/json
@@ -12,41 +12,39 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '130'
+      - '159'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g -l --address-prefix
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-vnet-000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006\",\r\n
-        \ \"etag\": \"W/\\\"8c5221d0-bc50-4fe0-abf1-73513a52f5fb\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"e0c4616c-8971-41e4-87e7-e1dad3bb4a8e\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westcentralus\",\r\n
-        \ \"tags\": {\r\n    \"CreatedOnDate\": \"2022-12-27T17:32:48.0654726Z\"\r\n
+        \ \"tags\": {\r\n    \"CreatedOnDate\": \"2023-04-28T17:39:58.0034251Z\"\r\n
         \ },\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"541f0e5c-e22d-4e5d-b48d-c9b3aeea251c\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"2e547ae3-2aa6-4fdd-be90-a9b5c1ea5a3f\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.5.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+        \   },\r\n    \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n
+        \   \"enableDdosProtection\": false\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/9c401c18-839f-421f-a26d-aa5dab7267da?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/faa558e2-0c64-4a3a-8900-5f186560c58a?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '786'
+      - '732'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:32:53 GMT
+      - Fri, 28 Apr 2023 17:40:01 GMT
       expires:
       - '-1'
       pragma:
@@ -59,12 +57,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - fbd85471-f8ac-4e2a-b0b8-ff6023ed8170
+      - 147229dd-b9e6-46ef-a5ad-4e7a90c7106e
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1193'
     status:
       code: 201
-      message: ''
+      message: Created
 - request:
     body: null
     headers:
@@ -79,10 +77,58 @@ interactions:
       ParameterSetName:
       - -n -g -l --address-prefix
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/9c401c18-839f-421f-a26d-aa5dab7267da?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/faa558e2-0c64-4a3a-8900-5f186560c58a?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 28 Apr 2023 17:40:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - a5688b33-5d56-44ac-8940-8bb577846eb5
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --address-prefix
+      User-Agent:
+      - AZURECLI/2.48.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/faa558e2-0c64-4a3a-8900-5f186560c58a?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -94,7 +140,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:32:56 GMT
+      - Fri, 28 Apr 2023 17:40:13 GMT
       expires:
       - '-1'
       pragma:
@@ -111,10 +157,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 96fea19c-fe1b-4e2c-a5db-a2f845482715
+      - c025d8b4-cebe-4ebb-bb8d-cd8f71423a67
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -129,33 +175,31 @@ interactions:
       ParameterSetName:
       - -n -g -l --address-prefix
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-vnet-000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006\",\r\n
-        \ \"etag\": \"W/\\\"fe25ddd5-0b30-4e5a-8671-631d8de1478d\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"f1314969-5e2b-413b-998b-df4d2c50ba59\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westcentralus\",\r\n
-        \ \"tags\": {\r\n    \"CreatedOnDate\": \"2022-12-27T17:32:48.0654726Z\"\r\n
+        \ \"tags\": {\r\n    \"CreatedOnDate\": \"2023-04-28T17:39:58.0034251Z\"\r\n
         \ },\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"541f0e5c-e22d-4e5d-b48d-c9b3aeea251c\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"2e547ae3-2aa6-4fdd-be90-a9b5c1ea5a3f\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.5.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+        \   },\r\n    \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n
+        \   \"enableDdosProtection\": false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '787'
+      - '733'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:32:56 GMT
+      - Fri, 28 Apr 2023 17:40:13 GMT
       etag:
-      - W/"fe25ddd5-0b30-4e5a-8671-631d8de1478d"
+      - W/"f1314969-5e2b-413b-998b-df4d2c50ba59"
       expires:
       - '-1'
       pragma:
@@ -172,80 +216,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 56684d4a-accb-4d16-9957-c4d334e2fcf3
+      - a4a6513b-2268-422e-a7a7-7485ab2a6c9a
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n --vnet-name --address-prefixes --delegations -g
-      User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.5
-        (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006/subnets/cli-subnet-000007?api-version=2022-01-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"cli-vnet-000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006\",\r\n
-        \ \"etag\": \"W/\\\"fe25ddd5-0b30-4e5a-8671-631d8de1478d\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westcentralus\",\r\n
-        \ \"tags\": {\r\n    \"CreatedOnDate\": \"2022-12-27T17:32:48.0654726Z\"\r\n
-        \ },\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"541f0e5c-e22d-4e5d-b48d-c9b3aeea251c\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.5.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '787'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 27 Dec 2022 17:32:57 GMT
-      etag:
-      - W/"fe25ddd5-0b30-4e5a-8671-631d8de1478d"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - a9c6ce65-3993-4697-ae91-4948d1066e92
-    status:
-      code: 200
-      message: ''
-- request:
-    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006",
-      "location": "westcentralus", "tags": {"CreatedOnDate": "2022-12-27T17:32:48.0654726Z"},
-      "properties": {"addressSpace": {"addressPrefixes": ["10.5.0.0/16"]}, "dhcpOptions":
-      {"dnsServers": []}, "subnets": [{"name": "cli-subnet-000007", "properties":
-      {"addressPrefix": "10.5.0.0/24", "delegations": [{"name": "0", "properties":
-      {"serviceName": "Microsoft.Netapp/volumes"}}], "privateEndpointNetworkPolicies":
-      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}}], "virtualNetworkPeerings":
-      [], "enableDdosProtection": false}}'
+    body: '{"name": "cli-subnet-000007", "properties": {"addressPrefix": "10.5.0.0/24",
+      "delegations": [{"name": "0", "properties": {"serviceName": "Microsoft.Netapp/volumes"}}]}}'
     headers:
       Accept:
       - application/json
@@ -256,57 +233,90 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '713'
+      - '168'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n --vnet-name --address-prefixes --delegations -g
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006/subnets/cli-subnet-000007?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-vnet-000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006\",\r\n
-        \ \"etag\": \"W/\\\"33eb96f1-2a60-4e29-b323-f7d96830a339\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westcentralus\",\r\n
-        \ \"tags\": {\r\n    \"CreatedOnDate\": \"2022-12-27T17:32:48.0654726Z\"\r\n
-        \ },\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"541f0e5c-e22d-4e5d-b48d-c9b3aeea251c\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.5.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [\r\n      {\r\n        \"name\": \"cli-subnet-000007\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006/subnets/cli-subnet-000007\",\r\n
-        \       \"etag\": \"W/\\\"33eb96f1-2a60-4e29-b323-f7d96830a339\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
-        \         \"addressPrefix\": \"10.5.0.0/24\",\r\n          \"delegations\":
-        [\r\n            {\r\n              \"name\": \"0\",\r\n              \"id\":
+      string: "{\r\n  \"name\": \"cli-subnet-000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006/subnets/cli-subnet-000007\",\r\n
+        \ \"etag\": \"W/\\\"13c663de-6498-4c78-bbda-2da5de8dc9e2\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.5.0.0/24\",\r\n
+        \   \"delegations\": [\r\n      {\r\n        \"name\": \"0\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006/subnets/cli-subnet-000007/delegations/0\",\r\n
-        \             \"etag\": \"W/\\\"33eb96f1-2a60-4e29-b323-f7d96830a339\\\"\",\r\n
-        \             \"properties\": {\r\n                \"provisioningState\":
-        \"Succeeded\",\r\n                \"serviceName\": \"Microsoft.Netapp/volumes\",\r\n
-        \               \"actions\": [\r\n                  \"Microsoft.Network/networkinterfaces/*\",\r\n
-        \                 \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
-        \               ]\r\n              },\r\n              \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
-        \           }\r\n          ],\r\n          \"purpose\": \"HostedWorkloads\",\r\n
-        \         \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
-        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
-        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+        \       \"etag\": \"W/\\\"13c663de-6498-4c78-bbda-2da5de8dc9e2\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"serviceName\": \"Microsoft.Netapp/volumes\",\r\n          \"actions\":
+        [\r\n            \"Microsoft.Network/networkinterfaces/*\",\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
+        \     }\r\n    ],\r\n    \"purpose\": \"HostedWorkloads\",\r\n    \"privateEndpointNetworkPolicies\":
+        \"Disabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \ },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/4a3be58e-8c9f-4881-80d9-879a36ef2419?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/8298cde2-58a0-4a98-b84e-b292783b58cf?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '2298'
+      - '1330'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:33:00 GMT
+      - Fri, 28 Apr 2023 17:40:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 6cab50a6-a6dc-4114-b5a7-83f4c21bb950
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1194'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --vnet-name --address-prefixes --delegations -g
+      User-Agent:
+      - AZURECLI/2.48.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/8298cde2-58a0-4a98-b84e-b292783b58cf?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 28 Apr 2023 17:40:15 GMT
       expires:
       - '-1'
       pragma:
@@ -323,12 +333,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 3230b4c5-5561-43f1-befd-938e7b403b6f
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - dbc0d9a0-76f1-496a-9687-cc2e601c7c01
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -343,10 +351,9 @@ interactions:
       ParameterSetName:
       - -n --vnet-name --address-prefixes --delegations -g
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/4a3be58e-8c9f-4881-80d9-879a36ef2419?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/8298cde2-58a0-4a98-b84e-b292783b58cf?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -358,7 +365,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:33:03 GMT
+      - Fri, 28 Apr 2023 17:40:25 GMT
       expires:
       - '-1'
       pragma:
@@ -375,10 +382,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - dda3d571-af57-4cda-a0ba-e4b53cb50edd
+      - 6ef8d774-0db6-4289-a3e1-342c7285255f
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -393,49 +400,35 @@ interactions:
       ParameterSetName:
       - -n --vnet-name --address-prefixes --delegations -g
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-azure-mgmt-network/21.0.1 Python/3.9.5
-        (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 (AAZ) azsdk-python-core/1.26.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006/subnets/cli-subnet-000007?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-vnet-000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006\",\r\n
-        \ \"etag\": \"W/\\\"195daf31-77c8-4584-933b-a88034a63803\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westcentralus\",\r\n
-        \ \"tags\": {\r\n    \"CreatedOnDate\": \"2022-12-27T17:32:48.0654726Z\"\r\n
-        \ },\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"541f0e5c-e22d-4e5d-b48d-c9b3aeea251c\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.5.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [\r\n      {\r\n        \"name\": \"cli-subnet-000007\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006/subnets/cli-subnet-000007\",\r\n
-        \       \"etag\": \"W/\\\"195daf31-77c8-4584-933b-a88034a63803\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"addressPrefix\": \"10.5.0.0/24\",\r\n          \"delegations\":
-        [\r\n            {\r\n              \"name\": \"0\",\r\n              \"id\":
+      string: "{\r\n  \"name\": \"cli-subnet-000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006/subnets/cli-subnet-000007\",\r\n
+        \ \"etag\": \"W/\\\"e6b976ee-b0d5-41df-bb7d-36fc984189f5\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.5.0.0/24\",\r\n
+        \   \"delegations\": [\r\n      {\r\n        \"name\": \"0\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006/subnets/cli-subnet-000007/delegations/0\",\r\n
-        \             \"etag\": \"W/\\\"195daf31-77c8-4584-933b-a88034a63803\\\"\",\r\n
-        \             \"properties\": {\r\n                \"provisioningState\":
-        \"Succeeded\",\r\n                \"serviceName\": \"Microsoft.Netapp/volumes\",\r\n
-        \               \"actions\": [\r\n                  \"Microsoft.Network/networkinterfaces/*\",\r\n
-        \                 \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
-        \               ]\r\n              },\r\n              \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
-        \           }\r\n          ],\r\n          \"purpose\": \"HostedWorkloads\",\r\n
-        \         \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
-        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
-        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+        \       \"etag\": \"W/\\\"e6b976ee-b0d5-41df-bb7d-36fc984189f5\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"serviceName\": \"Microsoft.Netapp/volumes\",\r\n          \"actions\":
+        [\r\n            \"Microsoft.Network/networkinterfaces/*\",\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
+        \     }\r\n    ],\r\n    \"purpose\": \"HostedWorkloads\",\r\n    \"privateEndpointNetworkPolicies\":
+        \"Disabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \ },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2300'
+      - '1331'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:33:03 GMT
+      - Fri, 28 Apr 2023 17:40:25 GMT
       etag:
-      - W/"195daf31-77c8-4584-933b-a88034a63803"
+      - W/"e6b976ee-b0d5-41df-bb7d-36fc984189f5"
       expires:
       - '-1'
       pragma:
@@ -452,10 +445,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 81707bc8-7a7f-49be-9e7c-b03725ff509a
+      - e043a541-c2e4-497c-8c9e-854df1a11e96
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: '{"location": "westcentralus"}'
     headers:
@@ -474,25 +467,25 @@ interactions:
       ParameterSetName:
       - -g -a -l
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002","name":"cli-acc-000002","type":"Microsoft.NetApp/netAppAccounts","etag":"W/\"datetime''2022-12-27T17%3A33%3A10.9697921Z''\"","location":"westcentralus","tags":{"CreatedOnDate":"2022-12-27T17:33:07.5662041Z"},"properties":{"provisioningState":"Creating"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2022-12-27T17:33:10.1160502Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2022-12-27T17:33:10.1160502Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002","name":"cli-acc-000002","type":"Microsoft.NetApp/netAppAccounts","etag":"W/\"datetime''2023-04-28T17%3A40%3A31.6760984Z''\"","location":"westcentralus","tags":{"CreatedOnDate":"2023-04-28T17:40:27.4950729Z"},"properties":{"provisioningState":"Creating"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2023-04-28T17:40:30.82648Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2023-04-28T17:40:30.82648Z"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/1f009538-4992-4493-a5e7-b8ba65fd97db?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/f83f4250-a45e-4056-87c8-fb566b79db31?api-version=2022-09-01
       cache-control:
       - no-cache
       content-length:
-      - '708'
+      - '704'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:33:11 GMT
+      - Fri, 28 Apr 2023 17:40:32 GMT
       etag:
-      - W/"datetime'2022-12-27T17%3A33%3A10.9697921Z'"
+      - W/"datetime'2023-04-28T17%3A40%3A31.6760984Z'"
       expires:
       - '-1'
       pragma:
@@ -504,7 +497,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1196'
       x-powered-by:
       - ASP.NET
     status:
@@ -524,12 +517,12 @@ interactions:
       ParameterSetName:
       - -g -a -l
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/1f009538-4992-4493-a5e7-b8ba65fd97db?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/f83f4250-a45e-4056-87c8-fb566b79db31?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/1f009538-4992-4493-a5e7-b8ba65fd97db","name":"1f009538-4992-4493-a5e7-b8ba65fd97db","status":"Succeeded","startTime":"2022-12-27T17:33:10.9782781Z","endTime":"2022-12-27T17:33:11.0436169Z","percentComplete":100.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002","action":"CREATE"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/f83f4250-a45e-4056-87c8-fb566b79db31","name":"f83f4250-a45e-4056-87c8-fb566b79db31","status":"Succeeded","startTime":"2023-04-28T17:40:31.6831792Z","endTime":"2023-04-28T17:40:31.7734642Z","percentComplete":100.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002","action":"CREATE"}}'
     headers:
       cache-control:
       - no-cache
@@ -538,7 +531,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:33:41 GMT
+      - Fri, 28 Apr 2023 17:40:32 GMT
       expires:
       - '-1'
       pragma:
@@ -572,23 +565,23 @@ interactions:
       ParameterSetName:
       - -g -a -l
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002","name":"cli-acc-000002","type":"Microsoft.NetApp/netAppAccounts","etag":"W/\"datetime''2022-12-27T17%3A33%3A11.0368127Z''\"","location":"westcentralus","tags":{"CreatedOnDate":"2022-12-27T17:33:07.5662041Z"},"properties":{"activeDirectories":[{"site":"Default-First-Site-Name","activeDirectoryId":"88c33840-fd2e-668c-08ba-da1291753572","username":"cds","password":"****************","domain":"qatest.com","dns":"10.3.39.20","status":"InUse","smbServerName":"QATEST","organizationalUnit":"CN=Computers","adName":"windows-vm-ad","aesEncryption":false,"ldapSigning":false,"ldapOverTLS":false,"allowLocalNfsUsersWithLdap":false,"encryptDCConnections":false,"ldapSearchScope":{}}],"encryption":{"keySource":"Microsoft.NetApp"},"provisioningState":"Succeeded"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2022-12-27T17:33:10.1160502Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2022-12-27T17:33:10.1160502Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002","name":"cli-acc-000002","type":"Microsoft.NetApp/netAppAccounts","etag":"W/\"datetime''2023-04-28T17%3A40%3A31.7665973Z''\"","location":"westcentralus","tags":{"CreatedOnDate":"2023-04-28T17:40:27.4950729Z"},"properties":{"activeDirectories":[{"site":"Default-First-Site-Name","activeDirectoryId":"88c33840-fd2e-668c-08ba-da1291753572","username":"cds","password":"****************","domain":"qatest.com","dns":"10.3.39.20","status":"Created","smbServerName":"QATEST","organizationalUnit":"CN=Computers","adName":"windows-vm-ad","aesEncryption":false,"ldapSigning":false,"ldapOverTLS":false,"allowLocalNfsUsersWithLdap":false,"encryptDCConnections":false,"ldapSearchScope":{}}],"encryption":{"keySource":"Microsoft.NetApp"},"provisioningState":"Succeeded"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2023-04-28T17:40:30.82648Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2023-04-28T17:40:30.82648Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1209'
+      - '1207'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:33:43 GMT
+      - Fri, 28 Apr 2023 17:40:32 GMT
       etag:
-      - W/"datetime'2022-12-27T17%3A33%3A11.0368127Z'"
+      - W/"datetime'2023-04-28T17%3A40%3A31.7665973Z'"
       expires:
       - '-1'
       pragma:
@@ -627,25 +620,25 @@ interactions:
       ParameterSetName:
       - -g -a -p -l --service-level --size
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003","name":"cli-acc-000002/cli-pool-000003","type":"Microsoft.NetApp/netAppAccounts/capacityPools","etag":"W/\"datetime''2022-12-27T17%3A33%3A52.0679609Z''\"","location":"westcentralus","tags":{"CreatedOnDate":"2022-12-27T17:33:48.4081147Z"},"properties":{"serviceLevel":"Premium","size":4398046511104,"totalThroughputMibps":0.0,"utilizedThroughputMibps":0.0,"provisioningState":"Creating"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2022-12-27T17:33:51.0599731Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2022-12-27T17:33:51.0599731Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003","name":"cli-acc-000002/cli-pool-000003","type":"Microsoft.NetApp/netAppAccounts/capacityPools","etag":"W/\"datetime''2023-04-28T17%3A40%3A38.534775Z''\"","location":"westcentralus","tags":{"CreatedOnDate":"2023-04-28T17:40:35.0222294Z"},"properties":{"serviceLevel":"Premium","size":4398046511104,"totalThroughputMibps":0.0,"utilizedThroughputMibps":0.0,"provisioningState":"Creating"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2023-04-28T17:40:37.6591878Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2023-04-28T17:40:37.6591878Z"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/ab60da8e-b2b3-4ea9-a088-59bd0aa1435c?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/03cf93b7-e6bb-4202-ac5e-2798d8ff4125?api-version=2022-09-01
       cache-control:
       - no-cache
       content-length:
-      - '871'
+      - '870'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:33:53 GMT
+      - Fri, 28 Apr 2023 17:40:39 GMT
       etag:
-      - W/"datetime'2022-12-27T17%3A33%3A52.0679609Z'"
+      - W/"datetime'2023-04-28T17%3A40%3A38.534775Z'"
       expires:
       - '-1'
       pragma:
@@ -657,7 +650,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1196'
       x-powered-by:
       - ASP.NET
     status:
@@ -677,12 +670,12 @@ interactions:
       ParameterSetName:
       - -g -a -p -l --service-level --size
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/ab60da8e-b2b3-4ea9-a088-59bd0aa1435c?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/03cf93b7-e6bb-4202-ac5e-2798d8ff4125?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/ab60da8e-b2b3-4ea9-a088-59bd0aa1435c","name":"ab60da8e-b2b3-4ea9-a088-59bd0aa1435c","status":"Succeeded","startTime":"2022-12-27T17:33:52.0721478Z","endTime":"2022-12-27T17:33:52.5357017Z","percentComplete":100.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003","action":"CREATE"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/03cf93b7-e6bb-4202-ac5e-2798d8ff4125","name":"03cf93b7-e6bb-4202-ac5e-2798d8ff4125","status":"Succeeded","startTime":"2023-04-28T17:40:38.5404649Z","endTime":"2023-04-28T17:40:38.9404355Z","percentComplete":100.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003","action":"CREATE"}}'
     headers:
       cache-control:
       - no-cache
@@ -691,7 +684,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:34:23 GMT
+      - Fri, 28 Apr 2023 17:40:39 GMT
       expires:
       - '-1'
       pragma:
@@ -725,12 +718,12 @@ interactions:
       ParameterSetName:
       - -g -a -p -l --service-level --size
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003","name":"cli-acc-000002/cli-pool-000003","type":"Microsoft.NetApp/netAppAccounts/capacityPools","etag":"W/\"datetime''2022-12-27T17%3A33%3A52.5301374Z''\"","location":"westcentralus","tags":{"CreatedOnDate":"2022-12-27T17:33:48.4081147Z"},"properties":{"poolId":"e3668f3b-e724-b94e-0252-8a96e04ac1d9","serviceLevel":"Premium","size":4398046511104,"qosType":"Auto","totalThroughputMibps":256.0,"utilizedThroughputMibps":0.0,"encryptionType":"Single","coolAccess":false,"provisioningState":"Succeeded"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2022-12-27T17:33:51.0599731Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2022-12-27T17:33:51.0599731Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003","name":"cli-acc-000002/cli-pool-000003","type":"Microsoft.NetApp/netAppAccounts/capacityPools","etag":"W/\"datetime''2023-04-28T17%3A40%3A38.9305541Z''\"","location":"westcentralus","tags":{"CreatedOnDate":"2023-04-28T17:40:35.0222294Z"},"properties":{"poolId":"ccb2ed71-5924-2cf2-41ff-70e6c081758b","serviceLevel":"Premium","size":4398046511104,"qosType":"Auto","totalThroughputMibps":256.0,"utilizedThroughputMibps":0.0,"encryptionType":"Single","coolAccess":false,"provisioningState":"Succeeded"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2023-04-28T17:40:37.6591878Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2023-04-28T17:40:37.6591878Z"}}'
     headers:
       cache-control:
       - no-cache
@@ -739,9 +732,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:34:23 GMT
+      - Fri, 28 Apr 2023 17:40:40 GMT
       etag:
-      - W/"datetime'2022-12-27T17%3A33%3A52.5301374Z'"
+      - W/"datetime'2023-04-28T17%3A40%3A38.9305541Z'"
       expires:
       - '-1'
       pragma:
@@ -763,7 +756,8 @@ interactions:
       message: OK
 - request:
     body: '{"location": "westcentralus", "properties": {"creationToken": "cli-vol-000004",
-      "usageThreshold": 107374182400, "subnetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006/subnets/cli-subnet-000007"}}'
+      "usageThreshold": 107374182400, "subnetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006/subnets/cli-subnet-000007",
+      "isLargeVolume": false}}'
     headers:
       Accept:
       - application/json
@@ -774,31 +768,31 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '326'
+      - '350'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -a -p -v -l --vnet --subnet --file-path --usage-threshold
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","name":"cli-acc-000002/cli-pool-000003/cli-vol-000004","type":"Microsoft.NetApp/netAppAccounts/capacityPools/volumes","etag":"W/\"datetime''2022-12-27T17%3A34%3A32.6723054Z''\"","location":"westcentralus","tags":{"CreatedOnDate":"2022-12-27T17:34:28.2945715Z"},"properties":{"serviceLevel":"Premium","creationToken":"cli-vol-000004","usageThreshold":107374182400,"subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006/subnets/cli-subnet-000007","maximumNumberOfFiles":100000000,"provisioningState":"Creating"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2022-12-27T17:34:31.7017647Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2022-12-27T17:34:31.7017647Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","name":"cli-acc-000002/cli-pool-000003/cli-vol-000004","type":"Microsoft.NetApp/netAppAccounts/capacityPools/volumes","etag":"W/\"datetime''2023-04-28T17%3A40%3A46.9806596Z''\"","location":"westcentralus","tags":{"CreatedOnDate":"2023-04-28T17:40:42.3461374Z"},"properties":{"serviceLevel":"Premium","creationToken":"cli-vol-000004","usageThreshold":107374182400,"subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006/subnets/cli-subnet-000007","maximumNumberOfFiles":100000000,"isLargeVolume":false,"provisioningState":"Creating"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2023-04-28T17:40:46.0476785Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2023-04-28T17:40:46.0476785Z"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c6019379-a18a-4754-b21d-aadc859fd65e?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/63f35a1b-14a4-4232-92e1-5770ca0ef842?api-version=2022-09-01
       cache-control:
       - no-cache
       content-length:
-      - '1147'
+      - '1169'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:34:33 GMT
+      - Fri, 28 Apr 2023 17:40:47 GMT
       etag:
-      - W/"datetime'2022-12-27T17%3A34%3A32.6723054Z'"
+      - W/"datetime'2023-04-28T17%3A40%3A46.9806596Z'"
       expires:
       - '-1'
       pragma:
@@ -810,7 +804,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1194'
       x-powered-by:
       - ASP.NET
     status:
@@ -830,12 +824,12 @@ interactions:
       ParameterSetName:
       - -g -a -p -v -l --vnet --subnet --file-path --usage-threshold
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c6019379-a18a-4754-b21d-aadc859fd65e?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/63f35a1b-14a4-4232-92e1-5770ca0ef842?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c6019379-a18a-4754-b21d-aadc859fd65e","name":"c6019379-a18a-4754-b21d-aadc859fd65e","status":"Creating","startTime":"2022-12-27T17:34:32.6697924Z","endTime":"0001-01-01T00:00:00Z","percentComplete":0.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","action":"CREATE"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/63f35a1b-14a4-4232-92e1-5770ca0ef842","name":"63f35a1b-14a4-4232-92e1-5770ca0ef842","status":"Creating","startTime":"2023-04-28T17:40:46.9875446Z","endTime":"0001-01-01T00:00:00Z","percentComplete":0.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","action":"CREATE"}}'
     headers:
       cache-control:
       - no-cache
@@ -844,7 +838,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:35:04 GMT
+      - Fri, 28 Apr 2023 17:40:47 GMT
       expires:
       - '-1'
       pragma:
@@ -878,12 +872,12 @@ interactions:
       ParameterSetName:
       - -g -a -p -v -l --vnet --subnet --file-path --usage-threshold
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c6019379-a18a-4754-b21d-aadc859fd65e?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/63f35a1b-14a4-4232-92e1-5770ca0ef842?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c6019379-a18a-4754-b21d-aadc859fd65e","name":"c6019379-a18a-4754-b21d-aadc859fd65e","status":"Creating","startTime":"2022-12-27T17:34:32.6697924Z","endTime":"0001-01-01T00:00:00Z","percentComplete":0.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","action":"CREATE"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/63f35a1b-14a4-4232-92e1-5770ca0ef842","name":"63f35a1b-14a4-4232-92e1-5770ca0ef842","status":"Creating","startTime":"2023-04-28T17:40:46.9875446Z","endTime":"0001-01-01T00:00:00Z","percentComplete":0.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","action":"CREATE"}}'
     headers:
       cache-control:
       - no-cache
@@ -892,7 +886,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:35:33 GMT
+      - Fri, 28 Apr 2023 17:41:18 GMT
       expires:
       - '-1'
       pragma:
@@ -926,12 +920,12 @@ interactions:
       ParameterSetName:
       - -g -a -p -v -l --vnet --subnet --file-path --usage-threshold
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c6019379-a18a-4754-b21d-aadc859fd65e?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/63f35a1b-14a4-4232-92e1-5770ca0ef842?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c6019379-a18a-4754-b21d-aadc859fd65e","name":"c6019379-a18a-4754-b21d-aadc859fd65e","status":"Creating","startTime":"2022-12-27T17:34:32.6697924Z","endTime":"0001-01-01T00:00:00Z","percentComplete":0.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","action":"CREATE"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/63f35a1b-14a4-4232-92e1-5770ca0ef842","name":"63f35a1b-14a4-4232-92e1-5770ca0ef842","status":"Creating","startTime":"2023-04-28T17:40:46.9875446Z","endTime":"0001-01-01T00:00:00Z","percentComplete":0.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","action":"CREATE"}}'
     headers:
       cache-control:
       - no-cache
@@ -940,7 +934,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:36:04 GMT
+      - Fri, 28 Apr 2023 17:41:48 GMT
       expires:
       - '-1'
       pragma:
@@ -974,12 +968,12 @@ interactions:
       ParameterSetName:
       - -g -a -p -v -l --vnet --subnet --file-path --usage-threshold
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c6019379-a18a-4754-b21d-aadc859fd65e?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/63f35a1b-14a4-4232-92e1-5770ca0ef842?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c6019379-a18a-4754-b21d-aadc859fd65e","name":"c6019379-a18a-4754-b21d-aadc859fd65e","status":"Creating","startTime":"2022-12-27T17:34:32.6697924Z","endTime":"0001-01-01T00:00:00Z","percentComplete":0.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","action":"CREATE"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/63f35a1b-14a4-4232-92e1-5770ca0ef842","name":"63f35a1b-14a4-4232-92e1-5770ca0ef842","status":"Creating","startTime":"2023-04-28T17:40:46.9875446Z","endTime":"0001-01-01T00:00:00Z","percentComplete":0.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","action":"CREATE"}}'
     headers:
       cache-control:
       - no-cache
@@ -988,7 +982,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:36:34 GMT
+      - Fri, 28 Apr 2023 17:42:18 GMT
       expires:
       - '-1'
       pragma:
@@ -1022,12 +1016,12 @@ interactions:
       ParameterSetName:
       - -g -a -p -v -l --vnet --subnet --file-path --usage-threshold
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c6019379-a18a-4754-b21d-aadc859fd65e?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/63f35a1b-14a4-4232-92e1-5770ca0ef842?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c6019379-a18a-4754-b21d-aadc859fd65e","name":"c6019379-a18a-4754-b21d-aadc859fd65e","status":"Creating","startTime":"2022-12-27T17:34:32.6697924Z","endTime":"0001-01-01T00:00:00Z","percentComplete":0.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","action":"CREATE"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/63f35a1b-14a4-4232-92e1-5770ca0ef842","name":"63f35a1b-14a4-4232-92e1-5770ca0ef842","status":"Creating","startTime":"2023-04-28T17:40:46.9875446Z","endTime":"0001-01-01T00:00:00Z","percentComplete":0.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","action":"CREATE"}}'
     headers:
       cache-control:
       - no-cache
@@ -1036,7 +1030,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:37:05 GMT
+      - Fri, 28 Apr 2023 17:42:48 GMT
       expires:
       - '-1'
       pragma:
@@ -1070,12 +1064,12 @@ interactions:
       ParameterSetName:
       - -g -a -p -v -l --vnet --subnet --file-path --usage-threshold
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c6019379-a18a-4754-b21d-aadc859fd65e?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/63f35a1b-14a4-4232-92e1-5770ca0ef842?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c6019379-a18a-4754-b21d-aadc859fd65e","name":"c6019379-a18a-4754-b21d-aadc859fd65e","status":"Creating","startTime":"2022-12-27T17:34:32.6697924Z","endTime":"0001-01-01T00:00:00Z","percentComplete":0.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","action":"CREATE"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/63f35a1b-14a4-4232-92e1-5770ca0ef842","name":"63f35a1b-14a4-4232-92e1-5770ca0ef842","status":"Creating","startTime":"2023-04-28T17:40:46.9875446Z","endTime":"0001-01-01T00:00:00Z","percentComplete":0.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","action":"CREATE"}}'
     headers:
       cache-control:
       - no-cache
@@ -1084,7 +1078,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:37:34 GMT
+      - Fri, 28 Apr 2023 17:43:19 GMT
       expires:
       - '-1'
       pragma:
@@ -1118,12 +1112,12 @@ interactions:
       ParameterSetName:
       - -g -a -p -v -l --vnet --subnet --file-path --usage-threshold
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c6019379-a18a-4754-b21d-aadc859fd65e?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/63f35a1b-14a4-4232-92e1-5770ca0ef842?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c6019379-a18a-4754-b21d-aadc859fd65e","name":"c6019379-a18a-4754-b21d-aadc859fd65e","status":"Creating","startTime":"2022-12-27T17:34:32.6697924Z","endTime":"0001-01-01T00:00:00Z","percentComplete":0.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","action":"CREATE"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/63f35a1b-14a4-4232-92e1-5770ca0ef842","name":"63f35a1b-14a4-4232-92e1-5770ca0ef842","status":"Creating","startTime":"2023-04-28T17:40:46.9875446Z","endTime":"0001-01-01T00:00:00Z","percentComplete":0.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","action":"CREATE"}}'
     headers:
       cache-control:
       - no-cache
@@ -1132,7 +1126,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:38:05 GMT
+      - Fri, 28 Apr 2023 17:43:49 GMT
       expires:
       - '-1'
       pragma:
@@ -1166,12 +1160,12 @@ interactions:
       ParameterSetName:
       - -g -a -p -v -l --vnet --subnet --file-path --usage-threshold
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c6019379-a18a-4754-b21d-aadc859fd65e?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/63f35a1b-14a4-4232-92e1-5770ca0ef842?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c6019379-a18a-4754-b21d-aadc859fd65e","name":"c6019379-a18a-4754-b21d-aadc859fd65e","status":"Creating","startTime":"2022-12-27T17:34:32.6697924Z","endTime":"0001-01-01T00:00:00Z","percentComplete":0.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","action":"CREATE"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/63f35a1b-14a4-4232-92e1-5770ca0ef842","name":"63f35a1b-14a4-4232-92e1-5770ca0ef842","status":"Creating","startTime":"2023-04-28T17:40:46.9875446Z","endTime":"0001-01-01T00:00:00Z","percentComplete":0.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","action":"CREATE"}}'
     headers:
       cache-control:
       - no-cache
@@ -1180,7 +1174,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:38:35 GMT
+      - Fri, 28 Apr 2023 17:44:19 GMT
       expires:
       - '-1'
       pragma:
@@ -1214,12 +1208,60 @@ interactions:
       ParameterSetName:
       - -g -a -p -v -l --vnet --subnet --file-path --usage-threshold
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c6019379-a18a-4754-b21d-aadc859fd65e?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/63f35a1b-14a4-4232-92e1-5770ca0ef842?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c6019379-a18a-4754-b21d-aadc859fd65e","name":"c6019379-a18a-4754-b21d-aadc859fd65e","status":"Succeeded","startTime":"2022-12-27T17:34:32.6697924Z","endTime":"2022-12-27T17:38:41.7074336Z","percentComplete":100.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","action":"CREATE"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/63f35a1b-14a4-4232-92e1-5770ca0ef842","name":"63f35a1b-14a4-4232-92e1-5770ca0ef842","status":"Creating","startTime":"2023-04-28T17:40:46.9875446Z","endTime":"0001-01-01T00:00:00Z","percentComplete":0.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","action":"CREATE"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '602'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 28 Apr 2023 17:44:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - netappfiles volume create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -a -p -v -l --vnet --subnet --file-path --usage-threshold
+      User-Agent:
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/63f35a1b-14a4-4232-92e1-5770ca0ef842?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/63f35a1b-14a4-4232-92e1-5770ca0ef842","name":"63f35a1b-14a4-4232-92e1-5770ca0ef842","status":"Succeeded","startTime":"2023-04-28T17:40:46.9875446Z","endTime":"2023-04-28T17:44:51.5059402Z","percentComplete":100.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","action":"CREATE"}}'
     headers:
       cache-control:
       - no-cache
@@ -1228,7 +1270,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:39:06 GMT
+      - Fri, 28 Apr 2023 17:45:20 GMT
       expires:
       - '-1'
       pragma:
@@ -1262,23 +1304,23 @@ interactions:
       ParameterSetName:
       - -g -a -p -v -l --vnet --subnet --file-path --usage-threshold
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","name":"cli-acc-000002/cli-pool-000003/cli-vol-000004","type":"Microsoft.NetApp/netAppAccounts/capacityPools/volumes","etag":"W/\"datetime''2022-12-27T17%3A38%3A41.7035441Z''\"","location":"westcentralus","tags":{"CreatedOnDate":"2022-12-27T17:34:28.2945715Z"},"properties":{"fileSystemId":"3336fcca-773d-f12f-fbba-aa5bea4d38b2","serviceLevel":"Premium","creationToken":"cli-vol-000004","usageThreshold":107374182400,"exportPolicy":{"rules":[{"ruleIndex":1,"unixReadOnly":false,"unixReadWrite":true,"cifs":false,"nfsv3":true,"nfsv41":false,"allowedClients":"0.0.0.0/0","kerberos5ReadOnly":false,"kerberos5ReadWrite":false,"kerberos5iReadOnly":false,"kerberos5iReadWrite":false,"kerberos5pReadOnly":false,"kerberos5pReadWrite":false,"hasRootAccess":true,"chownMode":"Restricted"}]},"protocolTypes":["NFSv3"],"baremetalTenantId":"baremetalTenant_svm_d6b6d5667ca611e9bd525e79ea9641f1_81b90af0","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006/subnets/cli-subnet-000007","networkFeatures":"Basic","networkSiblingSetId":"f1b2f79b-f64c-c877-6a82-469be2aa420f","storageToNetworkProximity":"T2","snapshotDirectoryVisible":true,"kerberosEnabled":false,"securityStyle":"Unix","smbEncryption":false,"smbContinuouslyAvailable":false,"encryptionKeySource":"Microsoft.NetApp","ldapEnabled":false,"unixPermissions":"0770","mountTargets":[{"mountTargetId":"3336fcca-773d-f12f-fbba-aa5bea4d38b2","fileSystemId":"3336fcca-773d-f12f-fbba-aa5bea4d38b2","ipAddress":"10.5.0.4"}],"throughputMibps":6.25,"coolAccess":false,"avsDataStore":"Disabled","isDefaultQuotaEnabled":false,"defaultUserQuotaInKiBs":0,"defaultGroupQuotaInKiBs":0,"enableSubvolumes":"Disabled","maximumNumberOfFiles":100000000,"smbNonBrowsable":"Disabled","smbAccessBasedEnumeration":"Disabled","provisioningState":"Succeeded"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2022-12-27T17:34:31.7017647Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2022-12-27T17:34:31.7017647Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004","name":"cli-acc-000002/cli-pool-000003/cli-vol-000004","type":"Microsoft.NetApp/netAppAccounts/capacityPools/volumes","etag":"W/\"datetime''2023-04-28T17%3A44%3A51.491848Z''\"","location":"westcentralus","tags":{"CreatedOnDate":"2023-04-28T17:40:42.3461374Z"},"properties":{"fileSystemId":"89874162-d804-c667-a8b7-c8ca428eede5","serviceLevel":"Premium","creationToken":"cli-vol-000004","usageThreshold":107374182400,"exportPolicy":{"rules":[{"ruleIndex":1,"unixReadOnly":false,"unixReadWrite":true,"cifs":false,"nfsv3":true,"nfsv41":false,"allowedClients":"0.0.0.0/0","kerberos5ReadOnly":false,"kerberos5ReadWrite":false,"kerberos5iReadOnly":false,"kerberos5iReadWrite":false,"kerberos5pReadOnly":false,"kerberos5pReadWrite":false,"hasRootAccess":true,"chownMode":"Restricted"}]},"protocolTypes":["NFSv3"],"baremetalTenantId":"baremetalTenant_svm_d6b6d5667ca611e9bd525e79ea9641f1_7b79fde6","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000006/subnets/cli-subnet-000007","networkFeatures":"Basic","networkSiblingSetId":"f1b2f79b-f64c-c877-6a82-469be2aa420f","storageToNetworkProximity":"T2","snapshotDirectoryVisible":true,"kerberosEnabled":false,"securityStyle":"Unix","smbEncryption":false,"smbContinuouslyAvailable":false,"encryptionKeySource":"Microsoft.NetApp","ldapEnabled":false,"unixPermissions":"0770","mountTargets":[{"mountTargetId":"89874162-d804-c667-a8b7-c8ca428eede5","fileSystemId":"89874162-d804-c667-a8b7-c8ca428eede5","ipAddress":"10.5.0.4"}],"throughputMibps":6.25,"coolAccess":false,"avsDataStore":"Disabled","isDefaultQuotaEnabled":false,"defaultUserQuotaInKiBs":0,"defaultGroupQuotaInKiBs":0,"enableSubvolumes":"Disabled","maximumNumberOfFiles":100000000,"smbNonBrowsable":"Disabled","smbAccessBasedEnumeration":"Disabled","isLargeVolume":false,"provisionedAvailabilityZone":"","provisioningState":"Succeeded"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2023-04-28T17:40:46.0476785Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2023-04-28T17:40:46.0476785Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2418'
+      - '2472'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:39:06 GMT
+      - Fri, 28 Apr 2023 17:45:20 GMT
       etag:
-      - W/"datetime'2022-12-27T17%3A38%3A41.7035441Z'"
+      - W/"datetime'2023-04-28T17%3A44%3A51.491848Z'"
       expires:
       - '-1'
       pragma:
@@ -1312,9 +1354,9 @@ interactions:
       ParameterSetName:
       - -g -a -p -v
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules?api-version=2022-09-01
   response:
     body:
       string: '{"value":[]}'
@@ -1326,7 +1368,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:39:10 GMT
+      - Fri, 28 Apr 2023 17:45:23 GMT
       expires:
       - '-1'
       pragma:
@@ -1365,15 +1407,15 @@ interactions:
       ParameterSetName:
       - -g -a -p -l -v --quota-rule-name --quota-size --quota-type --quota-target
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","name":"cli-acc-000002/cli-pool-000003/cli-vol-000004/cli-qr-000005","type":"Microsoft.NetApp/netAppAccounts/capacityPools/volumes/volumeQuotaRules","etag":"W/\"datetime''2022-12-27T17%3A39%3A16.0245611Z''\"","location":"westcentralus","properties":{"quotaTarget":"","quotaSizeInKiBs":100006,"quotaType":"DefaultGroupQuota","provisioningState":"Creating"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2022-12-27T17:39:13.2138156Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2022-12-27T17:39:13.2138156Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","name":"cli-acc-000002/cli-pool-000003/cli-vol-000004/cli-qr-000005","type":"Microsoft.NetApp/netAppAccounts/capacityPools/volumes/volumeQuotaRules","etag":"W/\"datetime''2023-04-28T17%3A45%3A25.6233283Z''\"","location":"westcentralus","properties":{"quotaTarget":"","quotaSizeInKiBs":100006,"quotaType":"DefaultGroupQuota","provisioningState":"Creating"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2023-04-28T17:45:24.5924076Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2023-04-28T17:45:24.5924076Z"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/f0fb54c5-0b2a-4b9b-9aab-17868c7288be?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/dead76d4-8e30-4ad4-841b-c03f64390c46?api-version=2022-09-01
       cache-control:
       - no-cache
       content-length:
@@ -1381,9 +1423,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:39:15 GMT
+      - Fri, 28 Apr 2023 17:45:25 GMT
       etag:
-      - W/"datetime'2022-12-27T17%3A39%3A16.0245611Z'"
+      - W/"datetime'2023-04-28T17%3A45%3A25.6233283Z'"
       expires:
       - '-1'
       pragma:
@@ -1395,7 +1437,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1194'
       x-powered-by:
       - ASP.NET
     status:
@@ -1415,21 +1457,21 @@ interactions:
       ParameterSetName:
       - -g -a -p -l -v --quota-rule-name --quota-size --quota-type --quota-target
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/f0fb54c5-0b2a-4b9b-9aab-17868c7288be?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/dead76d4-8e30-4ad4-841b-c03f64390c46?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/f0fb54c5-0b2a-4b9b-9aab-17868c7288be","name":"f0fb54c5-0b2a-4b9b-9aab-17868c7288be","status":"Succeeded","startTime":"2022-12-27T17:39:16.0250375Z","endTime":"2022-12-27T17:39:22.1667837Z","percentComplete":100.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","action":"CREATE"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/dead76d4-8e30-4ad4-841b-c03f64390c46","name":"dead76d4-8e30-4ad4-841b-c03f64390c46","status":"Creating","startTime":"2023-04-28T17:45:25.6401966Z","endTime":"0001-01-01T00:00:00Z","percentComplete":0.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","action":"CREATE"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '644'
+      - '633'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:39:46 GMT
+      - Fri, 28 Apr 2023 17:45:25 GMT
       expires:
       - '-1'
       pragma:
@@ -1463,23 +1505,71 @@ interactions:
       ParameterSetName:
       - -g -a -p -l -v --quota-rule-name --quota-size --quota-type --quota-target
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/dead76d4-8e30-4ad4-841b-c03f64390c46?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","name":"cli-acc-000002/cli-pool-000003/cli-vol-000004/cli-qr-000005","type":"Microsoft.NetApp/netAppAccounts/capacityPools/volumes/volumeQuotaRules","etag":"W/\"datetime''2022-12-27T17%3A39%3A22.165527Z''\"","location":"westcentralus","properties":{"quotaTarget":"","quotaSizeInKiBs":100006,"quotaType":"DefaultGroupQuota","provisioningState":"Succeeded"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2022-12-27T17:39:13.2138156Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2022-12-27T17:39:13.2138156Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/dead76d4-8e30-4ad4-841b-c03f64390c46","name":"dead76d4-8e30-4ad4-841b-c03f64390c46","status":"Succeeded","startTime":"2023-04-28T17:45:25.6401966Z","endTime":"2023-04-28T17:45:32.8240574Z","percentComplete":100.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","action":"CREATE"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '894'
+      - '644'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:39:47 GMT
+      - Fri, 28 Apr 2023 17:45:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - netappfiles volume quota-rule create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -a -p -l -v --quota-rule-name --quota-size --quota-type --quota-target
+      User-Agent:
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","name":"cli-acc-000002/cli-pool-000003/cli-vol-000004/cli-qr-000005","type":"Microsoft.NetApp/netAppAccounts/capacityPools/volumes/volumeQuotaRules","etag":"W/\"datetime''2023-04-28T17%3A45%3A32.8126856Z''\"","location":"westcentralus","properties":{"quotaTarget":"","quotaSizeInKiBs":100006,"quotaType":"DefaultGroupQuota","provisioningState":"Succeeded"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2023-04-28T17:45:24.5924076Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2023-04-28T17:45:24.5924076Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '895'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 28 Apr 2023 17:45:56 GMT
       etag:
-      - W/"datetime'2022-12-27T17%3A39%3A22.165527Z'"
+      - W/"datetime'2023-04-28T17%3A45%3A32.8126856Z'"
       expires:
       - '-1'
       pragma:
@@ -1513,21 +1603,21 @@ interactions:
       ParameterSetName:
       - -g -a -p -v
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules?api-version=2022-09-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","name":"cli-acc-000002/cli-pool-000003/cli-vol-000004/cli-qr-000005","type":"Microsoft.NetApp/netAppAccounts/capacityPools/volumes/volumeQuotaRules","etag":"W/\"datetime''2022-12-27T17%3A39%3A22.165527Z''\"","location":"westcentralus","properties":{"quotaTarget":"","quotaSizeInKiBs":100006,"quotaType":"DefaultGroupQuota","provisioningState":"Succeeded"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2022-12-27T17:39:13.2138156Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2022-12-27T17:39:13.2138156Z"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","name":"cli-acc-000002/cli-pool-000003/cli-vol-000004/cli-qr-000005","type":"Microsoft.NetApp/netAppAccounts/capacityPools/volumes/volumeQuotaRules","etag":"W/\"datetime''2023-04-28T17%3A45%3A32.8126856Z''\"","location":"westcentralus","properties":{"quotaTarget":"","quotaSizeInKiBs":100006,"quotaType":"DefaultGroupQuota","provisioningState":"Succeeded"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2023-04-28T17:45:24.5924076Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2023-04-28T17:45:24.5924076Z"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '906'
+      - '907'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:39:50 GMT
+      - Fri, 28 Apr 2023 17:45:57 GMT
       expires:
       - '-1'
       pragma:
@@ -1561,23 +1651,23 @@ interactions:
       ParameterSetName:
       - -g -a -p -v --quota-rule-name
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","name":"cli-acc-000002/cli-pool-000003/cli-vol-000004/cli-qr-000005","type":"Microsoft.NetApp/netAppAccounts/capacityPools/volumes/volumeQuotaRules","etag":"W/\"datetime''2022-12-27T17%3A39%3A22.165527Z''\"","location":"westcentralus","properties":{"quotaTarget":"","quotaSizeInKiBs":100006,"quotaType":"DefaultGroupQuota","provisioningState":"Succeeded"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2022-12-27T17:39:13.2138156Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2022-12-27T17:39:13.2138156Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","name":"cli-acc-000002/cli-pool-000003/cli-vol-000004/cli-qr-000005","type":"Microsoft.NetApp/netAppAccounts/capacityPools/volumes/volumeQuotaRules","etag":"W/\"datetime''2023-04-28T17%3A45%3A32.8126856Z''\"","location":"westcentralus","properties":{"quotaTarget":"","quotaSizeInKiBs":100006,"quotaType":"DefaultGroupQuota","provisioningState":"Succeeded"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2023-04-28T17:45:24.5924076Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2023-04-28T17:45:24.5924076Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '894'
+      - '895'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:39:52 GMT
+      - Fri, 28 Apr 2023 17:45:58 GMT
       etag:
-      - W/"datetime'2022-12-27T17%3A39%3A22.165527Z'"
+      - W/"datetime'2023-04-28T17%3A45%3A32.8126856Z'"
       expires:
       - '-1'
       pragma:
@@ -1611,23 +1701,23 @@ interactions:
       ParameterSetName:
       - -g -a -p -v --quota-rule-name --quota-size --quota-type
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","name":"cli-acc-000002/cli-pool-000003/cli-vol-000004/cli-qr-000005","type":"Microsoft.NetApp/netAppAccounts/capacityPools/volumes/volumeQuotaRules","etag":"W/\"datetime''2022-12-27T17%3A39%3A22.165527Z''\"","location":"westcentralus","properties":{"quotaTarget":"","quotaSizeInKiBs":100006,"quotaType":"DefaultGroupQuota","provisioningState":"Succeeded"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2022-12-27T17:39:13.2138156Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2022-12-27T17:39:13.2138156Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","name":"cli-acc-000002/cli-pool-000003/cli-vol-000004/cli-qr-000005","type":"Microsoft.NetApp/netAppAccounts/capacityPools/volumes/volumeQuotaRules","etag":"W/\"datetime''2023-04-28T17%3A45%3A32.8126856Z''\"","location":"westcentralus","properties":{"quotaTarget":"","quotaSizeInKiBs":100006,"quotaType":"DefaultGroupQuota","provisioningState":"Succeeded"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2023-04-28T17:45:24.5924076Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2023-04-28T17:45:24.5924076Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '894'
+      - '895'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:39:53 GMT
+      - Fri, 28 Apr 2023 17:45:58 GMT
       etag:
-      - W/"datetime'2022-12-27T17%3A39%3A22.165527Z'"
+      - W/"datetime'2023-04-28T17%3A45%3A32.8126856Z'"
       expires:
       - '-1'
       pragma:
@@ -1666,29 +1756,29 @@ interactions:
       ParameterSetName:
       - -g -a -p -v --quota-rule-name --quota-size --quota-type
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","name":"cli-acc-000002/cli-pool-000003/cli-vol-000004/cli-qr-000005","type":"Microsoft.NetApp/netAppAccounts/capacityPools/volumes/volumeQuotaRules","etag":"W/\"datetime''2022-12-27T17%3A39%3A58.2679763Z''\"","location":"westcentralus","properties":{"provisioningState":"Patching","quotaTarget":"","quotaSizeInKiBs":100006,"quotaType":"DefaultGroupQuota"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2022-12-27T17:39:13.2138156Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2022-12-27T17:39:13.2138156Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","name":"cli-acc-000002/cli-pool-000003/cli-vol-000004/cli-qr-000005","type":"Microsoft.NetApp/netAppAccounts/capacityPools/volumes/volumeQuotaRules","etag":"W/\"datetime''2023-04-28T17%3A46%3A01.813415Z''\"","location":"westcentralus","properties":{"provisioningState":"Patching","quotaTarget":"","quotaSizeInKiBs":100006,"quotaType":"DefaultGroupQuota"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2023-04-28T17:45:24.5924076Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2023-04-28T17:45:24.5924076Z"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c7bf2306-5eac-454f-9e55-622a8931bb7d?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/ee9703c7-4514-48f7-919f-cf4d67607c72?api-version=2022-09-01
       cache-control:
       - no-cache
       content-length:
-      - '894'
+      - '893'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:39:57 GMT
+      - Fri, 28 Apr 2023 17:46:01 GMT
       etag:
-      - W/"datetime'2022-12-27T17%3A39%3A58.2679763Z'"
+      - W/"datetime'2023-04-28T17%3A46%3A01.813415Z'"
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c7bf2306-5eac-454f-9e55-622a8931bb7d?api-version=2022-05-01&operationResultResponseType=Location
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/ee9703c7-4514-48f7-919f-cf4d67607c72?api-version=2022-09-01&operationResultResponseType=Location
       pragma:
       - no-cache
       server:
@@ -1698,7 +1788,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
       x-powered-by:
       - ASP.NET
     status:
@@ -1718,21 +1808,21 @@ interactions:
       ParameterSetName:
       - -g -a -p -v --quota-rule-name --quota-size --quota-type
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c7bf2306-5eac-454f-9e55-622a8931bb7d?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/ee9703c7-4514-48f7-919f-cf4d67607c72?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c7bf2306-5eac-454f-9e55-622a8931bb7d","name":"c7bf2306-5eac-454f-9e55-622a8931bb7d","status":"Succeeded","startTime":"2022-12-27T17:39:58.2751315Z","endTime":"2022-12-27T17:40:05.6588937Z","percentComplete":100.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","action":"PATCH"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/ee9703c7-4514-48f7-919f-cf4d67607c72","name":"ee9703c7-4514-48f7-919f-cf4d67607c72","status":"Patching","startTime":"2023-04-28T17:46:01.8239223Z","endTime":"0001-01-01T00:00:00Z","percentComplete":0.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","action":"PATCH"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '643'
+      - '632'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:40:28 GMT
+      - Fri, 28 Apr 2023 17:46:02 GMT
       expires:
       - '-1'
       pragma:
@@ -1766,21 +1856,69 @@ interactions:
       ParameterSetName:
       - -g -a -p -v --quota-rule-name --quota-size --quota-type
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/c7bf2306-5eac-454f-9e55-622a8931bb7d?api-version=2022-05-01&operationResultResponseType=Location
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/ee9703c7-4514-48f7-919f-cf4d67607c72?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","name":"cli-acc-000002/cli-pool-000003/cli-vol-000004/cli-qr-000005","type":"Microsoft.NetApp/netAppAccounts/capacityPools/volumes/volumeQuotaRules","etag":"W/\"datetime''2022-12-27T17%3A40%3A05.6507724Z''\"","location":"westcentralus","properties":{"ruleId":"c8040e25-2937-619c-6fe3-10c5e522c585","quotaTarget":"","quotaSizeInKiBs":1000016,"quotaType":"DefaultGroupQuota","provisioningState":"Succeeded"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2022-12-27T17:39:55.5303366Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2022-12-27T17:39:55.5303366Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/ee9703c7-4514-48f7-919f-cf4d67607c72","name":"ee9703c7-4514-48f7-919f-cf4d67607c72","status":"Succeeded","startTime":"2023-04-28T17:46:01.8239223Z","endTime":"2023-04-28T17:46:04.7284358Z","percentComplete":100.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","action":"PATCH"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '944'
+      - '643'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:40:28 GMT
+      - Fri, 28 Apr 2023 17:46:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - netappfiles volume quota-rule update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -a -p -v --quota-rule-name --quota-size --quota-type
+      User-Agent:
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/ee9703c7-4514-48f7-919f-cf4d67607c72?api-version=2022-09-01&operationResultResponseType=Location
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","name":"cli-acc-000002/cli-pool-000003/cli-vol-000004/cli-qr-000005","type":"Microsoft.NetApp/netAppAccounts/capacityPools/volumes/volumeQuotaRules","etag":"W/\"datetime''2023-04-28T17%3A46%3A04.716786Z''\"","location":"westcentralus","properties":{"ruleId":"703f5a01-e187-a8b8-042e-2340102ff06a","quotaTarget":"","quotaSizeInKiBs":1000016,"quotaType":"DefaultGroupQuota","provisioningState":"Succeeded"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2023-04-28T17:45:59.9366451Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2023-04-28T17:45:59.9366451Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '943'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 28 Apr 2023 17:46:32 GMT
       expires:
       - '-1'
       pragma:
@@ -1814,23 +1952,23 @@ interactions:
       ParameterSetName:
       - -g -a -p -v --quota-rule-name
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","name":"cli-acc-000002/cli-pool-000003/cli-vol-000004/cli-qr-000005","type":"Microsoft.NetApp/netAppAccounts/capacityPools/volumes/volumeQuotaRules","etag":"W/\"datetime''2022-12-27T17%3A40%3A05.6507724Z''\"","location":"westcentralus","properties":{"quotaTarget":"","quotaSizeInKiBs":1000016,"quotaType":"DefaultGroupQuota","provisioningState":"Succeeded"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2022-12-27T17:39:55.5303366Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2022-12-27T17:39:55.5303366Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","name":"cli-acc-000002/cli-pool-000003/cli-vol-000004/cli-qr-000005","type":"Microsoft.NetApp/netAppAccounts/capacityPools/volumes/volumeQuotaRules","etag":"W/\"datetime''2023-04-28T17%3A46%3A04.716786Z''\"","location":"westcentralus","properties":{"quotaTarget":"","quotaSizeInKiBs":1000016,"quotaType":"DefaultGroupQuota","provisioningState":"Succeeded"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2023-04-28T17:45:59.9366451Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2023-04-28T17:45:59.9366451Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '896'
+      - '895'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:40:31 GMT
+      - Fri, 28 Apr 2023 17:46:33 GMT
       etag:
-      - W/"datetime'2022-12-27T17%3A40%3A05.6507724Z'"
+      - W/"datetime'2023-04-28T17%3A46%3A04.716786Z'"
       expires:
       - '-1'
       pragma:
@@ -1866,25 +2004,25 @@ interactions:
       ParameterSetName:
       - -g -a -p -v --quota-rule-name -y
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005?api-version=2022-09-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/281a819f-716b-4a1c-ac86-fb47c8670750?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/3f24318c-ed70-47e4-91c3-fb351942268a?api-version=2022-09-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Tue, 27 Dec 2022 17:40:34 GMT
+      - Fri, 28 Apr 2023 17:46:35 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/281a819f-716b-4a1c-ac86-fb47c8670750?api-version=2022-05-01&operationResultResponseType=Location
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/3f24318c-ed70-47e4-91c3-fb351942268a?api-version=2022-09-01&operationResultResponseType=Location
       pragma:
       - no-cache
       server:
@@ -1894,7 +2032,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14998'
       x-powered-by:
       - ASP.NET
     status:
@@ -1914,21 +2052,21 @@ interactions:
       ParameterSetName:
       - -g -a -p -v --quota-rule-name -y
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/281a819f-716b-4a1c-ac86-fb47c8670750?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/3f24318c-ed70-47e4-91c3-fb351942268a?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/281a819f-716b-4a1c-ac86-fb47c8670750","name":"281a819f-716b-4a1c-ac86-fb47c8670750","status":"Succeeded","startTime":"2022-12-27T17:40:34.6941502Z","endTime":"2022-12-27T17:40:34.82273Z","percentComplete":100.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","action":"DELETE"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/3f24318c-ed70-47e4-91c3-fb351942268a","name":"3f24318c-ed70-47e4-91c3-fb351942268a","status":"Succeeded","startTime":"2023-04-28T17:46:35.7289795Z","endTime":"2023-04-28T17:46:35.928369Z","percentComplete":100.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","action":"DELETE"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '642'
+      - '643'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:41:04 GMT
+      - Fri, 28 Apr 2023 17:46:35 GMT
       expires:
       - '-1'
       pragma:
@@ -1962,12 +2100,12 @@ interactions:
       ParameterSetName:
       - -g -a -p -v --quota-rule-name -y
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/281a819f-716b-4a1c-ac86-fb47c8670750?api-version=2022-05-01&operationResultResponseType=Location
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/westcentralus/operationResults/3f24318c-ed70-47e4-91c3-fb351942268a?api-version=2022-09-01&operationResultResponseType=Location
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","name":"cli-acc-000002/cli-pool-000003/cli-vol-000004/cli-qr-000005","type":"Microsoft.NetApp/netAppAccounts/capacityPools/volumes/volumeQuotaRules","etag":"W/\"datetime''2022-12-27T17%3A40%3A34.6922313Z''\"","location":"westcentralus","properties":{"ruleId":"c8040e25-2937-619c-6fe3-10c5e522c585","quotaTarget":"","quotaSizeInKiBs":1000016,"quotaType":"DefaultGroupQuota","provisioningState":"Deleting"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2022-12-27T17:39:55.5303366Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2022-12-27T17:39:55.5303366Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules/cli-qr-000005","name":"cli-acc-000002/cli-pool-000003/cli-vol-000004/cli-qr-000005","type":"Microsoft.NetApp/netAppAccounts/capacityPools/volumes/volumeQuotaRules","etag":"W/\"datetime''2023-04-28T17%3A46%3A35.7203788Z''\"","location":"westcentralus","properties":{"ruleId":"703f5a01-e187-a8b8-042e-2340102ff06a","quotaTarget":"","quotaSizeInKiBs":1000016,"quotaType":"DefaultGroupQuota","provisioningState":"Deleting"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2023-04-28T17:45:59.9366451Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2023-04-28T17:45:59.9366451Z"}}'
     headers:
       cache-control:
       - no-cache
@@ -1976,7 +2114,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:41:05 GMT
+      - Fri, 28 Apr 2023 17:46:35 GMT
       expires:
       - '-1'
       pragma:
@@ -2010,9 +2148,9 @@ interactions:
       ParameterSetName:
       - -g -a -p -v
       User-Agent:
-      - AZURECLI/2.43.0 (PIP) azsdk-python-mgmt-netapp/9.0.1 Python/3.9.5 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_volume_quota_rule_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002/capacityPools/cli-pool-000003/volumes/cli-vol-000004/volumeQuotaRules?api-version=2022-09-01
   response:
     body:
       string: '{"value":[]}'
@@ -2024,7 +2162,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 27 Dec 2022 17:41:09 GMT
+      - Fri, 28 Apr 2023 17:46:37 GMT
       expires:
       - '-1'
       pragma:
