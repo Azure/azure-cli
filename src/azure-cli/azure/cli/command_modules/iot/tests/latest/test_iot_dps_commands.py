@@ -4,12 +4,14 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-statements
 
+from unittest import mock
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 from azure.cli.command_modules.iot.tests.latest._test_utils import (
     _create_test_cert, _delete_test_cert, _create_verification_cert, _create_fake_chain_cert
 )
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from azure.cli.command_modules.iot.shared import IdentityType
 from azure.cli.command_modules.iot.tests.latest.recording_processors import KeyReplacer
 from azure.core.exceptions import HttpResponseError
 import random
@@ -100,7 +102,7 @@ class IoTDpsTest(ScenarioTest):
         # Delete DPS
         self.cmd('az iot dps delete -g {} -n {}'.format(group_name, dps_name))
 
-        # Data Residency tests
+        # Data Residency tests - TODO change these
         dr_dps_name = self.create_random_name('dps-dr', 20)
 
         # Data residency not enabled in this region
@@ -113,6 +115,160 @@ class IoTDpsTest(ScenarioTest):
                          self.check('location', 'southeastasia'),
                          self.check('properties.enableDataResidency', True)])
         self.cmd('az iot dps delete -g {} -n {}'.format(group_name, dr_dps_name))
+
+    @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')
+    def test_dps_lifecycle(self, group_name, group_location):
+        rg = group_name
+        dps_name = self.create_random_name('dps', 20)
+        identity_storage_role = 'Storage Blob Data Contributor'
+        rg_id = self.cmd('group show -n {0}'.format(rg)).get_output_in_json()['id']
+
+
+        # identities
+        user_identity_names = [
+            self.create_random_name(prefix='iot-user-identity', length=32),
+            self.create_random_name(prefix='iot-user-identity', length=32),
+            self.create_random_name(prefix='iot-user-identity', length=32)
+        ]
+
+        # create user-assigned identity
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            user_identity_1 = self.cmd('identity create -n {0} -g {1}'.format(user_identity_names[0], rg)).get_output_in_json()['id']
+            user_identity_2 = self.cmd('identity create -n {0} -g {1}'.format(user_identity_names[1], rg)).get_output_in_json()['id']
+            user_identity_3 = self.cmd('identity create -n {0} -g {1}'.format(user_identity_names[2], rg)).get_output_in_json()['id']
+
+
+        # Create DPS with system identity and user identity, assign role to rg
+        tags = "key1=value1 key2=value2"
+
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
+            self.cmd('az iot dps create -g {} -n {} --mi-system-assigned --mi-user-assigned {} --tags {} --role "{}" --scopes "{}"'.format(
+                group_name, dps_name, user_identity_1, tags, identity_storage_role, rg_id
+                ),
+                 checks=[self.check('name', dps_name),
+                         self.check('location', group_location),
+                         self.check('tags', {'key1': 'value1', 'key2': 'value2'})])
+
+        # Check that there is system and user identity
+        dps_principal_id = self.cmd('iot dps identity show -n {0} -g {1}'.format(dps_name, rg),
+                 checks=[
+                     self.check('length(userAssignedIdentities)', 1),
+                     self.check('type', IdentityType.system_assigned_user_assigned.value),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_1))
+                 ]).get_output_in_json()["identity"]["principalId"]
+
+        # Check that the role to the rg got created
+        self.cmd('role assignment list --scope {0} --role "{1}" --assignee "{}"'.format(
+            rg_id, identity_storage_role, dps_principal_id
+            ),
+                 checks=[
+                     self.check('length(@)', 1)])
+
+        # Turn off system
+        # assign (user) add multiple user-assigned identities (2, 3)
+        self.cmd('iot dps identity assign -n {0} -g {1} --user {2} {3}'
+                 .format(dps_name, rg, user_identity_2, user_identity_3),
+                 checks=[
+                     self.check('length(userAssignedIdentities)', 3),
+                     self.check('type', IdentityType.system_assigned_user_assigned.value),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_1)),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_2)),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_3))])
+
+        # remove (system)
+        self.cmd('iot dps identity remove -n {0} -g {1} --system'.format(dps_name, rg),
+                 checks=[
+                     self.check('length(userAssignedIdentities)', 3),
+                     self.check('type', IdentityType.user_assigned.value),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_1)),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_2)),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_3))])
+
+        # assign (system) re-add system identity
+        self.cmd('iot dps identity assign -n {0} -g {1} --system'.format(dps_name, rg),
+                 checks=[
+                     self.check('length(userAssignedIdentities)', 3),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_1)),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_2)),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_3)),
+                     self.check('type', IdentityType.system_assigned_user_assigned.value)])
+
+        # remove (system) - remove system identity
+        self.cmd('iot dps identity remove -n {0} -g {1} --system-assigned'.format(dps_name, rg),
+                 checks=[
+                     self.check('type', IdentityType.user_assigned.value),
+                     self.check('length(userAssignedIdentities)', 3),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_1)),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_2)),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_3))])
+
+        # remove (user) - remove single identity (2)
+        self.cmd('iot dps identity remove -n {0} -g {1} --user {2}'.format(dps_name, rg, user_identity_2),
+                 checks=[
+                     self.check('type', IdentityType.user_assigned.value),
+                     self.check('length(userAssignedIdentities)', 2),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_1)),
+                     self.exists('userAssignedIdentities."{0}"'.format(user_identity_3))])
+
+        # TODO - see if the same guid or different (should be different) - and if the with is needed
+        # assign (system) re-add system identity + assign scope + role
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
+            dps_principal_id = self.cmd('iot dps identity assign -n {0} -g {1} --system --role "{}" --scopes "{}"'
+                 .format(dps_name, rg, identity_storage_role, rg_id),
+                 checks=[
+                     self.check('length(userAssignedIdentities)', 2),
+                     self.check('type', IdentityType.system_assigned_user_assigned.value)]).get_output_in_json()["identity"]["principalId"]
+
+        # Check assignment
+        self.cmd('role assignment list --scope {0} --role "{1}" --assignee "{}"'.format(
+            rg_id, identity_storage_role, dps_principal_id
+            ),
+                 checks=[
+                     self.check('length(@)', 1)])
+
+        # remove (--user-assigned)
+        self.cmd('iot dps identity remove -n {0} -g {1} --user-assigned'
+                 .format(dps_name, rg),
+                 checks=[
+                     self.check('userAssignedIdentities', None),
+                     self.check('type', IdentityType.system_assigned.value)])
+
+        # remove (--system)
+        self.cmd('iot dps identity remove -n {0} -g {1} --system'
+                 .format(dps_name, rg),
+                 checks=[
+                     self.check('userAssignedIdentities', None),
+                     self.check('type', IdentityType.none.value)])
+
+
+    @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')
+    def test_dps_failover_lifecycle(self, group_name, group_location):
+        dps_name = self.create_random_name('dps', 20)
+        # find region pair
+        failover_location = "westus" if group_location == "eastus" else "eastus"
+
+        # Create DPS with CEDR
+        self.cmd('az iot dps create -g {} -n {} --region {}'.format(group_name, dps_name, failover_location),
+                 checks=[self.check('name', dps_name),
+                         self.check('location', group_location)])
+
+        # Start Failover
+        self.cmd('az iot dps manual-failover -g {} -n {}'.format(group_name, dps_name))
+
+        # check that the region changed correctly
+        self.cmd('az iot dps show -g {} -n {}'.format(group_name, dps_name),
+                 checks=[self.check('name', dps_name),
+                         self.check('location', failover_location)])
+
+        # Failover again should put back to primary region
+        self.cmd('az iot dps manual-failover -g {} -n {}'.format(group_name, dps_name))
+
+        self.cmd('az iot dps show -g {} -n {}'.format(group_name, dps_name),
+                 checks=[self.check('name', dps_name),
+                         self.check('location', group_location)])
+
+        # Delete DPS
+        self.cmd('az iot dps delete -g {} -n {}'.format(group_name, dps_name))
 
 
     @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')

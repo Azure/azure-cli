@@ -469,7 +469,7 @@ def iot_dps_identity_assign(cmd, client, dps_name, system_identity=None, user_id
         else:
             dps.identity.type = IdentityType.user_assigned.value if dps.identity.user_assigned_identities else IdentityType.none.value
 
-        poller = client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps, {'IF-MATCH': hub.etag})
+        poller = client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps, {'IF-MATCH': dps.etag})
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
     if bool(identity_role) ^ bool(identity_scopes):
