@@ -217,7 +217,19 @@ def create_log_analytics_workspace_table_restore(cmd, resource_group_name, works
                                                  no_wait=False):
     from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.table import Create
 
-    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+    class RefinedCreate(Create):
+
+        @classmethod
+        def _build_arguments_schema(cls, *args, **kwargs):
+            from azure.cli.core.aaz import AAZIntArgFormat
+            args_schema = super()._build_arguments_schema(*args, **kwargs)
+            args_schema.total_retention_time._fmt = AAZIntArgFormat(
+                maximum=2556,
+                minimum=4,
+            )
+            return args_schema
+
+    return RefinedCreate(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "table_name": table_name,
         "workspace_name": workspace_name,
@@ -234,6 +246,18 @@ def update_log_analytics_workspace_table(cmd, resource_group_name, workspace_nam
                                          retention_in_days=None, total_retention_in_days=None, plan=None,
                                          description=None, no_wait=False):
     from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.table import Update
+
+    class RefinedUpdate(Update):
+
+        @classmethod
+        def _build_arguments_schema(cls, *args, **kwargs):
+            from azure.cli.core.aaz import AAZIntArgFormat
+            args_schema = super()._build_arguments_schema(*args, **kwargs)
+            args_schema.total_retention_time._fmt = AAZIntArgFormat(
+                maximum=2556,
+                minimum=4,
+            )
+            return args_schema
 
     columns_list = None
     if columns:
@@ -263,4 +287,4 @@ def update_log_analytics_workspace_table(cmd, resource_group_name, workspace_nam
         command_args["schema"]["columns"] = columns_list
     if description is not None:
         command_args["schema"]["description"] = description
-    return Update(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    return RefinedUpdate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
