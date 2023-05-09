@@ -6347,11 +6347,25 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             '--enable-managed-identity', '--enable-azuremonitormetrics --enable-windows-recording-rules',
             '--ssh-key-value={ssh_key_value} --node-vm-size={node_vm_size}',
         ])
-        # azuremonitor metrics will be set to false after initial creation command as its in the
-        # postprocessing step that we do an update to enable it. This behavior is expected.
         self.cmd(create_cmd, checks=[
+            self.is_empty(),
+        ])
+
+        # azuremonitor metrics will be set to false after initial creation command as its in the
+        # postprocessing step that we do an update to enable it. Adding a wait for the second put request
+        # in addonput.py which enables the Azure Monitor Metrics addon as all the DC* resources
+        # have now been created.
+        wait_cmd = ' '.join([
+            'aks', 'wait', '--resource-group={resource_group}', '--name={name}', '--updated',
+            '--interval 60', '--timeout 300',
+        ])
+        self.cmd(wait_cmd, checks=[
+            self.is_empty(),
+        ])
+
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('azureMonitorProfile.metrics.enabled', False),
+            self.check('azureMonitorProfile.metrics.enabled', True),
         ])
 
         # delete
