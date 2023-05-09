@@ -3652,7 +3652,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        consumption_plan_location=None, app_insights=None, app_insights_key=None,
                        disable_app_insights=None, deployment_source_url=None,
                        deployment_source_branch='master', deployment_local_git=None,
-                       registry_password=None, registry_username=None,
+                       registry_server=None, registry_password=None, registry_username=None,
                        image=None, tags=None, assign_identities=None,
                        role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
                        environment=None, min_replicas=None, max_replicas=None):
@@ -3758,7 +3758,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         if image is None:
             image = DEFAULT_CENTAURI_IMAGE
 
-    docker_registry_server_url = parse_docker_image_name(image, environment)
+    if registry_server:
+        docker_registry_server_url = registry_server
+    else:
+        docker_registry_server_url = parse_docker_image_name(image, environment)
 
     if functions_version == '2' and functionapp_def.location in FUNCTIONS_NO_V2_REGIONS:
         raise ValidationError("2.x functions are not supported in this region. To create a 3.x function, "
