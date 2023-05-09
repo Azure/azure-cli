@@ -286,9 +286,9 @@ def clean_deleted_keyvault():
     for name, scheduledPurgeDate, keyvault_type in tqdm(deleted_keyvaults):
         if scheduledPurgeDate <= datetime.datetime.now().isoformat():
             if keyvault_type == 'Microsoft.KeyVault/deletedVaults':
-                cmd = ['az', 'keyvault', 'purge', '--name', name]
+                cmd = ['az', 'keyvault', 'purge', '--name', name, '--no-wait']
             elif keyvault_type == 'Microsoft.KeyVault/deletedManagedHSMs':
-                cmd = ['az', 'keyvault', 'purge', '--hsm-name', name]
+                cmd = ['az', 'keyvault', 'purge', '--hsm-name', name, '--no-wait']
             else:
                 continue
             print(cmd)

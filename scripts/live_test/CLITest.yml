@@ -26,7 +26,8 @@ variables:
 jobs:
 - job: LiveTestPython38
   displayName: Live Test Python 3.8
-  timeoutInMinutes: 0
+  # Sometimes the live test will be stuck forever, so the timeout cannot be set to 0, it is recommended to set it to twice the maximum time
+  timeoutInMinutes: 600
   strategy:
     maxParallel: 10
     matrix:
