@@ -550,7 +550,6 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
         raise ResourceNotFoundError('The function app \'{}\' was not found in resource group \'{}\'. '
                                     'Please make sure these values are correct.'.format(name, resource_group_name))
     parse_plan_id = parse_resource_id(app.server_farm_id)
-
     plan_info = None
     retry_delay = 10  # seconds
     # We need to retry getting the plan because sometimes if the plan is created as part of function app,

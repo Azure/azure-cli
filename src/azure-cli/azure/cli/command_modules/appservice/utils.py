@@ -175,6 +175,7 @@ def is_centauri_functionapp(cmd, resource_group, name):
     function_app = show_raw_functionapp(cmd, resource_group, name)
     return function_app.get("properties", {}).get("managedEnvironmentId", None) is not None
 
+
 def is_cv2_functionapp(cmd, resource_group, name):
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group, name)
