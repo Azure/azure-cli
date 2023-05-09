@@ -6,7 +6,7 @@
 from azure.core.exceptions import HttpResponseError
 from datetime import datetime
 from enum import Enum
-from _constants import StatusCodes
+from ._constants import StatusCodes
 
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-instance-attributes
