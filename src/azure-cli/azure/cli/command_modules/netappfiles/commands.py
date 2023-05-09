@@ -16,7 +16,6 @@ from azure.cli.command_modules.netappfiles._client_factory import (
     account_backups_mgmt_client_factory,
     backups_mgmt_client_factory,
     backup_policies_mgmt_client_factory,
-    vaults_mgmt_client_factory,
     subvolumes_mgmt_client_factory,
     volume_groups_mgmt_client_factory,
     netapp_resource_mgmt_client_factory,
@@ -81,13 +80,6 @@ def load_command_table(self, _):
         exception_handler=netappfiles_exception_handler
     )
     load_backup_policies_command_groups(self, netappfiles_backup_policies_sdk)
-
-    netappfiles_vaults_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.netapp.operations._vaults_operations#VaultsOperations.{}',
-        client_factory=vaults_mgmt_client_factory,
-        exception_handler=netappfiles_exception_handler
-    )
-    load_vaults_command_groups(self, netappfiles_vaults_sdk)
 
     netappfiles_subvolumes_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.netapp.operations._subvolumes_operations#SubvolumesOperations.{}',
@@ -250,6 +242,12 @@ def load_volumes_command_groups(self, netappfiles_volumes_sdk):
         g.command('relocate', 'begin_relocate', supports_no_wait=True)
         g.command('finalize-relocation', 'begin_finalize_relocation', supports_no_wait=True)
         g.command('revert-relocation', 'begin_revert_relocation', supports_no_wait=True, confirmation=True)
+        g.custom_command('break-file-locks', 'break_file_locks',
+                         client_factory=volumes_mgmt_client_factory,
+                         supports_no_wait=True,
+                         doc_string_source='azure.mgmt.netapp.models#BreakFileLocksRequest',
+                         exception_handler=netappfiles_exception_handler,
+                         confirmation=True)
         g.wait_command('wait')
 
     with self.command_group('netappfiles volume export-policy', netappfiles_volumes_sdk) as g:
@@ -339,21 +337,18 @@ def load_snapshots_policies_command_groups(self, netappfiles_snapshot_policies_s
         g.command('list', 'list')
         g.command('volumes', 'list_volumes')
         g.command('delete', 'begin_delete', supports_no_wait=True)
-        g.custom_command('update', 'patch_snapshot_policy',
-                         client_factory=snapshot_policies_mgmt_client_factory,
-                         supports_no_wait=True,
-                         doc_string_source='azure.mgmt.netapp.models#SnapshotPolicyPatch',
-                         exception_handler=netappfiles_exception_handler)
+        g.generic_update_command('update',
+                                 setter_name='begin_update',
+                                 custom_func_name='patch_snapshot_policy',
+                                 supports_no_wait=True,
+                                 setter_arg_name='body',
+                                 doc_string_source='azure.mgmt.netapp.models#SnapshotPolicyPatch',
+                                 exception_handler=netappfiles_exception_handler)
         g.custom_command('create', 'create_snapshot_policy',
                          client_factory=snapshot_policies_mgmt_client_factory,
                          doc_string_source='azure.mgmt.netapp.models#SnapshotPolicy',
                          exception_handler=netappfiles_exception_handler)
         g.wait_command('wait')
-
-
-def load_vaults_command_groups(self, netappfiles_vaults_sdk):
-    with self.command_group('netappfiles vault', netappfiles_vaults_sdk) as g:
-        g.command('list', 'list')
 
 
 def load_subvolumes_command_groups(self, netappfiles_subvolumes_sdk):
