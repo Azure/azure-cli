@@ -6027,7 +6027,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         get_fw_private_ip_cmd = 'network firewall show -g {resource_group} -n {fw_name}'
         fw_private_ip = self.cmd(get_fw_private_ip_cmd).get_output_in_json()
-        fw_private_ip_address = fw_private_ip.get("ipConfigurations")[0].get("privateIpAddress")
+        fw_private_ip_address = fw_private_ip.get("ipConfigurations")[0].get("privateIPAddress")
 
         self.kwargs.update({
             'fw_public_ip_address': fw_public_ip_address,

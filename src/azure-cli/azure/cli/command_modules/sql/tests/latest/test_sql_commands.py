@@ -938,6 +938,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
     def test_sql_db_preferred_enclave_type(self, resource_group, resource_group_location, server):
         database_name_one = "cliautomationdb01"
         database_name_two = "cliautomationdb02"
+        database_name_three = "cliautomationdb03"
         preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default
         preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs
 
@@ -973,6 +974,39 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_vbs)])
+
+        # test sql db update from Default to VBS enclave type
+        self.cmd('sql db create -g {} --server {} --name {} --preferred-enclave-type {} '
+                .format(resource_group, server, database_name_three, preferred_enclave_type_default),
+                checks=[
+                    JMESPathCheck('resourceGroup', resource_group),
+                    JMESPathCheck('name', database_name_three),
+                    JMESPathCheck('location', resource_group_location),
+                    JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)])
+
+        self.cmd('sql db show -g {} -s {} --name {}'
+                 .format(resource_group, server, database_name_three),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_three),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)])
+
+        self.cmd('sql db update -g {} --server {} --name {} --preferred-enclave-type {}'
+                .format(resource_group, server, database_name_three, preferred_enclave_type_vbs),
+                checks=[
+                    JMESPathCheck('resourceGroup', resource_group),
+                    JMESPathCheck('name', database_name_three),
+                    JMESPathCheck('location', resource_group_location),
+                    JMESPathCheck('preferredEnclaveType', preferred_enclave_type_vbs)])
+
+        self.cmd('sql db show -g {} -s {} --name {}'
+                 .format(resource_group, server, database_name_three),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_three),
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('preferredEnclaveType', preferred_enclave_type_vbs)])
 
@@ -3494,6 +3528,108 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('requestedServiceObjectiveName', db_service_objective),
                      JMESPathCheck('status', 'Online'),
                      JMESPathCheck('highAvailabilityReplicaCount', replica_count)]) #Verify its the same as pool
+
+    @ResourceGroupPreparer(name_prefix='clitest-EPVBS', location='eastus2euap')
+    @SqlServerPreparer(name_prefix='clitest-EPVBS', location='eastus2euap')
+    @unittest.skip('Cannot record yet due to pending MS deployment')
+    @AllowLargeResponse()
+    def test_sql_elastic_pools_preferred_enclave_type_mgmt(self, resource_group, resource_group_location, server):
+        pool_name_one = "cliautomationpool1"
+        pool_name_two = "cliautomationpool2"
+        database_name_one = "cliautomationdb01"
+        database_name_two = "cliautomationdb02"
+        edition = 'GeneralPurpose'
+        preferred_enclave_type_default = AlwaysEncryptedEnclaveType.default
+        preferred_enclave_type_vbs = AlwaysEncryptedEnclaveType.vbs
+
+        # Create general purpose pool with default enclave type
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --preferred-enclave-type {}'
+                 .format(resource_group, server, pool_name_one, edition, preferred_enclave_type_default),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name_one),
+                     JMESPathCheck('edition', edition),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)])
+
+        self.cmd('sql elastic-pool show -g {} --server {} --name {}'
+                 .format(resource_group, server, pool_name_one),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name_one),
+                     JMESPathCheck('edition', edition),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)])
+
+        # Create a database inside the general purpose elastic pool with default enclave type.
+        self.cmd('sql db create -g {} --server {} --name {} '
+                 '--elastic-pool {}'
+                 .format(resource_group, server, database_name_one, pool_name_one),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one),
+                     JMESPathCheck('requestedServiceObjectiveName', 'ElasticPool'),
+                     JMESPathCheck('status', 'Online'),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)]) #Verify its the same as pool
+
+        self.cmd('sql db show -g {} --server {} --name {}'
+                 .format(resource_group, server, database_name_one),
+                 checks=[
+                     JMESPathCheck('elasticPoolName', pool_name_one),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)])
+
+        # Create general purpose pool with vbs enclave type
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --preferred-enclave-type {}'
+                 .format(resource_group, server, pool_name_two, edition, preferred_enclave_type_vbs),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name_two),
+                     JMESPathCheck('edition', edition),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_vbs)])
+
+        self.cmd('sql elastic-pool show -g {} --server {} --name {}'
+                 .format(resource_group, server, pool_name_two),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name_two),
+                     JMESPathCheck('edition', edition),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_vbs)])
+
+        # Create a database inside the general purpose elastic pool with vbs enclave type.
+        self.cmd('sql db create -g {} --server {} --name {} '
+                 '--elastic-pool {}'
+                 .format(resource_group, server, database_name_two, pool_name_two),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('requestedServiceObjectiveName', 'ElasticPool'),
+                     JMESPathCheck('status', 'Online'),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_vbs)]) #Verify its the same as pool
+
+        self.cmd('sql db show -g {} --server {} --name {}'
+                 .format(resource_group, server, database_name_two),
+                 checks=[
+                     JMESPathCheck('elasticPoolName', pool_name_two),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_vbs)])
+
+        # Update only preferred enclave type from vbs -> default on the elastic pool
+        self.cmd('sql elastic-pool update -g {} --server {} --name {} --preferred-enclave-type {}'
+                 .format(resource_group, server, pool_name_two, preferred_enclave_type_default),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', pool_name_two),
+                     JMESPathCheck('edition', edition),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)])
+
+        self.cmd('sql db show -g {} --server {} --name {}'
+                 .format(resource_group, server, database_name_two),
+                 checks=[
+                     JMESPathCheck('elasticPoolName', pool_name_two),
+                     JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)])
+
 
 class SqlElasticPoolOperationMgmtScenarioTest(ScenarioTest):
     def __init__(self, method_name):

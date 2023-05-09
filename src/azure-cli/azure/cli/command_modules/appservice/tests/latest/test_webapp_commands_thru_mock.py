@@ -250,11 +250,13 @@ class TestWebappMocked(unittest.TestCase):
         log_mock.assert_called_with(mock.ANY, 'myRG', 'myweb', None, None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._rename_server_farm_props', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._fill_ftp_publishing_url', autospec=True)
-    def test_show_webapp(self, file_ftp_mock, rename_mock, site_op_mock):
+    def test_show_webapp(self, file_ftp_mock, rename_mock, is_centauri_functionapp_mock, site_op_mock):
         faked_web = mock.MagicMock()
         site_op_mock.return_value = faked_web
+        is_centauri_functionapp_mock.return_value = False
         # action
         result = show_app(mock.MagicMock(), 'myRG', 'myweb', slot=None)
         # assert (we invoke the site op)
