@@ -238,7 +238,6 @@ def load_command_table(self, _):
         g.keyvault_custom('restore', 'restore_secret', transform=transform_secret_set_attributes)
 
     with self.command_group('keyvault certificate', data_entity.command_type) as g:
-        g.keyvault_custom('import', 'import_certificate', transform=extract_subresource_name())
         g.keyvault_custom('download', 'download_certificate')
         g.keyvault_custom('get-default-policy', 'get_default_policy')
 
@@ -294,6 +293,7 @@ def load_command_table(self, _):
         g.keyvault_command('purge', 'purge_deleted_certificate')
         g.keyvault_command('recover', 'begin_recover_deleted_certificate', transform=transform_certificate_recover)
         g.keyvault_custom('set-attributes', 'set_attributes_certificate', transform=transform_certificate_show)
+        g.keyvault_custom('import', 'import_certificate', transform=transform_certificate_show)
 
     if not is_azure_stack_profile(self):
         with self.command_group('keyvault role', data_access_control_entity.command_type):

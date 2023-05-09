@@ -825,7 +825,7 @@ def load_arguments(self, _):
     with self.argument_context('keyvault certificate import') as c:
         c.argument('certificate_name', options_list=['--name', '-n'], required=True, arg_group='Id',
                    help='Name of the certificate.')
-        c.argument('vault_base_url', vault_name_type, required=True, arg_group='Id',
+        c.extra('vault_base_url', vault_name_type, required=True, arg_group='Id',
                 type=get_vault_base_url_type(self.cli_ctx), id_part=None)
         c.argument('certificate_data', options_list=['--file', '-f'], completer=FilesCompleter(),
                    help='PKCS12 file or PEM file containing the certificate and private key.',

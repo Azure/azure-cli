@@ -780,14 +780,15 @@ def process_certificate_policy(cmd, ns):
         reuse_key = key_properties.get('reuse_key')
         key_curve_name = key_properties.get('curve')
 
-    if policy.get('lifetime_actions'):
+    lifetime_actions = policy.get('lifetime_actions')
+    if lifetime_actions:
         lifetime_actions = [
             LifetimeAction(
                 action=item['action'].get('action_type') if item.get('action') else None,
                 lifetime_percentage=item['trigger'].get('lifetime_percentage') if item.get('trigger') else None,
                 days_before_expiry=item['trigger'].get('days_before_expiry') if item.get('trigger') else None
             )
-            for item in policy.get('lifetime_actions')]
+            for item in lifetime_actions]
 
     secret_properties = policy.get('secret_properties')
     if secret_properties:
