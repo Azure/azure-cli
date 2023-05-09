@@ -1850,7 +1850,7 @@ def _resolve_hostname_through_dns(hostname):
     return socket.gethostbyname(hostname)
 
 
-def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_source=None,
+def create_webapp_slot(cmd, resource_group_name, name, slot, configuration_source=None,
                        deployment_container_image_name=None, docker_registry_server_password=None,
                        docker_registry_server_user=None):
     container_args = deployment_container_image_name or docker_registry_server_password or docker_registry_server_user
@@ -1863,13 +1863,13 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
 
     Site, SiteConfig, NameValuePair = cmd.get_models('Site', 'SiteConfig', 'NameValuePair')
     client = web_client_factory(cmd.cli_ctx)
-    site = client.web_apps.get(resource_group_name, webapp)
-    site_config = get_site_configs(cmd, resource_group_name, webapp, None)
+    site = client.web_apps.get(resource_group_name, name)
+    site_config = get_site_configs(cmd, resource_group_name, name, None)
     if not site:
-        raise ResourceNotFoundError("'{}' app doesn't exist".format(webapp))
+        raise ResourceNotFoundError("'{}' app doesn't exist".format(name))
     if 'functionapp' in site.kind:
         raise ValidationError("'{}' is a function app. Please use "
-                              "`az functionapp deployment slot create`.".format(webapp))
+                              "`az functionapp deployment slot create`.".format(name))
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
     slot_def.site_config = SiteConfig()
@@ -1878,9 +1878,9 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
     # app settings to perform the container image validation:
     if configuration_source and site_config.windows_fx_version:
         # get settings from the source
-        clone_from_prod = configuration_source.lower() == webapp.lower()
+        clone_from_prod = configuration_source.lower() == name.lower()
         src_slot = None if clone_from_prod else configuration_source
-        app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp,
+        app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                                'list_application_settings', src_slot)
         settings = []
         for k, v in app_settings.properties.items():
@@ -1888,11 +1888,11 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
                      "DOCKER_REGISTRY_SERVER_URL"):
                 settings.append(NameValuePair(name=k, value=v))
         slot_def.site_config = SiteConfig(app_settings=settings)
-    poller = client.web_apps.begin_create_or_update_slot(resource_group_name, webapp, site_envelope=slot_def, slot=slot)
+    poller = client.web_apps.begin_create_or_update_slot(resource_group_name, name, site_envelope=slot_def, slot=slot)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
 
     if configuration_source:
-        update_slot_configuration_from_source(cmd, client, resource_group_name, webapp, slot, configuration_source,
+        update_slot_configuration_from_source(cmd, client, resource_group_name, name, slot, configuration_source,
                                               deployment_container_image_name, docker_registry_server_password,
                                               docker_registry_server_user,
                                               docker_registry_server_url=docker_registry_server_url)
