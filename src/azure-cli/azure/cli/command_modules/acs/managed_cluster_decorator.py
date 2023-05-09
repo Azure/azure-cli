@@ -5810,7 +5810,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         support_plan = self.context.get_k8s_support_plan()
         if support_plan == KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT:
-            if mc == None or mc.sku == None or mc.sku.tier != CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM:
+            if mc == None or mc.sku == None or mc.sku.tier.lower() != CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM.lower():
                 raise AzCLIError("Long term support is only available for premium tier clusters.")
 
         mc.support_plan = support_plan
@@ -6769,7 +6769,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         support_plan = self.context.get_k8s_support_plan()
         if support_plan == KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT:
-            if mc == None or mc.sku == None or mc.sku.tier != CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM:
+            if mc == None or mc.sku == None or mc.sku.tier.lower() != CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM.lower():
                 raise AzCLIError("Long term support is only available for premium tier clusters.")
 
         mc.support_plan = support_plan

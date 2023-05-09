@@ -125,8 +125,6 @@ auto_upgrade_channels = [
     CONST_NONE_UPGRADE_CHANNEL,
 ]
 
-k8s_support_plans = [KubernetesSupportPlan.KUBERNETES_OFFICIAL, KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT]
-
 dev_space_endpoint_types = ['Public', 'Private', 'None']
 
 keyvault_network_access_types = [CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC, CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE]
@@ -143,6 +141,7 @@ gpu_instance_profiles = [
 def load_arguments(self, _):
 
     acr_arg_type = CLIArgumentType(metavar='ACR_NAME_OR_RESOURCE_ID')
+    k8s_support_plans = self.get_models("KubernetesSupportPlan", resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters')
 
     # AKS command argument configuration
     with self.argument_context('aks', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
