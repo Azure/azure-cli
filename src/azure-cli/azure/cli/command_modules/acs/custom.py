@@ -1488,9 +1488,9 @@ def get_arch_for_cli_binary():
             )
         )
     logger.warning(
-        "The detected architecture is '%s', which will be regarded as '%s' and "
-        "the corresponding binary will be downloaded. "
-        "If there is any problem, please download the appropriate binary by yourself.",
+        'The detected architecture of current device is "%s", and the binary for "%s" '
+        'will be downloaded. If the detectiton is wrong, please download and install '
+        'the binary corresponding to the appropriate architecture.',
         arch,
         formatted_arch,
     )
@@ -1574,6 +1574,27 @@ def log_windows_post_installation_manual_steps_warning(install_dir, binary_name)
     )
 
 
+def validate_install_location(install_location: str, exe_name: str) -> None:
+    # check if the installation path is a directory
+    if os.path.isdir(install_location):
+        from azure.cli.command_modules.acs._params import _get_default_install_location
+        raise InvalidArgumentValueError(
+            'The installation location "{}" is a directory. Please specify a path '
+            'including the binary filename e.g. "{}".'.format(
+                install_location, _get_default_install_location(exe_name)
+            )
+        )
+    # check if the binary filename in installation path is correct
+    binary_name = os.path.basename(install_location)
+    if binary_name != exe_name:
+        logger.error(
+            'The binary filename "%s" in install location does not match '
+            'the expected binary name "%s".',
+            binary_name,
+            exe_name,
+        )
+
+
 # install kubectl
 def k8s_install_kubectl(cmd, client_version='latest', install_location=None, source_url=None, arch=None):
     """
@@ -1587,8 +1608,9 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
             source_url = 'https://mirror.azure.cn/kubernetes/kubectl'
 
     if client_version == 'latest':
-        context = _ssl_context()
-        version = urlopen(source_url + '/stable.txt', context=context).read()
+        latest_version_url = source_url + '/stable.txt'
+        logger.warning('No version specified, will get the latest version of kubectl from "%s"', latest_version_url)
+        version = urlopen(source_url + '/stable.txt', context=_ssl_context()).read()
         client_version = version.decode('UTF-8').strip()
     else:
         client_version = "v%s" % client_version
@@ -1606,16 +1628,21 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
         os.makedirs(install_dir)
 
     if system == 'Windows':
-        file_url = base_url.format(client_version, 'windows', 'kubectl.exe')
+        binary_name = 'kubectl.exe'
+        file_url = base_url.format(client_version, 'windows', binary_name)
     elif system == 'Linux':
-        file_url = base_url.format(client_version, 'linux', 'kubectl')
+        binary_name = 'kubectl'
+        file_url = base_url.format(client_version, 'linux', binary_name)
     elif system == 'Darwin':
-        file_url = base_url.format(client_version, 'darwin', 'kubectl')
+        binary_name = 'kubectl'
+        file_url = base_url.format(client_version, 'darwin', binary_name)
     else:
         raise UnknownError("Unsupported system '{}'.".format(system))
 
-    logger.warning('Downloading client to "%s" from "%s"',
-                   install_location, file_url)
+    # validate install location
+    validate_install_location(install_location, binary_name)
+
+    logger.warning('Downloading client to "%s" from "%s"', install_location, file_url)
     try:
         _urlretrieve(file_url, install_location)
         os.chmod(install_location,
@@ -1645,11 +1672,11 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
             source_url = 'https://mirror.azure.cn/kubernetes/kubelogin'
 
     if client_version == 'latest':
-        context = _ssl_context()
         latest_release_url = 'https://api.github.com/repos/Azure/kubelogin/releases/latest'
         if cloud_name.lower() == 'azurechinacloud':
             latest_release_url = 'https://mirror.azure.cn/kubernetes/kubelogin/latest'
-        latest_release = urlopen(latest_release_url, context=context).read()
+        logger.warning('No version specified, will get the latest version of kubelogin from "%s"', latest_release_url)
+        latest_release = urlopen(latest_release_url, context=_ssl_context()).read()
         client_version = json.loads(latest_release)['tag_name'].strip()
     else:
         client_version = "v%s" % client_version
@@ -1675,6 +1702,9 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
     else:
         raise UnknownError("Unsupported system '{}'.".format(system))
 
+    # validate install location
+    validate_install_location(install_location, binary_name)
+
     with tempfile.TemporaryDirectory() as tmp_dir:
         try:
             download_path = os.path.join(tmp_dir, 'kubelogin.zip')
@@ -1686,6 +1716,7 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
                 'Connection error while attempting to download client ({})'.format(ex))
         _unzip(download_path, tmp_dir)
         download_path = os.path.join(tmp_dir, 'bin', sub_dir, binary_name)
+        logger.warning('Moving binary to "%s" from "%s"', install_location, download_path)
         shutil.move(download_path, install_location)
     os.chmod(install_location, os.stat(install_location).st_mode |
              stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
