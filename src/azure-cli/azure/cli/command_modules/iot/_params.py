@@ -62,17 +62,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('iot dps') as c:
         c.argument('dps_name', dps_name_type, options_list=['--name', '-n'], id_part='name')
         c.argument('tags', tags_type)
-        c.argument('system_identity', options_list=['--mi-system-assigned'],
-                   arg_type=get_three_state_flag(),
-                   help="Enable system-assigned managed identity for this DPS", is_preview=True)
-        c.argument('user_identities', options_list=['--mi-user-assigned'],
-                   nargs='*', help="Enable user-assigned managed identities for this DPS. "
-                   "Accept space-separated list of identity resource IDs.", is_preview=True)
         c.argument('identity_role', options_list=['--role'],
-                   help="Role to assign to the DPS's system-assigned managed identity.", is_preview=True)
+                   help="Role to assign to the DPS's system-assigned managed identity.")
         c.argument('identity_scopes', options_list=['--scopes'], nargs='*',
                    help="Space separated list of scopes to assign the role (--role) "
-                   "for the system-assigned managed identity.", is_preview=True)
+                   "for the system-assigned managed identity.")
 
     with self.argument_context('iot dps create') as c:
         c.argument('location', get_location_type(self.cli_ctx),
@@ -88,10 +82,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    'Only available in select regions. Learn more at https://aka.ms/dpsdr')
         c.argument('enable_customer_initiated_failover', arg_type=get_three_state_flag(),
                    options_list=['--enable-customer-initiated-failover', '--ecif'],
-                   help='See if this param is even needed... or if we can just get away with region')
-        c.argument('failover_region', arg_type=get_three_state_flag(),
-                   options_list=['--failover-region', '--fr'],
-                   help='See if this is will have exactly one region or if we can do multiple')
+                   help='See if this param is even needed... or if we can just get away with region',
+                   is_preview=True)
+        c.argument('system_identity', options_list=['--mi-system-assigned'],
+                   arg_type=get_three_state_flag(),
+                   help="Enable system-assigned managed identity for this DPS", is_preview=True)
+        c.argument('user_identities', options_list=['--mi-user-assigned'],
+                   nargs='*', help="Enable user-assigned managed identities for this DPS. "
+                   "Accept space-separated list of identity resource IDs.", is_preview=True)
+        # vilit - remove this once GA. This is here to make az iot dps identity commands look nicer
+        c.argument('identity_role', options_list=['--role'],
+                   help="Role to assign to the DPS's system-assigned managed identity.", is_preview=True)
+        c.argument('identity_scopes', options_list=['--scopes'], nargs='*',
+                   help="Space separated list of scopes to assign the role (--role) "
+                   "for the system-assigned managed identity.", is_preview=True)
 
     # plan to slowly align this with extension naming patterns - n should be aligned with dps_name
     for subgroup in ['linked-hub', 'certificate']:
@@ -157,6 +161,22 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         with self.argument_context('iot dps certificate {}'.format(subgroup)) as c:
             c.argument('is_verified', options_list=['--verified', '-v'], arg_type=get_three_state_flag(),
                        help='A boolean indicating whether or not the certificate is verified.')
+
+    with self.argument_context('iot dps identity assign') as c:
+        c.argument('system_identity', options_list=['--system-assigned', '--system'],
+                   arg_type=get_three_state_flag(),
+                   nargs='*', help="Assign a system-assigned managed identity to this DPS.")
+        c.argument('user_identities', options_list=['--user-assigned', '--user'],
+                   nargs='+', help="Assign user-assigned managed identities to this DPS. "
+                   "Accept space-separated list of identity resource IDs.")
+
+    with self.argument_context('iot dps identity remove') as c:
+        c.argument('system_identity', options_list=['--system-assigned', '--system'],
+                   arg_type=get_three_state_flag(),
+                   nargs='*', help="Remove a system-assigned managed identity from this DPS.")
+        c.argument('user_identities', options_list=['--user-assigned', '--user'],
+                   nargs='*', help="Remove user-assigned managed identities from this DPS. "
+                   "Accept space-separated list of identity resource IDs.")
 
     # Arguments for IoT Hub
     with self.argument_context('iot hub') as c:

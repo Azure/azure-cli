@@ -117,7 +117,7 @@ class IoTDpsTest(ScenarioTest):
         self.cmd('az iot dps delete -g {} -n {}'.format(group_name, dr_dps_name))
 
     @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')
-    def test_dps_lifecycle(self, group_name, group_location):
+    def test_dps_identity_lifecycle(self, group_name, group_location):
         rg = group_name
         dps_name = self.create_random_name('dps', 20)
         identity_storage_role = 'Storage Blob Data Contributor'

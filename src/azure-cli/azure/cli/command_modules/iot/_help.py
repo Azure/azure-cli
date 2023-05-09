@@ -148,9 +148,51 @@ examples:
         az iot dps certificate verify --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate --path /certificates/Verification.pem --etag AAAAAAAAAAA=
 """
 
+helps['iot dps identity'] = """
+type: group
+short-summary: Manage identities of an Azure IoT Hub Device Provisioning Service instance.
+"""
+
+helps['iot dps identity assign'] = """
+type: command
+short-summary: Assign managed identities to an IoT Azure IoT Hub Device Provisioning Service instance.
+examples:
+  - name: Assign user-assigned managed identities to an IoT DPS.
+    text: >
+        az iot dps identity assign --name MyIoTDPS --resource-group MyResourceGroup --user-assigned {resourceId1} {resourceId2}
+  - name: Assign a system-assigned managed identity to an IoT DPS and assign a role to that identity.
+    text: >
+        az iot dps identity assign --name MyIoTDPS --resource-group MyResourceGroup --system-assigned --role "Storage Blob Data Contributor" --scopes {resourceId}
+"""
+
+helps['iot dps identity show'] = """
+type: command
+short-summary: Show the identity properties of an IoT Azure IoT Hub Device Provisioning Service instance.
+examples:
+  - name: Show identity properties of an IoT DPS.
+    text: >
+        az iot dps identity show --name MyIoTDPS --resource-group MyResourceGroup
+"""
+
+helps['iot dps identity remove'] = """
+type: command
+short-summary: Remove managed identities from an IoT Azure IoT Hub Device Provisioning Service instance.
+examples:
+  - name: Remove a user-assigned managed identity from an IoT DPS.
+    text: >
+        az iot dps identity remove --name MyIoTDPS --resource-group MyResourceGroup --user-assigned {resourceId}
+  - name: Remove a system-assigned managed identity from an IoT DPS.
+    text: >
+        az iot dps identity remove --name MyIoTDPS --resource-group MyResourceGroup --system-assigned
+  - name: Remove all identities from an IoT DPS.
+    text: >
+        az iot dps identity remove --name MyIoTDPS --resource-group MyResourceGroup --system-assigned --user-assigned
+"""
+
+
 helps['iot dps manual-failover'] = """
 type: command
-short-summary: Initiate a manual failover for the Azure IoT Hub Device Provisioning Service instance to the (TODO: what terms to use) disaster recovery region.
+short-summary: Initiate a manual failover for the Azure IoT Hub Device Provisioning Service instance to the (TODO- what terms to use) disaster recovery region.
 examples:
   - name: Initiate failover MyDps from primary to secondary region.
     text: >
@@ -168,7 +210,7 @@ examples:
   - name: Create an Azure IoT Hub Device Provisioning Service with the standard pricing tier S1, in the 'eastus' region.
     text: >
         az iot dps create --name MyDps --resource-group MyResourceGroup --location eastus
-  - name: Create an Azure IoT Hub Device Provisioning Service with data residency enforced. This will disable cross-region disaster recovery. TODO: possibly remove this
+  - name: Create an Azure IoT Hub Device Provisioning Service with data residency enforced. This will disable cross-region disaster recovery. TODO- possibly remove this
     text: >
         az iot dps create --name MyDps --resource-group MyResourceGroup --edr
   - name: Create an Azure IoT Hub Device Provisioning Service with enabled disaster recovery and set the secondary region to 'eastus'.

@@ -100,6 +100,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('verify', 'iot_dps_certificate_verify')
         g.custom_command('update', 'iot_dps_certificate_update')
 
+    # iot dps identity commands
+    with self.command_group('iot dps identity', client_factory=iot_service_provisioning_factory, is_preview=True) as g:
+        g.custom_command('assign', 'iot_dps_identity_assign')
+        g.custom_show_command('show', 'iot_dps_identity_show')
+        g.custom_command('remove', 'iot_dps_identity_remove')
+
     # iot dps policy commands
     with self.command_group('iot dps policy', client_factory=iot_service_provisioning_factory) as g:
         g.custom_command('list', 'iot_dps_policy_list')
