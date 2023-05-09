@@ -640,8 +640,6 @@ parameters:
     short-summary: Backup ID. UUID v4 or resource identifier used to identify the Backup
   - name: --policy-enforced
     short-summary: Policy Enforced
-  - name: --vault-id
-    short-summary: Vault Resource ID
   - name: --kerberos-enabled
     short-summary: Describe if a volume is KerberosEnabled
   - name: --throughput-mibps
@@ -649,7 +647,7 @@ parameters:
   - name: --snapshot-dir-visible
     short-summary: If enabled (true) the volume will contain a read-only .snapshot directory which provides access to each of the volume's snapshots (default to true).
   - name: --security-style
-    short-summary: The security style of volume
+    short-summary: The security style of volume, default unix, defaults to ntfs for dual protocol or CIFS protocol
   - name: --kerberos5-r
     short-summary: Kerberos5 Read only access
   - name: --kerberos5-rw
@@ -805,7 +803,7 @@ examples:
 
 helps['netappfiles volume replication resume'] = """
 type: command
-short-summary: Resync a volume replication for the specified destination volume. The replication process is resumed from source to destination.
+short-summary: Resync a volume replication for the specified destination volume. The replication process is resumed from source to destination. If any quota rules exists on destination volume  they will be overwritten with source volume's quota rules
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
@@ -1025,8 +1023,6 @@ parameters:
     short-summary: Backup Policy Resource ID
   - name: --policy-enforced
     short-summary: Backup Policy Enforced
-  - name: --vault-id
-    short-summary: Vault Resource ID
   - name: --snapshot-policy-id
     short-summary: Snapshot Policy ResourceId
   - name: --is-def-quota-enabled
@@ -1103,6 +1099,15 @@ examples:
         az netappfiles volume revert-relocation -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
 """
 
+helps['netappfiles volume break-file-locks'] = """
+type: command
+short-summary: Break file locks
+long-summary: Break all the file locks on a volume
+examples:
+  - name: Break all the file locks on the volume
+    text: >
+        az netappfiles volume break-file-locks -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
+"""
 
 helps['netappfiles volume backup'] = """
 type: group
@@ -1446,30 +1451,12 @@ parameters:
 examples:
   - name: Update specific values for an ANF snapshot policy
     text: >
-        az netappfiles snapshot policy update -g mygroup --account-name myaccountname --snapshot-policy-name mysnapshotpolicyname -l westus2 --daily-snapshots 1 --enabled false
+        az netappfiles snapshot policy update -g mygroup --account-name myaccountname --snapshot-policy-name mysnapshotpolicyname --daily-snapshots 1 --enabled false
 """
 
 helps['netappfiles snapshot policy wait'] = """
 type: command
 short-summary: Wait for a snapshot policy operation.
-"""
-
-
-helps['netappfiles vault'] = """
-type: group
-short-summary: Manage Azure NetApp Files (ANF) Vault Resources.
-"""
-
-helps['netappfiles vault list'] = """
-type: command
-short-summary: List the ANF vaults for NetApp Account.
-parameters:
-  - name: --account-name -a
-    short-summary: The name of the ANF account
-examples:
-  - name: List the vaults of the ANF account
-    text: >
-        az netappfiles vault list -g mygroup --account-name myname
 """
 
 helps['netappfiles subvolume'] = """
