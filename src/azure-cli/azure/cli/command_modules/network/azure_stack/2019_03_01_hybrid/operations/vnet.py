@@ -110,7 +110,7 @@ _VNetSubNet = import_aaz_by_profile("network.vnet.subnet")
 class VNetSubnetCreate(_VNetSubNet.Create):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.delegations = AAZListArg(
             options=["--delegations"],
@@ -124,6 +124,14 @@ class VNetSubnetCreate(_VNetSubNet.Create):
                  "Values from: az network vnet list-endpoint-services.",
         )
         args_schema.service_endpoints.Element = AAZStrArg()
+        args_schema.network_security_group._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/networkSecurityGroups/{}",
+        )
+        args_schema.route_table._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/routeTables/{}",
+        )
         # filter arguments
         args_schema.endpoints._registered = False
         return args_schema
@@ -233,7 +241,11 @@ _VNetPeering = import_aaz_by_profile("network.vnet.peering")
 class VNetPeeringCreate(_VNetPeering.Create):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.remote_vnet._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}",
+        )
         return args_schema
 
 
