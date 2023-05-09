@@ -97,6 +97,12 @@ def apim_create(client, resource_group_name, name, publisher_email, sku_name=Sku
     if parameters.sku.name == SkuType.consumption.value:
         parameters.sku.capacity = 0
 
+    if parameters.public_network_access is not None:
+        if parameters.public_network_access:
+            parameters.public_network_access = "Enabled"
+        else:
+            parameters.public_network_access = "Disabled"
+
     return sdk_no_wait(no_wait, client.api_management_service.begin_create_or_update,
                        resource_group_name=resource_group_name,
                        service_name=name, parameters=parameters)
