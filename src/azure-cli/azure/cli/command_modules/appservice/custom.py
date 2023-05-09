@@ -68,7 +68,7 @@ from .utils import (_normalize_sku,
                     _normalize_location,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
                     get_resource_if_exists, repo_url_to_name, get_token,
-                    app_service_plan_exists, is_centauri_functionapp)
+                    app_service_plan_exists, is_centauri_functionapp, is_cv2_functionapp)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -550,6 +550,7 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
         raise ResourceNotFoundError('The function app \'{}\' was not found in resource group \'{}\'. '
                                     'Please make sure these values are correct.'.format(name, resource_group_name))
     parse_plan_id = parse_resource_id(app.server_farm_id)
+
     plan_info = None
     retry_delay = 10  # seconds
     # We need to retry getting the plan because sometimes if the plan is created as part of function app,
@@ -1285,7 +1286,9 @@ def get_site_configs(cmd, resource_group_name, name, slot=None):
 def get_app_settings(cmd, resource_group_name, name, slot=None):
     result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory(cmd.cli_ctx)
-    slot_app_setting_names = [] if is_centauri_functionapp(cmd, resource_group_name, name) \
+    is_centauri = is_centauri_functionapp(cmd, resource_group_name, name)
+    is_cv2 = is_cv2_functionapp(cmd, resource_group_name, name)
+    slot_app_setting_names = [] if (is_centauri or is_cv2) \
         else client.web_apps.list_slot_configuration_names(resource_group_name, name) \
         .app_setting_names
     return _build_app_settings_output(result.properties, slot_app_setting_names)
@@ -1536,8 +1539,9 @@ def update_configuration_polling(cmd, resource_group_name, name, slot, configs):
 def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None):
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory(cmd.cli_ctx)
-    centauri_functionapp = is_centauri_functionapp(cmd, resource_group_name, name)
-    slot_cfg_names = {} if centauri_functionapp \
+    is_centauri = is_centauri_functionapp(cmd, resource_group_name, name)
+    is_cv2 = is_cv2_functionapp(cmd, resource_group_name, name)
+    slot_cfg_names = {} if (is_centauri or is_cv2) \
         else client.web_apps.list_slot_configuration_names(resource_group_name, name)
     is_slot_settings = False
 
@@ -1551,7 +1555,7 @@ def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
 # TODO: Centauri currently return wrong payload for update appsettings, remove this once backend has the fix.
-    if centauri_functionapp:
+    if is_centauri:
         update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client)
         result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     else:
