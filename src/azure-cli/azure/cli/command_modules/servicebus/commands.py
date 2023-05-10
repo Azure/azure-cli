@@ -21,7 +21,7 @@ def load_command_table(self, _):
         resource_type=ResourceType.MGMT_SERVICEBUS)
 
     sb_namespace_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.servicebus.Operation.namespace_custom#{}',
+        operations_tmpl='azure.cli.command_modules.servicebus.operation.namespace_custom#{}',
     )
 
     sb_migration_util = CliCommandType(
