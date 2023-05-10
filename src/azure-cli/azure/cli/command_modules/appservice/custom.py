@@ -3738,6 +3738,12 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 '--deployment-source-branch is not a valid input for Azure Functions on Flex App Service plans. '
                 'Please try again without the --deployment-source-branch parameter.')
 
+        if os_type and os_type.lower() != LINUX_OS_NAME:
+            raise ArgumentUsageError(
+                '--os-type windows is not a valid input for Azure Functions on Flex App Service plans. '
+                'Please try again without the --os-type parameter or set --os-type to be linux.'
+            )
+
     deployment_source_branch = deployment_source_branch or 'master'
 
     from azure.mgmt.web.models import Site
