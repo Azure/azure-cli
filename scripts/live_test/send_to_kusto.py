@@ -59,7 +59,7 @@ def generate_csv_file():
                 Description = ''
                 ExtendedProperties = ''
                 for result in results.find_all('tbody'):
-                    Name = result.find('td', {'class': 'col-name'}).text.split('::')[2]
+                    Name = result.find('td', {'class': 'col-name'}).text.split('::')[-1]
                     Duration = result.find('td', {'class': 'col-duration'}).text
                     Status = result.find('td', {'class': 'col-result'}).text
                     if Status == 'Failed':
