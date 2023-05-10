@@ -113,44 +113,6 @@ def cli_georecovery_alias_exists(cmd, client, resource_group_name, namespace_nam
                                               parameters={'name': name})
 
 
-# MigrationConfigs Region
-def cli_migration_start(cmd, client, resource_group_name, namespace_name,
-                        target_namespace, post_migration_name, config_name="$default"):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        import time
-        parameters = {
-            'target_namespace': target_namespace,
-            'post_migration_name': post_migration_name
-        }
-        client.begin_create_and_start_migration(resource_group_name, namespace_name, config_name, parameters)
-        getresponse = client.get(resource_group_name, namespace_name, config_name)
-
-        # pool till Provisioning state is succeeded
-        while getresponse.provisioning_state != 'Succeeded':
-            time.sleep(30)
-            getresponse = client.get(resource_group_name, namespace_name, config_name)
-
-        # poll on the 'pendingReplicationOperationsCount' to be 0 or none
-        while getresponse.pending_replication_operations_count != 0 and getresponse.pending_replication_operations_count is not None:
-            time.sleep(30)
-            getresponse = client.get(resource_group_name, namespace_name, config_name)
-
-        return client.get(resource_group_name, namespace_name, config_name)
-
-
-def cli_migration_show(cmd, client, resource_group_name, namespace_name, config_name="$default"):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        return client.get(resource_group_name, namespace_name, config_name)
-
-
-def cli_migration_complete(client, resource_group_name, namespace_name, config_name="$default"):
-    return client.complete_migration(resource_group_name, namespace_name, config_name)
-
-
-def revert(client, resource_group_name, namespace_name, config_name="$default"):
-    return client.revert(resource_group_name, namespace_name, config_name)
-
-
 iso8601pattern = re.compile("^P(?!$)(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(?=\\d)(\\d+H)?(\\d+M)?(\\d+.)?(\\d+S)?)?$")
 timedeltapattern = re.compile("^\\d+:\\d+:\\d+$")
 
