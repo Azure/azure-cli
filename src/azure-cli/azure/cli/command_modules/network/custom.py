@@ -5816,6 +5816,8 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
             instance.properties.network_security_group = None
         if not has_value(instance.properties.route_table.id):
             instance.properties.route_table = None
+        if not has_value(instance.properties.nat_gateway.id):
+            instance.properties.nat_gateway = None
 
 
 class VNetPeeringCreate(_VNetPeeringCreate):
