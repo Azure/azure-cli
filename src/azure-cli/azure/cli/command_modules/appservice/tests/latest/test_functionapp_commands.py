@@ -798,6 +798,89 @@ class FunctionAppManagedEnvironment(LiveScenarioTest):
         self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
             JMESPathCheck('siteConfig.minimumElasticInstanceCount', 1),
             JMESPathCheck('siteConfig.functionAppScaleLimit', 10)])
+        
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_create_registry_server_error(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionappwindowsruntime', 30)
+        managed_environment_name = self.create_random_name(
+            'containerappmanagedenvironment', 40
+        )
+
+        self.cmd('containerapp env create --name {} --resource-group {} --location {}'
+        .format(managed_environment_name, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).assert_with_checks([
+                     JMESPathCheck('name', managed_environment_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('location', WINDOWS_ASP_LOCATION_FUNCTIONAPP)])
+
+        with self.assertRaises(RequiredArgumentMissingError):   
+            self.cmd('functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet \
+                    --functions-version 4 --image nginx --registry-server docker.io'
+                    .format(resource_group, functionapp_name, storage_account, managed_environment_name))
+            
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_create_registry_username_error(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionappwindowsruntime', 30)
+        managed_environment_name = self.create_random_name(
+            'containerappmanagedenvironment', 40
+        )
+
+        self.cmd('containerapp env create --name {} --resource-group {} --location {}'
+        .format(managed_environment_name, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).assert_with_checks([
+                     JMESPathCheck('name', managed_environment_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('location', WINDOWS_ASP_LOCATION_FUNCTIONAPP)])
+
+        with self.assertRaises(RequiredArgumentMissingError):   
+            self.cmd('functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet \
+                    --functions-version 4 --image nginx --registry-username azfunctest'
+                    .format(resource_group, functionapp_name, storage_account, managed_environment_name))
+            
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_create_registry_password_error(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionappwindowsruntime', 30)
+        managed_environment_name = self.create_random_name(
+            'containerappmanagedenvironment', 40
+        )
+
+        self.cmd('containerapp env create --name {} --resource-group {} --location {}'
+        .format(managed_environment_name, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).assert_with_checks([
+                     JMESPathCheck('name', managed_environment_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('location', WINDOWS_ASP_LOCATION_FUNCTIONAPP)])
+
+        with self.assertRaises(RequiredArgumentMissingError):   
+            self.cmd('functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet \
+                    --functions-version 4 --image nginx  --registry-password 123'
+                    .format(resource_group, functionapp_name, storage_account, managed_environment_name))
+            
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_create_registry_image(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionappwindowsruntime', 30)
+        managed_environment_name = self.create_random_name(
+            'containerappmanagedenvironment', 40
+        )
+
+        self.cmd('containerapp env create --name {} --resource-group {} --location {}'
+        .format(managed_environment_name, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).assert_with_checks([
+                     JMESPathCheck('name', managed_environment_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('location', WINDOWS_ASP_LOCATION_FUNCTIONAPP)])
+
+        self.cmd('functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet --functions-version 4 \
+                 --image nginx --registry-server docker.io --registry-username azfunctest --registry-password 123'
+                 .format(resource_group, functionapp_name, storage_account, managed_environment_name)).assert_with_checks([
+                     JMESPathCheck('name', functionapp_name)])
+
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck("[?name=='DOCKER_REGISTRY_SERVER_URL'].value|[0]", 'docker.io')])
 
 
 class FunctionAppOnWindowsWithRuntime(ScenarioTest):

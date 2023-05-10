@@ -43,8 +43,6 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
                             (account_name, pool_name, volume_name, LOCATION, vnet_name, subnet_name, volume_name,
                              backup_id)).get_output_in_json()
 
-    def get_vaults(self, account_name):
-        return self.cmd("az netappfiles vault list -g {rg} -a %s" % account_name).get_output_in_json()
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_policy_', additional_tags={'owner': 'cli_test'})
     def test_create_delete_backup_policies(self):
@@ -221,16 +219,13 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         assert backup_policy_from_id['name'] == account_name + '/' + backup_policy_name
         assert backup_policy['dailyBackupsToKeep'] == 2
 
-        # get vault
-        vaults = self.get_vaults(account_name)
-
         # create account, pool and volume
         self.create_volume(account_name, pool_name, volume_name )
 
 
         # volume update with backup policy
-        self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --vault-id %s --backup-enabled %s --backup-policy-id %s" %
-                     (account_name, pool_name, volume_name, vaults[0]['id'], True, backup_policy['id']))
+        self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --backup-enabled %s --backup-policy-id %s" %
+                     (account_name, pool_name, volume_name, True, backup_policy['id']))
 
         volume = self.cmd("az netappfiles volume show --resource-group {rg} -a %s -p %s -v %s" % (account_name, pool_name, volume_name)).get_output_in_json()
         assert volume['dataProtection'] is not None
