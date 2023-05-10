@@ -81,18 +81,19 @@ def _azure_stack_wrapper(cmd, client, function_name, resource_type, min_api_vers
 
 
 def _default_certificate_profile(cmd):
-
-    Action = cmd.get_models('Action', resource_type=ResourceType.DATA_KEYVAULT)
-    ActionType = cmd.get_models('ActionType', resource_type=ResourceType.DATA_KEYVAULT)
-    KeyUsageType = cmd.get_models('KeyUsageType', resource_type=ResourceType.DATA_KEYVAULT)
-    CertificateAttributes = cmd.get_models('CertificateAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    CertificatePolicy = cmd.get_models('CertificatePolicy', resource_type=ResourceType.DATA_KEYVAULT)
-    IssuerParameters = cmd.get_models('IssuerParameters', resource_type=ResourceType.DATA_KEYVAULT)
-    KeyProperties = cmd.get_models('KeyProperties', resource_type=ResourceType.DATA_KEYVAULT)
-    LifetimeAction = cmd.get_models('LifetimeAction', resource_type=ResourceType.DATA_KEYVAULT)
-    SecretProperties = cmd.get_models('SecretProperties', resource_type=ResourceType.DATA_KEYVAULT)
-    X509CertificateProperties = cmd.get_models('X509CertificateProperties', resource_type=ResourceType.DATA_KEYVAULT)
-    Trigger = cmd.get_models('Trigger', resource_type=ResourceType.DATA_KEYVAULT)
+    get_model = lambda x: cmd.loader.get_sdk(x, resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES,
+                                             mod='_generated_models')
+    Action = get_model('Action')
+    ActionType = get_model('ActionType')
+    KeyUsageType = get_model('KeyUsageType')
+    CertificateAttributes = get_model('CertificateAttributes')
+    CertificatePolicy = get_model('CertificatePolicy')
+    IssuerParameters = get_model('IssuerParameters')
+    KeyProperties = get_model('KeyProperties')
+    LifetimeAction = get_model('LifetimeAction')
+    SecretProperties = get_model('SecretProperties')
+    X509CertificateProperties = get_model('X509CertificateProperties')
+    Trigger = get_model('Trigger')
 
     template = CertificatePolicy(
         key_properties=KeyProperties(
@@ -141,18 +142,20 @@ def _default_certificate_profile(cmd):
 
 
 def _scaffold_certificate_profile(cmd):
-    Action = cmd.get_models('Action', resource_type=ResourceType.DATA_KEYVAULT)
-    ActionType = cmd.get_models('ActionType', resource_type=ResourceType.DATA_KEYVAULT)
-    KeyUsageType = cmd.get_models('KeyUsageType', resource_type=ResourceType.DATA_KEYVAULT)
-    CertificateAttributes = cmd.get_models('CertificateAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    CertificatePolicy = cmd.get_models('CertificatePolicy', resource_type=ResourceType.DATA_KEYVAULT)
-    IssuerParameters = cmd.get_models('IssuerParameters', resource_type=ResourceType.DATA_KEYVAULT)
-    KeyProperties = cmd.get_models('KeyProperties', resource_type=ResourceType.DATA_KEYVAULT)
-    LifetimeAction = cmd.get_models('LifetimeAction', resource_type=ResourceType.DATA_KEYVAULT)
-    SecretProperties = cmd.get_models('SecretProperties', resource_type=ResourceType.DATA_KEYVAULT)
-    X509CertificateProperties = cmd.get_models('X509CertificateProperties', resource_type=ResourceType.DATA_KEYVAULT)
-    SubjectAlternativeNames = cmd.get_models('SubjectAlternativeNames', resource_type=ResourceType.DATA_KEYVAULT)
-    Trigger = cmd.get_models('Trigger', resource_type=ResourceType.DATA_KEYVAULT)
+    get_model = lambda x: cmd.loader.get_sdk(x, resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES,
+                                             mod='_generated_models')
+    Action = get_model('Action')
+    ActionType = get_model('ActionType')
+    KeyUsageType = get_model('KeyUsageType')
+    CertificateAttributes = get_model('CertificateAttributes')
+    CertificatePolicy = get_model('CertificatePolicy')
+    IssuerParameters = get_model('IssuerParameters')
+    KeyProperties = get_model('KeyProperties')
+    LifetimeAction = get_model('LifetimeAction')
+    SecretProperties = get_model('SecretProperties')
+    X509CertificateProperties = get_model('X509CertificateProperties')
+    SubjectAlternativeNames = get_model('SubjectAlternativeNames')
+    Trigger = get_model('Trigger')
 
     template = CertificatePolicy(
         key_properties=KeyProperties(
@@ -367,10 +370,9 @@ def _create_network_rule_set(cmd, bypass=None, default_action=None):
 
 
 # region KeyVault Vault
-def get_default_policy(cmd, client, scaffold=False):  # pylint: disable=unused-argument
+def get_default_policy(cmd, scaffold=False):  # pylint: disable=unused-argument
     """
     Get a default certificate policy to be used with `az keyvault certificate create`
-    :param client:
     :param bool scaffold: create a fully formed policy structure with default values
     :return: policy dict
     :rtype: dict
