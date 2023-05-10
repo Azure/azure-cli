@@ -59,15 +59,11 @@ from azure.cli.command_modules.acs._consts import (
     CONST_VIRTUAL_NODE_SUBNET_NAME,
     DecoratorEarlyExitException,
 )
-from azure.cli.command_modules.acs._helpers import (
-    get_user_assigned_identity_by_resource_id,
-)
 from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.addonconfiguration import (
     add_ingress_appgw_addon_role_assignment,
-    add_monitoring_role_assignment,
     add_virtual_node_role_assignment,
     ensure_container_insights_for_monitoring,
     ensure_default_log_analytics_workspace_for_monitoring,
@@ -929,21 +925,11 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
             client.begin_create_or_update(resource_group_name, name, instance))
 
         if enable_monitoring:
-            from msrestazure.tools import resource_id
-            cluster_resource_id = resource_id(
-                subscription=subscription_id,
-                resource_group=resource_group_name,
-                namespace='Microsoft.ContainerService', type='managedClusters',
-                name=name
-            )
             cloud_name = cmd.cli_ctx.cloud.name
             if enable_msi_auth_for_monitoring and (cloud_name.lower() == 'ussec' or cloud_name.lower() == 'usnat'):
-                try:
-                    get_user_assigned_identity_by_resource_id(cluster_resource_id)
-                except InvalidArgumentValueError:
-                    enable_msi_auth_for_monitoring = False
-                    # raise ArgumentUsageError("--enable_msi_auth_for_monitoring are only support in public cloud.")
+                if instance.identity is not None and instance.identity.type is not None and instance.identity.type == "userassigned":
                     logger.warning("--enable_msi_auth_for_monitoring are not supported in airgap clouds.")
+                    enable_msi_auth_for_monitoring = False
 
         if ingress_appgw_addon_enabled:
             add_ingress_appgw_addon_role_assignment(result, cmd)
