@@ -571,7 +571,7 @@ class CommandIndex:
         index_modules_extensions = index.get(top_command)
         if not index_modules_extensions and self.cli_ctx.data['completer_active']:
             # If user type `az acco`, command begin with `acco` will be matched.
-            logger.debug("In autocomplete mode, load command begin with: '%s'", top_command)
+            logger.debug("In autocomplete mode, load commands starting with: '%s'", top_command)
             index_modules_extensions = []
             for command in index:
                 if command.startswith(top_command):
