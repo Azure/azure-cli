@@ -536,7 +536,7 @@ def iot_dps_identity_remove(cmd, client, dps_name, system_identity=None, user_id
 # DPS Failover
 def iot_dps_manual_failover(cmd, client, dps_name, resource_group_name=None, no_wait=False):
     dps = iot_dps_get(cmd, client, dps_name, resource_group_name)
-    resource_group_name = dps.additional_properties['resourcegroup']
+    resource_group_name = dps.resourcegroup if hasattr(dps, "resourcegroup") else dps.additional_properties['resourcegroup']
     failover_region = next(x.location for x in dps.properties.locations if x.role.lower() == 'secondary')
     failover_input = CustomerInitiatedFailoverInput(failover_region=failover_region)
     if no_wait:
@@ -1426,7 +1426,9 @@ def _get_iot_dps_by_name(client, dps_name, resource_group=None):
 
 def _ensure_dps_resource_group_name(client, resource_group_name, dps_name):
     if resource_group_name is None:
-        return _get_iot_dps_by_name(client, dps_name).additional_properties['resourcegroup']
+        # TODO: change to use one thing once official sdk is out
+        dps = _get_iot_dps_by_name(client, dps_name)
+        return dps.resourcegroup if hasattr(dps, "resourcegroup") else dps.additional_properties['resourcegroup']
     return resource_group_name
 
 
