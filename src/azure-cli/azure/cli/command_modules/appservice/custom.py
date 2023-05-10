@@ -3818,7 +3818,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         location = next((loc for loc in locations if loc['name'].lower() == flexconsumption_location.lower()), None)
         if location is None:
             raise ValidationError("Location is invalid. Use: az functionapp list-flexconsumption-locations")
-        is_linux = bool(os_type and os_type.lower() == LINUX_OS_NAME)
+        is_linux = True
         # Following the same plan name format as the backend
         plan_name = "{}{}FlexPlan".format(flexconsumption_location, os_type)
         plan_info = create_flex_app_service_plan(
