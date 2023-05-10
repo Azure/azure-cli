@@ -1601,9 +1601,8 @@ def download_certificate(client, file_path, certificate_name=None, encoding='PEM
         raise ex
 
 
-def backup_certificate(client, file_path, vault_base_url=None,
-                       certificate_name=None, identifier=None):  # pylint: disable=unused-argument
-    cert = client.backup_certificate(vault_base_url, certificate_name).value
+def backup_certificate(client, file_path, certificate_name=None):  # pylint: disable=unused-argument
+    cert = client.backup_certificate(certificate_name)
     with open(file_path, 'wb') as output:
         output.write(cert)
 

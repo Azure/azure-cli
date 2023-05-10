@@ -293,6 +293,14 @@ def load_command_table(self, _):
         g.keyvault_custom('download', 'download_certificate')
         g.keyvault_custom('get-default-policy', 'get_default_policy')
 
+    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT_CERTIFICATES)). \
+        replace('.', '_').replace('-', '_')
+
+    if data_api_version != '2016_10_01':
+        with self.command_group('keyvault certificate', data_certificate_entity.command_type) as g:
+            g.keyvault_custom('backup', 'backup_certificate',
+                              doc_string_source=data_entity.operations_docs_tmpl.format('backup_certificate'))
+
     if not is_azure_stack_profile(self):
         with self.command_group('keyvault role', data_access_control_entity.command_type):
             pass
@@ -314,8 +322,6 @@ def load_command_table(self, _):
 
     if data_api_version != '2016_10_01':
         with self.command_group('keyvault certificate', data_entity.command_type) as g:
-            g.keyvault_custom('backup', 'backup_certificate',
-                              doc_string_source=data_entity.operations_docs_tmpl.format('backup_certificate'))
             g.keyvault_custom('restore', 'restore_certificate',
                               doc_string_source=data_entity.operations_docs_tmpl.format('restore_certificate'))
 
