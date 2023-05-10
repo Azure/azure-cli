@@ -15,7 +15,10 @@ from azure.cli.core.aaz import *
     "sql mi link show",
 )
 class Show(AAZCommand):
-    """Get a distributed availability group info.
+    """Returns information about link feature for Azure SQL Managed Instance.
+
+    :example: Show the information about a specific instance link
+        az sql mi link show -g 'rg1' --instance-name 'mi1' --name 'link1'
     """
 
     _aaz_info = {

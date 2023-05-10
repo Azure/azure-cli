@@ -13,10 +13,15 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "sql mi link delete",
-    confirmation="Are you sure you want to perform this operation?",
+    confirmation="This operation may cause data loss if replica's last hardened LSN is not in sync with the primary. Are you sure you want to proceed?",
 )
 class Delete(AAZCommand):
-    """Drop a distributed availability group between Sql On-Prem and Sql Managed Instance.
+    """Removes an instance link.
+
+    This command may cause data loss if the link is dropped and replica's LSNs are not synchronized with the primary, thus user must explicitly confirm the command when prompted, or use --yes parameter.
+
+    :example: Forcefully deletes an instance link.
+        az sql mi link delete -g 'rg1' --instance-name 'mi1' -n 'link1' --yes
     """
 
     _aaz_info = {

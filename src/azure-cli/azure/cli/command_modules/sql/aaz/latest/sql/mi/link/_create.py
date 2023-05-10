@@ -15,7 +15,12 @@ from azure.cli.core.aaz import *
     "sql mi link create",
 )
 class Create(AAZCommand):
-    """Create a distributed availability group between Sql On-Prem and Sql Managed Instance.
+    """Creates a new instance link.
+
+    This command creates an Azure SQL Managed Instance link by joining distributed availability group on SQL Server based on the parameters passed.
+
+    :example: Creates an instance link.
+        az sql mi link create -g 'rg1' --instance-name 'mi1' --name 'link1' --primary-availability-group-name 'primaryag1' --replication-mode 'Async' --secondary-availability-group-name 'secondaryag1' --source-endpoint '"tcp://server1:5022" --target-database 'db1' --no-wait')
     """
 
     _aaz_info = {
@@ -55,6 +60,11 @@ class Create(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+        _args_schema.replication_mode = AAZStrArg(
+            options=["--replication-mode"],
+            help="Replication mode value. Possible values include 'Sync' and 'Async'.",
+            enum={"Async": "Async", "Sync": "Sync"},
+        )
 
         # define Arg Group "Properties"
 
@@ -63,12 +73,6 @@ class Create(AAZCommand):
             options=["--primary-ag", "--primary-availability-group-name"],
             arg_group="Properties",
             help="Primary availability group name",
-        )
-        _args_schema.replication_mode = AAZStrArg(
-            options=["--replication-mode"],
-            arg_group="Properties",
-            help="Replication mode of a distributed availability group. Parameter will be ignored during link creation.",
-            enum={"Async": "Async", "Sync": "Sync"},
         )
         _args_schema.secondary_availability_group_name = AAZStrArg(
             options=["--secondary-ag", "--secondary-availability-group-name"],

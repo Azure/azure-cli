@@ -15,7 +15,10 @@ from azure.cli.core.aaz import *
     "sql mi link update",
 )
 class Update(AAZCommand):
-    """Update a distributed availability group replication mode.
+    """Updates the properties of an instance link.
+
+    :example: Change replication mode to Sync
+        az sql mi link update -g 'rg1' --mi 'mi1' -n 'link1' --replication-mode 'Sync'
     """
 
     _aaz_info = {
@@ -50,43 +53,20 @@ class Update(AAZCommand):
         )
         _args_schema.managed_instance_name = AAZStrArg(
             options=["--mi", "--instance-name", "--managed-instance", "--managed-instance-name"],
-            help="The name of the managed instance.",
+            help="Name of the managed instance.",
             required=True,
             id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-
-        # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.primary_availability_group_name = AAZStrArg(
-            options=["--primary-availability-group-name"],
-            arg_group="Properties",
-            help="The primary availability group name",
-        )
         _args_schema.replication_mode = AAZStrArg(
             options=["--replication-mode"],
-            arg_group="Properties",
-            help="The replication mode of a distributed availability group. Parameter will be ignored during link creation.",
+            help="Replication mode value. Possible values include 'Sync' and 'Async'.",
             enum={"Async": "Async", "Sync": "Sync"},
         )
-        _args_schema.secondary_availability_group_name = AAZStrArg(
-            options=["--secondary-availability-group-name"],
-            arg_group="Properties",
-            help="The secondary availability group name",
-        )
-        _args_schema.source_endpoint = AAZStrArg(
-            options=["--source-endpoint"],
-            arg_group="Properties",
-            help="The source endpoint",
-        )
-        _args_schema.target_database = AAZStrArg(
-            options=["--target-database"],
-            arg_group="Properties",
-            help="The name of the target database",
-        )
+
+        # define Arg Group "Properties"
         return cls._args_schema
 
     def _execute_operations(self):
@@ -203,11 +183,7 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("primaryAvailabilityGroupName", AAZStrType, ".primary_availability_group_name")
                 properties.set_prop("replicationMode", AAZStrType, ".replication_mode")
-                properties.set_prop("secondaryAvailabilityGroupName", AAZStrType, ".secondary_availability_group_name")
-                properties.set_prop("sourceEndpoint", AAZStrType, ".source_endpoint")
-                properties.set_prop("targetDatabase", AAZStrType, ".target_database")
 
             return self.serialize_content(_content_value)
 
