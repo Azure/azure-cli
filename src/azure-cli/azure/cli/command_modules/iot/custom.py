@@ -63,7 +63,8 @@ from azure.mgmt.iothubprovisioningservices.models import (CertificateBodyDescrip
                                                           OperationInputs as DpsOperationInputs,
                                                           SharedAccessSignatureAuthorizationRuleAccessRightsDescription,
                                                           VerificationCodeRequest,
-                                                          CustomerInitiatedFailoverInput)
+                                                          CustomerInitiatedFailoverInput,
+                                                          ManagedServiceIdentity)
 
 
 from azure.mgmt.iotcentral.models import (AppSkuInfo,
@@ -132,17 +133,16 @@ def iot_dps_create(cmd, client, dps_name, resource_group_name, location=None,
     if bool(enable_customer_initiated_failover) ^ bool(failover_region):
         raise RequiredArgumentMissingError('TODO See what is minimum needed for customer initiated failover.')
     dps_failover_description = IotDpsPropertiesDescriptionDpsFailoverDescription(failover_region=failover_region)
-    dps_property = IotDpsPropertiesDescription(enable_data_residency=enable_data_residency,
+    dps_property = IotDpsPropertiesDescription(#enable_data_residency=enable_data_residency,
                                                enable_customer_initiated_failover=enable_customer_initiated_failover,
                                                dps_failover_description=dps_failover_description)
     dps_description = ProvisioningServiceDescription(location=location,
                                                      properties=dps_property,
                                                      sku=IotDpsSkuInfo(name=sku, capacity=unit),
                                                      tags=tags)
-    import pdb; pdb.set_trace()
 
     if (system_identity or user_identities):
-        dps_description.identity = _build_identity(system=bool(system_identity), identities=user_identities)
+        dps_description.identity = _build_identity(system=bool(system_identity), identities=user_identities, identity_cls=ManagedServiceIdentity)
     if bool(identity_role) ^ bool(identity_scopes):
         raise RequiredArgumentMissingError('At least one scope (--scopes) and one role (--role) required for system-assigned managed identity role assignment')
 
@@ -156,7 +156,7 @@ def iot_dps_create(cmd, client, dps_name, resource_group_name, location=None,
                 if principal_id:
                     dps_description.identity.principal_id = principal_id
                     for scope in identity_scopes:
-                        assign_identity(cmd.cli_ctx, lambda: dps_description, lambda hub: dps_description, identity_role=identity_role, identity_scope=scope)
+                        assign_identity(cmd.cli_ctx, lambda: dps_description, lambda dps: dps_description, identity_role=identity_role, identity_scope=scope)
         except CloudError as e:
             raise e
 
@@ -452,7 +452,7 @@ def iot_dps_identity_assign(cmd, client, dps_name, system_identity=None, user_id
     resource_group_name = _ensure_dps_resource_group_name(client, resource_group_name, dps_name)
 
     def getter():
-        return iot_dps_get(cmd, client, dps_name, resource_group_name)
+        return iot_dps_get(client, dps_name, resource_group_name)
 
     def setter(dps):
 
@@ -469,7 +469,7 @@ def iot_dps_identity_assign(cmd, client, dps_name, system_identity=None, user_id
         else:
             dps.identity.type = IdentityType.user_assigned.value if dps.identity.user_assigned_identities else IdentityType.none.value
 
-        poller = client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps, {'IF-MATCH': dps.etag})
+        poller = client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
     if bool(identity_role) ^ bool(identity_scopes):
@@ -487,13 +487,13 @@ def iot_dps_identity_assign(cmd, client, dps_name, system_identity=None, user_id
 
 def iot_dps_identity_show(cmd, client, dps_name, resource_group_name=None):
     resource_group_name = _ensure_dps_resource_group_name(client, resource_group_name, dps_name)
-    dps = iot_dps_get(cmd, client, dps_name, resource_group_name)
+    dps = iot_dps_get(client, dps_name, resource_group_name)
     return dps.identity
 
 
 def iot_dps_identity_remove(cmd, client, dps_name, system_identity=None, user_identities=None, resource_group_name=None):
     resource_group_name = _ensure_dps_resource_group_name(client, resource_group_name, dps_name)
-    dps = iot_dps_get(cmd, client, dps_name, resource_group_name)
+    dps = iot_dps_get(client, dps_name, resource_group_name)
     dps_identity = dps.identity
 
     if not system_identity and user_identities is None:
@@ -529,7 +529,7 @@ def iot_dps_identity_remove(cmd, client, dps_name, system_identity=None, user_id
     dps.identity = dps_identity
     if not getattr(dps.identity, 'user_assigned_identities', None):
         dps.identity.user_assigned_identities = None
-    poller = client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps, {'IF-MATCH': dps.etag})
+    poller = client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps)
     lro = LongRunningOperation(cmd.cli_ctx)(poller)
     return lro.identity
 
@@ -1802,10 +1802,11 @@ def _get_hub_identity_type(instance):
     return getattr(identity, 'type', None)
 
 
-def _build_identity(system=False, identities=None):
+def _build_identity(system=False, identities=None, identity_cls=ArmIdentity):
     identity_type = IdentityType.none.value
     if not (system or identities):
-        return ArmIdentity(type=identity_type)
+        # return {"type": identity_type}
+        return identity_cls(type=identity_type)
     if system:
         identity_type = IdentityType.system_assigned.value
     user_identities = list(identities) if identities else None
@@ -1814,7 +1815,10 @@ def _build_identity(system=False, identities=None):
     elif user_identities:
         identity_type = IdentityType.user_assigned.value
 
-    identity = ArmIdentity(type=identity_type)
+    # identity = {"type": identity_type}
+    # if user_identities:
+    #     identity["userAssignedIdentities"] =  {i: {} for i in user_identities}
+    identity = identity_cls(type=identity_type)
     if user_identities:
         identity.user_assigned_identities = {i: {} for i in user_identities}  # pylint: disable=not-an-iterable
 
