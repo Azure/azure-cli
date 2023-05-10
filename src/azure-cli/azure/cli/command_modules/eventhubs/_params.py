@@ -81,7 +81,7 @@ def load_arguments_eh(self, _):
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
 
 
-#Region Geo DR Configuration
+# Region Geo DR Configuration
     with self.argument_context('eventhubs georecovery-alias set') as c:
         c.argument('partner_namespace', required=True, validator=validate_partner_namespace, help='Name (if within the same resource group) or ARM Id of the Primary/Secondary eventhub namespace name, which is part of GEO DR pairing')
         c.argument('alternate_name', help='Alternate Name for the Alias, when the Namespace name and Alias name are same')
