@@ -44,7 +44,6 @@ def put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, a
             headers = ['User-Agent=azuremonitormetrics.put_rules.' + default_rule_group_name]
             send_raw_request(cmd.cli_ctx, "PUT", url,
                              body=body, headers=headers)
-            print(f"Created rule group ({rule_group_text}) : {default_rule_group_id}")
             break
         except CLIError as e:
             error = e
