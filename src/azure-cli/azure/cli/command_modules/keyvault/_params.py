@@ -736,20 +736,6 @@ def load_arguments(self, _):
     # endregion
 
     # KeyVault Certificate
-    with self.argument_context('keyvault certificate backup') as c:
-        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
-                   help='Local file path in which to store certificate backup.')
-
-    with self.argument_context('keyvault certificate restore') as c:
-        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
-                   help='Local certificate backup from which to restore certificate.')
-
-    with self.argument_context('keyvault certificate download') as c:
-        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
-                   help='File to receive the binary certificate contents.')
-        c.argument('encoding', arg_type=get_enum_type(certificate_format_values), options_list=['--encoding', '-e'],
-                   help='Encoding of the certificate. DER will create a binary DER formatted x509 certificate, '
-                        'and PEM will create a base64 PEM x509 certificate.')
 
     # TODO: Fix once service side issue is fixed that there is no way to list pending certificates
     with self.argument_context('keyvault certificate pending') as c:
@@ -834,6 +820,23 @@ def load_arguments(self, _):
                 help='JSON encoded policy definition. Use @{file} to load from a file(e.g. @my_policy.json).',
                 type=get_json_object, validator=process_certificate_policy)
         c.extra('tags', tags_type)
+
+    with self.argument_context('keyvault certificate backup') as c:
+        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
+                   help='Local file path in which to store certificate backup.')
+
+    with self.argument_context('keyvault certificate restore') as c:
+        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
+                   help='Local certificate backup from which to restore certificate.')
+        c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None,
+                options_list=['--vault-name'], help='Name of the Key Vault. Required if --id is not specified')
+
+    with self.argument_context('keyvault certificate download') as c:
+        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
+                   help='File to receive the binary certificate contents.')
+        c.argument('encoding', arg_type=get_enum_type(certificate_format_values), options_list=['--encoding', '-e'],
+                   help='Encoding of the certificate. DER will create a binary DER formatted x509 certificate, '
+                        'and PEM will create a base64 PEM x509 certificate.')
     # endregion
 
     # region KeyVault Role

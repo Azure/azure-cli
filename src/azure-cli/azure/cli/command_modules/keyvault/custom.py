@@ -1607,10 +1607,10 @@ def backup_certificate(client, file_path, certificate_name=None):  # pylint: dis
         output.write(cert)
 
 
-def restore_certificate(client, vault_base_url, file_path):
+def restore_certificate(client, file_path):
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
-    return client.restore_certificate(vault_base_url, data)
+    return client.restore_certificate_backup(backup=data)
 
 
 def add_certificate_contact(cmd, client, vault_base_url, contact_email, contact_name=None,

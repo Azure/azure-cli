@@ -169,6 +169,14 @@ examples:
           --image debian --secrets "$vm_secrets"
 """
 
+helps['keyvault certificate backup'] = """
+type: command
+short-summary: Backs up the specified certificate.
+long-summary: Requests that a backup of the specified certificate be downloaded to the client. All
+        versions of the certificate will be downloaded. This operation requires the
+        certificates/backup permission.
+"""
+
 helps['keyvault certificate issuer'] = """
 type: group
 short-summary: Manage certificate issuer information.
