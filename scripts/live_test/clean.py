@@ -22,6 +22,7 @@ def main():
     clean_servicebus()
     clean_backup()
     clean_deleted_keyvault()
+    # clean_resource_group()
     get_remaining_tests()
 
 
@@ -296,6 +297,30 @@ def clean_deleted_keyvault():
             out = subprocess.run(cmd, capture_output=True)
             print(out.stdout)
     print(count)
+
+
+def clean_resource_group():
+    skip_grous = []
+    cmd = ['az', 'group', 'list', '--query', '[].name']
+    print(cmd)
+    out = subprocess.run(cmd, capture_output=True)
+    rgs = json.loads(out.stdout) if out.stdout else []
+    for rg in rgs:
+        if rg in skip_grous:
+            continue
+        cmd = ['az', 'lock', 'list', '-g', rg]
+        print(cmd)
+        out = subprocess.run(cmd, capture_output=True)
+        # skip the resource group when get a lock
+        # b'[]\r\n'
+        locks = json.loads(out.stdout)
+        print(locks)
+        if locks:
+            continue
+        cmd = ['az', 'group', 'delete', '-n', rg, '--yes']
+        print(cmd)
+        out = subprocess.run(cmd, capture_output=True)
+        print(out.stdout)
 
 
 def get_remaining_tests():
