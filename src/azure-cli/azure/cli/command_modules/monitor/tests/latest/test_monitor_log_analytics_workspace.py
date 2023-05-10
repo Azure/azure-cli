@@ -567,6 +567,7 @@ class TestLogProfileScenarios(ScenarioTest):
                      self.check('retentionInDays', 45),
                      self.check('totalRetentionInDays', 400),
                  ])
+
         self.cmd(
             'monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --total-retention-time 2556 --retention-time 50',
             checks=[
