@@ -41,12 +41,6 @@ def load_command_table(self, _):
         client_factory=disaster_recovery_mgmt_client_factory,
         resource_type=ResourceType.MGMT_EVENTHUB)
 
-    eh_schema_registry_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventhub.operations#SchemaRegistryOperations.{}',
-        client_factory=schema_registry_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_EVENTHUB
-    )
-
     eh_application_group_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventhub.operations#ApplicationGroupOperations.{}',
         client_factory=schema_registry_mgmt_client_factory,
@@ -60,8 +54,6 @@ def load_command_table(self, _):
     with self.command_group('eventhubs namespace', custom_command_type=eh_namespace_custom,
                             is_preview=True) as g:
         g.custom_command('create', 'create_eventhub_namespace')
-    with self.command_group('eventhubs namespace', eh_namespace_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
-        g.custom_command('exists', 'cli_namespace_exists')
 
     with self.command_group('eventhubs namespace private-endpoint-connection', custom_command_type=eh_namespace_custom,
                             is_preview=True) as g:
@@ -93,11 +85,11 @@ def load_command_table(self, _):
         g.command('keys list', 'list_keys')
 
 # NetwrokRuleSet Region
-    with self.command_group('eventhubs namespace network-rule', eh_namespace_util, min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
-        g.custom_command('add', 'cli_networkrule_createupdate', validator=validate_subnet)
-        g.show_command('list', 'get_network_rule_set')
-        g.custom_command('remove', 'cli_networkrule_delete', validator=validate_subnet)
-        g.custom_command('update', 'cli_networkrule_update')
+    with self.command_group('eventhubs namespace network-rule', eh_namespace_util, deprecate_info=self.deprecate(redirect='eventhubs namespace network-rule-set'), min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
+        g.custom_command('add', 'cli_networkrule_createupdate', deprecate_info=self.deprecate(redirect='eventhubs namespace network-rule-set ip-rule/virtual-network-rule add'), validator=validate_subnet)
+        g.show_command('list', 'get_network_rule_set', deprecate_info=self.deprecate(redirect='eventhubs namespace network-rule-set list'))
+        g.custom_command('remove', 'cli_networkrule_delete', deprecate_info=self.deprecate(redirect='eventhubs namespace network-rule-set ip-rule/virtual-network-rule remove'), validator=validate_subnet)
+        g.custom_command('update', 'cli_networkrule_update', deprecate_info=self.deprecate(redirect='eventhubs namespace network-rule-set update'))
 
 # Identity Region
     with self.command_group('eventhubs namespace identity', custom_command_type=eh_namespace_custom,
@@ -110,13 +102,6 @@ def load_command_table(self, _):
                             is_preview=True) as g:
         g.custom_command('add', 'cli_add_encryption')
         g.custom_command('remove', 'cli_remove_encryption')
-
-# SchemaRegistry Region
-    with self.command_group('eventhubs namespace schema-registry', eh_schema_registry_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=schema_registry_mgmt_client_factory) as g:
-        g.custom_command('create', 'cli_schemaregistry_createupdate')
-        g.command('list', 'list_by_namespace')
-        g.show_command('show', 'get')
-        g.command('delete', 'delete')
 
 # ApplicationGroup Region
     with self.command_group('eventhubs namespace application-group', eh_application_group_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=application_group_mgmt_client_factory) as g:

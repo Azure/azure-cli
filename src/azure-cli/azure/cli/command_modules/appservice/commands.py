@@ -16,7 +16,8 @@ from ._validators import (validate_onedeploy_params, validate_staticsite_link_fu
                           validate_functionapp_on_containerapp_site_config_set,
                           validate_functionapp_on_containerapp_site_config_show,
                           validate_functionapp_on_containerapp_container_settings_delete,
-                          validate_functionapp_on_containerapp_update)
+                          validate_functionapp_on_containerapp_update,
+                          validate_functionapp)
 
 
 def output_slots_in_table(slots):
@@ -319,7 +320,7 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp') as g:
         g.custom_command('create', 'create_functionapp', exception_handler=ex_handler_factory(),
-                         validator=validate_vnet_integration)
+                         validator=validate_functionapp)
         g.custom_command('list-runtimes', 'list_function_app_runtimes')
         g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
         g.custom_show_command('show', 'show_functionapp', table_transformer=transform_web_output)

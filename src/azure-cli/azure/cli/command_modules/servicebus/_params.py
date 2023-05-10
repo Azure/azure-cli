@@ -18,7 +18,7 @@ def load_arguments_sb(self, _):
     from azure.cli.command_modules.servicebus._validators import _validate_auto_delete_on_idle, \
         _validate_duplicate_detection_history_time_window, \
         _validate_default_message_time_to_live, \
-        _validate_lock_duration, validate_partner_namespace, validate_premiumsku_capacity, validate_target_namespace
+        _validate_lock_duration, validate_partner_namespace, validate_premiumsku_capacity
 
     (SkuName, FilterType, TlsVersion) = self.get_models('SkuName', 'FilterType', 'TlsVersion', resource_type=ResourceType.MGMT_SERVICEBUS)
 
@@ -49,9 +49,6 @@ def load_arguments_sb(self, _):
                    help='This determines if traffic is allowed over public network. By default it is enabled. If value is SecuredByPerimeter then Inbound and Outbound communication is controlled by the network security perimeter and profile\' access rules.')
         c.argument('premium_messaging_partitions', options_list=['--premium-messaging-partitions', '--premium-partitions'], type=int, help='The number of partitions of a Service Bus namespace. This property is only applicable to Premium SKU namespaces. The default value is 1 and possible values are 1, 2 and 4')
         c.argument('alternate_name', help='Alternate name specified when alias and namespace names are same.')
-
-    with self.argument_context('servicebus namespace exists') as c:
-        c.argument('name', arg_type=name_type, help='Namespace name. Name can contain only letters, numbers, and hyphens. The namespace must start with a letter, and it must end with a letter or number.')
 
     with self.argument_context('servicebus namespace create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
@@ -208,6 +205,9 @@ def load_arguments_sb(self, _):
     with self.argument_context('servicebus georecovery-alias list') as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
 
+    with self.argument_context('servicebus georecovery-alias fail-over') as c:
+        c.argument('parameters', options_list=['--parameters'], deprecate_info=c.deprecate(expiration='2.49.0'), help='Parameters required to create an Alias(Disaster Recovery configuration). Is either a FailoverProperties type or a IO type. Default value is None.')
+
     with self.argument_context('servicebus georecovery-alias authorization-rule list') as c:
         c.argument('alias', options_list=['--alias', '-a'], help='Name of Geo-Disaster Recovery Configuration Alias')
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
@@ -217,20 +217,6 @@ def load_arguments_sb(self, _):
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
         c.argument('authorization_rule_name', arg_type=name_type, help='Name of Namespace AuthorizationRule')
 
-    # Standard to Premium Migration: Region
-
-    with self.argument_context('servicebus migration start') as c:
-        c.ignore('config_name')
-        c.argument('namespace_name', arg_type=name_type, help='Name of Standard Namespace used as source of the migration')
-        # c.argument('config_name', options_list=['--config-name'], id_part=None, help='Name of configuration. Should always be "$default"')
-        c.argument('target_namespace', options_list=['--target-namespace'], validator=validate_target_namespace, help='Name (if within the same resource group) or ARM Id of empty Premium Service Bus namespace name that will be target of the migration')
-        c.argument('post_migration_name', options_list=['--post-migration-name'], help='Post migration name is the name that can be used to connect to standard namespace after migration is complete.')
-
-    for scope in ['show', 'complete', 'abort']:
-        with self.argument_context('servicebus migration {}'.format(scope)) as c:
-            c.ignore('config_name')
-            c.argument('namespace_name', arg_type=name_type, help='Name of Standard Namespace')
-
 # Region Namespace NetworkRuleSet
     with self.argument_context('servicebus namespace network-rule') as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
@@ -238,9 +224,9 @@ def load_arguments_sb(self, _):
     for scope in ['servicebus namespace network-rule add', 'servicebus namespace network-rule remove']:
         with self.argument_context(scope) as c:
             c.argument('subnet', arg_group='Virtual Network Rule', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
-            c.argument('ip_mask', arg_group='IP Address Rule', options_list=['--ip-address'], help='IPv4 address or CIDR range.')
+            c.argument('ip_mask', arg_group='IP Address Rule', options_list=['--ip-address'], help='IPv4 address or CIDR range.', deprecate_info=c.deprecate(redirect='--ip-rule', expiration='2.49.0'))
             c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
-            c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'], help='Name of the Virtual Network')
+            c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'], help='Name of the Virtual Network', deprecate_info=c.deprecate(expiration='2.49.0'))
 
     with self.argument_context('servicebus namespace network-rule update', resource_type=ResourceType.MGMT_SERVICEBUS,
                                min_api='2017-04-01') as c:
