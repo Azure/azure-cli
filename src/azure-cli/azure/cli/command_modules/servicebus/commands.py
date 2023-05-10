@@ -42,9 +42,6 @@ def load_command_table(self, _):
                             is_preview=True) as g:
         g.custom_command('create', 'create_servicebus_namespace', supports_no_wait=True)
 
-    with self.command_group('servicebus namespace', sb_namespace_util, client_factory=namespaces_mgmt_client_factory, min_api='2021-06-01-preview') as g:
-        g.custom_command('exists', 'cli_namespace_exists')
-
     with self.command_group('servicebus namespace private-endpoint-connection', custom_command_type=sb_namespace_custom,
                             is_preview=True) as g:
         from ._validators import validate_private_endpoint_connection_id
