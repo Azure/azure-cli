@@ -36,12 +36,6 @@ def load_command_table(self, _):
         client_factory=disaster_recovery_mgmt_client_factory,
         resource_type=ResourceType.MGMT_EVENTHUB)
 
-    eh_schema_registry_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventhub.operations#SchemaRegistryOperations.{}',
-        client_factory=schema_registry_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_EVENTHUB
-    )
-
     eh_application_group_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventhub.operations#ApplicationGroupOperations.{}',
         client_factory=schema_registry_mgmt_client_factory,
@@ -106,13 +100,6 @@ def load_command_table(self, _):
                             is_preview=True) as g:
         g.custom_command('add', 'cli_add_encryption')
         g.custom_command('remove', 'cli_remove_encryption')
-
-# SchemaRegistry Region
-    with self.command_group('eventhubs namespace schema-registry', eh_schema_registry_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=schema_registry_mgmt_client_factory) as g:
-        g.custom_command('create', 'cli_schemaregistry_createupdate')
-        g.command('list', 'list_by_namespace')
-        g.show_command('show', 'get')
-        g.command('delete', 'delete')
 
 # ApplicationGroup Region
     with self.command_group('eventhubs namespace application-group', eh_application_group_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=application_group_mgmt_client_factory) as g:
