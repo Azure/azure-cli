@@ -453,14 +453,15 @@ class MainCommandsLoader(CLICommandsLoader):
                     # If the command is not complete in autocomplete mode, we should match shorter command.
                     # For example, `account sho` should match `account`.
                     logger.debug("Could not find a match in the command or command group table for '%s'", raw_cmd)
-                    raw_cmd_group = ' '.join(raw_cmd.split()[:-1])
-                    logger.debug("In autocomplete mode, try to match cmd group: '%s'", raw_cmd_group)
-                    if not raw_cmd_group:
-                        # If full command is 'az acc', raw_cmd is 'acc', raw_cmd_group is ''.
-                        logger.debug("Cmd group is empty, return command table.")
+                    trimmed_raw_cmd = ' '.join(raw_cmd.split()[:-1])
+                    logger.debug("In autocomplete mode, try to match trimmed raw cmd: '%s'", trimmed_raw_cmd)
+                    if not trimmed_raw_cmd:
+                        # If full command is 'az acc', raw_cmd is 'acc', trimmed_raw_cmd is ''.
+                        logger.debug("Trimmed raw cmd is empty, return command table.")
                         return self.command_table
-                    if raw_cmd_group in self.command_group_table:
-                        logger.debug("Found a match in the command group table for cmd group: '%s'.", raw_cmd_group)
+                    if trimmed_raw_cmd in self.command_group_table:
+                        logger.debug("Found a match in the command group table for trimmed raw cmd: '%s'.",
+                                     trimmed_raw_cmd)
                         return self.command_table
 
                 logger.debug("Could not find a match in the command or command group table for '%s'. "
