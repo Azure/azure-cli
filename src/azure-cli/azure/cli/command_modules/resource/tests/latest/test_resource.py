@@ -4017,9 +4017,6 @@ class BicepScenarioTest(ScenarioTest):
 # Because don't want to record bicep cli binary
 class BicepBuildTest(LiveScenarioTest):
 
-    def __init__(self, *arg, **kwargs):
-        super().__init__(*arg, random_config_dir=True, **kwargs)
-
     def setup(self):
         super().setup()
         self.cmd('az bicep uninstall')
@@ -4049,9 +4046,6 @@ class BicepBuildTest(LiveScenarioTest):
             os.remove(decompile_path)
 
 class BicepGenerateParamsTest(LiveScenarioTest):
-
-    def __init__(self, *arg, **kwargs):
-        super().__init__(*arg, random_config_dir=True, **kwargs)
 
     def setup(self):
         super().setup()
@@ -4108,9 +4102,6 @@ class BicepInstallationTest(LiveScenarioTest):
 
 class BicepRestoreTest(LiveScenarioTest):
 
-    def __init__(self, *arg, **kwargs):
-        super().__init__(*arg, random_config_dir=True, **kwargs)
-
     def setup(self):
         super().setup()
         self.cmd('az bicep uninstall')
@@ -4138,9 +4129,6 @@ class BicepRestoreTest(LiveScenarioTest):
 
 class BicepFormatTest(LiveScenarioTest):
 
-    def __init__(self, *arg, **kwargs):
-        super().__init__(*arg, random_config_dir=True, **kwargs)
-
     def setup(self):
         super().setup()
         self.cmd('az bicep uninstall')
@@ -4165,8 +4153,6 @@ class BicepFormatTest(LiveScenarioTest):
 
 
 class DeploymentWithBicepScenarioTest(LiveScenarioTest):
-    def __init__(self, *arg, **kwargs):
-        super().__init__(*arg, random_config_dir=True, **kwargs)
 
     def setup(self):
         super.setup()
