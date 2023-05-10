@@ -78,7 +78,8 @@ from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERS
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
                          WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
-                         WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, DEFAULT_CENTAURI_IMAGE)
+                         WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, DEFAULT_CENTAURI_IMAGE,
+                         FLEX_RUNTIMES)
 from ._github_oauth import (get_github_access_token, cache_github_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
@@ -3855,6 +3856,19 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     if runtime is None and runtime_version is not None:
         raise ArgumentUsageError('Must specify --runtime to use --runtime-version')
+
+    if flexconsumption_location:
+        runtime = runtime or 'dotnet'
+        lang = next((r for r in FLEX_RUNTIMES if r['runtime'] == runtime), None)
+        if lang is None:
+            raise ValidationError("Invalid runtime. Supported runtimes for function apps on Flex App "
+                                  "Service plans are 'dotnet', 'java', 'node', 'python' and 'powershell'.")
+        if runtime_version is None:
+            runtime_version = lang['version']
+        elif str(runtime_version) != lang['version']:
+            raise ValidationError("Invalid version {0} for runtime {1} for function apps on Flex App Service plans. "
+                                  "Supported version for runtime {1} is {2}."
+                                  .format(runtime_version, runtime, lang['version']))
 
     runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=(not is_linux))
     matched_runtime = runtime_helper.resolve("dotnet" if not runtime else runtime,
