@@ -2541,7 +2541,7 @@ def security_domain_upload(cmd, client, hsm_name, sd_file, restore_blob=False, s
                            sd_wrapping_keys=None, passwords=None, identifier=None, vault_base_url=None,
                            no_wait=False):  # pylint: disable=unused-argument
     if not restore_blob:
-        restore_blob_value = _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys)
+        restore_blob_value = _security_domain_restore_blob(sd_file, sd_exchange_key, sd_wrapping_keys, passwords)
     else:
         with open(sd_file, 'r') as f:
             restore_blob_value = f.read()
