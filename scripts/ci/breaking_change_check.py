@@ -26,8 +26,9 @@ output_path = '/mnt/vss/_work/1/output_meta'
 def get_base_meta_files():
     cmd = ['azdev', 'command-change', 'meta-export', 'CLI', '--meta-output-path', base_meta_path]
     print(cmd)
-    out = subprocess.run(cmd, capture_output=True)
-    print(out.stdout)
+    subprocess.run(cmd)
+    # out = subprocess.run(cmd, capture_output=True)
+    # print(out.stdout)
 
 
 def get_diff_meta_files():
@@ -35,28 +36,30 @@ def get_diff_meta_files():
     target_branch = f'refs/remotes/pull/{pull_request_number}/merge'
     cmd = ['azdev', 'command-change', 'meta-export', '--src', 'dev', '--tgt', target_branch, '--repo', get_cli_repo_path(), '--meta-output-path', diff_meta_path]
     print(cmd)
-    out = subprocess.run(cmd, capture_output=True)
-    print(out.stdout)
+    subprocess.run(cmd)
+    # out = subprocess.run(cmd, capture_output=True)
+    # print(out.stdout)
 
 
 def meta_diff():
     cmd = ['git', 'checkout',  'dev']
     print(cmd)
-    out = subprocess.run(cmd, capture_output=True)
-    print(out.stdout)
-    # list file in diff_meta_path
-    # for each file, run follow command
-    # cmd = ['azdev', 'command-change', 'meta-diff', '--base-meta-file', 'az_monitor_meta_before.json', '--diff-meta-file', 'az_monitor_meta_after.json', '--output-file', 'xxx', '--output-type', 'xxx']
-    for file in os.listdir(diff_meta_path):
-        if file.endswith('.json'):
-            cmd = ['azdev', 'command-change', 'meta-diff', '--base-meta-file', os.path.join(base_meta_path, file), '--diff-meta-file', os.path.join(diff_meta_path, file), '--output-file', output_path]
-            print(cmd)
-            out = subprocess.run(cmd, capture_output=True)
-            print(out.stdout)
-    cmd = ['ls', '-al', output_path]
-    print(cmd)
-    out = subprocess.run(cmd, capture_output=True)
-    print(out.stdout)
+    subprocess.run(cmd)
+    # out = subprocess.run(cmd, capture_output=True)
+    # print(out.stdout)
+    if os.path.exists(diff_meta_path):
+        for file in os.listdir(diff_meta_path):
+            if file.endswith('.json'):
+                cmd = ['azdev', 'command-change', 'meta-diff', '--base-meta-file', os.path.join(base_meta_path, file), '--diff-meta-file', os.path.join(diff_meta_path, file), '--output-file', output_path]
+                print(cmd)
+                subprocess.run(cmd)
+                # out = subprocess.run(cmd, capture_output=True)
+                # print(out.stdout)
+        cmd = ['ls', '-al', output_path]
+        print(cmd)
+        subprocess.run(cmd)
+        # out = subprocess.run(cmd, capture_output=True)
+        # print(out.stdout)
 
 
 def build_pipeline_result():
