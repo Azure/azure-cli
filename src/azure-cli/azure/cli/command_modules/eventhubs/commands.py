@@ -23,7 +23,7 @@ def load_command_table(self, _):
         resource_type=ResourceType.MGMT_EVENTHUB)
 
     eh_namespace_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.eventhubs.Operation.namespace_custom#{}',
+        operations_tmpl='azure.cli.command_modules.eventhubs.operation.namespace_custom#{}',
     )
     eh_event_hub_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventhub.operations#EventHubsOperations.{}',
