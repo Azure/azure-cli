@@ -9,7 +9,7 @@ import logging
 import os
 import subprocess
 
-from azdev.utilities.path import get_cli_repo_path
+from azdev.utilities.path import get_cli_repo_path, get_ext_repo_paths
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -24,6 +24,12 @@ output_path = '/mnt/vss/_work/1/output_meta'
 
 
 def get_base_meta_files():
+    cmd = ['git', 'checkout', 'dev']
+    print(cmd)
+    subprocess.run(cmd)
+    cmd = ['azdev', 'setup', '--cli', get_cli_repo_path(), '--repo', get_ext_repo_paths()]
+    print(cmd)
+    subprocess.run(cmd)
     cmd = ['azdev', 'command-change', 'meta-export', 'CLI', '--meta-output-path', base_meta_path]
     print(cmd)
     subprocess.run(cmd)
@@ -42,11 +48,6 @@ def get_diff_meta_files():
 
 
 def meta_diff():
-    cmd = ['git', 'checkout',  'dev']
-    print(cmd)
-    subprocess.run(cmd)
-    # out = subprocess.run(cmd, capture_output=True)
-    # print(out.stdout)
     if os.path.exists(diff_meta_path):
         for file in os.listdir(diff_meta_path):
             if file.endswith('.json'):
@@ -89,8 +90,8 @@ def save_pipeline_result(pipeline_result):
 
 def main():
     logger.info("Start breaking change check ...\n")
-    get_base_meta_files()
     get_diff_meta_files()
+    get_base_meta_files()
     meta_diff()
 
 
