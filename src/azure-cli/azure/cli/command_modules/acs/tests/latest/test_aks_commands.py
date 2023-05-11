@@ -6012,7 +6012,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(deploy_azfw_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('name', fw_name),
-            self.check('"Network.DNS.EnableProxy"', 'true') # pending verification
+            self.check('additionalProperties.\"Network.DNS.EnableProxy\"', 'true')
         ])
 
         # configure Firewall IP Config
@@ -6027,7 +6027,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         get_fw_private_ip_cmd = 'network firewall show -g {resource_group} -n {fw_name}'
         fw_private_ip = self.cmd(get_fw_private_ip_cmd).get_output_in_json()
-        fw_private_ip_address = fw_private_ip.get("ipConfigurations")[0].get("privateIpAddress")
+        fw_private_ip_address = fw_private_ip.get("ipConfigurations")[0].get("privateIPAddress")
 
         self.kwargs.update({
             'fw_public_ip_address': fw_public_ip_address,
