@@ -20,6 +20,7 @@ logger.addHandler(ch)
 
 pull_request_number = os.environ.get('PULL_REQUEST_NUMBER', None)
 job_name = os.environ.get('JOB_NAME', None)
+azdev_test_result_dir = os.path.expanduser("~/.azdev/env_config/mnt/vss/_work/1/s/env")
 src_branch = 'azure-cli-2.48.1'
 target_branch = 'dev'
 # src_branch = os.environ.get('SRC_BRANCH', None)
@@ -114,7 +115,7 @@ def get_pipeline_result():
                     breaking_change['Content'] = build_markdown_content(item['cmd_name'], item['is_break'], item['rule_message'], item['suggest_message'], breaking_change['Content'])
                 breaking_change['Status'] = status
                 pipeline_result['breaking_change_check']['Details'].append(breaking_change)
-    print(json.dumps(pipeline_result, indent=2))
+    print(json.dumps(pipeline_result, indent=4))
     return pipeline_result
 
 
@@ -126,13 +127,12 @@ def build_markdown_content(cmd_name, is_break, rule_message, suggest_message, co
 
 
 def save_pipeline_result(pipeline_result):
-    # # save pipeline result to file
-    # # /mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/pipeline_result_3.8_latest_1.json
-    # filename = os.path.join(azdev_test_result_dir, f'pipeline_result_{python_version}_{profile}_{instance_idx}.json')
-    # with open(filename, 'w') as f:
-    #     json.dump(pipeline_result, f, indent=4)
-    # logger.info(f"save pipeline result to file: {filename}")
-    pass
+    # save pipeline result to file
+    # /mnt/vss/.azdev/env_config/mnt/vss/_work/1/s/env/breaking_change_check.json
+    filename = os.path.join(azdev_test_result_dir, f'breaking_change_check.json')
+    with open(filename, 'w') as f:
+        json.dump(pipeline_result, f, indent=4)
+    logger.info(f"save pipeline result to file: {filename}")
 
 
 def main():
@@ -141,7 +141,8 @@ def main():
         get_diff_meta_files()
         get_base_meta_files()
         meta_diff()
-        get_pipeline_result()
+        pipeline_result = get_pipeline_result()
+        save_pipeline_result(pipeline_result)
 
 
 if __name__ == '__main__':
