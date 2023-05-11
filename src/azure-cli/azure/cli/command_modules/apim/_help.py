@@ -665,9 +665,9 @@ examples:
 
 helps['apim graphqlapi resolver delete'] = """
 type: command
-short-summary: Deletes the specified resolver in the GraphQL API.
+short-summary: Delete the specified resolver in the GraphQL API.
 examples:
-  - name: Deletes resolver.
+  - name: Delete resolver.
     text: |
         az apim api delete --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId
 """
