@@ -479,7 +479,7 @@ parameters:
   - name: --enable-keda
     type: bool
     short-summary: Enable KEDA workload auto-scaler.
-  - name: --enable-azuremonitormetrics
+  - name: --enable-azure-monitor-metrics
     type: bool
     short-summary: Enable Azure Monitor Metrics Profile
   - name: --azure-monitor-workspace-resource-id
@@ -568,7 +568,7 @@ examples:
   - name: Create a kubernetes cluster with KEDA workload autoscaler enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-keda
   - name: Create a kubernetes cluster with Azure Monitor Metrics enabled.
-    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azuremonitormetrics
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-metrics
 """
 
 helps['aks update'] = """
@@ -811,7 +811,7 @@ parameters:
   - name: --disable-keda
     type: bool
     short-summary: Disable KEDA workload auto-scaler.
-  - name: --enable-azuremonitormetrics
+  - name: --enable-azure-monitor-metrics
     type: bool
     short-summary: Enable Azure Monitor Metrics Profile
   - name: --azure-monitor-workspace-resource-id
@@ -829,7 +829,7 @@ parameters:
   - name: --enable-windows-recording-rules
     type: bool
     short-summary: Enable Windows Recording Rules when enabling the Azure Monitor Metrics addon
-  - name: --disable-azuremonitormetrics
+  - name: --disable-azure-monitor-metrics
     type: bool
     short-summary: Disable Azure Monitor Metrics Profile. This will delete all DCRA's associated with the cluster, any linked DCRs with the data stream = prometheus-stream and the recording rule groups created by the addon for this AKS cluster.
 

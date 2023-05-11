@@ -494,7 +494,7 @@ def aks_create(
     host_group_id=None,
     gpu_instance_profile=None,
     # azure monitor profile
-    enable_azuremonitormetrics=False,
+    enable_azure_monitor_metrics=False,
     azure_monitor_workspace_resource_id=None,
     ksm_metric_labels_allow_list=None,
     ksm_metric_annotations_allow_list=None,
@@ -619,13 +619,13 @@ def aks_update(
     max_count=None,
     nodepool_labels=None,
     # azure monitor profile
-    enable_azuremonitormetrics=False,
+    enable_azure_monitor_metrics=False,
     azure_monitor_workspace_resource_id=None,
     ksm_metric_labels_allow_list=None,
     ksm_metric_annotations_allow_list=None,
     grafana_resource_id=None,
     enable_windows_recording_rules=False,
-    disable_azuremonitormetrics=False,
+    disable_azure_monitor_metrics=False,
     # misc
     yes=False,
     no_wait=False,

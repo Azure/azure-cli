@@ -6323,9 +6323,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-    @live_only()
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap')
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_with_azuremonitormetrics(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -6342,61 +6341,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'node_vm_size': node_vm_size
         })
 
-        create_cmd = ' '.join([
-            'aks', 'create', '--resource-group={resource_group}', '--name={name}', '--location={location}',
-            '--enable-managed-identity', '--enable-azuremonitormetrics --enable-windows-recording-rules',
-            '--ssh-key-value={ssh_key_value} --node-vm-size={node_vm_size}',
-        ])
-        self.cmd(create_cmd, checks=[
-            self.is_empty(),
-        ])
-
-        # azuremonitor metrics will be set to false after initial creation command as its in the
-        # postprocessing step that we do an update to enable it. Adding a wait for the second put request
-        # in addonput.py which enables the Azure Monitor Metrics addon as all the DC* resources
-        # have now been created.
-        wait_cmd = ' '.join([
-            'aks', 'wait', '--resource-group={resource_group}', '--name={name}', '--updated',
-            '--interval 60', '--timeout 300',
-        ])
-        self.cmd(wait_cmd, checks=[
-            self.is_empty(),
-        ])
-
-        self.cmd('aks show -g {resource_group} -n {name}', checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('azureMonitorProfile.metrics.enabled', True),
-        ])
-
-        # delete
-        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
-        self.cmd(cmd, checks=[
-            self.is_empty(),
-        ])
-
-    @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap')
-    def test_aks_create_with_azuremonitormetrics(self, resource_group, resource_group_location):
-        # reset the count so in replay mode the random names will start with 0
-        self.test_resources_count = 0
-        # kwargs for string formatting
-        aks_name = self.create_random_name('cliakstest', 16)
-
-        node_vm_size = 'standard_d2s_v3'
-        self.kwargs.update({
-            'resource_group': resource_group,
-            'name': aks_name,
-            'location': resource_group_location,
-            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
-            'ssh_key_value': self.generate_ssh_keys(),
-            'node_vm_size': node_vm_size
-        })
-
-        create_cmd = ' '.join([
-            'aks', 'create', '--resource-group={resource_group}', '--name={name}', '--location={location}',
-            '--enable-managed-identity', '--enable-azuremonitormetrics --enable-windows-recording-rules',
-            '--ssh-key-value={ssh_key_value} --node-vm-size={node_vm_size}',
-        ])
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--ssh-key-value={ssh_key_value} --node-vm-size={node_vm_size} --enable-managed-identity ' \
+                     '--enable-azuremonitormetrics --enable-windows-recording-rules --output=json'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
         ])
@@ -6413,7 +6360,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.is_empty(),
         ])
 
-        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+        self.cmd('aks show -g {resource_group} -n {name} --output=json', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('azureMonitorProfile.metrics.enabled', True),
         ])
@@ -6452,9 +6399,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('azureMonitorProfile.metrics.enabled', True),
         ])
 
-        # update: disable-azuremonitormetrics
+        # update: disable-azure-monitor-metrics
         update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
-                     '--disable-azuremonitormetrics'
+                     '--disable-azure-monitor-metrics'
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('azureMonitorProfile.metrics.enabled', False),

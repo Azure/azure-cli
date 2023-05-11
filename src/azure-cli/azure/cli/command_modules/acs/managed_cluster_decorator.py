@@ -4757,7 +4757,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         # print("_get_enable_azure_monitor_metrics being called...")
         # Read the original value passed by the command.
-        enable_azure_monitor_metrics = self.raw_param.get("enable_azuremonitormetrics")
+        enable_azure_monitor_metrics = self.raw_param.get("enable_azure_monitor_metrics")
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
@@ -4771,11 +4771,11 @@ class AKSManagedClusterContext(BaseAKSContext):
         if enable_validation:
             if enable_azure_monitor_metrics and self._get_disable_azure_monitor_metrics(False):
                 raise MutuallyExclusiveArgumentError(
-                    "Cannot specify --enable-azuremonitormetrics and --disable-azuremonitormetrics at the same time."
+                    "Cannot specify --enable-azure-monitor-metrics and --disable-azure-monitor-metrics at the same time."
                 )
             if enable_azure_monitor_metrics and not check_is_msi_cluster(self.mc):
                 raise RequiredArgumentMissingError(
-                    "--enable-azuremonitormetrics can only be specified for clusters with managed identity enabled"
+                    "--enable-azure-monitor-metrics can only be specified for clusters with managed identity enabled"
                 )
         return enable_azure_monitor_metrics
 
@@ -4796,11 +4796,11 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: bool
         """
         # Read the original value passed by the command.
-        disable_azure_monitor_metrics = self.raw_param.get("disable_azuremonitormetrics")
+        disable_azure_monitor_metrics = self.raw_param.get("disable_azure_monitor_metrics")
         if enable_validation:
             if disable_azure_monitor_metrics and self._get_enable_azure_monitor_metrics(False):
                 raise MutuallyExclusiveArgumentError(
-                    "Cannot specify --enable-azuremonitormetrics and --disable-azuremonitormetrics at the same time."
+                    "Cannot specify --enable-azure-monitor-metrics and --disable-azure-monitor-metrics at the same time."
                 )
         return disable_azure_monitor_metrics
 
@@ -6985,8 +6985,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.azure_monitor_profile.metrics = self.models.ManagedClusterAzureMonitorProfileMetrics(enabled=False)
 
         if (
-            self.context.raw_param.get("enable_azuremonitormetrics") or
-            self.context.raw_param.get("disable_azuremonitormetrics")
+            self.context.raw_param.get("enable_azure_monitor_metrics") or
+            self.context.raw_param.get("disable_azure_monitor_metrics")
         ):
             self.context.external_functions.ensure_azure_monitor_profile_prerequisites(
                 self.cmd,
