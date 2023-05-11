@@ -6343,7 +6343,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--ssh-key-value={ssh_key_value} --node-vm-size={node_vm_size} --enable-managed-identity ' \
-                     '--enable-azuremonitormetrics --enable-windows-recording-rules --output=json'
+                     '--enable-azure-monitor-metrics --enable-windows-recording-rules --output=json'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
         ])
@@ -6384,16 +6384,16 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'node_vm_size': node_vm_size,
         })
 
-        # create: without enable-azuremonitormetrics
+        # create: without enable-azure-monitor-metrics
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} --ssh-key-value={ssh_key_value} --node-vm-size={node_vm_size} --enable-managed-identity --output=json'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.not_exists('azureMonitorProfile.metrics'),
         ])
 
-        # update: enable-azuremonitormetrics
+        # update: enable-azure-monitor-metrics
         update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
-                     '--enable-azuremonitormetrics --enable-managed-identity --enable-windows-recording-rules'
+                     '--enable-azure-monitor-metrics --enable-managed-identity --enable-windows-recording-rules'
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('azureMonitorProfile.metrics.enabled', True),
