@@ -978,4 +978,54 @@ def show_template_optimizer(cmd, client, resource_group_name, image_template_nam
                                          resource_group_name=resource_group_name,
                                          image_template_name=image_template_name)
     return existing_image_template.optimize
+
+#
+# def create_template_trigger(cmd, client, resource_group_name, image_template_name, trigger_name, trigger_type=None):
+#     # _require_defer(cmd)
+#     # existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+#     #                                      resource_group_name=resource_group_name,
+#     #                                      image_template_name=image_template_name)
+#
+#     from azure.mgmt.imagebuilder.models import Trigger
+#
+#     trigger = Trigger()
+#     if trigger_type:
+#         trigger.type = trigger_type
+#
+#     return client.triggers.begin_create_or_update(parameters=trigger, resource_group_name=resource_group_name,
+#                                                   image_template_name=image_template_name, trigger_name=trigger_name)
+#     # return cached_put(cmd, client.triggers.begin_create_or_update,
+#     #                   parameters=trigger, resource_group_name=resource_group_name,
+#     #                   image_template_name=image_template_name, trigger_name=trigger_name)
+#
+#
+# def delete_template_trigger(cmd, client, resource_group_name, image_template_name, optimizer_type=None):
+#     # _require_defer(cmd)
+#     # existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+#     #                                      resource_group_name=resource_group_name,
+#     #                                      image_template_name=image_template_name)
+#
+#     if not existing_image_template.optimize:
+#         raise ResourceNotFoundError("No optimize existing in this image template, no need to remove.")
+#
+#     if optimizer_type == "vmBoot":
+#         existing_image_template.optimize.vm_boot = None
+#
+#     return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
+#                       resource_group_name=resource_group_name, image_template_name=image_template_name)
+#
+#
+# def list_template_trigger(cmd, client, resource_group_name, image_template_name):
+#     if resource_group_name:
+#         return client.virtual_machine_image_templates.list_by_resource_group(resource_group_name)
+#     return client.virtual_machine_image_templates.list()
+#
+#
+# def show_template_trigger(cmd, client, resource_group_name, image_template_name):
+#     _require_defer(cmd)
+#
+#     existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+#                                          resource_group_name=resource_group_name,
+#                                          image_template_name=image_template_name)
+#     return existing_image_template.optimize
 # endregion

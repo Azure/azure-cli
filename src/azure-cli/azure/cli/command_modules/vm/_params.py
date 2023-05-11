@@ -375,6 +375,16 @@ def load_arguments(self, _):
 
     with self.argument_context('image builder optimizer remove', min_api='2022-07-01') as c:
         c.argument('optimizer_type', get_enum_type(['vmBoot']), options_list=['--type', '--optimizer-type'], help='The type of optimizer added. Known values is: "vmBoot".')
+
+    # with self.argument_context('image builder trigger', min_api='2022-07-01') as c:
+    #     c.argument('trigger_name', help='The name of the resource.')
+    #
+    # with self.argument_context('image builder trigger create', min_api='2022-07-01') as c:
+    #     c.argument('trigger_type', options_list=['--type', '--trigger-type'], help='The type of the resource. E.g. "Microsoft.Compute/virtualMachines" or "Microsoft.Storage/storageAccounts".')
+        # c.argument('state', get_enum_type(['Enabled', 'Disabled']), help='Enabling this field will improve VM boot time by optimizing the final customized image output.')
+    #
+    # with self.argument_context('image builder optimizer remove', min_api='2022-07-01') as c:
+    #     c.argument('optimizer_type', get_enum_type(['vmBoot']), options_list=['--type', '--optimizer-type'], help='The type of optimizer added. Known values is: "vmBoot".')
     # endregion
 
     # region AvailabilitySets
