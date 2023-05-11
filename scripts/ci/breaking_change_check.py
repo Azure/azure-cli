@@ -29,6 +29,9 @@ def get_diff_meta_files():
     cmd = ['git', 'checkout', 'dev']
     print(cmd)
     subprocess.run(cmd)
+    cmd = ['git', 'fetch', '--all', '--tags', '--prune']
+    print(cmd)
+    subprocess.run(cmd)
     cmd = ['git', 'checkout', 'azure-cli-2.48.1']
     print(cmd)
     subprocess.run(cmd)
@@ -82,7 +85,7 @@ def get_pipeline_result():
         pipeline_result['pull_request_number'] = pull_request_number
     if os.path.exists(output_path):
         for file in os.listdir(output_path):
-            with open('example.json', 'r') as f:
+            with open(file, 'r') as f:
                 items = json.load(f)
                 module = os.path.basename(file).split('.')[0].split('_')[1]
                 breaking_change = {
@@ -115,11 +118,12 @@ def save_pipeline_result(pipeline_result):
 
 
 def main():
-    logger.info("Start breaking change check ...\n")
-    get_diff_meta_files()
-    get_base_meta_files()
-    meta_diff()
-    get_pipeline_result()
+    if pull_request_number != '$(System.PullRequest.PullRequestNumber)':
+        logger.info("Start breaking change check ...\n")
+        get_diff_meta_files()
+        get_base_meta_files()
+        meta_diff()
+        get_pipeline_result()
 
 
 if __name__ == '__main__':
