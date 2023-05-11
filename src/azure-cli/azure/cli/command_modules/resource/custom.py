@@ -3254,7 +3254,7 @@ def create_lock(cmd, lock_name, level,
     :type notes: str
     """
     ManagementLockObject = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_LOCKS, 'ManagementLockObject', mod='models')
-    parameters = ManagementLockObject(level=level, notes=notes, name=lock_name)
+    parameters = ManagementLockObject(level=level, notes=notes)
 
     lock_client = _resource_lock_client_factory(cmd.cli_ctx)
     lock_resource = _extract_lock_params(resource_group, resource_provider_namespace,
@@ -3764,7 +3764,7 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
         if indent_size:
             args += ["--indentSize", indent_size]
         if insert_final_newline:
-            args += ["--insertFinalNewline", insert_final_newline]
+            args += ["--insertFinalNewline"]
 
         output = run_bicep_command(cmd.cli_ctx, args)
 

@@ -3667,6 +3667,7 @@ def elastic_pool_create(
         elastic_pool_name,
         sku=None,
         maintenance_configuration_id=None,
+        preferred_enclave_type=None,
         **kwargs):
     '''
     Creates an elastic pool.
@@ -3687,6 +3688,9 @@ def elastic_pool_create(
         cmd.cli_ctx,
         maintenance_configuration_id)
 
+    # Add preferred enclave type, if requested
+    kwargs['preferred_enclave_type'] = preferred_enclave_type
+
     # Create
     return client.begin_create_or_update(
         server_name=server_name,
@@ -3706,7 +3710,8 @@ def elastic_pool_update(
         family=None,
         capacity=None,
         maintenance_configuration_id=None,
-        high_availability_replica_count=None):
+        high_availability_replica_count=None,
+        preferred_enclave_type=None):
     '''
     Updates an elastic pool. Custom update function to apply parameters to instance.
     '''
@@ -3747,6 +3752,9 @@ def elastic_pool_update(
 
     if high_availability_replica_count is not None:
         instance.high_availability_replica_count = high_availability_replica_count
+
+    if preferred_enclave_type is not None:
+        instance.preferred_enclave_type = preferred_enclave_type
 
     return instance
 
