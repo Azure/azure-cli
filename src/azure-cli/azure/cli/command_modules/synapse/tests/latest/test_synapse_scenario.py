@@ -3154,7 +3154,7 @@ class SynapseScenarioTests(ScenarioTest):
             '--sql-admin-login-password {login-password} '
             '--location {location} --uami-id "{uami_id1}" "{uami_id2}" '
             '--key-name {keyname} --key-identifier {key_identifier} '
-            '--uami-id-in-encrypt {uami_id3} --use-sami-in-encrypt false', checks=[
+            '--uami-id-in-encrypt {uami_id3} --use-sami-in-encrypt False', checks=[
                 self.check('name', self.kwargs['workspace']),
                 self.check('type', 'Microsoft.Synapse/workspaces'),
                 self.check('provisioningState', 'Succeeded'),
