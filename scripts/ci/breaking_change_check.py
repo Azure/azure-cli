@@ -9,7 +9,7 @@ import logging
 import os
 import subprocess
 
-from azdev.utilities.path import get_cli_repo_path, get_ext_repo_paths
+from azdev.utilities.path import get_cli_repo_path
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -27,7 +27,7 @@ def get_base_meta_files():
     cmd = ['git', 'checkout', 'dev']
     print(cmd)
     subprocess.run(cmd)
-    cmd = ['azdev', 'setup', '--cli', get_cli_repo_path(), '--repo', get_ext_repo_paths()]
+    cmd = ['azdev', 'setup', '--cli', get_cli_repo_path()]
     print(cmd)
     subprocess.run(cmd)
     cmd = ['azdev', 'command-change', 'meta-export', 'CLI', '--meta-output-path', base_meta_path]
