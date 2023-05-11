@@ -163,4 +163,8 @@ class CheckDns(AAZCommand):
             return cls._schema_on_200
 
 
+class _CheckDnsHelper:
+    """Helper class for CheckDns"""
+
+
 __all__ = ["CheckDns"]

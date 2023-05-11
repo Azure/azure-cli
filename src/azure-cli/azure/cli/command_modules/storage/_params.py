@@ -314,8 +314,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], local_context_attribute=None)
 
     with self.argument_context('storage account create', resource_type=ResourceType.MGMT_STORAGE) as c:
-        t_account_type, t_sku_name, t_kind, t_tls_version = \
-            self.get_models('AccountType', 'SkuName', 'Kind', 'MinimumTlsVersion',
+        t_account_type, t_sku_name, t_kind, t_tls_version, t_dns_endpoint_type = \
+            self.get_models('AccountType', 'SkuName', 'Kind', 'MinimumTlsVersion', 'DnsEndpointType',
                             resource_type=ResourceType.MGMT_STORAGE)
         t_identity_type = self.get_models('IdentityType', resource_type=ResourceType.MGMT_STORAGE)
         c.register_common_storage_account_options()
@@ -421,6 +421,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('public_network_access', arg_type=get_enum_type(public_network_access_enum), min_api='2021-06-01',
                    help='Enable or disable public network access to the storage account. '
                         'Possible values include: `Enabled` or `Disabled`.')
+        c.argument('dns_endpoint_type', arg_type=get_enum_type(t_dns_endpoint_type),
+                   options_list=['--dns-endpoint-type', '--endpoint'], min_api='2021-09-01',
+                   help='Allow you to specify the type of endpoint. Set this to AzureDNSZone to create a large number '
+                        'of accounts in a single subscription, which creates accounts in an Azure DNS Zone and the '
+                        'endpoint URL will have an alphanumeric DNS Zone identifier.')
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -956,7 +961,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('lease', options_list=['--lease-id'], help='Required if the blob has an active lease.')
 
     with self.argument_context('storage blob exists') as c:
-        c.register_blob_arguments()
+        c.register_blob_arguments_track2()
         c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
                                  'specifies the snapshot.')
 
@@ -969,13 +974,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                  'parameter indicates the snapshot version.')
 
     with self.argument_context('storage blob snapshot') as c:
-        c.register_blob_arguments()
+        c.register_blob_arguments_track2()
         c.register_precondition_options()
         c.extra('lease', options_list=['--lease-id'], help='Required if the blob has an active lease.')
 
     with self.argument_context('storage blob set-tier') as c:
         from azure.cli.command_modules.storage._validators import (blob_rehydrate_priority_validator)
-        c.register_blob_arguments()
+        c.register_blob_arguments_track2()
 
         c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(('block', 'page')))
         c.argument('tier', validator=blob_tier_validator)
@@ -1018,7 +1023,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     for item in ['show', 'metadata show', 'metadata update']:
         with self.argument_context('storage blob {}'.format(item)) as c:
-            c.register_blob_arguments()
+            c.register_blob_arguments_track2()
             c.register_precondition_options()
             c.extra('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
                                      'specifies the blob snapshot to retrieve.')
@@ -1143,7 +1148,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob delete') as c:
         from .sdkutil import get_delete_blob_snapshot_type_names
-        c.register_blob_arguments()
+        c.register_blob_arguments_track2()
         c.register_precondition_options()
         c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()),
                    help='Required if the blob has associated snapshots. '
@@ -1154,7 +1159,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                  'specifies the blob snapshot to delete.')
 
     with self.argument_context('storage blob undelete') as c:
-        c.register_blob_arguments()
+        c.register_blob_arguments_track2()
 
     with self.argument_context('storage blob delete-batch') as c:
         c.ignore('source_container_name')
@@ -1353,7 +1358,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob query') as c:
         from ._validators import validate_text_configuration
-        c.register_blob_arguments()
+        c.register_blob_arguments_track2()
         c.register_precondition_options()
         line_separator = CLIArgumentType(help="The string used to separate records.", default='\n')
         column_separator = CLIArgumentType(help="The string used to separate columns.", default=',')
@@ -1429,6 +1434,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('exclude_pattern', exclude_pattern_type)
         c.argument('include_pattern', include_pattern_type)
         c.argument('exclude_path', exclude_path_type)
+        c.positional('extra_options', nargs='*', is_experimental=True, default=[],
+                     help="Other options which will be passed through to azcopy as it is. "
+                          "Please put all the extra options after a `--`")
 
     with self.argument_context('storage container') as c:
         t_public_access = self.get_sdk('_models#PublicAccess', resource_type=ResourceType.DATA_STORAGE_BLOB)

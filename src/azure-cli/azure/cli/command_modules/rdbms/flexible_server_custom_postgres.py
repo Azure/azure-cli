@@ -20,6 +20,7 @@ from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql
 from ._flexible_server_util import generate_missing_parameters, resolve_poller,\
     generate_password, parse_maintenance_window, get_current_time, build_identity_and_data_encryption, \
     _is_resource_name, get_tenant_id
+from ._flexible_server_location_capabilities_util import get_postgres_location_capability_info
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
@@ -144,7 +145,7 @@ def flexible_server_create(cmd, client,
     version = server_result.version
     sku = server_result.sku.name
     host = server_result.fully_qualified_domain_name
-    subnet_id = network.delegated_subnet_resource_id
+    subnet_id = None if network is None else network.delegated_subnet_resource_id
 
     logger.warning('Make a note of your password. If you forget, you would have to '
                    'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
@@ -433,14 +434,18 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     except Exception as e:
         raise ResourceNotFoundError(e)
 
-    validate_postgres_replica(cmd, source_server_object)
-
     if not location:
         location = source_server_object.location
-    if not zone:
-        zone = source_server_object.availability_zone
-
     location = ''.join(location.lower().split())
+
+    list_location_capability_info = get_postgres_location_capability_info(cmd, location)
+
+    validate_postgres_replica(cmd, source_server_object.sku.tier, location, list_location_capability_info)
+
+    if not zone:
+        zone = _get_pg_replica_zone(list_location_capability_info['zones'],
+                                    source_server_object.availability_zone,
+                                    zone)
 
     db_context = DbContext(
         cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
@@ -755,9 +760,10 @@ def flexible_server_provision_network_resource(cmd, resource_group_name, server_
                                                vnet=None, subnet=None, vnet_address_prefix=None, subnet_address_prefix=None, yes=False):
     start_ip = -1
     end_ip = -1
-    network = postgresql_flexibleservers.models.Network()
+    network = None
 
     if subnet is not None or vnet is not None:
+        network = postgresql_flexibleservers.models.Network()
         subnet_id = prepare_private_network(cmd,
                                             resource_group_name,
                                             server_name,
@@ -855,6 +861,38 @@ def _update_local_contexts(cmd, server_name, resource_group_name, database_name,
         cmd.cli_ctx.local_context.set([ALL], 'location',
                                       location)  # Setting the location in the local context
         cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)
+
+
+def _get_pg_replica_zone(availabilityZones, sourceServerZone, replicaZone):
+    preferredZone = 'none'
+    for _index, zone in enumerate(availabilityZones):
+        if zone != sourceServerZone and zone != 'none':
+            preferredZone = zone
+
+    if not preferredZone:
+        preferredZone = 'none'
+
+    selectZone = preferredZone if not replicaZone else replicaZone
+
+    selectZoneSupported = False
+    for _index, zone in enumerate(availabilityZones):
+        if zone == selectZone:
+            selectZoneSupported = True
+
+    pg_replica_zone = None
+    if len(availabilityZones) > 1 and selectZone and selectZoneSupported:
+        pg_replica_zone = selectZone if selectZone != 'none' else None
+    else:
+        sourceZoneSupported = False
+        for _index, zone in enumerate(availabilityZones):
+            if zone == sourceServerZone:
+                sourceZoneSupported = True
+        if sourceZoneSupported:
+            pg_replica_zone = sourceServerZone
+        else:
+            pg_replica_zone = None
+
+    return pg_replica_zone
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance

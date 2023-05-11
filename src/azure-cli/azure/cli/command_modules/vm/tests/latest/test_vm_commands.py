@@ -63,6 +63,32 @@ class VMImageListByAliasesScenarioTest(ScenarioTest):
         self.assertEqual(result[0]['architecture'], 'x64')
 
 
+class VmReimageTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_reimage_')
+    def test_vm_reimage(self, resource_group):
+
+        self.kwargs.update({
+            'vm': 'vm'
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image centos --admin-username centosadmin --admin-password testPassword0 '
+                 '--authentication-type password --os-disk-delete-option Delete --nsg-rule NONE')
+        vm_json_before_reimage = self.cmd('vm show -n {vm} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'os_disk_before_reimage': vm_json_before_reimage['storageProfile']['osDisk']['name']
+        })
+
+        self.cmd('vm reimage --name {vm} --resource-group {rg} --temp-disk false '
+                 '--admin-password password --custom-data "dGVzdA==" --exact-version 0.1')
+        vm_json_after_reimage = self.cmd('vm show -n {vm} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'os_disk_after_reimage': vm_json_after_reimage['storageProfile']['osDisk']['name']
+        })
+
+        self.assertNotEqual('{os_disk_before_reimage}', '{os_disk_after_reimage}')
+
+
 class VMUsageScenarioTest(ScenarioTest):
 
     def test_vm_usage(self):
@@ -6738,6 +6764,22 @@ class DedicatedHostScenarioTest(ScenarioTest):
 
         self.cmd('vm host delete -n {host} --host-group {host-group} -g {rg} --yes')
         self.cmd('vm host group delete -n {host-group} -g {rg} --yes')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_host_resize_', location='centraluseuap')
+    def test_vm_host_resize(self, resource_group):
+        self.kwargs.update({
+            'host-group': 'my-host-group',
+            'host': 'my-host',
+        })
+
+        self.cmd('vm host group create -n {host-group} -c 1 -g {rg}')
+        self.cmd('vm host create -n {host} --host-group {host-group} -d 0 -g {rg} --sku DSv3-Type1')
+
+        self.kwargs['resize-sku'] = self.cmd('vm host list-resize-options --name {host} --host-group {host-group} -g {rg}').get_output_in_json()[0]
+
+        self.cmd('vm host resize -n {host} --host-group {host-group} -g {rg} --sku {resize-sku}', checks=[
+            self.check('sku.name', '{resize-sku}')
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_host_ultra_ssd_')
     def test_vm_host_ultra_ssd(self, resource_group):

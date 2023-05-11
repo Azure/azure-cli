@@ -920,7 +920,7 @@ def local_connection_update_kafka(cmd, client,  # pylint: disable=too-many-local
                 "'--kafka-secret' is required to update a bootstrap server connection")
         if schema_registry or schema_key or schema_secret:
             raise ValidationError("The available parameters to update a bootstrap server connection are:"
-                                  " ['--bootstrap-server', '--kafka-key', '--skafka-secret', '--client-type']")
+                                  " ['--bootstrap-server', '--kafka-key', '--kafka-secret', '--client-type']")
         schema_linker = todict(client.get(subscription_id=get_subscription_id(cmd.cli_ctx),
                                           resource_group_name=resource_group_name,
                                           location=location,
@@ -1116,7 +1116,7 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
             raise ValidationError("'--kafka-secret' is required to update a bootstrap server connection")
         if schema_registry or schema_key or schema_secret:
             raise ValidationError("The available parameters to update a bootstrap server connection are:"
-                                  " ['--bootstrap-server', '--kafka-key', '--skafka-secret', '--client-type']")
+                                  " ['--bootstrap-server', '--kafka-key', '--kafka-secret', '--client-type']")
         schema_linker = todict(client.get(resource_uri=source_id, linker_name=connection_name))
 
         if schema_linker.get('secretStore') and schema_linker.get('secretStore').get('keyVaultId'):

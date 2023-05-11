@@ -81,8 +81,10 @@ class CheckerMixin(object):
 
 class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
     def __init__(self, method_name, config_file=None, recording_name=None,
-                 recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None):
-        self.cli_ctx = get_dummy_cli()
+                 recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None,
+                 random_config_dir=False):
+        self.cli_ctx = get_dummy_cli(random_config_dir=random_config_dir)
+        self.random_config_dir = random_config_dir
         self.name_replacer = GeneralNameReplacer()
         self.kwargs = {}
         self.test_guid_count = 0
@@ -137,6 +139,9 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
     def tearDown(self):
         for processor in self._processors_to_reset:
             processor.reset()
+        if self.random_config_dir:
+            from azure.cli.core.util import rmtree_with_retry
+            rmtree_with_retry(self.cli_ctx.config.config_dir)
         super(ScenarioTest, self).tearDown()
 
     def create_random_name(self, prefix, length):
@@ -181,7 +186,8 @@ class LocalContextScenarioTest(ScenarioTest):
     def __init__(self, method_name, config_file=None, recording_name=None, recording_processors=None,
                  replay_processors=None, recording_patches=None, replay_patches=None, working_dir=None):
         super(LocalContextScenarioTest, self).__init__(method_name, config_file, recording_name, recording_processors,
-                                                       replay_processors, recording_patches, replay_patches)
+                                                       replay_processors, recording_patches, replay_patches,
+                                                       random_config_dir=True)
         if self.in_recording:
             self.recording_patches.append(patch_get_current_system_username)
         else:

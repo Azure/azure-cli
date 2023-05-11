@@ -49,19 +49,16 @@ class Create(AAZCommand):
             options=["--circuit-name"],
             help="ExpressRoute circuit name.",
             required=True,
-            id_part="name",
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
             help="Name of the peering connection.",
             required=True,
-            id_part="child_name_2",
         )
         _args_schema.peering_name = AAZStrArg(
             options=["--peering-name"],
             help="Name of BGP peering (i.e. AzurePrivatePeering).",
             required=True,
-            id_part="child_name_1",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -74,12 +71,9 @@ class Create(AAZCommand):
             options=["--authorization-key"],
             help="The authorization key used when the peer circuit is in another subscription.",
         )
-        _args_schema.peer_circuit = AAZResourceIdArg(
+        _args_schema.peer_circuit = AAZStrArg(
             options=["--peer-circuit"],
             help="Name or ID of the peer ExpressRoute circuit.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{}/peerings/{peering_name}"
-            )
         )
 
         # define Arg Group "ExpressRouteCircuitConnectionParameters"
@@ -87,13 +81,10 @@ class Create(AAZCommand):
         # define Arg Group "ExpressRouteCircuitPeering"
 
         _args_schema = cls._args_schema
-        _args_schema.source_circuit = AAZResourceIdArg(
+        _args_schema.source_circuit = AAZStrArg(
             options=["--source-circuit"],
             arg_group="ExpressRouteCircuitPeering",
             help="Reference to Express Route Circuit Private Peering Resource of the circuit initiating connection.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{circuit_name}/peerings/{peering_name}"
-            )
         )
 
         # define Arg Group "Properties"
@@ -277,14 +268,14 @@ class Create(AAZCommand):
             properties.express_route_circuit_peering = AAZObjectType(
                 serialized_name="expressRouteCircuitPeering",
             )
-            _build_schema_sub_resource_read(properties.express_route_circuit_peering)
+            _CreateHelper._build_schema_sub_resource_read(properties.express_route_circuit_peering)
             properties.ipv6_circuit_connection_config = AAZObjectType(
                 serialized_name="ipv6CircuitConnectionConfig",
             )
             properties.peer_express_route_circuit_peering = AAZObjectType(
                 serialized_name="peerExpressRouteCircuitPeering",
             )
-            _build_schema_sub_resource_read(properties.peer_express_route_circuit_peering)
+            _CreateHelper._build_schema_sub_resource_read(properties.peer_express_route_circuit_peering)
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -302,21 +293,23 @@ class Create(AAZCommand):
             return cls._schema_on_200_201
 
 
-_schema_sub_resource_read = None
+class _CreateHelper:
+    """Helper class for Create"""
 
+    _schema_sub_resource_read = None
 
-def _build_schema_sub_resource_read(_schema):
-    global _schema_sub_resource_read
-    if _schema_sub_resource_read is not None:
-        _schema.id = _schema_sub_resource_read.id
-        return
+    @classmethod
+    def _build_schema_sub_resource_read(cls, _schema):
+        if cls._schema_sub_resource_read is not None:
+            _schema.id = cls._schema_sub_resource_read.id
+            return
 
-    _schema_sub_resource_read = AAZObjectType()
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
 
-    sub_resource_read = _schema_sub_resource_read
-    sub_resource_read.id = AAZStrType()
+        sub_resource_read = _schema_sub_resource_read
+        sub_resource_read.id = AAZStrType()
 
-    _schema.id = _schema_sub_resource_read.id
+        _schema.id = cls._schema_sub_resource_read.id
 
 
 __all__ = ["Create"]

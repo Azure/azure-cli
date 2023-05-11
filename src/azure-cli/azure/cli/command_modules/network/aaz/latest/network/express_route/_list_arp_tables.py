@@ -211,4 +211,8 @@ class ListArpTables(AAZCommand):
             return cls._schema_on_200
 
 
+class _ListArpTablesHelper:
+    """Helper class for ListArpTables"""
+
+
 __all__ = ["ListArpTables"]

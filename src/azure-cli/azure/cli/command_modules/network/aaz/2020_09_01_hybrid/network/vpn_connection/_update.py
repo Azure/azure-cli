@@ -925,16 +925,16 @@ class _UpdateHelper:
 
         _elements = _builder.get(".properties.ipConfigurations[]")
         if _elements is not None:
-            _elements.set_prop("etag", AAZStrType, "@VirtualNetworkGateway_update.ip_configurations.[].etag")
-            _elements.set_prop("id", AAZStrType, "@VirtualNetworkGateway_update.ip_configurations.[].id")
-            _elements.set_prop("name", AAZStrType, "@VirtualNetworkGateway_update.ip_configurations.[].name")
+            _elements.set_prop("etag", AAZStrType, ".etag")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("name", AAZStrType, ".name")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
         properties = _builder.get(".properties.ipConfigurations[].properties")
         if properties is not None:
-            properties.set_prop("privateIPAllocationMethod", AAZStrType, "@VirtualNetworkGateway_update.ip_configurations.[].private_ip_allocation_method")
-            cls._build_schema_sub_resource_update(properties.set_prop("publicIPAddress", AAZObjectType, "@VirtualNetworkGateway_update.ip_configurations.[].public_ip_address"))
-            cls._build_schema_sub_resource_update(properties.set_prop("subnet", AAZObjectType, "@VirtualNetworkGateway_update.ip_configurations.[].subnet"))
+            properties.set_prop("privateIPAllocationMethod", AAZStrType, ".private_ip_allocation_method")
+            cls._build_schema_sub_resource_update(properties.set_prop("publicIPAddress", AAZObjectType, ".public_ip_address"))
+            cls._build_schema_sub_resource_update(properties.set_prop("subnet", AAZObjectType, ".subnet"))
 
         sku = _builder.get(".properties.sku")
         if sku is not None:
@@ -966,14 +966,14 @@ class _UpdateHelper:
 
         _elements = _builder.get(".properties.vpnClientConfiguration.vpnClientRevokedCertificates[]")
         if _elements is not None:
-            _elements.set_prop("etag", AAZStrType, "@VirtualNetworkGateway_update.vpn_client_configuration.vpn_client_revoked_certificates.[].etag")
-            _elements.set_prop("id", AAZStrType, "@VirtualNetworkGateway_update.vpn_client_configuration.vpn_client_revoked_certificates.[].id")
-            _elements.set_prop("name", AAZStrType, "@VirtualNetworkGateway_update.vpn_client_configuration.vpn_client_revoked_certificates.[].name")
+            _elements.set_prop("etag", AAZStrType, ".etag")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("name", AAZStrType, ".name")
             _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
         properties = _builder.get(".properties.vpnClientConfiguration.vpnClientRevokedCertificates[].properties")
         if properties is not None:
-            properties.set_prop("thumbprint", AAZStrType, "@VirtualNetworkGateway_update.vpn_client_configuration.vpn_client_revoked_certificates.[].thumbprint")
+            properties.set_prop("thumbprint", AAZStrType, ".thumbprint")
 
         vpn_client_root_certificates = _builder.get(".properties.vpnClientConfiguration.vpnClientRootCertificates")
         if vpn_client_root_certificates is not None:
@@ -981,14 +981,14 @@ class _UpdateHelper:
 
         _elements = _builder.get(".properties.vpnClientConfiguration.vpnClientRootCertificates[]")
         if _elements is not None:
-            _elements.set_prop("etag", AAZStrType, "@VirtualNetworkGateway_update.vpn_client_configuration.vpn_client_root_certificates.[].etag")
-            _elements.set_prop("id", AAZStrType, "@VirtualNetworkGateway_update.vpn_client_configuration.vpn_client_root_certificates.[].id")
-            _elements.set_prop("name", AAZStrType, "@VirtualNetworkGateway_update.vpn_client_configuration.vpn_client_root_certificates.[].name")
+            _elements.set_prop("etag", AAZStrType, ".etag")
+            _elements.set_prop("id", AAZStrType, ".id")
+            _elements.set_prop("name", AAZStrType, ".name")
             _elements.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
 
         properties = _builder.get(".properties.vpnClientConfiguration.vpnClientRootCertificates[].properties")
         if properties is not None:
-            properties.set_prop("publicCertData", AAZStrType, "@VirtualNetworkGateway_update.vpn_client_configuration.vpn_client_root_certificates.[].public_cert_data", typ_kwargs={"flags": {"required": True}})
+            properties.set_prop("publicCertData", AAZStrType, ".public_cert_data", typ_kwargs={"flags": {"required": True}})
 
         tags = _builder.get(".tags")
         if tags is not None:

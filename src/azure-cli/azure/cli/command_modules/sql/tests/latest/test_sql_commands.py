@@ -171,6 +171,17 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
             except ResourceNotFoundError:
                 pass
 
+class SqlServerExternalGovernanceTests(ScenarioTest):
+    
+    @ResourceGroupPreparer(location='eastus2euap')
+    @SqlServerPreparer(location='eastus2euap')
+    def test_sql_refresh_external_governance_status(self, resource_group, resource_group_location, server):
+        
+        self.cmd('sql server refresh-external-governance-status -g {} --server {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('serverName', server),
+                     JMESPathCheck('status', 'Succeeded')])
 
 class SqlServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
@@ -1240,7 +1251,8 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
         self.cmd(
             'sql db ltr-backup restore --backup-id \'{backup_id}\' --dest-database {dest_database_name}'
             ' --dest-server {server_name} --dest-resource-group {rg} -i --encryption-protector {encryption_protector}'
-            ' --keys {keys} --umi {umi}',
+            ' --keys {keys} --umi {umi} --edition Hyperscale'
+            ' --service-level-objective SQLDB_HS_Gen5_2 --bsr Zone --ha-replicas 1 -z true',
             checks=[
                 self.check('name', '{dest_database_name}')])
 
@@ -1252,15 +1264,16 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
 
 class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
     @record_only()
+    @AllowLargeResponse()
     # using fixed resources because of long time preperation for geo-redundant backup
     # need to change resources for others who want to rerecord this test
     def test_sql_db_geo_restore(
             self):
         self.kwargs.update({
-            'rg': 'sejagada-AlwaysEncrypted',
-            'loc': 'eastus2euap',
-            'server_name': 'sejagada-ae-sqlserver-canary-donotdelete',
-            'database_name': 'sejagada-ae-sqldb-canary-donotdelete'
+            'rg': 'rebeccaxu-test',
+            'loc': 'eastus',
+            'server_name': 'rebeccaxu-eastus-svr',
+            'database_name': 'cli-test-hs',
         })
 
         # test list geo backups for database
@@ -1282,7 +1295,8 @@ class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
 
         self.cmd(
             'sql db geo-backup restore --geo-backup-id {backup_id} --dest-database {dest_database_name}'
-            ' --dest-server {server_name} --resource-group {rg}',
+            ' --dest-server {server_name} --resource-group {rg} --edition Hyperscale'
+            ' --service-level-objective SQLDB_HS_Gen5_2 --bsr Zone --ha-replicas 1 -z true',
             checks=[
                 self.check('name', '{dest_database_name}')])
                 
@@ -5732,6 +5746,44 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                  .format(resource_group_1, managed_instance_name_1, database_name),
                  expect_failure=True)
 
+    @ManagedInstancePreparer(parameter_name="mi")
+    def test_sql_midb_ledger(self, mi, rg):
+        managed_instance_name = mi
+        resource_group = rg
+        
+        database_name_one = "cliautomationmidb01"
+        database_name_two = "cliautomationmidb02"
+
+        # test sql mi db is created with ledger off by default
+        self.cmd('sql midb create -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, database_name_one),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one),
+                     JMESPathCheck('isLedgerOn', False)])
+
+        self.cmd('sql midb show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, database_name_one),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_one),
+                     JMESPathCheck('isLedgerOn', False)])
+
+        # test sql mi db with ledger on
+        self.cmd('sql midb create -g {} --mi {} -n {} --ledger-on'
+                 .format(resource_group, managed_instance_name, database_name_two),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('isLedgerOn', True)])
+
+        self.cmd('sql midb show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, database_name_two),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name_two),
+                     JMESPathCheck('isLedgerOn', True)])
+
 
 class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
     # This MI AAD test needs special AD setup, please contact MI AAD team for new recording.
@@ -6522,6 +6574,50 @@ class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
                  .format(resource_group, server, db_name),
                  checks=[JMESPathCheck('state', 'Disabled')])
 
+class SqlManagedLedgerDigestUploadsScenarioTest(ScenarioTest):
+    def _get_storage_endpoint(self, storage_account, resource_group):
+        return self.cmd('storage account show -g {} -n {}'
+                        ' --query primaryEndpoints.blob'
+                        .format(resource_group, storage_account)).get_output_in_json()
+
+    @ManagedInstancePreparer(parameter_name="mi")
+    def test_sql_mi_ledger(self, mi, rg):
+        db_name = self.create_random_name("sqlledgermidb", 20)
+        endpoint = "https://mi-test.confidential-ledger.azure.com"
+        managed_instance_name = mi
+        resource_group = rg
+
+        # create database
+        self.cmd('sql midb create -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, db_name))
+
+        # validate ledger digest uploads is disabled by default
+        self.cmd('sql midb ledger-digest-uploads show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, db_name),
+                 checks=[JMESPathCheck('state', 'Disabled')])
+
+        # enable uploads to ACL dummy instance
+        self.cmd('sql midb ledger-digest-uploads enable -g {} --mi {} -n {} --endpoint {}'
+                 .format(resource_group, managed_instance_name, db_name, endpoint))
+
+        time.sleep(2)
+
+        # validate setting through show command
+        self.cmd('sql midb ledger-digest-uploads show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, db_name),
+                 checks=[JMESPathCheck('state', 'Enabled'),
+                         JMESPathCheck('digestStorageEndpoint', endpoint)])
+
+        # disable ledger digest uploads
+        self.cmd('sql midb ledger-digest-uploads disable -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, db_name))
+
+        time.sleep(2)
+
+        # validate setting through show command
+        self.cmd('sql midb ledger-digest-uploads show -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, db_name),
+                 checks=[JMESPathCheck('state', 'Disabled')])
 
 class SqlManagedInstanceEndpointCertificateScenarioTest(ScenarioTest):
     @AllowLargeResponse()
@@ -6823,9 +6919,9 @@ class SqlManagedInstanceDatabaseRecoverTest(ScenarioTest):
         self.kwargs.update({
             'recoverable_db': recoverable_db['id']
         })
-        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db3 -r {recoverable_db}',
+        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db4 -r {recoverable_db}',
                 checks=[
-                    JMESPathCheck('name', "recovered_db3")])
+                    JMESPathCheck('name', "recovered_db4")])
 
 
 class SqlManagedInstanceZoneRedundancyScenarioTest(ScenarioTest):
@@ -6897,3 +6993,61 @@ class SqlManagedInstanceZoneRedundancyScenarioTest(ScenarioTest):
         # Delete the managed instance
         self.cmd('sql mi delete --ids {} --yes'
                  .format(managed_instance['id']), checks=NoneCheck())
+
+class SqlManagedInstanceServerConfigurationOptionTest(ScenarioTest):
+    @AllowLargeResponse()
+    @ManagedInstancePreparer(parameter_name="mi")
+    def test_sql_mi_server_configuration_options(self, mi, rg):
+        option_name = 'allowPolybaseExport'
+        option_value = 1
+        self.kwargs.update({
+            'rg': rg,
+            'mi': mi,
+            'option_name' : option_name,
+            'option_value': option_value,
+        })
+
+        # Create sql managed_instance
+        self.cmd('sql mi show -g {rg} -n {mi}',
+                    checks=[
+                        JMESPathCheck('name', mi),
+                        JMESPathCheck('resourceGroup', rg)]).get_output_in_json()
+
+        # no config options on the instance
+        self.cmd('sql mi server-configuration-option list -g {rg} --instance-name {mi}',
+                    checks=[JMESPathCheck('length(@)', 0)])
+
+        # upsert config option
+        self.cmd('sql mi server-configuration-option set -g {rg} --instance-name {mi} --name {option_name} --value {option_value}')
+
+        # show config option
+        opt = self.cmd('sql mi server-configuration-option show -g {rg} --instance-name {mi} --name {option_name}',
+                    checks=[
+                        JMESPathCheck('name', option_name),
+                        JMESPathCheck('resourceGroup', rg),
+                        JMESPathCheck('type', 'Microsoft.Sql/managedInstances/serverConfigurationOptions'),
+                        JMESPathCheck('serverConfigurationOptionValue', option_value),
+                        JMESPathCheck('provisioningState', 'Succeeded'),
+                        ]).get_output_in_json()
+
+        opt_id = opt['id']
+        self.kwargs.update({
+            'opt_id': opt_id
+        })
+
+        # show command with --ids parameter
+        self.cmd('sql mi server-configuration-option show --ids {opt_id}',
+                    checks=[
+                        JMESPathCheck('name', option_name),
+                        JMESPathCheck('resourceGroup', rg),
+                        JMESPathCheck('type', 'Microsoft.Sql/managedInstances/serverConfigurationOptions'),
+                        JMESPathCheck('serverConfigurationOptionValue', option_value),
+                        JMESPathCheck('provisioningState', 'Succeeded'),
+                        ]).get_output_in_json()
+
+        # delete config option
+        self.cmd('sql mi server-configuration-option set -g {rg} --instance-name {mi} -n {option_name} --value 0')
+
+        # list 0 config options
+        self.cmd('sql mi server-configuration-option list -g {rg} --instance-name {mi}',
+                    checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json

@@ -14,7 +14,6 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
-# , resource_type = ResourceType.MGMT_EVENTHUB
 # Namespace Region
 def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard', capacity=None,
                          is_auto_inflate_enabled=None, maximum_throughput_units=None, is_kafka_enabled=None, zone_redundant=None, cluster_arm_id=None,
@@ -123,73 +122,6 @@ def cli_namespace_exists(client, name):
     return client.check_name_availability(parameters={'name': name})
 
 
-# Cluster region
-def cli_cluster_create(cmd, client, resource_group_name, cluster_name, location=None, tags=None, capacity=None, supports_scaling=None):
-    Cluster = cmd.get_models('Cluster', resource_type=ResourceType.MGMT_EVENTHUB)
-    ClusterSku = cmd.get_models('ClusterSku', resource_type=ResourceType.MGMT_EVENTHUB)
-
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2016-06-01-preview'):
-        ehparam = Cluster()
-        ehparam.sku = ClusterSku(name='Dedicated')
-        ehparam.location = location
-
-        if capacity:
-            ehparam.sku.capacity = capacity
-        else:
-            ehparam.sku.capacity = 1
-
-        if supports_scaling is not None:
-            ehparam.supports_scaling = supports_scaling
-
-        ehparam.tags = tags
-
-        cluster_result = client.begin_create_or_update(
-            resource_group_name=resource_group_name,
-            cluster_name=cluster_name,
-            parameters=ehparam).result()
-
-    return cluster_result
-
-
-def cli_cluster_update(cmd, instance, tags=None, capacity=None):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2016-06-01-preview'):
-
-        if tags:
-            instance.tags = tags
-
-        if capacity:
-            instance.sku.capacity = capacity
-
-    return instance
-
-
-# Namespace Authorization rule:
-def cli_namespaceautho_create(client, resource_group_name, namespace_name, name, rights=None):
-    from azure.cli.command_modules.eventhubs._utils import accessrights_converter
-    return client.create_or_update_authorization_rule(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        authorization_rule_name=name,
-        parameters={'rights': accessrights_converter(rights)}
-    )
-
-
-def cli_autho_update(cmd, instance, rights):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2021-06-01-preview'):
-        from azure.cli.command_modules.eventhubs._utils import accessrights_converter
-        instance.rights = accessrights_converter(rights)
-    return instance
-
-
-def cli_keys_renew(client, resource_group_name, namespace_name, name, key_type, key=None):
-    return client.regenerate_keys(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        authorization_rule_name=name,
-        parameters={'key_type': key_type, 'key': key}
-    )
-
-
 # Eventhub Region
 def cli_eheventhub_create(cmd, client, resource_group_name, namespace_name, event_hub_name, message_retention_in_days=None, partition_count=None, status=None,
                           enabled=None, skip_empty_archives=None, capture_interval_seconds=None, capture_size_limit_bytes=None, destination_name=None, storage_account_resource_id=None, blob_container=None, archive_name_format=None):
@@ -276,47 +208,6 @@ def cli_eheventhub_update(cmd, instance, message_retention_in_days=None, partiti
     return instance
 
 
-# Eventhub Authorizationrule
-def cli_eventhubautho_create(client, resource_group_name, namespace_name, event_hub_name, name, rights=None):
-    from azure.cli.command_modules.eventhubs._utils import accessrights_converter
-    return client.create_or_update_authorization_rule(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        event_hub_name=event_hub_name,
-        authorization_rule_name=name,
-        parameters={'rights': accessrights_converter(rights)}
-    )
-
-
-def cli_eventhub_keys_renew(client, resource_group_name, namespace_name, event_hub_name, name, key_type, key=None):
-    return client.regenerate_keys(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        event_hub_name=event_hub_name,
-        authorization_rule_name=name,
-        parameters={'key_type': key_type, 'key': key}
-    )
-
-
-# ConsumerGroup region
-def cli_consumergroup_create(client, resource_group_name, namespace_name, event_hub_name, name, user_metadata=None):
-    return client.create_or_update(
-        resource_group_name=resource_group_name,
-        namespace_name=namespace_name,
-        event_hub_name=event_hub_name,
-        consumer_group_name=name,
-        parameters={'user_metadata': user_metadata}
-    )
-
-
-def cli_consumergroup_update(cmd, instance, user_metadata=None):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
-        if user_metadata:
-            instance.user_metadata = user_metadata
-
-    return instance
-
-
 # NetwrokRuleSet Region
 def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_name, subnet=None, ip_mask=None, ignore_missing_vnet_service_endpoint=False, action='Allow'):
     NWRuleSetVirtualNetworkRules = cmd.get_models('NWRuleSetVirtualNetworkRules', resource_type=ResourceType.MGMT_EVENTHUB)
@@ -324,7 +215,7 @@ def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_nam
     NWRuleSetIpRules = cmd.get_models('NWRuleSetIpRules', resource_type=ResourceType.MGMT_EVENTHUB)
 
     netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
-
+    logger.warning('This version will be depracated & latest version will release in breaking change release.')
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
         if netwrokruleset.virtual_network_rules is None:
             netwrokruleset.virtual_network_rules = [NWRuleSetVirtualNetworkRules]
@@ -396,53 +287,6 @@ def cli_geodr_create(client, resource_group_name, namespace_name, alias, partner
                                    namespace_name,
                                    alias,
                                    parameters={'partner_namespace': partner_namespace, 'alternate_name': alternate_name})
-
-
-# Private Endpoint
-def _update_private_endpoint_connection_status(cmd, client, resource_group_name, namespace_name,
-                                               private_endpoint_connection_name, is_approved=True, description=None):
-    from azure.core.exceptions import HttpResponseError
-    import time
-
-    PrivateEndpointServiceConnectionStatus = cmd.get_models('PrivateLinkConnectionStatus')
-
-    private_endpoint_connection = client.get(resource_group_name=resource_group_name, namespace_name=namespace_name,
-                                             private_endpoint_connection_name=private_endpoint_connection_name)
-
-    old_status = private_endpoint_connection.private_link_service_connection_state.status
-    if old_status != "Approved" or not is_approved:
-        private_endpoint_connection.private_link_service_connection_state.status = PrivateEndpointServiceConnectionStatus.APPROVED\
-            if is_approved else PrivateEndpointServiceConnectionStatus.REJECTED
-        private_endpoint_connection.private_link_service_connection_state.description = description
-        try:
-            private_endpoint_connection = client.create_or_update(resource_group_name=resource_group_name,
-                                                                  namespace_name=namespace_name,
-                                                                  private_endpoint_connection_name=private_endpoint_connection_name,
-                                                                  parameters=private_endpoint_connection)
-        except HttpResponseError as ex:
-            if 'Operation returned an invalid status ''Accepted''' in ex.message:
-                time.sleep(30)
-                private_endpoint_connection = client.get(resource_group_name=resource_group_name,
-                                                         namespace_name=namespace_name,
-                                                         private_endpoint_connection_name=private_endpoint_connection_name)
-    return private_endpoint_connection
-
-
-def approve_private_endpoint_connection(cmd, client, resource_group_name, namespace_name,
-                                        private_endpoint_connection_name, description=None):
-
-    return _update_private_endpoint_connection_status(
-        cmd, client, resource_group_name=resource_group_name, namespace_name=namespace_name, is_approved=True,
-        private_endpoint_connection_name=private_endpoint_connection_name, description=description
-    )
-
-
-def reject_private_endpoint_connection(cmd, client, resource_group_name, namespace_name, private_endpoint_connection_name,
-                                       description=None):
-    return _update_private_endpoint_connection_status(
-        cmd, client, resource_group_name=resource_group_name, namespace_name=namespace_name, is_approved=False,
-        private_endpoint_connection_name=private_endpoint_connection_name, description=description
-    )
 
 
 def cli_add_identity(cmd, client, resource_group_name, namespace_name, system_assigned=None, user_assigned=None):
@@ -621,7 +465,9 @@ def cli_remove_appgroup_policy(client, resource_group_name, namespace_name, appl
     from azure.cli.core import CLIError
 
     appGroup = client.get(resource_group_name, namespace_name, application_group_name)
-
+    logger.warning(
+        'This operation will do removals based on policy name. Will not accept metric-id,rate-limit-threshold in the future in future release.'
+        'Also throttling_policy_config parameter will replace with "policy" in same future release.')
     if appGroup.policies:
         for policy_object in throttling_policy_config:
             if policy_object in appGroup.policies:
