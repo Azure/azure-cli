@@ -452,6 +452,7 @@ def aks_create(
     # addons
     enable_addons=None,
     workspace_resource_id=None,
+    # run tests
     enable_msi_auth_for_monitoring=False,
     enable_syslog=False,
     data_collection_settings=None,
