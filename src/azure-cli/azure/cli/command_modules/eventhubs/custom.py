@@ -270,20 +270,6 @@ def cli_networkrule_delete(cmd, client, resource_group_name, namespace_name, sub
     return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
 
 
-# GeoDR region
-def cli_geodr_name_exists(client, resource_group_name, namespace_name, name):
-
-    return client.check_name_availability(resource_group_name, namespace_name, parameters={'name': name})
-
-
-def cli_geodr_create(client, resource_group_name, namespace_name, alias, partner_namespace=None, alternate_name=None):
-
-    return client.create_or_update(resource_group_name,
-                                   namespace_name,
-                                   alias,
-                                   parameters={'partner_namespace': partner_namespace, 'alternate_name': alternate_name})
-
-
 def cli_add_identity(cmd, client, resource_group_name, namespace_name, system_assigned=None, user_assigned=None):
     namespace = client.get(resource_group_name, namespace_name)
     IdentityType = cmd.get_models('ManagedServiceIdentityType', resource_type=ResourceType.MGMT_EVENTHUB)
