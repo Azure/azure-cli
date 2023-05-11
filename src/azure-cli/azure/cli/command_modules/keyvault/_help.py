@@ -222,6 +222,13 @@ long-summary: Deletes the creation operation for a specified certificate that is
         certificates/update permission.
 """
 
+helps['keyvault certificate contact list'] = """
+type: command
+short-summary: Lists the certificate contacts for a specified key vault.
+long-summary: The GetCertificateContacts operation returns the set of certificate contact resources in the
+        specified key vault. This operation requires the certificates/managecontacts permission.
+"""
+
 helps['keyvault create'] = """
 type: command
 short-summary: Create a Vault or HSM.

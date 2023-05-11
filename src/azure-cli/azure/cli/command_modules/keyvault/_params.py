@@ -737,13 +737,7 @@ def load_arguments(self, _):
 
     # KeyVault Certificate
 
-    with self.argument_context('keyvault certificate pending cancel') as c:
-        c.ignore('cancellation_requested')
 
-    with self.argument_context('keyvault certificate contact') as c:
-        c.argument('contact_email', options_list=['--email'], help='Contact e-mail address. Must be unique.')
-        c.argument('contact_name', options_list=['--name'], help='Full contact name.')
-        c.argument('contact_phone', options_list=['--phone'], help='Contact phone number.')
 
     with self.argument_context('keyvault certificate issuer admin') as c:
         c.argument('email', help='Admin e-mail address. Must be unique within the vault.')
@@ -845,6 +839,17 @@ def load_arguments(self, _):
         c.extra('disabled', arg_type=get_three_state_flag(), help='Create certificate in disabled state.',
                 validator=process_certificate_import)
         c.extra('tags', tags_type)
+
+    with self.argument_context('keyvault certificate contact') as c:
+        c.argument('contact_email', options_list=['--email'], help='Contact e-mail address. Must be unique.')
+        c.argument('contact_name', options_list=['--name'], help='Full contact name.')
+        c.argument('contact_phone', options_list=['--phone'], help='Contact phone number.')
+
+    for item in ['list', 'add', 'delete']:
+        with self.argument_context('keyvault certificate contact {}'.format(item)) as c:
+            c.extra('vault_base_url', vault_name_type, required=True, arg_group='Id',
+                    type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+
 
     # endregion
 
