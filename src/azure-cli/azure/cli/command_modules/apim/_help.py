@@ -710,9 +710,9 @@ examples:
 
 helps['apim graphqlapi resolver policy delete'] = """
 type: command
-short-summary: Deletes the policy configuration at the GraphQL Api Resolver.
+short-summary: Delete the policy configuration at the GraphQL Api Resolver.
 examples:
-  - name: Deletes policy configuration.
+  - name: Delete policy configuration.
     text: |
         az apim graphqlapi resolver policy delete --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId
 """
