@@ -31,11 +31,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.cli.command_modules.eventhubs.Operation.EventHubEntity#{}',
     )
 
-    eh_event_hub_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventhub.operations#EventHubsOperations.{}',
-        client_factory=event_hub_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_EVENTHUB)
-
     eh_geodr_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventhub.operations#DisasterRecoveryConfigsOperations.{}',
         client_factory=disaster_recovery_mgmt_client_factory,

@@ -210,7 +210,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_SERVICEBUS: '2022-10-01-preview',
-        ResourceType.MGMT_EVENTHUB: '2022-10-01-preview',
+        ResourceType.MGMT_EVENTHUB: '2022-01-01-preview',
         ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
             'action_groups': '2022-06-01',
             'activity_log_alerts': '2017-04-01',
