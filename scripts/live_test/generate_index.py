@@ -65,6 +65,15 @@ def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_
     return html
 
 
+def sort_by_module_name(item):
+    # Sort test data by module name,
+    # and modules starting with `ext-` need to be placed after modules not starting with `ext-`,
+    if item["module"].startswith("ext-"):
+        return item["module"][4:], 1  # sort with higher priority
+    else:
+        return item["module"], 0  # sort with lower priority
+
+
 def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE):
     """
     Return a HTML string
@@ -149,7 +158,9 @@ def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COM
       </tr>
     """.format(testdata.total[1], testdata.total[2], testdata.total[3])
 
-    for module, passed, failed, rate in testdata.modules:
+    sorted_modules = sorted(testdata.modules, key=sort_by_module_name)
+
+    for module, passed, failed, rate in sorted_modules:
         reports = ''
         for x in data:
             name = x['name']
