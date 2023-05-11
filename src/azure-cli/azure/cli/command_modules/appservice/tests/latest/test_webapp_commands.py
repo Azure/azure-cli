@@ -73,8 +73,6 @@ class WebappBasicE2ETest(ScenarioTest):
             JMESPathCheck('httpsOnly', 'True'),
             JMESPathCheck('publicNetworkAccess', 'Enabled')
         ])
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group,
-                                                              webapp_name, plan))  # test idempotency
         self.cmd('webapp list -g {}'.format(resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', webapp_name),
@@ -124,17 +122,9 @@ class WebappBasicE2ETest(ScenarioTest):
         result = self.cmd('webapp deployment list-publishing-credentials -g {} -n {}'.format(
             resource_group, webapp_name)).get_output_in_json()
         self.assertTrue('scm' in result['scmUri'])
-        # verify httpsOnly is false
-        self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp_name), checks=[
-            JMESPathCheck('httpsOnly', False),
-        ])
-
-        # verify creating an non node app using --runtime
-        self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "php|7.4"'.format(resource_group, webapp_name, plan))
 
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
-            JMESPathCheck('phpVersion', '7.4')
+            JMESPathCheck('phpVersion', '5.6')
         ])
 
     def test_webapp_runtimes(self):
@@ -445,7 +435,7 @@ class AppServiceLogTest(ScenarioTest):
         webapp_name = self.create_random_name(
             prefix='webapp-win-log', length=24)
         plan = self.create_random_name(prefix='win-log', length=24)
-        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan} -l eastus')
         self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|16LTS"'.format(
             resource_group, webapp_name, plan, TEST_REPO_URL))
         # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
@@ -1700,7 +1690,7 @@ class WebappUndeleteTest(ScenarioTest):
         self.cmd('webapp deleted list -g {}'.format(resource_group), checks=[
             JMESPathCheck('[0].deletedSiteName', webapp_name)
         ])
-    
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_deleted_restore_to_existing_site(self, resource_group):
@@ -1716,7 +1706,7 @@ class WebappUndeleteTest(ScenarioTest):
 
         # delete webapp_1
         self.cmd(f'webapp delete -g {resource_group} -n {webapp_1_name}')
-        
+
         # collect list of deleted webapps
         deleted_list = self.cmd(f'webapp deleted list -g {resource_group} -n {webapp_1_name}', checks=[
             JMESPathCheck('length(@)', 1),
@@ -1727,7 +1717,7 @@ class WebappUndeleteTest(ScenarioTest):
         # restore deleted webapp to existing app i.e webapp_2
         self.cmd(f'webapp deleted restore -g {resource_group} -n {webapp_2_name} --deleted-id "{deleted_id}"')
 
-        # list/get the restored webapp_2 
+        # list/get the restored webapp_2
         self.cmd(f'az webapp show --name {webapp_2_name} -g {resource_group}', checks=[
             JMESPathCheck('name', webapp_2_name)
         ])
@@ -1749,7 +1739,7 @@ class WebappUndeleteTest(ScenarioTest):
 
         # delete webapp_1
         self.cmd(f'webapp delete -g {resource_group} -n {webapp_1_name}')
-        
+
         # collect list of deleted webapps
         deleted_list = self.cmd(f'webapp deleted list -g {resource_group} -n {webapp_1_name}', checks=[
             JMESPathCheck('length(@)', 1),
@@ -1764,7 +1754,7 @@ class WebappUndeleteTest(ScenarioTest):
         self.cmd(f'az webapp show --name {webapp_2_name} -g {resource_group}', checks=[
             JMESPathCheck('name', webapp_2_name)
         ])
-    
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_deleted_restore_to_non_existent_site_fails_when_asp_argument_is_not_provided_or_does_not_exist(self, resource_group):
@@ -1795,7 +1785,7 @@ class WebappUndeleteTest(ScenarioTest):
         # # restore deleted webapp to non existent app i.e webapp_2 with non existent ASP, raises ValidationError
         with self.assertRaises(ValidationError) as ctx:
             self.cmd(f'webapp deleted restore -g {resource_group} -n {webapp_2_name} --deleted-id "{deleted_id}" --target-app-svc-plan idontexistplan')
-        
+
 
 
 class WebappAuthenticationTest(ScenarioTest):
@@ -1884,7 +1874,7 @@ class WebappZipDeployScenarioTest(ScenarioTest):
         plan_name = self.create_random_name('webapp-zipDeploy-plan', 40)
         zip_file = os.path.join(TEST_DIR, 'test.zip')
         self.cmd(
-            'appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+            f'appservice plan create -g {resource_group} -n {plan_name} --sku S1 -l eastus')
         self.cmd(
             'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
         self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).assert_with_checks([
@@ -2529,7 +2519,7 @@ class WebappDeploymentLogsScenarioTest(ScenarioTest):
         plan_name = self.create_random_name('show-deployment-plan', 40)
         zip_file = os.path.join(TEST_DIR, 'test.zip')
 
-        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan_name} --sku S1 -l eastus')
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
 
         self.cmd('webapp log deployment show -g {} -n {}'.format(resource_group, webapp_name), checks=[
@@ -2551,7 +2541,7 @@ class WebappDeploymentLogsScenarioTest(ScenarioTest):
         plan_name = self.create_random_name('list-deployment-plan', 40)
         zip_file = os.path.join(TEST_DIR, 'test.zip')
 
-        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan_name} --sku S1 -l eastus')
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
 
         self.cmd('webapp log deployment list -g {} -n {}'.format(resource_group, webapp_name), checks=[

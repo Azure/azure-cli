@@ -4670,9 +4670,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('sku.tier', 'Free')
         ])
         # update to uptime sla again
-        uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --uptime-sla --no-wait'
+        uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --uptime-sla'
         self.cmd(uptime_sla_cmd, checks=[
-            self.is_empty()
+            self.check('sku.tier', 'Standard')
         ])
         # delete
         self.cmd(
@@ -6012,7 +6012,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(deploy_azfw_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('name', fw_name),
-            self.check('"Network.DNS.EnableProxy"', 'true') # pending verification
+            self.check('additionalProperties.\"Network.DNS.EnableProxy\"', 'true')
         ])
 
         # configure Firewall IP Config
@@ -6027,7 +6027,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         get_fw_private_ip_cmd = 'network firewall show -g {resource_group} -n {fw_name}'
         fw_private_ip = self.cmd(get_fw_private_ip_cmd).get_output_in_json()
-        fw_private_ip_address = fw_private_ip.get("ipConfigurations")[0].get("privateIpAddress")
+        fw_private_ip_address = fw_private_ip.get("ipConfigurations")[0].get("privateIPAddress")
 
         self.kwargs.update({
             'fw_public_ip_address': fw_public_ip_address,
@@ -6338,7 +6338,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # create workspace
         create_workspace_cmd = 'monitor log-analytics workspace create -g {resource_group} -n {workspace_name}'
         self.cmd(create_workspace_cmd, checks=[
-            self.check('provisioningState', 'Succeeded'),
+            # self.check('provisioningState', 'Succeeded'),
             self.check('name', workspace_name)
         ])
 

@@ -70,7 +70,7 @@ def load_arguments(self, _):
              "use 'Windows_Client'. For more information see the Azure Windows VM online docs.",
         arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'RHEL_BYOS', 'SLES_BYOS', 'RHEL_BASE',
                                 'RHEL_SAPAPPS', 'RHEL_SAPHA', 'RHEL_EUS', 'RHEL_BASESAPAPPS', 'RHEL_BASESAPHA', 'SLES_STANDARD', 'SLES', 'SLES_SAP', 'SLES_HPC',
-                                'None', 'RHEL_ELS_6']))
+                                'None', 'RHEL_ELS_6', 'UBUNTU_PRO', 'UBUNTU']))
 
     # StorageAccountTypes renamed to DiskStorageAccountTypes in 2018_06_01 of azure-mgmt-compute
     DiskStorageAccountTypes = DiskStorageAccountTypes or self.get_models('StorageAccountTypes')
