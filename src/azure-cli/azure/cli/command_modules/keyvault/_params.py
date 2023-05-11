@@ -833,6 +833,11 @@ def load_arguments(self, _):
                    help='Name of the pending certificate.',
                    id_part='child_name_1', completer=None)
 
+    for item in ['merge', 'show', 'delete']:
+        with self.argument_context('keyvault certificate pending {}'.format(item)) as c:
+            c.extra('vault_base_url', vault_name_type, required=True, arg_group='Id',
+                    type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+
     with self.argument_context('keyvault certificate pending merge') as c:
         c.argument('x509_certificates', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                    help='File containing the certificate or certificate chain to merge.',
@@ -840,8 +845,6 @@ def load_arguments(self, _):
         c.extra('disabled', arg_type=get_three_state_flag(), help='Create certificate in disabled state.',
                 validator=process_certificate_import)
         c.extra('tags', tags_type)
-        c.extra('vault_base_url', vault_name_type, required=True, arg_group='Id',
-                type=get_vault_base_url_type(self.cli_ctx), id_part=None)
 
     # endregion
 
