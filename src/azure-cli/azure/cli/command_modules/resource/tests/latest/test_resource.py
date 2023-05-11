@@ -359,6 +359,9 @@ class ResourceCreateAndShowScenarioTest(ScenarioTest):
 
 class TagScenarioTest(ScenarioTest):
 
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, random_config_dir=True, **kwargs)
+
     def test_tag_scenario(self):
 
         self.kwargs.update({
@@ -4939,7 +4942,15 @@ class BicepScenarioTest(ScenarioTest):
 
 # Because don't want to record bicep cli binary
 class BicepBuildTest(LiveScenarioTest):
-    
+
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
     def test_bicep_build_decompile(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         tf = os.path.join(curr_dir, 'storage_account_deploy.bicep').replace('\\', '\\\\')
@@ -4961,6 +4972,14 @@ class BicepBuildTest(LiveScenarioTest):
             os.remove(decompile_path)
 
 class BicepGenerateParamsTest(LiveScenarioTest):
+
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
 
     def test_bicep_generate_params(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -5008,6 +5027,15 @@ class BicepInstallationTest(LiveScenarioTest):
 
 
 class BicepRestoreTest(LiveScenarioTest):
+
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
     def test_restore(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         bf = os.path.join(curr_dir, 'data', 'external_modules.bicep').replace('\\', '\\\\')
@@ -5025,7 +5053,33 @@ class BicepRestoreTest(LiveScenarioTest):
             os.remove(out_path)
 
 
+class BicepFormatTest(LiveScenarioTest):
+
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
+    def test_format(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        bf = os.path.join(curr_dir, 'storage_account_deploy.bicep').replace('\\', '\\\\')
+        out_file = os.path.join(curr_dir, 'storage_account_deploy.formatted.bicep').replace('\\', '\\\\')
+        self.kwargs.update({
+            'bf': bf,
+            'out_file': out_file,
+        })
+
+        self.cmd('az bicep format --file {bf} --outfile {out_file} --newline lf --indent-kind space --indent-size 2 --insert-final-newline')
+
+        if os.path.exists(out_file):
+            os.remove(out_file)
+
+
 class DeploymentWithBicepScenarioTest(LiveScenarioTest):
+
     def setup(self):
         super.setup()
         self.cmd('az bicep uninstall')

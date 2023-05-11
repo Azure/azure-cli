@@ -145,7 +145,7 @@ def flexible_server_create(cmd, client,
     version = server_result.version
     sku = server_result.sku.name
     host = server_result.fully_qualified_domain_name
-    subnet_id = network.delegated_subnet_resource_id
+    subnet_id = None if network is None else network.delegated_subnet_resource_id
 
     logger.warning('Make a note of your password. If you forget, you would have to '
                    'reset your password with "az postgres flexible-server update -n %s -g %s -p <new-password>".',
@@ -760,9 +760,10 @@ def flexible_server_provision_network_resource(cmd, resource_group_name, server_
                                                vnet=None, subnet=None, vnet_address_prefix=None, subnet_address_prefix=None, yes=False):
     start_ip = -1
     end_ip = -1
-    network = postgresql_flexibleservers.models.Network()
+    network = None
 
     if subnet is not None or vnet is not None:
+        network = postgresql_flexibleservers.models.Network()
         subnet_id = prepare_private_network(cmd,
                                             resource_group_name,
                                             server_name,

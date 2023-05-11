@@ -44,6 +44,9 @@ class VNetCreate(_VNet.Create):
                          "/networkSecurityGroups/{}",
             ),
         )
+        args_schema.ddos_protection_plan._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/ddosProtectionPlans/{}",
+        )
         # filter arguments
         return args_schema
 
@@ -157,6 +160,14 @@ class VNetSubnetCreate(_VNetSubNet.Create):
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                          "/serviceEndpointPolicies/{}",
             ),
+        )
+        args_schema.network_security_group._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/networkSecurityGroups/{}",
+        )
+        args_schema.route_table._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/routeTables/{}",
         )
         # filter arguments
         args_schema.policies._registered = False
@@ -332,7 +343,11 @@ _VNetPeering = import_aaz_by_profile("network.vnet.peering")
 class VNetPeeringCreate(_VNetPeering.Create):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.remote_vnet._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}",
+        )
         return args_schema
 
 

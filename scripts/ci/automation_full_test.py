@@ -381,11 +381,16 @@ def build_pipeline_result():
             "Name": job_name,
             "Details": [
                 {
-                    "Profile": profile,
+                    "TestName": "AzureCLI-FullTest",
                     "Details": [
                         {
-                            "PythonVersion": python_version,
-                            "Details": []
+                            "Profile": profile,
+                            "Details": [
+                                {
+                                    "PythonVersion": python_version,
+                                    "Details": []
+                                }
+                            ]
                         }
                     ]
                 }
@@ -396,7 +401,7 @@ def build_pipeline_result():
         pipeline_result['pull_request_number'] = pull_request_number
 
     for k in selected_modules:
-        pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details'].append({
+        pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details'][0]['Details'].append({
             "Module": k,
             "Status": "Running",
             "Content": ""
@@ -441,13 +446,13 @@ def get_pipeline_result(test_result_fp, pipeline_result):
                 for failure in failures:
                     message = failure.attrib['message'].replace('\n', '<br>')
                     break
-                for i in pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details']:
+                for i in pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details'][0]['Details']:
                     if i['Module'] == module:
                         i['Status'] = 'Failed'
                         i['Content'] = build_markdown_content(state, test_case, message, line, i['Content'])
                         break
             else:
-                for i in pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details']:
+                for i in pipeline_result[unique_job_name]['Details'][0]['Details'][0]['Details'][0]['Details']:
                     if i['Module'] == module:
                         i['Status'] = 'Succeeded' if i['Status'] != 'Failed' else 'Failed'
                         break

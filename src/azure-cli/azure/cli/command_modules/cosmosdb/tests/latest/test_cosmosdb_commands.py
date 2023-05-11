@@ -60,7 +60,7 @@ class CosmosDBTests(ScenarioTest):
             self.check('backupPolicy.type', 'Periodic'),
         ])
 
-        self.cmd('az cosmosdb update -n {acc} -g {rg} --enable-automatic-failover false --default-consistency-level Session --disable-key-based-metadata-write-access --enable-public-network false --network-acl-bypass None')
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --enable-automatic-failover false --default-consistency-level Session --disable-key-based-metadata-write-access --public-network-access "DISABLED" --network-acl-bypass None')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             self.check('enableAutomaticFailover', False),
             self.check('consistencyPolicy.defaultConsistencyLevel', 'Session'),
@@ -69,7 +69,7 @@ class CosmosDBTests(ScenarioTest):
             self.check('networkAclBypass', 'None'),
         ])
 
-        self.cmd('az cosmosdb update -n {acc} -g {rg} --tags testKey=testValue --enable-public-network')
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --tags testKey=testValue --public-network-access "ENABLED"')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             self.check('enableAutomaticFailover', False),
             self.check('consistencyPolicy.defaultConsistencyLevel', 'Session'),

@@ -40,6 +40,7 @@ def register_providers():
     _register_one_provider('Microsoft.EventGrid/topics', '2020-04-01-preview', True)
     _register_one_provider('Microsoft.EventGrid/domains', '2020-04-01-preview', True)
     _register_one_provider("Microsoft.EventHub/namespaces", "2021-06-01-preview", True)
+    _register_one_provider('Microsoft.HardwareSecurityModules/cloudHsmClusters', '2022-08-31-preview', True)
     _register_one_provider("Microsoft.HDInsight/clusters", '2018-06-01-preview', True)
     _register_one_provider("Microsoft.HybridCompute/privateLinkScopes", '2021-05-20', True)
     _register_one_provider("Microsoft.HealthcareApis/services", "2020-03-30", True)

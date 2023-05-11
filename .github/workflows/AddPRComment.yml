@@ -11,8 +11,10 @@ jobs:
     name: Say thanks for the PR
     steps:
       - name: get message
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
         run: |
-          message=$(echo '${{ github.event.pull_request.title }}' | grep -oP '[{\[][^}\]]+[}\]]' | sed 's/{\|}\|\[\|\]//g')
+          message=$(echo "$TITLE" | grep -oP '[{\[][^}\]]+[}\]]' | sed 's/{\|}\|\[\|\]//g')
           echo "message=$message" >> $GITHUB_ENV
           if [ -z $message ]; then
               echo "message=$(echo 'Thank you for your contribution! We will review the pull request and get back to you soon.')" >> $GITHUB_ENV

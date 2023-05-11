@@ -3987,7 +3987,7 @@ def create_lock(cmd, lock_name, level,
     :type notes: str
     """
     ManagementLockObject = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_LOCKS, 'ManagementLockObject', mod='models')
-    parameters = ManagementLockObject(level=level, notes=notes, name=lock_name)
+    parameters = ManagementLockObject(level=level, notes=notes)
 
     lock_client = _resource_lock_client_factory(cmd.cli_ctx)
     lock_resource = _extract_lock_params(resource_group, resource_provider_namespace,
@@ -4497,7 +4497,7 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
         if indent_size:
             args += ["--indentSize", indent_size]
         if insert_final_newline:
-            args += ["--insertFinalNewline", insert_final_newline]
+            args += ["--insertFinalNewline"]
 
         output = run_bicep_command(cmd.cli_ctx, args)
 
@@ -4507,7 +4507,9 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
         logger.error("az bicep format could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
 
-def publish_bicep_file(cmd, file, target, documentationUri=None):
+def publish_bicep_file(cmd, file, target, documentationUri=None, force=None):
+    ensure_bicep_installation(cmd.cli_ctx)
+
     minimum_supported_version = "0.4.1008"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["publish", file, "--target", target]
@@ -4516,14 +4518,21 @@ def publish_bicep_file(cmd, file, target, documentationUri=None):
             if bicep_version_greater_than_or_equal_to(minimum_supported_version_for_documentationUri_parameter):
                 args += ["--documentationUri", documentationUri]
             else:
-                logger.error("az bicep publish with --documentationUri/-d parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.",
-                             minimum_supported_version_for_documentationUri_parameter)
+                logger.error("az bicep publish with --documentationUri/-d parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_documentationUri_parameter)
+        if force:
+            minimum_supported_version_for_publish_force = "0.17.1"
+            if bicep_version_greater_than_or_equal_to(minimum_supported_version_for_publish_force):
+                args += ["--force"]
+            else:
+                logger.error("az bicep publish with --force parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_publish_force)
         run_bicep_command(cmd.cli_ctx, args)
     else:
         logger.error("az bicep publish could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
 
 def restore_bicep_file(cmd, file, force=None):
+    ensure_bicep_installation(cmd.cli_ctx)
+
     minimum_supported_version = "0.4.1008"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["restore", file]
@@ -4550,6 +4559,8 @@ def list_bicep_cli_versions(cmd):
 
 
 def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, stdout=None):
+    ensure_bicep_installation(cmd.cli_ctx)
+
     minimum_supported_version = "0.7.4"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["generate-params", file]
