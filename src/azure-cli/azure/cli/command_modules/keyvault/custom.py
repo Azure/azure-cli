@@ -1628,18 +1628,16 @@ def add_certificate_contact(cmd, client, email, name=None, phone=None):
     return client.set_contacts(contacts)
 
 
-def delete_certificate_contact(cmd, client, vault_base_url, contact_email):
+def delete_certificate_contact(client, email):
     """ Remove a certificate contact from the specified vault. """
-    Contacts = cmd.get_models('Contacts', resource_type=ResourceType.DATA_KEYVAULT)
-    orig_contacts = client.get_certificate_contacts(vault_base_url).contact_list
-    remaining_contacts = [x for x in client.get_certificate_contacts(vault_base_url).contact_list
-                          if x.email_address != contact_email]
-    remaining = Contacts(contact_list=remaining_contacts)
+    orig_contacts = client.get_contacts()
+    remaining_contacts = [x for x in orig_contacts if x.email != email]
     if len(remaining_contacts) == len(orig_contacts):
-        raise CLIError("contact '{}' not found in vault '{}'".format(contact_email, vault_base_url))
-    if remaining.contact_list:
-        return client.set_certificate_contacts(vault_base_url, remaining.contact_list)
-    return client.delete_certificate_contacts(vault_base_url)
+        raise CLIError("contact '{}' not found in vault".format(email))
+    if remaining_contacts is not None and len(remaining_contacts) > 0:
+        return client.set_contacts(remaining_contacts)
+    client.delete_contacts()
+    return []
 
 
 def create_certificate_issuer(cmd, client, vault_base_url, issuer_name, provider_name, account_id=None,

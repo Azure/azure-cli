@@ -236,9 +236,6 @@ def load_command_table(self, _):
         g.keyvault_custom('backup', 'backup_secret')
         g.keyvault_custom('restore', 'restore_secret', transform=transform_secret_set_attributes)
 
-    with self.command_group('keyvault certificate contact', data_entity.command_type) as g:
-        g.keyvault_custom('delete', 'delete_certificate_contact')
-
     with self.command_group('keyvault certificate issuer', data_entity.command_type) as g:
         g.keyvault_custom('update', 'update_certificate_issuer')
         g.keyvault_command('list', 'get_certificate_issuers', transform=keep_max_results)
@@ -300,6 +297,7 @@ def load_command_table(self, _):
     with self.command_group('keyvault certificate contact', data_certificate_entity.command_type) as g:
         g.keyvault_command('list', 'get_contacts', transform=transform_certificate_contact_list)
         g.keyvault_custom('add', 'add_certificate_contact', transform=transform_certificate_contact_add)
+        g.keyvault_custom('delete', 'delete_certificate_contact', transform=transform_certificate_contact_add)
 
     if not is_azure_stack_profile(self):
         with self.command_group('keyvault role', data_access_control_entity.command_type):
