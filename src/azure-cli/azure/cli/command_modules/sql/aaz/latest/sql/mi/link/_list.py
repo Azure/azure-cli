@@ -45,10 +45,11 @@ class List(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.managed_instance_name = AAZStrArg(
             options=["--mi", "--instance-name", "--managed-instance", "--managed-instance-name"],
-            help="Name of the managed instance.",
+            help="Name of Azure SQL Managed Instance.",
             required=True,
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
+            help="Name of the resource group.",
             required=True,
         )
         return cls._args_schema

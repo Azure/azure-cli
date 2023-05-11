@@ -20,7 +20,7 @@ class Create(AAZCommand):
     This command creates an Azure SQL Managed Instance link by joining distributed availability group on SQL Server based on the parameters passed.
 
     :example: Creates an instance link.
-        az sql mi link create -g 'rg1' --instance-name 'mi1' --name 'link1' --primary-availability-group-name 'primaryag1' --replication-mode 'Async' --secondary-availability-group-name 'secondaryag1' --source-endpoint '"tcp://server1:5022" --target-database 'db1' --no-wait')
+        az sql mi link create -g 'rg1' --instance-name 'mi1' --name 'link1' --primary-availability-group-name 'primaryag1' --secondary-availability-group-name 'secondaryag1' --source-endpoint '"tcp://server1:5022" --target-database 'db1' --no-wait')
     """
 
     _aaz_info = {
@@ -49,21 +49,17 @@ class Create(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.distributed_availability_group_name = AAZStrArg(
             options=["-n", "--link", "--name", "--distributed-availability-group-name"],
-            help="Distributed availability group name.",
+            help="Name of the instance link.",
             required=True,
         )
         _args_schema.managed_instance_name = AAZStrArg(
             options=["--mi", "--instance-name", "--managed-instance", "--managed-instance-name"],
-            help="Name of the managed instance.",
+            help="Name of Azure SQL Managed Instance.",
             required=True,
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
+            help="Name of the resource group.",
             required=True,
-        )
-        _args_schema.replication_mode = AAZStrArg(
-            options=["--replication-mode"],
-            help="Replication mode value. Possible values include 'Sync' and 'Async'.",
-            enum={"Async": "Async", "Sync": "Sync"},
         )
 
         # define Arg Group "Properties"
@@ -72,17 +68,17 @@ class Create(AAZCommand):
         _args_schema.primary_availability_group_name = AAZStrArg(
             options=["--primary-ag", "--primary-availability-group-name"],
             arg_group="Properties",
-            help="Primary availability group name",
+            help="Name of the primary availability group.",
         )
         _args_schema.secondary_availability_group_name = AAZStrArg(
             options=["--secondary-ag", "--secondary-availability-group-name"],
             arg_group="Properties",
-            help="Secondary availability group name",
+            help="Name of the secondary availability group.",
         )
         _args_schema.source_endpoint = AAZStrArg(
             options=["--source-endpoint"],
             arg_group="Properties",
-            help="Source endpoint",
+            help="IP adress of the source endpoint.",
         )
         _args_schema.target_database = AAZStrArg(
             options=["--target-db", "--target-database"],
@@ -206,7 +202,6 @@ class Create(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("primaryAvailabilityGroupName", AAZStrType, ".primary_availability_group_name")
-                properties.set_prop("replicationMode", AAZStrType, ".replication_mode")
                 properties.set_prop("secondaryAvailabilityGroupName", AAZStrType, ".secondary_availability_group_name")
                 properties.set_prop("sourceEndpoint", AAZStrType, ".source_endpoint")
                 properties.set_prop("targetDatabase", AAZStrType, ".target_database")

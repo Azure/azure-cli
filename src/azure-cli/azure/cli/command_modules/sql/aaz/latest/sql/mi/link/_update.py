@@ -47,17 +47,18 @@ class Update(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.distributed_availability_group_name = AAZStrArg(
             options=["-n", "--link", "--name", "--distributed-availability-group-name"],
-            help="Distributed availability group name.",
+            help="Name of the instance link.",
             required=True,
             id_part="child_name_1",
         )
         _args_schema.managed_instance_name = AAZStrArg(
             options=["--mi", "--instance-name", "--managed-instance", "--managed-instance-name"],
-            help="Name of the managed instance.",
+            help="Name of Azure SQL Managed Instance.",
             required=True,
             id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
+            help="Name of the resource group.",
             required=True,
         )
         _args_schema.replication_mode = AAZStrArg(
