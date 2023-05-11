@@ -20,16 +20,14 @@ logger.addHandler(ch)
 
 pull_request_number = os.environ.get('PULL_REQUEST_NUMBER', None)
 job_name = os.environ.get('JOB_NAME', None)
-base_branch = os.environ.get('BASE_BRANCH', None)
-print('base_branch: ', base_branch)
+src_branch = 'azure-cli-2.48.1'
+target_branch = 'dev'
+# src_branch = os.environ.get('SRC_BRANCH', None)
+# refs/remotes/pull/24765/merge
+# target_branch = f'refs/remotes/pull/{pull_request_number}/merge'
 base_meta_path = '/mnt/vss/_work/1/base_meta'
 diff_meta_path = '/mnt/vss/_work/1/diff_meta'
 output_path = '/mnt/vss/_work/1/output_meta'
-src_branch = 'azure-cli-2.48.1'
-target_branch = 'dev'
-# src_branch = 'dev'
-# refs/remotes/pull/24765/merge
-# target_branch = f'refs/remotes/pull/{pull_request_number}/merge'
 
 
 def get_diff_meta_files():
@@ -100,15 +98,20 @@ def get_pipeline_result():
         for file in os.listdir(output_path):
             with open(os.path.join(output_path, file), 'r') as f:
                 items = json.load(f)
-                module = os.path.basename(file).split('.')[0].split('_')[1]
-                breaking_change = {
-                    "Module": module,
-                    "Status": "",
-                    "Content": ""
-                }
-                for item in items:
-                    breaking_change['Content'] = build_markdown_content(item['cmd_name'], item['is_break'], item['rule_message'], item['suggest_message'], breaking_change['Content'])
-                pipeline_result['breaking_change_check']['Details'].append(breaking_change)
+                if items:
+                    module = os.path.basename(file).split('.')[0].split('_')[1]
+                    breaking_change = {
+                        "Module": module,
+                        "Status": "",
+                        "Content": ""
+                    }
+                    status = 'Warning'
+                    for item in items:
+                        if item['is_break'] == 'Yes':
+                            status = 'Fail'
+                        breaking_change['Content'] = build_markdown_content(item['cmd_name'], item['is_break'], item['rule_message'], item['suggest_message'], breaking_change['Content'])
+                    breaking_change['Status'] = status
+                    pipeline_result['breaking_change_check']['Details'].append(breaking_change)
     print(json.dumps(pipeline_result, indent=2))
     return pipeline_result
 

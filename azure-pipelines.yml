@@ -1104,9 +1104,9 @@ jobs:
       python scripts/ci/breaking_change_check.py
     displayName: "Breaking Change Check"
     env:
+      SRC_BRANCH: $(system.pullRequest.targetBranchName)
       PULL_REQUEST_NUMBER: $(System.PullRequest.PullRequestNumber)
       JOB_NAME: "breaking_change_check"
-      BASE_BRANCH: $(Build.SourceBranchName)
 
 #- job: NotifyCIErrors
 #  dependsOn:
