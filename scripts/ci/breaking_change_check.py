@@ -5,6 +5,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 import logging
 import os
 import subprocess
@@ -18,6 +19,7 @@ ch.setLevel(logging.DEBUG)
 logger.addHandler(ch)
 
 pull_request_number = os.environ.get('PULL_REQUEST_NUMBER', None)
+job_name = os.environ.get('JOB_NAME', None)
 base_meta_path = '/mnt/vss/_work/1/base_meta'
 diff_meta_path = '/mnt/vss/_work/1/diff_meta'
 output_path = '/mnt/vss/_work/1/output_meta'
@@ -26,15 +28,16 @@ output_path = '/mnt/vss/_work/1/output_meta'
 def get_base_meta_files():
     cmd = ['git', 'checkout', 'dev']
     print(cmd)
-    subprocess.run(cmd)
+    out = subprocess.run(cmd, capture_output=True)
+    print(out.stdout)
     cmd = ['azdev', 'setup', '--cli', get_cli_repo_path()]
     print(cmd)
-    subprocess.run(cmd)
+    out = subprocess.run(cmd, capture_output=True)
+    print(out.stdout)
     cmd = ['azdev', 'command-change', 'meta-export', 'CLI', '--meta-output-path', base_meta_path]
     print(cmd)
-    subprocess.run(cmd)
-    # out = subprocess.run(cmd, capture_output=True)
-    # print(out.stdout)
+    out = subprocess.run(cmd, capture_output=True)
+    print(out.stdout)
 
 
 def get_diff_meta_files():
@@ -42,39 +45,58 @@ def get_diff_meta_files():
     target_branch = f'refs/remotes/pull/{pull_request_number}/merge'
     cmd = ['azdev', 'command-change', 'meta-export', '--src', 'dev', '--tgt', target_branch, '--repo', get_cli_repo_path(), '--meta-output-path', diff_meta_path]
     print(cmd)
-    subprocess.run(cmd)
-    # out = subprocess.run(cmd, capture_output=True)
-    # print(out.stdout)
+    out = subprocess.run(cmd, capture_output=True)
+    print(out.stdout)
 
 
 def meta_diff():
     if os.path.exists(diff_meta_path):
         for file in os.listdir(diff_meta_path):
             if file.endswith('.json'):
-                cmd = ['azdev', 'command-change', 'meta-diff', '--base-meta-file', os.path.join(base_meta_path, file), '--diff-meta-file', os.path.join(diff_meta_path, file), '--output-file', output_path]
+                cmd = ['azdev', 'command-change', 'meta-diff', '--base-meta-file', os.path.join(base_meta_path, file), '--diff-meta-file', os.path.join(diff_meta_path, file), '--output-file', os.path.join(output_path, file)]
                 print(cmd)
-                subprocess.run(cmd)
-                # out = subprocess.run(cmd, capture_output=True)
-                # print(out.stdout)
+                out = subprocess.run(cmd, capture_output=True)
+                print(out.stdout)
         cmd = ['ls', '-al', output_path]
         print(cmd)
-        subprocess.run(cmd)
-        # out = subprocess.run(cmd, capture_output=True)
-        # print(out.stdout)
+        out = subprocess.run(cmd, capture_output=True)
+        print(out.stdout)
 
 
 def build_pipeline_result():
-    pass
+    pipeline_result = {
+        "breaking_change_check": {
+            "Name": job_name,
+            "Details": []
+        }
+    }
+    if pull_request_number != '$(System.PullRequest.PullRequestNumber)':
+        pipeline_result['pull_request_number'] = pull_request_number
+    return pipeline_result
 
 
-def get_pipeline_result():
-    pass
+def get_pipeline_result(pipeline_result):
+    if os.path.exists(output_path):
+        for file in os.listdir(output_path):
+            with open('example.json', 'r') as f:
+                items = json.load(f)
+                module = os.path.basename(file).split('.')[0].split('_')[1]
+                breaking_change = {
+                    "Module": module,
+                    "Status": "",
+                    "Content": ""
+                }
+                for item in items:
+                    breaking_change['Content'] = build_markdown_content(item['cmd_name'], item['is_break'], item['rule_message'], item['suggest_message'], breaking_change['Content'])
+                pipeline_result['breaking_change_check']['Details'].append(breaking_change)
+    print(pipeline_result)
+    return pipeline_result
 
 
-def build_markdown_content(state, test_case, message, line, content):
+def build_markdown_content(cmd_name, is_break, rule_message, suggest_message, content):
     if content == "":
-        content = f'|Type|Test Case|Error Message|Line|\n|---|---|---|---|\n'
-    content += f'|{state}|{test_case}|{message}|{line}|\n'
+        content = f'|is_break|cmd_name|rule_message|suggest_message|\n|---|---|---|---|\n'
+    content += f'|{is_break}|{cmd_name}|{rule_message}|{suggest_message}|\n'
     return content
 
 
@@ -93,6 +115,7 @@ def main():
     get_diff_meta_files()
     get_base_meta_files()
     meta_diff()
+    get_pipeline_result()
 
 
 if __name__ == '__main__':
