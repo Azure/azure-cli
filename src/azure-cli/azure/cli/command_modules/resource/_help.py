@@ -2866,7 +2866,7 @@ helps['stack mg list'] = """
 type: command
 short-summary: List all deployment stacks in management group
 examples:
-  - name: List all stacks 
+  - name: List all stacks
     text: az stack mg list --management-group-id myMg
 """
 
@@ -2930,7 +2930,7 @@ helps['stack sub list'] = """
 type: command
 short-summary: List all deployment stacks in subscription
 examples:
-  - name: List all stacks 
+  - name: List all stacks
     text: az stack sub list
 """
 

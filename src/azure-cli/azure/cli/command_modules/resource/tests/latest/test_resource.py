@@ -2138,6 +2138,7 @@ class DeploymentStacksTest(ScenarioTest):
     global location
     location = "westus2"
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
+    @AllowLargeResponse
     def test_create_deployment_stack_subscription(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         deployment_stack_name = self.create_random_name('cli-test-create-deployment-stack-subscription', 60)
