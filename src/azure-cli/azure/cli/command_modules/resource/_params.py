@@ -142,22 +142,6 @@ def load_arguments(self, _):
     bicep_file_type = CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(), type=file_type)
     bicep_force_type = CLIArgumentType(options_list=['--force'], action='store_true')
     bicep_no_restore_type = CLIArgumentType(options_list=['--no-restore'], action='store_true')
-<<<<<<< HEAD
-    bicep_outdir_type = CLIArgumentType(
-        options_list=['--outdir'], completer=DirectoriesCompleter(), help="When set, saves the output at the specified directory.")
-    bicep_outfile_type = CLIArgumentType(
-        options_list=['--outfile'], completer=FilesCompleter(), help="When set, saves the output as the specified file path.")
-    bicep_stdout_type = CLIArgumentType(
-        options_list=['--stdout'], action='store_true', help="When set, prints all output to stdout instead of corresponding files.")
-    bicep_indentkind_type = CLIArgumentType(
-        options_list=['--indent-kind'], help="Set indentation kind. Valid values are ( Space | Tab ).")
-    bicep_indentsize_type = CLIArgumentType(
-        options_list=['--indent-size'], help="Number of spaces to indent with (Only valid with --indent-kind set to Space).")
-    bicep_insertfinalnewline_type = CLIArgumentType(
-        options_list=['--insert-final-newline'], action='store_true', help="Insert a final newline.")
-    bicep_newline_type = CLIArgumentType(
-        options_list=['--newline'], action='store_true', help="Set newline char. Valid values are ( Auto | LF | CRLF | CR ).")
-=======
     bicep_outdir_type = CLIArgumentType(options_list=['--outdir'], completer=DirectoriesCompleter(), help="When set, saves the output at the specified directory.")
     bicep_outfile_type = CLIArgumentType(options_list=['--outfile'], completer=FilesCompleter(), help="When set, saves the output as the specified file path.")
     bicep_stdout_type = CLIArgumentType(options_list=['--stdout'], action='store_true', help="When set, prints all output to stdout instead of corresponding files.")
@@ -165,7 +149,6 @@ def load_arguments(self, _):
     bicep_indentsize_type = CLIArgumentType(options_list=['--indent-size'], help="Number of spaces to indent with (Only valid with --indent-kind set to Space).")
     bicep_insertfinalnewline_type = CLIArgumentType(options_list=['--insert-final-newline'], action='store_true', help="Insert a final newline.")
     bicep_newline_type = CLIArgumentType(options_list=['--newline'], help="Set newline char. Valid values are ( Auto | LF | CRLF | CR ).")
->>>>>>> dev
     bicep_target_platform_type = CLIArgumentType(options_list=['--target-platform', '-t'],
                                                  arg_type=get_enum_type(
                                                      ["win-x64", "linux-musl-x64", "linux-x64", "osx-x64", "linux-arm64", "osx-arm64"]),
