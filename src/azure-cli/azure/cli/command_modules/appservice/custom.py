@@ -4162,7 +4162,8 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, head
             num_trials = num_trials + 1
 
         if res_dict.get('status', 0) == 3:
-            _configure_default_logging(cmd, rg_name, name)
+            if not is_flex_functionapp(cmd, rg_name, name):
+                _configure_default_logging(cmd, rg_name, name)
             raise CLIError("Zip deployment failed. {}. Please run the command az webapp log deployment show "
                            "-n {} -g {}".format(res_dict, name, rg_name))
         if res_dict.get('status', 0) == 4:
@@ -4171,7 +4172,8 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, head
             logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
     # if the deployment is taking longer than expected
     if res_dict.get('status', 0) != 4:
-        _configure_default_logging(cmd, rg_name, name)
+        if not is_flex_functionapp(cmd, rg_name, name):
+            _configure_default_logging(cmd, rg_name, name)
         raise CLIError("""Timeout reached by the command, however, the deployment operation
                        is still on-going. Navigate to your scm site to check the deployment status""")
     return res_dict
