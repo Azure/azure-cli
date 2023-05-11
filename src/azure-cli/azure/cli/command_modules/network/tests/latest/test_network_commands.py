@@ -3484,7 +3484,7 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
 
         self.cmd('network cross-region-lb rule list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 2))
-        self.cmd('network cross-region-lb rule update -g {rg} --lb-name {lb} -n rule1 --floating-ip true --idle-timeout 20 --load-distribution sourceip --protocol udp')
+        self.cmd('network cross-region-lb rule update -g {rg} --lb-name {lb} -n rule1 --floating-ip true --load-distribution sourceip --protocol udp')
         self.cmd('network cross-region-lb rule update -g {rg} --lb-name {lb} -n rule2 --backend-pool-name bap2 --load-distribution sourceipprotocol')
         self.cmd('network cross-region-lb rule show -g {rg} --lb-name {lb} -n rule1', checks=[
             self.check('enableFloatingIP', True),
