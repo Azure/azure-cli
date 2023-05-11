@@ -23,37 +23,48 @@ job_name = os.environ.get('JOB_NAME', None)
 base_meta_path = '/mnt/vss/_work/1/base_meta'
 diff_meta_path = '/mnt/vss/_work/1/diff_meta'
 output_path = '/mnt/vss/_work/1/output_meta'
+src_branch = 'azure-cli-2.48.1'
+target_branch = 'dev'
+# src_branch = 'dev'
+# refs/remotes/pull/24765/merge
+# target_branch = f'refs/remotes/pull/{pull_request_number}/merge'
 
 
 def get_diff_meta_files():
-    cmd = ['git', 'checkout', 'dev']
-    print(cmd)
-    subprocess.run(cmd)
     cmd = ['git', 'fetch', '--all', '--tags', '--prune']
     print(cmd)
     subprocess.run(cmd)
-    cmd = ['git', 'checkout', 'azure-cli-2.48.1']
+    cmd = ['git', 'checkout', src_branch]
+    print(cmd)
+    subprocess.run(cmd)
+    cmd = ['git', 'checkout', target_branch]
+    print(cmd)
+    subprocess.run(cmd)
+    cmd = ['azdev', 'setup', '--cli', get_cli_repo_path()]
     print(cmd)
     subprocess.run(cmd)
     # refs/remotes/pull/24765/merge
-    target_branch = 'dev'
     cmd = ['azdev', 'command-change', 'meta-export', '--src', 'azure-cli-2.48.1', '--tgt', target_branch, '--repo', get_cli_repo_path(), '--meta-output-path', diff_meta_path]
     print(cmd)
     subprocess.run(cmd)
 
 
 # def get_diff_meta_files():
-#     cmd = ['git', 'checkout', 'dev']
+#     cmd = ['git', 'checkout', src_branch]
 #     print(cmd)
 #     subprocess.run(cmd)
-#     # refs/remotes/pull/24765/merge
-#     target_branch = f'refs/remotes/pull/{pull_request_number}/merge'
+#     cmd = ['git', 'checkout', target_branch]
+#     print(cmd)
+#     subprocess.run(cmd)
 #     cmd = ['azdev', 'command-change', 'meta-export', '--src', 'dev', '--tgt', target_branch, '--repo', get_cli_repo_path(), '--meta-output-path', diff_meta_path]
 #     print(cmd)
 #     subprocess.run(cmd)
 
 
 def get_base_meta_files():
+    cmd = ['git', 'checkout', src_branch]
+    print(cmd)
+    subprocess.run(cmd)
     cmd = ['azdev', 'setup', '--cli', get_cli_repo_path()]
     print(cmd)
     subprocess.run(cmd)
