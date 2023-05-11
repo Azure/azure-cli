@@ -25,22 +25,36 @@ diff_meta_path = '/mnt/vss/_work/1/diff_meta'
 output_path = '/mnt/vss/_work/1/output_meta'
 
 
+def get_diff_meta_files():
+    cmd = ['git', 'checkout', 'dev']
+    print(cmd)
+    subprocess.run(cmd)
+    cmd = ['git', 'checkout', 'azure-cli-2.48.1']
+    print(cmd)
+    subprocess.run(cmd)
+    # refs/remotes/pull/24765/merge
+    target_branch = 'dev'
+    cmd = ['azdev', 'command-change', 'meta-export', '--src', 'azure-cli-2.48.1', '--tgt', target_branch, '--repo', get_cli_repo_path(), '--meta-output-path', diff_meta_path]
+    print(cmd)
+    subprocess.run(cmd)
+
+
+# def get_diff_meta_files():
+#     cmd = ['git', 'checkout', 'dev']
+#     print(cmd)
+#     subprocess.run(cmd)
+#     # refs/remotes/pull/24765/merge
+#     target_branch = f'refs/remotes/pull/{pull_request_number}/merge'
+#     cmd = ['azdev', 'command-change', 'meta-export', '--src', 'dev', '--tgt', target_branch, '--repo', get_cli_repo_path(), '--meta-output-path', diff_meta_path]
+#     print(cmd)
+#     subprocess.run(cmd)
+
+
 def get_base_meta_files():
     cmd = ['azdev', 'setup', '--cli', get_cli_repo_path()]
     print(cmd)
     subprocess.run(cmd)
     cmd = ['azdev', 'command-change', 'meta-export', 'CLI', '--meta-output-path', base_meta_path]
-    print(cmd)
-    subprocess.run(cmd)
-
-
-def get_diff_meta_files():
-    cmd = ['git', 'checkout', 'dev']
-    print(cmd)
-    subprocess.run(cmd)
-    # refs/remotes/pull/24765/merge
-    target_branch = f'refs/remotes/pull/{pull_request_number}/merge'
-    cmd = ['azdev', 'command-change', 'meta-export', '--src', 'dev', '--tgt', target_branch, '--repo', get_cli_repo_path(), '--meta-output-path', diff_meta_path]
     print(cmd)
     subprocess.run(cmd)
 
