@@ -692,9 +692,9 @@ examples:
 
 helps['apim graphqlapi resolver policy create'] = """
 type: command
-short-summary: Creates or updates policy configuration for the GraphQL API Resolver level.
+short-summary: Create or updates policy configuration for the GraphQL API Resolver level.
 examples:
-  - name: Creates a resolver policy.
+  - name: Create a resolver policy.
     text: |
         az apim graphqlapi resolver policy create --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId --format xml --value-path 'path to xml file'
 """
