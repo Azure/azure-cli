@@ -98,7 +98,6 @@ class ConstructPolicy(argparse._AppendAction):
 
             else:
                 raise InvalidArgumentValueError("Invalid Argument for:'{}' Only allowed arguments are 'name, rate-limit-threshold and metric-id'".format(option_string))
-        print("hi", throttling_policy)
 
         if (throttling_policy["name"] is None) or (throttling_policy["throttling_policy"]["metric_id"] is None) or (throttling_policy["throttling_policy"]["rate_limit_threshold"] is None):
             raise CLIError('One of the throttling policies is missing one of these parameters: name, metric-id, rate-limit-threshold')
