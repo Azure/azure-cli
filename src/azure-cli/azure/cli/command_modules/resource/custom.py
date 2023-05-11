@@ -3775,6 +3775,8 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
 
 
 def publish_bicep_file(cmd, file, target, documentationUri=None):
+    ensure_bicep_installation(cmd.cli_ctx)
+
     minimum_supported_version = "0.4.1008"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["publish", file, "--target", target]
@@ -3790,6 +3792,8 @@ def publish_bicep_file(cmd, file, target, documentationUri=None):
 
 
 def restore_bicep_file(cmd, file, force=None):
+    ensure_bicep_installation(cmd.cli_ctx)
+
     minimum_supported_version = "0.4.1008"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["restore", file]
@@ -3816,6 +3820,8 @@ def list_bicep_cli_versions(cmd):
 
 
 def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, stdout=None):
+    ensure_bicep_installation(cmd.cli_ctx)
+
     minimum_supported_version = "0.7.4"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["generate-params", file]
