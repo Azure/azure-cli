@@ -841,9 +841,9 @@ def load_arguments(self, _):
         c.extra('tags', tags_type)
 
     with self.argument_context('keyvault certificate contact') as c:
-        c.argument('contact_email', options_list=['--email'], help='Contact e-mail address. Must be unique.')
-        c.argument('contact_name', options_list=['--name'], help='Full contact name.')
-        c.argument('contact_phone', options_list=['--phone'], help='Contact phone number.')
+        c.argument('email', help='Contact e-mail address. Must be unique.')
+        c.argument('name',  help='Full contact name.')
+        c.argument('phone', help='Contact phone number.')
 
     for item in ['list', 'add', 'delete']:
         with self.argument_context('keyvault certificate contact {}'.format(item)) as c:

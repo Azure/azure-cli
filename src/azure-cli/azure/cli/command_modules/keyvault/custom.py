@@ -1613,21 +1613,19 @@ def restore_certificate(client, file_path):
     return client.restore_certificate_backup(backup=data)
 
 
-def add_certificate_contact(cmd, client, vault_base_url, contact_email, contact_name=None,
-                            contact_phone=None):
+def add_certificate_contact(cmd, client, email, name=None, phone=None):
     """ Add a contact to the specified vault to receive notifications of certificate operations. """
-    Contact = cmd.get_models('Contact', resource_type=ResourceType.DATA_KEYVAULT)
-    Contacts = cmd.get_models('Contacts', resource_type=ResourceType.DATA_KEYVAULT)
-    KeyVaultErrorException = cmd.get_models('KeyVaultErrorException', resource_type=ResourceType.DATA_KEYVAULT)
+    CertificateContact = cmd.loader.get_sdk('CertificateContact', resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES,
+                                            mod='_models')
     try:
-        contacts = client.get_certificate_contacts(vault_base_url)
-    except KeyVaultErrorException:
-        contacts = Contacts(contact_list=[])
-    contact = Contact(email_address=contact_email, name=contact_name, phone=contact_phone)
-    if any((x for x in contacts.contact_list if x.email_address == contact_email)):
-        raise CLIError("contact '{}' already exists".format(contact_email))
-    contacts.contact_list.append(contact)
-    return client.set_certificate_contacts(vault_base_url, contacts.contact_list)
+        contacts = client.get_contacts()
+    except:
+        contacts = []
+    contact = CertificateContact(email=email, name=name, phone=phone)
+    if any((x for x in contacts if x.email == email)):
+        raise CLIError("contact '{}' already exists".format(email))
+    contacts.append(contact)
+    return client.set_contacts(contacts)
 
 
 def delete_certificate_contact(cmd, client, vault_base_url, contact_email):

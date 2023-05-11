@@ -380,19 +380,30 @@ def transform_certificate_recover(result, **command_args):
 def transform_certificate_contact_list(result, **command_args):
     if isinstance(result, list):
         client = command_args.get('self')
-        try:
-            id = getattr(client, "vault_url")+'/certificates/contacts'
-        except:
-            id = ""
-        ret = {
-          "contactList": [
+        return transform_certificate_contact_list_result(result, client)
+    return result
+
+
+def transform_certificate_contact_list_result(result, client):
+    try:
+        id = getattr(client, "vault_url") + '/certificates/contacts'
+    except:
+        id = ""
+    ret = {
+        "contactList": [
             {
-              "emailAddress": getattr(contact, "email"),
-              "name": getattr(contact, "name"),
-              "phone": getattr(contact, "phone")
+                "emailAddress": getattr(contact, "email"),
+                "name": getattr(contact, "name"),
+                "phone": getattr(contact, "phone")
             } for contact in result
-          ],
-          "id": id
-        }
-        return ret
+        ],
+        "id": id
+    }
+    return ret
+
+
+def transform_certificate_contact_add(result, **command_args):
+    if isinstance(result, list):
+        client = command_args.get('client')
+        return transform_certificate_contact_list_result(result, client)
     return result

@@ -19,7 +19,7 @@ from azure.cli.command_modules.keyvault._transformers import (
     transform_secret_set_attributes, transform_secret_show_deleted, transform_secret_delete, transform_secret_recover,
     transform_certificate_create, transform_certificate_list, transform_certificate_list_deleted,
     transform_certificate_show, transform_certificate_show_deleted, transform_certificate_delete,
-    transform_certificate_recover, transform_certificate_contact_list)
+    transform_certificate_recover, transform_certificate_contact_list, transform_certificate_contact_add)
 
 from azure.cli.command_modules.keyvault._format import transform_secret_list_table
 
@@ -237,7 +237,6 @@ def load_command_table(self, _):
         g.keyvault_custom('restore', 'restore_secret', transform=transform_secret_set_attributes)
 
     with self.command_group('keyvault certificate contact', data_entity.command_type) as g:
-        g.keyvault_custom('add', 'add_certificate_contact')
         g.keyvault_custom('delete', 'delete_certificate_contact')
 
     with self.command_group('keyvault certificate issuer', data_entity.command_type) as g:
@@ -299,8 +298,8 @@ def load_command_table(self, _):
         g.keyvault_command('delete', 'delete_certificate_operation', transform=transform_certificate_create)
 
     with self.command_group('keyvault certificate contact', data_certificate_entity.command_type) as g:
-        g.keyvault_command('list', 'get_contacts',
-                           transform=transform_certificate_contact_list)
+        g.keyvault_command('list', 'get_contacts', transform=transform_certificate_contact_list)
+        g.keyvault_custom('add', 'add_certificate_contact', transform=transform_certificate_contact_add)
 
     if not is_azure_stack_profile(self):
         with self.command_group('keyvault role', data_access_control_entity.command_type):
