@@ -457,7 +457,7 @@ def load_arguments(self, _):
         c.argument('resolver_id', required=True,
                    help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
         c.argument('policy_id', required=True, help='The identifier of the Policy.')
-        c.argument('format', help='Format of the policyContent.')
+        c.argument('policy_format', help='Format of the policyContent.')
         c.argument('value_path', required=True, help='Contents of the Policy as defined by the format.')
 
     with self.argument_context('apim graphql api resolver policy get') as c:

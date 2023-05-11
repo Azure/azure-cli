@@ -906,7 +906,7 @@ def apim_api_vs_update(
                 raise RequiredArgumentMissingError(
                     "Please specify version header name while using 'header' as version scheme.")
 
-            instance.version_header_name = version_header_nameNone
+            instance.version_header_name = version_header_name
             instance.version_query_name = None
         if versioning_scheme == VersioningScheme.query:
             if version_query_name is None:
@@ -959,7 +959,8 @@ def apim_ds_purge(client, service_name, location, no_wait=False):
 
 
 def apim_graphqlapi_resolver_create(
-        client, resource_group_name, service_name, api_id, resolver_id, display_name, path, description=None, no_wait=False):
+        client, resource_group_name, service_name, api_id, resolver_id, display_name,
+        path, description=None, no_wait=False):
     """Creates a new Resolver. """
     parameters = ResolverContract(
         display_name=display_name,
@@ -1006,14 +1007,14 @@ def apim_graphqlapi_resolver_list(client, resource_group_name, service_name, api
 # Graphql Resolver Policy Operations
 
 def apim_graphqlapi_resolver_policy_create(
-        client, resource_group_name, service_name, api_id, resolver_id, value_path, format=None, no_wait=False):
+        client, resource_group_name, service_name, api_id, resolver_id, value_path, policy_format=None, no_wait=False):
     """Creates a new Resolver policy. """
     api_file = open(value_path, 'r')
     content_value = api_file.read()
     value = content_value
 
     parameters = PolicyContract(
-        format=format,
+        format=policy_format,
         value=value
     )
 
