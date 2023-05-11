@@ -4016,7 +4016,15 @@ class BicepScenarioTest(ScenarioTest):
 
 # Because don't want to record bicep cli binary
 class BicepBuildTest(LiveScenarioTest):
-    
+
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
     def test_bicep_build_decompile(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         tf = os.path.join(curr_dir, 'storage_account_deploy.bicep').replace('\\', '\\\\')
@@ -4038,6 +4046,14 @@ class BicepBuildTest(LiveScenarioTest):
             os.remove(decompile_path)
 
 class BicepGenerateParamsTest(LiveScenarioTest):
+
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
 
     def test_bicep_generate_params(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -4085,6 +4101,15 @@ class BicepInstallationTest(LiveScenarioTest):
 
 
 class BicepRestoreTest(LiveScenarioTest):
+
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
     def test_restore(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         bf = os.path.join(curr_dir, 'data', 'external_modules.bicep').replace('\\', '\\\\')
@@ -4103,6 +4128,15 @@ class BicepRestoreTest(LiveScenarioTest):
 
 
 class BicepFormatTest(LiveScenarioTest):
+
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
     def test_format(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         bf = os.path.join(curr_dir, 'storage_account_deploy.bicep').replace('\\', '\\\\')
@@ -4119,6 +4153,7 @@ class BicepFormatTest(LiveScenarioTest):
 
 
 class DeploymentWithBicepScenarioTest(LiveScenarioTest):
+
     def setup(self):
         super.setup()
         self.cmd('az bicep uninstall')
