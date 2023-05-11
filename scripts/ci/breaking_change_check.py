@@ -96,22 +96,24 @@ def get_pipeline_result():
         pipeline_result['pull_request_number'] = pull_request_number
     if os.path.exists(output_path):
         for file in os.listdir(output_path):
+            # skip empty file
+            if not os.path.getsize(os.path.join(output_path, file)):
+                continue
             with open(os.path.join(output_path, file), 'r') as f:
                 items = json.load(f)
-                if items:
-                    module = os.path.basename(file).split('.')[0].split('_')[1]
-                    breaking_change = {
-                        "Module": module,
-                        "Status": "",
-                        "Content": ""
-                    }
-                    status = 'Warning'
-                    for item in items:
-                        if item['is_break'] == 'Yes':
-                            status = 'Fail'
-                        breaking_change['Content'] = build_markdown_content(item['cmd_name'], item['is_break'], item['rule_message'], item['suggest_message'], breaking_change['Content'])
-                    breaking_change['Status'] = status
-                    pipeline_result['breaking_change_check']['Details'].append(breaking_change)
+                module = os.path.basename(file).split('.')[0].split('_')[1]
+                breaking_change = {
+                    "Module": module,
+                    "Status": "",
+                    "Content": ""
+                }
+                status = 'Warning'
+                for item in items:
+                    if item['is_break'] == 'Yes':
+                        status = 'Fail'
+                    breaking_change['Content'] = build_markdown_content(item['cmd_name'], item['is_break'], item['rule_message'], item['suggest_message'], breaking_change['Content'])
+                breaking_change['Status'] = status
+                pipeline_result['breaking_change_check']['Details'].append(breaking_change)
     print(json.dumps(pipeline_result, indent=2))
     return pipeline_result
 
