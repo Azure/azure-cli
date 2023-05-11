@@ -106,7 +106,7 @@ def load_arguments(self, _):
     bicep_indentkind_type = CLIArgumentType(options_list=['--indent-kind'], help="Set indentation kind. Valid values are ( Space | Tab ).")
     bicep_indentsize_type = CLIArgumentType(options_list=['--indent-size'], help="Number of spaces to indent with (Only valid with --indent-kind set to Space).")
     bicep_insertfinalnewline_type = CLIArgumentType(options_list=['--insert-final-newline'], action='store_true', help="Insert a final newline.")
-    bicep_newline_type = CLIArgumentType(options_list=['--newline'], action='store_true', help="Set newline char. Valid values are ( Auto | LF | CRLF | CR ).")
+    bicep_newline_type = CLIArgumentType(options_list=['--newline'], help="Set newline char. Valid values are ( Auto | LF | CRLF | CR ).")
     bicep_target_platform_type = CLIArgumentType(options_list=['--target-platform', '-t'],
                                                  arg_type=get_enum_type(
                                                      ["win-x64", "linux-musl-x64", "linux-x64", "osx-x64", "linux-arm64", "osx-arm64"]),
