@@ -19,36 +19,23 @@ def create_app_group_policy_object(col):
             }
         })
 
-    if "rate_limit_threshold" in col and "metric_id" in col:
-        policy_object.update({
-            "throttling_policy": {
-                "rate_limit_threshold": col["rate_limit_threshold"],
-                "metric_id": col["metric_id"]
-            }
-        })
-
     return policy_object
 
 
 def cli_appgroup_create(cmd, resource_group_name, namespace_name, application_group_name, client_app_group_identifier,
-                        throttling_policy_config, is_enabled=None):
+                        throttling_policy_config=None, is_enabled=None):
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.application_group import Create
     command_args_dict = {}
-    policy_object = []
-    if is_enabled is not None:
-        command_args_dict["is_enabled"] = is_enabled
-    command_args_dict["client_app_group_identifier"] = client_app_group_identifier
-    if throttling_policy_config:
-        for col in throttling_policy_config:
-            policy_object.append(create_app_group_policy_object(col))
-        command_args_dict["policies"] = policy_object
 
     command_args_dict.update({
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
-        "application_group_name": application_group_name
+        "application_group_name": application_group_name,
+        "is_enabled": is_enabled,
+        "client_app_group_identifier": client_app_group_identifier,
+        "policies": throttling_policy_config
     })
-    print(command_args_dict)
+
     return Create(cli_ctx=cmd.cli_ctx)(command_args=command_args_dict)
 
 
@@ -61,18 +48,18 @@ def cli_add_appgroup_policy(cmd, resource_group_name, namespace_name, applicatio
         "namespace_name": namespace_name,
         "application_group_name": application_group_name
     })
-    policy_obejct = []
+    policy_object = []
     for obj in application_group["policies"]:
         policy = create_app_group_policy_object(obj)
-        policy_obejct.append(policy)
+        policy_object.append(policy)
     for obj in throttling_policy_config:
-        if obj not in policy_obejct:
-            policy_obejct.append(create_app_group_policy_object(obj))
+        if obj not in policy_object:
+            policy_object.append(obj)
     return Update(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
         "application_group_name": application_group_name,
-        "policies": policy_obejct
+        "policies": policy_object
     })
 
 

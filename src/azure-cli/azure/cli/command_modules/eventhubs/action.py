@@ -64,7 +64,15 @@ class ConstructPolicy(argparse._AppendAction):
         from azure.cli.command_modules.eventhubs.constants import OUTGOING_BYTES
         from azure.cli.command_modules.eventhubs.constants import OUTGOING_MESSAGES
 
-        throttling_policy = {}
+        throttling_policy = {
+            "name": None,
+            "type": "ThrottlingPolicy",
+            "throttling_policy": {
+                "rate_limit_threshold": None,
+                "metric_id": None
+            }
+        }
+
         for (k, v) in (x.split('=', 1) for x in values):
             if k == 'name':
                 throttling_policy["name"] = v
@@ -72,24 +80,27 @@ class ConstructPolicy(argparse._AppendAction):
             elif k == 'rate-limit-threshold':
                 if v.isdigit() is False:
                     raise CLIError('rate-limit-threshold should be an integer')
-                throttling_policy["rate_limit_threshold"] = int(v)
+                if 'throttling_policy' in throttling_policy:
+                    throttling_policy["throttling_policy"] = {}
+                throttling_policy["throttling_policy"]["rate_limit_threshold"] = int(v)
 
             elif k == 'metric-id':
                 if v.lower() == INCOMING_MESSAGES.lower():
-                    throttling_policy["metric_id"] = INCOMING_MESSAGES
+                    throttling_policy["throttling_policy"]["metric_id"] = INCOMING_MESSAGES
                 elif v.lower() == INCOMING_BYTES.lower():
-                    throttling_policy["metric_id"] = INCOMING_BYTES
+                    throttling_policy["throttling_policy"]["metric_id"] = INCOMING_BYTES
                 elif v.lower() == OUTGOING_MESSAGES.lower():
-                    throttling_policy["metric_id"] = OUTGOING_MESSAGES
+                    throttling_policy["throttling_policy"]["metric_id"] = OUTGOING_MESSAGES
                 elif v.lower() == OUTGOING_BYTES.lower():
-                    throttling_policy["metric_id"] = OUTGOING_BYTES
+                    throttling_policy["throttling_policy"]["metric_id"] = OUTGOING_BYTES
                 else:
                     raise CLIError('Only allowed values for metric_id are: {0}, {1}, {2}, {3}'.format(INCOMING_MESSAGES, INCOMING_BYTES, OUTGOING_MESSAGES, OUTGOING_BYTES))
 
             else:
                 raise InvalidArgumentValueError("Invalid Argument for:'{}' Only allowed arguments are 'name, rate-limit-threshold and metric-id'".format(option_string))
+        print("hi", throttling_policy)
 
-        if (throttling_policy["name"] is None) or (throttling_policy["metric_id"] is None) or (throttling_policy["rate_limit_threshold"] is None):
+        if (throttling_policy["name"] is None) or (throttling_policy["throttling_policy"]["metric_id"] is None) or (throttling_policy["throttling_policy"]["rate_limit_threshold"] is None):
             raise CLIError('One of the throttling policies is missing one of these parameters: name, metric-id, rate-limit-threshold')
 
         return throttling_policy
@@ -105,10 +116,8 @@ class ConstructPolicyName(argparse._AppendAction):
         from azure.cli.core.azclierror import InvalidArgumentValueError
         policy = {}
         for (k, v) in (x.split('=', 1) for x in values):
-            print("hello")
             if k == 'name':
                 policy["name"] = v
-                print("helo")
             else:
                 raise InvalidArgumentValueError(
                     "Invalid Argument for:'{}' Only allowed arguments are 'name' ".format(option_string))
