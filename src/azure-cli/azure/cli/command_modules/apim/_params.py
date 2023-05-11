@@ -424,11 +424,11 @@ def load_arguments(self, _):
     with self.argument_context('apim graphql api resolver create') as c:
         c.argument('service_name', options_list=['--service-name', '-n'],
                    help='The name of the API Management service instance.')
-        c.argument('api_id', arg_type=api_id, required=True)
-        c.argument('resolver_id', required=True,
+        c.argument('api_id', arg_type=api_id)
+        c.argument('resolver_id',
                    help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
         c.argument('display_name',
-                   help='Resolver Name.', required=True)
+                   help='Resolver Name.')
         c.argument('path', help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.', required=True)
         c.argument('description',
                    help='Description of the resolver. May include HTML formatting tags.')

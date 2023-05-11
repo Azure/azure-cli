@@ -656,7 +656,7 @@ examples:
 
 helps['apim graphqlapi resolver create'] = """
 type: command
-short-summary: Creates a new resolver in the GraphQL API or updates an existing one.
+short-summary: Create a new resolver in the GraphQL API or updates an existing one.
 examples:
   - name: Create a new resolver.
     text: |
@@ -665,9 +665,9 @@ examples:
 
 helps['apim graphqlapi resolver delete'] = """
 type: command
-short-summary: Deletes the specified resolver in the GraphQL API.
+short-summary: Delete the specified resolver in the GraphQL API.
 examples:
-  - name: Deletes resolver.
+  - name: Delete resolver.
     text: |
         az apim api delete --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId
 """
@@ -683,18 +683,18 @@ examples:
 
 helps['apim graphqlapi resolver list'] = """
 type: command
-short-summary: Lists a collection of the resolvers for the specified GraphQL API.
+short-summary: List a collection of the resolvers for the specified GraphQL API.
 examples:
-  - name: Gets list of resolvers of an API.
+  - name: Get list of resolvers of an API.
     text: |
         az apim api show --service-name MyApim -g MyResourceGroup --api-id MyApi
 """
 
 helps['apim graphqlapi resolver policy create'] = """
 type: command
-short-summary: Creates or updates policy configuration for the GraphQL API Resolver level.
+short-summary: Create or updates policy configuration for the GraphQL API Resolver level.
 examples:
-  - name: Creates a resolver policy.
+  - name: Create a resolver policy.
     text: |
         az apim graphqlapi resolver policy create --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId --format xml --value-path 'path to xml file'
 """
@@ -710,9 +710,9 @@ examples:
 
 helps['apim graphqlapi resolver policy delete'] = """
 type: command
-short-summary: Deletes the policy configuration at the GraphQL Api Resolver.
+short-summary: Delete the policy configuration at the GraphQL Api Resolver.
 examples:
-  - name: Deletes policy configuration.
+  - name: Delete policy configuration.
     text: |
         az apim graphqlapi resolver policy delete --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId
 """
