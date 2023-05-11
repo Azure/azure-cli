@@ -96,7 +96,7 @@ def get_pipeline_result():
         pipeline_result['pull_request_number'] = pull_request_number
     if os.path.exists(output_path):
         for file in os.listdir(output_path):
-            with open(file, 'r') as f:
+            with open(os.path.join(output_path, file), 'r') as f:
                 items = json.load(f)
                 module = os.path.basename(file).split('.')[0].split('_')[1]
                 breaking_change = {
