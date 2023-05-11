@@ -177,6 +177,13 @@ long-summary: Requests that a backup of the specified certificate be downloaded 
         certificates/backup permission.
 """
 
+helps['keyvault certificate restore'] = """
+type: command
+short-summary: Restores a backed up certificate to a vault.
+long-summary: Restores a backed up certificate, and all its versions, to a vault. This operation requires
+        the certificates/restore permission.
+"""
+
 helps['keyvault certificate issuer'] = """
 type: group
 short-summary: Manage certificate issuer information.
@@ -190,6 +197,14 @@ short-summary: Manage admin information for certificate issuers.
 helps['keyvault certificate pending'] = """
 type: group
 short-summary: Manage pending certificate creation operations.
+"""
+
+helps['keyvault certificate pending merge'] = """
+type: command
+short-summary: Merges a certificate or a certificate chain with a key pair existing on the server.
+long-summary: The MergeCertificate operation performs the merging of a certificate or certificate chain
+        with a key pair currently available in the service. This operation requires the
+        certificates/create permission.
 """
 
 helps['keyvault create'] = """

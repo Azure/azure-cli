@@ -537,7 +537,7 @@ def load_arguments(self, _):
             c.extra('expires_on', options_list=['--expires'], type=datetime_type,
                     help='Expiration UTC datetime (Y-m-d\'T\'H:M:S\'Z\').')
             c.extra('not_before', type=datetime_type,
-                    help='Key not usable before the provided UTC datetime (Y-m-d\'T\'H:M:S\'Z\').')
+                    help='Secret not usable before the provided UTC datetime (Y-m-d\'T\'H:M:S\'Z\').')
             c.extra('tags', tags_type)
 
 
@@ -737,17 +737,6 @@ def load_arguments(self, _):
 
     # KeyVault Certificate
 
-    # TODO: Fix once service side issue is fixed that there is no way to list pending certificates
-    with self.argument_context('keyvault certificate pending') as c:
-        c.argument('certificate_name', options_list=['--name', '-n'], help='Name of the pending certificate.',
-                   id_part='child_name_1', completer=None)
-
-    with self.argument_context('keyvault certificate pending merge') as c:
-        c.argument('x509_certificates', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
-                   help='File containing the certificate or certificate chain to merge.',
-                   validator=validate_x509_certificate_chain)
-        c.attributes_argument('certificate', CertificateAttributes, True)
-
     with self.argument_context('keyvault certificate pending cancel') as c:
         c.ignore('cancellation_requested')
 
@@ -829,7 +818,7 @@ def load_arguments(self, _):
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                    help='Local certificate backup from which to restore certificate.')
         c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None,
-                options_list=['--vault-name'], help='Name of the Key Vault. Required if --id is not specified')
+                options_list=['--vault-name'], arg_group='Id', help='Name of the Key Vault.')
 
     with self.argument_context('keyvault certificate download') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
@@ -837,6 +826,23 @@ def load_arguments(self, _):
         c.argument('encoding', arg_type=get_enum_type(certificate_format_values), options_list=['--encoding', '-e'],
                    help='Encoding of the certificate. DER will create a binary DER formatted x509 certificate, '
                         'and PEM will create a base64 PEM x509 certificate.')
+
+    # TODO: Fix once service side issue is fixed that there is no way to list pending certificates
+    with self.argument_context('keyvault certificate pending') as c:
+        c.argument('certificate_name', options_list=['--name', '-n'], arg_group='Id',
+                   help='Name of the pending certificate.',
+                   id_part='child_name_1', completer=None)
+
+    with self.argument_context('keyvault certificate pending merge') as c:
+        c.argument('x509_certificates', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
+                   help='File containing the certificate or certificate chain to merge.',
+                   validator=validate_x509_certificate_chain)
+        c.extra('disabled', arg_type=get_three_state_flag(), help='Create certificate in disabled state.',
+                validator=process_certificate_import)
+        c.extra('tags', tags_type)
+        c.extra('vault_base_url', vault_name_type, required=True, arg_group='Id',
+                type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+
     # endregion
 
     # region KeyVault Role
