@@ -26,27 +26,23 @@ output_path = '/mnt/vss/_work/1/output_meta'
 
 
 def get_base_meta_files():
-    cmd = ['git', 'checkout', 'dev']
-    print(cmd)
-    out = subprocess.run(cmd, capture_output=True)
-    print(out.stdout)
     cmd = ['azdev', 'setup', '--cli', get_cli_repo_path()]
     print(cmd)
-    out = subprocess.run(cmd, capture_output=True)
-    print(out.stdout)
+    subprocess.run(cmd)
     cmd = ['azdev', 'command-change', 'meta-export', 'CLI', '--meta-output-path', base_meta_path]
     print(cmd)
-    out = subprocess.run(cmd, capture_output=True)
-    print(out.stdout)
+    subprocess.run(cmd)
 
 
 def get_diff_meta_files():
+    cmd = ['git', 'checkout', 'dev']
+    print(cmd)
+    subprocess.run(cmd)
     # refs/remotes/pull/24765/merge
     target_branch = f'refs/remotes/pull/{pull_request_number}/merge'
     cmd = ['azdev', 'command-change', 'meta-export', '--src', 'dev', '--tgt', target_branch, '--repo', get_cli_repo_path(), '--meta-output-path', diff_meta_path]
     print(cmd)
-    out = subprocess.run(cmd, capture_output=True)
-    print(out.stdout)
+    subprocess.run(cmd)
 
 
 def meta_diff():
@@ -55,15 +51,13 @@ def meta_diff():
             if file.endswith('.json'):
                 cmd = ['azdev', 'command-change', 'meta-diff', '--base-meta-file', os.path.join(base_meta_path, file), '--diff-meta-file', os.path.join(diff_meta_path, file), '--output-file', os.path.join(output_path, file)]
                 print(cmd)
-                out = subprocess.run(cmd, capture_output=True)
-                print(out.stdout)
+                subprocess.run(cmd)
         cmd = ['ls', '-al', output_path]
         print(cmd)
-        out = subprocess.run(cmd, capture_output=True)
-        print(out.stdout)
+        subprocess.run(cmd)
 
 
-def build_pipeline_result():
+def get_pipeline_result():
     pipeline_result = {
         "breaking_change_check": {
             "Name": job_name,
@@ -72,10 +66,6 @@ def build_pipeline_result():
     }
     if pull_request_number != '$(System.PullRequest.PullRequestNumber)':
         pipeline_result['pull_request_number'] = pull_request_number
-    return pipeline_result
-
-
-def get_pipeline_result(pipeline_result):
     if os.path.exists(output_path):
         for file in os.listdir(output_path):
             with open('example.json', 'r') as f:
