@@ -13,7 +13,7 @@ mod_list = [mod for mod in sorted(os.listdir(root_dir)) if os.path.isdir(os.path
 
 pytest_base_cmd = f'PYTHONPATH=/usr/lib64/az/lib/{python_version}/site-packages python -m pytest -x -v --forked -p no:warnings --log-level=WARN'
 pytest_parallel_cmd = '{} -n auto'.format(pytest_base_cmd)
-serial_test_modules = ['botservice', 'network', 'cloud', 'appservice']
+serial_test_modules = ['botservice', 'network', 'cloud', 'appservice', 'iot', 'resource']
 
 for mod_name in mod_list:
     cmd = '{} --junit-xml /azure_cli_test_result/{}.xml --pyargs azure.cli.command_modules.{}'.format(
@@ -25,5 +25,5 @@ for mod_name in mod_list:
     elif exit_code != 0:
         sys.exit(exit_code)
 
-exit_code = subprocess.call(['{} --junit-xml /azure_cli_test_result/azure-cli-core.xml --pyargs azure.cli.core'.format(pytest_parallel_cmd)], shell=True)
+exit_code = subprocess.call(['{} --junit-xml /azure_cli_test_result/azure-cli-core.xml --pyargs azure.cli.core'.format(pytest_base_cmd)], shell=True)
 sys.exit(exit_code)

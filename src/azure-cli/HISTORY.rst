@@ -3,6 +3,62 @@
 Release History
 ===============
 
+2.48.1
+++++++
+
+**App Service**
+
+* Hotfix: Use basic auth with SCM sites if supported, else use AAD auth (#26229)
+
+2.48.0
+++++++
+
+**App Service**
+
+* Fix #25642: `az functionapp deployment user show`: Fix the AttributeError `'function' object has no attribute 'metadata'` (#26078)
+* `az staticwebapp appsettings`: Add `--environment-name` parameter to allow app setting operation on preview environments (#25997)
+* `az functionapp create`: Update 'kind' attribute for Centauri function apps (#26129)
+
+**Compute**
+
+* Fix #26118: `az vm list-ip-addresses`: Fix the KeyError when attributes missing in public IP address (#26135)
+* Fix #26164: `az vmss update`: Fix unexpected error while running the update instance protection command on VMSS flex instances (#26174)
+* Fix #26185: `az sig update`: Fix issues that `is_soft_delete_enabled` may not exist (#26188)
+* `az vm host resize`: Add new command to support resizing dedicated host (#26189)
+* `az vm host list-resize-options`: Add new command to support getting possible resize options (#26189)
+
+**DMS**
+
+* `az dms project tack create`: Add support for database schema migration (#26077)
+
+**Eventhub**
+
+* `az eventhubs namespace application-group policy remove`: Add upcoming breaking change notification (#26041)
+
+**Network**
+
+* `az network nic update`: Add `--ip-configurations` to support shorthand syntax (#26009)
+* `az network public-ip prefix create`: Add parameter `--ip-tags` (#26087)
+* `az network cross-region-lb rule create`: Set default value for `--enable-tcp-reset` and `--idle-timeout` (#26070)
+
+**RDBMS**
+
+* `az mysql flexible-server create/update/gtid reset`: Add GTID reset and fix public-access (#26178)
+
+**SQL**
+
+* `az sql midb ledger-digest-uploads`: Support SQL Ledger (#26043)
+* `az sql mi server-configuration-option`: New command group to manage server configuration options (#26114)
+
+**SQL VM**
+
+* `az sql vm enable-azure-ad-auth/validate-azure-ad-auth`: Single mode improvement (#26133)
+
+**Storage**
+
+* `az storage file/directory`: Add `--auth-mode login` and `--backup-intent` to support OAuth (#25883)
+* `az storage blob sync`: Add positional argument `extra_options` to pass through options to `azcopy` (#26127)
+
 2.47.0
 ++++++
 

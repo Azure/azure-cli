@@ -214,7 +214,7 @@ ledger_on_param_type = CLIArgumentType(
 
 preferred_enclave_param_type = CLIArgumentType(
     options_list=['--preferred-enclave-type'],
-    help='Create a database configured with Default or VBS preferred enclave type. ',
+    help='Specifies type of enclave for this resource.',
     arg_type=get_enum_type(AlwaysEncryptedEnclaveType))
 
 database_assign_identity_param_type = CLIArgumentType(
@@ -1492,6 +1492,9 @@ def load_arguments(self, _):
         c.argument('high_availability_replica_count',
                    arg_type=read_replicas_param_type)
 
+        c.argument('preferred_enclave_type',
+                   arg_type=preferred_enclave_param_type)
+
     with self.argument_context('sql elastic-pool create') as c:
         # Create args that will be used to build up the ElasticPool object
         create_args_for_complex_type(
@@ -1504,6 +1507,7 @@ def load_arguments(self, _):
                 'zone_redundant',
                 'maintenance_configuration_id',
                 'high_availability_replica_count',
+                'preferred_enclave_type',
             ])
 
         # Create args that will be used to build up the ElasticPoolPerDatabaseSettings object
@@ -1563,6 +1567,9 @@ def load_arguments(self, _):
 
         c.argument('storage_mb',
                    help='Storage limit for the elastic pool in MB.')
+
+        c.argument('preferred_enclave_type',
+                   help='Type of enclave to be configured for the elastic pool.')
 
     #####
     #           sql elastic-pool op

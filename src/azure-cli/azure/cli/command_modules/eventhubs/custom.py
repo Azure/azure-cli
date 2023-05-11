@@ -113,13 +113,7 @@ def cli_namespace_list(cmd, client, resource_group_name=None):
     if cmd.supported_api_version(min_api='2021-06-01-preview'):
         if resource_group_name:
             return client.list_by_resource_group(resource_group_name=resource_group_name)
-
     return client.list()
-
-
-def cli_namespace_exists(client, name):
-
-    return client.check_name_availability(parameters={'name': name})
 
 
 # NetwrokRuleSet Region
@@ -129,7 +123,7 @@ def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_nam
     NWRuleSetIpRules = cmd.get_models('NWRuleSetIpRules', resource_type=ResourceType.MGMT_EVENTHUB)
 
     netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
-
+    logger.warning('This version will be depracated & latest version will release in breaking change release.')
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
         if netwrokruleset.virtual_network_rules is None:
             netwrokruleset.virtual_network_rules = [NWRuleSetVirtualNetworkRules]
@@ -339,14 +333,6 @@ def cli_remove_encryption(client, resource_group_name, namespace_name, encryptio
     get_namespace = client.get(resource_group_name, namespace_name)
 
     return get_namespace
-
-
-def cli_schemaregistry_createupdate(cmd, client, resource_group_name, namespace_name, schema_group_name,
-                                    schema_compatibility, schema_type, tags=None):
-    SchemaGroup = cmd.get_models('SchemaGroup', resource_type=ResourceType.MGMT_EVENTHUB)
-    ehSchemaGroup = SchemaGroup(schema_compatibility=schema_compatibility, schema_type=schema_type, group_properties=tags)
-
-    return client.create_or_update(resource_group_name, namespace_name, schema_group_name, ehSchemaGroup)
 
 
 def cli_appgroup_create(cmd, client, resource_group_name, namespace_name, application_group_name, client_app_group_identifier,

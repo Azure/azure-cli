@@ -118,9 +118,9 @@ def load_arguments_eh(self, _):
     for scope in ['eventhubs namespace network-rule add', 'eventhubs namespace network-rule remove']:
         with self.argument_context(scope, resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01') as c:
             c.argument('subnet', arg_group='Virtual Network Rule', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
-            c.argument('ip_mask', arg_group='IP Address Rule', options_list=['--ip-address'], help='IPv4 address or CIDR range - 10.6.0.0/24')
+            c.argument('ip_mask', arg_group='IP Address Rule', options_list=['--ip-address'], help='IPv4 address or CIDR range - 10.6.0.0/24', deprecate_info=c.deprecate(redirect='--ip-rule', expiration='2.49.0'))
             c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
-            c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'], help='Name of the Virtual Network')
+            c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'], help='Name of the Virtual Network', deprecate_info=c.deprecate(expiration='2.49.0'))
 
     with self.argument_context('eventhubs namespace network-rule update', resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01') as c:
         c.argument('public_network_access', options_list=['--public-network-access', '--public-network'], arg_type=get_enum_type(['Enabled', 'Disabled']), help='This determines if traffic is allowed over public network. By default it is enabled. If value is SecuredByPerimeter then Inbound and Outbound communication is controlled by the network security perimeter and profile\' access rules.')
@@ -180,21 +180,6 @@ def load_arguments_eh(self, _):
             c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'], is_preview=True,
                        arg_type=get_three_state_flag(),
                        help='A boolean value that indicates whether Infrastructure Encryption (Double Encryption) is enabled/disabled')
-
-# Schema Registry
-    with self.argument_context('eventhubs namespace schema-registry list') as c:
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-
-    with self.argument_context('eventhubs namespace schema-registry') as c:
-        c.argument('namespace_name', arg_type=namespace_name_arg_type, options_list=['--namespace-name'], help='name of Namespace')
-        c.argument('schema_group_name', arg_type=name_type, id_part='child_name_1', help='name of schema group')
-
-    for scope in ['eventhubs namespace schema-registry create', 'eventhubs namespace schema-registry update']:
-        with self.argument_context(scope) as c:
-            c.argument('schema_compatibility', options_list=['--schema-compatibility'], arg_type=get_enum_type(['None', 'Backward', 'Forward']), help='Compatibility of Schema')
-            c.argument('schema_type', options_list=['--schema-type'], arg_type=get_enum_type(['Avro']), help='Type of Schema')
-            c.argument('tags', options_list=['--group-properties'], arg_type=tags_type,
-                       help='Type of Schema')
 
 # Application Group
     with self.argument_context('eventhubs namespace application-group') as c:

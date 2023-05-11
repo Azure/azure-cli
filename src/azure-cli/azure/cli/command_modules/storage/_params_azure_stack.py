@@ -696,6 +696,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('exclude_pattern', exclude_pattern_type)
         c.argument('include_pattern', include_pattern_type)
         c.argument('exclude_path', exclude_path_type)
+        c.positional('extra_options', nargs='*', is_experimental=True, default=[],
+                     help="Other options which will be passed through to azcopy as it is. "
+                          "Please put all the extra options after a `--`")
 
     with self.argument_context('storage container') as c:
         from .sdkutil import get_container_access_type_names
