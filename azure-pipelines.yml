@@ -1105,7 +1105,8 @@ jobs:
     displayName: "Breaking Change Check"
     env:
       PULL_REQUEST_NUMBER: $(System.PullRequest.PullRequestNumber)
-      JOB_NAME: $(System.JobName)
+      JOB_NAME: "breaking_change_check"
+      BASE_BRANCH: $(Build.SourceBranchName)
 
 #- job: NotifyCIErrors
 #  dependsOn:

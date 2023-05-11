@@ -20,6 +20,8 @@ logger.addHandler(ch)
 
 pull_request_number = os.environ.get('PULL_REQUEST_NUMBER', None)
 job_name = os.environ.get('JOB_NAME', None)
+base_branch = os.environ.get('BASE_BRANCH', None)
+print('base_branch: ', base_branch)
 base_meta_path = '/mnt/vss/_work/1/base_meta'
 diff_meta_path = '/mnt/vss/_work/1/diff_meta'
 output_path = '/mnt/vss/_work/1/output_meta'
@@ -107,7 +109,7 @@ def get_pipeline_result():
                 for item in items:
                     breaking_change['Content'] = build_markdown_content(item['cmd_name'], item['is_break'], item['rule_message'], item['suggest_message'], breaking_change['Content'])
                 pipeline_result['breaking_change_check']['Details'].append(breaking_change)
-    print(pipeline_result)
+    print(json.dumps(pipeline_result, indent=2))
     return pipeline_result
 
 
