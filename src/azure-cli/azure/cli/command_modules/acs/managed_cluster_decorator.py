@@ -4771,7 +4771,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         if enable_validation:
             if enable_azure_monitor_metrics and self._get_disable_azure_monitor_metrics(False):
                 raise MutuallyExclusiveArgumentError(
-                    "Cannot specify --enable-azure-monitor-metrics and --disable-azure-monitor-metrics at the same time."
+                    "Cannot specify --enable-azure-monitor-metrics and --disable-azure-monitor-metrics at the same time"
                 )
             if enable_azure_monitor_metrics and not check_is_msi_cluster(self.mc):
                 raise RequiredArgumentMissingError(
@@ -4800,7 +4800,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         if enable_validation:
             if disable_azure_monitor_metrics and self._get_enable_azure_monitor_metrics(False):
                 raise MutuallyExclusiveArgumentError(
-                    "Cannot specify --enable-azure-monitor-metrics and --disable-azure-monitor-metrics at the same time."
+                    "Cannot specify --enable-azure-monitor-metrics and --disable-azure-monitor-metrics at the same time"
                 )
         return disable_azure_monitor_metrics
 

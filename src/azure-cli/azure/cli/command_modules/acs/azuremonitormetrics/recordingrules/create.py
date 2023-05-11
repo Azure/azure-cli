@@ -36,9 +36,6 @@ def put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, a
             "rules": default_rules_template[i]["properties"]["rulesArmTemplate"]["resources"][0]["properties"]["rules"]
         }
     })
-    rule_group_text = "Disabled"
-    if enable_rules is True:
-        rule_group_text = "Enabled"
     for _ in range(3):
         try:
             headers = ['User-Agent=azuremonitormetrics.put_rules.' + default_rule_group_name]
