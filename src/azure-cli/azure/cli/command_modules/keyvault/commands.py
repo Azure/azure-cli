@@ -24,8 +24,7 @@ from azure.cli.command_modules.keyvault._transformers import (
 from azure.cli.command_modules.keyvault._format import transform_secret_list_table
 
 from azure.cli.command_modules.keyvault._validators import (
-    process_secret_set_namespace, process_certificate_cancel_namespace,
-    validate_private_endpoint_connection_id, validate_role_assignment_args)
+    process_secret_set_namespace, validate_private_endpoint_connection_id, validate_role_assignment_args)
 
 
 def transform_assignment_list(result):
@@ -237,10 +236,6 @@ def load_command_table(self, _):
         g.keyvault_custom('backup', 'backup_secret')
         g.keyvault_custom('restore', 'restore_secret', transform=transform_secret_set_attributes)
 
-    with self.command_group('keyvault certificate pending', data_entity.command_type) as g:
-        g.keyvault_command('delete', 'delete_certificate_operation', validator=process_certificate_cancel_namespace,
-                           transform=extract_subresource_name())
-
     with self.command_group('keyvault certificate contact', data_entity.command_type) as g:
         g.keyvault_command('list', 'get_certificate_contacts', transform=keep_max_results)
         g.keyvault_custom('add', 'add_certificate_contact')
@@ -300,8 +295,9 @@ def load_command_table(self, _):
             g.keyvault_custom('restore', 'restore_certificate', transform=transform_certificate_show)
 
     with self.command_group('keyvault certificate pending', data_certificate_entity.command_type) as g:
-        g.keyvault_command('merge', 'merge_certificate')
+        g.keyvault_command('merge', 'merge_certificate', transform=transform_certificate_show)
         g.keyvault_command('show', 'get_certificate_operation', transform=transform_certificate_create)
+        g.keyvault_command('delete', 'delete_certificate_operation', transform=transform_certificate_create)
 
     if not is_azure_stack_profile(self):
         with self.command_group('keyvault role', data_access_control_entity.command_type):

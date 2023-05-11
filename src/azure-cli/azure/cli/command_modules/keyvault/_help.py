@@ -207,6 +207,21 @@ long-summary: The MergeCertificate operation performs the merging of a certifica
         certificates/create permission.
 """
 
+helps['keyvault certificate pending show'] = """
+type: command
+short-summary: Gets the creation operation of a certificate.
+long-summary: Gets the creation operation associated with a specified certificate. This operation requires
+        the certificates/get permission.
+"""
+
+helps['keyvault certificate pending delete'] = """
+type: command
+short-summary: Deletes the creation operation for a specific certificate.
+long-summary: Deletes the creation operation for a specified certificate that is in the process of being
+        created. The certificate is no longer created. This operation requires the
+        certificates/update permission.
+"""
+
 helps['keyvault create'] = """
 type: command
 short-summary: Create a Vault or HSM.

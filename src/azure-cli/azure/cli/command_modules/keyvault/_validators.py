@@ -130,12 +130,6 @@ def _get_resource_group_from_resource_name(cli_ctx, vault_name, hsm_name=None):
 
 
 # COMMAND NAMESPACE VALIDATORS
-
-
-def process_certificate_cancel_namespace(namespace):
-    namespace.cancellation_requested = True
-
-
 def process_secret_set_namespace(cmd, namespace):
     validate_tags(namespace)
 
