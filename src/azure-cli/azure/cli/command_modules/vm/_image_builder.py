@@ -408,7 +408,7 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
                                                 ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
                                                 ImageTemplateManagedImageDistributor,
                                                 ImageTemplateSharedImageDistributor, ImageTemplateIdentity,
-                                                ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties,  # pylint: disable=line-too-long
+                                                UserAssignedIdentity,  # pylint: disable=line-too-long
                                                 ImageTemplateVmProfile, VirtualNetworkConfig)
 
     if image_template is not None:
@@ -495,7 +495,7 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
             if not is_valid_resource_id(ide):
                 ide = resource_id(subscription=subscription_id, resource_group=resource_group_name,
                                   namespace='Microsoft.ManagedIdentity', type='userAssignedIdentities', name=ide)
-            user_assigned_identities[ide] = ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties()  # pylint: disable=line-too-long
+            user_assigned_identities[ide] = UserAssignedIdentity()  # pylint: disable=line-too-long
         identity_body = ImageTemplateIdentity(type='UserAssigned', user_assigned_identities=user_assigned_identities)
 
     # VM profile
@@ -523,12 +523,12 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
         image_template.customize = template_scripts
 
     return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=image_template,
-                      resource_group_name=resource_group_name, image_template_name=image_template_name)
+                      resource_group_name=resource_group_name, image_template_name=image_template_name, api_version=cmd.get_api_version())
 
 
 def assign_template_identity(cmd, client, resource_group_name, image_template_name, user_assigned=None):
     from azure.mgmt.imagebuilder.models import (ImageTemplateIdentity, ImageTemplateUpdateParameters,
-                                                ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties)  # pylint: disable=line-too-long
+                                                UserAssignedIdentity)  # pylint: disable=line-too-long
 
     from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
 
@@ -551,7 +551,7 @@ def assign_template_identity(cmd, client, resource_group_name, image_template_na
 
         updated_user_assigned = list(existing_user_identities.union(add_user_assigned))
 
-        default_user_identity = ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties()  # pylint: disable=line-too-long
+        default_user_identity = UserAssignedIdentity()  # pylint: disable=line-too-long
         user_assigned_identities = dict.fromkeys(updated_user_assigned, default_user_identity)
 
         image_template_identity = ImageTemplateIdentity(type='UserAssigned',
