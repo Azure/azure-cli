@@ -3764,7 +3764,7 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
         if indent_size:
             args += ["--indentSize", indent_size]
         if insert_final_newline:
-            args += ["--insertFinalNewline", insert_final_newline]
+            args += ["--insertFinalNewline"]
 
         output = run_bicep_command(cmd.cli_ctx, args)
 
