@@ -846,6 +846,10 @@ def _stream_logs(client, resource_group_name, name, container_name, restart_poli
     lastOutputLines = 0
     while True:
         log = client.list_logs(resource_group_name, name, container_name)
+        if log.content is None:
+            time.sleep(2)
+            continue
+
         lines = log.content.split('\n')
         currentOutputLines = len(lines)
 
