@@ -656,7 +656,7 @@ examples:
 
 helps['apim graphqlapi resolver create'] = """
 type: command
-short-summary: Creates a new resolver in the GraphQL API or updates an existing one.
+short-summary: Create a new resolver in the GraphQL API or updates an existing one.
 examples:
   - name: Create a new resolver.
     text: |
