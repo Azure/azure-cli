@@ -92,27 +92,6 @@ def cli_namespace_list(cmd, client, resource_group_name=None):
         return client.list()
 
 
-# DisasterRecoveryConfigs Region
-def cli_georecovery_alias_create(cmd, client, resource_group_name, namespace_name, alias,
-                                 partner_namespace, alternate_name=None):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        parameters = {
-            'partner_namespace': partner_namespace,
-            'alternate_name': alternate_name,
-        }
-        logger.warning(
-            'the argument parameters from georecovery-alias fail-over cmdlets will be remove in future release.')
-        return client.create_or_update(resource_group_name=resource_group_name, namespace_name=namespace_name,
-                                       alias=alias, parameters=parameters)
-
-
-def cli_georecovery_alias_exists(cmd, client, resource_group_name, namespace_name, name):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        return client.check_name_availability(resource_group_name=resource_group_name,
-                                              namespace_name=namespace_name,
-                                              parameters={'name': name})
-
-
 iso8601pattern = re.compile("^P(?!$)(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(?=\\d)(\\d+H)?(\\d+M)?(\\d+.)?(\\d+S)?)?$")
 timedeltapattern = re.compile("^\\d+:\\d+:\\d+$")
 
@@ -188,7 +167,6 @@ def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_nam
     NWRuleSetIpRules = cmd.get_models('NWRuleSetIpRules', resource_type=ResourceType.MGMT_SERVICEBUS)
     netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
 
-    logger.warning('This version will be depracated & latest version will release in breaking change release.')
     if netwrokruleset.virtual_network_rules is None:
         netwrokruleset.virtual_network_rules = []
 
