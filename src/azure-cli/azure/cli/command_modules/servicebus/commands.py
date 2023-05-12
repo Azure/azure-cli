@@ -8,7 +8,6 @@
 # pylint: disable=too-many-locals
 
 from azure.cli.core.commands import CliCommandType
-from azure.cli.core.profiles import ResourceType
 
 
 def load_command_table(self, _):
