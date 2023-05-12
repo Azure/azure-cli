@@ -3626,14 +3626,14 @@ def get_app_insights_key(cli_ctx, resource_group, name):
     return appinsights.instrumentation_key
 
 
-def create_flex_app_service_plan(cmd, resource_group_name, name, location, is_linux):
+def create_flex_app_service_plan(cmd, resource_group_name, name, location):
     SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
     client = web_client_factory(cmd.cli_ctx)
     sku_def = SkuDescription(tier="FlexConsumption", name="FL1", size="FL", family="FL")
     plan_def = AppServicePlan(
         location=location,
         sku=sku_def,
-        reserved=(is_linux or None),
+        reserved=True,
         kind="functionapp",
         name=name
     )
@@ -3744,6 +3744,13 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 'Please try again without the --os-type parameter or set --os-type to be linux.'
             )
 
+    if ((always_ready_instances is not None or maximum_instances is not None or instance_size is not None) and
+        flexconsumption_location is None):
+        raise RequiredArgumentMissingError("usage error: parameters --always-ready-instances, --maximum-instances "
+                                           "and --instance-size must be used with parameter "
+                                           "--flexconsumption-location, please provide the name of the flex plan "
+                                           "location using --flexconsumption-location.")
+
     deployment_source_branch = deployment_source_branch or 'master'
 
     from azure.mgmt.web.models import Site
@@ -3820,9 +3827,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             raise ValidationError("Location is invalid. Use: az functionapp list-flexconsumption-locations")
         is_linux = True
         # Following the same plan name format as the backend
-        plan_name = "{}{}FlexPlan".format(flexconsumption_location, os_type)
+        plan_name = "{}LinuxFlexPlan".format(flexconsumption_location)
         plan_info = create_flex_app_service_plan(
-            cmd, resource_group_name, plan_name, flexconsumption_location, is_linux)
+            cmd, resource_group_name, plan_name, flexconsumption_location)
         functionapp_def.server_farm_id = plan_info.id
         functionapp_def.location = flexconsumption_location
 
