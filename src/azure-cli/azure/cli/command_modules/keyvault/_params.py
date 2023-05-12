@@ -736,31 +736,12 @@ def load_arguments(self, _):
     # endregion
 
     # KeyVault Certificate
-
-
-
     with self.argument_context('keyvault certificate issuer admin') as c:
         c.argument('email', help='Admin e-mail address. Must be unique within the vault.')
         c.argument('name', help='Full admin name.')
         c.argument('phone', help='Admin phone number.')
         c.argument('first_name', help='Admin first name.')
         c.argument('last_name', help='Admin last name.')
-
-    with self.argument_context('keyvault certificate issuer') as c:
-        c.argument('issuer_name', help='Certificate issuer name.')
-        c.argument('disabled', arg_type=get_three_state_flag(), help='Set issuer to disabled state.')
-        c.argument('enabled', arg_type=get_three_state_flag(), help='Set issuer enabled state.')
-
-    with self.argument_context('keyvault certificate issuer', arg_group='Issuer Credential') as c:
-        c.argument('account_id')
-        c.argument('password')
-
-    with self.argument_context('keyvault certificate issuer', arg_group='Organization Detail') as c:
-        c.argument('organization_id')
-        c.argument('admin_first_name')
-        c.argument('admin_last_name')
-        c.argument('admin_email')
-        c.argument('admin_phone')
     # endregion
 
     # region KeyVault Certificate track2
@@ -850,6 +831,26 @@ def load_arguments(self, _):
             c.extra('vault_base_url', vault_name_type, required=True, arg_group='Id',
                     type=get_vault_base_url_type(self.cli_ctx), id_part=None)
 
+    with self.argument_context('keyvault certificate issuer') as c:
+        c.argument('issuer_name', help='Certificate issuer name.')
+        c.argument('disabled', arg_type=get_three_state_flag(), help='Set issuer to disabled state.')
+        c.argument('enabled', arg_type=get_three_state_flag(), help='Set issuer enabled state.')
+
+    with self.argument_context('keyvault certificate issuer', arg_group='Issuer Credential') as c:
+        c.argument('account_id')
+        c.argument('password')
+
+    with self.argument_context('keyvault certificate issuer', arg_group='Organization Detail') as c:
+        c.argument('organization_id')
+        c.argument('admin_first_name')
+        c.argument('admin_last_name')
+        c.argument('admin_email')
+        c.argument('admin_phone')
+
+    for item in ['create', 'show', 'list', 'delete', 'update']:
+        with self.argument_context('keyvault certificate issuer {}'.format(item)) as c:
+            c.extra('vault_base_url', vault_name_type, required=True, arg_group='Id',
+                    type=get_vault_base_url_type(self.cli_ctx), id_part=None)
 
     # endregion
 

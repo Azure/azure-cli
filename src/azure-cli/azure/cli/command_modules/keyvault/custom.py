@@ -1640,24 +1640,18 @@ def delete_certificate_contact(client, email):
     return []
 
 
-def create_certificate_issuer(cmd, client, vault_base_url, issuer_name, provider_name, account_id=None,
+def create_certificate_issuer(client, issuer_name, provider_name, account_id=None,
                               password=None, disabled=None, organization_id=None):
     """ Create a certificate issuer record.
-    :param issuer_name: Unique identifier for the issuer settings.
+    :param issuer_name: The name of the issuer.
     :param provider_name: The certificate provider name. Must be registered with your
         tenant ID and in your region.
     :param account_id: The issuer account id/username/etc.
     :param password: The issuer account password/secret/etc.
     :param organization_id: The organization id.
     """
-    IssuerCredentials = cmd.get_models('IssuerCredentials', resource_type=ResourceType.DATA_KEYVAULT)
-    OrganizationDetails = cmd.get_models('OrganizationDetails', resource_type=ResourceType.DATA_KEYVAULT)
-    IssuerAttributes = cmd.get_models('IssuerAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    credentials = IssuerCredentials(account_id=account_id, password=password)
-    issuer_attrs = IssuerAttributes(enabled=not disabled)
-    org_details = OrganizationDetails(id=organization_id, admin_details=[])
-    return client.set_certificate_issuer(
-        vault_base_url, issuer_name, provider_name, credentials, org_details, issuer_attrs)
+    return client.create_issuer(issuer_name, provider_name, enabled=not disabled, account_id=account_id,
+                                password=password, organization_id=organization_id, admin_contacts=[])
 
 
 def update_certificate_issuer(client, vault_base_url, issuer_name, provider_name=None,

@@ -407,3 +407,26 @@ def transform_certificate_contact_add(result, **command_args):
         client = command_args.get('client')
         return transform_certificate_contact_list_result(result, client)
     return result
+
+def transform_certificate_issuer_create(result, **command_args):
+    if not isinstance(result, dict):
+        ret = {
+            "attributes": {
+                "created": getattr(result, "created_on"),
+                "enabled": getattr(result, "enabled"),
+                "updated": getattr(result, "updated_on")
+            },
+            "credentials": {
+                "accountId": getattr(result, "account_id"),
+                "password": getattr(result, "password")
+            },
+            "id": getattr(result, "id"),
+            "organizationDetails": {
+                "adminDetails": getattr(result, "admin_contacts"),
+                "id": getattr(result, "organization_id"),
+                "zip": 0
+            },
+            "provider": getattr(result, "provider")
+        }
+        return ret
+    return result
