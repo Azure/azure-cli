@@ -97,6 +97,7 @@ def get_docs_tmpl(cli_ctx, resource_type, client_name, module_name='operations')
         obj_name='{}')
 
 
+# pylint: disable=too-many-return-statements
 def get_client_factory(resource_type, client_name=''):
     if is_mgmt_plane(resource_type):
         return keyvault_mgmt_client_factory(resource_type, client_name)
