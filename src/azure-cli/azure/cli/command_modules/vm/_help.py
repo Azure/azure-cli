@@ -491,7 +491,7 @@ examples:
 
 helps['image builder optimizer remove'] = """
 type: command
-short-summary: Remove optimizer from an existing image builder template.
+short-summary: Remove an optimizer from an existing image builder template.
 long-summary: Must be used with --defer
 examples:
   - name: Remove an optimizer from an existing image builder template.
