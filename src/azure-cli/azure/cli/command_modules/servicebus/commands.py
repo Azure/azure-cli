@@ -12,20 +12,12 @@ from azure.cli.core.profiles import ResourceType
 
 
 def load_command_table(self, _):
-    from azure.cli.command_modules.servicebus._client_factory import (namespaces_mgmt_client_factory)
-    sb_namespace_util = CliCommandType(
-        operations_tmpl='azure.mgmt.servicebus.operations#NamespacesOperations.{}',
-        client_factory=namespaces_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_SERVICEBUS)
-
     sb_namespace_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.servicebus.operations.namespace_custom#{}',
     )
-
     sb_network_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.servicebus.operations.network_rule_set#{}',
     )
-
 
 # Namespace Region
     with self.command_group('servicebus namespace', custom_command_type=sb_namespace_custom,
