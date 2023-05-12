@@ -61,6 +61,9 @@ from azure.cli.command_modules.acs.agentpool_decorator import (
     AKSAgentPoolModels,
     AKSAgentPoolUpdateDecorator,
 )
+from azure.cli.command_modules.acs.azuremonitormetrics.azuremonitorprofile import (
+    ensure_azure_monitor_profile_prerequisites
+)
 from azure.cli.command_modules.acs.base_decorator import (
     BaseAKSContext,
     BaseAKSManagedClusterDecorator,
@@ -251,6 +254,9 @@ class AKSManagedClusterContext(BaseAKSContext):
             external_functions["add_monitoring_role_assignment"] = add_monitoring_role_assignment
             external_functions["add_virtual_node_role_assignment"] = add_virtual_node_role_assignment
             external_functions["ensure_container_insights_for_monitoring"] = ensure_container_insights_for_monitoring
+            external_functions[
+                "ensure_azure_monitor_profile_prerequisites"
+            ] = ensure_azure_monitor_profile_prerequisites
             external_functions[
                 "ensure_default_log_analytics_workspace_for_monitoring"
             ] = ensure_default_log_analytics_workspace_for_monitoring
@@ -4741,6 +4747,72 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return aks_custom_headers
 
+    def _get_enable_azure_monitor_metrics(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of enable_azure_monitor_metrics.
+        This function supports the option of enable_validation.
+        When enabled, if both enable_azure_monitor_metrics and disable_azure_monitor_metrics are
+        specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        # print("_get_enable_azure_monitor_metrics being called...")
+        # Read the original value passed by the command.
+        enable_azure_monitor_metrics = self.raw_param.get("enable_azure_monitor_metrics")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                hasattr(self.mc, "azure_monitor_profile") and
+                self.mc.azure_monitor_profile and
+                self.mc.azure_monitor_profile.metrics
+            ):
+                enable_azure_monitor_metrics = self.mc.azure_monitor_profile.metrics.enabled
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if enable_azure_monitor_metrics and self._get_disable_azure_monitor_metrics(False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-azure-monitor-metrics and --disable-azure-monitor-metrics at the same time"
+                )
+            if enable_azure_monitor_metrics and not check_is_msi_cluster(self.mc):
+                raise RequiredArgumentMissingError(
+                    "--enable-azure-monitor-metrics can only be specified for clusters with managed identity enabled"
+                )
+        return enable_azure_monitor_metrics
+
+    def get_enable_azure_monitor_metrics(self) -> bool:
+        """Obtain the value of enable_azure_monitor_metrics.
+        This function will verify the parameter by default.
+        If both enable_azure_monitor_metrics and disable_azure_monitor_metrics are specified,
+        raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        return self._get_enable_azure_monitor_metrics(enable_validation=True)
+
+    def _get_disable_azure_monitor_metrics(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of disable_azure_monito4790r_metrics.
+        This function supports the option of enable_validation.
+        When enabled, if both enable_azure_monitor_metrics and disable_azure_monitor_metrics are
+        specified, raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        # Read the original value passed by the command.
+        disable_azure_monitor_metrics = self.raw_param.get("disable_azure_monitor_metrics")
+        if enable_validation:
+            if disable_azure_monitor_metrics and self._get_enable_azure_monitor_metrics(False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-azure-monitor-metrics and --disable-azure-monitor-metrics at the same time"
+                )
+        return disable_azure_monitor_metrics
+
+    def get_disable_azure_monitor_metrics(self) -> bool:
+        """Obtain the value of disable_azure_monitor_metrics.
+        This function will verify the parameter by default.
+        If both enable_azure_monitor_metrics and disable_azure_monitor_metrics are specified,
+        raise a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        return self._get_disable_azure_monitor_metrics(enable_validation=True)
+
 
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def __init__(
@@ -5770,6 +5842,29 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc.node_resource_group = self.context.get_node_resource_group()
         return mc
 
+    def set_up_azure_monitor_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up azure monitor profile for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+        # read the original value passed by the command
+        ksm_metric_labels_allow_list = self.context.raw_param.get("ksm_metric_labels_allow_list")
+        ksm_metric_annotations_allow_list = self.context.raw_param.get("ksm_metric_annotations_allow_list")
+        if ksm_metric_labels_allow_list is None:
+            ksm_metric_labels_allow_list = ""
+        if ksm_metric_annotations_allow_list is None:
+            ksm_metric_annotations_allow_list = ""
+        if self.context.get_enable_azure_monitor_metrics():
+            if mc.azure_monitor_profile is None:
+                mc.azure_monitor_profile = self.models.ManagedClusterAzureMonitorProfile()
+            mc.azure_monitor_profile.metrics = self.models.ManagedClusterAzureMonitorProfileMetrics(enabled=False)
+            mc.azure_monitor_profile.metrics.kube_state_metrics = self.models.ManagedClusterAzureMonitorProfileKubeStateMetrics(  # pylint:disable=line-too-long
+                metric_labels_allowlist=str(ksm_metric_labels_allow_list),
+                metric_annotations_allow_list=str(ksm_metric_annotations_allow_list))
+            # set intermediate
+            self.context.set_intermediate("azuremonitormetrics_addon_enabled", True, overwrite_exists=True)
+        return mc
+
     def construct_mc_profile_default(self, bypass_restore_defaults: bool = False) -> ManagedCluster:
         """The overall controller used to construct the default ManagedCluster profile.
 
@@ -5835,6 +5930,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_http_proxy_config(mc)
         # set up workload autoscaler profile
         mc = self.set_up_workload_auto_scaler_profile(mc)
+        # set up azure monitor metrics profile
+        mc = self.set_up_azure_monitor_profile(mc)
 
         # DO NOT MOVE: keep this at the bottom, restore defaults
         if not bypass_restore_defaults:
@@ -5851,6 +5948,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         monitoring_addon_enabled = self.context.get_intermediate("monitoring_addon_enabled", default_value=False)
         ingress_appgw_addon_enabled = self.context.get_intermediate("ingress_appgw_addon_enabled", default_value=False)
         virtual_node_addon_enabled = self.context.get_intermediate("virtual_node_addon_enabled", default_value=False)
+        azuremonitormetrics_addon_enabled = self.context.get_intermediate(
+            "azuremonitormetrics_addon_enabled",
+            default_value=False
+        )
         enable_managed_identity = self.context.get_enable_managed_identity()
         attach_acr = self.context.get_attach_acr()
         need_grant_vnet_permission_to_cluster_identity = self.context.get_intermediate(
@@ -5861,6 +5962,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             monitoring_addon_enabled or
             ingress_appgw_addon_enabled or
             virtual_node_addon_enabled or
+            azuremonitormetrics_addon_enabled or
             (enable_managed_identity and attach_acr) or
             need_grant_vnet_permission_to_cluster_identity
         ):
@@ -5919,7 +6021,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     self.context.external_functions.add_monitoring_role_assignment(
                         cluster, cluster_resource_id, self.cmd
                     )
-            else:
+            elif self.context.raw_param.get("enable_addons") is not None:
                 # Create the DCR Association here
                 addon_consts = self.context.get_addon_consts()
                 CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
@@ -5970,6 +6072,24 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     subscription_id=self.context.get_subscription_id(),
                     is_service_principal=False,
                 )
+
+        # azure monitor metrics addon (v2)
+        azuremonitormetrics_addon_enabled = self.context.get_intermediate(
+            "azuremonitormetrics_addon_enabled",
+            default_value=False
+        )
+        if azuremonitormetrics_addon_enabled:
+            # Create the DC* objects, AMW, recording rules and grafana link here
+            self.context.external_functions.ensure_azure_monitor_profile_prerequisites(
+                self.cmd,
+                self.context.get_subscription_id(),
+                self.context.get_resource_group_name(),
+                self.context.get_name(),
+                self.context.get_location(),
+                self.__raw_parameters,
+                self.context.get_disable_azure_monitor_metrics(),
+                True
+            )
 
     def put_mc(self, mc: ManagedCluster) -> ManagedCluster:
         if self.check_is_postprocessing_required(mc):
@@ -6837,6 +6957,50 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def update_azure_monitor_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update azure monitor profile for the ManagedCluster object.
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        # read the original value passed by the command
+        ksm_metric_labels_allow_list = self.context.raw_param.get("ksm_metric_labels_allow_list")
+        ksm_metric_annotations_allow_list = self.context.raw_param.get("ksm_metric_annotations_allow_list")
+
+        if ksm_metric_labels_allow_list is None:
+            ksm_metric_labels_allow_list = ""
+        if ksm_metric_annotations_allow_list is None:
+            ksm_metric_annotations_allow_list = ""
+
+        if self.context.get_enable_azure_monitor_metrics():
+            if mc.azure_monitor_profile is None:
+                mc.azure_monitor_profile = self.models.ManagedClusterAzureMonitorProfile()
+            mc.azure_monitor_profile.metrics = self.models.ManagedClusterAzureMonitorProfileMetrics(enabled=True)
+            mc.azure_monitor_profile.metrics.kube_state_metrics = self.models.ManagedClusterAzureMonitorProfileKubeStateMetrics(  # pylint:disable=line-too-long
+                metric_labels_allowlist=str(ksm_metric_labels_allow_list),
+                metric_annotations_allow_list=str(ksm_metric_annotations_allow_list))
+
+        if self.context.get_disable_azure_monitor_metrics():
+            if mc.azure_monitor_profile is None:
+                mc.azure_monitor_profile = self.models.ManagedClusterAzureMonitorProfile()
+            mc.azure_monitor_profile.metrics = self.models.ManagedClusterAzureMonitorProfileMetrics(enabled=False)
+
+        if (
+            self.context.raw_param.get("enable_azure_monitor_metrics") or
+            self.context.raw_param.get("disable_azure_monitor_metrics")
+        ):
+            self.context.external_functions.ensure_azure_monitor_profile_prerequisites(
+                self.cmd,
+                self.context.get_subscription_id(),
+                self.context.get_resource_group_name(),
+                self.context.get_name(),
+                self.context.get_location(),
+                self.__raw_parameters,
+                self.context.get_disable_azure_monitor_metrics(),
+                False)
+
+        return mc
+
     def update_mc_profile_default(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -6898,6 +7062,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_http_proxy_config(mc)
         # update workload autoscaler profile
         mc = self.update_workload_auto_scaler_profile(mc)
+        # update azure monitor metrics profile
+        mc = self.update_azure_monitor_profile(mc)
         return mc
 
     def check_is_postprocessing_required(self, mc: ManagedCluster) -> bool:
@@ -6956,7 +7122,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     self.context.external_functions.add_monitoring_role_assignment(
                         cluster, cluster_resource_id, self.cmd
                     )
-            else:
+            elif (
+                self.context.raw_param.get("enable_addons") is not None or
+                self.context.raw_param.get("disable_addons") is not None
+            ):
                 # Create the DCR Association here
                 addon_consts = self.context.get_addon_consts()
                 CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
