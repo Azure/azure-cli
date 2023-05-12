@@ -569,36 +569,36 @@ class ImageTemplateTest(ScenarioTest):
 
         self.kwargs.update({
             'img_src': 'Canonical:UbuntuServer:18.04-LTS:latest',
-            'gallery': self.create_random_name("ib_sig", 10),
-            'sig1': 'image1',
             'tmpl': 'template01',
             'script': TEST_SHELL_SCRIPT_URL,
+            'img': 'new_img',
+            'loc': 'southcentralus',
             'trigger': 'trigger'
         })
 
-        self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
-        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1} '
-                 '--os-type linux -p publisher1 -f offer1 -s sku1')
-        self.cmd('image builder create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src} --identity {ide} --defer')
+        self.cmd(
+            'image builder create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src} --identity {ide} --defer')
 
-        self.cmd('image builder output add -n {tmpl} -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1}'
-                 ' --gallery-replication-regions westus --versioning Source --defer',
-                 checks=[
-                     self.check('properties.distribute[0].replicationRegions[0]', 'westus'),
-                     self.check('properties.distribute[0].runOutputName', '{sig1}'),
-                     self.check('properties.distribute[0].versioning.scheme', 'Source')
-                 ])
+        self.cmd(
+            'image builder output add -n {tmpl} -g {rg} --managed-image {img} --managed-image-location {loc} --defer')
 
         # send put request using cached template object
-        self.cmd('image builder update -n {tmpl} -g {rg}', checks=[
-            self.check('distribute[0].replicationRegions[0]', 'westus'),
-            self.check('distribute[0].runOutputName', '{sig1}')
-        ])
+        self.cmd('image builder update -n {tmpl} -g {rg}')
 
-        self.cmd('image builder trigger create --image-template-name {tmpl} -g {rg} --trigger-name {trigger}')
-        self.cmd('image builder trigger show --image-template-name {tmpl} -g {rg} --trigger-name {trigger}')
-        self.cmd('image builder trigger list --image-template-name {tmpl} -g {rg}')
-        self.cmd('image builder trigger delete --image-template-name {tmpl} -g {rg} --trigger-name {trigger}')
+        self.cmd(
+            'image builder trigger create --image-template-name {tmpl} -g {rg} --trigger-name {trigger} --kind SourceImage',
+            checks=[
+                self.check('kind', 'SourceImage')
+            ])
+        self.cmd('image builder trigger show --image-template-name {tmpl} -g {rg} --trigger-name {trigger}',
+                 checks=[
+                     self.check('kind', 'SourceImage')
+                 ])
+        self.cmd('image builder trigger list --image-template-name {tmpl} -g {rg}',
+                 checks=[
+                     self.check('[0].kind', 'SourceImage')
+                 ])
+        self.cmd('image builder trigger delete --image-template-name {tmpl} -g {rg} --trigger-name {trigger} --yes')
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_identity_')
     def test_image_build_identity(self, resource_group):
