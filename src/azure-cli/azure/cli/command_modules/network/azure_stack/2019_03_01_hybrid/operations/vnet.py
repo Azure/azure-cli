@@ -69,24 +69,6 @@ class VNetCreate(_VNet.Create):
         return {"newVNet": result}
 
 
-class VNetUpdate(_VNet.Update):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        # handle detach logic
-        args_schema.dns_servers._fmt = EmptyListArgFormat()
-        return args_schema
-
-
 def list_available_ips(cmd, resource_group_name, virtual_network_name):
     Show = import_aaz_by_profile("network.vnet").Show
     vnet = Show(cli_ctx=cmd.cli_ctx)(command_args={
@@ -148,22 +130,7 @@ class VNetSubnetCreate(_VNetSubNet.Create):
 class VNetSubnetUpdate(_VNetSubNet.Update):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZListArgFormat, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.delegations = AAZListArg(
             options=["--delegations"],
@@ -179,7 +146,6 @@ class VNetSubnetUpdate(_VNetSubNet.Update):
             help="Space-separated list of services allowed private access to this subnet. "
                  "Values from: az network vnet list-endpoint-services.",
             nullable=True,
-            fmt=EmptyListArgFormat(),
         )
         args_schema.service_endpoints.Element = AAZStrArg(
             nullable=True,
@@ -188,11 +154,11 @@ class VNetSubnetUpdate(_VNetSubNet.Update):
         args_schema.address_prefix._registered = False
         args_schema.endpoints._registered = False
         # handle detach logic
-        args_schema.network_security_group._fmt = EmptyResourceIdArgFormat(
+        args_schema.network_security_group._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/networkSecurityGroups/{}",
         )
-        args_schema.route_table._fmt = EmptyResourceIdArgFormat(
+        args_schema.route_table._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/routeTables/{}",
         )
