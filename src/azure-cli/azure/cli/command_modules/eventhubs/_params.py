@@ -81,34 +81,14 @@ def load_arguments_eh(self, _):
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
 
 
-#   : Region Geo DR Configuration
-    with self.argument_context('eventhubs georecovery-alias') as c:
-        c.argument('alias', options_list=['--alias', '-a'], id_part='child_name_1', help='Name of Geo-Disaster Recovery Configuration Alias')
-
-    with self.argument_context('eventhubs georecovery-alias exists') as c:
-        c.argument('name', options_list=['--alias', '-a'], arg_type=name_type, help='Name of Geo Recovery Configs - Alias to check availability')
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-
+# Region Geo DR Configuration
     with self.argument_context('eventhubs georecovery-alias set') as c:
         c.argument('partner_namespace', required=True, validator=validate_partner_namespace, help='Name (if within the same resource group) or ARM Id of the Primary/Secondary eventhub namespace name, which is part of GEO DR pairing')
         c.argument('alternate_name', help='Alternate Name for the Alias, when the Namespace name and Alias name are same')
-
-    for scope in ['eventhubs georecovery-alias authorization-rule show']:
-        with self.argument_context(scope)as c:
-            c.argument('authorization_rule_name', arg_type=name_type, id_part='child_name_2', help='Name of Namespace AuthorizationRule')
-
-    with self.argument_context('eventhubs georecovery-alias list') as c:
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-
-    with self.argument_context('eventhubs georecovery-alias authorization-rule list') as c:
-        c.argument('alias', options_list=['--alias', '-a'], help='Name of Geo-Disaster Recovery Configuration Alias')
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-
-    with self.argument_context('eventhubs georecovery-alias authorization-rule keys list') as c:
-        c.argument('alias', options_list=['--alias', '-a'], id_part=None, help='Name of Geo-Disaster Recovery Configuration Alias')
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-        c.argument('authorization_rule_name', arg_type=name_type, help='Name of Namespace AuthorizationRule')
-
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='Name of Namespace')
+        c.argument('alias', options_list=['--alias', '-a'],
+                   help='Name of the Geo-Disaster Recovery Configuration Alias')
 # Region Namespace NetworkRuleSet
     with self.argument_context('eventhubs namespace network-rule', resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01') as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')

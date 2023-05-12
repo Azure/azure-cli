@@ -12,9 +12,7 @@ from azure.cli.core.profiles import ResourceType
 
 
 def load_command_table(self, _):
-    from azure.cli.command_modules.servicebus._client_factory import (namespaces_mgmt_client_factory,
-                                                                      migration_mgmt_client_factory)
-
+    from azure.cli.command_modules.servicebus._client_factory import (namespaces_mgmt_client_factory)
     sb_namespace_util = CliCommandType(
         operations_tmpl='azure.mgmt.servicebus.operations#NamespacesOperations.{}',
         client_factory=namespaces_mgmt_client_factory,
@@ -24,20 +22,12 @@ def load_command_table(self, _):
         operations_tmpl='azure.cli.command_modules.servicebus.operations.namespace_custom#{}',
     )
 
-    sb_migration_util = CliCommandType(
-        operations_tmpl='azure.mgmt.servicebus.operations#MigrationConfigsOperations.{}',
-        client_factory=migration_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_SERVICEBUS)
-
     from ._validators import validate_subnet
 
 # Namespace Region
     with self.command_group('servicebus namespace', custom_command_type=sb_namespace_custom,
                             is_preview=True) as g:
         g.custom_command('create', 'create_servicebus_namespace', supports_no_wait=True)
-
-    with self.command_group('servicebus namespace', sb_namespace_util, client_factory=namespaces_mgmt_client_factory, min_api='2021-06-01-preview') as g:
-        g.custom_command('exists', 'cli_namespace_exists')
 
     with self.command_group('servicebus namespace private-endpoint-connection', custom_command_type=sb_namespace_custom,
                             is_preview=True) as g:
@@ -55,13 +45,6 @@ def load_command_table(self, _):
     with self.command_group('servicebus georecovery-alias', custom_command_type=sb_namespace_custom,
                             is_preview=True) as g:
         g.custom_command('set', 'set_georecovery_alias', supports_no_wait=True)
-
-# MigrationConfigs Region
-    with self.command_group('servicebus migration', sb_migration_util, client_factory=migration_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
-        g.custom_command('start', 'cli_migration_start')
-        g.custom_show_command('show', 'cli_migration_show')
-        g.custom_command('complete', 'cli_migration_complete')
-        g.custom_command('abort', 'revert')
 
 # NetwrokRuleSet Region
     with self.command_group('servicebus namespace network-rule', sb_namespace_util, deprecate_info=self.deprecate(redirect='servicebus namespace network-rule-set'), client_factory=namespaces_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
