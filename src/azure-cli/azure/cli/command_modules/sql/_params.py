@@ -198,7 +198,7 @@ max_size_bytes_param_type = CLIArgumentType(
 
 zone_redundant_param_type = CLIArgumentType(
     options_list=['--zone-redundant', '-z'],
-    help='Specifies whether to enable zone redundancy',
+    help='Specifies whether to enable zone redundancy. Default is true if no value is specified',
     arg_type=get_three_state_flag())
 
 maintenance_configuration_id_param_type = CLIArgumentType(
