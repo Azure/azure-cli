@@ -75,26 +75,10 @@ class VNetCreate(_VNet.Create):
 class VNetUpdate(_VNet.Update):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArgFormat, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         # handle detach logic
-        args_schema.dns_servers._fmt = EmptyListArgFormat()
-        args_schema.ddos_protection_plan._fmt = EmptyResourceIdArgFormat(
+        args_schema.ddos_protection_plan._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/ddosProtectionPlans/{}",
         )
@@ -211,23 +195,7 @@ class VNetSubnetCreate(_VNetSubNet.Create):
 class VNetSubnetUpdate(_VNetSubNet.Update):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZListArgFormat, \
-            AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.delegations = AAZListArg(
             options=["--delegations"],
@@ -243,7 +211,6 @@ class VNetSubnetUpdate(_VNetSubNet.Update):
             help="Space-separated list of services allowed private access to this subnet. "
                  "Values from: az network vnet list-endpoint-services.",
             nullable=True,
-            fmt=EmptyListArgFormat(),
         )
         args_schema.service_endpoints.Element = AAZStrArg(
             nullable=True,
@@ -252,7 +219,6 @@ class VNetSubnetUpdate(_VNetSubNet.Update):
             options=["--service-endpoint-policy"],
             help="Space-separated list of names or IDs of service endpoint policies to apply.",
             nullable=True,
-            fmt=EmptyListArgFormat(),
         )
         args_schema.service_endpoint_policy.Element = AAZResourceIdArg(
             nullable=True,
@@ -267,11 +233,11 @@ class VNetSubnetUpdate(_VNetSubNet.Update):
         args_schema.endpoints._registered = False
         args_schema.policies._registered = False
         # handle detach logic
-        args_schema.network_security_group._fmt = EmptyResourceIdArgFormat(
+        args_schema.network_security_group._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/networkSecurityGroups/{}",
         )
-        args_schema.route_table._fmt = EmptyResourceIdArgFormat(
+        args_schema.route_table._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/routeTables/{}",
         )

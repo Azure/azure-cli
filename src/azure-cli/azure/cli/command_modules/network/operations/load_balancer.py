@@ -32,14 +32,6 @@ from ..aaz.latest.network.lb.probe import Create as _LBProbeCreate, Update as _L
 logger = get_logger(__name__)
 
 
-class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-    def __call__(self, ctx, value):
-        if value._data == "":
-            logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-            value._data = None
-        return super().__call__(ctx, value)
-
-
 class LBFrontendIPCreate(_LBFrontendIPCreate):
 
     @classmethod
@@ -100,16 +92,16 @@ class LBFrontendIPUpdate(_LBFrontendIPUpdate):
             options=['--vnet-name'],
             help="The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id)."
         )
-        args_schema.subnet._fmt = EmptyResourceIdArgFormat(
+        args_schema.subnet._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{vnet_name}/subnets/{}",
         )
-        args_schema.public_ip_prefix._fmt = EmptyResourceIdArgFormat(
+        args_schema.public_ip_prefix._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIpPrefixes/{}",
         )
-        args_schema.public_ip_address._fmt = EmptyResourceIdArgFormat(
+        args_schema.public_ip_address._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIPAddresses/{}",
         )
-        args_schema.gateway_lb._fmt = EmptyResourceIdArgFormat(
+        args_schema.gateway_lb._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{}/frontendIPConfigurations/{}"
         )
 
@@ -169,7 +161,7 @@ class LBInboundNatPoolUpdate(_LBInboundNatPoolUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.frontend_ip_name._fmt = EmptyResourceIdArgFormat(
+        args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
         )
         return args_schema
@@ -292,7 +284,7 @@ class LBRuleUpdate(_LBRuleUpdate):
         args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
         )
-        args_schema.probe_name._fmt = EmptyResourceIdArgFormat(
+        args_schema.probe_name._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/probes/{}"
         )
 
@@ -869,10 +861,10 @@ class CrossRegionLoadBalancerFrontendIPUpdate(_LBFrontendIPUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.public_ip_prefix._fmt = EmptyResourceIdArgFormat(
+        args_schema.public_ip_prefix._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIpPrefixes/{}",
         )
-        args_schema.public_ip_address._fmt = EmptyResourceIdArgFormat(
+        args_schema.public_ip_address._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIPAddresses/{}",
         )
         args_schema.zones.Element.enum = AAZArgEnum({
@@ -956,6 +948,8 @@ class CrossRegionLoadBalancerRuleCreate(_LBRuleCreate):
         args_schema.backend_port._required = True
         args_schema.backend_address_pools._registered = False
         args_schema.disable_outbound_snat._registered = False   # it's not required for cross-region-lb
+        args_schema.idle_timeout_in_minutes._registered = False
+        args_schema.enable_tcp_reset._registered = False
         return args_schema
 
     def pre_instance_create(self):
@@ -997,7 +991,7 @@ class CrossRegionLoadBalancerRuleUpdate(_LBRuleUpdate):
         args_schema.frontend_ip_name._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIPConfigurations/{}"
         )
-        args_schema.probe_name._fmt = EmptyResourceIdArgFormat(
+        args_schema.probe_name._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/probes/{}"
         )
         # not support multi backend pools because the loadbalance SKU is not Gateway
@@ -1016,6 +1010,8 @@ class CrossRegionLoadBalancerRuleUpdate(_LBRuleUpdate):
         args_schema.backend_port._nullable = False
         args_schema.backend_address_pools._registered = False
         args_schema.disable_outbound_snat._registered = False   # it's not required for cross-region-lb
+        args_schema.idle_timeout_in_minutes._registered = False
+        args_schema.enable_tcp_reset._registered = False
         return args_schema
 
     def pre_operations(self):
