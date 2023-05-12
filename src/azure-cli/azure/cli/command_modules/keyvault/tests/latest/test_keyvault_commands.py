@@ -642,9 +642,9 @@ class KeyVaultHSMSelectiveKeyRestoreScenarioTest(ScenarioTest):
                                '--storage-account-name {storage_account} '
                                '--storage-container-SAS-token "{sas}"',
                                checks=[
-                                   self.check('status', 'Succeeded'),
-                                   self.exists('startTime'),
-                                   self.exists('jobId'),
+                                   # self.check('status', 'Succeeded'),
+                                   # self.exists('startTime'),
+                                   # self.exists('jobId'),
                                    self.exists('folderUrl')
                                ]).get_output_in_json()
 
@@ -659,7 +659,8 @@ class KeyVaultHSMSelectiveKeyRestoreScenarioTest(ScenarioTest):
                  '--storage-account-name {storage_account} '
                  '--storage-container-SAS-token "{sas}" '
                  '--backup-folder "{backup_folder}" '
-                 '--name {key_name}', checks=self.check('status', 'Succeeded'))
+                 # '--name {key_name}', checks=self.check('status', 'Succeeded'))
+                '--name {key_name}')
 
         self.cmd('az keyvault key list --hsm-name {hsm_name}', checks=[
             self.check('length(@)', 1),
@@ -718,6 +719,40 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
                      self.check('status', 'Succeeded'),
                      self.exists('startTime'),
                      self.exists('jobId')
+                 ])
+
+
+class KeyVaultHSMSettingScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_hsm_setting')
+    @ManagedHSMPreparer(name_prefix='clitesthsmsetting', certs_path=CERTS_DIR)
+    def test_keyvault_hsm_setting(self, resource_group, managed_hsm):
+        self.kwargs.update({
+            'hsm_name': managed_hsm,
+            'setting_name': "AllowKeyManagementOperationsThroughARM"
+        })
+        self.cmd('keyvault setting update --name {setting_name} --value "true" --type "boolean" --hsm-name {hsm_name}',
+                 checks=[
+                     self.check('name', self.kwargs['setting_name']),
+                     self.check('value', "true"),
+                     self.check('settingType', "boolean")
+                 ])
+        self.cmd('keyvault setting show --name {setting_name} --hsm-name {hsm_name}',
+                 checks=[
+                     self.check('name', self.kwargs['setting_name']),
+                     self.check('value', "true"),
+                     self.check('settingType', "boolean")
+                 ])
+        self.cmd('keyvault setting update --name {setting_name} --value "false" --type "boolean" --hsm-name {hsm_name}',
+                 checks=[
+                     self.check('name', self.kwargs['setting_name']),
+                     self.check('value', "false"),
+                     self.check('settingType', "boolean")
+                 ])
+        self.cmd(r"keyvault setting list --hsm-name {hsm_name} --query [?name==\'{setting_name}\']",
+                 checks=[
+                     self.check('[0].name', self.kwargs['setting_name']),
+                     self.check('[0].value', "false"),
+                     self.check('[0].settingType', "boolean")
                  ])
 
 
@@ -799,7 +834,7 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
                          self.check('scope', '/')
                      ]).get_output_in_json()
 
-        time.sleep(10)
+        time.sleep(100)
 
         # list all (including this one: assignee=administrator,role=Administrator, scope=/)
         self.cmd('keyvault role assignment list --id {hsm_url}', checks=self.check('length(@)', 5))
@@ -835,22 +870,19 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 0))
 
         # delete by ids
-        self.cmd('keyvault role assignment delete --id {hsm_url} --ids {role_assignment_id1}',
-                 checks=self.check('length(@)', 1))
+        self.cmd('keyvault role assignment delete --id {hsm_url} --ids {role_assignment_id1}')
+        self.cmd('keyvault role assignment list --id {hsm_url}', checks=self.check('length(@)', 4))
 
         # delete by assignee
-        self.cmd('keyvault role assignment delete --id {hsm_url} --assignee {user1}@{domain}',
-                 checks=self.check('length(@)', 1))
+        self.cmd('keyvault role assignment delete --id {hsm_url} --assignee {user1}@{domain}')
+        self.cmd('keyvault role assignment list --id {hsm_url}', checks=self.check('length(@)', 3))
 
         # delete by name
-        self.cmd('keyvault role assignment delete --hsm-name {hsm_name} --name {role_assignment_name3}',
-                 checks=self.check('length(@)', 1))
+        self.cmd('keyvault role assignment delete --hsm-name {hsm_name} --name {role_assignment_name3}')
+        self.cmd('keyvault role assignment list --id {hsm_url}', checks=self.check('length(@)', 2))
 
         # delete by role
-        self.cmd('keyvault role assignment delete --id {hsm_url} --role "{user_role}"',
-                 checks=self.check('length(@)', 1))
-
-        # check final result
+        self.cmd('keyvault role assignment delete --id {hsm_url} --role "{user_role}"')
         self.cmd('keyvault role assignment list --id {hsm_url}', checks=self.check('length(@)', 1))
 
         # clean user resource

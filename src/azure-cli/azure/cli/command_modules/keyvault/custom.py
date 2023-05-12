@@ -1956,18 +1956,19 @@ def _resolve_role_id(client, role, scope):
     else:
         all_roles = list_role_definitions(client, scope=scope)
         for _role in all_roles:
-            if _role.get('roleName', None) == role:
-                role_id = _role['id']
+            if _role.role_name == role:
+                role_id = _role.id
                 break
     return role_id
 
 
 def _get_role_dics(role_defs):
-    return {i['id']: i.get('roleName', None) for i in role_defs}
+    return {i.id: i.role_name for i in role_defs}
 
 
 def _get_principal_dics(cli_ctx, role_assignments):
-    principal_ids = {i.principal_id for i in role_assignments if getattr(i, 'principal_id', None)}
+    principal_ids = {getattr(i.properties, 'principal_id', None) for i in role_assignments
+                     if getattr(i, 'properties', None)}
     if principal_ids:
         from azure.cli.command_modules.role import graph_client_factory, GraphError
         try:
@@ -1995,10 +1996,10 @@ def _reconstruct_role_assignment(role_dics, principal_dics, role_assignment):
     ret = {
         'id': role_assignment.role_assignment_id,
         'name': role_assignment.name,
-        'scope': role_assignment.scope,
+        'scope': role_assignment.properties.scope,
         'type': role_assignment.type
     }
-    role_definition_id = getattr(role_assignment, 'role_definition_id', None)
+    role_definition_id = getattr(role_assignment.properties, 'role_definition_id', None) if getattr(role_assignment, 'properties', None) else None
     ret['roleDefinitionId'] = role_definition_id
     if role_definition_id:
         ret['roleName'] = role_dics.get(role_definition_id)
@@ -2006,7 +2007,7 @@ def _reconstruct_role_assignment(role_dics, principal_dics, role_assignment):
         ret['roleName'] = None  # the role definition might have been deleted
 
     # fill in principal names
-    principal_id = getattr(role_assignment, 'principal_id', None)
+    principal_id = getattr(role_assignment.properties, 'principal_id', None) if getattr(role_assignment, 'properties', None) else None
     ret['principalId'] = principal_id
     if principal_id:
         principal_info = principal_dics.get(principal_id)
@@ -2051,8 +2052,10 @@ def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
         scope = ''
 
     role_assignment = client.create_role_assignment(
-        role_scope=scope, role_assignment_name=role_assignment_name,
-        principal_id=assignee_object_id, role_definition_id=role_definition_id
+        scope=scope,
+        definition_id=role_definition_id,
+        principal_id=assignee_object_id,
+        name=role_assignment_name,
     )
 
     role_defs = list_role_definitions(client)
@@ -2074,42 +2077,19 @@ def delete_role_assignment(cmd, client, role_assignment_name=None, scope=None, a
     if query_scope is None:
         query_scope = ''
 
-    deleted_role_assignments = []
     if ids is not None:
         for cnt_id in ids:
             cnt_name = cnt_id.split('/')[-1]
-            deleted_role_assignments.append(
-                client.delete_role_assignment(role_scope=query_scope, role_assignment_name=cnt_name)
-            )
+            client.delete_role_assignment(scope=query_scope, name=cnt_name)
     else:
         if role_assignment_name is not None:
-            deleted_role_assignments.append(
-                client.delete_role_assignment(role_scope=query_scope, role_assignment_name=role_assignment_name)
-            )
+            client.delete_role_assignment(scope=query_scope, name=role_assignment_name)
         else:
             matched_role_assignments = list_role_assignments(
                 cmd, client, scope=scope, role=role, assignee_object_id=assignee_object_id, assignee=assignee
             )
             for role_assignment in matched_role_assignments:
-                deleted_role_assignments.append(
-                    client.delete_role_assignment(
-                        role_scope=query_scope, role_assignment_name=role_assignment.get('name')
-                    )
-                )
-
-    role_defs = list_role_definitions(client)
-    role_dics = _get_role_dics(role_defs)
-    principal_dics = _get_principal_dics(cmd.cli_ctx, deleted_role_assignments)
-
-    ret = []
-    for i in deleted_role_assignments:
-        ret.append(_reconstruct_role_assignment(
-            role_dics=role_dics,
-            principal_dics=principal_dics,
-            role_assignment=i
-        ))
-
-    return ret
+                client.delete_role_assignment(scope=query_scope, name=role_assignment.get('name'))
 
 
 def list_role_assignments(cmd, client, scope=None, assignee=None, role=None, assignee_object_id=None,
@@ -2128,18 +2108,18 @@ def list_role_assignments(cmd, client, scope=None, assignee=None, role=None, ass
     if role is not None:
         role_definition_id = _resolve_role_id(client, role=role, scope=query_scope)
 
-    all_role_assignments = client.list_role_assignments(role_scope=query_scope)
+    all_role_assignments = client.list_role_assignments(scope=query_scope)
     matched_role_assignments = []
     for role_assignment in all_role_assignments:
         if role_definition_id is not None:
-            if role_assignment.role_definition_id != role_definition_id:
+            if role_assignment.properties.role_definition_id != role_definition_id:
                 continue
         if scope is not None:
-            cnt_scope = role_assignment.scope
+            cnt_scope = role_assignment.properties.scope
             if cnt_scope not in [scope, '/' + scope]:
                 continue
         if assignee_object_id is not None:
-            if role_assignment.principal_id != assignee_object_id:
+            if role_assignment.properties.principal_id != assignee_object_id:
                 continue
         matched_role_assignments.append(role_assignment)
 
@@ -2158,40 +2138,15 @@ def list_role_assignments(cmd, client, scope=None, assignee=None, role=None, ass
     return ret
 
 
-def _reconstruct_role_definition(role_definition):
-    ret_permissions = []
-    permissions = role_definition.permissions
-    for permission in permissions:
-        ret_permissions.append({
-            'actions': permission.allowed_actions,
-            'notActions': permission.denied_actions,
-            'dataActions': permission.allowed_data_actions,
-            'notDataActions': permission.denied_data_actions
-        })
-
-    ret = {
-        'assignableScopes': role_definition.assignable_scopes,
-        'description': role_definition.description,
-        'id': role_definition.id,
-        'name': role_definition.name,
-        'permissions': ret_permissions,
-        'roleName': role_definition.role_name,
-        'roleType': role_definition.role_type,
-        'type': role_definition.type,
-    }
-
-    return ret
-
-
 def list_role_definitions(client, scope=None, hsm_name=None, custom_role_only=False):  # pylint: disable=unused-argument
     """ List role definitions. """
     query_scope = scope
     if query_scope is None:
         query_scope = ''
-    role_definitions = client.list_role_definitions(role_scope=query_scope)
+    role_definitions = client.list_role_definitions(scope=query_scope)
     if custom_role_only:
         role_definitions = [role for role in role_definitions if role.role_type == 'CustomRole']
-    return [_reconstruct_role_definition(role) for role in role_definitions]
+    return role_definitions
 
 
 def create_role_definition(client, hsm_name, role_definition):  # pylint: disable=unused-argument
@@ -2225,10 +2180,10 @@ def _create_update_role_definition(client, role_definition, for_update):
     role_name = role_definition.get('roleName', None)
     description = role_definition.get('description', None)
     permissions = [KeyVaultPermission(
-        allowed_actions=role_definition.get('actions', None),
-        denied_actions=role_definition.get('notActions', None),
-        allowed_data_actions=role_definition.get('dataActions', None),
-        denied_data_actions=role_definition.get('notDataActions', None)
+        actions=role_definition.get('actions', None),
+        not_actions=role_definition.get('notActions', None),
+        data_actions=role_definition.get('dataActions', None),
+        not_data_actions=role_definition.get('notDataActions', None)
     )]
 
     if for_update:
@@ -2242,14 +2197,14 @@ def _create_update_role_definition(client, role_definition, for_update):
         role_definition_name = _get_role_definition_name(role_definition_name, role_id)
 
     result_role_definition = client.set_role_definition(
-        role_scope=role_scope,
+        scope=role_scope,
         permissions=permissions,
-        role_definition_name=role_definition_name,
+        name=role_definition_name,
         role_name=role_name,
         description=description
     )
 
-    return _reconstruct_role_definition(result_role_definition)
+    return result_role_definition
 
 
 def _get_role_definition_name(role_definition_name, role_id):
@@ -2280,7 +2235,7 @@ def show_role_definition(client, hsm_name, role_definition_name=None, role_id=No
     role_scope = '/'  # Managed HSM only supports '/'
     result_role_definition = client.get_role_definition(role_scope, role_definition_name)
 
-    return _reconstruct_role_definition(result_role_definition)
+    return result_role_definition
 # endregion
 
 
@@ -2674,4 +2629,15 @@ def remove_hsm_region(client, resource_group_name, name, region_name, no_wait=Fa
                                name=name, parameters=hsm)
     logger.warning("%s doesn't exist", region_name)
     return hsm
+# endregion
+
+
+# region mhsm settings
+def update_hsm_setting(client, name, value, setting_type='string'):
+    # TODO: remove this additional call to `get_setting` after SDK fix the auth issue for `update_setting`
+    # TODO: For now, we need to call `get_setting` first to make sure client has set credential correctly
+    client.get_setting(name=name)
+    from azure.keyvault.administration import KeyVaultSetting
+    setting = KeyVaultSetting(name=name, value=value, setting_type=setting_type)
+    return client.update_setting(setting)
 # endregion

@@ -58,7 +58,7 @@ DEPENDENCIES = [
     'azure-data-tables==12.4.0',
     'azure-datalake-store~=0.0.49',
     'azure-graphrbac~=0.60.0',
-    'azure-keyvault-administration==4.0.0b3',
+    'azure-keyvault-administration==4.3.0',
     'azure-keyvault-keys==4.8.0b2',
     'azure-keyvault~=1.1.0',
     'azure-loganalytics~=0.1.0',
