@@ -88,7 +88,7 @@ def load_arguments_eh(self, _):
         c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='Name of Namespace')
         c.argument('alias', options_list=['--alias', '-a'],
                    help='Name of the Geo-Disaster Recovery Configuration Alias')
-        
+
 # Region Namespace NetworkRuleSet
     with self.argument_context('eventhubs namespace network-rule-set') as c:
         c.argument('namespace_name', options_list=['--namespace-name', '--name', '-n'], id_part=None, help='Name of the Namespace')

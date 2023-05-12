@@ -22,7 +22,7 @@ def load_command_table(self, _):
     )
 
     eh_network_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.eventhubs.Operation.network_rule_set#{}'
+        operations_tmpl='azure.cli.command_modules.eventhubs.operations.network_rule_set#{}'
     )
 
     eh_event_hub_util = CliCommandType(
