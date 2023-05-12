@@ -13,7 +13,8 @@ from ._transformers import (
 from ._resource_config import (
     RESOURCE,
     SOURCE_RESOURCES,
-    SUPPORTED_AUTH_TYPE
+    SUPPORTED_AUTH_TYPE,
+    TARGET_RESOURCES_DEPRECATED
 )
 from ._utils import should_load_source
 
@@ -55,7 +56,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
             for target in supported_target_resources:
                 with self.command_group('{} connection create'.format(source.value),
                                         connection_type, client_factory=cf_linker) as ig:
-                    if target == RESOURCE.Mysql:
+                    if target in TARGET_RESOURCES_DEPRECATED:
                         ig.custom_command(target.value, 'connection_create', deprecate_info=self.deprecate(hide=False),
                                           supports_no_wait=True, transform=transform_linker_properties)
                     else:
@@ -63,7 +64,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                                           supports_no_wait=True, transform=transform_linker_properties)
                 with self.command_group('{} connection update'.format(source.value),
                                         connection_type, client_factory=cf_linker) as ig:
-                    if target == RESOURCE.Mysql:
+                    if target in TARGET_RESOURCES_DEPRECATED:
                         ig.custom_command(target.value, 'connection_update', deprecate_info=self.deprecate(hide=False),
                                           supports_no_wait=True, transform=transform_linker_properties)
                     else:
