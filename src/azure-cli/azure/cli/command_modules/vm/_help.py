@@ -494,17 +494,17 @@ type: command
 short-summary: Remove optimizer from an existing image builder template.
 long-summary: Must be used with --defer
 examples:
-  - name: Remove optimizer from an existing image builder template.
+  - name: Remove an optimizer from an existing image builder template.
     text: |
         az image builder optimizer remove -n myTemplate -g myGroup --type vmBoot --defer
 """
 
 helps['image builder optimizer clear'] = """
 type: command
-short-summary: Remove all optimizers from an existing image builder template.
+short-summary: Clear all optimizers from an existing image builder template.
 long-summary: Must be used with --defer
 examples:
-  - name: Remove all optimizers from an existing image builder template.
+  - name: Clear all optimizers from an existing image builder template.
     text: |
         az image builder optimizer clear -n myTemplate -g myGroup --defer
 """
