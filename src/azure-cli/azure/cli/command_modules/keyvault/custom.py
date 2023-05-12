@@ -1651,10 +1651,10 @@ def create_certificate_issuer(client, issuer_name, provider_name, account_id=Non
     :param organization_id: The organization id.
     """
     return client.create_issuer(issuer_name, provider_name, enabled=not disabled, account_id=account_id,
-                                password=password, organization_id=organization_id, admin_contacts=[])
+                                password=password, organization_id=organization_id)
 
 
-def update_certificate_issuer(client, vault_base_url, issuer_name, provider_name=None,
+def update_certificate_issuer(client, issuer_name, provider_name=None,
                               account_id=None, password=None, enabled=None, organization_id=None):
     """ Update a certificate issuer record.
     :param issuer_name: Unique identifier for the issuer settings.
@@ -1664,23 +1664,8 @@ def update_certificate_issuer(client, vault_base_url, issuer_name, provider_name
     :param password: The issuer account password/secret/etc.
     :param organization_id: The organization id.
     """
-    def update(obj, prop, value, nullable=False):
-        set_value = value if value is not None else getattr(obj, prop, None)
-        if set_value is None and not nullable:
-            raise CLIError("property '{}' cannot be cleared".format(prop))
-        if not set_value and nullable:
-            set_value = None
-        setattr(obj, prop, set_value)
-
-    issuer = client.get_certificate_issuer(vault_base_url, issuer_name)
-    update(issuer.credentials, 'account_id', account_id, True)
-    update(issuer.credentials, 'password', password, True)
-    update(issuer.attributes, 'enabled', enabled)
-    update(issuer.organization_details, 'id', organization_id, True)
-    update(issuer, 'provider', provider_name)
-    return client.set_certificate_issuer(
-        vault_base_url, issuer_name, issuer.provider, issuer.credentials,
-        issuer.organization_details, issuer.attributes)
+    return client.update_issuer(issuer_name, provider=provider_name, enabled=enabled, account_id=account_id,
+                                password=password, organization_id=organization_id)
 
 
 def list_certificate_issuer_admins(client, vault_base_url, issuer_name):
