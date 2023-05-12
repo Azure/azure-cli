@@ -5307,6 +5307,35 @@ class NetworkSubnetScenarioTests(ScenarioTest):
         self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
         self.cmd('network nsg delete --resource-group {rg} --name {nsg}')
 
+    @ResourceGroupPreparer(name_prefix='cli_subnet_detach_nat_gateway_', location="eastus2")
+    def test_subnet_detach_nat_gateway(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'vnet_prefix': '123.0.0.0/16',
+            'subnet': 'default',
+            'subnet_prefix': '123.0.0.0/24',
+            'nat': 'test-nat',
+            'idle_timeout': 4,
+            'sku': "Standard",
+            'ip_addr': "pip",
+            'ip_prefix': "prefix",
+            'idle_timeout_updated': 5,
+            'zone': 2,
+            'location': resource_group_location,
+            'resource_type': 'Microsoft.Network/NatGateways'
+        })
+
+        self.cmd('network public-ip create -g {rg} -n {ip_addr} --location {location} --zone {zone} --sku Standard ')
+        self.cmd('network public-ip prefix create --length 29 --location {location} --name {ip_prefix} --resource-group {rg} --zone {zone}')
+        self.cmd('network nat gateway create --resource-group {rg} --location {location} --public-ip-prefixes {ip_prefix} --name {nat} --public-ip-addresses {ip_addr} --idle-timeout {idle_timeout} --zone {zone}')
+        self.cmd('network vnet create --resource-group {rg} --name {vnet} --address-prefix {vnet_prefix}')
+
+        self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefixes {subnet_prefix} --nat-gateway {nat}',
+                 checks=self.check('ends_with(@.natGateway.id, `/{nat}`)', True))
+        self.cmd('network vnet subnet update --resource-group {rg} --vnet-name {vnet} --name {subnet} --nat-gateway \"\"',
+                 checks=self.check('natGateway', None))
+
+
     @ResourceGroupPreparer(name_prefix='cli_subnet_endpoint_service_test')
     def test_network_subnet_endpoint_service(self, resource_group):
         self.kwargs.update({

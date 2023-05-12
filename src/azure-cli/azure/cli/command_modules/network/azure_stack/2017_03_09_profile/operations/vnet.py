@@ -88,6 +88,22 @@ class VNetUpdate(_VNet.Update):
 _VNetSubNet = import_aaz_by_profile("network.vnet.subnet")
 
 
+class VNetSubnetCreate(_VNetSubNet.Create):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.network_security_group._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/networkSecurityGroups/{}",
+        )
+        args_schema.route_table._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/routeTables/{}",
+        )
+        return args_schema
+
+
 class VNetSubnetUpdate(_VNetSubNet.Update):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):

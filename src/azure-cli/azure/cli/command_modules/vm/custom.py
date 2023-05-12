@@ -340,9 +340,9 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         raise RequiredArgumentMissingError(
             'usage error: --upload-size-bytes should be used together with --upload-type')
 
-    log_message = 'Starting Build 2023 event, "az disk create" command will deploy Trusted Launch VM by default.' \
-                  ' To know more about Trusted Launch, please visit' \
-                  ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch'
+    log_message = 'Ignite (November) 2023 onwards "az disk create" command will deploy Gen2-Trusted Launch VM ' \
+                  'by default. To know more about the default change and Trusted Launch, ' \
+                  'please visit https://aka.ms/TLaD'
     if image_reference is not None:
         if not is_valid_resource_id(image_reference):
             # URN or name
@@ -3123,7 +3123,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 application_security_groups=None, ultra_ssd_enabled=None,
                 ephemeral_os_disk=None, ephemeral_os_disk_placement=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
-                max_price=None, computer_name_prefix=None, orchestration_mode='Uniform', scale_in_policy=None,
+                max_price=None, computer_name_prefix=None, orchestration_mode=None, scale_in_policy=None,
                 os_disk_encryption_set=None, data_disk_encryption_sets=None, data_disk_iops=None, data_disk_mbps=None,
                 automatic_repairs_grace_period=None, specialized=None, os_disk_size_gb=None, encryption_at_host=None,
                 host_group=None, max_batch_instance_percent=None, max_unhealthy_instance_percent=None,

@@ -14,8 +14,7 @@ from azure.cli.core.profiles import ResourceType
 def load_command_table(self, _):
     from azure.cli.command_modules.eventhubs._client_factory import (namespaces_mgmt_client_factory,
                                                                      event_hub_mgmt_client_factory,
-                                                                     disaster_recovery_mgmt_client_factory,
-                                                                     schema_registry_mgmt_client_factory)
+                                                                     application_group_mgmt_client_factory)
 
     eh_namespace_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventhub.operations#NamespacesOperations.{}',
@@ -23,7 +22,7 @@ def load_command_table(self, _):
         resource_type=ResourceType.MGMT_EVENTHUB)
 
     eh_namespace_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.eventhubs.operations.namespace_custom_file#{}',
+        operations_tmpl='azure.cli.command_modules.eventhubs.operations.namespace_custom#{}',
     )
 
     eh_appgroup_custom = CliCommandType(
@@ -35,17 +34,6 @@ def load_command_table(self, _):
         client_factory=event_hub_mgmt_client_factory,
         resource_type=ResourceType.MGMT_EVENTHUB)
 
-    eh_geodr_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventhub.operations#DisasterRecoveryConfigsOperations.{}',
-        client_factory=disaster_recovery_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_EVENTHUB)
-
-    eh_schema_registry_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventhub.operations#SchemaRegistryOperations.{}',
-        client_factory=schema_registry_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_EVENTHUB
-    )
-
     from ._validator import validate_subnet
 
 
@@ -53,8 +41,6 @@ def load_command_table(self, _):
     with self.command_group('eventhubs namespace', custom_command_type=eh_namespace_custom,
                             is_preview=True) as g:
         g.custom_command('create', 'create_eventhub_namespace')
-    with self.command_group('eventhubs namespace', eh_namespace_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
-        g.custom_command('exists', 'cli_namespace_exists')
 
     with self.command_group('eventhubs namespace private-endpoint-connection', custom_command_type=eh_namespace_custom,
                             is_preview=True) as g:
@@ -72,19 +58,9 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='cli_eheventhub_update')
 
 # DisasterRecoveryConfigs Region
-    with self.command_group('eventhubs georecovery-alias', eh_geodr_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=disaster_recovery_mgmt_client_factory) as g:
-        g.custom_command('set', 'cli_geodr_create')
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.command('break-pair', 'break_pairing')
-        g.command('fail-over', 'fail_over')
-        g.custom_command('exists', 'cli_geodr_name_exists')
-        g.command('delete', 'delete')
-
-    with self.command_group('eventhubs georecovery-alias authorization-rule', eh_geodr_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=disaster_recovery_mgmt_client_factory) as g:
-        g.command('list', 'list_authorization_rules')
-        g.show_command('show', 'get_authorization_rule')
-        g.command('keys list', 'list_keys')
+    with self.command_group('eventhubs georecovery-alias', custom_command_type=eh_namespace_custom,
+                            is_preview=True) as g:
+        g.custom_command('set', 'set_georecovery_alias', supports_no_wait=True)
 
 # NetwrokRuleSet Region
     with self.command_group('eventhubs namespace network-rule', eh_namespace_util, min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
@@ -104,13 +80,6 @@ def load_command_table(self, _):
                             is_preview=True) as g:
         g.custom_command('add', 'cli_add_encryption')
         g.custom_command('remove', 'cli_remove_encryption')
-
-# SchemaRegistry Region
-    with self.command_group('eventhubs namespace schema-registry', eh_schema_registry_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=schema_registry_mgmt_client_factory) as g:
-        g.custom_command('create', 'cli_schemaregistry_createupdate')
-        g.command('list', 'list_by_namespace')
-        g.show_command('show', 'get')
-        g.command('delete', 'delete')
 
 # ApplicationGroup Region
     with self.command_group('eventhubs namespace application-group', custom_command_type=eh_appgroup_custom,
