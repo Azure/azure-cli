@@ -2633,7 +2633,7 @@ def remove_hsm_region(client, resource_group_name, name, region_name, no_wait=Fa
 
 
 # region mhsm settings
-def update_hsm_setting(client, name, value, setting_type='string'):
+def update_hsm_setting(client, name, value, setting_type=None):
     # TODO: remove this additional call to `get_setting` after SDK fix the auth issue for `update_setting`
     # TODO: For now, we need to call `get_setting` first to make sure client has set credential correctly
     client.get_setting(name=name)
