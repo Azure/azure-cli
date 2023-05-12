@@ -408,6 +408,7 @@ def transform_certificate_contact_add(result, **command_args):
         return transform_certificate_contact_list_result(result, client)
     return result
 
+
 def transform_certificate_issuer_create(result, **command_args):
     if not isinstance(result, dict):
         ret = {
@@ -430,3 +431,14 @@ def transform_certificate_issuer_create(result, **command_args):
         }
         return ret
     return result
+
+
+def transform_certificate_issuer_list(result, **command_args):
+    if not isinstance(result, dict) and not isinstance(result, list):
+        ret = [{
+            "id": getattr(res, "id"),
+            "provider": getattr(res, "provider")
+        } for res in result]
+        return ret
+    return result
+
