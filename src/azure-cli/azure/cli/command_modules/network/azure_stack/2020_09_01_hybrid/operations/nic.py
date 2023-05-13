@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument
 from azure.cli.core.aaz import AAZResourceIdArgFormat, has_value, AAZListArg, AAZResourceIdArg, \
-    AAZStrArg, AAZListArgFormat
+    AAZStrArg
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
 from knack.log import get_logger
 
@@ -155,31 +155,16 @@ class NICUpdate(_NIC.Update):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_security_group = AAZResourceIdArg(
             options=["--network-security-group"],
             help="Name or ID of an existing network security group",
-            fmt=EmptyResourceIdArgFormat(
+            fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                          "/networkSecurityGroups/{}",
             ),
             nullable=True,
         )
-        args_schema.dns_servers._fmt = EmptyListArgFormat()
         args_schema.nsg._registered = False
         return args_schema
 
@@ -320,21 +305,6 @@ class NICIPConfigUpdate(_NICIPConfig.Update):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.vnet_name = AAZStrArg(
             options=["--vnet-name"],
@@ -342,11 +312,11 @@ class NICIPConfigUpdate(_NICIPConfig.Update):
             help="Name of the virtual network.",
             nullable=True,
         )
-        args_schema.subnet._fmt = EmptyResourceIdArgFormat(
+        args_schema.subnet._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/virtualNetworks/{vnet_name}/subnets/{}",
         )
-        args_schema.public_ip_address._fmt = EmptyResourceIdArgFormat(
+        args_schema.public_ip_address._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
                      "publicIPAddresses/{}"
         )
@@ -354,7 +324,6 @@ class NICIPConfigUpdate(_NICIPConfig.Update):
             options=["--application-security-groups", "--asgs"],
             arg_group="IP Configuration",
             help="Space-separated list of application security groups.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.application_security_groups.Element = AAZResourceIdArg(
@@ -375,7 +344,6 @@ class NICIPConfigUpdate(_NICIPConfig.Update):
             arg_group="Application Gateway",
             help="Space-separated list of names or IDs of application gateway backend address pools to "
                  "associate with the NIC. If names are used, `--gateway-name` must be specified.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.app_gateway_address_pools.Element = AAZResourceIdArg(
@@ -396,7 +364,6 @@ class NICIPConfigUpdate(_NICIPConfig.Update):
             arg_group="Load Balancer",
             help="Space-separated list of names or IDs of load balancer address pools to associate with the NIC. "
                  "If names are used, `--lb-name` must be specified.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.lb_address_pools.Element = AAZResourceIdArg(
@@ -411,7 +378,6 @@ class NICIPConfigUpdate(_NICIPConfig.Update):
             arg_group="Load Balancer",
             help="Space-separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. "
                  "If names are used, `--lb-name` must be specified.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.lb_inbound_nat_rules.Element = AAZResourceIdArg(

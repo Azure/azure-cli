@@ -12,21 +12,15 @@ from azure.cli.core.profiles import ResourceType
 
 
 def load_command_table(self, _):
-    from azure.cli.command_modules.servicebus._client_factory import (namespaces_mgmt_client_factory,
-                                                                      disaster_recovery_mgmt_client_factory)
+    from azure.cli.command_modules.servicebus._client_factory import (namespaces_mgmt_client_factory)
     sb_namespace_util = CliCommandType(
         operations_tmpl='azure.mgmt.servicebus.operations#NamespacesOperations.{}',
         client_factory=namespaces_mgmt_client_factory,
         resource_type=ResourceType.MGMT_SERVICEBUS)
 
     sb_namespace_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.servicebus.Operation.NamespaceCustomFile#{}',
+        operations_tmpl='azure.cli.command_modules.servicebus.operations.namespace_custom#{}',
     )
-
-    sb_geodr_util = CliCommandType(
-        operations_tmpl='azure.mgmt.servicebus.operations#DisasterRecoveryConfigsOperations.{}',
-        client_factory=disaster_recovery_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_SERVICEBUS)
 
     from ._validators import validate_subnet
 
@@ -48,20 +42,9 @@ def load_command_table(self, _):
         g.custom_command('create', 'sb_rule_create', supports_no_wait=True)
 
 # DisasterRecoveryConfigs Region
-    with self.command_group('servicebus georecovery-alias', sb_geodr_util, client_factory=disaster_recovery_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
-        g.custom_command('set', 'cli_georecovery_alias_create')
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.command('break-pair', 'break_pairing')
-        g.command('fail-over', 'fail_over')
-        g.custom_command('exists', 'cli_georecovery_alias_exists')
-        g.command('delete', 'delete')
-
-# DisasterRecoveryConfigs Authorization Region
-    with self.command_group('servicebus georecovery-alias authorization-rule', sb_geodr_util, client_factory=disaster_recovery_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
-        g.command('list', 'list_authorization_rules')
-        g.show_command('show', 'get_authorization_rule')
-        g.command('keys list', 'list_keys')
+    with self.command_group('servicebus georecovery-alias', custom_command_type=sb_namespace_custom,
+                            is_preview=True) as g:
+        g.custom_command('set', 'set_georecovery_alias', supports_no_wait=True)
 
 # NetwrokRuleSet Region
     with self.command_group('servicebus namespace network-rule', sb_namespace_util, deprecate_info=self.deprecate(redirect='servicebus namespace network-rule-set'), client_factory=namespaces_mgmt_client_factory, resource_type=ResourceType.MGMT_SERVICEBUS) as g:
