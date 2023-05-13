@@ -103,11 +103,11 @@ class EHNamespaceEntityCURDScenarioTest(ScenarioTest):
         self.cmd(
             'eventhubs namespace create --resource-group {rg} --name {namespacename1} --location {loc} --tags {tags} --sku Premium ')
         eh3 = self.cmd(
-            'eventhubs eventhub create -g {rg} -n {eventhubname3} --namespace-name {namespacename1} --cleanup-policy Compact ').get_output_in_json()
+            'eventhubs eventhub create -g {rg} -n {eventhubname3} --namespace-name {namespacename1} --cleanup-policy Delete --retention-time 7 ').get_output_in_json()
 
         self.assertEqual(eh3['name'], self.kwargs['eventhubname3'])
-        self.assertEqual(eh3['retentionDescription']['cleanupPolicy'], "Compact")
-        self.assertEqual(eh3['messageRetentionInDays'], 9223372036854775807)
+        self.assertEqual(eh3['retentionDescription']['cleanupPolicy'], "Delete")
+        self.assertEqual(eh3['retentionDescription']['retentionTimeInHours'], 7)
 
         self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename}')
         self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename1}')

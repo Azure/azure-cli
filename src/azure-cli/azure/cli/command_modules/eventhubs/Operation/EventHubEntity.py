@@ -7,7 +7,7 @@ from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.eventhub import Up
 
 
 def cli_eventhub_create(cmd, resource_group_name, namespace_name, event_hub_name,
-                       partition_count=None, status=None, retention_time_in_hours=None, cleanup_policy="Delete", tombstone_retention_time_in_hours=None,
+                       partition_count=None, status=None, retention_time_in_hours=None, cleanup_policy=None, tombstone_retention_time_in_hours=None,
                        enable_capture=None, skip_empty_archives=None, capture_interval=None, capture_size_limit=None, destination_name=None,
                        blob_container=None, archive_name_format=None, encoding='Avro', storage_account=None):
 
