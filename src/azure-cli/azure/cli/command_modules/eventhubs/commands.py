@@ -13,8 +13,7 @@ from azure.cli.core.profiles import ResourceType
 
 def load_command_table(self, _):
     from azure.cli.command_modules.eventhubs._client_factory import (namespaces_mgmt_client_factory,
-                                                                     event_hub_mgmt_client_factory,
-                                                                     application_group_mgmt_client_factory)
+                                                                     event_hub_mgmt_client_factory)
 
     eh_namespace_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventhub.operations#NamespacesOperations.{}',
