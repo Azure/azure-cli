@@ -852,6 +852,10 @@ def load_arguments(self, _):
             c.extra('vault_base_url', vault_name_type, required=True, arg_group='Id',
                     type=get_vault_base_url_type(self.cli_ctx), id_part=None)
 
+    for item in ['add', 'list', 'delete']:
+        with self.argument_context('keyvault certificate issuer admin {}'.format(item)) as c:
+            c.extra('vault_base_url', vault_name_type, required=True, arg_group='Id',
+                    type=get_vault_base_url_type(self.cli_ctx), id_part=None)
     # endregion
 
     # region KeyVault Role

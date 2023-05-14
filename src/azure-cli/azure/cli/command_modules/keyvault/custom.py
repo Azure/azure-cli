@@ -1674,24 +1674,18 @@ def list_certificate_issuer_admins(client, vault_base_url, issuer_name):
         vault_base_url, issuer_name).organization_details.admin_details
 
 
-def add_certificate_issuer_admin(cmd, client, vault_base_url, issuer_name, email, first_name=None,
+def add_certificate_issuer_admin(cmd, client, issuer_name, email, first_name=None,
                                  last_name=None, phone=None):
     """ Add admin details for a specified certificate issuer. """
-    AdministratorDetails = cmd.get_models('AdministratorDetails', resource_type=ResourceType.DATA_KEYVAULT)
-    issuer = client.get_certificate_issuer(vault_base_url, issuer_name)
-    org_details = issuer.organization_details
-    admins = org_details.admin_details
-    if any((x for x in admins if x.email_address == email)):
+    AdministratorContact = cmd.loader.get_sdk('AdministratorContact', resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES,
+                                              mod='_models')
+    issuer = client.get_issuer(issuer_name)
+    admins = issuer.admin_contacts
+    if any((x for x in admins if x.email == email)):
         raise CLIError("admin '{}' already exists".format(email))
-    new_admin = AdministratorDetails(first_name=first_name, last_name=last_name, email_address=email, phone=phone)
+    new_admin = AdministratorContact(first_name=first_name, last_name=last_name, email=email, phone=phone)
     admins.append(new_admin)
-    org_details.admin_details = admins
-    result = client.set_certificate_issuer(
-        vault_base_url, issuer_name, issuer.provider, issuer.credentials, org_details,
-        issuer.attributes)
-    created_admin = next(x for x in result.organization_details.admin_details
-                         if x.email_address == email)
-    return created_admin
+    return client.update_issuer(issuer_name, admin_contacts=admins)
 
 
 def delete_certificate_issuer_admin(client, vault_base_url, issuer_name, email):

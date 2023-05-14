@@ -442,3 +442,16 @@ def transform_certificate_issuer_list(result, **command_args):
         return ret
     return result
 
+
+def transform_certificate_issuer_admin_add(result, **command_args):
+    if not isinstance(result, dict) and not isinstance(result, list):
+        admin_contacts = getattr(result, 'admin_contacts')
+        ret = [{
+            "emailAddress": getattr(contact, "email"),
+            "firstName": getattr(contact, "first_name"),
+            "lastName": getattr(contact, "last_name"),
+            "phone": getattr(contact, "phone")
+        } for contact in admin_contacts]
+        return ret
+    return result
+
