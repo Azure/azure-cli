@@ -13,7 +13,6 @@ from azure.cli.core.profiles import ResourceType
 
 def load_command_table(self, _):
     from azure.cli.command_modules.eventhubs._client_factory import (namespaces_mgmt_client_factory,
-                                                                     event_hub_mgmt_client_factory,
                                                                      schema_registry_mgmt_client_factory,
                                                                      application_group_mgmt_client_factory)
 
@@ -27,7 +26,7 @@ def load_command_table(self, _):
     )
 
     eh_eventhub_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.eventhubs.Operation.EventHubEntity#{}',
+        operations_tmpl='azure.cli.command_modules.eventhubs.operations.event_hub_entity#{}',
     )
 
     eh_application_group_util = CliCommandType(
@@ -52,7 +51,7 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_private_endpoint_connection', confirmation=True, validator=validate_private_endpoint_connection_id)
 
 # EventHub Region
-    from .Operation.EventHubEntity import EventHubEntityUpdate
+    from operations.EventHubEntity import EventHubEntityUpdate
     self.command_table['eventhubs eventhub update'] = EventHubEntityUpdate(loader=self)
     with self.command_group('eventhubs eventhub', custom_command_type=eh_eventhub_custom,
                             is_preview=True) as g:
