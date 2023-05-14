@@ -51,7 +51,7 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_private_endpoint_connection', confirmation=True, validator=validate_private_endpoint_connection_id)
 
 # EventHub Region
-    from operations.EventHubEntity import EventHubEntityUpdate
+    from operations.event_hub_entity import EventHubEntityUpdate
     self.command_table['eventhubs eventhub update'] = EventHubEntityUpdate(loader=self)
     with self.command_group('eventhubs eventhub', custom_command_type=eh_eventhub_custom,
                             is_preview=True) as g:
