@@ -238,7 +238,6 @@ def load_command_table(self, _):
         g.keyvault_custom('restore', 'restore_secret', transform=transform_secret_set_attributes)
 
     with self.command_group('keyvault certificate issuer', data_entity.command_type) as g:
-        g.keyvault_command('show', 'get_certificate_issuer')
         g.keyvault_command('delete', 'delete_certificate_issuer')
 
     with self.command_group('keyvault certificate issuer admin', data_entity.command_type) as g:
@@ -300,9 +299,11 @@ def load_command_table(self, _):
     with self.command_group('keyvault certificate issuer', data_certificate_entity.command_type) as g:
         g.keyvault_custom('create', 'create_certificate_issuer', transform=transform_certificate_issuer_create)
         g.keyvault_custom('update', 'update_certificate_issuer', transform=transform_certificate_issuer_create)
-        g.keyvault_command('list', 'list_properties_of_issuers', transform=multi_transformers(
+        g.keyvault_command('list', 'list_properties_of_issuers',
+                           transform=multi_transformers(
                                keep_max_results,
                                transform_certificate_issuer_list))
+        g.keyvault_command('show', 'get_issuer', transform=transform_certificate_issuer_create)
 
 
     if not is_azure_stack_profile(self):
