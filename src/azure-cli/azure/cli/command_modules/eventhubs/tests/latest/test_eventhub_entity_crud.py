@@ -51,7 +51,7 @@ class EHNamespaceEntityCURDScenarioTest(ScenarioTest):
         self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits}')
 
         eh1 = self.cmd('eventhubs eventhub create -g {rg} -n {eventhubname1} --namespace-name {namespacename} --retention-time-in-hours 24 --partition-count 15 --enable-capture true --capture-interval 100 --capture-size-limit 314572799 '
-                       '--destination-name {destinationname} --storage-account {storageid} --blob-container {containername} --archive-name-format {archinvenameformat}').get_output_in_json()
+                       '--destination-name {destinationname} --storage-account {storageid} --blob-container {containername} --archive-name-format {archinvenameformat} --cleanup-policy Delete').get_output_in_json()
 
         self.assertEqual(eh1['name'], self.kwargs['eventhubname1'])
         self.assertEqual(eh1['retentionDescription']['retentionTimeInHours'], 24)
