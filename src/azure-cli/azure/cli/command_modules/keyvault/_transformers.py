@@ -249,7 +249,7 @@ def transform_certificate_properties(result):
             "subject": getattr(result, "subject", ""),
             "tags": getattr(result, "tags", None),
             "x509Thumbprint": base64.b64encode(x509_thumbprint).decode('utf-8') if x509_thumbprint else None,
-            "x509ThumbprintHex": x509_thumbprint.hex().upper()
+            "x509ThumbprintHex": x509_thumbprint.hex().upper() if x509_thumbprint else None
         }
         return ret
     return result
@@ -294,7 +294,7 @@ def transform_certificate_show(result, **command_args):
 
 # pylint: disable=line-too-long
 def transform_certificate_policy(policy, id):
-    if not isinstance(policy, dict):
+    if policy is not None and not isinstance(policy, dict):
         san_emails = getattr(policy, "san_emails", None)
         san_dns_names = getattr(policy, "san_dns_names", None)
         san_upns = getattr(policy, "san_user_principal_names", None)

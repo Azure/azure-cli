@@ -674,6 +674,8 @@ def validate_keyvault_resource_id(entity_type):
             ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
             if getattr(ns, 'command', None) and 'key rotation-policy' in ns.command:
                 setattr(ns, 'key_name', ident.name)
+            elif getattr(ns, 'command', None) and 'certificate' in ns.command:
+                setattr(ns, 'certificate_name', ident.name)
             else:
                 setattr(ns, 'name', ident.name)
             setattr(ns, 'vault_base_url', ident.vault)
@@ -800,8 +802,8 @@ def process_certificate_policy(cmd, ns):
         key_usage = x509_certificate_properties.get('key_usage')
         validity_in_months = x509_certificate_properties.get('validity_in_months')
 
-    validity_in_months = getattr(ns, 'validity', validity_in_months)
     if hasattr(ns, 'validity'):
+        validity_in_months = ns.validity if ns.validity else validity_in_months
         del ns.validity
 
     policyObj = CertificatePolicy(issuer_name=issuer_name, subject=subject, attributes=attributes,

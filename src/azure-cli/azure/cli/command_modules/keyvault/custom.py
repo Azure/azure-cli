@@ -1671,7 +1671,8 @@ def update_certificate_issuer(client, issuer_name, provider_name=None,
 def add_certificate_issuer_admin(cmd, client, issuer_name, email, first_name=None,
                                  last_name=None, phone=None):
     """ Add admin details for a specified certificate issuer. """
-    AdministratorContact = cmd.loader.get_sdk('AdministratorContact', resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES,
+    AdministratorContact = cmd.loader.get_sdk('AdministratorContact',
+                                              resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES,
                                               mod='_models')
     issuer = client.get_issuer(issuer_name)
     admins = issuer.admin_contacts
@@ -1694,7 +1695,7 @@ def delete_certificate_issuer_admin(client, issuer_name, email):
     else:
         provider = issuer.provider
         organization_id = issuer.organization_id
-        client.create_issuer(issuer_name, provider=provider, organization_id=organization_id)
+        client.update_issuer(issuer_name, organization_id=organization_id)
 # endregion
 
 
