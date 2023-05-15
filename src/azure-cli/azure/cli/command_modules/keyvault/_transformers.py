@@ -276,17 +276,17 @@ def transform_certificate_show(result, **command_args):
     import base64
     if not isinstance(result, dict):
         ret = transform_certificate_properties(getattr(result, "properties", None))
-        id = getattr(result, "id", None)
+        cert_id = getattr(result, "id", None)
         cer = getattr(result, "cer", None)
         ret.update({
             "cer": base64.b64encode(cer).decode('utf-8') if cer else None,
             "contentType": getattr(result, "content_type", None),
             "kid": getattr(result, "key_id", None),
             "pending": {
-                "id": '/'.join(id.split('/')[:-1] + ['pending']) if id else None
+                "id": '/'.join(cert_id.split('/')[:-1] + ['pending']) if cert_id else None
             },
             "policy": transform_certificate_policy(policy=getattr(result, "policy", None),
-                                                   id='/'.join(id.split('/')[:-1] + ['policy'])),
+                                                   policy_id='/'.join(cert_id.split('/')[:-1] + ['policy'])),
             "sid": getattr(result, "secret_id", None)
         })
         del ret["subject"]
@@ -294,8 +294,8 @@ def transform_certificate_show(result, **command_args):
     return result
 
 
-# pylint: disable=line-too-long
-def transform_certificate_policy(policy, id):
+# pylint: disable=line-too-long,redefined-builtin
+def transform_certificate_policy(policy, policy_id):
     if policy is not None and not isinstance(policy, dict):
         san_emails = getattr(policy, "san_emails", None)
         san_dns_names = getattr(policy, "san_dns_names", None)
@@ -316,7 +316,7 @@ def transform_certificate_policy(policy, id):
                 "recoveryLevel": getattr(policy, "recovery_level", None),
                 "updated": getattr(policy, "updated_on", None)
             },
-            "id": id,
+            "id": policy_id,
             "issuerParameters": {
                 "certificateTransparency": getattr(policy, "certificate_transparency", None),
                 "certificateType": getattr(policy, "certificate_type", None),
@@ -388,9 +388,9 @@ def transform_certificate_contact_list(result, **command_args):
 
 def transform_certificate_contact_list_result(result, client):
     try:
-        id = getattr(client, "vault_url") + '/certificates/contacts'
-    except:
-        id = ""
+        contacts_id = getattr(client, "vault_url") + '/certificates/contacts'
+    except Exception:
+        contacts_id = ""
     ret = {
         "contactList": [
             {
@@ -399,7 +399,7 @@ def transform_certificate_contact_list_result(result, client):
                 "phone": getattr(contact, "phone")
             } for contact in result
         ],
-        "id": id
+        "id": contacts_id
     }
     return ret
 

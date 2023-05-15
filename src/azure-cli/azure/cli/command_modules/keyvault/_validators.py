@@ -130,7 +130,7 @@ def _get_resource_group_from_resource_name(cli_ctx, vault_name, hsm_name=None):
 
 
 # COMMAND NAMESPACE VALIDATORS
-def process_secret_set_namespace(cmd, namespace):
+def process_secret_set_namespace(namespace):
     validate_tags(namespace)
 
     content = namespace.value
@@ -738,7 +738,7 @@ def validate_decryption(ns):
     ns.value = base64.b64decode(ns.value)
 
 
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long, too-many-locals
 def process_certificate_policy(cmd, ns):
     CertificatePolicy = cmd.loader.get_sdk('CertificatePolicy', mod='_models',
                                            resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES)
@@ -752,7 +752,7 @@ def process_certificate_policy(cmd, ns):
                        'or can use @{file} to load from a file(e.g.@my_policy.json).')
 
     issuer_name = subject = exportable = key_type = key_size = reuse_key = key_curve_name = enhanced_key_usage \
-        = key_usage = content_type = validity_in_months = certificate_type = certificate_transparency = san_emails \
+        = key_usage = content_type = validity_in_months = issuer_certificate_type = certificate_transparency = san_emails \
         = san_dns_names = san_user_principal_names = None
 
     attributes = policy.get('attributes')
@@ -766,7 +766,7 @@ def process_certificate_policy(cmd, ns):
     issuer_parameters = policy.get('issuer_parameters')
     if issuer_parameters:
         issuer_name = issuer_parameters.get('name')
-        certificate_type = issuer_parameters.get('certificate_type')
+        issuer_certificate_type = issuer_parameters.get('certificate_type')
         certificate_transparency = issuer_parameters.get('certificate_transparency')
 
     key_properties = policy.get('key_properties')
@@ -811,7 +811,7 @@ def process_certificate_policy(cmd, ns):
                                   exportable=exportable, key_type=key_type, key_size=key_size, reuse_key=reuse_key,
                                   key_curve_name=key_curve_name, enhanced_key_usage=enhanced_key_usage,
                                   key_usage=key_usage, content_type=content_type, validity_in_months=validity_in_months,
-                                  lifetime_actions=lifetime_actions, certificate_type=certificate_type,
+                                  lifetime_actions=lifetime_actions, certificate_type=issuer_certificate_type,
                                   certificate_transparency=certificate_transparency, san_emails=san_emails,
                                   san_dns_names=san_dns_names, san_user_principal_names=san_user_principal_names)
     ns.policy = policyObj

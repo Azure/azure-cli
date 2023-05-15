@@ -37,8 +37,6 @@ from cryptography.x509 import load_pem_x509_certificate
 from knack.log import get_logger
 from knack.util import CLIError
 
-from OpenSSL import crypto
-
 
 logger = get_logger(__name__)
 
@@ -1621,7 +1619,7 @@ def add_certificate_contact(cmd, client, email, name=None, phone=None):
                                             mod='_models')
     try:
         contacts = client.get_contacts()
-    except:
+    except Exception:
         contacts = []
     contact = CertificateContact(email=email, name=name, phone=phone)
     if any((x for x in contacts if x.email == email)):
@@ -1720,7 +1718,6 @@ def delete_certificate_issuer_admin(client, issuer_name, email):
     if remaining:
         client.update_issuer(issuer_name, admin_contacts=remaining)
     else:
-        provider = issuer.provider
         organization_id = issuer.organization_id
         client.update_issuer(issuer_name, organization_id=organization_id)
 # endregion

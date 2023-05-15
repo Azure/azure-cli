@@ -43,7 +43,6 @@ def load_arguments(self, _):
          'JsonWebKeyOperation', 'SasTokenType',
          'SasDefinitionAttributes', 'StorageAccountAttributes',
          resource_type=ResourceType.DATA_KEYVAULT)
-    CertificateAttributes = self.get_sdk('CertificateAttributes', resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES, mod='_generated_models')
 
     JsonWebKeyType = self.get_sdk('KeyType', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_enums')
     KeyCurveName = self.get_sdk('KeyCurveName', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_enums')

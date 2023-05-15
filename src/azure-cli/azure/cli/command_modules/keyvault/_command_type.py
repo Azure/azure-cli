@@ -8,7 +8,7 @@ import base64
 from knack.introspection import extract_full_summary_from_signature, extract_args_from_signature
 from knack.util import CLIError
 
-from azure.cli.core.commands import LongRunningOperation, AzCommandGroup, AzArgumentContext
+from azure.cli.core.commands import LongRunningOperation, AzCommandGroup
 
 
 def _encode_hex(item):
