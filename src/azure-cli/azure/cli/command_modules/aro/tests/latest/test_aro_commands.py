@@ -10,6 +10,7 @@ from unittest import mock
 
 
 from knack.log import get_logger
+from azure.cli.command_modules.aro.tests.latest.custom_preparers import AROClusterServicePrincipalPreparer
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.checkers import StringContainCheck
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
@@ -20,7 +21,8 @@ logger = get_logger(__name__)
 class AroScenarioTests(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(random_name_length=28, name_prefix='cli_test_aro_create', location='eastus')
+    @ResourceGroupPreparer(random_name_length=28, name_prefix='clitestaro_create', location='eastus')
+    @AROClusterServicePrincipalPreparer(name_prefix='clitestaro_create')
     def test_aro_create(self, resource_group):
         from msrestazure.tools import resource_id
 
@@ -47,7 +49,7 @@ class AroScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
 
         with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
-            self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=create', checks=[
+            self.cmd('aro create -g {rg} -n {name} --client-id {aro_csp} --client-secret {aro_csp_pass} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=create', checks=[
                 self.check('tags.test', 'create'),
                 self.check('name', '{name}'),
                 self.check('masterProfile.subnetId', '{master_subnet_resource}'),
@@ -56,7 +58,8 @@ class AroScenarioTests(ScenarioTest):
             ])
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(random_name_length=28, name_prefix='cli_test_aro_list_cred', location='eastus')
+    @ResourceGroupPreparer(random_name_length=28, name_prefix='clitestaro_listcred', location='eastus')
+    @AROClusterServicePrincipalPreparer(name_prefix='clitestaro_listcred')
     def test_aro_list_credentials(self, resource_group):
         from msrestazure.tools import resource_id
 
@@ -83,12 +86,13 @@ class AroScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
 
         with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
-            self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=list-cred')
+            self.cmd('aro create -g {rg} -n {name} --client-id {aro_csp} --client-secret {aro_csp_pass} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=list-cred')
 
         self.cmd('aro list-credentials -g {rg} -n {name} --subscription {subscription}', checks=[self.check('kubeadminUsername', 'kubeadmin')])
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(random_name_length=28, name_prefix='cli_test_aro_kubeconfig', location='eastus')
+    @ResourceGroupPreparer(random_name_length=28, name_prefix='clitestaro_admin', location='eastus')
+    @AROClusterServicePrincipalPreparer(name_prefix='clitestaro_admin')
     def test_aro_get_admin_kubeconfig(self, resource_group):
         from msrestazure.tools import resource_id
 
@@ -118,7 +122,7 @@ class AroScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
 
         with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
-            self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=get-admin-kubeconfig')
+            self.cmd('aro create -g {rg} -n {name} --client-id {aro_csp} --client-secret {aro_csp_pass} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=get-admin-kubeconfig')
 
         try:
             self.cmd('aro get-admin-kubeconfig -g {rg} -n {name} --subscription {subscription} -f {temp_kubeconfig_path}')
@@ -127,7 +131,8 @@ class AroScenarioTests(ScenarioTest):
             os.remove(temp_kubeconfig_path)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(random_name_length=28, name_prefix='cli_test_aro_show', location='eastus')
+    @ResourceGroupPreparer(random_name_length=28, name_prefix='clitestaro_show', location='eastus')
+    @AROClusterServicePrincipalPreparer(name_prefix='clitestaro_show')
     def test_aro_show(self, resource_group):
         from msrestazure.tools import resource_id
 
@@ -155,7 +160,7 @@ class AroScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
 
         with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
-            self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=show')
+            self.cmd('aro create -g {rg} -n {name} --client-id {aro_csp} --client-secret {aro_csp_pass} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=show')
 
         self.cmd('aro show -g {rg} -n {name} --subscription {subscription} --output table', checks=[
             StringContainCheck(name),
@@ -165,7 +170,8 @@ class AroScenarioTests(ScenarioTest):
         ])
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(random_name_length=28, name_prefix='cli_test_aro_list', location='eastus')
+    @ResourceGroupPreparer(random_name_length=28, name_prefix='clitestaro_list', location='eastus')
+    @AROClusterServicePrincipalPreparer(name_prefix='clitestaro_list')
     def test_aro_list(self, resource_group):
         from msrestazure.tools import resource_id
 
@@ -192,7 +198,7 @@ class AroScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
 
         with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
-            self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=list')
+            self.cmd('aro create -g {rg} -n {name} --client-id {aro_csp} --client-secret {aro_csp_pass} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=list')
 
         self.cmd('aro list -g {rg} --subscription {subscription}', checks=[
             self.check('[0].name', '{name}'),
@@ -201,7 +207,8 @@ class AroScenarioTests(ScenarioTest):
         ])
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(random_name_length=28, name_prefix='cli_test_aro_delete', location='eastus')
+    @ResourceGroupPreparer(random_name_length=28, name_prefix='clitestaro_delete', location='eastus')
+    @AROClusterServicePrincipalPreparer(name_prefix='clitestaro_delete')
     def test_aro_delete(self, resource_group):
         from msrestazure.tools import resource_id
 
@@ -228,12 +235,13 @@ class AroScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
 
         with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
-            self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=delete')
+            self.cmd('aro create -g {rg} -n {name} --client-id {aro_csp} --client-secret {aro_csp_pass} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=delete')
 
         self.cmd('aro delete -y -g {rg} -n {name} --subscription {subscription}', expect_failure=False)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(random_name_length=28, name_prefix='cli_test_aro_update', location='eastus')
+    @ResourceGroupPreparer(random_name_length=28, name_prefix='clitestaro_update', location='eastus')
+    @AROClusterServicePrincipalPreparer(name_prefix='clitestaro_update')
     def test_aro_update(self, resource_group):
         from msrestazure.tools import resource_id
 
@@ -260,6 +268,6 @@ class AroScenarioTests(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --disable-private-link-service-network-policies true')
 
         with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
-            self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=update')
+            self.cmd('aro create -g {rg} -n {name} --client-id {aro_csp} --client-secret {aro_csp_pass} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=update')
 
         self.cmd('aro update -g {rg} -n {name} --subscription {subscription}', expect_failure=False)
