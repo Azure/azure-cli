@@ -3745,7 +3745,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             )
 
     if ((always_ready_instances is not None or maximum_instances is not None or instance_size is not None) and
-        flexconsumption_location is None):
+            flexconsumption_location is None):
         raise RequiredArgumentMissingError("usage error: parameters --always-ready-instances, --maximum-instances "
                                            "and --instance-size must be used with parameter "
                                            "--flexconsumption-location, please provide the name of the flex plan "
