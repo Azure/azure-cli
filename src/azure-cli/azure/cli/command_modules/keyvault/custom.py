@@ -1682,18 +1682,19 @@ def add_certificate_issuer_admin(cmd, client, issuer_name, email, first_name=Non
     return client.update_issuer(issuer_name, admin_contacts=admins)
 
 
-def delete_certificate_issuer_admin(client, vault_base_url, issuer_name, email):
+def delete_certificate_issuer_admin(client, issuer_name, email):
     """ Remove admin details for the specified certificate issuer. """
-    issuer = client.get_certificate_issuer(vault_base_url, issuer_name)
-    org_details = issuer.organization_details
-    admins = org_details.admin_details
-    remaining = [x for x in admins if x.email_address != email]
+    issuer = client.get_issuer(issuer_name)
+    admins = issuer.admin_contacts
+    remaining = [x for x in admins if x.email != email]
     if len(remaining) == len(admins):
         raise CLIError("admin '{}' not found for issuer '{}'".format(email, issuer_name))
-    org_details.admin_details = remaining
-    client.set_certificate_issuer(
-        vault_base_url, issuer_name, issuer.provider, issuer.credentials, org_details,
-        issuer.attributes)
+    if remaining:
+        client.update_issuer(issuer_name, admin_contacts=remaining)
+    else:
+        provider = issuer.provider
+        organization_id = issuer.organization_id
+        client.create_issuer(issuer_name, provider=provider, organization_id=organization_id)
 # endregion
 
 
