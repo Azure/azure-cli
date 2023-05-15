@@ -2,17 +2,19 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import math
+
+# pylint: disable=line-too-long
+# pylint: disable=too-many-statements
+# pylint: disable=too-many-locals
 from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.eventhub import Update as _EventHubEntityUpdate
 
 
 def cli_eventhub_create(cmd, resource_group_name, namespace_name, event_hub_name,
-                       partition_count=None, status=None, retention_time_in_hours=None, cleanup_policy=None, tombstone_retention_time_in_hours=None,
-                       enable_capture=None, skip_empty_archives=None, capture_interval=None, capture_size_limit=None, destination_name=None,
-                       blob_container=None, archive_name_format=None, encoding='Avro', storage_account=None):
+                        partition_count=None, status=None, retention_time_in_hours=None, cleanup_policy=None, tombstone_retention_time_in_hours=None,
+                        enable_capture=None, skip_empty_archives=None, capture_interval=None, capture_size_limit=None, destination_name=None,
+                        blob_container=None, archive_name_format=None, encoding='Avro', storage_account=None):
 
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.eventhub import Create
-    from azure.cli.core import CLIError
     command_arg_dict = {}
 
     if cleanup_policy:
