@@ -1737,7 +1737,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_3.get_network_plugin_mode(), "overlay")
-    
+
     def test_get_network_plugin(self):
         # default
         ctx_1 = AKSManagedClusterContext(
@@ -1783,8 +1783,9 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             DecoratorMode.CREATE,
         )
-        # overwrite warning
-        self.assertEqual(ctx_3.get_network_plugin(), "azure")
+
+        with self.assertRaises(InvalidArgumentValueError):
+            self.assertEqual(ctx_3.get_network_plugin(), "azure")
 
     def test_mc_get_network_dataplane(self):
         # Default, not set.
@@ -2174,7 +2175,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # fail on aci_subnet_name/vnet_subnet_id not specified
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_6.get_enable_addons()
-    
+
     def test_get_http_proxy_config(self):
         # default
         ctx_1 = AKSManagedClusterContext(
@@ -7226,7 +7227,12 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSManagedClusterCreateDecorator(
             self.cmd,
             self.client,
-            {"resource_group_name": "test_rg_name", "name": "test_name", "enable_msi_auth_for_monitoring": True},
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_msi_auth_for_monitoring": True,
+                "enable_addons": "monitoring"
+            },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
         monitoring_addon_profile_2 = self.models.ManagedClusterAddonProfile(
@@ -7377,7 +7383,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             return_value=mc_1,
         ):
             self.assertEqual(dec_1.create_mc(mc_1), mc_1)
-    
+
     def test_set_up_http_proxy_config(self):
         dec_1 = AKSManagedClusterCreateDecorator(
             self.cmd,
@@ -8814,6 +8820,42 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             identity=ground_truth_identity_5,
         )
         self.assertEqual(mc_5, ground_truth_mc_5)
+        # custom value
+        dec_6 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_managed_identity": True,
+                "assign_identity": "test_assign_identity",
+                "yes": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        user_assigned_identity_6 = {
+            "original_test_assign_identity": self.models.ManagedServiceIdentityUserAssignedIdentitiesValue()
+        }
+        identity_6 = self.models.ManagedClusterIdentity(
+            type="UserAssigned",
+            user_assigned_identities=user_assigned_identity_6,
+        )
+        mc_6 = self.models.ManagedCluster(
+            location="test_location",
+            identity=identity_6,
+        )
+        dec_6.context.attach_mc(mc_6)
+        dec_6.update_identity(mc_6)
+        ground_truth_user_assigned_identity_6 = {
+            "test_assign_identity": self.models.ManagedServiceIdentityUserAssignedIdentitiesValue()
+        }
+        ground_truth_identity_6 = self.models.ManagedClusterIdentity(
+            type="UserAssigned",
+            user_assigned_identities=ground_truth_user_assigned_identity_6,
+        )
+        ground_truth_mc_6 = self.models.ManagedCluster(
+            location="test_location",
+            identity=ground_truth_identity_6,
+        )
+        self.assertEqual(mc_6, ground_truth_mc_6)
 
     def test_ensure_azure_keyvault_secrets_provider_addon_profile(self):
         # custom
@@ -9779,7 +9821,12 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSManagedClusterUpdateDecorator(
             self.cmd,
             self.client,
-            {"resource_group_name": "test_rg_name", "name": "test_name", "enable_msi_auth_for_monitoring": True},
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_msi_auth_for_monitoring": True,
+                "enable_addons": "monitoring"
+            },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
         monitoring_addon_profile_2 = self.models.ManagedClusterAddonProfile(

@@ -3667,6 +3667,7 @@ def elastic_pool_create(
         elastic_pool_name,
         sku=None,
         maintenance_configuration_id=None,
+        preferred_enclave_type=None,
         **kwargs):
     '''
     Creates an elastic pool.
@@ -3687,6 +3688,9 @@ def elastic_pool_create(
         cmd.cli_ctx,
         maintenance_configuration_id)
 
+    # Add preferred enclave type, if requested
+    kwargs['preferred_enclave_type'] = preferred_enclave_type
+
     # Create
     return client.begin_create_or_update(
         server_name=server_name,
@@ -3706,7 +3710,8 @@ def elastic_pool_update(
         family=None,
         capacity=None,
         maintenance_configuration_id=None,
-        high_availability_replica_count=None):
+        high_availability_replica_count=None,
+        preferred_enclave_type=None):
     '''
     Updates an elastic pool. Custom update function to apply parameters to instance.
     '''
@@ -3747,6 +3752,9 @@ def elastic_pool_update(
 
     if high_availability_replica_count is not None:
         instance.high_availability_replica_count = high_availability_replica_count
+
+    if preferred_enclave_type is not None:
+        instance.preferred_enclave_type = preferred_enclave_type
 
     return instance
 
@@ -5951,6 +5959,60 @@ def managed_db_log_replay_get(
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name,
         restore_details_name=RestoreDetailsName.DEFAULT)
+
+
+def managed_ledger_digest_uploads_show(
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name):
+    '''
+    Shows ledger storage target
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        database_name=database_name,
+        ledger_digest_uploads=LedgerDigestUploadsName.CURRENT)
+
+
+def managed_ledger_digest_uploads_enable(
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        endpoint,
+        **kwargs):
+    '''
+    Enables ledger storage target
+    '''
+
+    kwargs['digest_storage_endpoint'] = endpoint
+
+    return client.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        database_name=database_name,
+        ledger_digest_uploads=LedgerDigestUploadsName.CURRENT,
+        parameters=kwargs)
+
+
+def managed_ledger_digest_uploads_disable(
+        client,
+        resource_group_name,
+        managed_instance_name,
+        database_name):
+    '''
+    Disables ledger storage target
+    '''
+
+    return client.begin_disable(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        database_name=database_name,
+        ledger_digest_uploads=LedgerDigestUploadsName.CURRENT)
+
 
 ###############################################
 #              sql failover-group             #
