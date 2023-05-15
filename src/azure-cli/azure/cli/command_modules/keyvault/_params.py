@@ -493,10 +493,10 @@ def load_arguments(self, _):
                     pass
                 if item == 'secret':
                     c.argument('name', options_list=['--name', '-n'], required=False,
-                        help='Name of the {}. Required if --id is not specified.'.format(item))
+                               help='Name of the {}. Required if --id is not specified.'.format(item))
                 elif item == 'certificate':
                     c.argument('{}_name'.format(item), options_list=['--name', '-n'], required=False,
-                            help='Name of the {}. Required if --id is not specified.'.format(item))
+                               help='Name of the {}. Required if --id is not specified.'.format(item))
                 c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None,
                         options_list=['--vault-name'], help='Name of the Key Vault. Required if --id is not specified')
                 c.argument('version', options_list=['--version', '-v'],
@@ -511,10 +511,10 @@ def load_arguments(self, _):
                         validator=validate_keyvault_resource_id(item))
                 if item == 'secret':
                     c.argument('name', options_list=['--name', '-n'], required=False,
-                        help='Name of the {}. Required if --id is not specified.'.format(item))
+                               help='Name of the {}. Required if --id is not specified.'.format(item))
                 elif item == 'certificate':
                     c.argument('{}_name'.format(item), options_list=['--name', '-n'], required=False,
-                        help='Name of the {}. Required if --id is not specified.'.format(item))
+                               help='Name of the {}. Required if --id is not specified.'.format(item))
                 c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None,
                         options_list=['--vault-name'], required=False,
                         help='Name of the Vault. Required if --id is not specified.')
@@ -539,7 +539,6 @@ def load_arguments(self, _):
             c.extra('not_before', type=datetime_type,
                     help='Secret not usable before the provided UTC datetime (Y-m-d\'T\'H:M:S\'Z\').')
             c.extra('tags', tags_type)
-
 
     with self.argument_context('keyvault secret set') as c:
         c.argument('name', options_list=['--name', '-n'], required=True, arg_group='Id',
@@ -752,7 +751,7 @@ def load_arguments(self, _):
                 type=get_vault_base_url_type(self.cli_ctx), id_part=None)
         c.extra('disabled', help='Create certificate in disabled state.', arg_type=get_three_state_flag())
         c.extra('validity', type=int,
-                   help='Number of months the certificate is valid for. Overrides the value specified with --policy/-p')
+                help='Number of months the certificate is valid for. Overrides the value specified with --policy/-p')
         c.argument('policy', options_list=['--policy', '-p'],
                    help='JSON encoded policy definition. Use @{file} to load from a file(e.g. @my_policy.json).',
                    type=get_json_object, validator=process_certificate_policy)
@@ -760,8 +759,8 @@ def load_arguments(self, _):
     with self.argument_context('keyvault certificate set-attributes') as c:
         c.extra('enabled', help='Enable the certificate.', arg_type=get_three_state_flag())
         c.extra('policy', options_list=['--policy', '-p'],
-                   help='JSON encoded policy definition. Use @{file} to load from a file(e.g. @my_policy.json).',
-                   type=get_json_object, validator=process_certificate_policy)
+                help='JSON encoded policy definition. Use @{file} to load from a file(e.g. @my_policy.json).',
+                type=get_json_object, validator=process_certificate_policy)
         c.extra('tags', tags_type)
 
     for cmd in ['list', 'list-deleted']:
@@ -823,7 +822,7 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault certificate contact') as c:
         c.argument('email', help='Contact e-mail address. Must be unique.')
-        c.argument('name',  help='Full contact name.')
+        c.argument('name', help='Full contact name.')
         c.argument('phone', help='Contact phone number.')
 
     for item in ['list', 'add', 'delete']:

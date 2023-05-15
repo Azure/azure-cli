@@ -271,6 +271,7 @@ def transform_deleted_certificate(result):
         return ret
     return result
 
+
 def transform_certificate_show(result, **command_args):
     import base64
     if not isinstance(result, dict):
@@ -291,6 +292,7 @@ def transform_certificate_show(result, **command_args):
         del ret["subject"]
         return ret
     return result
+
 
 # pylint: disable=line-too-long
 def transform_certificate_policy(policy, id):
@@ -454,4 +456,3 @@ def transform_certificate_issuer_admin_add(result, **command_args):
         } for contact in admin_contacts]
         return ret
     return result
-

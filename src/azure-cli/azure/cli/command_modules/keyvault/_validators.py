@@ -737,14 +737,15 @@ def validate_encryption(ns):
 def validate_decryption(ns):
     ns.value = base64.b64decode(ns.value)
 
+
 # pylint: disable=line-too-long
 def process_certificate_policy(cmd, ns):
     CertificatePolicy = cmd.loader.get_sdk('CertificatePolicy', mod='_models',
                                            resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES)
     CertificateAttributes = cmd.loader.get_sdk('CertificateAttributes', mod='_generated_models',
-                                        resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES)
+                                               resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES)
     LifetimeAction = cmd.loader.get_sdk('LifetimeAction', mod='_models',
-                                           resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES)
+                                        resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES)
     policy = getattr(ns, 'policy', None)
     if not isinstance(policy, dict):
         raise CLIError('incorrect usage: policy should be an JSON encoded string '
@@ -814,6 +815,7 @@ def process_certificate_policy(cmd, ns):
                                   certificate_transparency=certificate_transparency, san_emails=san_emails,
                                   san_dns_names=san_dns_names, san_user_principal_names=san_user_principal_names)
     ns.policy = policyObj
+
 
 def process_certificate_import(ns):
     if ns.disabled is not None:

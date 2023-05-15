@@ -748,15 +748,15 @@ examples:
 helps['keyvault secret list'] = """
 type: command
 short-summary: List secrets in a specified key vault.
-long-summary: The Get Secrets operation is applicable to the entire vault. However, only the base secret 
-    identifier and its attributes are provided in the response. Individual secret versions are 
+long-summary: The Get Secrets operation is applicable to the entire vault. However, only the base secret
+    identifier and its attributes are provided in the response. Individual secret versions are
     not listed in the response. This operation requires the secrets/list permission.
 """
 
 helps['keyvault secret list-versions'] = """
 type: command
 short-summary: List all versions of the specified secret.
-long-summary: The full secret identifier and attributes are provided in the response. No values are 
+long-summary: The full secret identifier and attributes are provided in the response. No values are
     returned for the secrets. This operations requires the secrets/list permission.
 """
 
@@ -778,7 +778,7 @@ long-summary: The UPDATE operation changes specified attributes of an existing s
 helps['keyvault secret show'] = """
 type: command
 short-summary: Get a specified secret from a given key vault.
-long-summary: The GET operation is applicable to any secret stored in Azure Key Vault. This operation 
+long-summary: The GET operation is applicable to any secret stored in Azure Key Vault. This operation
     requires the secrets/get permission.
 """
 
@@ -817,8 +817,6 @@ short-summary: Restores a backed up secret to a vault.
 long-summary: Restores a backed up secret, and all its versions, to a vault. This operation requires the
         secrets/restore permission.
 """
-
-
 
 helps['keyvault show'] = """
 type: command

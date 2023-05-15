@@ -227,6 +227,7 @@ def data_plane_azure_keyvault_administration_access_control_client(cli_ctx, comm
     return KeyVaultAccessControlClient(
         vault_url=vault_url, credential=credential, api_version=version)
 
+
 def data_plane_azure_keyvault_certificate_client(cli_ctx, command_args):
     from azure.keyvault.certificates import CertificateClient
 
@@ -238,6 +239,7 @@ def data_plane_azure_keyvault_certificate_client(cli_ctx, command_args):
     api_version = '7.4' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
     return CertificateClient(
         vault_url=vault_url, credential=credential, api_version=api_version or version)
+
 
 def data_plane_azure_keyvault_key_client(cli_ctx, command_args):
     from azure.keyvault.keys import KeyClient
@@ -251,6 +253,7 @@ def data_plane_azure_keyvault_key_client(cli_ctx, command_args):
     return KeyClient(
         vault_url=vault_url, credential=credential, api_version=api_version or version)
 
+
 def data_plane_azure_keyvault_secret_client(cli_ctx, command_args):
     from azure.keyvault.secrets import SecretClient
 
@@ -262,6 +265,7 @@ def data_plane_azure_keyvault_secret_client(cli_ctx, command_args):
     api_version = '7.4' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
     return SecretClient(
         vault_url=vault_url, credential=credential, api_version=api_version or version)
+
 
 def _prepare_data_plane_azure_keyvault_client(cli_ctx, command_args, resource_type):
     version = str(get_api_version(cli_ctx, resource_type))

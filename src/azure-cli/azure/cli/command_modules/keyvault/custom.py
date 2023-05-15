@@ -81,8 +81,9 @@ def _azure_stack_wrapper(cmd, client, function_name, resource_type, min_api_vers
 
 
 def _default_certificate_profile(cmd):
-    get_model = lambda x: cmd.loader.get_sdk(x, resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES,
-                                             mod='_generated_models')
+    def get_model(x):
+        return cmd.loader.get_sdk(x, resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES, mod='_generated_models')
+
     Action = get_model('Action')
     ActionType = get_model('ActionType')
     KeyUsageType = get_model('KeyUsageType')
@@ -142,8 +143,9 @@ def _default_certificate_profile(cmd):
 
 
 def _scaffold_certificate_profile(cmd):
-    get_model = lambda x: cmd.loader.get_sdk(x, resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES,
-                                             mod='_generated_models')
+    def get_model(x):
+        return cmd.loader.get_sdk(x, resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES, mod='_generated_models')
+
     Action = get_model('Action')
     ActionType = get_model('ActionType')
     KeyUsageType = get_model('KeyUsageType')
@@ -1485,7 +1487,7 @@ def update_key_rotation_policy(cmd, client, value, key_name=None):
 
 
 # region KeyVault Secret
-def download_secret(client, file_path,name=None, encoding=None, version=''):  # pylint: disable=unused-argument
+def download_secret(client, file_path, name=None, encoding=None, version=''):  # pylint: disable=unused-argument
     """ Download a secret from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
@@ -2560,6 +2562,7 @@ def remove_hsm_region(client, resource_group_name, name, region_name, no_wait=Fa
     logger.warning("%s doesn't exist", region_name)
     return hsm
 # endregion
+
 
 # region secret
 def list_secret(client, **kwargs):

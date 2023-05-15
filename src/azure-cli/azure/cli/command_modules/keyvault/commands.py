@@ -206,9 +206,9 @@ def load_command_table(self, _):
     with self.command_group('keyvault secret', data_secret_entity.command_type) as g:
         g.keyvault_custom('list', "list_secret",
                           transform=multi_transformers(
-                               filter_out_managed_resources,
-                               keep_max_results,
-                               transform_secret_list),
+                              filter_out_managed_resources,
+                              keep_max_results,
+                              transform_secret_list),
                           table_transformer=transform_secret_list_table)
         g.keyvault_command('list-versions', 'list_properties_of_secret_versions',
                            transform=multi_transformers(
