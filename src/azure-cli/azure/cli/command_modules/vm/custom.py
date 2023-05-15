@@ -5252,7 +5252,7 @@ def sig_shared_gallery_list(cmd, client, location, shared_to=None):
     # Keep it here as it will add subscription in the future and we need to set it to None to make it work
     if shared_to == 'subscription':
         shared_to = None
-    return client.list(location=location, shared_to=shared_to, api_version=cmd.get_api_version())
+    return client.list(location=location, shared_to=shared_to, api_version=cmd.get_api_version(operation_group="shared_galleries"))
 
 
 def get_page_result(generator, marker, show_next_marker=None):

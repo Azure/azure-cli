@@ -38,7 +38,7 @@ class BaseCommandOperation:
         """ Callback function of CLICommand description_loader """
         raise NotImplementedError()
 
-    def get_op_handler(self, op_path):
+    def get_op_handler(self, op_path, is_replace_version=True):
         """ Import and load the operation handler by path """
         # Patch the unversioned sdk path to include the appropriate API version for the
         # resource type in question.
