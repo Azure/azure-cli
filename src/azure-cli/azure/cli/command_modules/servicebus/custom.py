@@ -92,70 +92,6 @@ def cli_namespace_list(cmd, client, resource_group_name=None):
         return client.list()
 
 
-def cli_namespace_exists(cmd, client, name):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        return client.check_name_availability(parameters={'name': name})
-
-
-# DisasterRecoveryConfigs Region
-def cli_georecovery_alias_create(cmd, client, resource_group_name, namespace_name, alias,
-                                 partner_namespace, alternate_name=None):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        parameters = {
-            'partner_namespace': partner_namespace,
-            'alternate_name': alternate_name,
-        }
-        logger.warning(
-            'the argument parameters from georecovery-alias fail-over cmdlets will be remove in future release.')
-        return client.create_or_update(resource_group_name=resource_group_name, namespace_name=namespace_name,
-                                       alias=alias, parameters=parameters)
-
-
-def cli_georecovery_alias_exists(cmd, client, resource_group_name, namespace_name, name):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        return client.check_name_availability(resource_group_name=resource_group_name,
-                                              namespace_name=namespace_name,
-                                              parameters={'name': name})
-
-
-# MigrationConfigs Region
-def cli_migration_start(cmd, client, resource_group_name, namespace_name,
-                        target_namespace, post_migration_name, config_name="$default"):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        import time
-        parameters = {
-            'target_namespace': target_namespace,
-            'post_migration_name': post_migration_name
-        }
-        client.begin_create_and_start_migration(resource_group_name, namespace_name, config_name, parameters)
-        getresponse = client.get(resource_group_name, namespace_name, config_name)
-
-        # pool till Provisioning state is succeeded
-        while getresponse.provisioning_state != 'Succeeded':
-            time.sleep(30)
-            getresponse = client.get(resource_group_name, namespace_name, config_name)
-
-        # poll on the 'pendingReplicationOperationsCount' to be 0 or none
-        while getresponse.pending_replication_operations_count != 0 and getresponse.pending_replication_operations_count is not None:
-            time.sleep(30)
-            getresponse = client.get(resource_group_name, namespace_name, config_name)
-
-        return client.get(resource_group_name, namespace_name, config_name)
-
-
-def cli_migration_show(cmd, client, resource_group_name, namespace_name, config_name="$default"):
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_SERVICEBUS, min_api='2021-06-01-preview'):
-        return client.get(resource_group_name, namespace_name, config_name)
-
-
-def cli_migration_complete(client, resource_group_name, namespace_name, config_name="$default"):
-    return client.complete_migration(resource_group_name, namespace_name, config_name)
-
-
-def revert(client, resource_group_name, namespace_name, config_name="$default"):
-    return client.revert(resource_group_name, namespace_name, config_name)
-
-
 iso8601pattern = re.compile("^P(?!$)(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(?=\\d)(\\d+H)?(\\d+M)?(\\d+.)?(\\d+S)?)?$")
 timedeltapattern = re.compile("^\\d+:\\d+:\\d+$")
 
@@ -231,7 +167,6 @@ def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_nam
     NWRuleSetIpRules = cmd.get_models('NWRuleSetIpRules', resource_type=ResourceType.MGMT_SERVICEBUS)
     netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
 
-    logger.warning('This version will be depracated & latest version will release in breaking change release.')
     if netwrokruleset.virtual_network_rules is None:
         netwrokruleset.virtual_network_rules = []
 

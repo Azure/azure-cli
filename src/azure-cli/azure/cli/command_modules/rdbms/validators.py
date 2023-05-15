@@ -651,10 +651,3 @@ def validate_byok_identity(cmd, namespace):
 def validate_identities(cmd, namespace):
     if namespace.identities:
         namespace.identities = [_validate_identity(cmd, namespace, identity) for identity in namespace.identities]
-
-
-def high_availability_validator(namespace):
-    if namespace.high_availability and namespace.high_availability == 'Enabled':
-        logger.warning("'Enabled' value for high availability parameter will be deprecated by April 2023. "
-                       "Please use 'ZoneRedundant' or 'SameZone' instead.")
-        namespace.high_availability = 'ZoneRedundant'

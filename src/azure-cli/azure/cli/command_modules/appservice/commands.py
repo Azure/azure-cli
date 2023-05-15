@@ -367,9 +367,9 @@ def load_command_table(self, _):
         g.custom_command('config-local-git', 'enable_local_git', validator=validate_functionapp_on_flex_plan)
         g.custom_command('config-zip', 'enable_zip_deploy_functionapp')
         g.custom_command('config', 'config_source_control', exception_handler=ex_handler_factory(), validator=validate_functionapp_on_flex_plan)
-        g.custom_command('sync', 'sync_site_repo', validator=validate_functionapp_on_flex_plan)
-        g.custom_show_command('show', 'show_source_control', validator=validate_functionapp_on_flex_plan)
-        g.custom_command('delete', 'delete_source_control', validator=validate_functionapp_on_flex_plan)
+        g.custom_command('sync', 'sync_site_repo', exception_handler=ex_handler_factory(), validator=validate_functionapp_on_flex_plan)
+        g.custom_show_command('show', 'show_source_control', exception_handler=ex_handler_factory(), validator=validate_functionapp_on_flex_plan)
+        g.custom_command('delete', 'delete_source_control', exception_handler=ex_handler_factory(), validator=validate_functionapp_on_flex_plan)
         g.custom_command('update-token', 'update_git_token', exception_handler=ex_handler_factory())
 
     with self.command_group('functionapp deployment user', webclient_sdk) as g:
