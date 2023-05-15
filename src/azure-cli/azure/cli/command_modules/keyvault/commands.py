@@ -20,7 +20,7 @@ from azure.cli.command_modules.keyvault._transformers import (
     transform_certificate_create, transform_certificate_list, transform_certificate_list_deleted,
     transform_certificate_show, transform_certificate_show_deleted, transform_certificate_delete,
     transform_certificate_recover, transform_certificate_contact_list, transform_certificate_contact_add,
-    transform_certificate_issuer_create, transform_certificate_issuer_list, transform_certificate_issuer_admin_add)
+    transform_certificate_issuer_create, transform_certificate_issuer_list, transform_certificate_issuer_admin_list)
 
 from azure.cli.command_modules.keyvault._format import transform_secret_list_table
 
@@ -299,11 +299,11 @@ def load_command_table(self, _):
         g.keyvault_command('delete', 'delete_issuer', transform=transform_certificate_issuer_create)
 
     with self.command_group('keyvault certificate issuer admin', data_certificate_entity.command_type) as g:
-        g.keyvault_custom('add', 'add_certificate_issuer_admin', transform=transform_certificate_issuer_admin_add)
+        g.keyvault_custom('add', 'add_certificate_issuer_admin')
         g.keyvault_command('list', 'get_issuer',
                            transform=multi_transformers(
                                keep_max_results,
-                               transform_certificate_issuer_admin_add))
+                               transform_certificate_issuer_admin_list))
         g.keyvault_custom('delete', 'delete_certificate_issuer_admin')
 
     if not is_azure_stack_profile(self):

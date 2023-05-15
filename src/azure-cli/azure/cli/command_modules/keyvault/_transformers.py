@@ -445,7 +445,7 @@ def transform_certificate_issuer_list(result, **command_args):
     return result
 
 
-def transform_certificate_issuer_admin_add(result, **command_args):
+def transform_certificate_issuer_admin_list(result, **command_args):
     if not isinstance(result, dict) and not isinstance(result, list):
         admin_contacts = getattr(result, 'admin_contacts')
         ret = [{

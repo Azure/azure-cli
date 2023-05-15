@@ -1918,7 +1918,7 @@ class KeyVaultCertificateIssuerScenarioTest(ScenarioTest):
             self.check('provider', 'Test'),
             self.check('attributes.enabled', True),
             self.check('organizationDetails.id', 'TestOrg'),
-            self.check('credentials.accountId', None)
+            self.check('credentials.accountId', "")
         ])
         self.cmd('keyvault certificate issuer list --vault-name {kv}',
                  checks=self.check('length(@)', 1))

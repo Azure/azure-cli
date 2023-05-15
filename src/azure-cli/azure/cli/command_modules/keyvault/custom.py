@@ -1656,7 +1656,7 @@ def create_certificate_issuer(client, issuer_name, provider_name, account_id=Non
                                 password=password, organization_id=organization_id)
 
 
-def update_certificate_issuer(client, issuer_name, provider_name=None,
+def update_certificate_issuer(cmd, client, issuer_name, provider_name=None,
                               account_id=None, password=None, enabled=None, organization_id=None):
     """ Update a certificate issuer record.
     :param issuer_name: Unique identifier for the issuer settings.
@@ -1666,8 +1666,27 @@ def update_certificate_issuer(client, issuer_name, provider_name=None,
     :param password: The issuer account password/secret/etc.
     :param organization_id: The organization id.
     """
-    return client.update_issuer(issuer_name, provider=provider_name, enabled=enabled, account_id=account_id,
-                                password=password, organization_id=organization_id)
+    ## TODO revert to previous version once sdk is fixed
+    def get_model(x):
+        return cmd.loader.get_sdk(x, resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES, mod='_generated_models')
+
+    IssuerCredentials = get_model("IssuerCredentials")
+    OrganizationDetails = get_model("OrganizationDetails")
+    IssuerAttributes = get_model("IssuerAttributes")
+    CertificateIssuerUpdateParameters = get_model("CertificateIssuerUpdateParameters")
+    CertificateIssuer = cmd.loader.get_sdk("CertificateIssuer", resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES,
+                                           mod='_models')
+    parameters = CertificateIssuerUpdateParameters(provider=provider_name)
+    if account_id is not None or password is not None:
+        parameters.credentials = IssuerCredentials(account_id=account_id, password=password)
+    if organization_id is not None:
+        parameters.organization_details = OrganizationDetails(id=organization_id)
+    if enabled is not None:
+        parameters.issuer_attributes = IssuerAttributes(enabled=enabled)
+
+    issuer_bundle = client._client.update_certificate_issuer(
+        vault_base_url=client.vault_url, issuer_name=issuer_name, parameter=parameters)
+    return CertificateIssuer._from_issuer_bundle(issuer_bundle=issuer_bundle)
 
 
 def add_certificate_issuer_admin(cmd, client, issuer_name, email, first_name=None,
@@ -1682,7 +1701,13 @@ def add_certificate_issuer_admin(cmd, client, issuer_name, email, first_name=Non
         raise CLIError("admin '{}' already exists".format(email))
     new_admin = AdministratorContact(first_name=first_name, last_name=last_name, email=email, phone=phone)
     admins.append(new_admin)
-    return client.update_issuer(issuer_name, admin_contacts=admins)
+    client.update_issuer(issuer_name, admin_contacts=admins)
+    return {
+        "emailAddress": email,
+        "firstName": first_name,
+        "lastName": last_name,
+        "phone": phone
+    }
 
 
 def delete_certificate_issuer_admin(client, issuer_name, email):
