@@ -81,12 +81,12 @@ class Create(AAZCommand):
             arg_group="CaptureDescription",
             help="Blob container Name",
         )
-        _args_schema.storage_account_resource_id = AAZStrArg(
+        _args_schema.storage_account = AAZStrArg(
             options=["--storage-account"],
             arg_group="CaptureDescription",
             help="Resource id of the storage account to be used to create the blobs",
         )
-        _args_schema.enabled = AAZBoolArg(
+        _args_schema.enable_capture = AAZBoolArg(
             options=["--enable-capture"],
             arg_group="CaptureDescription",
             help="A value that indicates whether capture description is enabled.",
@@ -97,12 +97,12 @@ class Create(AAZCommand):
             help="Enumerates the possible values for the encoding format of capture description. Note: 'AvroDeflate' will be deprecated in New API Version",
             enum={"Avro": "Avro", "AvroDeflate": "AvroDeflate"},
         )
-        _args_schema.capture_interval_seconds = AAZIntArg(
+        _args_schema.capture_interval = AAZIntArg(
             options=["--capture-interval"],
             arg_group="CaptureDescription",
             help="The time window allows you to set the frequency with which the capture to Azure Blobs will happen, value should between 60 to 900 seconds",
         )
-        _args_schema.capture_size_limit_bytes = AAZIntArg(
+        _args_schema.capture_size_limit = AAZIntArg(
             options=["--capture-size-limit"],
             arg_group="CaptureDescription",
             help="The size window defines the amount of data built up in your Event Hub before an capture operation, value should be between 10485760 to 524288000 bytes",
@@ -267,10 +267,10 @@ class Create(AAZCommand):
             capture_description = _builder.get(".properties.captureDescription")
             if capture_description is not None:
                 capture_description.set_prop("destination", AAZObjectType)
-                capture_description.set_prop("enabled", AAZBoolType, ".enabled")
+                capture_description.set_prop("enabled", AAZBoolType, ".enable_capture")
                 capture_description.set_prop("encoding", AAZStrType, ".encoding")
-                capture_description.set_prop("intervalInSeconds", AAZIntType, ".capture_interval_seconds")
-                capture_description.set_prop("sizeLimitInBytes", AAZIntType, ".capture_size_limit_bytes")
+                capture_description.set_prop("intervalInSeconds", AAZIntType, ".capture_interval")
+                capture_description.set_prop("sizeLimitInBytes", AAZIntType, ".capture_size_limit")
                 capture_description.set_prop("skipEmptyArchives", AAZBoolType, ".skip_empty_archives")
 
             destination = _builder.get(".properties.captureDescription.destination")
@@ -282,7 +282,7 @@ class Create(AAZCommand):
             if properties is not None:
                 properties.set_prop("archiveNameFormat", AAZStrType, ".archive_name_format")
                 properties.set_prop("blobContainer", AAZStrType, ".blob_container")
-                properties.set_prop("storageAccountResourceId", AAZStrType, ".storage_account_resource_id")
+                properties.set_prop("storageAccountResourceId", AAZStrType, ".storage_account")
 
             retention_description = _builder.get(".properties.retentionDescription")
             if retention_description is not None:
