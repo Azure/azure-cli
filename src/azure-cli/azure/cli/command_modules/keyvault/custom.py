@@ -1668,12 +1668,6 @@ def update_certificate_issuer(client, issuer_name, provider_name=None,
                                 password=password, organization_id=organization_id)
 
 
-def list_certificate_issuer_admins(client, vault_base_url, issuer_name):
-    """ List admins for a specified certificate issuer. """
-    return client.get_certificate_issuer(
-        vault_base_url, issuer_name).organization_details.admin_details
-
-
 def add_certificate_issuer_admin(cmd, client, issuer_name, email, first_name=None,
                                  last_name=None, phone=None):
     """ Add admin details for a specified certificate issuer. """

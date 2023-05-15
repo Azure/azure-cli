@@ -229,6 +229,12 @@ long-summary: The GetCertificateContacts operation returns the set of certificat
         specified key vault. This operation requires the certificates/managecontacts permission.
 """
 
+helps['keyvault certificate issuer admin list'] = """
+type: command
+short-summary: List admins for a specified certificate issuer.
+long-summary: Requires certificates/manageissuers/getissuers permission.
+"""
+
 helps['keyvault create'] = """
 type: command
 short-summary: Create a Vault or HSM.
