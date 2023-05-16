@@ -387,10 +387,9 @@ def transform_certificate_contact_list(result, **command_args):
 
 
 def transform_certificate_contact_list_result(result, client):
-    try:
+    contacts_id = ""
+    if getattr(client, "vault_url") and isinstance(getattr(client, "vault_url"), str):
         contacts_id = getattr(client, "vault_url") + '/certificates/contacts'
-    except Exception:
-        contacts_id = ""
     ret = {
         "contactList": [
             {

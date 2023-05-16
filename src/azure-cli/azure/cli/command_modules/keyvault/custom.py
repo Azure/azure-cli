@@ -1617,9 +1617,10 @@ def add_certificate_contact(cmd, client, email, name=None, phone=None):
     """ Add a contact to the specified vault to receive notifications of certificate operations. """
     CertificateContact = cmd.loader.get_sdk('CertificateContact', resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES,
                                             mod='_models')
+    from azure.core.exceptions import ResourceNotFoundError
     try:
         contacts = client.get_contacts()
-    except Exception:
+    except ResourceNotFoundError:
         contacts = []
     contact = CertificateContact(email=email, name=name, phone=phone)
     if any((x for x in contacts if x.email == email)):
@@ -1664,27 +1665,8 @@ def update_certificate_issuer(cmd, client, issuer_name, provider_name=None,
     :param password: The issuer account password/secret/etc.
     :param organization_id: The organization id.
     """
-    ## TODO revert to previous version once sdk is fixed
-    def get_model(x):
-        return cmd.loader.get_sdk(x, resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES, mod='_generated_models')
-
-    IssuerCredentials = get_model("IssuerCredentials")
-    OrganizationDetails = get_model("OrganizationDetails")
-    IssuerAttributes = get_model("IssuerAttributes")
-    CertificateIssuerUpdateParameters = get_model("CertificateIssuerUpdateParameters")
-    CertificateIssuer = cmd.loader.get_sdk("CertificateIssuer", resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES,
-                                           mod='_models')
-    parameters = CertificateIssuerUpdateParameters(provider=provider_name)
-    if account_id is not None or password is not None:
-        parameters.credentials = IssuerCredentials(account_id=account_id, password=password)
-    if organization_id is not None:
-        parameters.organization_details = OrganizationDetails(id=organization_id)
-    if enabled is not None:
-        parameters.issuer_attributes = IssuerAttributes(enabled=enabled)
-
-    issuer_bundle = client._client.update_certificate_issuer(
-        vault_base_url=client.vault_url, issuer_name=issuer_name, parameter=parameters)
-    return CertificateIssuer._from_issuer_bundle(issuer_bundle=issuer_bundle)
+    return client.update_issuer(issuer_name, provider=provider_name, enabled=enabled, account_id=account_id,
+                                password=password, organization_id=organization_id)
 
 
 def add_certificate_issuer_admin(cmd, client, issuer_name, email, first_name=None,
@@ -2603,5 +2585,4 @@ def set_attributes_certificate(client, certificate_name, version=None, policy=No
         client.update_certificate_policy(certificate_name=certificate_name, policy=policy)
     if kwargs.get('enabled') is not None or kwargs.get('tags') is not None:
         return client.update_certificate_properties(certificate_name=certificate_name, version=version, **kwargs)
-    else:
-        return client.get_certificate(certificate_name=certificate_name)
+    return client.get_certificate(certificate_name=certificate_name)
