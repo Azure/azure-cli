@@ -73,11 +73,6 @@ type: group
 short-summary: Manage Azure API Management GraphQL API's.
 """
 
-helps['apim graphql api'] = """
-type: group
-short-summary: Manage Azure API Management GraphQL API's.
-"""
-
 helps['apim graphql resolver'] = """
 type: group
 short-summary: Manage Azure API Management GraphQL API's Resolvers.
