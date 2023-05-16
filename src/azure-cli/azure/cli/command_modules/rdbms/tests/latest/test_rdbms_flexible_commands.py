@@ -1327,7 +1327,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
 
     postgres_location = 'eastus'
 
-    @AllowLargeResponse
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
     def test_postgres_flexible_server_replica_mgmt(self, resource_group):
         self._test_flexible_server_replica_mgmt('postgres', resource_group, True)
@@ -1422,10 +1422,14 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
             location = self.postgres_location
             primary_role = 'Primary'
             replica_role = 'AsyncReplica'
+            public_access_arg = ''
+            public_access_check = []
         else:
             location = mysql_location
             primary_role = 'None'
             replica_role = 'Replica'
+            public_access_arg = '--public-access Disabled'
+            public_access_check = [JMESPathCheck('network.publicNetworkAccess', 'Disabled')]
 
         master_server = self.create_random_name(SERVER_NAME_PREFIX, 32)
         replicas = [self.create_random_name(F'azuredbclirep{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(2)]
@@ -1450,10 +1454,10 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
                           checks=[JMESPathCheck('replicationRole', primary_role)] + master_vnet_check).get_output_in_json()
-
+        
         # test replica create
-        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --zone 2 {} --public-access Disabled'
-                 .format(database_engine, resource_group, replicas[0], result['id'], replica_vnet_args[0]),
+        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --zone 2 {} {}'
+                 .format(database_engine, resource_group, replicas[0], result['id'], replica_vnet_args[0], public_access_arg),
                  checks=[
                      JMESPathCheck('name', replicas[0]),
                      JMESPathCheck('availabilityZone', 2),
@@ -1462,8 +1466,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('sku.name', result['sku']['name']),
                      JMESPathCheck('replicationRole', replica_role),
                      JMESPathCheck('sourceServerResourceId', result['id']),
-                     JMESPathCheck('replicaCapacity', '0'),
-                     JMESPathCheck('network.publicNetworkAccess', 'Disabled')] + replica_vnet_check[0])
+                     JMESPathCheck('replicaCapacity', '0')] + replica_vnet_check[0] + public_access_check)
 
         # test replica list
         self.cmd('{} flexible-server replica list -g {} --name {}'
