@@ -44,26 +44,19 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
             # create account, pool and volume
             self.create_volume(account_name, pool_name, volume_name, vnet_name=vnet_name)
 
-            # get vault
-            vaults = self.get_vaults(account_name)
-
             # volume update with backup policy
-            self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --vault-id %s --backup-enabled %s " %
-                     (account_name, pool_name, volume_name, vaults[0]['id'], True))
+            self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --backup-enabled %s " %
+                     (account_name, pool_name, volume_name, True))
 
         # create backup
         return self.cmd("az netappfiles volume backup create -g {rg} -a %s -p %s -v %s -l %s --backup-name %s" %
                         (account_name, pool_name, volume_name, LOCATION, backup_name)).get_output_in_json()
 
     def delete_backup(self, account_name, pool_name, volume_name):
-        vaults = self.get_vaults(account_name)
-
+        
         # Delete
-        self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --vault-id %s --backup-enabled %s " %
-                 (account_name, pool_name, volume_name, vaults[0]['id'], False))
-
-    def get_vaults(self, account_name):
-        return self.cmd("az netappfiles vault list -g {rg} -a %s" % account_name).get_output_in_json()
+        self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --backup-enabled %s " %
+                 (account_name, pool_name, volume_name, False))
 
     def wait_for_backup_created(self, account_name, pool_name, volume_name, backup_name):
         attempts = 0
@@ -209,14 +202,11 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
         backup_name = self.create_random_name(prefix='cli-backup-', length=24)
         self.create_backup(account_name, pool_name, volume_name, backup_name)
-
-        # get vault
-        vaults = self.cmd("az netappfiles vault list -g {rg} -a %s" % account_name).get_output_in_json()
+        
         self.wait_for_backup_created(account_name, pool_name, volume_name, backup_name)
-
         # volume update
-        volume = self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --vault-id %s --backup-enabled %s" %
-                          (account_name, pool_name, volume_name, vaults[0]['id'], False)).get_output_in_json()
+        volume = self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --backup-enabled %s" %
+                          (account_name, pool_name, volume_name, False)).get_output_in_json()
 
         assert not volume['dataProtection']['backup']['backupEnabled']
 
