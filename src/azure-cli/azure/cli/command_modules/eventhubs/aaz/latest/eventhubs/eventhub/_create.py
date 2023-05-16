@@ -393,7 +393,7 @@ class Create(AAZCommand):
             properties.data_lake_subscription_id = AAZStrType(
                 serialized_name="dataLakeSubscriptionId",
             )
-            properties.storage_account_resource_id = AAZStrType(
+            properties.storage_account = AAZStrType(
                 serialized_name="storageAccountResourceId",
             )
 
