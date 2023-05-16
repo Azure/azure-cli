@@ -168,12 +168,12 @@ def load_command_table(self, _):
 
     with self.command_group('apim graphqlapi resolver', graphql_api_resolver) as g:
         g.custom_command('create', 'apim_graphqlapi_resolver_create')
-        g.custom_command('delete', 'apim_graphqlapi_resolver_delete')
+        g.custom_command('delete', 'apim_graphqlapi_resolver_delete', confirmation=True)
         g.custom_command('show', 'apim_graphqlapi_resolver_get')
         g.custom_command('list', 'apim_graphqlapi_resolver_list')
 
     with self.command_group('apim graphqlapi resolver policy', graphql_api_resolver_policy) as g:
         g.custom_command('create', 'apim_graphqlapi_resolver_policy_create')
-        g.custom_command('delete', 'apim_graphqlapi_resolver_policy_delete')
+        g.custom_command('delete', 'apim_graphqlapi_resolver_policy_delete', confirmation=True)
         g.custom_command('show', 'apim_graphqlapi_resolver_policy_get')
         g.custom_command('list', 'apim_graphqlapi_resolver_policy_list')

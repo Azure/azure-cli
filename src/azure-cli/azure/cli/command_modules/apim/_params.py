@@ -421,7 +421,7 @@ def load_arguments(self, _):
             'service_name', options_list=['--service-name', '-n'],
             help="The name of the soft deleted API Management service instance.")
 
-    with self.argument_context('apim graphql api resolver create') as c:
+    with self.argument_context('apim graphqlapi resolver create') as c:
         c.argument('service_name', options_list=['--service-name', '-n'],
                    help='The name of the API Management service instance.')
         c.argument('api_id', arg_type=api_id)
@@ -433,51 +433,48 @@ def load_arguments(self, _):
         c.argument('description',
                    help='Description of the resolver. May include HTML formatting tags.')
 
-    with self.argument_context('apim graphql api resolver delete') as c:
+    with self.argument_context('apim graphqlapi resolver delete') as c:
         c.argument('service_name', options_list=['--service-name', '-n'],
                    help='The name of the API Management service instance.')
-        c.argument('api_id', arg_type=api_id, required=True)
-        c.argument('resolver_id', help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.', required=True)
+        c.argument('api_id', arg_type=api_id)
+        c.argument('resolver_id', help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
 
-    with self.argument_context('apim graphql api resolver get') as c:
+    with self.argument_context('apim graphqlapi resolver get') as c:
         c.argument('service_name', options_list=['--service-name', '-n'],
                    help='The name of the API Management service instance.')
-        c.argument('api_id', arg_type=api_id, required=True)
-        c.argument('resolver_id', help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.', required=True)
+        c.argument('api_id', arg_type=api_id)
+        c.argument('resolver_id', help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
 
-    with self.argument_context('apim graphql api resolver list') as c:
+    with self.argument_context('apim graphqlapi resolver list') as c:
         c.argument('service_name', options_list=['--service-name', '-n'],
                    help='The name of the API Management service instance.')
-        c.argument('api_id', arg_type=api_id, required=True)
+        c.argument('api_id', arg_type=api_id)
 
-    with self.argument_context('apim graphql api resolver policy create') as c:
+    with self.argument_context('apim graphqlapi resolver policy create') as c:
         c.argument('service_name', options_list=['--service-name', '-n'],
                    help='The name of the API Management service instance.')
-        c.argument('api_id', arg_type=api_id, required=True)
-        c.argument('resolver_id', required=True,
-                   help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
-        c.argument('policy_id', required=True, help='The identifier of the Policy.')
+        c.argument('api_id', arg_type=api_id)
+        c.argument('resolver_id', help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
         c.argument('policy_format', help='Format of the policyContent.')
-        c.argument('value_path', required=True, help='Contents of the Policy as defined by the format.')
+        c.argument('value_path', help='Contents of the Policy as defined by the format.')
 
-    with self.argument_context('apim graphql api resolver policy get') as c:
+    with self.argument_context('apim graphqlapi resolver policy get') as c:
         c.argument('service_name', options_list=['--service-name', '-n'],
                    help='The name of the API Management service instance.')
-        c.argument('api_id', arg_type=api_id, required=True)
-        c.argument('resolver_id', required=True,
-                   help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
-        c.argument('policy_id', required=True, help='The identifier of the Policy.')
-
-    with self.argument_context('apim graphql api resolver policy list') as c:
-        c.argument('service_name', options_list=['--service-name', '-n'],
-                   help='The name of the API Management service instance.')
-        c.argument('api_id', arg_type=api_id, required=True)
-        c.argument('resolver_id', required=True,
+        c.argument('api_id', arg_type=api_id)
+        c.argument('resolver_id',
                    help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
 
-    with self.argument_context('apim graphql api resolver policy delete') as c:
+    with self.argument_context('apim graphqlapi resolver policy list') as c:
         c.argument('service_name', options_list=['--service-name', '-n'],
                    help='The name of the API Management service instance.')
-        c.argument('api_id', arg_type=api_id, required=True)
-        c.argument('resolver_id', required=True,
+        c.argument('api_id', arg_type=api_id)
+        c.argument('resolver_id',
+                   help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
+
+    with self.argument_context('apim graphqlapi resolver policy delete') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('api_id', arg_type=api_id)
+        c.argument('resolver_id',
                    help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
