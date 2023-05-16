@@ -308,10 +308,7 @@ def flexible_server_restore(cmd, client,
 
     restore_server_object = client.get(resource_group_name, server_name)
     restore_server_network = restore_server_object.network
-
-    if public_access is not None:
-        restore_server_network.public_network_access = public_access
-
+    restore_server_network.public_network_access = public_access if public_access else source_server_object.network.public_network_access
     update_parameter = mysql_flexibleservers.models.ServerForUpdate(network=restore_server_network)
 
     return sdk_no_wait(no_wait, client.begin_update, resource_group_name, server_name, update_parameter)
