@@ -674,9 +674,9 @@ examples:
 
 helps['apim graphql resolver show'] = """
 type: command
-short-summary: Gets the details of the GraphQL API Resolver specified by its identifier.
+short-summary: Get the details of the GraphQL API Resolver specified by its identifier.
 examples:
-  - name: Gets details of resolver.
+  - name: Get details of resolver.
     text: |
         az apim api show --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId
 """
