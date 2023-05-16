@@ -1118,3 +1118,39 @@ def begin_failover(client, resource_group_name, account_name, failover_type=None
         """
         user_confirmation(message, yes)
     return client.begin_failover(resource_group_name=resource_group_name, account_name=account_name, failover_type=failover_type, **kwargs)
+
+
+def list_blob_cors_rules(client, resource_group_name, account_name):
+    blob_service_properties = client.get_service_properties(resource_group_name=resource_group_name,
+                                                            account_name=account_name)
+    if not blob_service_properties.cors or not blob_service_properties.cors.cors_rules:
+        return []
+    return blob_service_properties.cors.cors_rules
+
+
+def add_blob_cors_rule(cmd, client, resource_group_name, account_name, max_age_in_seconds,
+                       allowed_origins, allowed_methods, allowed_headers=[], exposed_headers=[]):
+    CorsRules, CorsRule = cmd.get_models('CorsRules', 'CorsRule')
+    blob_service_properties = client.get_service_properties(resource_group_name=resource_group_name,
+                                                            account_name=account_name)
+    if not blob_service_properties.cors or not blob_service_properties.cors.cors_rules:
+        blob_service_properties.cors = CorsRules(cors_rules=[])
+
+    new_rule = CorsRule(allowed_origins=allowed_origins, allowed_methods=allowed_methods,
+                        allowed_headers=allowed_headers, exposed_headers=exposed_headers,
+                        max_age_in_seconds=max_age_in_seconds)
+    blob_service_properties.cors.cors_rules.append(new_rule)
+    return client.set_service_properties(resource_group_name=resource_group_name,
+                                         account_name=account_name,
+                                         parameters=blob_service_properties).cors.cors_rules
+
+
+def clear_blob_cors_rules(cmd, client, resource_group_name, account_name):
+    blob_service_properties = client.get_service_properties(resource_group_name=resource_group_name,
+                                                            account_name=account_name)
+    CorsRules = cmd.get_models('CorsRules')
+    blob_service_properties.cors = CorsRules(cors_rules=[])
+    client.set_service_properties(resource_group_name=resource_group_name,
+                                  account_name=account_name,
+                                  parameters=blob_service_properties)
+    return []

@@ -105,6 +105,38 @@ examples:
     text: az storage account blob-service-properties update --default-service-version 2020-04-08 -n mystorageaccount -g myresourcegroup
 """
 
+helps['storage account blob-service-properties cors-rule'] = """
+type: group
+short-summary: Manage the Cross-Origin Resource Sharing (CORS) rules of a storage account's blob service properties.
+"""
+
+helps['storage account blob-service-properties cors-rule list'] = """
+type: command
+short-summary: List all CORS rules of a storage account's blob service properties.
+examples:
+  - name: List all CORS rules of a storage account
+    text: |
+        az storage blob-service-properties cors-rule list --account-name mystorageaccount --resource-group myresourcegroup
+"""
+
+helps['storage account blob-service-properties cors-rule clear'] = """
+type: command
+short-summary: Clear all CORS rules for a storage account.
+examples:
+  - name: Clear all CORS rules for a storage account
+    text: |
+        az storage blob-service-properties cors-rule clear --account-name mystorageaccount --resource-group myresourcegroup
+"""
+
+helps['storage account blob-service-properties cors-rule add'] = """
+type: command
+short-summary: Add a CORS rule for a storage account.
+examples:
+  - name: Add a CORS rule for a storage account
+    text: |
+        az storage blob-service-properties cors-rule add --account-name mystorageaccount --resource-group myresourcegroup --allowed-origins "http://*.contoso.com" --allowed-methods PUT GET --max-age 200
+"""
+
 helps['storage account create'] = """
 type: command
 short-summary: Create a storage account.
