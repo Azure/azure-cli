@@ -2402,10 +2402,7 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
                      '--assignee "https://vault.azure.net" --scope {sa_rid}')
             # Give tester all permissions to keyvault storage
             # (remember to replace the object id if you are the new tester)
-            logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
-            logged_in_user = logged_in_user["id"] if logged_in_user is not None else \
-                "a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e"
-            self.cmd('az keyvault set-policy -n {kv} --storage-permissions all purge --object-id '+logged_in_user)
+            self.cmd('az keyvault set-policy -n {kv} --storage-permissions all purge --object-id a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e')
             time.sleep(300)
 
         retry = 0
@@ -2425,7 +2422,7 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
                     retry += 1
                 else:
                     raise e
-        expiry = (datetime.datetime.utcnow() + datetime.timedelta(minutes=200)).strftime(f"%Y-%m-%dT%H:%MZ")
+        expiry = (datetime.utcnow() + timedelta(minutes=200)).strftime(f"%Y-%m-%dT%H:%MZ")
         self.kwargs.update({
             'sa_id': kv_sa['id'],
             'expiry': expiry
