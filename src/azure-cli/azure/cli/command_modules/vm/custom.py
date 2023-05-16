@@ -2111,6 +2111,8 @@ def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publishe
                        'on a Red Hat based operating system.')
     if vm_extension_name == 'AHBForSLES':
         logger.warning('Please ensure that you are provisioning AHBForSLES extension on a SLES based operating system.')
+    if vm_extension_name == 'GuestAttestation' and enable_auto_upgrade is None:
+        enable_auto_upgrade = True
 
     version = _normalize_extension_version(cmd.cli_ctx, publisher, vm_extension_name, version, vm.location)
     ext = VirtualMachineExtension(location=vm.location,
