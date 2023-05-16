@@ -109,7 +109,7 @@ class ConstructPolicy(argparse._AppendAction):
         super(ConstructPolicy, self).__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
-        from azure.cli.core import CLIError
+        from azure.cli.core.azclierror import RequiredArgumentMissingError
         from azure.cli.core.azclierror import InvalidArgumentValueError
         from azure.cli.command_modules.eventhubs.constants import INCOMING_MESSAGES
         from azure.cli.command_modules.eventhubs.constants import INCOMING_BYTES
@@ -152,7 +152,7 @@ class ConstructPolicy(argparse._AppendAction):
                 raise InvalidArgumentValueError("Invalid Argument for:'{}' Only allowed arguments are 'name, rate-limit-threshold and metric-id'".format(option_string))
 
         if (throttling_policy["name"] is None) or (throttling_policy["throttling_policy"].get("rate_limit_threshold", None) is None) or (throttling_policy["throttling_policy"].get("metric_id", None) is None):
-            raise CLIError('Throttling policies is missing one of these parameters:name, metric-id, rate-limit-threshold')
+            raise RequiredArgumentMissingError('Throttling policies is missing one of these parameters:name, metric-id, rate-limit-threshold')
 
         return throttling_policy
 

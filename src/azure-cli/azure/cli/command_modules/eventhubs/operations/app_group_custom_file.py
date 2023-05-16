@@ -64,7 +64,7 @@ def cli_add_appgroup_policy(cmd, resource_group_name, namespace_name, applicatio
 
 
 def cli_remove_appgroup_policy(cmd, resource_group_name, namespace_name, application_group_name, policy):
-    from azure.cli.core import CLIError
+    from azure.cli.core.azclierror import ResourceNotFoundError
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.application_group import Update
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.application_group import Show
     application_group = Show(cli_ctx=cmd.cli_ctx)(command_args={
@@ -80,7 +80,7 @@ def cli_remove_appgroup_policy(cmd, resource_group_name, namespace_name, applica
                 application_group["policies"].remove(j)
                 semaphor = 1
         if semaphor == 0:
-            raise CLIError('The following policy was not found: Name: ' + i["name"])
+            raise ResourceNotFoundError('The following policy was not found: Name: ' + i["name"])
     for col in application_group["policies"]:
         policy_object.append(create_app_group_policy_object(col))
     return Update(cli_ctx=cmd.cli_ctx)(command_args={
