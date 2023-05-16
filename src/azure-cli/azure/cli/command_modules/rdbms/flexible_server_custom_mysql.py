@@ -26,7 +26,7 @@ from .flexible_server_virtual_network import prepare_mysql_exist_private_dns_zon
     prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from .validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, \
     mysql_restore_tier_validator, mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, \
-    validate_mysql_replica, validate_server_name, validate_georestore_location, validate_georestore_network, \
+    validate_mysql_replica, validate_server_name, validate_georestore_location, \
     validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_replica_location
 
 logger = get_logger(__name__)
@@ -302,7 +302,16 @@ def flexible_server_restore(cmd, client,
     except Exception as e:
         raise ResourceNotFoundError(e)
 
-    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
+    resolve_poller(
+        client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx,
+        'Restore Server')
+
+    restore_server_object = client.get(resource_group_name, server_name)
+    restore_server_network = restore_server_object.network
+    restore_server_network.public_network_access = public_access if public_access else source_server_object.network.public_network_access
+    update_parameter = mysql_flexibleservers.models.ServerForUpdate(network=restore_server_network)
+
+    return sdk_no_wait(no_wait, client.begin_update, resource_group_name, server_name, update_parameter)
 
 
 def flexible_server_georestore(cmd, client,
@@ -371,7 +380,6 @@ def flexible_server_georestore(cmd, client,
 
         validate_server_name(db_context, server_name, provider + '/flexibleServers')
         validate_georestore_location(db_context, location)
-        validate_georestore_network(source_server_object, public_access, vnet, subnet, 'mysql')
 
         identity, data_encryption = get_identity_and_data_encryption(source_server_object)
 
@@ -418,7 +426,19 @@ def flexible_server_georestore(cmd, client,
     except Exception as e:
         raise ResourceNotFoundError(e)
 
-    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
+    resolve_poller(
+        client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx,
+        'GeoRestore Server')
+
+    restore_server_object = client.get(resource_group_name, server_name)
+    restore_server_network = restore_server_object.network
+
+    if public_access is not None:
+        restore_server_network.public_network_access = public_access
+
+    update_parameter = mysql_flexibleservers.models.ServerForUpdate(network=restore_server_network)
+
+    return sdk_no_wait(no_wait, client.begin_update, resource_group_name, server_name, update_parameter)
 
 
 # pylint: disable=too-many-branches
@@ -697,7 +717,7 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
 # Replica commands
 # Custom functions for server replica, will add MySQL part after backend ready in future
 def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, location=None,
-                            private_dns_zone_arguments=None, vnet=None, subnet=None, zone=None, no_wait=False):
+                            private_dns_zone_arguments=None, vnet=None, subnet=None, zone=None, public_access=None, no_wait=False):
     provider = 'Microsoft.DBforMySQL'
     replica_name = replica_name.lower()
 
@@ -750,8 +770,19 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
                                                                     private_dns_zone_arguments,
                                                                     vnet,
                                                                     subnet)
+    resolve_poller(
+        client.begin_create(resource_group_name, replica_name, parameters), cmd.cli_ctx,
+        'Create Replica')
 
-    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, replica_name, parameters)
+    replica_server_object = client.get(resource_group_name, replica_name)
+    replica_server_network = replica_server_object.network
+
+    if public_access is not None:
+        replica_server_network.public_network_access = public_access
+
+    update_parameter = mysql_flexibleservers.models.ServerForUpdate(network=replica_server_network)
+
+    return sdk_no_wait(no_wait, client.begin_update, resource_group_name, replica_name, update_parameter)
 
 
 def flexible_replica_stop(client, resource_group_name, server_name):
