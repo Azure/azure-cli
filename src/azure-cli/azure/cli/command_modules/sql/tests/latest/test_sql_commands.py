@@ -6929,7 +6929,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
                     checks=[JMESPathCheck('length(@)', 0)])
 
         # upsert link (copying state)
-        self.cmd('sql mi link create -g {rg} --instance-name {mi} --name {link_name} --primary-availability-group-name {primary_ag} --replication-mode {replication_mode} --secondary-availability-group-name {secondary_ag} --source-endpoint {source_endpoint} --target-database {target_database} --no-wait')
+        self.cmd('sql mi link create -g {rg} --instance-name {mi} --name {link_name} --primary-availability-group-name {primary_ag} --secondary-availability-group-name {secondary_ag} --source-endpoint {source_endpoint} --target-database {target_database} --no-wait')
 
         # wait a bit for the resource creation (this doesn't mean the link is fully established)
         time.sleep(60)
@@ -6942,6 +6942,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
                         JMESPathCheck('targetDatabase', target_database),
                         JMESPathCheck('sourceEndpoint', source_endpoint),
                         JMESPathCheck('linkState', 'WaitForHybridConnectionToEstablish'),
+                        JMESPathCheck('replicationMode', replication_mode), # link is in async repl mode by default
                         ]).get_output_in_json()
 
         link_id = link['id']
@@ -6958,6 +6959,7 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
                         JMESPathCheck('targetDatabase', target_database),
                         JMESPathCheck('sourceEndpoint', source_endpoint),
                         JMESPathCheck('linkState', 'WaitForHybridConnectionToEstablish'),
+                        JMESPathCheck('replicationMode', replication_mode), # link is in async repl mode by default
                         ]).get_output_in_json()
 
         # delete instance link
