@@ -78,8 +78,6 @@ def load_arguments_eh(self, _):
             c.argument('retention_time_in_hours', type=int, arg_group='Retention-Description', options_list=['--retention-time-in-hours', '--retention-time'], help="Number of hours to retain the events for this Event Hub. This value is only used when cleanupPolicy is Delete. If cleanupPolicy is Compaction the returned value of this property is Long.MaxValue")
             c.argument('tombstone_retention_time_in_hours', type=int, arg_group='Retention-Description', options_list=['--tombstone-retention-time-in-hours', '--tombstone-time'], help="Number of hours to retain the tombstone markers of a compacted Event Hub. This value is only used when cleanupPolicy is Compaction. Consumer must complete reading the tombstone marker within this specified amount of time if consumer begins from starting offset to ensure they get a valid snapshot for the specific key described by the tombstone marker within the compacted Event Hub")
             c.argument('cleanup_policy', arg_group='Retention-Description', arg_type=get_enum_type(['Delete', 'Compaction']), help="Enumerates the possible values for cleanup policy")
-            #c.argument('encoding', help='Enumerates the possible values for the encoding format of capture description. Default Value:Avro')
-            
     with self.argument_context('eventhubs eventhub list') as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
 
