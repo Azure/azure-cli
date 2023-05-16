@@ -166,14 +166,14 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'apim_ds_get')
         g.custom_command('purge', 'apim_ds_purge')
 
-    with self.command_group('apim graphqlapi resolver', graphql_api_resolver) as g:
-        g.custom_command('create', 'apim_graphqlapi_resolver_create')
-        g.custom_command('delete', 'apim_graphqlapi_resolver_delete', confirmation=True)
-        g.custom_command('show', 'apim_graphqlapi_resolver_get')
-        g.custom_command('list', 'apim_graphqlapi_resolver_list')
+    with self.command_group('apim graphql resolver', graphql_api_resolver) as g:
+        g.custom_command('create', 'apim_graphql_resolver_create')
+        g.custom_command('delete', 'apim_graphql_resolver_delete', confirmation=True)
+        g.custom_command('show', 'apim_graphql_resolver_get')
+        g.custom_command('list', 'apim_graphql_resolver_list')
 
-    with self.command_group('apim graphqlapi resolver policy', graphql_api_resolver_policy) as g:
-        g.custom_command('create', 'apim_graphqlapi_resolver_policy_create')
-        g.custom_command('delete', 'apim_graphqlapi_resolver_policy_delete', confirmation=True)
-        g.custom_command('show', 'apim_graphqlapi_resolver_policy_get')
-        g.custom_command('list', 'apim_graphqlapi_resolver_policy_list')
+    with self.command_group('apim graphql resolver policy', graphql_api_resolver_policy) as g:
+        g.custom_command('create', 'apim_graphql_resolver_policy_create')
+        g.custom_command('delete', 'apim_graphql_resolver_policy_delete', confirmation=True)
+        g.custom_command('show', 'apim_graphql_resolver_policy_get')
+        g.custom_command('list', 'apim_graphql_resolver_policy_list')

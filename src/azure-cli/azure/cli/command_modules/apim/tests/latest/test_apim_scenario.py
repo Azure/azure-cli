@@ -384,10 +384,7 @@ class ApimScenarioTest(ScenarioTest):
         value = content_value
         
         pythonfile = 'policy.xml'
-        schemapath = os.path.join(TEST_DIR, pythonfile)
-        api_file = open(schemapath, 'r')
-        content_value = api_file.read()
-        xmlvalue = content_value
+        policypath = os.path.join(TEST_DIR, pythonfile)
 
         self.kwargs.update({
             'graphql_api_id': self.create_random_name('gr-api', 10),
@@ -408,7 +405,7 @@ class ApimScenarioTest(ScenarioTest):
             'resolver_display_name': 'Query-allFamilies',
             'resolver_path': 'Query/allFamilies',
             'resolver_decription': "A GraphQL Resolver example",
-            'value_path': xmlvalue
+            'value_path': policypath
         })
 
         # import api
@@ -437,15 +434,40 @@ class ApimScenarioTest(ScenarioTest):
         
         #create resolver
         self.cmd(
-            'apim api graphqlapi resolver create -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}" --display-name "{resolver_display_name}" --path "{resolver_path}" --description "{resolver_decription}"',
-            checks=[self.check('name', '{resolver_display_name}'),
+            'apim api graphql resolver create -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}" --display-name "{resolver_display_name}" --path "{resolver_path}" --description "{resolver_decription}"',
+            checks=[self.check('name', '{resolver_id}'),
                     self.check('path', '{resolver_path}')])
         
+        #get resolver
+        self.cmd(
+            'apim api graphql resolver show -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}"',
+            checks=[self.check('name', '{resolver_id}'),
+                    self.check('path', '{resolver_path}')])
+        
+        #list resolvers
+        resolver_count = len(self.cmd('apim api graphql resolver list -g "{rg}" -n "{service_name}" --api-id "{graphql_api_id}"').get_output_in_json())
+        self.assertEqual(resolver_count, 1)
+
         #create resolver policy
         self.cmd(
-            'apim api graphqlapi resolver policy create -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}" --format "xml" --value-path {value_path}',
+            'apim api graphql resolver policy create -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}" --format "xml" --value-path {value_path}',
             checks=[self.check('format', 'xml')])
         
+        #get resolver policy
+        self.cmd(
+            'apim api graphql resolver policy show -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}"',
+            checks=[self.check('format', 'xml')])
+        
+        #delete resolver policy
+        self.cmd(
+            'apim api graphql resolver policy show -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}" --yes')
+        
+        #delete resolver
+        self.cmd(
+            'apim api graphql resolver delete -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}" --yes')
+        
+        
+
         #get schema
         self.cmd(
             'apim api schema show -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --schema-id "{graphql_sch_id}"',

@@ -958,7 +958,7 @@ def apim_ds_purge(client, service_name, location, no_wait=False):
 # Graphql Resolver Operations
 
 
-def apim_graphqlapi_resolver_create(
+def apim_graphql_resolver_create(
         client, resource_group_name, service_name, api_id, resolver_id, display_name,
         path, description=None, no_wait=False):
     """Creates a new Resolver. """
@@ -976,7 +976,7 @@ def apim_graphqlapi_resolver_create(
                        parameters=parameters)
 
 
-def apim_graphqlapi_resolver_delete(
+def apim_graphql_resolver_delete(
         client, resource_group_name, service_name, api_id, resolver_id, no_wait=False, if_match=None):
 
     return sdk_no_wait(no_wait, client.graph_ql_api_resolver.delete,
@@ -987,7 +987,7 @@ def apim_graphqlapi_resolver_delete(
                        if_match="*" if if_match is None else if_match)
 
 
-def apim_graphqlapi_resolver_get(client, resource_group_name, service_name, api_id, resolver_id, no_wait=False):
+def apim_graphql_resolver_get(client, resource_group_name, service_name, api_id, resolver_id, no_wait=False):
 
     return sdk_no_wait(no_wait, client.graph_ql_api_resolver.get,
                        resource_group_name=resource_group_name,
@@ -996,7 +996,7 @@ def apim_graphqlapi_resolver_get(client, resource_group_name, service_name, api_
                        resolver_id=resolver_id)
 
 
-def apim_graphqlapi_resolver_list(client, resource_group_name, service_name, api_id, no_wait=False):
+def apim_graphql_resolver_list(client, resource_group_name, service_name, api_id, no_wait=False):
 
     return sdk_no_wait(no_wait, client.graph_ql_api_resolver.list_by_api,
                        resource_group_name=resource_group_name,
@@ -1006,7 +1006,7 @@ def apim_graphqlapi_resolver_list(client, resource_group_name, service_name, api
 
 # Graphql Resolver Policy Operations
 
-def apim_graphqlapi_resolver_policy_create(
+def apim_graphql_resolver_policy_create(
         client, resource_group_name, service_name, api_id, resolver_id, value_path, policy_format=None, no_wait=False):
     """Creates a new Resolver policy. """
     api_file = open(value_path, 'r')
@@ -1027,7 +1027,7 @@ def apim_graphqlapi_resolver_policy_create(
                        parameters=parameters)
 
 
-def apim_graphqlapi_resolver_policy_get(client, resource_group_name, service_name, api_id, resolver_id, no_wait=False):
+def apim_graphql_resolver_policy_get(client, resource_group_name, service_name, api_id, resolver_id, no_wait=False):
 
     return sdk_no_wait(no_wait, client.graph_ql_api_resolver_policy.get,
                        resource_group_name=resource_group_name,
@@ -1037,7 +1037,7 @@ def apim_graphqlapi_resolver_policy_get(client, resource_group_name, service_nam
                        policy_id="policy")
 
 
-def apim_graphqlapi_resolver_policy_list(client, resource_group_name, service_name, api_id, resolver_id, no_wait=False):
+def apim_graphql_resolver_policy_list(client, resource_group_name, service_name, api_id, resolver_id, no_wait=False):
 
     return sdk_no_wait(no_wait, client.graph_ql_api_resolver_policy.list_by_resolver,
                        resource_group_name=resource_group_name,
@@ -1046,7 +1046,7 @@ def apim_graphqlapi_resolver_policy_list(client, resource_group_name, service_na
                        resolver_id=resolver_id)
 
 
-def apim_graphqlapi_resolver_policy_delete(
+def apim_graphql_resolver_policy_delete(
         client, resource_group_name, service_name, api_id, resolver_id, no_wait=False, if_match=None):
 
     return sdk_no_wait(no_wait, client.graph_ql_api_resolver_policy.delete,
