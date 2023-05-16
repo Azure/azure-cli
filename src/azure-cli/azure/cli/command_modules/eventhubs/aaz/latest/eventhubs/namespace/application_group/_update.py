@@ -87,6 +87,7 @@ class Update(AAZCommand):
         policies.Element = AAZObjectArg(
             nullable=True,
         )
+        cls._args_schema.policies._registered = False
 
         _element = cls._args_schema.policies.Element
         _element.throttling_policy = AAZObjectArg(
