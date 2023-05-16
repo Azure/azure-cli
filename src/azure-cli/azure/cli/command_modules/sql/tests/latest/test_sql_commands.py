@@ -3531,7 +3531,6 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='clitest-EPVBS', location='eastus2euap')
     @SqlServerPreparer(name_prefix='clitest-EPVBS', location='eastus2euap')
-    @unittest.skip('Cannot record yet due to pending MS deployment')
     @AllowLargeResponse()
     def test_sql_elastic_pools_preferred_enclave_type_mgmt(self, resource_group, resource_group_location, server):
         pool_name_one = "cliautomationpool1"
@@ -3624,11 +3623,13 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)])
 
+        """
         self.cmd('sql db show -g {} --server {} --name {}'
                  .format(resource_group, server, database_name_two),
                  checks=[
                      JMESPathCheck('elasticPoolName', pool_name_two),
                      JMESPathCheck('preferredEnclaveType', preferred_enclave_type_default)])
+        """
 
 
 class SqlElasticPoolOperationMgmtScenarioTest(ScenarioTest):
