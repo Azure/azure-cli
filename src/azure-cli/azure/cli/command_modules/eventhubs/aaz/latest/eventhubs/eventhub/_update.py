@@ -107,6 +107,7 @@ class Update(AAZCommand):
             nullable=True,
             enum={"Avro": "Avro", "AvroDeflate": "AvroDeflate"},
         )
+        _args_schema.encoding._registered = False
         _args_schema.capture_interval = AAZIntArg(
             options=["--capture-interval"],
             arg_group="CaptureDescription",

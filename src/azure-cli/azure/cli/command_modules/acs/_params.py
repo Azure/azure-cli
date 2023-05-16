@@ -17,17 +17,16 @@ from azure.cli.command_modules.acs._consts import (
     CONST_GPU_INSTANCE_PROFILE_MIG3_G, CONST_GPU_INSTANCE_PROFILE_MIG4_G,
     CONST_GPU_INSTANCE_PROFILE_MIG7_G, CONST_LOAD_BALANCER_SKU_BASIC,
     CONST_LOAD_BALANCER_SKU_STANDARD, CONST_MANAGED_CLUSTER_SKU_TIER_FREE,
-    CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD, CONST_NETWORK_PLUGIN_AZURE,
-    CONST_NETWORK_PLUGIN_KUBENET, CONST_NETWORK_PLUGIN_NONE,
-    CONST_NETWORK_PLUGIN_MODE_OVERLAY,
-    CONST_NETWORK_DATAPLANE_AZURE, CONST_NETWORK_DATAPLANE_CILIUM,
-    CONST_NODE_IMAGE_UPGRADE_CHANNEL, CONST_NODEPOOL_MODE_SYSTEM,
-    CONST_NODEPOOL_MODE_USER, CONST_NONE_UPGRADE_CHANNEL,
-    CONST_OS_DISK_TYPE_EPHEMERAL, CONST_OS_DISK_TYPE_MANAGED,
+    CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD, CONST_NETWORK_DATAPLANE_AZURE,
+    CONST_NETWORK_DATAPLANE_CILIUM, CONST_NETWORK_PLUGIN_AZURE,
+    CONST_NETWORK_PLUGIN_KUBENET, CONST_NETWORK_PLUGIN_MODE_OVERLAY,
+    CONST_NETWORK_PLUGIN_NONE, CONST_NODE_IMAGE_UPGRADE_CHANNEL,
+    CONST_NODEPOOL_MODE_SYSTEM, CONST_NODEPOOL_MODE_USER,
+    CONST_NONE_UPGRADE_CHANNEL, CONST_OS_DISK_TYPE_EPHEMERAL,
+    CONST_OS_DISK_TYPE_MANAGED, CONST_OS_SKU_AZURELINUX,
     CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER, CONST_OS_SKU_UBUNTU,
     CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022,
-    CONST_OUTBOUND_TYPE_LOAD_BALANCER,
-    CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
+    CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, CONST_PATCH_UPGRADE_CHANNEL,
     CONST_RAPID_UPGRADE_CHANNEL, CONST_SCALE_DOWN_MODE_DEALLOCATE,
@@ -38,27 +37,26 @@ from azure.cli.command_modules.acs._validators import (
     validate_acr, validate_agent_pool_name, validate_assign_identity,
     validate_assign_kubelet_identity, validate_azure_keyvault_kms_key_id,
     validate_azure_keyvault_kms_key_vault_resource_id,
-    validate_image_cleaner_enable_disable_mutually_exclusive,
-    validate_create_parameters, validate_credential_format,
-    validate_defender_config_parameter,
+    validate_azuremonitorworkspaceresourceid, validate_create_parameters,
+    validate_credential_format, validate_defender_config_parameter,
     validate_defender_disable_and_enable_parameters, validate_eviction_policy,
-    validate_host_group_id, validate_ip_ranges, validate_k8s_version,
+    validate_grafanaresourceid, validate_host_group_id,
+    validate_image_cleaner_enable_disable_mutually_exclusive,
+    validate_ip_ranges, validate_k8s_version,
     validate_keyvault_secrets_provider_disable_and_enable_parameters,
     validate_kubectl_version, validate_kubelogin_version,
     validate_linux_host_name, validate_load_balancer_idle_timeout,
     validate_load_balancer_outbound_ip_prefixes,
     validate_load_balancer_outbound_ips, validate_load_balancer_outbound_ports,
-    validate_load_balancer_sku, validate_sku_tier, validate_max_surge,
+    validate_load_balancer_sku, validate_max_surge,
     validate_nat_gateway_idle_timeout,
     validate_nat_gateway_managed_outbound_ip_count, validate_network_policy,
     validate_nodepool_id, validate_nodepool_labels, validate_nodepool_name,
-    validate_nodepool_tags, validate_nodes_count, validate_pod_subnet_id,
-    validate_ppg, validate_priority, validate_registry_name,
-    validate_snapshot_id, validate_snapshot_name, validate_spot_max_price,
-    validate_ssh_key, validate_taints, validate_vm_set_type,
-    validate_vnet_subnet_id,
-    validate_azuremonitorworkspaceresourceid,
-    validate_grafanaresourceid)
+    validate_nodepool_tags, validate_nodes_count, validate_os_sku,
+    validate_pod_subnet_id, validate_ppg, validate_priority,
+    validate_registry_name, validate_sku_tier, validate_snapshot_id,
+    validate_snapshot_name, validate_spot_max_price, validate_ssh_key,
+    validate_taints, validate_vm_set_type, validate_vnet_subnet_id)
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
     get_resource_name_completion_list, get_three_state_flag, name_type,
@@ -108,7 +106,7 @@ node_priorities = [CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SP
 node_eviction_policies = [CONST_SPOT_EVICTION_POLICY_DELETE, CONST_SPOT_EVICTION_POLICY_DEALLOCATE]
 node_os_disk_types = [CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL]
 node_mode_types = [CONST_NODEPOOL_MODE_SYSTEM, CONST_NODEPOOL_MODE_USER]
-node_os_skus_create = [CONST_OS_SKU_UBUNTU, CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER]
+node_os_skus_create = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER]
 node_os_skus = node_os_skus_create + [CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022]
 scale_down_modes = [CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_DOWN_MODE_DEALLOCATE]
 
@@ -257,7 +255,7 @@ def load_arguments(self, _):
         c.argument('nodepool_name', default='nodepool1',
                    help='Node pool name, up to 12 alphanumeric characters', validator=validate_nodepool_name)
         c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
-        c.argument('os_sku', arg_type=get_enum_type(node_os_skus_create))
+        c.argument('os_sku', arg_type=get_enum_type(node_os_skus_create), validator=validate_os_sku)
         c.argument('snapshot_id', validator=validate_snapshot_id)
         c.argument('vnet_subnet_id', validator=validate_vnet_subnet_id)
         c.argument('pod_subnet_id', validator=validate_pod_subnet_id)
@@ -449,7 +447,7 @@ def load_arguments(self, _):
     with self.argument_context('aks nodepool add') as c:
         c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
         c.argument('os_type')
-        c.argument('os_sku', arg_type=get_enum_type(node_os_skus))
+        c.argument('os_sku', arg_type=get_enum_type(node_os_skus), validator=validate_os_sku)
         c.argument('snapshot_id', validator=validate_snapshot_id)
         c.argument('vnet_subnet_id', validator=validate_vnet_subnet_id)
         c.argument('pod_subnet_id', validator=validate_pod_subnet_id)

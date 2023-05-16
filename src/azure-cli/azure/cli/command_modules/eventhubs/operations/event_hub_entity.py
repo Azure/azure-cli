@@ -12,7 +12,7 @@ from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.eventhub import Up
 def cli_eventhub_create(cmd, resource_group_name, namespace_name, event_hub_name,
                         partition_count=None, status=None, retention_time_in_hours=None, cleanup_policy=None, tombstone_retention_time_in_hours=None,
                         enable_capture=None, skip_empty_archives=None, capture_interval=None, capture_size_limit=None, destination_name=None,
-                        blob_container=None, archive_name_format=None, encoding='Avro', storage_account=None):
+                        blob_container=None, archive_name_format=None, storage_account=None):
 
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.eventhub import Create
     command_arg_dict = {}
@@ -45,7 +45,7 @@ def cli_eventhub_create(cmd, resource_group_name, namespace_name, event_hub_name
             "capture_size_limit": int(capture_size_limit),
             "destination_name": destination_name,
             "enable_capture": bool(enable_capture),
-            "encoding": encoding,
+            "encoding": 'Avro',
             "storage_account": storage_account,
             "skip_empty_archives": skip_empty_archives
         })
