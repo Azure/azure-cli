@@ -1655,7 +1655,7 @@ def create_certificate_issuer(client, issuer_name, provider_name, account_id=Non
                                 password=password, organization_id=organization_id)
 
 
-def update_certificate_issuer(cmd, client, issuer_name, provider_name=None,
+def update_certificate_issuer(client, issuer_name, provider_name=None,
                               account_id=None, password=None, enabled=None, organization_id=None):
     """ Update a certificate issuer record.
     :param issuer_name: Unique identifier for the issuer settings.
