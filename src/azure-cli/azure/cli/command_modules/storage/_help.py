@@ -116,7 +116,7 @@ short-summary: List all CORS rules of a storage account's blob service propertie
 examples:
   - name: List all CORS rules of a storage account
     text: |
-        az storage blob-service-properties cors-rule list --account-name mystorageaccount --resource-group myresourcegroup
+        az storage account blob-service-properties cors-rule list --account-name mystorageaccount --resource-group myresourcegroup
 """
 
 helps['storage account blob-service-properties cors-rule clear'] = """
@@ -125,7 +125,7 @@ short-summary: Clear all CORS rules for a storage account.
 examples:
   - name: Clear all CORS rules for a storage account
     text: |
-        az storage blob-service-properties cors-rule clear --account-name mystorageaccount --resource-group myresourcegroup
+        az storage account blob-service-properties cors-rule clear --account-name mystorageaccount --resource-group myresourcegroup
 """
 
 helps['storage account blob-service-properties cors-rule add'] = """
@@ -134,7 +134,7 @@ short-summary: Add a CORS rule for a storage account.
 examples:
   - name: Add a CORS rule for a storage account
     text: |
-        az storage blob-service-properties cors-rule add --account-name mystorageaccount --resource-group myresourcegroup --allowed-origins "http://*.contoso.com" --allowed-methods PUT GET --max-age 200
+        az storage account blob-service-properties cors-rule add --account-name mystorageaccount --resource-group myresourcegroup --allowed-origins "http://*.contoso.com" --allowed-methods PUT GET --max-age 200
 """
 
 helps['storage account create'] = """
