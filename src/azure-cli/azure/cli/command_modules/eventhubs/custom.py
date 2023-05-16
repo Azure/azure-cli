@@ -117,11 +117,6 @@ def cli_namespace_list(cmd, client, resource_group_name=None):
     return client.list()
 
 
-def cli_namespace_exists(client, name):
-
-    return client.check_name_availability(parameters={'name': name})
-
-
 # Eventhub Region
 def cli_eheventhub_create(cmd, client, resource_group_name, namespace_name, event_hub_name, message_retention_in_days=None, partition_count=None, status=None,
                           enabled=None, skip_empty_archives=None, capture_interval_seconds=None, capture_size_limit_bytes=None, destination_name=None, storage_account_resource_id=None, blob_container=None, archive_name_format=None):
@@ -206,87 +201,6 @@ def cli_eheventhub_update(cmd, instance, message_retention_in_days=None, partiti
                 instance.capture_description.skip_empty_archives = skip_empty_archives
 
     return instance
-
-
-# NetwrokRuleSet Region
-def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_name, subnet=None, ip_mask=None, ignore_missing_vnet_service_endpoint=False, action='Allow'):
-    NWRuleSetVirtualNetworkRules = cmd.get_models('NWRuleSetVirtualNetworkRules', resource_type=ResourceType.MGMT_EVENTHUB)
-    Subnet = cmd.get_models('Subnet', resource_type=ResourceType.MGMT_EVENTHUB)
-    NWRuleSetIpRules = cmd.get_models('NWRuleSetIpRules', resource_type=ResourceType.MGMT_EVENTHUB)
-
-    netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
-    logger.warning('This version will be depracated & latest version will release in breaking change release.')
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
-        if netwrokruleset.virtual_network_rules is None:
-            netwrokruleset.virtual_network_rules = [NWRuleSetVirtualNetworkRules]
-
-        if netwrokruleset.ip_rules is None:
-            netwrokruleset.ip_rules = [NWRuleSetIpRules]
-
-        if subnet:
-            netwrokruleset.virtual_network_rules.append(NWRuleSetVirtualNetworkRules(subnet=Subnet(id=subnet),
-                                                                                     ignore_missing_vnet_service_endpoint=ignore_missing_vnet_service_endpoint))
-
-        if ip_mask:
-            netwrokruleset.ip_rules.append(NWRuleSetIpRules(ip_mask=ip_mask, action=action))
-
-    return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
-
-
-def cli_networkrule_update(client, resource_group_name, namespace_name, public_network_access=None, trusted_service_access_enabled=None,
-                           default_action=None):
-    networkruleset = client.get_network_rule_set(resource_group_name, namespace_name)
-
-    if trusted_service_access_enabled is not None:
-        networkruleset.trusted_service_access_enabled = trusted_service_access_enabled
-
-    if public_network_access:
-        networkruleset.public_network_access = public_network_access
-
-    if default_action:
-        networkruleset.default_action = default_action
-
-    return client.create_or_update_network_rule_set(resource_group_name, namespace_name, networkruleset)
-
-
-def cli_networkrule_delete(cmd, client, resource_group_name, namespace_name, subnet=None, ip_mask=None):
-    NWRuleSetVirtualNetworkRules = cmd.get_models('NWRuleSetVirtualNetworkRules', resource_type=ResourceType.MGMT_EVENTHUB)
-    NWRuleSetIpRules = cmd.get_models('NWRuleSetIpRules', resource_type=ResourceType.MGMT_EVENTHUB)
-    netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
-    if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
-        if subnet:
-            virtualnetworkrule = NWRuleSetVirtualNetworkRules()
-            virtualnetworkrule.subnet = subnet
-
-            for vnetruletodelete in netwrokruleset.virtual_network_rules:
-                if vnetruletodelete.subnet.id.lower() == subnet.lower():
-                    virtualnetworkrule.ignore_missing_vnet_service_endpoint = vnetruletodelete.ignore_missing_vnet_service_endpoint
-                    netwrokruleset.virtual_network_rules.remove(vnetruletodelete)
-                    break
-
-        if ip_mask:
-            ipruletodelete = NWRuleSetIpRules()
-            ipruletodelete.ip_mask = ip_mask
-            ipruletodelete.action = "Allow"
-
-            if ipruletodelete in netwrokruleset.ip_rules:
-                netwrokruleset.ip_rules.remove(ipruletodelete)
-
-    return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
-
-
-# GeoDR region
-def cli_geodr_name_exists(client, resource_group_name, namespace_name, name):
-
-    return client.check_name_availability(resource_group_name, namespace_name, parameters={'name': name})
-
-
-def cli_geodr_create(client, resource_group_name, namespace_name, alias, partner_namespace=None, alternate_name=None):
-
-    return client.create_or_update(resource_group_name,
-                                   namespace_name,
-                                   alias,
-                                   parameters={'partner_namespace': partner_namespace, 'alternate_name': alternate_name})
 
 
 def cli_add_identity(cmd, client, resource_group_name, namespace_name, system_assigned=None, user_assigned=None):
@@ -425,14 +339,6 @@ def cli_remove_encryption(client, resource_group_name, namespace_name, encryptio
     get_namespace = client.get(resource_group_name, namespace_name)
 
     return get_namespace
-
-
-def cli_schemaregistry_createupdate(cmd, client, resource_group_name, namespace_name, schema_group_name,
-                                    schema_compatibility, schema_type, tags=None):
-    SchemaGroup = cmd.get_models('SchemaGroup', resource_type=ResourceType.MGMT_EVENTHUB)
-    ehSchemaGroup = SchemaGroup(schema_compatibility=schema_compatibility, schema_type=schema_type, group_properties=tags)
-
-    return client.create_or_update(resource_group_name, namespace_name, schema_group_name, ehSchemaGroup)
 
 
 def cli_appgroup_create(cmd, client, resource_group_name, namespace_name, application_group_name, client_app_group_identifier,

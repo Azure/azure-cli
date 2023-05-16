@@ -336,3 +336,8 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('list', 'flexible_server_ad_admin_list')
         g.custom_show_command('show', 'flexible_server_ad_admin_show')
         g.custom_wait_command('wait', 'flexible_server_ad_admin_show')
+
+    with self.command_group('mysql flexible-server gtid', mysql_flexible_servers_sdk,
+                            custom_command_type=flexible_servers_custom_mysql,
+                            client_factory=cf_mysql_flexible_servers) as g:
+        g.custom_command('reset', 'flexible_gtid_reset', supports_no_wait=True)

@@ -59,3 +59,56 @@ class CredentialReplacer(RecordingProcessor):
                 pass
 
         return response
+
+MASK_ID = '00000000-0000-0000-0000-000000000000'
+
+class UserMICredentialReplacer(RecordingProcessor):
+
+    def process_request(self, request):
+        if is_text_payload(request) and request.body and isinstance(request.body, str):
+            request.body = self._replace_ids_str(request.body)
+        elif is_text_payload(request) and request.body and isinstance(request.body, bytes):
+            request.body = self._replace_ids_bytes(request.body)
+        
+        return request
+    
+    def process_response(self, response):
+        if is_text_payload(response) and response['body']['string']:
+            response['body']['string'] = self._replace_name_value_keys_str(response['body']['string'])
+            response['body']['string'] = self._replace_ids_str(response['body']['string'])
+        return response
+
+    def _replace_name_value_keys_str(self, res):
+        import re
+        sensitive_key = [r'secret', r'key', r'clientid']
+
+        for key in sensitive_key:
+            if key in res.lower():
+                res = re.sub(r'("name":( ?)"[^"]*{}[^"]*",( ?)"value":( ?))"[^"]*"'.format(key), 
+                             r'\1"HIDDEN"', 
+                             res, flags=re.IGNORECASE)
+
+        return res
+
+    def _replace_ids_str(self, req):
+        import re
+
+        sensitive_ids = [r'subscriptionId', r'tenantId', r'clientId', r'principalId']
+        for sensitive_id in sensitive_ids:
+            if sensitive_id in req:
+                req = re.sub(r'"' + sensitive_id + '":( ?)"[^"]*"', 
+                             r'"'+ sensitive_id + '" :"'+ MASK_ID + r'"', 
+                             req, flags=re.IGNORECASE)
+        return req
+
+    def _replace_ids_bytes(self, req):
+        import re
+
+        sensitive_ids = [b'subscriptionId', b'tenantId', b'clientId', b'principalId']
+        for sensitive_id in sensitive_ids:
+            if sensitive_id in req:
+                req = re.sub(b'"' + sensitive_id + b'":( ?)"[^"]*"', 
+                             b'"'+ sensitive_id + b'":"'+ MASK_ID.encode() + b'"', 
+                             req, flags=re.IGNORECASE)
+        
+        return req

@@ -10,12 +10,13 @@ from azure.appconfiguration import AzureAppConfigurationClient
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import (ValidationError,
                                        AzureResponseError,
+                                       InvalidArgumentValueError,
                                        ResourceNotFoundError,
                                        RequiredArgumentMissingError,
                                        MutuallyExclusiveArgumentError)
 
 from ._client_factory import cf_configstore
-from ._constants import HttpHeaders
+from ._constants import HttpHeaders, FeatureFlagConstants
 
 logger = get_logger(__name__)
 
@@ -186,3 +187,24 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
             raise CLIError("Failed to initialize AzureAppConfigurationClient due to an exception: {}".format(str(ex)))
 
     return azconfig_client
+
+
+def validate_feature_flag_name(feature):
+    if feature:
+        INVALID_FEATURE_CHARACTERS = ("%", ":")
+        if any(invalid_char in feature for invalid_char in INVALID_FEATURE_CHARACTERS):
+            raise InvalidArgumentValueError(
+                "Feature name cannot contain the following characters: '{}'.".format("', '".join(INVALID_FEATURE_CHARACTERS)))
+
+    else:
+        raise InvalidArgumentValueError("Feature name cannot be empty.")
+
+
+def validate_feature_flag_key(key):
+    input_key = str(key).lower()
+    if '%' in input_key:
+        raise InvalidArgumentValueError("Feature flag key cannot contain the '%' character.")
+    if not input_key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
+        raise InvalidArgumentValueError("Feature flag key must start with the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))
+    if len(input_key) == len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
+        raise InvalidArgumentValueError("Feature flag key must contain more characters after the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))

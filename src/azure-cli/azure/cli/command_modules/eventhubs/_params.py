@@ -17,7 +17,7 @@ def load_arguments_eh(self, _):
     from knack.arguments import CLIArgumentType
     from azure.cli.core.profiles import ResourceType
     (SkuName, TlsVersion) = self.get_models('SkuName', 'TlsVersion', resource_type=ResourceType.MGMT_EVENTHUB)
-    from azure.cli.command_modules.eventhubs.action import AlertAddEncryption, ConstructPolicy
+    from azure.cli.command_modules.eventhubs.action import AlertAddEncryption, ConstructPolicy, AlertAddIpRule, AlertAddVirtualNetwork
 
     namespace_name_arg_type = CLIArgumentType(options_list=['--namespace-name'], help='Name of Namespace', id_part='name')
 
@@ -29,7 +29,7 @@ def load_arguments_eh(self, _):
         c.argument('name', arg_type=name_type, help='Namespace name. Name can contain only letters, numbers, and hyphens. The namespace must start with a letter, and it must end with a letter or number.')
 
     with self.argument_context('eventhubs namespace', min_api='2021-06-01-preview') as c:
-        c.argument('namespace_name', arg_type=name_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.ServiceBus/namespaces'), help='Name of Namespace')
+        c.argument('namespace_name', arg_type=name_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.eventhubs/namespaces'), help='Name of Namespace')
         c.argument('is_kafka_enabled', options_list=['--enable-kafka'], arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether Kafka is enabled for eventhub namespace.')
         c.argument('tags', arg_type=tags_type)
@@ -80,58 +80,28 @@ def load_arguments_eh(self, _):
     with self.argument_context('eventhubs eventhub list') as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
 
-
-#   : Region Geo DR Configuration
-    with self.argument_context('eventhubs georecovery-alias') as c:
-        c.argument('alias', options_list=['--alias', '-a'], id_part='child_name_1', help='Name of Geo-Disaster Recovery Configuration Alias')
-
-    with self.argument_context('eventhubs georecovery-alias exists') as c:
-        c.argument('name', options_list=['--alias', '-a'], arg_type=name_type, help='Name of Geo Recovery Configs - Alias to check availability')
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-
+# Region Geo DR Configuration
     with self.argument_context('eventhubs georecovery-alias set') as c:
         c.argument('partner_namespace', required=True, validator=validate_partner_namespace, help='Name (if within the same resource group) or ARM Id of the Primary/Secondary eventhub namespace name, which is part of GEO DR pairing')
         c.argument('alternate_name', help='Alternate Name for the Alias, when the Namespace name and Alias name are same')
-
-    for scope in ['eventhubs georecovery-alias authorization-rule show']:
-        with self.argument_context(scope)as c:
-            c.argument('authorization_rule_name', arg_type=name_type, id_part='child_name_2', help='Name of Namespace AuthorizationRule')
-
-    with self.argument_context('eventhubs georecovery-alias list') as c:
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-
-    with self.argument_context('eventhubs georecovery-alias authorization-rule list') as c:
-        c.argument('alias', options_list=['--alias', '-a'], help='Name of Geo-Disaster Recovery Configuration Alias')
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-
-    with self.argument_context('eventhubs georecovery-alias authorization-rule keys list') as c:
-        c.argument('alias', options_list=['--alias', '-a'], id_part=None, help='Name of Geo-Disaster Recovery Configuration Alias')
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-        c.argument('authorization_rule_name', arg_type=name_type, help='Name of Namespace AuthorizationRule')
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='Name of Namespace')
+        c.argument('alias', options_list=['--alias', '-a'],
+                   help='Name of the Geo-Disaster Recovery Configuration Alias')
 
 # Region Namespace NetworkRuleSet
-    with self.argument_context('eventhubs namespace network-rule', resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01') as c:
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+    with self.argument_context('eventhubs namespace network-rule-set') as c:
+        c.argument('namespace_name', options_list=['--namespace-name', '--name', '-n'], id_part=None, help='Name of the Namespace')
 
-    for scope in ['eventhubs namespace network-rule add', 'eventhubs namespace network-rule remove']:
-        with self.argument_context(scope, resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01') as c:
-            c.argument('subnet', arg_group='Virtual Network Rule', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
-            c.argument('ip_mask', arg_group='IP Address Rule', options_list=['--ip-address'], help='IPv4 address or CIDR range - 10.6.0.0/24', deprecate_info=c.deprecate(redirect='--ip-rule', expiration='2.49.0'))
-            c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
-            c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'], help='Name of the Virtual Network', deprecate_info=c.deprecate(expiration='2.49.0'))
+    for scope in ['eventhubs namespace network-rule-set ip-rule add', 'eventhubs namespace network-rule-set ip-rule remove']:
+        with self.argument_context(scope) as c:
+            c.argument('ip_rule', action=AlertAddIpRule, nargs='+', help='List VirtualNetwork Rules.')
+            c.argument('namespace_name', options_list=['--namespace-name', '--name', '-n'], id_part=None, help='Name of the Namespace')
 
-    with self.argument_context('eventhubs namespace network-rule update', resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01') as c:
-        c.argument('public_network_access', options_list=['--public-network-access', '--public-network'], arg_type=get_enum_type(['Enabled', 'Disabled']), help='This determines if traffic is allowed over public network. By default it is enabled. If value is SecuredByPerimeter then Inbound and Outbound communication is controlled by the network security perimeter and profile\' access rules.')
-        c.argument('trusted_service_access_enabled', options_list=['--enable-trusted-service-access', '-t'],
-                   arg_type=get_three_state_flag(),
-                   help='A boolean value that indicates whether Trusted Service Access is enabled for Network Rule Set.')
-        c.argument('default_action', arg_group='networkrule', options_list=['--default-action'],
-                   arg_type=get_enum_type(['Allow', 'Deny']),
-                   help='Default Action for Network Rule Set.')
-
-    with self.argument_context('eventhubs namespace network-rule add', resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01') as c:
-        c.argument('ignore_missing_vnet_service_endpoint', arg_group='Virtual Network Rule', options_list=['--ignore-missing-endpoint'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
-        c.argument('action', arg_group='IP Address Rule', options_list=['--action'], arg_type=get_enum_type(['Allow']), help='Action of the IP rule')
+    for scope in ['eventhubs namespace network-rule-set virtual-network-rule add', 'eventhubs namespace network-rule-set virtual-network-rule remove']:
+        with self.argument_context(scope) as c:
+            c.argument('namespace_name', options_list=['--namespace-name', '--name', '-n'], id_part=None, help='Name of the Namespace')
+            c.argument('subnet', action=AlertAddVirtualNetwork, nargs='+', help='List VirtualNetwork Rules.')
 
 # Private end point connection
     with self.argument_context('eventhubs namespace private-endpoint-connection',
@@ -178,21 +148,6 @@ def load_arguments_eh(self, _):
             c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'], is_preview=True,
                        arg_type=get_three_state_flag(),
                        help='A boolean value that indicates whether Infrastructure Encryption (Double Encryption) is enabled/disabled')
-
-# Schema Registry
-    with self.argument_context('eventhubs namespace schema-registry list') as c:
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-
-    with self.argument_context('eventhubs namespace schema-registry') as c:
-        c.argument('namespace_name', arg_type=namespace_name_arg_type, options_list=['--namespace-name'], help='name of Namespace')
-        c.argument('schema_group_name', arg_type=name_type, id_part='child_name_1', help='name of schema group')
-
-    for scope in ['eventhubs namespace schema-registry create', 'eventhubs namespace schema-registry update']:
-        with self.argument_context(scope) as c:
-            c.argument('schema_compatibility', options_list=['--schema-compatibility'], arg_type=get_enum_type(['None', 'Backward', 'Forward']), help='Compatibility of Schema')
-            c.argument('schema_type', options_list=['--schema-type'], arg_type=get_enum_type(['Avro']), help='Type of Schema')
-            c.argument('tags', options_list=['--group-properties'], arg_type=tags_type,
-                       help='Type of Schema')
 
 # Application Group
     with self.argument_context('eventhubs namespace application-group') as c:

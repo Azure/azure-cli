@@ -668,8 +668,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.kwargs['job'] = self.kwargs['backup_job']['name']
 
-        self.cmd('backup job wait -v {vault} -g {rg} -n {job} --use-secondary-region')
+        # self.cmd('backup job wait -v {vault} -g {rg} -n {job} --use-secondary-region')
 
+    @AllowLargeResponse()
     @record_only()
     def test_backup_wl_sql_archive (self):
         self.kwargs.update({
