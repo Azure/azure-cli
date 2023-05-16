@@ -16,7 +16,7 @@ from datetime import datetime
 from knack.log import get_logger
 from knack.arguments import ignore_type
 from azure.cli.core.commands import AzArgumentContext
-from .validators import get_combined_validator
+from ._validators import get_combined_validator
 from knack.prompting import prompt_y_n, NoTTYException
 from msrestazure.tools import parse_resource_id
 from msrestazure.azure_exceptions import CloudError

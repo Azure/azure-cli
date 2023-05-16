@@ -429,6 +429,7 @@ def load_arguments(self, _):
         c.argument('vnet', arg_type=vnet_arg_type)
         c.argument('subnet', arg_type=subnet_arg_type)
         c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
+        c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']), help='Determines the public access. ')
 
     with self.argument_context('mysql flexible-server replica stop-replication') as c:
         c.argument('server_name', arg_type=server_name_arg_type)
