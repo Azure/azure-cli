@@ -613,7 +613,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     # check the status of async deployment
     if res.status_code == 202:
         response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
-                                                headers, timeout)
+                                                slot, timeout)
         return response
 
     # check if there's an ongoing process
@@ -4097,10 +4097,11 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
     return [geo_region for geo_region in web_client_geo_regions if geo_region.name in providers_client_locations_list]
 
 
-def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, headers, timeout=None):
+def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, slot, timeout=None):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
 
+    headers = get_scm_site_headers(cmd.cli_ctx, name, rg_name, slot)
     total_trials = (int(timeout) // 2) if timeout else 450
     num_trials = 0
     while num_trials < total_trials:
@@ -5031,6 +5032,19 @@ def _build_onedeploy_url(params):
     return deploy_url
 
 
+def _get_ondeploy_headers(params):
+    if params.src_path:
+        content_type = 'application/octet-stream'
+    elif params.src_url:
+        content_type = 'application/json'
+    else:
+        raise RequiredArgumentMissingError('Unable to determine source location of the artifact being deployed')
+
+    additional_headers = {"Content-Type": content_type, "Cache-Control": "no-cache"}
+
+    return get_scm_site_headers(params.cmd.cli_ctx, params.webapp_name, params.resource_group_name, params.slot, additional_headers=additional_headers)
+
+
 def _get_onedeploy_status_url(params):
     scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
     return scm_url + '/api/deployments/latest'
@@ -5085,7 +5099,7 @@ def _make_onedeploy_request(params):
     body = _get_onedeploy_request_body(params)
     deploy_url = _build_onedeploy_url(params)
     deployment_status_url = _get_onedeploy_status_url(params)
-    headers = get_scm_site_headers(params.cmd.cli_ctx, params.webapp_name, params.resource_group_name, params.slot)
+    headers = _get_ondeploy_headers(params)
 
     logger.info("Deployment API: %s", deploy_url)
     response = requests.post(deploy_url, data=body, headers=headers, verify=not should_disable_connection_verify())
@@ -5100,7 +5114,7 @@ def _make_onedeploy_request(params):
         if poll_async_deployment_for_debugging:
             logger.info('Polling the status of async deployment')
             response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
-                                                         deployment_status_url, headers, params.timeout)
+                                                         deployment_status_url, params.slot, params.timeout)
             logger.info('Async deployment complete. Server response: %s', response_body)
         return response_body
 
