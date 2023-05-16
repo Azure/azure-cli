@@ -479,6 +479,24 @@ parameters:
   - name: --enable-keda
     type: bool
     short-summary: Enable KEDA workload auto-scaler.
+  - name: --enable-azure-monitor-metrics
+    type: bool
+    short-summary: Enable Azure Monitor Metrics Profile
+  - name: --azure-monitor-workspace-resource-id
+    type: string
+    short-summary: Resource ID of the Azure Monitor Workspace
+  - name: --ksm-metric-labels-allow-list
+    type: string
+    short-summary: Comma-separated list of additional Kubernetes label keys that will be used in the resource' labels metric. By default the metric contains only name and namespace labels. To include additional labels provide a list of resource names in their plural form and Kubernetes label keys you would like to allow for them (e.g. '=namespaces=[k8s-label-1,k8s-label-n,...],pods=[app],...)'. A single '*' can be provided per resource instead to allow any labels, but that has severe performance implications (e.g. '=pods=[*]').
+  - name: --ksm-metric-annotations-allow-list
+    type: string
+    short-summary: Comma-separated list of additional Kubernetes label keys that will be used in the resource' labels metric. By default the metric contains only name and namespace labels. To include additional labels provide a list of resource names in their plural form and Kubernetes label keys you would like to allow for them (e.g.'=namespaces=[k8s-label-1,k8s-label-n,...],pods=[app],...)'. A single '*' can be provided per resource instead to allow any labels, but that has severe performance implications (e.g. '=pods=[*]').
+  - name: --grafana-resource-id
+    type: string
+    short-summary: Resource ID of the Azure Managed Grafana Workspace
+  - name: --enable-windows-recording-rules
+    type: bool
+    short-summary: Enable Windows Recording Rules when enabling the Azure Monitor Metrics addon
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -549,6 +567,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --network-plugin none
   - name: Create a kubernetes cluster with KEDA workload autoscaler enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-keda
+  - name: Create a kubernetes cluster with Azure Monitor Metrics enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-metrics
 """
 
 helps['aks update'] = """
@@ -791,6 +811,27 @@ parameters:
   - name: --disable-keda
     type: bool
     short-summary: Disable KEDA workload auto-scaler.
+  - name: --enable-azure-monitor-metrics
+    type: bool
+    short-summary: Enable Azure Monitor Metrics Profile
+  - name: --azure-monitor-workspace-resource-id
+    type: string
+    short-summary: Resource ID of the Azure Monitor Workspace
+  - name: --ksm-metric-labels-allow-list
+    type: string
+    short-summary: Comma-separated list of additional Kubernetes label keys that will be used in the resource' labels metric. By default the metric contains only name and namespace labels. To include additional labels provide a list of resource names in their plural form and Kubernetes label keys you would like to allow for them (e.g. '=namespaces=[k8s-label-1,k8s-label-n,...],pods=[app],...)'. A single '*' can be provided per resource instead to allow any labels, but that has severe performance implications (e.g. '=pods=[*]').
+  - name: --ksm-metric-annotations-allow-list
+    type: string
+    short-summary: Comma-separated list of additional Kubernetes label keys that will be used in the resource' labels metric. By default the metric contains only name and namespace labels. To include additional labels provide a list of resource names in their plural form and Kubernetes label keys you would like to allow for them (e.g.'=namespaces=[k8s-label-1,k8s-label-n,...],pods=[app],...)'. A single '*' can be provided per resource instead to allow any labels, but that has severe performance implications (e.g. '=pods=[*]').
+  - name: --grafana-resource-id
+    type: string
+    short-summary: Resource ID of the Azure Managed Grafana Workspace
+  - name: --enable-windows-recording-rules
+    type: bool
+    short-summary: Enable Windows Recording Rules when enabling the Azure Monitor Metrics addon
+  - name: --disable-azure-monitor-metrics
+    type: bool
+    short-summary: Disable Azure Monitor Metrics Profile. This will delete all DCRA's associated with the cluster, any linked DCRs with the data stream = prometheus-stream and the recording rule groups created by the addon for this AKS cluster.
 
 examples:
   - name: Reconcile the cluster back to its current state.
