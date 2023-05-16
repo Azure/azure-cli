@@ -740,13 +740,15 @@ def validate_decryption(ns):
 
 # pylint: disable=line-too-long, too-many-locals
 def process_certificate_policy(cmd, ns):
+    policy = getattr(ns, 'policy', None)
+    if policy is None:
+        return
     CertificatePolicy = cmd.loader.get_sdk('CertificatePolicy', mod='_models',
                                            resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES)
     CertificateAttributes = cmd.loader.get_sdk('CertificateAttributes', mod='_generated_models',
                                                resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES)
     LifetimeAction = cmd.loader.get_sdk('LifetimeAction', mod='_models',
                                         resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES)
-    policy = getattr(ns, 'policy', None)
     if not isinstance(policy, dict):
         raise CLIError('incorrect usage: policy should be an JSON encoded string '
                        'or can use @{file} to load from a file(e.g.@my_policy.json).')
