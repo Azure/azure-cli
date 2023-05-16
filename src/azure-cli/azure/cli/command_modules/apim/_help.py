@@ -68,6 +68,26 @@ type: group
 short-summary: Manage Azure API Management API Schema's.
 """
 
+helps['apim graphql'] = """
+type: group
+short-summary: Manage Azure API Management GraphQL API's.
+"""
+
+helps['apim graphql api'] = """
+type: group
+short-summary: Manage Azure API Management GraphQL API's.
+"""
+
+helps['apim graphql resolver'] = """
+type: group
+short-summary: Manage Azure API Management GraphQL API's Resolvers.
+"""
+
+helps['apim graphql resolver policy'] = """
+type: group
+short-summary: Manage Azure API Management GraphQL API's Resolvers Policies.
+"""
+
 helps['apim deletedservice'] = """
 type: group
 short-summary: Manage soft-deleted Azure API Management services.
