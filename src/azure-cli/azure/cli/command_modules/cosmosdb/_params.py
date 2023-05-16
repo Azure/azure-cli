@@ -88,6 +88,7 @@ def load_arguments(self, _):
         c.argument('databases_to_restore', nargs='+', action=CreateDatabaseRestoreResource, arg_group='Restore')
         c.argument('gremlin_databases_to_restore', nargs='+', action=CreateGremlinDatabaseRestoreResource, arg_group='Restore')
         c.argument('tables_to_restore', nargs='+', action=CreateTableRestoreResource, arg_group='Restore')
+        c.argument('enable_partition_merge', arg_type=get_three_state_flag(), help="Flag to enable partition merge on the account.")
 
     for scope in ['cosmosdb create', 'cosmosdb update']:
         with self.argument_context(scope) as c:
@@ -117,6 +118,7 @@ def load_arguments(self, _):
             c.argument('default_identity', help="The primary identity to access key vault in CMK related features. e.g. 'FirstPartyIdentity', 'SystemAssignedIdentity' and more. User-assigned identities are specified in format 'UserAssignedIdentity=<resource ID of the user-assigned identity>'.", is_preview=True)
             c.argument('analytical_storage_schema_type', options_list=['--analytical-storage-schema-type', '--as-schema'], arg_type=get_enum_type(AnalyticalStorageSchemaType), help="Schema type for analytical storage.", arg_group='Analytical Storage Configuration')
             c.argument('backup_policy_type', arg_type=get_enum_type(BackupPolicyType), help="The type of backup policy of the account to create", arg_group='Backup Policy')
+            c.argument('enable_partition_merge', arg_type=get_three_state_flag(), help="Flag to enable partition merge on the account.")
             c.argument('continuous_tier', arg_type=get_enum_type(ContinuousTier), help="The tier of Continuous backup", arg_group='Backup Policy')
 
     for scope in ['cosmosdb regenerate-key', 'cosmosdb keys regenerate']:

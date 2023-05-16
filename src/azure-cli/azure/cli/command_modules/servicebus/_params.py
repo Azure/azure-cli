@@ -148,9 +148,7 @@ def load_arguments_sb(self, _):
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
         c.argument('topic_name', options_list=['--topic-name'], id_part=None, help='Name of Topic')
 
-    # Region Subscription Rules
-    # Region Rules Create
-
+# Region Subscription Rules
     with self.argument_context('servicebus topic subscription rule') as c:
         c.argument('rule_name', arg_type=name_type, id_part='child_name_3', completer=get_rules_command_completion_list, help='Name of Rule')
         c.argument('subscription_name', options_list=['--subscription-name'], id_part='child_name_2', help='Name of Subscription')
@@ -182,40 +180,13 @@ def load_arguments_sb(self, _):
         c.argument('topic_name', options_list=['--topic-name'], id_part=None, help='Name of Topic')
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
 
-    # Geo DR - Disaster Recovery Configs - Alias  : Region
-    with self.argument_context('servicebus georecovery-alias exists') as c:
-        c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='Name of Namespace')
-        c.argument('name', options_list=['--alias', '-a'], arg_type=name_type, help='Name of Geo-Disaster Recovery Configuration Alias to check availability')
-
-    with self.argument_context('servicebus georecovery-alias') as c:
-        c.argument('alias', options_list=['--alias', '-a'], id_part='child_name_1', help='Name of the Geo-Disaster Recovery Configuration Alias')
-
+# Geo DR - Disaster Recovery Configs - Alias  : Region
     with self.argument_context('servicebus georecovery-alias set') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='Name of Namespace')
         c.argument('alias', options_list=['--alias', '-a'], help='Name of the Geo-Disaster Recovery Configuration Alias')
         c.argument('partner_namespace', required=True, options_list=['--partner-namespace'], validator=validate_partner_namespace, help='Name (if within the same resource group) or ARM Id of Primary/Secondary Service Bus  namespace name, which is part of GEO DR pairing')
         c.argument('alternate_name', help='Alternate Name (Post failover) for Primary Namespace, when Namespace name and Alias name are same')
-
-    for scope in ['servicebus georecovery-alias authorization-rule show', 'servicebus georecovery-alias authorization-rule keys list']:
-        with self.argument_context(scope)as c:
-            c.argument('authorization_rule_name', arg_type=name_type, id_part='child_name_2', help='name of Namespace Authorization Rule')
-
-    with self.argument_context('servicebus georecovery-alias list') as c:
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-
-    with self.argument_context('servicebus georecovery-alias fail-over') as c:
-        c.argument('parameters', options_list=['--parameters'], deprecate_info=c.deprecate(expiration='2.49.0'), help='Parameters required to create an Alias(Disaster Recovery configuration). Is either a FailoverProperties type or a IO type. Default value is None.')
-
-    with self.argument_context('servicebus georecovery-alias authorization-rule list') as c:
-        c.argument('alias', options_list=['--alias', '-a'], help='Name of Geo-Disaster Recovery Configuration Alias')
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-
-    with self.argument_context('servicebus georecovery-alias authorization-rule keys list') as c:
-        c.argument('alias', options_list=['--alias', '-a'], id_part=None, help='Name of Geo-Disaster Recovery Configuration Alias')
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-        c.argument('authorization_rule_name', arg_type=name_type, help='Name of Namespace AuthorizationRule')
 
 # Region Namespace NetworkRuleSet
     with self.argument_context('servicebus namespace network-rule') as c:
@@ -224,9 +195,9 @@ def load_arguments_sb(self, _):
     for scope in ['servicebus namespace network-rule add', 'servicebus namespace network-rule remove']:
         with self.argument_context(scope) as c:
             c.argument('subnet', arg_group='Virtual Network Rule', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
-            c.argument('ip_mask', arg_group='IP Address Rule', options_list=['--ip-address'], help='IPv4 address or CIDR range.', deprecate_info=c.deprecate(redirect='--ip-rule', expiration='2.49.0'))
+            c.argument('ip_mask', arg_group='IP Address Rule', options_list=['--ip-address'], help='IPv4 address or CIDR range.')
             c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
-            c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'], help='Name of the Virtual Network', deprecate_info=c.deprecate(expiration='2.49.0'))
+            c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'], help='Name of the Virtual Network')
 
     with self.argument_context('servicebus namespace network-rule update', resource_type=ResourceType.MGMT_SERVICEBUS,
                                min_api='2017-04-01') as c:

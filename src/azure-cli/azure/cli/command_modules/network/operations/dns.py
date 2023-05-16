@@ -12,19 +12,11 @@ from ..aaz.latest.network.dns.record_set import Update as _RecordSetUpdate
 logger = get_logger(__name__)
 
 
-class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-    def __call__(self, ctx, value):
-        if value._data == "":
-            logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-            value._data = None
-        return super().__call__(ctx, value)
-
-
 class RecordSetUpdate(_RecordSetUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.target_resource._fmt = EmptyResourceIdArgFormat()
+        args_schema.target_resource._fmt = AAZResourceIdArgFormat()
 
         args_schema.record_type._required = False
         args_schema.record_type._registered = False
