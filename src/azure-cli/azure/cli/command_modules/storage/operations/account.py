@@ -1128,6 +1128,7 @@ def list_blob_cors_rules(client, resource_group_name, account_name):
     return blob_service_properties.cors.cors_rules
 
 
+# pylint: disable=dangerous-default-value
 def add_blob_cors_rule(cmd, client, resource_group_name, account_name, max_age_in_seconds,
                        allowed_origins, allowed_methods, allowed_headers=[], exposed_headers=[]):
     CorsRules, CorsRule = cmd.get_models('CorsRules', 'CorsRule')
