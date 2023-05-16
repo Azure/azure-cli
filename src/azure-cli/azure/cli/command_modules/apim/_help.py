@@ -696,7 +696,7 @@ short-summary: Create or updates policy configuration for the GraphQL API Resolv
 examples:
   - name: Create a resolver policy.
     text: |
-        az apim graphql resolver policy create --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId --format xml --value-path 'path to xml file'
+        az apim graphql resolver policy create --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId --policy-format xml --value-path 'path to xml file'
 """
 
 helps['apim graphql resolver policy show'] = """
