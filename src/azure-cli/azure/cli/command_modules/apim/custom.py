@@ -1013,6 +1013,7 @@ def apim_graphql_resolver_policy_create(
     content_value = api_file.read()
     value = content_value
 
+
     parameters = PolicyContract(
         format=policy_format,
         value=value
