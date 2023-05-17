@@ -150,7 +150,7 @@ def flatten_version_table(release_info):
     for release in release_info:
         isPreview = release.get("isPreview", False)
         for k, v in release.get("patchVersions", {}).items():
-            item = { "version": k, "upgrades": v.get("upgrades", []), "isPreview": isPreview }
+            item = {"version": k, "upgrades": v.get("upgrades", []), "isPreview": isPreview}
             flattened.append(item)
     return flattened
 
