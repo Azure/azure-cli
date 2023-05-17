@@ -282,9 +282,6 @@ def transform_certificate_show(result, **command_args):
             "cer": base64.b64encode(cer).decode('utf-8') if cer else None,
             "contentType": getattr(result, "content_type", None),
             "kid": getattr(result, "key_id", None),
-            "pending": {
-                "id": '/'.join(cert_id.split('/')[:-1] + ['pending']) if cert_id else None
-            },
             "policy": transform_certificate_policy(policy=getattr(result, "policy", None),
                                                    policy_id='/'.join(cert_id.split('/')[:-1] + ['policy'])),
             "sid": getattr(result, "secret_id", None)
