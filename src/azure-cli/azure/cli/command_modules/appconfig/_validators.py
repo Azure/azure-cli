@@ -14,9 +14,13 @@ from azure.cli.core.azclierror import (InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
                                        ArgumentUsageError)
 
-from ._utils import is_valid_connection_string, resolve_store_metadata, get_store_name_from_connection_string
+from ._utils import (is_valid_connection_string,
+                     resolve_store_metadata,
+                     get_store_name_from_connection_string,
+                     validate_feature_flag_name,
+                     validate_feature_flag_key)
 from ._models import QueryFields
-from ._constants import FeatureFlagConstants, ImportExportProfiles
+from ._constants import ImportExportProfiles
 from ._featuremodels import FeatureQueryFields
 
 logger = get_logger(__name__)
@@ -30,8 +34,13 @@ def validate_datetime(namespace):
             'The input datetime is invalid. Correct format should be YYYY-MM-DDThh:mm:ssZ ')
 
 
-def validate_connection_string(namespace):
+def validate_connection_string(cmd, namespace):
     ''' Endpoint=https://example.azconfig.io;Id=xxxxx;Secret=xxxx'''
+    # Only use defaults when both name and connection string not specified
+    if not (namespace.connection_string or namespace.name):
+        namespace.connection_string = cmd.cli_ctx.config.get('defaults', 'appconfig_connection_string', None) or cmd.cli_ctx.config.get('appconfig', 'connection_string', None)
+        namespace.name = cmd.cli_ctx.config.get('defaults', 'app_configuration_store', None)
+
     connection_string = namespace.connection_string
     if connection_string:
         if not is_valid_connection_string(connection_string):
@@ -235,21 +244,12 @@ def validate_resolve_keyvault(namespace):
 
 def validate_feature(namespace):
     if namespace.feature is not None:
-        if '%' in namespace.feature:
-            raise InvalidArgumentValueError("Feature name cannot contain the '%' character.")
-        if not namespace.feature:
-            raise InvalidArgumentValueError("Feature name cannot be empty.")
+        validate_feature_flag_name(namespace.feature)
 
 
 def validate_feature_key(namespace):
     if namespace.key is not None:
-        input_key = str(namespace.key).lower()
-        if '%' in input_key:
-            raise InvalidArgumentValueError("Feature flag key cannot contain the '%' character.")
-        if not input_key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
-            raise InvalidArgumentValueError("Feature flag key must start with the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))
-        if len(input_key) == len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
-            raise InvalidArgumentValueError("Feature flag key must contain more characters after the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))
+        validate_feature_flag_key(namespace.key)
 
 
 def validate_import_profile(namespace):

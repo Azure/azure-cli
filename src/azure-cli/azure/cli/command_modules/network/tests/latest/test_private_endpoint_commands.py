@@ -11,7 +11,7 @@ import unittest
 from azure.core.exceptions import HttpResponseError
 
 from azure.cli.testsdk import (
-    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, KeyVaultPreparer, live_only, record_only)
+    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, KeyVaultPreparer, ManagedHSMPreparer, live_only, record_only)
 from azure.cli.core.util import parse_proxy_resource_id, CLIError
 
 from azure.cli.command_modules.rdbms.tests.latest.test_rdbms_commands import ServerPreparer
@@ -20,7 +20,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse, RecordingProces
 from azure.cli.testsdk.scenario_tests.utilities import is_text_payload
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
-
+KV_CERTS_DIR = os.path.join(TEST_DIR, 'certs')
 
 class RedisCacheCredentialReplacer(RecordingProcessor):
     def process_response(self, response):
@@ -55,20 +55,17 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
                  checks=self.check('@[0].properties.groupId', 'vault'))
 
     @ResourceGroupPreparer(name_prefix='cli_test_hsm_plr_rg')
-    def test_mhsm_private_link_resource(self, resource_group):
+    @ManagedHSMPreparer(name_prefix='cli-test-hsm-plr-', certs_path=KV_CERTS_DIR, location='centraluseuap')
+    def test_mhsm_private_link_resource(self, resource_group, managed_hsm):
         self.kwargs.update({
-            'hsm': self.create_random_name('cli-test-hsm-plr-', 24),
+            'hsm': managed_hsm,
             'loc': 'centraluseuap'
         })
-        self.cmd('keyvault create --hsm-name {hsm} -g {rg} -l {loc} '
-                 '--administrators "3707fb2f-ac10-4591-a04f-8b0d786ea37d"')
         self.cmd('network private-link-resource list '
                  '--name {hsm} '
                  '-g {rg} '
                  '--type microsoft.keyvault/managedHSMs',
                  checks=self.check('@[0].properties.groupId', 'managedhsm'))
-        self.cmd('keyvault delete --hsm-name {hsm} -g {rg}')
-        self.cmd('keyvault purge --hsm-name {hsm} -l {loc}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pe')
     @KeyVaultPreparer(name_prefix='cli-test-kv-pe-', location='centraluseuap')
@@ -176,21 +173,21 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
         self.cmd('network private-endpoint-connection delete --id {kv_pe_id} -y')
 
     @ResourceGroupPreparer(name_prefix='cli_test_hsm_pe')
-    def test_hsm_private_endpoint_connection2(self, resource_group):
+    @ManagedHSMPreparer(name_prefix='cli-test-hsm-pe-', certs_path=KV_CERTS_DIR, location='uksouth')
+    def test_hsm_private_endpoint_connection2(self, resource_group, managed_hsm):
         self.kwargs.update({
-            'hsm': self.create_random_name('cli-test-hsm-pe-', 24),
-            'loc': 'westus3',
+            'hsm': managed_hsm,
+            'loc': 'uksouth',
             'vnet': self.create_random_name('cli-vnet-', 24),
             'subnet': self.create_random_name('cli-subnet-', 24),
             'pe': self.create_random_name('cli-pe-', 24),
             'pe_connection': self.create_random_name('cli-pec-', 24),
-            'rg': resource_group
+            'rg': resource_group,
+            'subscription_id': self.get_subscription_id(),
         })
 
         # Prepare hsm and network
-        hsm = self.cmd('keyvault create --hsm-name {hsm} -g {rg} -l {loc} '
-                       '--administrators "3707fb2f-ac10-4591-a04f-8b0d786ea37d"').get_output_in_json()
-        self.kwargs['hsm_id'] = hsm['id']
+        self.kwargs['hsm_id'] = f"/subscriptions/{self.kwargs['subscription_id']}/resourceGroups/{resource_group}/providers/Microsoft.KeyVault/managedHSMs/{managed_hsm}"
         self.cmd('network vnet create '
                  '-n {vnet} '
                  '-g {rg} '
@@ -270,8 +267,6 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
 
         # clear resources
         self.cmd('network private-endpoint delete -g {rg} -n {pe}')
-        self.cmd('keyvault delete --hsm-name {hsm} -g {rg}')
-        self.cmd('keyvault purge --hsm-name {hsm} -l {loc}')
 
 
 class NetworkPrivateLinkStorageAccountScenarioTest(ScenarioTest):
@@ -1029,7 +1024,7 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
         })
 
         # Prepare cosmos db account and network
-        account = self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-public-network false').get_output_in_json()
+        account = self.cmd('az cosmosdb create -n {acc} -g {rg} --public-network-access "DISABLED"').get_output_in_json()
         self.kwargs['acc_id'] = account['id']
         self.cmd('az network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
                  checks=self.check('length(newVNet.subnets)', 1))
