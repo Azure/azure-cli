@@ -928,7 +928,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
             cloud_name = cmd.cli_ctx.cloud.name
             if enable_msi_auth_for_monitoring and (cloud_name.lower() == 'ussec' or cloud_name.lower() == 'usnat'):
                 if instance.identity is not None and instance.identity.type is not None and instance.identity.type == "userassigned":
-                    logger.warning("--enable_msi_auth_for_monitoring are not supported in airgap clouds.")
+                    logger.warning("--enable_msi_auth_for_monitoring is not supported in %s cloud and continuing monitoring enablement without this flag.", cloud_name )
                     enable_msi_auth_for_monitoring = False
 
         if ingress_appgw_addon_enabled:
