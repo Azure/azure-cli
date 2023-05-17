@@ -456,6 +456,8 @@ def iot_dps_identity_assign(cmd, client, dps_name, system_identity=None, user_id
         return iot_dps_get(client, dps_name, resource_group_name)
 
     def setter(dps):
+        if dps.identity is None:
+            dps.identity = ManagedServiceIdentity(type=IdentityType.none.value)
 
         if user_identities and not dps.identity.user_assigned_identities:
             dps.identity.user_assigned_identities = {}
