@@ -474,51 +474,6 @@ examples:
         az image builder validator show -n myTemplate -g myGroup --defer
 """
 
-helps['image builder optimizer'] = """
-type: group
-short-summary: Manage image builder template optimizer.
-"""
-
-helps['image builder optimizer add'] = """
-type: command
-short-summary: Add optimizer to an existing image builder template.
-long-summary: Must be used with --defer
-examples:
-  - name: Add optimizer for improving VM boot time by optimizing the final customized image output.
-    text: |
-        az image builder optimizer add -n myTemplate -g myGroup --type vmBoot --state Enabled --defer
-"""
-
-helps['image builder optimizer remove'] = """
-type: command
-short-summary: Remove an optimizer from an existing image builder template.
-long-summary: Must be used with --defer
-examples:
-  - name: Remove an optimizer from an existing image builder template.
-    text: |
-        az image builder optimizer remove -n myTemplate -g myGroup --type vmBoot --defer
-"""
-
-helps['image builder optimizer clear'] = """
-type: command
-short-summary: Clear all optimizers from an existing image builder template.
-long-summary: Must be used with --defer
-examples:
-  - name: Clear all optimizers from an existing image builder template.
-    text: |
-        az image builder optimizer clear -n myTemplate -g myGroup --defer
-"""
-
-helps['image builder optimizer show'] = """
-type: command
-short-summary: Show optimizer of an existing image builder template.
-long-summary: Must be used with --defer
-examples:
-  - name: Show optimizer of an existing image builder template.
-    text: |
-        az image builder optimizer show -n myTemplate -g myGroup --defer
-"""
-
 helps['image builder identity'] = """
 type: group
 short-summary: Manage identities of an image builder template.
