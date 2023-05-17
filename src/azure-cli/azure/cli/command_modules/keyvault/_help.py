@@ -865,3 +865,31 @@ examples:
     text: |
         az keyvault region wait --hsm-name myhsm --updated
 """
+
+helps['keyvault setting'] = """
+type: group
+short-summary: Manage MHSM settings.
+"""
+
+helps['keyvault setting list'] = """
+type: command
+short-summary: Get all settings associated with the managed HSM.
+"""
+
+helps['keyvault setting show'] = """
+type: command
+short-summary: Get specific setting associated with the managed HSM.
+examples:
+  - name: Add "AllowKeyManagementOperationsThroughARM" setting of the managed HSM.
+    text: |
+        az keyvault setting show --name AllowKeyManagementOperationsThroughARM --hsm-name myhsm
+"""
+
+helps['keyvault setting update'] = """
+type: command
+short-summary: Update specific setting associated with the managed HSM.
+examples:
+  - name: Allow key management operations through ARM for the managed HSM.
+    text: |
+        az keyvault setting update --name AllowKeyManagementOperationsThroughARM --value true --type boolean --hsm-name myhsm
+"""
