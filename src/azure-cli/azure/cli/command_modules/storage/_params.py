@@ -639,7 +639,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tenant_id', help='The tenant id to add in network rule.', arg_group='Resource Access Rule',
                    min_api='2020-08-01-preview')
 
-    with self.argument_context('storage account blob-service-properties show',
+    with self.argument_context('storage account blob-service-properties',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('account_name', acct_name_type, id_part=None)
         c.argument('resource_group_name', required=False, validator=process_resource_group)
@@ -688,6 +688,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_last_access_tracking', arg_type=get_three_state_flag(), min_api='2019-06-01',
                    options_list=['--enable-last-access-tracking', '-t'],
                    help='When set to true last access time based tracking policy is enabled.')
+
+    with self.argument_context('storage account blob-service-properties cors-rule',
+                               resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('max_age_in_seconds', options_list=['--max-age', '--max-age-in-seconds'], type=int,
+                   help='The number of seconds that the client/browser should cache a preflight response')
+        c.argument('allowed_origins', nargs='+', options_list=['--origins', '--allowed-origins'],
+                   help='Space-separated list of origin domains that will be allowed via CORS,'
+                        ' or "*" to allow all domains')
+        c.argument('allowed_methods', nargs='+', options_list=['--methods', '--allowed-methods'],
+                   help='Space-separated list of HTTP verbs (methods) allowed to be executed by the origin')
+        c.argument('allowed_headers', nargs='+',
+                   help='Space-separated list of headers allowed to be part of the cross-origin request')
+        c.argument('exposed_headers', nargs='+',
+                   help='Space-separated list of response headers to expose to CORS clients')
 
     with self.argument_context('storage account file-service-properties show',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
