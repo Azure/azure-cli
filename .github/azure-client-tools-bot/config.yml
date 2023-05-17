@@ -19,6 +19,18 @@ pull_request:
       init_comment: |
         Validation for Azure CLI Full Test Starting...
         Thanks for your contribution!
+    - azure_pipeline:
+        allow_list:
+          - "Azure.azure-cli Breaking Change Test"
+        result_path: "/breaking_change_test/"
+      group_by_keys:
+        - "TestName"
+        - "Module"
+      template_path: "templates/BreakingChangeTest.handlebars"
+      comment_title: "AzureCLI-BreakingChangeTest"
+      init_comment: |
+        Validation for Breaking Change Starting...
+        Thanks for your contribution!
 cli_common_issues:
   issues:
     - tag: unofficial_cli
