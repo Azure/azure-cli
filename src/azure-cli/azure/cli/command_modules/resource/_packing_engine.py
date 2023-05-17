@@ -136,6 +136,8 @@ def _get_deployment_resource_objects(cmd, template_obj, includeNested=False):
 
     if 'resources' in template_obj:
         resources = template_obj['resources']
+        if isinstance(resources, dict):  # Check if resources is an object
+            resources = list(resources.values())  # Convert object to array
         for resource in resources:
             if 'type' in resource and resource['type'] == 'Microsoft.Resources/deployments':
                 immediate_deployment_resources.append(resource)
