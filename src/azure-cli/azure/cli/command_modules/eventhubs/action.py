@@ -111,6 +111,7 @@ class ConstructPolicy(argparse._AppendAction):
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         from azure.cli.core.azclierror import RequiredArgumentMissingError
         from azure.cli.core.azclierror import InvalidArgumentValueError
+        from azure.cli.core import CLIError
         from azure.cli.command_modules.eventhubs.constants import INCOMING_MESSAGES
         from azure.cli.command_modules.eventhubs.constants import INCOMING_BYTES
         from azure.cli.command_modules.eventhubs.constants import OUTGOING_BYTES
@@ -163,7 +164,7 @@ class ConstructPolicyName(argparse._AppendAction):
         super(ConstructPolicyName, self).__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
-        from azure.cli.core import CLIError
+        from azure.cli.core.azclierror import RequiredArgumentMissingError
         from azure.cli.core.azclierror import InvalidArgumentValueError
         policy = {}
         for (k, v) in (x.split('=', 1) for x in values):
@@ -173,6 +174,6 @@ class ConstructPolicyName(argparse._AppendAction):
                 raise InvalidArgumentValueError(
                     "Invalid Argument for:'{}' Only allowed arguments are 'name' ".format(option_string))
         if policy["name"] is None:
-            raise CLIError('Throttling policies is missing the parameters: name')
+            raise RequiredArgumentMissingError('Throttling policies is missing the parameters: name')
 
         return policy
