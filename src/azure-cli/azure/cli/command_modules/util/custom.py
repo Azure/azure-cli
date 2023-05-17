@@ -53,7 +53,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
     from azure.cli.core.util import get_latest_from_github
     try:
         latest_version = get_latest_from_github()
-        local_version = '2.48.0'
+        local_version = '2.45.0'
         if latest_version and parse(latest_version) <= parse(local_version):
             logger.warning("You already have the latest azure-cli version: %s", local_version)
             update_cli = False
@@ -66,7 +66,6 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
     exit_code = 0
     installer = os.getenv(_ENV_AZ_INSTALLER) or ''
     installer = installer.upper()
-    installer = 'MSI'
     if update_cli:
         latest_version_msg = 'It will be updated to {}.'.format(latest_version) if yes \
             else 'Latest version available is {}.'.format(latest_version)
@@ -189,14 +188,12 @@ def _upgrade_on_windows():
     """
     logger.warning("Updating Azure CLI with MSI from https://aka.ms/installazurecliwindows")
     tmp_dir, msi_path = _download_from_url('https://aka.ms/installazurecliwindows')
-    # C:\Users\hanglei\AppData\Local\Temp\tmpnl6ypp4t\azure-cli-2.48.1.msi
-    print(msi_path)
-
     logger.warning("Installing MSI")
     import subprocess
-    subprocess.call(['msiexec.exe', '/i', msi_path])
+    subprocess.Popen(['msiexec.exe', '/i', msi_path])
     logger.warning("Installation started, please wait for a few minutes.")
-    return 0
+    import sys
+    sys.exit(0)
 
     if exit_code:
         logger.warning("Installation Failed. You may manually install %s", msi_path)
