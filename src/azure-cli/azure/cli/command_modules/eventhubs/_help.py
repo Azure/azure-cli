@@ -768,7 +768,7 @@ helps['eventhubs namespace application-group policy remove'] = """
 type: command
 short-summary: Removes an application group policy from the existing policies. This cmdlet can be used to remove one or more throttling policies.
 examples:
-  - name: Removes a throttling policy from an applicatin group myAppGroup.
+  - name: Removes a throttling policy from an application group myAppGroup.
     text: |
-        az eventhubs namespace application-group policy remove --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --throttling-policy-config name=policy1 metric-id=OutgoingMessages rate-limit-threshold=10500
+        az eventhubs namespace application-group policy remove --namespace-name mynamespace -g MyResourceGroup --name myAppGroup --policy name=policy1
 """
