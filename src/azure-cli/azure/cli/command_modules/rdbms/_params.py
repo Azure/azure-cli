@@ -703,6 +703,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('byok_key', arg_type=key_arg_type)
                 c.argument('byok_identity', arg_type=identity_arg_type)
                 c.argument('yes', arg_type=yes_arg_type)
+            if command_group == 'mysql':
+                c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']),
+                           help='Determines the public access. ')
 
         with self.argument_context('{} flexible-server replica stop-replication'.format(command_group)) as c:
             c.argument('server_name', arg_type=server_name_arg_type)
