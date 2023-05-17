@@ -987,21 +987,19 @@ def apim_graphql_resolver_delete(
                        if_match="*" if if_match is None else if_match)
 
 
-def apim_graphql_resolver_show(client, resource_group_name, service_name, api_id, resolver_id, no_wait=False):
+def apim_graphql_resolver_show(client, resource_group_name, service_name, api_id, resolver_id):
+    
+        return client.graph_ql_api_resolver.get(
+            resource_group_name=resource_group_name,
+            service_name=service_name,
+            api_id=api_id,
+            resolver_id=resolver_id)
 
-    return sdk_no_wait(no_wait, client.graph_ql_api_resolver.get,
-                       resource_group_name=resource_group_name,
-                       service_name=service_name,
-                       api_id=api_id,
-                       resolver_id=resolver_id)
 
+def apim_graphql_resolver_list(client, resource_group_name, service_name, api_id):
+    
+        return client.graph_ql_api_resolver.list_by_api(resource_group_name, service_name, api_id)
 
-def apim_graphql_resolver_list(client, resource_group_name, service_name, api_id, no_wait=False):
-
-    return sdk_no_wait(no_wait, client.graph_ql_api_resolver.list_by_api,
-                       resource_group_name=resource_group_name,
-                       service_name=service_name,
-                       api_id=api_id)
 
 
 # Graphql Resolver Policy Operations
@@ -1028,28 +1026,28 @@ def apim_graphql_resolver_policy_create(
                        parameters=parameters)
 
 
-def apim_graphql_resolver_policy_show(client, resource_group_name, service_name, api_id, resolver_id, no_wait=False):
+def apim_graphql_resolver_policy_show(client, resource_group_name, service_name, api_id, resolver_id):
 
-    return sdk_no_wait(no_wait, client.graph_ql_api_resolver_policy.get,
-                       resource_group_name=resource_group_name,
-                       service_name=service_name,
-                       api_id=api_id,
-                       resolver_id=resolver_id,
-                       policy_id="policy")
+    return client.graph_ql_api_resolver_policy.get(
+        resource_group_name=resource_group_name,
+        service_name=service_name,
+        api_id=api_id,
+        resolver_id=resolver_id,
+        policy_id="policy")
 
 
-def apim_graphql_resolver_policy_list(client, resource_group_name, service_name, api_id, resolver_id, no_wait=False):
-
-    return sdk_no_wait(no_wait, client.graph_ql_api_resolver_policy.list_by_resolver,
-                       resource_group_name=resource_group_name,
-                       service_name=service_name,
-                       api_id=api_id,
-                       resolver_id=resolver_id)
+def apim_graphql_resolver_policy_list(client, resource_group_name, service_name, api_id, resolver_id):
+    
+        return client.graph_ql_api_resolver_policy.list_by_resolver(
+            resource_group_name=resource_group_name,
+            service_name=service_name,
+            api_id=api_id,
+            resolver_id=resolver_id)
 
 
 def apim_graphql_resolver_policy_delete(
         client, resource_group_name, service_name, api_id, resolver_id, no_wait=False, if_match=None):
-
+    
     return sdk_no_wait(no_wait, client.graph_ql_api_resolver_policy.delete,
                        resource_group_name=resource_group_name,
                        service_name=service_name,
