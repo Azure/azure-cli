@@ -37,8 +37,6 @@ from cryptography.x509 import load_pem_x509_certificate
 from knack.log import get_logger
 from knack.util import CLIError
 
-from OpenSSL import crypto
-
 
 logger = get_logger(__name__)
 
@@ -81,18 +79,20 @@ def _azure_stack_wrapper(cmd, client, function_name, resource_type, min_api_vers
 
 
 def _default_certificate_profile(cmd):
+    def get_model(x):
+        return cmd.loader.get_sdk(x, resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES, mod='_generated_models')
 
-    Action = cmd.get_models('Action', resource_type=ResourceType.DATA_KEYVAULT)
-    ActionType = cmd.get_models('ActionType', resource_type=ResourceType.DATA_KEYVAULT)
-    KeyUsageType = cmd.get_models('KeyUsageType', resource_type=ResourceType.DATA_KEYVAULT)
-    CertificateAttributes = cmd.get_models('CertificateAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    CertificatePolicy = cmd.get_models('CertificatePolicy', resource_type=ResourceType.DATA_KEYVAULT)
-    IssuerParameters = cmd.get_models('IssuerParameters', resource_type=ResourceType.DATA_KEYVAULT)
-    KeyProperties = cmd.get_models('KeyProperties', resource_type=ResourceType.DATA_KEYVAULT)
-    LifetimeAction = cmd.get_models('LifetimeAction', resource_type=ResourceType.DATA_KEYVAULT)
-    SecretProperties = cmd.get_models('SecretProperties', resource_type=ResourceType.DATA_KEYVAULT)
-    X509CertificateProperties = cmd.get_models('X509CertificateProperties', resource_type=ResourceType.DATA_KEYVAULT)
-    Trigger = cmd.get_models('Trigger', resource_type=ResourceType.DATA_KEYVAULT)
+    Action = get_model('Action')
+    ActionType = get_model('ActionType')
+    KeyUsageType = get_model('KeyUsageType')
+    CertificateAttributes = get_model('CertificateAttributes')
+    CertificatePolicy = get_model('CertificatePolicy')
+    IssuerParameters = get_model('IssuerParameters')
+    KeyProperties = get_model('KeyProperties')
+    LifetimeAction = get_model('LifetimeAction')
+    SecretProperties = get_model('SecretProperties')
+    X509CertificateProperties = get_model('X509CertificateProperties')
+    Trigger = get_model('Trigger')
 
     template = CertificatePolicy(
         key_properties=KeyProperties(
@@ -141,18 +141,21 @@ def _default_certificate_profile(cmd):
 
 
 def _scaffold_certificate_profile(cmd):
-    Action = cmd.get_models('Action', resource_type=ResourceType.DATA_KEYVAULT)
-    ActionType = cmd.get_models('ActionType', resource_type=ResourceType.DATA_KEYVAULT)
-    KeyUsageType = cmd.get_models('KeyUsageType', resource_type=ResourceType.DATA_KEYVAULT)
-    CertificateAttributes = cmd.get_models('CertificateAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    CertificatePolicy = cmd.get_models('CertificatePolicy', resource_type=ResourceType.DATA_KEYVAULT)
-    IssuerParameters = cmd.get_models('IssuerParameters', resource_type=ResourceType.DATA_KEYVAULT)
-    KeyProperties = cmd.get_models('KeyProperties', resource_type=ResourceType.DATA_KEYVAULT)
-    LifetimeAction = cmd.get_models('LifetimeAction', resource_type=ResourceType.DATA_KEYVAULT)
-    SecretProperties = cmd.get_models('SecretProperties', resource_type=ResourceType.DATA_KEYVAULT)
-    X509CertificateProperties = cmd.get_models('X509CertificateProperties', resource_type=ResourceType.DATA_KEYVAULT)
-    SubjectAlternativeNames = cmd.get_models('SubjectAlternativeNames', resource_type=ResourceType.DATA_KEYVAULT)
-    Trigger = cmd.get_models('Trigger', resource_type=ResourceType.DATA_KEYVAULT)
+    def get_model(x):
+        return cmd.loader.get_sdk(x, resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES, mod='_generated_models')
+
+    Action = get_model('Action')
+    ActionType = get_model('ActionType')
+    KeyUsageType = get_model('KeyUsageType')
+    CertificateAttributes = get_model('CertificateAttributes')
+    CertificatePolicy = get_model('CertificatePolicy')
+    IssuerParameters = get_model('IssuerParameters')
+    KeyProperties = get_model('KeyProperties')
+    LifetimeAction = get_model('LifetimeAction')
+    SecretProperties = get_model('SecretProperties')
+    X509CertificateProperties = get_model('X509CertificateProperties')
+    SubjectAlternativeNames = get_model('SubjectAlternativeNames')
+    Trigger = get_model('Trigger')
 
     template = CertificatePolicy(
         key_properties=KeyProperties(
@@ -367,10 +370,9 @@ def _create_network_rule_set(cmd, bypass=None, default_action=None):
 
 
 # region KeyVault Vault
-def get_default_policy(cmd, client, scaffold=False):  # pylint: disable=unused-argument
+def get_default_policy(cmd, scaffold=False):  # pylint: disable=unused-argument
     """
     Get a default certificate policy to be used with `az keyvault certificate create`
-    :param client:
     :param bool scaffold: create a fully formed policy structure with default values
     :return: policy dict
     :rtype: dict
@@ -1483,16 +1485,15 @@ def update_key_rotation_policy(cmd, client, value, key_name=None):
 
 
 # region KeyVault Secret
-def download_secret(client, file_path, vault_base_url=None, secret_name=None, encoding=None,
-                    secret_version='', identifier=None):  # pylint: disable=unused-argument
+def download_secret(client, file_path, name=None, encoding=None, version=''):  # pylint: disable=unused-argument
     """ Download a secret from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
 
-    secret = client.get_secret(vault_base_url, secret_name, secret_version)
+    secret = client.get_secret(name, version)
 
     if not encoding:
-        encoding = secret.tags.get('file-encoding', 'utf-8') if secret.tags else 'utf-8'
+        encoding = secret.properties.tags.get('file-encoding', 'utf-8') if secret.properties.tags else 'utf-8'
 
     secret_value = secret.value
 
@@ -1516,41 +1517,35 @@ def download_secret(client, file_path, vault_base_url=None, secret_name=None, en
         raise ex
 
 
-def backup_secret(client, file_path, vault_base_url=None,
-                  secret_name=None, identifier=None):  # pylint: disable=unused-argument
-    backup = client.backup_secret(vault_base_url, secret_name).value
+def backup_secret(client, file_path, name=None):  # pylint: disable=unused-argument
+    backup = client.backup_secret(name)
     with open(file_path, 'wb') as output:
         output.write(backup)
 
 
-def restore_secret(client, vault_base_url, file_path):
+def restore_secret(client, file_path):
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
-    return client.restore_secret(vault_base_url, data)
+    return client.restore_secret_backup(data)
 # endregion
 
 
 # region KeyVault Certificate
 # pylint: disable=inconsistent-return-statements
-def create_certificate(cmd, client, vault_base_url, certificate_name, certificate_policy,
-                       disabled=False, tags=None, validity=None):
-    CertificateAttributes = cmd.get_models('CertificateAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    cert_attrs = CertificateAttributes(enabled=not disabled)
+def create_certificate(client, certificate_name, policy,
+                       disabled=False, tags=None):
     logger.info("Starting long-running operation 'keyvault certificate create'")
 
-    if validity is not None:
-        certificate_policy['x509_certificate_properties']['validity_in_months'] = validity
+    client.begin_create_certificate(
+        certificate_name=certificate_name, policy=policy, enabled=not disabled, tags=tags)
 
-    client.create_certificate(
-        vault_base_url, certificate_name, certificate_policy, cert_attrs, tags)
-
-    if certificate_policy['issuer_parameters']['name'].lower() == 'unknown':
+    if policy.issuer_name.lower() == 'unknown':
         # return immediately for a pending certificate
-        return client.get_certificate_operation(vault_base_url, certificate_name)
+        return client.get_certificate_operation(certificate_name)
 
     # otherwise loop until the certificate creation is complete
     while True:
-        check = client.get_certificate_operation(vault_base_url, certificate_name)
+        check = client.get_certificate_operation(certificate_name)
         if check.status != 'inProgress':
             logger.info(
                 "Long-running operation 'keyvault certificate create' finished with result %s.",
@@ -1582,86 +1577,12 @@ def _asn1_to_iso8601(asn1_date):
     return dateutil.parser.parse(asn1_date)
 
 
-def import_certificate(cmd, client, vault_base_url, certificate_name, certificate_data,
-                       disabled=False, password=None, certificate_policy=None, tags=None):
-    import binascii
-    CertificateAttributes = cmd.get_models('CertificateAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    SecretProperties = cmd.get_models('SecretProperties', resource_type=ResourceType.DATA_KEYVAULT)
-    CertificatePolicy = cmd.get_models('CertificatePolicy', resource_type=ResourceType.DATA_KEYVAULT)
-    x509 = None
-    content_type = None
-    try:
-        x509 = crypto.load_certificate(crypto.FILETYPE_PEM, certificate_data)
-        # if we get here, we know it was a PEM file
-        content_type = 'application/x-pem-file'
-        try:
-            # for PEM files (including automatic endline conversion for Windows)
-            certificate_data = certificate_data.decode('utf-8').replace('\r\n', '\n')
-        except UnicodeDecodeError:
-            certificate_data = binascii.b2a_base64(certificate_data).decode('utf-8')
-    except (ValueError, crypto.Error):
-        pass
-
-    if not x509:
-        try:
-            if password:
-                x509 = crypto.load_pkcs12(certificate_data, password).get_certificate()
-            else:
-                x509 = crypto.load_pkcs12(certificate_data).get_certificate()
-            content_type = 'application/x-pkcs12'
-            certificate_data = binascii.b2a_base64(certificate_data).decode('utf-8')
-        except crypto.Error:
-            raise CLIError(
-                'We could not parse the provided certificate as .pem or .pfx. Please verify the certificate with OpenSSL.')  # pylint: disable=line-too-long
-
-    not_before, not_after = None, None
-
-    if x509.get_notBefore():
-        not_before = _asn1_to_iso8601(x509.get_notBefore())
-
-    if x509.get_notAfter():
-        not_after = _asn1_to_iso8601(x509.get_notAfter())
-
-    cert_attrs = CertificateAttributes(
-        enabled=not disabled,
-        not_before=not_before,
-        expires=not_after)
-
-    if certificate_policy:
-        secret_props = certificate_policy.get('secret_properties')
-        if secret_props:
-            secret_props['content_type'] = content_type
-        elif certificate_policy and not secret_props:
-            certificate_policy['secret_properties'] = SecretProperties(content_type=content_type)
-
-        attributes = certificate_policy.get('attributes')
-        if attributes:
-            attributes['created'] = None
-            attributes['updated'] = None
-    else:
-        certificate_policy = CertificatePolicy(
-            secret_properties=SecretProperties(content_type=content_type))
-
-    logger.info("Starting 'keyvault certificate import'")
-    result = client.import_certificate(vault_base_url=vault_base_url,
-                                       certificate_name=certificate_name,
-                                       base64_encoded_certificate=certificate_data,
-                                       certificate_attributes=cert_attrs,
-                                       certificate_policy=certificate_policy,
-                                       tags=tags,
-                                       password=password)
-    logger.info("Finished 'keyvault certificate import'")
-    return result
-
-
-def download_certificate(client, file_path, vault_base_url=None, certificate_name=None,
-                         identifier=None, encoding='PEM', certificate_version=''):  # pylint: disable=unused-argument
+def download_certificate(client, file_path, certificate_name=None, encoding='PEM', version=''):
     """ Download a certificate from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
 
-    cert = client.get_certificate(
-        vault_base_url, certificate_name, certificate_version).cer
+    cert = client.get_certificate_version(certificate_name, version).cer
 
     try:
         with open(file_path, 'wb') as f:
@@ -1680,71 +1601,61 @@ def download_certificate(client, file_path, vault_base_url=None, certificate_nam
         raise ex
 
 
-def backup_certificate(client, file_path, vault_base_url=None,
-                       certificate_name=None, identifier=None):  # pylint: disable=unused-argument
-    cert = client.backup_certificate(vault_base_url, certificate_name).value
+def backup_certificate(client, file_path, certificate_name=None):  # pylint: disable=unused-argument
+    cert = client.backup_certificate(certificate_name)
     with open(file_path, 'wb') as output:
         output.write(cert)
 
 
-def restore_certificate(client, vault_base_url, file_path):
+def restore_certificate(client, file_path):
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
-    return client.restore_certificate(vault_base_url, data)
+    return client.restore_certificate_backup(backup=data)
 
 
-def add_certificate_contact(cmd, client, vault_base_url, contact_email, contact_name=None,
-                            contact_phone=None):
+def add_certificate_contact(cmd, client, email, name=None, phone=None):
     """ Add a contact to the specified vault to receive notifications of certificate operations. """
-    Contact = cmd.get_models('Contact', resource_type=ResourceType.DATA_KEYVAULT)
-    Contacts = cmd.get_models('Contacts', resource_type=ResourceType.DATA_KEYVAULT)
-    KeyVaultErrorException = cmd.get_models('KeyVaultErrorException', resource_type=ResourceType.DATA_KEYVAULT)
+    CertificateContact = cmd.loader.get_sdk('CertificateContact', resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES,
+                                            mod='_models')
+    from azure.core.exceptions import ResourceNotFoundError
     try:
-        contacts = client.get_certificate_contacts(vault_base_url)
-    except KeyVaultErrorException:
-        contacts = Contacts(contact_list=[])
-    contact = Contact(email_address=contact_email, name=contact_name, phone=contact_phone)
-    if any((x for x in contacts.contact_list if x.email_address == contact_email)):
-        raise CLIError("contact '{}' already exists".format(contact_email))
-    contacts.contact_list.append(contact)
-    return client.set_certificate_contacts(vault_base_url, contacts.contact_list)
+        contacts = client.get_contacts()
+    except ResourceNotFoundError:
+        contacts = []
+    contact = CertificateContact(email=email, name=name, phone=phone)
+    if any((x for x in contacts if x.email == email)):
+        raise CLIError("contact '{}' already exists".format(email))
+    contacts.append(contact)
+    return client.set_contacts(contacts)
 
 
-def delete_certificate_contact(cmd, client, vault_base_url, contact_email):
+def delete_certificate_contact(client, email):
     """ Remove a certificate contact from the specified vault. """
-    Contacts = cmd.get_models('Contacts', resource_type=ResourceType.DATA_KEYVAULT)
-    orig_contacts = client.get_certificate_contacts(vault_base_url).contact_list
-    remaining_contacts = [x for x in client.get_certificate_contacts(vault_base_url).contact_list
-                          if x.email_address != contact_email]
-    remaining = Contacts(contact_list=remaining_contacts)
+    orig_contacts = client.get_contacts()
+    remaining_contacts = [x for x in orig_contacts if x.email != email]
     if len(remaining_contacts) == len(orig_contacts):
-        raise CLIError("contact '{}' not found in vault '{}'".format(contact_email, vault_base_url))
-    if remaining.contact_list:
-        return client.set_certificate_contacts(vault_base_url, remaining.contact_list)
-    return client.delete_certificate_contacts(vault_base_url)
+        raise CLIError("contact '{}' not found in vault".format(email))
+    if remaining_contacts is not None and len(remaining_contacts) > 0:
+        return client.set_contacts(remaining_contacts)
+    client.delete_contacts()
+    return []
 
 
-def create_certificate_issuer(cmd, client, vault_base_url, issuer_name, provider_name, account_id=None,
+def create_certificate_issuer(client, issuer_name, provider_name, account_id=None,
                               password=None, disabled=None, organization_id=None):
     """ Create a certificate issuer record.
-    :param issuer_name: Unique identifier for the issuer settings.
+    :param issuer_name: The name of the issuer.
     :param provider_name: The certificate provider name. Must be registered with your
         tenant ID and in your region.
     :param account_id: The issuer account id/username/etc.
     :param password: The issuer account password/secret/etc.
     :param organization_id: The organization id.
     """
-    IssuerCredentials = cmd.get_models('IssuerCredentials', resource_type=ResourceType.DATA_KEYVAULT)
-    OrganizationDetails = cmd.get_models('OrganizationDetails', resource_type=ResourceType.DATA_KEYVAULT)
-    IssuerAttributes = cmd.get_models('IssuerAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    credentials = IssuerCredentials(account_id=account_id, password=password)
-    issuer_attrs = IssuerAttributes(enabled=not disabled)
-    org_details = OrganizationDetails(id=organization_id, admin_details=[])
-    return client.set_certificate_issuer(
-        vault_base_url, issuer_name, provider_name, credentials, org_details, issuer_attrs)
+    return client.create_issuer(issuer_name, provider_name, enabled=not disabled, account_id=account_id,
+                                password=password, organization_id=organization_id)
 
 
-def update_certificate_issuer(client, vault_base_url, issuer_name, provider_name=None,
+def update_certificate_issuer(client, issuer_name, provider_name=None,
                               account_id=None, password=None, enabled=None, organization_id=None):
     """ Update a certificate issuer record.
     :param issuer_name: Unique identifier for the issuer settings.
@@ -1754,63 +1665,43 @@ def update_certificate_issuer(client, vault_base_url, issuer_name, provider_name
     :param password: The issuer account password/secret/etc.
     :param organization_id: The organization id.
     """
-    def update(obj, prop, value, nullable=False):
-        set_value = value if value is not None else getattr(obj, prop, None)
-        if set_value is None and not nullable:
-            raise CLIError("property '{}' cannot be cleared".format(prop))
-        if not set_value and nullable:
-            set_value = None
-        setattr(obj, prop, set_value)
-
-    issuer = client.get_certificate_issuer(vault_base_url, issuer_name)
-    update(issuer.credentials, 'account_id', account_id, True)
-    update(issuer.credentials, 'password', password, True)
-    update(issuer.attributes, 'enabled', enabled)
-    update(issuer.organization_details, 'id', organization_id, True)
-    update(issuer, 'provider', provider_name)
-    return client.set_certificate_issuer(
-        vault_base_url, issuer_name, issuer.provider, issuer.credentials,
-        issuer.organization_details, issuer.attributes)
+    return client.update_issuer(issuer_name, provider=provider_name, enabled=enabled, account_id=account_id,
+                                password=password, organization_id=organization_id)
 
 
-def list_certificate_issuer_admins(client, vault_base_url, issuer_name):
-    """ List admins for a specified certificate issuer. """
-    return client.get_certificate_issuer(
-        vault_base_url, issuer_name).organization_details.admin_details
-
-
-def add_certificate_issuer_admin(cmd, client, vault_base_url, issuer_name, email, first_name=None,
+def add_certificate_issuer_admin(cmd, client, issuer_name, email, first_name=None,
                                  last_name=None, phone=None):
     """ Add admin details for a specified certificate issuer. """
-    AdministratorDetails = cmd.get_models('AdministratorDetails', resource_type=ResourceType.DATA_KEYVAULT)
-    issuer = client.get_certificate_issuer(vault_base_url, issuer_name)
-    org_details = issuer.organization_details
-    admins = org_details.admin_details
-    if any((x for x in admins if x.email_address == email)):
+    AdministratorContact = cmd.loader.get_sdk('AdministratorContact',
+                                              resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES,
+                                              mod='_models')
+    issuer = client.get_issuer(issuer_name)
+    admins = issuer.admin_contacts
+    if any((x for x in admins if x.email == email)):
         raise CLIError("admin '{}' already exists".format(email))
-    new_admin = AdministratorDetails(first_name=first_name, last_name=last_name, email_address=email, phone=phone)
+    new_admin = AdministratorContact(first_name=first_name, last_name=last_name, email=email, phone=phone)
     admins.append(new_admin)
-    org_details.admin_details = admins
-    result = client.set_certificate_issuer(
-        vault_base_url, issuer_name, issuer.provider, issuer.credentials, org_details,
-        issuer.attributes)
-    created_admin = next(x for x in result.organization_details.admin_details
-                         if x.email_address == email)
-    return created_admin
+    client.update_issuer(issuer_name, admin_contacts=admins)
+    return {
+        "emailAddress": email,
+        "firstName": first_name,
+        "lastName": last_name,
+        "phone": phone
+    }
 
 
-def delete_certificate_issuer_admin(client, vault_base_url, issuer_name, email):
+def delete_certificate_issuer_admin(client, issuer_name, email):
     """ Remove admin details for the specified certificate issuer. """
-    issuer = client.get_certificate_issuer(vault_base_url, issuer_name)
-    org_details = issuer.organization_details
-    admins = org_details.admin_details
-    remaining = [x for x in admins if x.email_address != email]
+    issuer = client.get_issuer(issuer_name)
+    admins = issuer.admin_contacts
+    remaining = [x for x in admins if x.email != email]
     if len(remaining) == len(admins):
         raise CLIError("admin '{}' not found for issuer '{}'".format(email, issuer_name))
-    org_details.admin_details = remaining
-    client.set_certificate_issuer(
-        vault_base_url, issuer_name, issuer.provider, issuer.credentials, org_details,
-        issuer.attributes)
+    if remaining:
+        client.update_issuer(issuer_name, admin_contacts=remaining)
+    else:
+        organization_id = issuer.organization_id
+        client.update_issuer(issuer_name, organization_id=organization_id)
 # endregion
 
 
@@ -2643,3 +2534,23 @@ def update_hsm_setting(client, name, value, setting_type=None):
     setting = KeyVaultSetting(name=name, value=value, setting_type=setting_type)
     return client.update_setting(setting)
 # endregion
+
+
+# region secret
+def list_secret(client, **kwargs):
+    include_managed = kwargs.pop('include_managed', None)
+    result = client.list_properties_of_secrets(**kwargs)
+    kwargs.update({
+        "include_managed": include_managed
+    })
+    return result
+
+# endregion
+
+
+def set_attributes_certificate(client, certificate_name, version=None, policy=None, **kwargs):
+    if policy:
+        client.update_certificate_policy(certificate_name=certificate_name, policy=policy)
+    if kwargs.get('enabled') is not None or kwargs.get('tags') is not None:
+        return client.update_certificate_properties(certificate_name=certificate_name, version=version, **kwargs)
+    return client.get_certificate(certificate_name=certificate_name)
