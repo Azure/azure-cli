@@ -531,18 +531,3 @@ def get_tenant_id():
     profile = Profile()
     sub = profile.get_subscription()
     return sub['tenantId']
-
-
-def generate_username():
-    directory_path = os.path.dirname(__file__)
-    adjectives, nouns = [], []
-    with open(os.path.join(directory_path, 'adjectives.txt'), 'r') as file_adjective:
-        with open(os.path.join(directory_path, 'nouns.txt'), 'r') as file_noun:
-            for line in file_adjective:
-                adjectives.append(line.strip())
-            for line in file_noun:
-                nouns.append(line.strip())
-    adjective = random.choice(adjectives)
-    noun = random.choice(nouns)
-    num = str(random.randrange(10))
-    return adjective + noun + num

@@ -8,10 +8,11 @@
 
 from knack.arguments import CLIArgumentType
 from azure.cli.core.commands.parameters import tags_type, get_location_type, get_enum_type, file_type, resource_group_name_type, get_three_state_flag
-from azure.cli.command_modules.rdbms.validators import public_access_validator, maintenance_window_validator, \
-    ip_address_validator, firewall_rule_name_validator, validate_identity, validate_byok_identity, validate_identities
+from azure.cli.command_modules.mysql.random.generate import generate_username
+from azure.cli.command_modules.mysql._validators import public_access_validator, maintenance_window_validator, ip_address_validator, \
+    firewall_rule_name_validator, validate_identity, validate_byok_identity, validate_identities
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
-from ._util import get_current_time, generate_username
+from ._util import get_current_time
 from argcomplete.completers import FilesCompleter
 
 
