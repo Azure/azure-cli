@@ -414,6 +414,7 @@ def load_arguments(self, _):
         c.argument('backup_management_type', backup_management_type)
         c.argument('target_resource_group', options_list=['--target-resource-group'], help="""Specify the resource group of target item for Cross Region Restore. Default value will be same as --resource-group if not specified.""")
         c.argument('target_vault_name', options_list=['--target-vault-name'], help="""Specify the vault name of target item for Cross Region Restore. Default value will be same as --vault-name if not specified.""")
+        c.argument('target_subscription_id', options_list=['--target-subscription-id'], help="""Specify the subscription of the target item for Cross Subscription Restore. Defaulted to source subscription if not specified.""")
 
     # Job
     with self.argument_context('backup job') as c:
