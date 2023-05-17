@@ -47,6 +47,8 @@ KEYVAULT_TEMPLATE_STRINGS = {
         'azure.keyvault.administration._backup_client#KeyVaultBackupClient{obj_name}',
     ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL:
         'azure.keyvault.administration._access_control_client#KeyVaultAccessControlClient{obj_name}',
+    ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING:
+        'azure.keyvault.administration._settings_client#KeyVaultSettingsClient{obj_name}',
     ResourceType.DATA_KEYVAULT_CERTIFICATES:
         'azure.keyvault.certificates._client#CertificateClient{obj_name}',
     ResourceType.DATA_KEYVAULT_KEYS:
@@ -65,7 +67,8 @@ def get_operations_tmpl(resource_type, client_name):
                          ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL,
                          ResourceType.DATA_KEYVAULT_CERTIFICATES,
                          ResourceType.DATA_KEYVAULT_KEYS,
-                         ResourceType.DATA_KEYVAULT_SECRETS]:
+                         ResourceType.DATA_KEYVAULT_SECRETS,
+                         ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING]:
         return KEYVAULT_TEMPLATE_STRINGS[resource_type].format(obj_name='.{}')
 
     class_name = OPERATIONS_NAME.get(client_name, '') if is_mgmt_plane(resource_type) else 'KeyVaultClient'
@@ -81,7 +84,8 @@ def get_docs_tmpl(cli_ctx, resource_type, client_name, module_name='operations')
                          ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL,
                          ResourceType.DATA_KEYVAULT_CERTIFICATES,
                          ResourceType.DATA_KEYVAULT_KEYS,
-                         ResourceType.DATA_KEYVAULT_SECRETS]:
+                         ResourceType.DATA_KEYVAULT_SECRETS,
+                         ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING]:
         return KEYVAULT_TEMPLATE_STRINGS[resource_type].format(obj_name='.{}')
 
     api_version = get_api_version(cli_ctx, resource_type, as_sdk_profile=True)
@@ -113,6 +117,8 @@ def get_client_factory(resource_type, client_name=''):
         return data_plane_azure_keyvault_administration_backup_client
     if resource_type == ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL:
         return data_plane_azure_keyvault_administration_access_control_client
+    if resource_type == ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING:
+        return data_plane_azure_keyvault_administration_setting_client
     if resource_type == ResourceType.DATA_KEYVAULT_CERTIFICATES:
         return data_plane_azure_keyvault_certificate_client
     if resource_type == ResourceType.DATA_KEYVAULT_KEYS:
@@ -227,6 +233,18 @@ def data_plane_azure_keyvault_administration_access_control_client(cli_ctx, comm
         cli_ctx, command_args, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL)
     return KeyVaultAccessControlClient(
         vault_url=vault_url, credential=credential, api_version=version)
+
+
+def data_plane_azure_keyvault_administration_setting_client(cli_ctx, command_args):
+    from azure.keyvault.administration import KeyVaultSettingsClient
+
+    vault_url, credential, _ = _prepare_data_plane_azure_keyvault_client(
+        cli_ctx, command_args, ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING)
+    command_args.pop('hsm_name', None)
+    command_args.pop('vault_base_url', None)
+    command_args.pop('identifier', None)
+    return KeyVaultSettingsClient(
+        vault_url=vault_url, credential=credential, api_version='7.4')
 
 
 def data_plane_azure_keyvault_certificate_client(cli_ctx, command_args):

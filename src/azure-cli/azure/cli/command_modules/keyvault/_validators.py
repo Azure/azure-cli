@@ -210,6 +210,18 @@ def validate_vault_name_and_hsm_name(ns):
 # PARAMETER NAMESPACE VALIDATORS
 
 
+def validate_retention_days_on_creation(ns):
+    # If customer has specified retention days, nothing to do
+    if ns.retention_days:
+        return
+    # If customer has not specified retention days,
+    # ask for mandatory retention days for MHSM creation, else set to default '90' for keyvault creation
+    if getattr(ns, 'hsm_name', None):
+        raise RequiredArgumentMissingError("--retention-days is required for MHSM creation.")
+    if getattr(ns, 'vault_name', None):
+        ns.retention_days = '90'
+
+
 def get_attribute_validator(name, attribute_class, create=False):
     def validator(ns):
         ns_dict = ns.__dict__

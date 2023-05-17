@@ -56,9 +56,10 @@ def load_command_table(self, _):
         private_data_entity = get_client(self.cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT)
         data_backup_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)
         data_access_control_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL)
+        data_setting_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING)
     else:
         mgmt_hsms_entity = mgmt_hsms_regions_entity = private_data_entity = data_backup_entity = \
-            data_access_control_entity = None
+            data_access_control_entity = data_setting_entity = None
 
     kv_vaults_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
@@ -321,6 +322,12 @@ def load_command_table(self, _):
             g.keyvault_custom('update', 'update_role_definition')
             g.keyvault_custom('delete', 'delete_role_definition')
             g.keyvault_custom('show', 'show_role_definition')
+
+    if not is_azure_stack_profile(self):
+        with self.command_group('keyvault setting', data_setting_entity.command_type) as g:
+            g.keyvault_command('list', 'list_settings')
+            g.keyvault_command('show', 'get_setting')
+            g.keyvault_custom('update', 'update_hsm_setting')
 
     data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT)).\
         replace('.', '_').replace('-', '_')
