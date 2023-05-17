@@ -21,7 +21,7 @@ from ..aaz.latest.network.lb.address_pool import Create as _LBAddressPoolCreate,
     Show as _LBAddressPoolShow, Delete as _LBAddressPoolDelete, List as _LBAddressPoolList
 from ..aaz.latest.network.lb.address_pool.address import Add as _LBAddressPoolAddressAdd, \
     Update as _LBAddressPoolAddressUpdate, Show as _LBAddressPoolAddressShow, \
-    List as _LBAddressPoolAddressList
+    Remove as _LBAddressPoolAddressRemove, List as _LBAddressPoolAddressList
 from ..aaz.latest.network.lb.address_pool.basic import Create as _LBAddressPoolBasicCreate, \
     Delete as _LBAddressPoolBasicDelete
 from ..aaz.latest.network.lb.address_pool.tunnel_interface import Add as _LBAddressPoolTunnelInterfaceAdd, \
@@ -1126,6 +1126,14 @@ class CrossRegionLoadBalancerAddressPoolAddressAdd(_LBAddressPoolAddressAdd):
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
+
+
+@register_command("network cross-region-lb address-pool address remove")
+class CrossRegionLoadBalancerAddressPoolAddressRemove(_LBAddressPoolAddressRemove):
+    """Remove one backend address from the load balance backend address pool.
+    :example: Remove one backend address from the load balance backend address pool.
+        az network cross-region-lb address-pool address remove -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress
+    """
 
 
 @register_command("network cross-region-lb address-pool address update")

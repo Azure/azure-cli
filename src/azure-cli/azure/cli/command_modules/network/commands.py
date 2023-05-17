@@ -428,8 +428,9 @@ def load_command_table(self, _):
         self.command_table['network cross-region-lb address-pool update'] = CrossRegionLoadBalancerAddressPoolUpdate(loader=self)
 
     with self.command_group('network cross-region-lb address-pool address') as g:
-        from .operations.load_balancer import CrossRegionLoadBalancerAddressPoolAddressAdd, CrossRegionLoadBalancerAddressPoolAddressUpdate, CrossRegionLoadBalancerAddressPoolAddressList, CrossRegionLoadBalancerAddressPoolAddressShow
+        from .operations.load_balancer import CrossRegionLoadBalancerAddressPoolAddressAdd, CrossRegionLoadBalancerAddressPoolAddressUpdate, CrossRegionLoadBalancerAddressPoolAddressRemove, CrossRegionLoadBalancerAddressPoolAddressList, CrossRegionLoadBalancerAddressPoolAddressShow
         self.command_table['network cross-region-lb address-pool address add'] = CrossRegionLoadBalancerAddressPoolAddressAdd(loader=self)
+        self.command_table['network cross-region-lb address-pool address remove'] = CrossRegionLoadBalancerAddressPoolAddressRemove(loader=self)
         self.command_table['network cross-region-lb address-pool address update'] = CrossRegionLoadBalancerAddressPoolAddressUpdate(loader=self)
         self.command_table['network cross-region-lb address-pool address list'] = CrossRegionLoadBalancerAddressPoolAddressList(loader=self)
         self.command_table['network cross-region-lb address-pool address show'] = CrossRegionLoadBalancerAddressPoolAddressShow(loader=self)
