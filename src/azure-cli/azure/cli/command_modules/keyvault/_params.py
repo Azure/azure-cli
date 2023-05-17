@@ -867,3 +867,16 @@ def load_arguments(self, _):
         c.argument('name', hsm_name_type)
         c.argument('region_name', options_list=['--region-name', '--region', '-r'],
                    help='The region name.')
+
+    for item in ['list', 'show', 'update']:
+        with self.argument_context(f'keyvault setting {item}', arg_group='Id') as c:
+            c.extra('hsm_name', hsm_url_type)
+            c.extra('identifier', options_list=['--id'],
+                    help='Full URI of the HSM. If specified all other \'Id\' arguments should be omitted.',
+                    validator=process_hsm_name)
+
+    with self.argument_context('keyvault setting') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the setting.')
+        c.argument('value', help='Value of the setting.')
+        c.argument('setting_type', options_list=['--setting-type', '--type'],
+                   arg_type=get_enum_type(['boolean', 'string']), help='Type of the setting value.')
