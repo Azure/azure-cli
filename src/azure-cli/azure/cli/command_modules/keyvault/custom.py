@@ -1999,7 +1999,8 @@ def _reconstruct_role_assignment(role_dics, principal_dics, role_assignment):
         'scope': role_assignment.properties.scope,
         'type': role_assignment.type
     }
-    role_definition_id = getattr(role_assignment.properties, 'role_definition_id', None) if getattr(role_assignment, 'properties', None) else None
+    role_definition_id = getattr(role_assignment.properties, 'role_definition_id', None)\
+        if getattr(role_assignment, 'properties', None) else None
     ret['roleDefinitionId'] = role_definition_id
     if role_definition_id:
         ret['roleName'] = role_dics.get(role_definition_id)
@@ -2007,7 +2008,8 @@ def _reconstruct_role_assignment(role_dics, principal_dics, role_assignment):
         ret['roleName'] = None  # the role definition might have been deleted
 
     # fill in principal names
-    principal_id = getattr(role_assignment.properties, 'principal_id', None) if getattr(role_assignment, 'properties', None) else None
+    principal_id = getattr(role_assignment.properties, 'principal_id', None)\
+        if getattr(role_assignment, 'properties', None) else None
     ret['principalId'] = principal_id
     if principal_id:
         principal_info = principal_dics.get(principal_id)
