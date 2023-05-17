@@ -19,7 +19,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.keyvault._completers import (
     get_keyvault_name_completion_list, get_keyvault_version_completion_list)
 from azure.cli.command_modules.keyvault._validators import (
-    datetime_type, certificate_type,
+    datetime_type, certificate_type, validate_retention_days_on_creation,
     get_vault_base_url_type, get_hsm_base_url_type, validate_key_import_type,
     validate_key_import_source, validate_key_type, validate_policy_permissions, validate_principal,
     validate_resource_group_name, validate_x509_certificate_chain,
@@ -166,7 +166,9 @@ def load_arguments(self, _):
         c.argument('no_self_perms', arg_type=get_three_state_flag(),
                    help='[Vault Only] Don\'t add permissions for the current user/service principal in the new vault.')
         c.argument('location', validator=get_default_location_from_resource_group)
-        c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90.', default='90')
+        c.argument('retention_days', validator=validate_retention_days_on_creation,
+                   help='Soft delete data retention days. It accepts >=7 and <=90. '
+                        'Defaults to 90 for keyvault creation. Required for MHSM creation')
 
     with self.argument_context('keyvault create', arg_group='Network Rule') as c:
         c.argument('network_acls', type=validate_file_or_dict,
