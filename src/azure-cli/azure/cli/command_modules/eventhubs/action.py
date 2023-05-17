@@ -133,8 +133,6 @@ class ConstructPolicy(argparse._AppendAction):
             elif k == 'rate-limit-threshold':
                 if v.isdigit() is False:
                     raise CLIError('rate-limit-threshold should be an integer')
-                if 'throttling_policy' in throttling_policy:
-                    throttling_policy["throttling_policy"] = {}
                 throttling_policy["throttling_policy"]["rate_limit_threshold"] = int(v)
 
             elif k == 'metric-id':
@@ -151,7 +149,6 @@ class ConstructPolicy(argparse._AppendAction):
 
             else:
                 raise InvalidArgumentValueError("Invalid Argument for:'{}' Only allowed arguments are 'name, rate-limit-threshold and metric-id'".format(option_string))
-
         if (throttling_policy["name"] is None) or (throttling_policy["throttling_policy"].get("rate_limit_threshold", None) is None) or (throttling_policy["throttling_policy"].get("metric_id", None) is None):
             raise RequiredArgumentMissingError('Throttling policies is missing one of these parameters:name, metric-id, rate-limit-threshold')
 
