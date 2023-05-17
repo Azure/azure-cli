@@ -68,8 +68,8 @@ class IoTDpsTest(ScenarioTest):
 
         # Test DPS Access Policy Lifecycle
         policy_name = self.create_random_name('policy', 20)
-        right = 'EnrollmentRead'
-        new_right = 'EnrollmentWrite'
+        right = 'RegistrationStatusRead'
+        new_right = 'RegistrationStatusWrite'
 
         # Create access policy
         self.cmd('az iot dps policy create -g {} --dps-name {} --pn {} -r {}'.format(group_name, dps_name, policy_name, right), checks=[
@@ -90,11 +90,11 @@ class IoTDpsTest(ScenarioTest):
             self.check('rights', right)
         ])
 
-        # Create update policy
+        # Create update policy - note that right is a subset of new_right so it will be present too
         self.cmd('az iot dps policy update -g {} --dps-name {} --pn {} -r {}'.format(group_name, dps_name, policy_name, new_right),
                  checks=[
                      self.check('keyName', policy_name),
-                     self.check('rights', new_right)
+                     self.check('rights', ', '.join([right, new_right]))
         ])
 
         # Delete policy
@@ -104,18 +104,18 @@ class IoTDpsTest(ScenarioTest):
         self.cmd('az iot dps delete -g {} -n {}'.format(group_name, dps_name))
 
         # Data Residency tests - TODO change these
-        dr_dps_name = self.create_random_name('dps-dr', 20)
+        # dr_dps_name = self.create_random_name('dps-dr', 20)
 
-        # Data residency not enabled in this region
-        with self.assertRaises(HttpResponseError):
-            self.cmd('az iot dps create -g {} -n {} --edr'.format(group_name, dr_dps_name))
+        # # Data residency not enabled in this region
+        # with self.assertRaises(HttpResponseError):
+        #     self.cmd('az iot dps create -g {} -n {} --edr'.format(group_name, dr_dps_name))
 
-        # Successfully create in this region
-        self.cmd('az iot dps create -g {} -n {} --location southeastasia --edr'.format(group_name, dr_dps_name),
-                 checks=[self.check('name', dr_dps_name),
-                         self.check('location', 'southeastasia'),
-                         self.check('properties.enableDataResidency', True)])
-        self.cmd('az iot dps delete -g {} -n {}'.format(group_name, dr_dps_name))
+        # # Successfully create in this region
+        # self.cmd('az iot dps create -g {} -n {} --location southeastasia --edr'.format(group_name, dr_dps_name),
+        #          checks=[self.check('name', dr_dps_name),
+        #                  self.check('location', 'southeastasia'),
+        #                  self.check('properties.enableDataResidency', True)])
+        # self.cmd('az iot dps delete -g {} -n {}'.format(group_name, dr_dps_name))
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')

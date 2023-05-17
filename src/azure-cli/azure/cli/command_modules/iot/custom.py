@@ -409,7 +409,8 @@ def iot_dps_certificate_create(client, dps_name, certificate_name, certificate_p
     certificate = open_certificate(certificate_path)
     if not certificate:
         raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
-    cert_description = CertificateBodyDescription(certificate=certificate, is_verified=is_verified)
+    cert_properties = CertificateBodyDescription(certificate=certificate, is_verified=is_verified)
+    cert_description = CertificateDescription(properties=cert_properties)
     return client.dps_certificate.create_or_update(resource_group_name, dps_name, certificate_name, cert_description)
 
 
@@ -421,20 +422,21 @@ def iot_dps_certificate_update(client, dps_name, certificate_name, certificate_p
             certificate = open_certificate(certificate_path)
             if not certificate:
                 raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
-            cert_description = CertificateBodyDescription(certificate=certificate, is_verified=is_verified)
-            return client.dps_certificate.create_or_update(resource_group_name, dps_name, certificate_name, cert_description, etag)
+            cert_properties = CertificateBodyDescription(certificate=certificate, is_verified=is_verified)
+            cert_description = CertificateDescription(properties=cert_properties)
+            return client.dps_certificate.create_or_update(resource_group_name, dps_name, certificate_name, cert_description, if_match=etag)
     raise CLIError("Certificate '{0}' does not exist. Use 'iot dps certificate create' to create a new certificate."
                    .format(certificate_name))
 
 
 def iot_dps_certificate_delete(client, dps_name, certificate_name, etag, resource_group_name=None):
     resource_group_name = _ensure_dps_resource_group_name(client, resource_group_name, dps_name)
-    return client.dps_certificate.delete(resource_group_name, etag, dps_name, certificate_name)
+    return client.dps_certificate.delete(resource_group_name, dps_name, certificate_name, if_match=etag)
 
 
 def iot_dps_certificate_gen_code(client, dps_name, certificate_name, etag, resource_group_name=None):
     resource_group_name = _ensure_dps_resource_group_name(client, resource_group_name, dps_name)
-    return client.dps_certificate.generate_verification_code(certificate_name, etag, resource_group_name, dps_name)
+    return client.dps_certificate.generate_verification_code(certificate_name, resource_group_name, dps_name, if_match=etag)
 
 
 def iot_dps_certificate_verify(client, dps_name, certificate_name, certificate_path, etag, resource_group_name=None):
@@ -443,7 +445,7 @@ def iot_dps_certificate_verify(client, dps_name, certificate_name, certificate_p
     if not certificate:
         raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
     request = VerificationCodeRequest(certificate=certificate)
-    return client.dps_certificate.verify_certificate(certificate_name, etag, resource_group_name, dps_name, request)
+    return client.dps_certificate.verify_certificate(certificate_name, resource_group_name, dps_name, request, if_match=etag)
 
 
 # DPS Identity Methods
