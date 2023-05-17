@@ -344,7 +344,7 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
 class KeyVaultCertificateContactsScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_contacts')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-co-')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-co-', skip_purge=True)
     def test_keyvault_certificate_contacts(self, resource_group):
 
         self.kwargs.update({
@@ -365,7 +365,7 @@ class KeyVaultCertificateContactsScenarioTest(ScenarioTest):
 class KeyVaultCertificateIssuerScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_issuer')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-is-')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-is-', skip_purge=True)
     def test_keyvault_certificate_issuers(self, resource_group):
 
         self.kwargs.update({
@@ -524,7 +524,7 @@ class KeyVaultCertificateDefaultPolicyScenarioTest(ScenarioTest):
 class KeyVaultCertificateScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_cert')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-', skip_purge=True)
     def test_keyvault_certificate_crud(self, resource_group):
 
         self.kwargs.update({
