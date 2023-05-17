@@ -5806,11 +5806,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
                      '--ssh-key-value={ssh_key_value} --pod-cidr 10.244.0.0/16 --service-cidr 10.0.0.0/16 ' \
-                     '--docker-bridge-address 172.17.0.1/16 --dns-service-ip 10.0.2.10 ' \
-                     '--network-plugin kubenet --network-policy calico'
+                     '--dns-service-ip 10.0.2.10 --network-plugin kubenet --network-policy calico'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('networkProfile.dockerBridgeCidr', '172.17.0.1/16'),
             self.check('networkProfile.podCidr', '10.244.0.0/16'),
             self.check('networkProfile.serviceCidr', '10.0.0.0/16'),
             self.check('networkProfile.dnsServiceIp', '10.0.2.10'),
