@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "eventhubs",
+    "eventhubs namespace application-group",
 )
 class __CMDGroup(AAZCommandGroup):
-    """eventhubs
+    """eventhubs namespace application-group
     """
     pass
 

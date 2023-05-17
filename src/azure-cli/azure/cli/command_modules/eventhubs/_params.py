@@ -17,7 +17,7 @@ def load_arguments_eh(self, _):
     from knack.arguments import CLIArgumentType
     from azure.cli.core.profiles import ResourceType
     (SkuName, TlsVersion) = self.get_models('SkuName', 'TlsVersion', resource_type=ResourceType.MGMT_EVENTHUB)
-    from azure.cli.command_modules.eventhubs.action import AlertAddEncryption, ConstructPolicy, AlertAddIpRule, AlertAddVirtualNetwork
+    from azure.cli.command_modules.eventhubs.action import AlertAddEncryption, ConstructPolicy, AlertAddIpRule, AlertAddVirtualNetwork, ConstructPolicyName
 
     namespace_name_arg_type = CLIArgumentType(options_list=['--namespace-name'], help='Name of Namespace', id_part='name')
 
@@ -169,6 +169,9 @@ def load_arguments_eh(self, _):
     with self.argument_context('eventhubs namespace application-group create') as c:
         c.argument('client_app_group_identifier', options_list=['--client-app-group-identifier', '--client-app-group-id'], help='The Unique identifier for application group.Supports SAS(NamespaceSASKeyName=KeyName or EntitySASKeyName=KeyName) or AAD(AADAppID=Guid)')
 
-    for scope in ['eventhubs namespace application-group policy add', 'eventhubs namespace application-group policy remove', 'eventhubs namespace application-group create']:
+    for scope in ['eventhubs namespace application-group create', 'eventhubs namespace application-group policy add']:
         with self.argument_context(scope) as c:
             c.argument('throttling_policy_config', action=ConstructPolicy, options_list=['--throttling-policy-config', '--throttling-policy', '--policy-config'], nargs='+', help='List of Throttling Policy Objects')
+
+    with self.argument_context('eventhubs namespace application-group policy remove') as c:
+        c.argument('policy', action=ConstructPolicyName, nargs='+', help='List of Throttling Policy Objects')
