@@ -49,8 +49,12 @@ KEYVAULT_TEMPLATE_STRINGS = {
         'azure.keyvault.administration._access_control_client#KeyVaultAccessControlClient{obj_name}',
     ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING:
         'azure.keyvault.administration._settings_client#KeyVaultSettingsClient{obj_name}',
+    ResourceType.DATA_KEYVAULT_CERTIFICATES:
+        'azure.keyvault.certificates._client#CertificateClient{obj_name}',
     ResourceType.DATA_KEYVAULT_KEYS:
         'azure.keyvault.keys._client#KeyClient{obj_name}',
+    ResourceType.DATA_KEYVAULT_SECRETS:
+        'azure.keyvault.secrets._client#SecretClient{obj_name}',
 }
 
 
@@ -61,7 +65,9 @@ def is_mgmt_plane(resource_type):
 def get_operations_tmpl(resource_type, client_name):
     if resource_type in [ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP,
                          ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL,
+                         ResourceType.DATA_KEYVAULT_CERTIFICATES,
                          ResourceType.DATA_KEYVAULT_KEYS,
+                         ResourceType.DATA_KEYVAULT_SECRETS,
                          ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING]:
         return KEYVAULT_TEMPLATE_STRINGS[resource_type].format(obj_name='.{}')
 
@@ -76,7 +82,9 @@ def get_operations_tmpl(resource_type, client_name):
 def get_docs_tmpl(cli_ctx, resource_type, client_name, module_name='operations'):
     if resource_type in [ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP,
                          ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL,
+                         ResourceType.DATA_KEYVAULT_CERTIFICATES,
                          ResourceType.DATA_KEYVAULT_KEYS,
+                         ResourceType.DATA_KEYVAULT_SECRETS,
                          ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING]:
         return KEYVAULT_TEMPLATE_STRINGS[resource_type].format(obj_name='.{}')
 
@@ -111,8 +119,12 @@ def get_client_factory(resource_type, client_name=''):
         return data_plane_azure_keyvault_administration_access_control_client
     if resource_type == ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING:
         return data_plane_azure_keyvault_administration_setting_client
+    if resource_type == ResourceType.DATA_KEYVAULT_CERTIFICATES:
+        return data_plane_azure_keyvault_certificate_client
     if resource_type == ResourceType.DATA_KEYVAULT_KEYS:
         return data_plane_azure_keyvault_key_client
+    if resource_type == ResourceType.DATA_KEYVAULT_SECRETS:
+        return data_plane_azure_keyvault_secret_client
     raise CLIError('Unsupported resource type: {}'.format(resource_type))
 
 
@@ -235,6 +247,19 @@ def data_plane_azure_keyvault_administration_setting_client(cli_ctx, command_arg
         vault_url=vault_url, credential=credential, api_version='7.4')
 
 
+def data_plane_azure_keyvault_certificate_client(cli_ctx, command_args):
+    from azure.keyvault.certificates import CertificateClient
+
+    vault_url, credential, version = _prepare_data_plane_azure_keyvault_client(
+        cli_ctx, command_args, ResourceType.DATA_KEYVAULT_CERTIFICATES)
+    command_args.pop('hsm_name', None)
+    command_args.pop('vault_base_url', None)
+    command_args.pop('identifier', None)
+    api_version = '7.4' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
+    return CertificateClient(
+        vault_url=vault_url, credential=credential, api_version=api_version or version)
+
+
 def data_plane_azure_keyvault_key_client(cli_ctx, command_args):
     from azure.keyvault.keys import KeyClient
 
@@ -245,6 +270,19 @@ def data_plane_azure_keyvault_key_client(cli_ctx, command_args):
     command_args.pop('identifier', None)
     api_version = '7.4-preview.1' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
     return KeyClient(
+        vault_url=vault_url, credential=credential, api_version=api_version or version)
+
+
+def data_plane_azure_keyvault_secret_client(cli_ctx, command_args):
+    from azure.keyvault.secrets import SecretClient
+
+    vault_url, credential, version = _prepare_data_plane_azure_keyvault_client(
+        cli_ctx, command_args, ResourceType.DATA_KEYVAULT_SECRETS)
+    command_args.pop('hsm_name', None)
+    command_args.pop('vault_base_url', None)
+    command_args.pop('identifier', None)
+    api_version = '7.4' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
+    return SecretClient(
         vault_url=vault_url, credential=credential, api_version=api_version or version)
 
 

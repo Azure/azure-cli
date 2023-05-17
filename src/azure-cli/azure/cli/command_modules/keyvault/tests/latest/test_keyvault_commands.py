@@ -1945,11 +1945,10 @@ class KeyVaultCertificateIssuerScenarioTest(ScenarioTest):
         with self.assertRaises(CLIError):
             self.cmd('keyvault certificate issuer update --vault-name {kv} --issuer-name notexist '
                      '--organization-id TestOrg --account-id test_account')
-        self.cmd('keyvault certificate issuer update --vault-name {kv} --issuer-name issuer1 --account-id ""', checks=[
+        self.cmd('keyvault certificate issuer update --vault-name {kv} --issuer-name issuer1', checks=[
             self.check('provider', 'Test'),
             self.check('attributes.enabled', True),
-            self.check('organizationDetails.id', 'TestOrg'),
-            self.check('credentials.accountId', None)
+            self.check('organizationDetails.id', 'TestOrg')
         ])
         self.cmd('keyvault certificate issuer list --vault-name {kv}',
                  checks=self.check('length(@)', 1))
@@ -2149,6 +2148,12 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
                  ])
         self.cmd('keyvault certificate list --vault-name {kv} --maxresults 10',
                  checks=self.check('length(@)', 1))
+
+        self.cmd('keyvault certificate list-versions --vault-name {kv} -n cert1',
+                 checks=[self.check('length(@)', 1)])
+        self.cmd('keyvault certificate show --vault-name {kv} -n cert1', checks=[
+            self.check('policy.x509CertificateProperties.validityInMonths', 60)
+        ])
 
         # create a new certificate version
         self.cmd('keyvault certificate create --vault-name {kv} -n cert1 -p @"{policy2_path}"', checks=[
@@ -2428,7 +2433,7 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
                      '--assignee "https://vault.azure.net" --scope {sa_rid}')
             # Give tester all permissions to keyvault storage
             # (remember to replace the object id if you are the new tester)
-            self.cmd('az keyvault set-policy -n {kv} --storage-permissions all purge --object-id 3707fb2f-ac10-4591-a04f-8b0d786ea37d')
+            self.cmd('az keyvault set-policy -n {kv} --storage-permissions all purge --object-id a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e')
             time.sleep(300)
 
         retry = 0
@@ -2448,12 +2453,16 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
                     retry += 1
                 else:
                     raise e
+        expiry = (datetime.utcnow() + timedelta(minutes=200)).strftime(f"%Y-%m-%dT%H:%MZ")
         self.kwargs.update({
-            'sa_id': kv_sa['id']
+            'sa_id': kv_sa['id'],
+            'expiry': expiry
         })
 
+
+
         # create an account sas definition
-        acct_sas_template = self.cmd('storage account generate-sas --expiry 2023-01-01 --permissions acdlpruw '
+        acct_sas_template = self.cmd('storage account generate-sas --expiry {expiry} --permissions acdlpruw '
                                      '--resource-types sco --services bfqt --https-only --account-name {sa} '
                                      '--account-key 00000000 -o tsv').output.strip('\n')
         self.kwargs.update({
