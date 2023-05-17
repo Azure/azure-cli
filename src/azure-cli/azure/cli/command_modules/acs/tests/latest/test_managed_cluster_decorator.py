@@ -1737,7 +1737,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_3.get_network_plugin_mode(), "overlay")
-    
+
     def test_get_network_plugin(self):
         # default
         ctx_1 = AKSManagedClusterContext(
@@ -1939,7 +1939,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                     "pod_cidr": None,
                     "service_cidr": None,
                     "dns_service_ip": None,
-                    "docker_bridge_address": None,
                     "network_policy": None,
                 }
             ),
@@ -1954,7 +1953,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             pod_cidr="test_pod_cidr",
             service_cidr="test_service_cidr",
             dns_service_ip="test_dns_service_ip",
-            docker_bridge_cidr="test_docker_bridge_address",
             network_policy="test_network_policy",
         )
         mc = self.models.ManagedCluster(location="test_location", network_profile=network_profile_1)
@@ -1965,7 +1963,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 "test_pod_cidr",
                 "test_service_cidr",
                 "test_dns_service_ip",
-                "test_docker_bridge_address",
+                None,
                 "test_network_policy",
             ),
         )
@@ -1992,7 +1990,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 {
                     "service_cidr": "test_service_cidr",
                     "dns_service_ip": "test_dns_service_ip",
-                    "docker_bridge_address": "test_docker_bridge_address",
                     "network_policy": "test_network_policy",
                 }
             ),
@@ -2175,7 +2172,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         # fail on aci_subnet_name/vnet_subnet_id not specified
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_6.get_enable_addons()
-    
+
     def test_get_http_proxy_config(self):
         # default
         ctx_1 = AKSManagedClusterContext(
@@ -5781,7 +5778,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "pod_cidr": None,
                 "service_cidr": None,
                 "dns_service_ip": None,
-                "docker_bridge_cidr": None,
                 "network_policy": None,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
@@ -5799,7 +5795,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             pod_cidr="10.244.0.0/16",  # default value in SDK
             service_cidr="10.0.0.0/16",  # default value in SDK
             dns_service_ip="10.0.0.10",  # default value in SDK
-            docker_bridge_cidr="172.17.0.1/16",  # default value in SDK
             load_balancer_sku="standard",
             outbound_type="loadBalancer",
         )
@@ -5822,7 +5817,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "pod_cidr": "10.246.0.0/16",
                 "service_cidr": None,
                 "dns_service_ip": None,
-                "docker_bridge_cidr": None,
                 "network_policy": None,
                 "nat_gateway_managed_outbound_ip_count": 10,
                 "nat_gateway_idle_timeout": 20,
@@ -5854,7 +5848,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             pod_cidr="10.246.0.0/16",
             service_cidr=None,  # overwritten to None
             dns_service_ip=None,  # overwritten to None
-            docker_bridge_cidr=None,  # overwritten to None
             load_balancer_sku="standard",
             outbound_type="loadBalancer",
             load_balancer_profile=load_balancer_profile_2,
@@ -5879,7 +5872,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "pod_cidr": None,
                 "service_cidr": None,
                 "dns_service_ip": None,
-                "docker_bridge_cidr": None,
                 "network_policy": None,
                 "nat_gateway_managed_outbound_ip_count": None,
                 "nat_gateway_idle_timeout": None,
@@ -5895,7 +5887,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             pod_cidr="10.244.0.0/16",  # default value in SDK
             service_cidr="10.0.0.0/16",  # default value in SDK
             dns_service_ip="10.0.0.10",  # default value in SDK
-            docker_bridge_cidr="172.17.0.1/16",  # default value in SDK
             load_balancer_sku="basic",
             outbound_type="loadBalancer",
             load_balancer_profile=None,  # profile dropped when lb sku is basic
@@ -5924,7 +5915,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "service_cidrs": "192.168.0.0/16,2001:abcd::/84",
                 "ip_families": "ipv4,ipv6",
                 "dns_service_ip": None,
-                "docker_bridge_cidr": None,
                 "network_policy": None,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
@@ -5955,7 +5945,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             pod_cidr=None, # overwritten to None
             service_cidr=None,  # overwritten to None
             dns_service_ip=None,  # overwritten to None
-            docker_bridge_cidr=None,  # overwritten to None
             load_balancer_sku="standard",
             outbound_type="loadBalancer",
             load_balancer_profile=load_balancer_profile_1,
@@ -7227,7 +7216,12 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSManagedClusterCreateDecorator(
             self.cmd,
             self.client,
-            {"resource_group_name": "test_rg_name", "name": "test_name", "enable_msi_auth_for_monitoring": True},
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_msi_auth_for_monitoring": True,
+                "enable_addons": "monitoring"
+            },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
         monitoring_addon_profile_2 = self.models.ManagedClusterAddonProfile(
@@ -7378,7 +7372,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             return_value=mc_1,
         ):
             self.assertEqual(dec_1.create_mc(mc_1), mc_1)
-    
+
     def test_set_up_http_proxy_config(self):
         dec_1 = AKSManagedClusterCreateDecorator(
             self.cmd,
@@ -9816,7 +9810,12 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         dec_2 = AKSManagedClusterUpdateDecorator(
             self.cmd,
             self.client,
-            {"resource_group_name": "test_rg_name", "name": "test_name", "enable_msi_auth_for_monitoring": True},
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_msi_auth_for_monitoring": True,
+                "enable_addons": "monitoring"
+            },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
         monitoring_addon_profile_2 = self.models.ManagedClusterAddonProfile(

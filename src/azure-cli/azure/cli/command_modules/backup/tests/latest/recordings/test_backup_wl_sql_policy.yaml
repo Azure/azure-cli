@@ -13,61 +13,10 @@ interactions:
       ParameterSetName:
       - -g -v -n
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.48.1 azsdk-python-mgmt-recoveryservicesbackup/6.0.0 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup?api-version=2023-01-01
-  response:
-    body:
-      string: '{"error":{"code":"CloudInternalError","message":"Microsoft Azure Backup
-        encountered an internal error. Wait for a few minutes and then try the operation
-        again. If the issue persists, please contact Microsoft support."}}'
-    headers:
-      cache-control:
-      - no-cache
-      connection:
-      - close
-      content-length:
-      - '219'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 31 Jan 2023 09:15:46 GMT
-      pragma:
-      - no-cache
-      server:
-      - Kestrel
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-failure-cause:
-      - service
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '291'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 500
-      message: Internal Server Error
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup policy show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v -n
-      User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
-        (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup?api-version=2023-02-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup","name":"HourlyLogBackup","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}}'
@@ -77,15 +26,15 @@ interactions:
       content-length:
       - '1084'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Tue, 31 Jan 2023 09:15:47 GMT
+      - Thu, 11 May 2023 14:00:22 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Kestrel
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -95,7 +44,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '290'
+      - '296'
       x-powered-by:
       - ASP.NET
     status:
@@ -129,10 +78,10 @@ interactions:
       ParameterSetName:
       - -g -v --policy --backup-management-type --workload-type --name
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.48.1 azsdk-python-mgmt-recoveryservicesbackup/6.0.0 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2023-02-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001","name":"clitest-policy000001","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}}'
@@ -142,15 +91,15 @@ interactions:
       content-length:
       - '1094'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Tue, 31 Jan 2023 09:15:49 GMT
+      - Thu, 11 May 2023 14:00:25 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Kestrel
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -160,7 +109,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1184'
+      - '1196'
       x-powered-by:
       - ASP.NET
     status:
@@ -180,10 +129,10 @@ interactions:
       ParameterSetName:
       - -g -v
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.48.1 azsdk-python-mgmt-recoveryservicesbackup/6.0.0 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies?api-version=2023-02-01
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policyhzumk5e457","name":"clitest-policyhzumk5e457","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup","name":"HourlyLogBackup","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/DefaultPolicy","name":"DefaultPolicy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureIaasVM","instantRPDetails":{},"schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"instantRpRetentionRangeInDays":2,"timeZone":"UTC","protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001","name":"clitest-policy000001","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/EnhancedPolicy","name":"EnhancedPolicy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureIaasVM","policyType":"V2","instantRPDetails":{},"schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicyV2","scheduleRunFrequency":"Hourly","hourlySchedule":{"interval":4,"scheduleWindowStartTime":"2022-05-13T08:00:00Z","scheduleWindowDuration":12}},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T08:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"instantRpRetentionRangeInDays":2,"timeZone":"UTC","protectedItemsCount":0}}]}'
@@ -193,15 +142,15 @@ interactions:
       content-length:
       - '4892'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Tue, 31 Jan 2023 09:15:50 GMT
+      - Thu, 11 May 2023 14:00:27 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Kestrel
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -231,10 +180,10 @@ interactions:
       ParameterSetName:
       - -g -v --policy -n
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.48.1 azsdk-python-mgmt-recoveryservicesbackup/6.0.0 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupResourceGuardProxies?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupResourceGuardProxies?api-version=2023-02-01
   response:
     body:
       string: '{"value":[]}'
@@ -244,15 +193,15 @@ interactions:
       content-length:
       - '12'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Tue, 31 Jan 2023 09:15:51 GMT
+      - Thu, 11 May 2023 14:00:28 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Kestrel
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -294,10 +243,10 @@ interactions:
       ParameterSetName:
       - -g -v --policy -n
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.48.1 azsdk-python-mgmt-recoveryservicesbackup/6.0.0 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2023-02-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001","name":"clitest-policy000001","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":true,"isCompression":true},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}}'
@@ -307,15 +256,15 @@ interactions:
       content-length:
       - '1092'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Tue, 31 Jan 2023 09:15:53 GMT
+      - Thu, 11 May 2023 14:00:31 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Kestrel
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -325,7 +274,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1182'
+      - '1198'
       x-powered-by:
       - ASP.NET
     status:
@@ -345,10 +294,10 @@ interactions:
       ParameterSetName:
       - -g -v --backup-management-type --fix-for-inconsistent-items -n
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.48.1 azsdk-python-mgmt-recoveryservicesbackup/6.0.0 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupResourceGuardProxies?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupResourceGuardProxies?api-version=2023-02-01
   response:
     body:
       string: '{"value":[]}'
@@ -358,15 +307,15 @@ interactions:
       content-length:
       - '12'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Tue, 31 Jan 2023 09:15:53 GMT
+      - Thu, 11 May 2023 14:00:33 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Kestrel
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -394,61 +343,10 @@ interactions:
       ParameterSetName:
       - -g -v --backup-management-type --fix-for-inconsistent-items -n
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.48.1 azsdk-python-mgmt-recoveryservicesbackup/6.0.0 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2023-01-01
-  response:
-    body:
-      string: '{"error":{"code":"CloudInternalError","message":"Microsoft Azure Backup
-        encountered an internal error. Wait for a few minutes and then try the operation
-        again. If the issue persists, please contact Microsoft support."}}'
-    headers:
-      cache-control:
-      - no-cache
-      connection:
-      - close
-      content-length:
-      - '219'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 31 Jan 2023 09:15:55 GMT
-      pragma:
-      - no-cache
-      server:
-      - Kestrel
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-failure-cause:
-      - service
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '298'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 500
-      message: Internal Server Error
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup policy set
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -v --backup-management-type --fix-for-inconsistent-items -n
-      User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
-        (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2023-02-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001","name":"clitest-policy000001","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":true,"isCompression":true},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}}'
@@ -458,15 +356,15 @@ interactions:
       content-length:
       - '1092'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Tue, 31 Jan 2023 09:15:56 GMT
+      - Thu, 11 May 2023 14:00:34 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Kestrel
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -510,10 +408,10 @@ interactions:
       ParameterSetName:
       - -g -v --backup-management-type --fix-for-inconsistent-items -n
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.48.1 azsdk-python-mgmt-recoveryservicesbackup/6.0.0 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2023-02-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001","name":"clitest-policy000001","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":true,"isCompression":true},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}}'
@@ -523,15 +421,15 @@ interactions:
       content-length:
       - '1092'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Tue, 31 Jan 2023 09:15:57 GMT
+      - Thu, 11 May 2023 14:00:35 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Kestrel
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -541,7 +439,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1183'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -561,10 +459,10 @@ interactions:
       ParameterSetName:
       - -g -v -n
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.48.1 azsdk-python-mgmt-recoveryservicesbackup/6.0.0 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2023-02-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001","name":"clitest-policy000001","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":true,"isCompression":true},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}}'
@@ -574,15 +472,15 @@ interactions:
       content-length:
       - '1092'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Tue, 31 Jan 2023 09:15:58 GMT
+      - Thu, 11 May 2023 14:00:37 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Kestrel
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -592,7 +490,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '296'
+      - '299'
       x-powered-by:
       - ASP.NET
     status:
@@ -614,58 +512,10 @@ interactions:
       ParameterSetName:
       - -g -v -n
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.48.1 azsdk-python-mgmt-recoveryservicesbackup/6.0.0 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2023-01-01
-  response:
-    body:
-      string: '{"error":{"code":"GatewayTimeout","message":"The gateway did not receive
-        a response from ''Microsoft.RecoveryServices'' within the specified time period."}}'
-    headers:
-      cache-control:
-      - no-cache
-      connection:
-      - close
-      content-length:
-      - '154'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 31 Jan 2023 09:16:59 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-failure-cause:
-      - service
-    status:
-      code: 504
-      message: Gateway Timeout
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - backup policy delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -g -v -n
-      User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
-        (Windows-10-10.0.22621-SP0)
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policy000001?api-version=2023-02-01
   response:
     body:
       string: ''
@@ -675,19 +525,17 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 31 Jan 2023 09:17:01 GMT
+      - Thu, 11 May 2023 14:00:38 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14998'
       x-powered-by:
       - ASP.NET
     status:
@@ -707,10 +555,10 @@ interactions:
       ParameterSetName:
       - -g -v
       User-Agent:
-      - AZURECLI/2.44.1 (PIP) azsdk-python-mgmt-recoveryservicesbackup/5.1.0 Python/3.10.7
-        (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.48.1 azsdk-python-mgmt-recoveryservicesbackup/6.0.0 Python/3.8.5
+        (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies?api-version=2023-02-01
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/clitest-policyhzumk5e457","name":"clitest-policyhzumk5e457","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/HourlyLogBackup","name":"HourlyLogBackup","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLDataBase","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"Full","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":30,"durationType":"Days"}}}],"protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/DefaultPolicy","name":"DefaultPolicy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureIaasVM","instantRPDetails":{},"schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2022-05-13T16:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T16:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"instantRpRetentionRangeInDays":2,"timeZone":"UTC","protectedItemsCount":0}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sql-clitest-rg/providers/Microsoft.RecoveryServices/vaults/sql-clitestvault-donotuse/backupPolicies/EnhancedPolicy","name":"EnhancedPolicy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureIaasVM","policyType":"V2","instantRPDetails":{},"schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicyV2","scheduleRunFrequency":"Hourly","hourlySchedule":{"interval":4,"scheduleWindowStartTime":"2022-05-13T08:00:00Z","scheduleWindowDuration":12}},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2022-05-13T08:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"instantRpRetentionRangeInDays":2,"timeZone":"UTC","protectedItemsCount":0}}]}'
@@ -720,15 +568,15 @@ interactions:
       content-length:
       - '3797'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Tue, 31 Jan 2023 09:17:02 GMT
+      - Thu, 11 May 2023 14:00:40 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Kestrel
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -738,7 +586,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '298'
+      - '299'
       x-powered-by:
       - ASP.NET
     status:
