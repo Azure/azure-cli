@@ -3767,7 +3767,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     deployment_source_branch = deployment_source_branch or 'master'
 
     from azure.mgmt.web.models import Site
-    SiteConfig, NameValuePair = cmd.get_models('SiteConfig', 'NameValuePair')
+    SiteConfig, NameValuePair, SiteConfigPropertiesDictionary = cmd.get_models(
+        'SiteConfig',
+        'NameValuePair',
+        'SiteConfigPropertiesDictionary')
     disable_app_insights = (disable_app_insights == "true")
 
     site_config = SiteConfig(app_settings=[])
@@ -3896,12 +3899,18 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                   "Supported version for runtime {1} is {2}."
                                   .format(runtime_version, runtime, lang['version']))
 
-    runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=(not is_linux))
-    matched_runtime = runtime_helper.resolve("dotnet" if not runtime else runtime,
-                                             runtime_version, functions_version, is_linux)
+        site_config_dict = SiteConfigPropertiesDictionary()
+        for prop, value in lang['site_config'].items():
+            setattr(site_config_dict, prop, value)
+        app_settings_dict = lang['app_settings']
 
-    site_config_dict = matched_runtime.site_config_dict
-    app_settings_dict = matched_runtime.app_settings_dict
+    else:
+        runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=(not is_linux))
+        matched_runtime = runtime_helper.resolve("dotnet" if not runtime else runtime,
+                                                 runtime_version, functions_version, is_linux)
+
+        site_config_dict = matched_runtime.site_config_dict
+        app_settings_dict = matched_runtime.app_settings_dict
 
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 

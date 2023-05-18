@@ -101,22 +101,57 @@ ACR_IMAGE_SUFFIX = ".azurecr.io"
 FLEX_RUNTIMES = [
     {
         'runtime': 'dotnet',
-        'version': '6'
+        'version': '6',
+        'site_config': {
+            'use32_bit_worker_process': True,
+            'linux_fx_version': 'DOTNET|6.0',
+        },
+        'app_settings': {
+            'FUNCTIONS_WORKER_RUNTIME': 'dotnet'
+        }
     },
     {
         'runtime': 'java',
-        'version': '17.0'
+        'version': '17.0',
+        'site_config': {
+            'use32_bit_worker_process': False,
+            'linux_fx_version': 'Java|17',
+        },
+        'app_settings': {
+            'FUNCTIONS_WORKER_RUNTIME': 'java'
+        }
     },
     {
         'runtime': 'node',
-        'version': '18'
+        'version': '18',
+        'site_config': {
+            'use32_bit_worker_process': False,
+            'linux_fx_version': 'Node|18'
+        },
+        'app_settings': {
+            'FUNCTIONS_WORKER_RUNTIME': 'node'
+        }
     },
     {
         'runtime': 'python',
-        'version': '3.10'
+        'version': '3.10',
+        'site_config': {
+            'use32_bit_worker_process': False,
+            'linux_fx_version': 'Python|3.10'
+        },
+        'app_settings': {
+            'FUNCTIONS_WORKER_RUNTIME': 'python'
+        }
     },
     {
         'runtime': 'powershell',
-        'version': '7.2'
+        'version': '7.2',
+        'site_config': {
+            'use32_bit_worker_process': False,
+            'linux_fx_version': 'PowerShell|7.2'
+        },
+        'app_settings': {
+            'FUNCTIONS_WORKER_RUNTIME': 'powershell'
+        }
     }
 ]
