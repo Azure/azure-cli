@@ -160,7 +160,7 @@ Release History
 
 **Storage**
 
-* `az storage account blob-service-properties cors-rule`: New command group to manage blob cors rules (#26447)
+* `az storage account blob-service-properties cors-rule`: Add new command group to manage blob cors rules (#26447)
 
 2.48.1
 ++++++
