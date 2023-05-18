@@ -924,13 +924,6 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
         result = LongRunningOperation(cmd.cli_ctx)(
             client.begin_create_or_update(resource_group_name, name, instance))
 
-        if enable_monitoring:
-            cloud_name = cmd.cli_ctx.cloud.name
-            if enable_msi_auth_for_monitoring and (cloud_name.lower() == 'ussec' or cloud_name.lower() == 'usnat'):
-                if instance.identity is not None and instance.identity.type is not None and instance.identity.type == "userassigned":
-                    logger.warning("--enable_msi_auth_for_monitoring is not supported in %s cloud and continuing monitoring enablement without this flag.", cloud_name)
-                    enable_msi_auth_for_monitoring = False
-
         if ingress_appgw_addon_enabled:
             add_ingress_appgw_addon_role_assignment(result, cmd)
 
@@ -1009,9 +1002,16 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                     workspace_resource_id = '/' + workspace_resource_id
                 if workspace_resource_id.endswith('/'):
                     workspace_resource_id = workspace_resource_id.rstrip('/')
+
+                cloud_name = cmd.cli_ctx.cloud.name
+                if enable_msi_auth_for_monitoring and (cloud_name.lower() == 'ussec' or cloud_name.lower() == 'usnat'):
+                    if instance.identity is not None and instance.identity.type is not None and instance.identity.type == "userassigned":
+                        logger.warning("--enable_msi_auth_for_monitoring is not supported in %s cloud and continuing monitoring enablement without this flag.", cloud_name)
+                        enable_msi_auth_for_monitoring = False
+
                 addon_profile.config = {
                     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id}
-                addon_profile.config[CONST_MONITORING_USING_AAD_MSI_AUTH] = enable_msi_auth_for_monitoring
+                addon_profile.config[CONST_MONITORING_USING_AAD_MSI_AUTH] = "true" if enable_msi_auth_for_monitoring else "false"
             elif addon == (CONST_VIRTUAL_NODE_ADDON_NAME + os_type):
                 if addon_profile.enabled:
                     raise CLIError('The virtual-node addon is already enabled for this managed cluster.\n'
