@@ -82,11 +82,11 @@ def load_arguments_sb(self, _):
 
     with self.argument_context('servicebus queue update') as c:
         c.argument('enable_partitioning', arg_type=get_three_state_flag(),
-                   help='A boolean value that indicates whether the queue is to be partitioned across multiple message brokers.', deprecate_info=c.deprecate(hide=True, expiration='2.49.0'))
-        c.argument('requires_session', options_list=['--enable-session'], arg_type=get_three_state_flag(), help='A boolean value indicating whether the queue supports the concept of sessions.', deprecate_info=c.deprecate(hide=True, expiration='2.49.0'))
+                   help='A boolean value that indicates whether the queue is to be partitioned across multiple message brokers.', deprecate_info=c.deprecate(hide=True))
+        c.argument('requires_session', options_list=['--enable-session'], arg_type=get_three_state_flag(), help='A boolean value indicating whether the queue supports the concept of sessions.', deprecate_info=c.deprecate(hide=True))
         c.argument('requires_duplicate_detection', options_list=['--enable-duplicate-detection'],
                    arg_type=get_three_state_flag(),
-                   help='A boolean value indicating if this queue requires duplicate detection.', deprecate_info=c.deprecate(hide=True, expiration='2.49.0'))
+                   help='A boolean value indicating if this queue requires duplicate detection.', deprecate_info=c.deprecate(hide=True))
 
     with self.argument_context('servicebus queue list') as c:
         c.argument('namespace_name', id_part=None, options_list=['--namespace-name'], help='Name of Namespace')
