@@ -38,7 +38,7 @@ class BaseCommandOperation:
         """ Callback function of CLICommand description_loader """
         raise NotImplementedError()
 
-    def get_op_handler(self, op_path, is_replace_version=True):
+    def get_op_handler(self, op_path, ignore_api_version_folder=False):
         """ Import and load the operation handler by path """
         # Patch the unversioned sdk path to include the appropriate API version for the
         # resource type in question.
@@ -48,11 +48,12 @@ class BaseCommandOperation:
         from azure.cli.core.profiles import AZURE_API_PROFILES
         from azure.cli.core.profiles._shared import get_versioned_sdk_path
 
-        for rt in AZURE_API_PROFILES[self.cli_ctx.cloud.profile]:
-            if op_path.startswith(rt.import_prefix + '.'):
-                op_path = op_path.replace(rt.import_prefix,
-                                          get_versioned_sdk_path(self.cli_ctx.cloud.profile, rt,
-                                                                 operation_group=self.operation_group))
+        if not ignore_api_version_folder:
+            for rt in AZURE_API_PROFILES[self.cli_ctx.cloud.profile]:
+                if op_path.startswith(rt.import_prefix + '.'):
+                    op_path = op_path.replace(rt.import_prefix,
+                                              get_versioned_sdk_path(self.cli_ctx.cloud.profile, rt,
+                                                                     operation_group=self.operation_group))
 
         try:
             mod_to_import, attr_path = op_path.split('#')
