@@ -22,14 +22,24 @@ class DummyCli(AzCli):
         from azure.cli.core._output import AzOutputProducer
 
         from knack.completion import ARGCOMPLETE_ENV_NAME
+        from knack.util import ensure_dir
 
         # random_config_dir only takes effects in playback mode
-        if random_config_dir and os.getenv(ENV_VAR_TEST_LIVE, '').lower() != 'true':
+        if random_config_dir:
             config_dir = os.path.join(GLOBAL_CONFIG_DIR, 'dummy_cli_config_dir', random_string())
-            self.use_random_config_dir = True
+
+            # In recording mode, copy login credentials from global config dir to the dummy config dir
+            if os.getenv(ENV_VAR_TEST_LIVE, '').lower() == 'true':
+                if os.path.exists(GLOBAL_CONFIG_DIR):
+                    ensure_dir(config_dir)
+                    import shutil
+                    for file in ['azureProfile.json', 'msal_token_cache.bin', 'clouds.config']:
+                        try:
+                            shutil.copy(os.path.join(GLOBAL_CONFIG_DIR, file), config_dir)
+                        except FileNotFoundError:
+                            pass
         else:
             config_dir = GLOBAL_CONFIG_DIR
-            self.use_random_config_dir = False
 
         super(DummyCli, self).__init__(
             cli_name='az',
