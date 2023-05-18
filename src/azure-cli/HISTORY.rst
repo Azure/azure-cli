@@ -80,7 +80,7 @@ Release History
 
 **IoT**
 
-*  `az iot hub create/update/delete`: Fix poller issues (#26296)
+* `az iot hub create/update/delete`: Fix poller issues (#26296)
 
 **Key Vault**
 
