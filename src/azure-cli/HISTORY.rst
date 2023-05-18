@@ -48,7 +48,7 @@ Release History
 
 **Backup**
 
-* Add support for HANA HSR workload (#26368)
+* `az backup`: Add support for HANA HSR workload (#26368)
 
 **Compute**
 
