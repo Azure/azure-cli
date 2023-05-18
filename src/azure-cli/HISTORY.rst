@@ -13,16 +13,16 @@ Release History
 **AKS**
 
 * [BREAKING CHANGE] `az aks create`: Specifying `--pod-cidr` with Azure CNI will return an error instead of logging a warning when not use `overlay` mode (#26237)
-* [BREAKING CHANGE] `aks create`: Change the default value of `--enable-msi-auth-for-monitoring` to true and add check for airgap clouds (#26356)
-* `az aks update`: Support update user assigned control plane identity for parameter ` --assign-identity` (#25973)
+* [BREAKING CHANGE] `az aks create`: Change the default value of `--enable-msi-auth-for-monitoring` to true and add check for airgap clouds (#26356)
+* `az aks update`: Support updating user assigned control plane identity for parameter `--assign-identity` (#25973)
 * `az aks install-cli`: Add validation for installation path and update help message for parameters `--install-location` and `--kubelogin-install-location` (#26357)
 * Fix #26353: `az aks install-cli`: Fix incorrect architecture detection on Darwin/arm64 (#26366)
 * `az aks create/update`: Add parameter `--enable-azure-monitor-metrics` to enable managed prometheus (Azure Monitor Metrics Addon) (#26201)
 * `az aks create/update`: Add parameter `--azure-monitor-workspace-resource-id` to store metrics for the managed prometheus addon (#26201)
 * `az aks create/update`: Add parameter `--grafana-resource-id` to link the Azure Monitor Workspace with a Grafana instance for viewing metrics and dashboards (#26201)
 * `az aks create/update`: Add parameter `--enable-windows-recording-rules` to enable windows recording rule groups on the Azure Monitor Workspace (by default they get created but are disabled) (#26201)
-* `az aks create/update`: Add parameter `--ksm-metric-labels-allow-list` to support the additional Kubernetes label keys that will be used in the resource' labels metric (#26201)
-* `az aks create/update`: Add parameter `--ksm-metric-annotations-allow-list` to support the Kubernetes annotations keys that will be used in the resource' labels metric (#26201)
+* `az aks create/update`: Add parameter `--ksm-metric-labels-allow-list` to support the additional Kubernetes label keys that will be used in the resource's labels metric (#26201)
+* `az aks create/update`: Add parameter `--ksm-metric-annotations-allow-list` to support the Kubernetes annotations keys that will be used in the resource's labels metric (#26201)
 * `az aks update`: Add parameter `--disable-azure-monitor-metrics` to disable the Azure Monitor Metrics addon (#26201)
 * `az aks create` and `az aks nodepool add`: Add warning message when specifying `--os-sku` to `Mariner` or `CBLMariner` (#26132)
 
@@ -75,12 +75,12 @@ Release History
 * [BREAKING CHANGE] `az eventhubs namespace network-rule add`: This command is removed and replaced by `az eventhubs namespace network-rule-set ip-rule/virtual-network-rule add` (#25792)
 * [BREAKING CHANGE] `az eventhubs namespace network-rule remove`: This command is removed and replaced by `az eventhubs namespace network-rule-set ip-rule/virtual-network-rule remove` (#25792)
 * [BREAKING CHANGE] `az eventhubs eventhub create/update`: Remove `--message-retention` parameter, it is replaced by `--retention-time-in-hours` (#26168)
-* [BREAKING CHANGE] `az eventhubs namespace application-group policy remove`: Renamed `--throttling-policy-config` to `--policy` and removed `metric-id` and `rate-limit-threshold` properties in it (#26032)
+* [BREAKING CHANGE] `az eventhubs namespace application-group policy remove`: Rename `--throttling-policy-config` to `--policy` and remove `metric-id` and `rate-limit-threshold` properties in it (#26032)
 * `az eventhubs eventhub create/update`: Add `--cleanup-policy`, `--retention-time-in-hours` and `--tombstone-retention-time-in-hours` to support `Retention-Description` feature (#26168)
 
 **IoT**
 
-* Fix poller issues for `az iot hub create`, `az iot hub update`, `az iot hub delete` (#26296)
+*  `az iot hub create/update/delete`: Fix poller issues (#26296)
 
 **Key Vault**
 
@@ -138,11 +138,11 @@ Release History
 **RDBMS**
 
 * [BREAKING CHANGE] `az mysql/postgres flexible-server create/update`: Deprecate `Enabled` for `--high-availability` argument (#26276)
-* `az mysql flexible-server restore/georestore/replica create`: Add public-access parameter for restore, replication and georestore (#26424)
+* `az mysql flexible-server restore/georestore/replica create`: Add `--public-access` parameter for restore, replication and georestore (#26424)
 
 **Service Bus**
 
-* [BREAKING CHANGE] `az servicebus georecovery-alias fail-over`: Removed `--parameters` argument (#26054)
+* [BREAKING CHANGE] `az servicebus georecovery-alias fail-over`: Remove `--parameters` argument (#26054)
 * [BREAKING CHANGE] `az servicebus namespace network-rule`: This command group is removed and replaced by `az servicebus namespace network-rule-set` (#25719)
 * [BREAKING CHANGE] `az servicebus namespace network-rule add`: This command is removed and replaced by `az servicebus namespace network-rule-set ip-rule/virtual-network-rule add` (#25719)
 * [BREAKING CHANGE] `az servicebus namespace network-rule remove`: This is removed and replaced by by `az servicebus namespace network-rule-set ip-rule/virtual-network-rule remove` (#25719)

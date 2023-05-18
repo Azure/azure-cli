@@ -5,7 +5,7 @@ Release History
 
 2.49.0
 ++++++
-* `extension`: Install extensions without prompt as default behavior when it's not in a tty (#26219)
+* Dynamically install extensions without prompt when not in a TTY (#26219)
 
 2.48.1
 ++++++
