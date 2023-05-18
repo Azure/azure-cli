@@ -97,7 +97,7 @@ Release History
 **Monitor**
 
 * `az monitor`: Add new subgroup `account` to support managing monitor workspace (#26358)
-* `az monitor log-analytics workspace table create/update`: `--total-retention-time` fix upper validation (#26384)
+* `az monitor log-analytics workspace table create/update`: Max `--total-retention-time` changed from 2555 to 2556 (#26384)
 
 **NetAppFiles**
 
