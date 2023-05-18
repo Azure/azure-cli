@@ -8,15 +8,15 @@
 # pylint: disable=too-many-locals
 
 from azure.cli.core.commands import CliCommandType
-from azure.cli.core.profiles import ResourceType
 
 
 def load_command_table(self, _):
-    from azure.cli.command_modules.eventhubs._client_factory import (schema_registry_mgmt_client_factory,
-                                                                     application_group_mgmt_client_factory)
-
     eh_namespace_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.eventhubs.operations.namespace_custom#{}',
+    )
+
+    eh_appgroup_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.eventhubs.operations.app_group_custom_file#{}'
     )
 
     eh_eventhub_custom = CliCommandType(
@@ -25,12 +25,6 @@ def load_command_table(self, _):
 
     eh_network_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.eventhubs.operations.network_rule_set#{}'
-    )
-
-    eh_application_group_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventhub.operations#ApplicationGroupOperations.{}',
-        client_factory=schema_registry_mgmt_client_factory,
-        resource_type=ResourceType.MGMT_EVENTHUB
     )
 
 # Namespace Region
@@ -81,13 +75,11 @@ def load_command_table(self, _):
         g.custom_command('remove', 'cli_remove_encryption')
 
 # ApplicationGroup Region
-    with self.command_group('eventhubs namespace application-group', eh_application_group_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=application_group_mgmt_client_factory) as g:
+    with self.command_group('eventhubs namespace application-group', custom_command_type=eh_appgroup_custom,
+                            is_preview=True) as g:
         g.custom_command('create', 'cli_appgroup_create')
-        g.custom_command('update', 'cli_appgroup_update')
-        g.show_command('show', 'get')
-        g.command('delete', 'delete')
-        g.command('list', 'list_by_namespace')
 
-    with self.command_group('eventhubs namespace application-group policy', eh_application_group_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=application_group_mgmt_client_factory) as g:
+    with self.command_group('eventhubs namespace application-group policy', custom_command_type=eh_appgroup_custom,
+                            is_preview=True) as g:
         g.custom_command('add', 'cli_add_appgroup_policy')
         g.custom_command('remove', 'cli_remove_appgroup_policy')
