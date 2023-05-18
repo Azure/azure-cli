@@ -13,8 +13,7 @@ from azure.cli.core.profiles import ResourceType
 
 
 def load_arguments_sb(self, _):
-    from azure.cli.command_modules.servicebus._completers import get_queue_command_completion_list, \
-        get_rules_command_completion_list, get_subscriptions_command_completion_list, get_topic_command_completion_list
+    from azure.cli.command_modules.servicebus._completers import get_rules_command_completion_list
     from azure.cli.command_modules.servicebus._validators import _validate_auto_delete_on_idle, \
         _validate_duplicate_detection_history_time_window, \
         _validate_default_message_time_to_live, \
