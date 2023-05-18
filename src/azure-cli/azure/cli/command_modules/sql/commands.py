@@ -424,7 +424,7 @@ def load_command_table(self, _):
     with self.command_group('sql db threat-policy',
                             database_threat_detection_policies_operations,
                             client_factory=get_sql_database_threat_detection_policies_operations,
-                            deprecate_info=self.deprecate(redirect='sql db advanced-threat-protection-setting', hide=True, expiration='2.49.0')) as g:
+                            deprecate_info=self.deprecate(redirect='sql db advanced-threat-protection-setting', hide=True)) as g:
 
         g.custom_show_command('show', 'db_threat_detection_policy_get')
         g.generic_update_command('update',
