@@ -230,6 +230,16 @@ class TestExtensions(TestExtensionsBase):
             self.assertFalse(is_compatible)
             self.assertEqual(min_ext_required, expected_min_ext_required)
 
+    @mock.patch('sys.stdin.isatty', return_value=True)
+    def test_ext_dynamic_install_config_tty(self, _):
+        from azure.cli.core.extension.dynamic_install import _get_extension_use_dynamic_install_config
+        self.assertEqual(_get_extension_use_dynamic_install_config(None), 'yes_prompt')
+
+    @mock.patch('sys.stdin.isatty', return_value=False)
+    def test_ext_dynamic_install_config_no_tty(self, _):
+        from azure.cli.core.extension.dynamic_install import _get_extension_use_dynamic_install_config
+        self.assertEqual(_get_extension_use_dynamic_install_config(None), 'yes_without_prompt')
+
 
 class TestWheelExtension(TestExtensionsBase):
 
