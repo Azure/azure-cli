@@ -406,7 +406,7 @@ def set_feedback(feedback):
 
 @decorators.suppress_all_exceptions()
 def set_cli_recommendation(api_version, feedback):
-    # This function returns the user's selection and feedback on the cli-recommendation results
+    # This function returns the user's selection and feedback on the cli-recommendation results in str format
     # Please refer to feedback_design.md of cli-recommendation for detailed information
     _session.cli_recommendation = json.dumps({"api_version": api_version, "feedback": feedback})
 
