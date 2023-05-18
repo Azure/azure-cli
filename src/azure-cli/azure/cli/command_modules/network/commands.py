@@ -377,14 +377,12 @@ def load_command_table(self, _):
     self.command_table["network lb address-pool delete"] = LBAddressPoolDelete(loader=self)
     self.command_table["network lb address-pool update"] = LBAddressPoolUpdate(loader=self)
 
-    from .operations.load_balancer import LBAddressPoolAddressAdd, LBAddressPoolAddressRemove, LBAddressPoolAddressUpdate
+    from .operations.load_balancer import LBAddressPoolAddressAdd, LBAddressPoolAddressUpdate
     self.command_table["network lb address-pool address add"] = LBAddressPoolAddressAdd(loader=self)
-    self.command_table["network lb address-pool address remove"] = LBAddressPoolAddressRemove(loader=self)
     self.command_table["network lb address-pool address update"] = LBAddressPoolAddressUpdate(loader=self)
 
-    from .operations.load_balancer import LBAddressPoolTunnelInterfaceAdd, LBAddressPoolTunnelInterfaceRemove, LBAddressPoolTunnelInterfaceUpdate
+    from .operations.load_balancer import LBAddressPoolTunnelInterfaceAdd, LBAddressPoolTunnelInterfaceUpdate
     self.command_table["network lb address-pool tunnel-interface add"] = LBAddressPoolTunnelInterfaceAdd(loader=self)
-    self.command_table["network lb address-pool tunnel-interface remove"] = LBAddressPoolTunnelInterfaceRemove(loader=self)
     self.command_table["network lb address-pool tunnel-interface update"] = LBAddressPoolTunnelInterfaceUpdate(loader=self)
 
     from .operations.load_balancer import LBProbeCreate, LBProbeUpdate
