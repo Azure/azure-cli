@@ -139,7 +139,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
     def tearDown(self):
         for processor in self._processors_to_reset:
             processor.reset()
-        if self.random_config_dir:
+        if self.cli_ctx.use_random_config_dir:
             from azure.cli.core.util import rmtree_with_retry
             rmtree_with_retry(self.cli_ctx.config.config_dir)
         super(ScenarioTest, self).tearDown()

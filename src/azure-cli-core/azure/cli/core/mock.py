@@ -26,8 +26,10 @@ class DummyCli(AzCli):
         # random_config_dir only takes effects in playback mode
         if random_config_dir and not os.getenv(ENV_VAR_TEST_LIVE):
             config_dir = os.path.join(GLOBAL_CONFIG_DIR, 'dummy_cli_config_dir', random_string())
+            self.use_random_config_dir = True
         else:
             config_dir = GLOBAL_CONFIG_DIR
+            self.use_random_config_dir = False
 
         super(DummyCli, self).__init__(
             cli_name='az',
