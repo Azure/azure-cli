@@ -24,7 +24,7 @@ class DummyCli(AzCli):
         from knack.completion import ARGCOMPLETE_ENV_NAME
 
         # random_config_dir only takes effects in playback mode
-        if random_config_dir and not os.getenv(ENV_VAR_TEST_LIVE, '').lower() == 'true':
+        if random_config_dir and os.getenv(ENV_VAR_TEST_LIVE, '').lower() != 'true':
             config_dir = os.path.join(GLOBAL_CONFIG_DIR, 'dummy_cli_config_dir', random_string())
             self.use_random_config_dir = True
         else:
