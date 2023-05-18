@@ -3641,6 +3641,19 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location):
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
 
+def create_flex_functionapp(cmd, resource_group_name, name, functionapp_def):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    client = web_client_factory(cmd.cli_ctx)
+    functionapp_json = functionapp_def.serialize()
+    body = json.dumps(functionapp_json)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    site_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'
+    site_url = site_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + site_url
+    response = send_raw_request(cmd.cli_ctx, "PUT", request_url, body=body)
+    return response.json()
+
+
 def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux, sku, number_of_workers=None,
                                         max_burst=None, location=None, tags=None, zone_redundant=False):
     SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
@@ -3827,7 +3840,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             raise ValidationError("Location is invalid. Use: az functionapp list-flexconsumption-locations")
         is_linux = True
         # Following the same plan name format as the backend
-        plan_name = "{}LinuxFlexPlan".format(flexconsumption_location)
+        plan_name = "{}FlexPlan".format(name)
         plan_info = create_flex_app_service_plan(
             cmd, resource_group_name, plan_name, flexconsumption_location)
         functionapp_def.server_farm_id = plan_info.id
@@ -4006,8 +4019,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                                   value=_get_extension_version_functionapp(functions_version)))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
 
-    # If plan is not consumption or elastic premium, we need to set always on
-    if consumption_plan_location is None and plan_info is not None and not is_plan_elastic_premium(cmd, plan_info):
+    # If plan is not flex, consumption or elastic premium, we need to set always on
+    if (flexconsumption_location is None and consumption_plan_location is None and plan_info is not None and
+            not is_plan_elastic_premium(cmd, plan_info)):
         site_config.always_on = True
 
     # If plan is elastic premium or consumption, we need these app settings
@@ -4030,6 +4044,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
     elif not disable_app_insights and matched_runtime.app_insights:
         create_app_insights = True
+
+    if flexconsumption_location:
+        return create_flex_functionapp(cmd, resource_group_name, name, functionapp_def)
 
     poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
