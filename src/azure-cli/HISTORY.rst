@@ -12,7 +12,7 @@ Release History
 
 **AKS**
 
-* [BREAKING CHANGE] `az aks create`: Specifying `--pod-cidr` with Azure CNI will return an error instead of logging a warning when not use `overlay` mode (#26237)
+* [BREAKING CHANGE] `az aks create`: Specify `--pod-cidr` with Azure CNI will return an error instead of logging a warning when not use `overlay` mode (#26237)
 * [BREAKING CHANGE] `az aks create`: Change the default value of `--enable-msi-auth-for-monitoring` to true and add check for airgap clouds (#26356)
 * `az aks update`: Support updating user assigned control plane identity for parameter `--assign-identity` (#25973)
 * `az aks install-cli`: Add validation for installation path and update help message for parameters `--install-location` and `--kubelogin-install-location` (#26357)
