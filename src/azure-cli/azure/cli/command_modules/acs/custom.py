@@ -64,7 +64,6 @@ from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.addonconfiguration import (
     add_ingress_appgw_addon_role_assignment,
-    add_monitoring_role_assignment,
     add_virtual_node_role_assignment,
     ensure_container_insights_for_monitoring,
     ensure_default_log_analytics_workspace_for_monitoring,
@@ -452,7 +451,7 @@ def aks_create(
     # addons
     enable_addons=None,
     workspace_resource_id=None,
-    enable_msi_auth_for_monitoring=False,
+    enable_msi_auth_for_monitoring=True,
     enable_syslog=False,
     data_collection_settings=None,
     aci_subnet_name=None,
@@ -869,7 +868,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       enable_secret_rotation=False,
                       rotation_poll_interval=None,
                       no_wait=False,
-                      enable_msi_auth_for_monitoring=False,
+                      enable_msi_auth_for_monitoring=True,
                       enable_syslog=False,
                       data_collection_settings=None,):
     instance = client.get(resource_group_name, name)
@@ -940,21 +939,6 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
         result = LongRunningOperation(cmd.cli_ctx)(
             client.begin_create_or_update(resource_group_name, name, instance))
 
-        # For monitoring addon, Metrics role assignement doesnt require in case of MSI auth
-        if enable_monitoring and not enable_msi_auth_for_monitoring:
-            cloud_name = cmd.cli_ctx.cloud.name
-            # mdm metrics supported only in Azure Public cloud so add the role assignment only in this cloud
-            if cloud_name.lower() == 'azurecloud':
-                from msrestazure.tools import resource_id
-                cluster_resource_id = resource_id(
-                    subscription=subscription_id,
-                    resource_group=resource_group_name,
-                    namespace='Microsoft.ContainerService', type='managedClusters',
-                    name=name
-                )
-                add_monitoring_role_assignment(
-                    result, cluster_resource_id, cmd)
-
         if ingress_appgw_addon_enabled:
             add_ingress_appgw_addon_role_assignment(result, cmd)
 
@@ -975,7 +959,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
 
 def _update_addons(cmd, instance, subscription_id, resource_group_name, name, addons, enable,
                    workspace_resource_id=None,
-                   enable_msi_auth_for_monitoring=False,
+                   enable_msi_auth_for_monitoring=True,
                    subnet_name=None,
                    appgw_name=None,
                    appgw_subnet_cidr=None,
@@ -1033,9 +1017,16 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                     workspace_resource_id = '/' + workspace_resource_id
                 if workspace_resource_id.endswith('/'):
                     workspace_resource_id = workspace_resource_id.rstrip('/')
+
+                cloud_name = cmd.cli_ctx.cloud.name
+                if enable_msi_auth_for_monitoring and (cloud_name.lower() == 'ussec' or cloud_name.lower() == 'usnat'):
+                    if instance.identity is not None and instance.identity.type is not None and instance.identity.type == "userassigned":
+                        logger.warning("--enable_msi_auth_for_monitoring is not supported in %s cloud and continuing monitoring enablement without this flag.", cloud_name)
+                        enable_msi_auth_for_monitoring = False
+
                 addon_profile.config = {
                     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id}
-                addon_profile.config[CONST_MONITORING_USING_AAD_MSI_AUTH] = enable_msi_auth_for_monitoring
+                addon_profile.config[CONST_MONITORING_USING_AAD_MSI_AUTH] = "true" if enable_msi_auth_for_monitoring else "false"
             elif addon == (CONST_VIRTUAL_NODE_ADDON_NAME + os_type):
                 if addon_profile.enabled:
                     raise CLIError('The virtual-node addon is already enabled for this managed cluster.\n'
