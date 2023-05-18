@@ -8,7 +8,7 @@
 from azure.cli.core.commands.parameters import tags_type, get_enum_type, resource_group_name_type, name_type,\
     get_location_type, get_three_state_flag, get_resource_name_completion_list
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from azure.cli.command_modules.servicebus.action import AlertAddEncryption
+from azure.cli.command_modules.servicebus.action import AlertAddEncryption, AlertAddIpRule, AlertAddVirtualNetwork
 from azure.cli.core.profiles import ResourceType
 
 
@@ -148,9 +148,7 @@ def load_arguments_sb(self, _):
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
         c.argument('topic_name', options_list=['--topic-name'], id_part=None, help='Name of Topic')
 
-    # Region Subscription Rules
-    # Region Rules Create
-
+# Region Subscription Rules
     with self.argument_context('servicebus topic subscription rule') as c:
         c.argument('rule_name', arg_type=name_type, id_part='child_name_3', completer=get_rules_command_completion_list, help='Name of Rule')
         c.argument('subscription_name', options_list=['--subscription-name'], id_part='child_name_2', help='Name of Subscription')
@@ -182,15 +180,7 @@ def load_arguments_sb(self, _):
         c.argument('topic_name', options_list=['--topic-name'], id_part=None, help='Name of Topic')
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
 
-    # Geo DR - Disaster Recovery Configs - Alias  : Region
-    with self.argument_context('servicebus georecovery-alias exists') as c:
-        c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='Name of Namespace')
-        c.argument('name', options_list=['--alias', '-a'], arg_type=name_type, help='Name of Geo-Disaster Recovery Configuration Alias to check availability')
-
-    with self.argument_context('servicebus georecovery-alias') as c:
-        c.argument('alias', options_list=['--alias', '-a'], id_part='child_name_1', help='Name of the Geo-Disaster Recovery Configuration Alias')
-
+# Geo DR - Disaster Recovery Configs - Alias  : Region
     with self.argument_context('servicebus georecovery-alias set') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='Name of Namespace')
@@ -198,51 +188,21 @@ def load_arguments_sb(self, _):
         c.argument('partner_namespace', required=True, options_list=['--partner-namespace'], validator=validate_partner_namespace, help='Name (if within the same resource group) or ARM Id of Primary/Secondary Service Bus  namespace name, which is part of GEO DR pairing')
         c.argument('alternate_name', help='Alternate Name (Post failover) for Primary Namespace, when Namespace name and Alias name are same')
 
-    for scope in ['servicebus georecovery-alias authorization-rule show', 'servicebus georecovery-alias authorization-rule keys list']:
-        with self.argument_context(scope)as c:
-            c.argument('authorization_rule_name', arg_type=name_type, id_part='child_name_2', help='name of Namespace Authorization Rule')
-
-    with self.argument_context('servicebus georecovery-alias list') as c:
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-
-    with self.argument_context('servicebus georecovery-alias fail-over') as c:
-        c.argument('parameters', options_list=['--parameters'], deprecate_info=c.deprecate(expiration='2.49.0'), help='Parameters required to create an Alias(Disaster Recovery configuration). Is either a FailoverProperties type or a IO type. Default value is None.')
-
-    with self.argument_context('servicebus georecovery-alias authorization-rule list') as c:
-        c.argument('alias', options_list=['--alias', '-a'], help='Name of Geo-Disaster Recovery Configuration Alias')
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-
-    with self.argument_context('servicebus georecovery-alias authorization-rule keys list') as c:
-        c.argument('alias', options_list=['--alias', '-a'], id_part=None, help='Name of Geo-Disaster Recovery Configuration Alias')
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
-        c.argument('authorization_rule_name', arg_type=name_type, help='Name of Namespace AuthorizationRule')
-
 # Region Namespace NetworkRuleSet
-    with self.argument_context('servicebus namespace network-rule') as c:
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
-
-    for scope in ['servicebus namespace network-rule add', 'servicebus namespace network-rule remove']:
+    with self.argument_context('servicebus namespace network-rule-set') as c:
+        c.argument('namespace_name', options_list=['--namespace-name', '--name', '-n'], id_part=None,
+                   help='Name of the Namespace')
+    for scope in ['servicebus namespace network-rule-set ip-rule add', 'servicebus namespace network-rule-set ip-rule remove']:
         with self.argument_context(scope) as c:
-            c.argument('subnet', arg_group='Virtual Network Rule', options_list=['--subnet'], help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
-            c.argument('ip_mask', arg_group='IP Address Rule', options_list=['--ip-address'], help='IPv4 address or CIDR range.', deprecate_info=c.deprecate(redirect='--ip-rule', expiration='2.49.0'))
+            c.argument('ip_rule', action=AlertAddIpRule, nargs='+', help='List VirtualNetwork Rules.')
+            c.argument('namespace_name', options_list=['--namespace-name', '--name', '-n'], id_part=None,
+                       help='Name of the Namespace')
+    for scope in ['servicebus namespace network-rule-set virtual-network-rule add', 'servicebus namespace network-rule-set virtual-network-rule remove']:
+        with self.argument_context(scope) as c:
+            c.argument('namespace_name', options_list=['--namespace-name', '--name', '-n'], id_part=None,
+                       help='Name of the Namespace')
+            c.argument('subnet', action=AlertAddVirtualNetwork, nargs='+', help='List VirtualNetwork Rules.')
             c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
-            c.extra('vnet_name', arg_group='Virtual Network Rule', options_list=['--vnet-name'], help='Name of the Virtual Network', deprecate_info=c.deprecate(expiration='2.49.0'))
-
-    with self.argument_context('servicebus namespace network-rule update', resource_type=ResourceType.MGMT_SERVICEBUS,
-                               min_api='2017-04-01') as c:
-        c.argument('public_network_access', options_list=['--public-network-access', '--public-network'],
-                   arg_type=get_enum_type(['Enabled', 'Disabled']),
-                   help='This determines if traffic is allowed over public network. By default it is enabled. If value is SecuredByPerimeter then Inbound and Outbound communication is controlled by the network security perimeter and profile\' access rules.')
-        c.argument('trusted_service_access_enabled', options_list=['--enable-trusted-service-access', '-t'],
-                   arg_type=get_three_state_flag(),
-                   help='A boolean value that indicates whether Trusted Service Access is enabled for Network Rule Set.')
-        c.argument('default_action', arg_group='networkrule', options_list=['--default-action'],
-                   arg_type=get_enum_type(['Allow', 'Deny']),
-                   help='Default Action for Network Rule Set.')
-
-    with self.argument_context('servicebus namespace network-rule add') as c:
-        c.argument('ignore_missing_vnet_service_endpoint', arg_group='Virtual Network Rule', options_list=['--ignore-missing-endpoint'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
-        c.argument('action', arg_group='IP Address Rule', options_list=['--action'], arg_type=get_enum_type(['Allow']), help='Action of the IP rule')
 
 # Private end point connection
     with self.argument_context('servicebus namespace private-endpoint-connection') as c:
