@@ -192,7 +192,8 @@ def _upgrade_on_windows():
     tmp_dir, msi_path = _download_from_url('https://aka.ms/installazurecliwindows')
     logger.warning("Installing MSI")
     subprocess.Popen(['msiexec.exe', '/i', msi_path])
-    logger.warning("Installation started. Please complete upgrade in the opened window.")
+    logger.warning("Installation started. Please complete upgrade in the opened window.\nTo update extensions, you "
+                   "need to run 'az upgrade' again after completing the upgrade.")
     sys.exit(0)
 
 
