@@ -137,7 +137,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
             logger.warning("Exit the container to pull latest image with 'docker pull mcr.microsoft.com/azure-cli' "
                            "or run 'pip install --upgrade azure-cli' in this container")
         elif installer == 'MSI':
-            exit_code = _upgrade_on_windows()
+            _upgrade_on_windows()
         else:
             logger.warning(UPGRADE_MSG)
     if exit_code:
@@ -188,7 +188,7 @@ def _upgrade_on_windows():
     import subprocess
     import sys
     logger.warning("Updating Azure CLI with MSI from https://aka.ms/installazurecliwindows")
-    tmp_dir, msi_path = _download_from_url('https://aka.ms/installazurecliwindows')
+    _, msi_path = _download_from_url('https://aka.ms/installazurecliwindows')
     logger.warning("Installing MSI")
     subprocess.Popen(['msiexec.exe', '/i', msi_path])
     logger.warning("Installation started. Please complete the upgrade in the opened window.\nTo update extensions, "
