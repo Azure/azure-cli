@@ -11,6 +11,7 @@
 # --------------------------------------------------------------------------
 
 from azure.cli.core import AzCommandsLoader
+from azure.cli.core.commands import AzCommandGroup
 from azure.cli.core.profiles import ResourceType
 
 import azure.cli.command_modules.vm._help  # pylint: disable=unused-import
@@ -27,7 +28,8 @@ class ComputeCommandsLoader(AzCommandsLoader):
         super(ComputeCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                     resource_type=ResourceType.MGMT_COMPUTE,
                                                     operation_group='virtual_machines',
-                                                    custom_command_type=compute_custom)
+                                                    custom_command_type=compute_custom,
+                                                    ) #command_group_cls=ComputeCommandGroup
 
     def load_command_table(self, args):
         from azure.cli.command_modules.vm.commands import load_command_table
@@ -63,6 +65,11 @@ class ComputeCommandsLoader(AzCommandsLoader):
             load_arguments_manual(self, command)
         except ImportError:
             pass
+#
+#
+# class ComputeCommandGroup(AzCommandGroup):
+#     def command(self, name, method_name=None, **kwargs):
+
 
 
 COMMAND_LOADER_CLS = ComputeCommandsLoader
