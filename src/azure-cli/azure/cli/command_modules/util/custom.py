@@ -186,22 +186,14 @@ def _upgrade_on_windows():
     Directly installing from URL may be blocked by policy: https://github.com/Azure/azure-cli/issues/19171
     This also gives the user a chance to manually install the MSI in case of msiexec.exe failure.
     """
+    import subprocess
+    import sys
     logger.warning("Updating Azure CLI with MSI from https://aka.ms/installazurecliwindows")
     tmp_dir, msi_path = _download_from_url('https://aka.ms/installazurecliwindows')
     logger.warning("Installing MSI")
-    import subprocess
     subprocess.Popen(['msiexec.exe', '/i', msi_path])
     logger.warning("Installation started. Please complete upgrade in the opened window.")
-    import sys
     sys.exit(0)
-
-    if exit_code:
-        logger.warning("Installation Failed. You may manually install %s", msi_path)
-    else:
-        from azure.cli.core.util import rmtree_with_retry
-        logger.warning("Succeeded. Deleting %s", tmp_dir)
-        rmtree_with_retry(tmp_dir)
-    return exit_code
 
 
 def _download_from_url(url):
