@@ -191,7 +191,7 @@ def _upgrade_on_windows():
     logger.warning("Installing MSI")
     import subprocess
     subprocess.Popen(['msiexec.exe', '/i', msi_path])
-    logger.warning("Installation started, please wait for a few minutes.")
+    logger.warning("Installation started. Please complete upgrade in the opened window.")
     import sys
     sys.exit(0)
 
