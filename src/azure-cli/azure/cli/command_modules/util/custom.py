@@ -53,7 +53,6 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
     from azure.cli.core.util import get_latest_from_github
     try:
         latest_version = get_latest_from_github()
-        local_version = '2.45.0'
         if latest_version and parse(latest_version) <= parse(local_version):
             logger.warning("You already have the latest azure-cli version: %s", local_version)
             update_cli = False
