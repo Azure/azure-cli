@@ -4,19 +4,17 @@
 # --------------------------------------------------------------------------------------------
 from dateutil import parser
 import re
-from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from knack.log import get_logger
 from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id, is_valid_resource_name
 from azure.cli.core.azclierror import ValidationError, ArgumentUsageError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
-from azure.cli.core.commands.validators import (get_default_location_from_resource_group, validate_tags)
 from azure.cli.core.util import parse_proxy_resource_id
 from azure.cli.core.profiles import ResourceType
 from azure.core.exceptions import HttpResponseError
 from ._client_factory import cf_mysql_flexible_servers
-from ._util import (get_mysql_versions, get_mysql_skus, get_mysql_storage_size, get_mysql_backup_retention, 
-                    get_mysql_tiers, get_mysql_list_skus_info, _is_resource_name)
+from ._util import get_mysql_versions, get_mysql_skus, get_mysql_storage_size, get_mysql_backup_retention, \
+    get_mysql_tiers, get_mysql_list_skus_info, _is_resource_name
 
 logger = get_logger(__name__)
 
@@ -38,22 +36,6 @@ def _get_resource_group_from_server_name(cli_ctx, server_name):
     return None
 
 
-def get_combined_validator(validators):
-    def _final_validator_impl(cmd, namespace):
-        # do additional creation validation
-        verbs = cmd.name.rsplit(' ', 2)
-        if verbs[1] == 'server' and verbs[2] == 'create':
-            password_validator(namespace)
-            get_default_location_from_resource_group(cmd, namespace)
-
-        validate_tags(namespace)
-
-        for validator in validators:
-            validator(namespace)
-
-    return _final_validator_impl
-
-
 def configuration_value_validator(ns):
     val = ns.value
     if val is None or not val.strip():
@@ -65,14 +47,6 @@ def tls_validator(ns):
     if ns.minimal_tls_version:
         if ns.ssl_enforcement is not None and ns.ssl_enforcement != 'Enabled':
             raise CLIError('Cannot specify TLS version when ssl_enforcement is explicitly Disabled')
-
-
-def password_validator(ns):
-    if not ns.administrator_login_password:
-        try:
-            ns.administrator_login_password = prompt_pass(msg='Admin Password: ')
-        except NoTTYException:
-            raise CLIError('Please specify password in non-interactive mode.')
 
 
 def retention_validator(ns):
@@ -128,12 +102,11 @@ def mysql_restore_tier_validator(target_tier, source_tier, sku_info):
 
 
 # pylint: disable=too-many-locals
-def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, backup_retention=None,
-                              server_name=None, zone=None, standby_availability_zone=None, high_availability=None,
-                              subnet=None, public_access=None, version=None, auto_grow=None, replication_role=None,
-                              geo_redundant_backup=None, byok_identity=None, backup_byok_identity=None, byok_key=None,
-                              backup_byok_key=None, disable_data_encryption=None, iops=None, auto_io_scaling=None,
-                              instance=None):
+def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, backup_retention=None, server_name=None,
+                              zone=None, standby_availability_zone=None, high_availability=None, backup_byok_key=None,
+                              public_access=None, version=None, auto_grow=None, replication_role=None, subnet=None,
+                              byok_identity=None, backup_byok_identity=None, byok_key=None, geo_redundant_backup=None,
+                              disable_data_encryption=None, iops=None, auto_io_scaling=None, instance=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
 
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location, server_name=instance.name if instance else None)
@@ -482,7 +455,7 @@ def validate_and_format_restore_point_in_time(restore_time):
                               "Please use ISO format e.g., 2021-10-22T00:08:23+00:00.")
 
 
-def validate_public_access_server(cmd, client, resource_group_name, server_name):
+def validate_public_access_server(cmd, resource_group_name, server_name):
     server_operations_client = cf_mysql_flexible_servers(cmd.cli_ctx, '_')
     server = server_operations_client.get(resource_group_name, server_name)
     if server.network.public_network_access == 'Disabled':

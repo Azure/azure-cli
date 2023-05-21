@@ -825,4 +825,3 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                                help='Name of the migration.')
 
     _flexible_server_params('postgres')
-    _flexible_server_params('mysql')

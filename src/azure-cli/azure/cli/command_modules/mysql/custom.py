@@ -18,7 +18,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.cli.core.local_context import ALL
 from azure.mgmt.rdbms import mysql_flexibleservers
-from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError
+from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, cf_mysql_flexible_db, \
     cf_mysql_check_resource_availability, cf_mysql_check_resource_availability_without_location, cf_mysql_flexible_config, \
     cf_mysql_flexible_servers, cf_mysql_flexible_replica, cf_mysql_flexible_adadmin, cf_mysql_flexible_private_dns_zone_suffix_operations
@@ -59,7 +59,7 @@ def server_list_custom_func(client, resource_group_name=None):
 
 
 def firewall_rule_delete_func(cmd, client, resource_group_name, server_name, firewall_rule_name, yes=None):
-    validate_public_access_server(cmd, client, resource_group_name, server_name)
+    validate_public_access_server(cmd, resource_group_name, server_name)
 
     result = None
     if not yes:
@@ -75,7 +75,7 @@ def firewall_rule_delete_func(cmd, client, resource_group_name, server_name, fir
 
 def firewall_rule_create_func(cmd, client, resource_group_name, server_name, firewall_rule_name=None, start_ip_address=None, end_ip_address=None):
 
-    validate_public_access_server(cmd, client, resource_group_name, server_name)
+    validate_public_access_server(cmd, resource_group_name, server_name)
 
     if end_ip_address is None and start_ip_address is not None:
         end_ip_address = start_ip_address
@@ -115,7 +115,7 @@ def firewall_rule_create_func(cmd, client, resource_group_name, server_name, fir
 
 
 def flexible_firewall_rule_custom_getter(cmd, client, resource_group_name, server_name, firewall_rule_name):
-    validate_public_access_server(cmd, client, resource_group_name, server_name)
+    validate_public_access_server(cmd, resource_group_name, server_name)
     return client.get(resource_group_name, server_name, firewall_rule_name)
 
 
@@ -136,12 +136,12 @@ def flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, e
 
 
 def firewall_rule_get_func(cmd, client, resource_group_name, server_name, firewall_rule_name):
-    validate_public_access_server(cmd, client, resource_group_name, server_name)
+    validate_public_access_server(cmd, resource_group_name, server_name)
     return client.get(resource_group_name, server_name, firewall_rule_name)
 
 
 def firewall_rule_list_func(cmd, client, resource_group_name, server_name):
-    validate_public_access_server(cmd, client, resource_group_name, server_name)
+    validate_public_access_server(cmd, resource_group_name, server_name)
     return client.list_by_server(resource_group_name, server_name)
 
 
@@ -176,7 +176,7 @@ def create_firewall_rule(db_context, cmd, resource_group_name, server_name, star
     return firewall.result().name
 
 
-def github_actions_setup(cmd, client, resource_group_name, server_name, database_name, administrator_login, 
+def github_actions_setup(cmd, client, resource_group_name, server_name, database_name, administrator_login,
                          administrator_login_password, sql_file_path, repository, action_name=None, branch=None, allow_push=None):
 
     server = client.get(resource_group_name, server_name)
@@ -303,7 +303,7 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
     )
 
 
-
+# pylint: disable=too-many-locals, too-many-statements, raise-missing-from
 # Region create without args
 def flexible_server_create(cmd, client,
                            resource_group_name=None, server_name=None,
@@ -319,8 +319,7 @@ def flexible_server_create(cmd, client,
                            byok_identity=None, backup_byok_identity=None, byok_key=None, backup_byok_key=None,
                            yes=False):
     # Generate missing parameters
-    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
-                                                                             server_name, 'mysql')
+    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
     db_context = DbContext(
         cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
         cf_availability=cf_mysql_check_resource_availability,
@@ -448,10 +447,9 @@ def flexible_server_create(cmd, client,
                           database_name, firewall_name, subnet_id)
 
 
-def flexible_server_restore(cmd, client,
-                            resource_group_name, server_name,
-                            source_server, restore_point_in_time=None, zone=None, no_wait=False,
-                            subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
+# pylint: disable=too-many-locals, too-many-statements, raise-missing-from
+def flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time=None, zone=None,
+                            no_wait=False, subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                             private_dns_zone_arguments=None, public_access=None, yes=False, sku_name=None, tier=None,
                             storage_gb=None, auto_grow=None, backup_retention=None, geo_redundant_backup=None):
     provider = 'Microsoft.DBforMySQL'
@@ -581,6 +579,7 @@ def flexible_server_restore(cmd, client,
     return sdk_no_wait(no_wait, client.begin_update, resource_group_name, server_name, update_parameter)
 
 
+# pylint: disable=too-many-locals, too-many-statements, raise-missing-from
 def flexible_server_georestore(cmd, client,
                                resource_group_name, server_name,
                                source_server, location, zone=None, no_wait=False,
@@ -708,7 +707,7 @@ def flexible_server_georestore(cmd, client,
     return sdk_no_wait(no_wait, client.begin_update, resource_group_name, server_name, update_parameter)
 
 
-# pylint: disable=too-many-branches
+# pylint: disable=too-many-branches, disable=too-many-locals, too-many-statements, raise-missing-from
 def flexible_server_update_custom_func(cmd, client, instance,
                                        sku_name=None,
                                        tier=None,

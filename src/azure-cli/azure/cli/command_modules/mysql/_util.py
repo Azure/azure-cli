@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-
+# pylint: disable=unused-argument, line-too-long, import-outside-toplevel, raise-missing-from
 import os
 import random
 import subprocess
@@ -15,22 +15,20 @@ import datetime as dt
 from datetime import datetime
 from knack.log import get_logger
 from knack.arguments import ignore_type
-from azure.cli.core.commands import AzArgumentContext
-from ._validators import get_combined_validator
-from knack.prompting import prompt_y_n, NoTTYException
+from knack.prompting import prompt_pass, prompt_y_n, NoTTYException
 from msrestazure.tools import parse_resource_id
 from msrestazure.azure_exceptions import CloudError
+from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError
-from azure.cli.core.azclierror import AuthenticationError
 from azure.core.exceptions import HttpResponseError
 from azure.core.paging import ItemPaged
-from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.cli.core.commands import LongRunningOperation, _is_poller
-from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
+from azure.cli.core.commands import LongRunningOperation, AzArgumentContext, _is_poller
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, AuthenticationError
 from azure.cli.command_modules.role.custom import create_service_principal_for_rbac
 from azure.mgmt.rdbms import mysql_flexibleservers, postgresql_flexibleservers
 from azure.mgmt.resource.resources.models import ResourceGroup
 from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities
+from azure.cli.core.commands.validators import get_default_location_from_resource_group, validate_tags
 
 
 logger = get_logger(__name__)
@@ -40,6 +38,7 @@ AZURE_CREDENTIALS = 'AZURE_CREDENTIALS'
 AZURE_POSTGRESQL_CONNECTION_STRING = 'AZURE_POSTGRESQL_CONNECTION_STRING'
 AZURE_MYSQL_CONNECTION_STRING = 'AZURE_MYSQL_CONNECTION_STRING'
 GITHUB_ACTION_PATH = '/.github/workflows/'
+
 
 # pylint: disable=too-few-public-methods, import-outside-toplevel
 class MysqlArgumentContext(AzArgumentContext):
@@ -65,6 +64,27 @@ class MysqlArgumentContext(AzArgumentContext):
                           validator=get_combined_validator(self.validators))
         else:
             self.argument(dest, options_list=dest_option, arg_type=ignore_type, validator=None)
+
+
+def get_combined_validator(validators):
+    def _final_validator_impl(cmd, namespace):
+        # do additional creation validation
+        verbs = cmd.name.rsplit(' ', 2)
+        if verbs[1] == 'server' and verbs[2] == 'create':
+            if not namespace.administrator_login_password:
+                try:
+                    namespace.administrator_login_password = prompt_pass(msg='Admin Password: ')
+                except NoTTYException:
+                    raise CLIError('Please specify password in non-interactive mode.')
+
+            get_default_location_from_resource_group(cmd, namespace)
+
+        validate_tags(namespace)
+
+        for validator in validators:
+            validator(namespace)
+
+    return _final_validator_impl
 
 
 def retryable_method(retries=3, interval_sec=5, exception_type=Exception, condition=None):
@@ -97,7 +117,7 @@ def create_random_resource_name(prefix='azure', length=15):
     return prefix + ''.join(digits)
 
 
-def generate_missing_parameters(cmd, location, resource_group_name, server_name, db_engine):
+def generate_missing_parameters(cmd, location, resource_group_name, server_name):
     # If resource group is there in local context, check for its existence.
     if resource_group_name is not None:
         logger.warning('Checking the existence of the resource group \'%s\'...', resource_group_name)
@@ -145,7 +165,7 @@ def parse_public_access_input(public_access):
         elif len(parsed_input) == 2:
             return parsed_input[0], parsed_input[1]
         else:
-            raise InvalidArgumentValueError('incorrect usage: --public-access. Acceptable values are \'all\', \'none\',\'<startIP>\' and \'<startIP>-<destinationIP>\' '
+            raise InvalidArgumentValueError('incorrect usage: --public-access. Acceptable values are \'all\',\'none\',\'<startIP>\' and \'<startIP>-<destinationIP>\' '
                                             'where startIP and destinationIP ranges from 0.0.0.0 to 255.255.255.255')
 
 
@@ -235,7 +255,8 @@ def _mysql_parse_list_skus(result):
         storage_info = tier_info.supported_storage_editions[0]
 
         tier_dict["backup_retention"] = (storage_info.min_backup_retention_days, storage_info.max_backup_retention_days)
-        tier_dict["storage_sizes"] = (int(storage_info.min_storage_size) // 1024, int(storage_info.max_storage_size) // 1024)
+        tier_dict["storage_sizes"] = (int(storage_info.min_storage_size) // 1024,
+                                      int(storage_info.max_storage_size) // 1024)
         iops_dict[tier_name] = sku_iops_dict
         tiers_dict[tier_name] = tier_dict
 
@@ -275,7 +296,8 @@ def _check_resource_group_existence(cmd, resource_group_name, resource_client=No
         exists = resource_client.resource_groups.check_existence(resource_group_name)
     except HttpResponseError as e:
         if e.status_code == 403:
-            raise CLIError("You don't have authorization to perform action 'Microsoft.Resources/subscriptions/resourceGroups/read' over scope '/subscriptions/{}/resourceGroups/{}'.".format(resource_client._config.subscription_id, resource_group_name))
+            raise CLIError("You don't have authorization to perform action 'Microsoft.Resources/subscriptions/resourceGroups/read' over scope '/subscriptions/{}/resourceGroups/{}'."
+                           .format(resource_client._config.subscription_id, resource_group_name))
 
     return exists
 
@@ -319,7 +341,8 @@ def check_existence(resource_client, value, resource_group, provider_namespace, 
     resource = None
 
     try:
-        resource = resource_client.resources.get(resource_group, provider_namespace, parent_path, resource_type, value, api_version)
+        resource = resource_client.resources.get(resource_group, provider_namespace, parent_path,
+                                                 resource_type, value, api_version)
     except HttpResponseError as e:
         if e.status_code == 403 and e.error and e.error.code == 'AuthorizationFailed':
             raise CLIError(e)
@@ -368,7 +391,8 @@ def register_credential_secrets(cmd, database_engine, server, repository):
     provider = "DBforMySQL"
     if database_engine == "postgresql":
         provider = "DBforPostgreSQL"
-    scope = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.{}/flexibleServers/{}".format(get_subscription_id(cmd.cli_ctx), resource_group, provider, server.name)
+    scope = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.{}/flexibleServers/{}".format(
+        get_subscription_id(cmd.cli_ctx), resource_group, provider, server.name)
 
     app = create_service_principal_for_rbac(cmd, display_name=server.name, role='contributor', scopes=[scope])
     app['clientId'], app['clientSecret'], app['tenantId'] = app.pop('appId'), app.pop('password'), app.pop('tenant')
@@ -389,17 +413,16 @@ def register_credential_secrets(cmd, database_engine, server, repository):
     os.remove(credential_file)
 
 
-def register_connection_secrets(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, repository, connection_string_name):
+def register_connection_secrets(server, database_name, administrator_login,
+                                administrator_login_password, repository, connection_string_name):
     logger.warning("Added secret %s to github repository", connection_string_name)
-    if database_engine == 'postgresql':
-        connection_string = "host={} port=5432 dbname={} user={} password={} sslmode=require".format(server.fully_qualified_domain_name, database_name, administrator_login, administrator_login_password)
-        run_subprocess('gh secret set {} --repo {} -b"{}"'.format(connection_string_name, repository, connection_string))
-    elif database_engine == 'mysql':
-        connection_string = "Server={}; Port=3306; Database={}; Uid={}; Pwd={}; SslMode=Preferred;".format(server.fully_qualified_domain_name, database_name, administrator_login, administrator_login_password)
-        run_subprocess('gh secret set {} --repo {} -b"{}"'.format(connection_string_name, repository, connection_string))
+    connection_string = "Server={}; Port=3306; Database={}; Uid={}; Pwd={}; SslMode=Preferred;".format(
+        server.fully_qualified_domain_name, database_name, administrator_login, administrator_login_password)
+    run_subprocess('gh secret set {} --repo {} -b"{}"'.format(connection_string_name, repository, connection_string))
 
 
-def fill_action_template(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, file_name, action_name, repository):
+def fill_action_template(cmd, database_engine, server, database_name, administrator_login,
+                         administrator_login_password, file_name, action_name, repository):
 
     action_dir = get_git_root_dir() + GITHUB_ACTION_PATH
     if not os.path.exists(action_dir):
@@ -407,7 +430,6 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
 
     process = run_subprocess_get_output("gh secret list --repo {}".format(repository))
     github_secrets = process.stdout.read().strip().decode('UTF-8')
-    # connection_string = AZURE_POSTGRESQL_CONNECTION_STRING if database_engine == 'postgresql' else AZURE_MYSQL_CONNECTION_STRING
 
     if AZURE_CREDENTIALS not in github_secrets:
         try:
@@ -422,9 +444,7 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
 
     connection_string_name = server.name.upper().replace("-", "_") + "_" + database_name.upper().replace("-", "_") + "_" + database_engine.upper() + "_CONNECTION_STRING"
     if connection_string_name not in github_secrets:
-        register_connection_secrets(cmd,
-                                    database_engine=database_engine,
-                                    server=server,
+        register_connection_secrets(server=server,
                                     database_name=database_name,
                                     administrator_login=administrator_login,
                                     administrator_login_password=administrator_login_password,
@@ -436,10 +456,7 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
     with open(current_location + "/templates/" + database_engine + "_githubaction_template.yaml", "r") as template_file:
         template = yaml.safe_load(template_file)
         template['jobs']['build']['steps'][2]['with']['server-name'] = server.fully_qualified_domain_name
-        if database_engine == 'postgresql':
-            template['jobs']['build']['steps'][2]['with']['plsql-file'] = file_name
-        else:
-            template['jobs']['build']['steps'][2]['with']['sql-file'] = file_name
+        template['jobs']['build']['steps'][2]['with']['sql-file'] = file_name
         template['jobs']['build']['steps'][2]['with']['connection-string'] = "${{ secrets." + connection_string_name + " }}"
         with open(action_dir + action_name + '.yml', 'w', encoding='utf8') as yml_file:
             yml_file.write("on: [workflow_dispatch]\n")

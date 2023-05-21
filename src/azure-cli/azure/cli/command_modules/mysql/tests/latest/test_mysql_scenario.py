@@ -589,6 +589,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, source_server))
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, target_server))
 
+
     def _test_flexible_server_byok_mgmt(self, database_engine, resource_group, vault_name, backup_vault_name=None):
         key_name = self.create_random_name('rdbmskey', 32)
         identity_name = self.create_random_name('identity', 32)
@@ -598,9 +599,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         replica_1_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         replica_2_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         backup_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        key_2_name = self.create_random_name('rdbmskey', 32)
-        identity_2_name = self.create_random_name('identity', 32)
-        server_2_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         tier = 'GeneralPurpose'
         sku_name = DEFAULT_GENERAL_PURPOSE_SKU
         location = DEFAULT_PAIRED_LOCATION
@@ -610,15 +608,20 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                        .format(key_name, vault_name)).get_output_in_json()
 
-        identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, identity_name, location)).get_output_in_json()
+        identity = self.cmd('identity create -g {} --name {} --location {}'
+                            .format(resource_group, identity_name, location)).get_output_in_json()
 
-        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'.format(resource_group, vault_name, identity['principalId']))
+        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
+                 .format(resource_group, vault_name, identity['principalId']))
 
-        backup_key = self.cmd('keyvault key create --name {} -p software --vault-name {}'.format(backup_key_name, backup_vault_name)).get_output_in_json()
+        backup_key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
+                              .format(backup_key_name, backup_vault_name)).get_output_in_json()
 
-        backup_identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, backup_identity_name, backup_location)).get_output_in_json()
+        backup_identity = self.cmd('identity create -g {} --name {} --location {}'
+                                   .format(resource_group, backup_identity_name, backup_location)).get_output_in_json()
 
-        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'.format(resource_group, backup_vault_name, backup_identity['principalId']))
+        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
+                 .format(resource_group, backup_vault_name, backup_identity['principalId']))
 
         def invalid_input_tests():
             # key or identity only
@@ -640,6 +643,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                 identity['id'],
             ), expect_failure=True)
 
+            # backup key or backup identity only
             self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --backup-key {} --geo-redundant-backup Enabled'.format(
                 database_engine,
                 resource_group,
@@ -683,7 +687,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                 key['key']['kid'],
                 identity['id'],
             ), expect_failure=True)
-            
 
         def main_tests(geo_redundant_backup):
             geo_redundant_backup_enabled = 'Enabled' if geo_redundant_backup else 'Disabled'
@@ -709,9 +712,10 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                      .format(database_engine, resource_group, server_name, identity['id']),
                      expect_failure=True)
 
-            self.cmd('{} flexible-server identity remove -g {} -s {} -n {} --yes'
-                        .format(database_engine, resource_group, server_name, backup_identity['id']),
-                        expect_failure=True)
+            if geo_redundant_backup:
+                self.cmd('{} flexible-server identity remove -g {} -s {} -n {} --yes'
+                         .format(database_engine, resource_group, server_name, backup_identity['id']),
+                         expect_failure=True)
 
             main_checks = [
                 JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
@@ -780,7 +784,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             self.cmd('{} flexible-server update -g {} -n {} --disable-data-encryption'
                     .format(database_engine, resource_group, replica_2_name),
                 expect_failure=True)
-            
+
             # restore backup
             current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
             earliest_restore_time = result['backup']['earliestRestoreDate']
@@ -792,7 +796,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                      restore_type,
                      resource_group,
                      backup_name,
-                     server_name), checks=main_checks).get_output_in_json()
+                     server_name
+            ), checks=main_checks).get_output_in_json()
 
             if geo_redundant_backup:
                 self.assertEqual(str(restore_result['location']).replace(' ', '').lower(), backup_location)
@@ -818,6 +823,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if backup_location != 'eastus2euap':
             main_tests(True)
         main_tests(False)
+
 
     def _test_flexible_server_gtid_reset(self, database_engine, resource_group):
         location = DEFAULT_LOCATION

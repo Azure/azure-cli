@@ -16,7 +16,7 @@ from ._util import get_current_time
 from argcomplete.completers import FilesCompleter
 
 
-def load_arguments(self, _):
+def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-locals
     server_name_arg_type = CLIArgumentType(
         metavar='NAME',
         options_list=['--name', '-n'],
@@ -47,8 +47,8 @@ def load_arguments(self, _):
     administrator_login_password_arg_type = CLIArgumentType(
         options_list=['--admin-password', '-p'],
         help='The password of the administrator. Minimum 8 characters and maximum 128 characters. '
-                'Password must contain characters from three of the following categories: '
-                'English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',
+        'Password must contain characters from three of the following categories: '
+        'English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.',
         arg_group='Authentication'
     )
 
@@ -93,8 +93,8 @@ def load_arguments(self, _):
         type=int,
         options_list=['--iops'],
         help='Number of IOPS to be allocated for this server. You will get certain amount of free IOPS based '
-                'on compute and storage provisioned. The default value for IOPS is free IOPS. '
-                'To learn more about IOPS based on compute and storage, refer to IOPS in Azure Database for MySQL Flexible Server'
+        'on compute and storage provisioned. The default value for IOPS is free IOPS. '
+        'To learn more about IOPS based on compute and storage, refer to IOPS in Azure Database for MySQL Flexible Server'
     )
 
     auto_grow_arg_type = CLIArgumentType(
@@ -118,24 +118,24 @@ def load_arguments(self, _):
     vnet_arg_type = CLIArgumentType(
         options_list=['--vnet'],
         help='Name or ID of a new or existing virtual network. '
-                'If you want to use a vnet from different resource group or subscription, '
-                'please provide a resource ID. The name must be between 2 to 64 characters. '
-                'The name must begin with a letter or number, end with a letter, number or underscore, '
-                'and may contain only letters, numbers, underscores, periods, or hyphens.'
+             'If you want to use a vnet from different resource group or subscription, '
+             'please provide a resource ID. The name must be between 2 to 64 characters. '
+             'The name must begin with a letter or number, end with a letter, number or underscore, '
+             'and may contain only letters, numbers, underscores, periods, or hyphens.'
     )
 
     vnet_address_prefix_arg_type = CLIArgumentType(
         options_list=['--address-prefixes'],
         help='The IP address prefix to use when creating a new virtual network in CIDR format. '
-                'Default value is 10.0.0.0/16.'
+             'Default value is 10.0.0.0/16.'
     )
 
     subnet_arg_type = CLIArgumentType(
         options_list=['--subnet'],
         help='Name or resource ID of a new or existing subnet. '
-                'If you want to use a subnet from different resource group or subscription, please provide resource ID instead of name. '
-                'Please note that the subnet will be delegated to flexibleServers. '
-                'After delegation, this subnet cannot be used for any other type of Azure resources.'
+             'If you want to use a subnet from different resource group or subscription, please provide resource ID instead of name. '
+             'Please note that the subnet will be delegated to flexibleServers. '
+             'After delegation, this subnet cannot be used for any other type of Azure resources.'
     )
 
     subnet_address_prefix_arg_type = CLIArgumentType(
@@ -157,9 +157,9 @@ def load_arguments(self, _):
     public_access_create_arg_type = CLIArgumentType(
         options_list=['--public-access'],
         help='Determines the public access. Enter single or range of IP addresses to be included in the allowed list of IPs. '
-                'IP address ranges must be dash-separated and not contain any spaces. '
-                'Specifying 0.0.0.0 allows public access from any resources deployed within Azure to access your server. '
-                'Setting it to "None" sets the server in public access mode but does not create a firewall rule. ',
+             'IP address ranges must be dash-separated and not contain any spaces. '
+             'Specifying 0.0.0.0 allows public access from any resources deployed within Azure to access your server. '
+             'Setting it to "None" sets the server in public access mode but does not create a firewall rule. ',
         validator=public_access_validator
     )
 
@@ -183,17 +183,17 @@ def load_arguments(self, _):
     private_dns_zone_arguments_arg_type = CLIArgumentType(
         options_list=['--private-dns-zone'],
         help='This parameter only applies for a server with private access. '
-                'The name or id of new or existing private dns zone. '
-                'You can use the private dns zone from same resource group, different resource group, or different subscription. '
-                'If you want to use a zone from different resource group or subscription, please provide resource Id. '
-                'CLI creates a new private dns zone within the same resource group as virtual network if not provided by users.'
+             'The name or id of new or existing private dns zone. '
+             'You can use the private dns zone from same resource group, different resource group, or different subscription. '
+             'If you want to use a zone from different resource group or subscription, please provide resource Id. '
+             'CLI creates a new private dns zone within the same resource group as virtual network if not provided by users.'
     )
 
     restore_point_in_time_arg_type = CLIArgumentType(
         options_list=['--restore-time'],
         default=get_current_time(),
         help='The point in time in UTC to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+00:00'
-                'The default value is set to current time.'
+             'The default value is set to current time.'
     )
 
     source_server_arg_type = CLIArgumentType(
@@ -245,7 +245,7 @@ def load_arguments(self, _):
     gtid_set_arg_type = CLIArgumentType(
         options_list=['--gtid-set'],
         help='A GTID set is a set comprising one or more single GTIDs or ranges of GTIDs. '
-                'A GTID is represented as a pair of coordinates, separated by a colon character (:), as shown: source_id:transaction_id'
+             'A GTID is represented as a pair of coordinates, separated by a colon character (:), as shown: source_id:transaction_id'
     )
 
     with self.argument_context('mysql flexible-server') as c:
@@ -325,7 +325,7 @@ def load_arguments(self, _):
     with self.argument_context('mysql flexible-server update') as c:
         c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
         c.argument('maintenance_window', options_list=['--maintenance-window'], validator=maintenance_window_validator,
-                    help='Period of time (UTC) designated for maintenance. Examples: "Sun:23:30" to schedule on Sunday, 11:30pm UTC. To set back to default pass in "Disabled".')
+                   help='Period of time (UTC) designated for maintenance. Examples: "Sun:23:30" to schedule on Sunday, 11:30pm UTC. To set back to default pass in "Disabled".')
         c.argument('tags', tags_type)
         c.argument('tier', arg_type=tier_arg_type)
         c.argument('sku_name', arg_type=sku_name_arg_type)
@@ -387,11 +387,11 @@ def load_arguments(self, _):
         argument_context_string = 'mysql flexible-server firewall-rule {}'.format(scope)
         with self.argument_context(argument_context_string) as c:
             c.argument('firewall_rule_name', id_part='child_name_1', options_list=['--rule-name', '-r'], validator=firewall_rule_name_validator,
-                        help='The name of the firewall rule. If name is omitted, default name will be chosen for firewall name. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the name of the firewall rule must be at least 3 characters and no more than 128 characters in length. ')
+                       help='The name of the firewall rule. If name is omitted, default name will be chosen for firewall name. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the name of the firewall rule must be at least 3 characters and no more than 128 characters in length. ')
             c.argument('end_ip_address', options_list=['--end-ip-address'], validator=ip_address_validator,
-                        help='The end IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
+                       help='The end IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
             c.argument('start_ip_address', options_list=['--start-ip-address'], validator=ip_address_validator,
-                        help='The start IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
+                       help='The start IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
 
     with self.argument_context('mysql flexible-server firewall-rule delete') as c:
         c.argument('yes', arg_type=yes_arg_type)
@@ -508,36 +508,36 @@ def load_arguments(self, _):
         argument_context_string = 'mysql flexible-server migration {}'.format(scope)
         with self.argument_context(argument_context_string) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type,
-                        help='Resource Group Name of the migration target server.')
+                       help='Resource Group Name of the migration target server.')
             c.argument('server_name', id_part='name', options_list=['--name', '-n'], arg_type=server_name_arg_type,
-                        help='Migration target server name.')
+                       help='Migration target server name.')
             if scope == "create":
                 c.argument('properties', type=file_type, completer=FilesCompleter(), options_list=['--properties', '-b'],
-                            help='Request properties. Use double or no quotes to pass in filepath as argument.')
+                           help='Request properties. Use double or no quotes to pass in filepath as argument.')
                 c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
-                            help='Name of the migration.')
+                           help='Name of the migration.')
                 c.argument('migration_mode', arg_type=migration_id_arg_type, options_list=['--migration-mode'], required=False,
-                            help='Either offline or online(with CDC) migration', choices=['offline', 'online'], default='offline')
+                           help='Either offline or online(with CDC) migration', choices=['offline', 'online'], default='offline')
             elif scope == "show":
                 c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
-                            help='Name of the migration.')
+                           help='Name of the migration.')
             elif scope == "list":
                 c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
                 c.argument('migration_filter', options_list=['--filter'], required=False, choices=['Active', 'All'], default='Active',
-                            help='Indicate whether all the migrations or just the Active migrations are returned. Valid values are: Active and All.')
+                           help='Indicate whether all the migrations or just the Active migrations are returned. Valid values are: Active and All.')
             elif scope == "update":
                 c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
-                            help='Name of the migration.')
+                           help='Name of the migration.')
                 c.argument('setup_logical_replication', options_list=['--setup-replication'], action='store_true', required=False,
-                            help='Allow the migration workflow to setup logical replication on the source. Note that this command will restart the source server.')
+                           help='Allow the migration workflow to setup logical replication on the source. Note that this command will restart the source server.')
                 c.argument('db_names', nargs='+', options_list=['--db-names', '--dbs'], required=False,
-                            help='Space-separated list of DBs to migrate. Note that each additional DB affects the performance of the source server.')
+                           help='Space-separated list of DBs to migrate. Note that each additional DB affects the performance of the source server.')
                 c.argument('overwrite_dbs', options_list=['--overwrite-dbs'], action='store_true', required=False,
-                            help='Allow the migration workflow to overwrite the DB on the target.')
+                           help='Allow the migration workflow to overwrite the DB on the target.')
                 c.argument('cutover', options_list=['--cutover'], required=False, action='store_true',
-                            help='Cut-over the data migration for all the databases in the migration. After this is complete, subsequent updates to all databases will not be migrated to the target.')
+                           help='Cut-over the data migration for all the databases in the migration. After this is complete, subsequent updates to all databases will not be migrated to the target.')
                 c.argument('cancel', options_list=['--cancel'], required=False, action='store_true',
-                            help='Cancel the data migration for all the databases.')
+                           help='Cancel the data migration for all the databases.')
             elif scope == "check-name-availability":
                 c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
-                            help='Name of the migration.')
+                           help='Name of the migration.')
