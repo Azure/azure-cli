@@ -3637,18 +3637,23 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location):
         kind="functionapp",
         name=name
     )
-    poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
+    plan_def.enable_additional_properties_sending()
+    existing_properties = plan_def.serialize()["properties"]
+    plan_def.additional_properties["properties"] = existing_properties
+    plan_def.additional_properties["properties"]["sku"] = "FlexConsumption"
+    params = {}
+    params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'
+    poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def, api_version='2014-11-01-privatepreview', params=params)
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
 
 def create_flex_functionapp(cmd, resource_group_name, name, functionapp_def):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    client = web_client_factory(cmd.cli_ctx)
     functionapp_json = functionapp_def.serialize()
     body = json.dumps(functionapp_json)
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    site_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'
-    site_url = site_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
+    site_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?stamp={}&api-version={}'
+    site_url = site_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2016-09-01')
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + site_url
     response = send_raw_request(cmd.cli_ctx, "PUT", request_url, body=body)
     return response.json()
@@ -3912,7 +3917,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         site_config_dict = matched_runtime.site_config_dict
         app_settings_dict = matched_runtime.app_settings_dict
 
-    con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
+    con_string = "test"
 
     if environment is not None:
         site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
