@@ -39,7 +39,7 @@ body:
         Please paste here the error message you have received. 
         
         **⚠ ATTENTION:** Make sure to remove all sensitive information, such as username, password, credential, subscription ID, etc.
-      placeholder: >
+      placeholder: |
         The command failed with an unexpected error. 
         Here is the traceback: {The rest of the error message}
     validations:
@@ -67,14 +67,6 @@ body:
     validations:
       required: true
   - type: textarea
-    id: version
-    attributes:
-      label: azure cli version
-      description: Please provide the first line of `az --version`.
-      placeholder: azure-cli                         2.48.1
-    validations:
-      required: true
-  - type: textarea
     id: env
     attributes:
       label: Environment Summary
@@ -97,7 +89,7 @@ body:
 
         Python (Windows) 3.10.10 (tags/v3.10.10:aad5f6a, Feb  7 2023, 17:05:00) [MSC v.1929 32 bit (Intel)]
     validations:
-      required: false
+      required: true
   - type: textarea
     id: additional-context
     attributes:
