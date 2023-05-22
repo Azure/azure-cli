@@ -9,7 +9,7 @@ from azure.cli.command_modules.backup import custom_help
 import azure.cli.command_modules.backup.custom_common as common
 from azure.cli.command_modules.backup import custom_wl
 from azure.cli.command_modules.backup._client_factory import protection_policies_cf, backup_protected_items_cf, \
-    backup_protection_containers_cf, backup_protectable_items_cf, registered_identities_cf
+    backup_protection_containers_cf, backup_protectable_items_cf, registered_identities_cf, vaults_cf
 from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError, InvalidArgumentValueError, \
     MutuallyExclusiveArgumentError, ArgumentUsageError
 from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
@@ -522,7 +522,17 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
                          target_server_name=None, workload_type=None, backup_management_type="AzureWorkload",
                          from_full_rp_name=None, filepath=None, target_container_name=None, target_resource_group=None,
                          target_vault_name=None, target_subscription_id=None):
-    target_subscription = get_subscription_id(cmd.cli_ctx) if target_subscription_id is None else target_subscription_id
+    target_subscription = get_subscription_id(cmd.cli_ctx)
+    if target_subscription_id is not None:
+        vault_csr_state = custom.get_vault_csr_state(vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name))
+        if vault_csr_state is None or vault_csr_state == "Enabled":
+            target_subscription = target_subscription_id
+        else:
+            raise ArgumentUsageError(
+                """
+                Cross Subscription Restore is not allowed on this Vault. Please either enable CSR on the vault or
+                remove --target-subscription-id from the command.
+                """)
     target_resource_group = resource_group_name if target_resource_group is None else target_resource_group
     target_vault_name = vault_name if target_vault_name is None else target_vault_name
     target_container_name = container_name if target_container_name is None else target_container_name

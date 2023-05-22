@@ -102,6 +102,7 @@ def load_arguments(self, _):
         c.argument('public_network_access', arg_type=get_enum_type(['Enable', 'Disable']), help='Use this property to specify whether public network access for the vault should be enabled or disabled. It is enabled by default. For setting up private endpoints, it has to be disabled.')
         c.argument('azure_monitor_alerts_for_job_failures', options_list=['--job-failure-alerts'], arg_type=get_enum_type(['Enable', 'Disable']), help='Use this property to specify whether built-in Azure Monitor alerts should be received for every job failure.')
         c.argument('immutability_state', arg_type=get_enum_type(['Disabled', 'Locked', 'Unlocked']), help='Use this parameter to configure immutability settings for the vault. By default, immutability is "Disabled" for the vault. "Unlocked" means that immutability is enabled for the vault and can be reversed. "Locked" means that immutability is enabled for the vault and cannot be reversed.')
+        c.argument('cross_subscription_restore_state', arg_type=get_enum_type(['Enable', 'Disable', 'PermanentlyDisable']), help='Use this parameter to configure cross subscription restore settings for the vault. By default, the property is "Enabled" for the vault.')
 
     with self.argument_context('backup vault backup-properties set') as c:
         c.argument('backup_storage_redundancy', arg_type=get_enum_type(['GeoRedundant', 'LocallyRedundant', 'ZoneRedundant']), help='Set backup storage properties for a Recovery Services vault.')

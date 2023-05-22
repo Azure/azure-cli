@@ -93,17 +93,19 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('properties.publicNetworkAccess', 'Enabled'),
             self.check('properties.monitoringSettings.azureMonitorAlertSettings.alertsForAllJobFailures', 'Enabled'),
-            self.check('properties.monitoringSettings.classicAlertSettings.alertsForCriticalOperations', 'Enabled')
+            self.check('properties.monitoringSettings.classicAlertSettings.alertsForCriticalOperations', 'Enabled'),
+            self.check('properties.restoreSettings.crossSubscriptionRestoreSettings.crossSubscriptionRestoreState', 'Enabled')
         ])
 
         self.kwargs['vault4'] = self.create_random_name('clitest-vault', 50)
-        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --public-network-access Disable --immutability-state Unlocked', checks=[
+        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --public-network-access Disable --immutability-state Unlocked --cross-subscription-restore-state Disable', checks=[
             self.check('name', '{vault4}'),
             self.check('resourceGroup', '{rg}'),
             self.check('location', '{loc}'),
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('properties.publicNetworkAccess', 'Disabled'),
             self.check('properties.securitySettings.immutabilitySettings.state', 'Unlocked'),
+            self.check('properties.restoreSettings.crossSubscriptionRestoreSettings.crossSubscriptionRestoreState', 'Disabled')
         ])
 
         self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --public-network-access Enable', checks=[
@@ -178,8 +180,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # self.kwargs['policy_json']['properties']['retentionPolicy']['dailySchedule']['retentionDuration'] = {"count": 20, "durationType": "Days"}
 
         # Immutable vault testing.
-        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --immutability-state Disabled', checks=[
-            self.check('properties.securitySettings.immutabilitySettings.state', 'Disabled')
+        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --immutability-state Disabled --cross-subscription-restore-state Enable', checks=[
+            self.check('properties.securitySettings.immutabilitySettings.state', 'Disabled'),
+            self.check('properties.restoreSettings.crossSubscriptionRestoreSettings.crossSubscriptionRestoreState', 'Enabled')
         ])
 
         # self.cmd('backup policy set -g {rg} -v {vault4} --policy {policy_json}', checks=[
@@ -188,8 +191,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         # self.kwargs['policy_json']['properties']['retentionPolicy']['dailySchedule']['retentionDuration']['count'] = 10
 
-        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --immutability-state Unlocked', checks=[
-            self.check('properties.securitySettings.immutabilitySettings.state', 'Unlocked')
+        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc} --immutability-state Unlocked --cross-subscription-restore-state PermanentlyDisable', checks=[
+            self.check('properties.securitySettings.immutabilitySettings.state', 'Unlocked'),
+            self.check('properties.restoreSettings.crossSubscriptionRestoreSettings.crossSubscriptionRestoreState', 'PermanentlyDisabled')
         ])
 
         # self.cmd('backup policy set -g {rg} -v {vault4} --policy {policy_json}', expect_failure=True)
@@ -872,7 +876,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup job stop -g {rg} -v {vault} -n {job}')
 
-    @ResourceGroupPreparer(location="eastus2euap")
+    @ResourceGroupPreparer(location="centraluseuap")
     @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
