@@ -4041,18 +4041,19 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     create_app_insights = False
 
-    if app_insights_key is not None:
-        site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
-                                                      value=app_insights_key))
-    elif app_insights is not None:
-        instrumentation_key = get_app_insights_key(cmd.cli_ctx, resource_group_name, app_insights)
-        site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
-                                                      value=instrumentation_key))
-    elif disable_app_insights or not matched_runtime.app_insights:
-        # set up dashboard if no app insights
-        site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
-    elif not disable_app_insights and matched_runtime.app_insights:
-        create_app_insights = True
+    if flexconsumption_location is None:
+        if app_insights_key is not None:
+            site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
+                                                          value=app_insights_key))
+        elif app_insights is not None:
+            instrumentation_key = get_app_insights_key(cmd.cli_ctx, resource_group_name, app_insights)
+            site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
+                                                          value=instrumentation_key))
+        elif disable_app_insights or not matched_runtime.app_insights:
+            # set up dashboard if no app insights
+            site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
+        elif not disable_app_insights and matched_runtime.app_insights:
+            create_app_insights = True
 
     if flexconsumption_location:
         return create_flex_functionapp(cmd, resource_group_name, name, functionapp_def)
