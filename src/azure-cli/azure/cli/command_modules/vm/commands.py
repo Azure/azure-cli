@@ -468,7 +468,7 @@ def load_command_table(self, _):
         g.custom_command('delete-instances', 'delete_vmss_instances', supports_no_wait=True)
         g.custom_command('get-instance-view', 'get_vmss_instance_view', table_transformer='{ProvisioningState:statuses[0].displayStatus, PowerState:statuses[1].displayStatus}')
         g.custom_command('list', 'list_vmss', table_transformer=get_vmss_table_output_transformer(self))
-        g.command('list-instances', 'list', command_type=compute_vmss_vm_sdk) # , ignore_api_version_folder=True
+        g.command('list-instances', 'list', command_type=compute_vmss_vm_sdk)
         g.custom_command('list-instance-connection-info', 'list_vmss_instance_connection_info')
         g.custom_command('list-instance-public-ips', 'list_vmss_instance_public_ips')
         g.command('list-skus', 'list_skus')

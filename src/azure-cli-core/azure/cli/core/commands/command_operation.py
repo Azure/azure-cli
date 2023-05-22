@@ -49,14 +49,14 @@ class BaseCommandOperation:
         from azure.cli.core.profiles import AZURE_API_PROFILES
         from azure.cli.core.profiles._shared import get_versioned_sdk_path
 
-        # if not self.ignore_api_version_folder:
-        for rt in AZURE_API_PROFILES[self.cli_ctx.cloud.profile]:
-            if op_path.startswith(rt.import_prefix + '.'):
-                op_path = op_path.replace(rt.import_prefix,
-                                          get_versioned_sdk_path(self.cli_ctx.cloud.profile, rt,
-                                                                 operation_group=self.operation_group))
-        # else:
-        #     print("test")
+        if not self.ignore_api_version_folder:
+            for rt in AZURE_API_PROFILES[self.cli_ctx.cloud.profile]:
+                if op_path.startswith(rt.import_prefix + '.'):
+                    op_path = op_path.replace(rt.import_prefix,
+                                              get_versioned_sdk_path(self.cli_ctx.cloud.profile, rt,
+                                                                     operation_group=self.operation_group))
+        else:
+            print("test")
 
         try:
             mod_to_import, attr_path = op_path.split('#')
