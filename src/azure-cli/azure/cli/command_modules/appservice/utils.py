@@ -163,9 +163,9 @@ def _get_location_from_resource_group(cli_ctx, resource_group_name):
 
 def show_raw_functionapp(cmd, resource_group_name, name):
     client = web_client_factory(cmd.cli_ctx)
-    site_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'
+    site_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?stamp={}&api-version={}'
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    site_url = site_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
+    site_url = site_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2014-11-01-privatepreview')
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + site_url
     response = send_raw_request(cmd.cli_ctx, "GET", request_url)
     return response.json()
@@ -189,8 +189,8 @@ def _list_app(cli_ctx, resource_group_name=None):
 
 def _rename_server_farm_props(webapp):
     # Should be renamed in SDK in a future release
-    setattr(webapp, 'app_service_plan_id', webapp.server_farm_id)
-    del webapp.server_farm_id
+    webapp['properties']['appServerPlanId'] = webapp['properties']['serverFarmId']
+    del webapp['properties']['serverFarmId']
     return webapp
 
 

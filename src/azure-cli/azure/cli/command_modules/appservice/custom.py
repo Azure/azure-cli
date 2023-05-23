@@ -396,6 +396,57 @@ def parse_docker_image_name(deployment_container_image_name, environment=None):
     return "https://{}".format(hostname)
 
 
+def list_application_settings(cmd, resource_group_name, name):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    appsettings_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/config/appsettings/list?stamp={}&api-version={}'
+    appsettings_url = appsettings_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2014-11-01-privatepreview')
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + appsettings_url
+    app_settings = send_raw_request(cmd.cli_ctx, "POST", request_url).json()
+    return app_settings
+
+
+def update_application_settings(cmd, resource_group_name, name, app_settings):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    appsettings_update_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/config/appsettings?stamp={}&api-version={}'
+    appsettings_update_url = appsettings_update_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2014-11-01-privatepreview')
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + appsettings_update_url
+    body = json.dumps(app_settings)
+    result = send_raw_request(cmd.cli_ctx, "PUT", request_url, body=body).json()
+    return result
+
+
+def get_app(cmd, resource_group_name, name):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    site_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?stamp={}&api-version={}'
+    site_url = site_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2014-11-01-privatepreview')
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + site_url
+    response = send_raw_request(cmd.cli_ctx, "GET", request_url)
+    return response.json()
+
+
+def get_app_service_plan(cmd, resource_group_name, name):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    server_farm_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/serverfarms/{}?stamp={}&api-version={}'
+    server_farm_url = server_farm_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2014-11-01-privatepreview')
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + server_farm_url
+    app_service_plan = send_raw_request(cmd.cli_ctx, "GET", request_url).json()
+    return app_service_plan
+
+
+def get_configuration(cmd, resource_group_name, name):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    get_configuration_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/config/web?stamp={}&api-version={}'
+    get_configuration_url = get_configuration_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2014-11-01-privatepreview')
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + get_configuration_url
+    response = send_raw_request(cmd.cli_ctx, "GET", request_url)
+    return response.json()
+
+
 def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
     if not settings and not slot_settings:
         raise MutuallyExclusiveArgumentError('Usage Error: --settings |--slot-settings')
@@ -403,8 +454,8 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
     settings = settings or []
     slot_settings = slot_settings or []
 
-    app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
-                                           'list_application_settings', slot)
+    app_settings = list_application_settings(cmd, resource_group_name, name)
+
     result, slot_result = {}, {}
     # pylint: disable=too-many-nested-blocks
     for src, dest, setting_type in [(settings, result, "Settings"), (slot_settings, slot_result, "SlotSettings")]:
@@ -426,7 +477,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                 result.update(dest)
 
     for setting_name, value in result.items():
-        app_settings.properties[setting_name] = value
+        app_settings['properties'][setting_name] = value
     client = web_client_factory(cmd.cli_ctx)
 
 
@@ -435,9 +486,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
         update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client)
         result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     else:
-        result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
-                                             'update_application_settings',
-                                             app_settings, slot, client)
+        result = update_application_settings(cmd, resource_group_name, name, app_settings)
 
     app_settings_slot_cfg_names = []
     if slot_result:
@@ -452,7 +501,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
         app_settings_slot_cfg_names = slot_cfg_names.app_setting_names
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    return _build_app_settings_output(result.properties, app_settings_slot_cfg_names)
+    return _build_app_settings_output(result['properties'], app_settings_slot_cfg_names)
 
 
 # TODO: Update manual polling to use LongRunningOperation once backend API & new SDK supports polling
@@ -972,12 +1021,11 @@ def list_function_app(cmd, resource_group_name=None):
 
 
 def show_functionapp(cmd, resource_group_name, name, slot=None):
-    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    app = get_app(cmd, resource_group_name, name)
     if not app:
         raise ResourceNotFoundError("Unable to find resource'{}', in ResourceGroup '{}'.".format(name,
                                                                                                  resource_group_name))
-    app.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration',
-                                              slot)
+    app['properties']['siteConfig'] = get_configuration(cmd, resource_group_name, name)
     if not is_centauri_functionapp(cmd, resource_group_name, name):
         _rename_server_farm_props(app)
         _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
@@ -1360,7 +1408,7 @@ def _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot=None):
     profiles = list_publish_profiles(cmd, resource_group_name, name, slot)
     try:
         url = next(p['publishUrl'] for p in profiles if p['publishMethod'] == 'FTP')
-        setattr(webapp, 'ftpPublishingUrl', url)
+        webapp['properties']['ftpPublishingUrl'] = url
     except StopIteration:
         pass
     return webapp
@@ -2448,10 +2496,19 @@ def list_publishing_credentials(cmd, resource_group_name, name, slot=None):
     return content.result()
 
 
+def publish_xml(cmd, resource_group_name, name):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    get_configuration_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/publishxml?stamp={}&api-version={}'
+    get_configuration_url = get_configuration_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2014-11-01-privatepreview')
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + get_configuration_url
+    response = send_raw_request(cmd.cli_ctx, "POST", request_url, body=json.dumps({"format": "WebDeploy"}))
+    return response
+
+
 def list_publish_profiles(cmd, resource_group_name, name, slot=None, xml=False):
     import xmltodict
-    content = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
-                                      'list_publishing_profile_xml_with_secrets', slot, {"format": "WebDeploy"})
+    content = publish_xml(cmd, resource_group_name, name)
     full_xml = ''
     for f in content:
         full_xml += f.decode()
