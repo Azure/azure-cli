@@ -65,10 +65,13 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_MONITOR = ('azure.mgmt.monitor', 'MonitorManagementClient')
     MGMT_MSI = ('azure.mgmt.msi', 'ManagedServiceIdentityClient')
     DATA_KEYVAULT = ('azure.keyvault', 'KeyVaultClient')
+    DATA_KEYVAULT_CERTIFICATES = ('azure.keyvault.certificates', 'CertificateClient')
     DATA_KEYVAULT_KEYS = ('azure.keyvault.keys', 'KeyClient')
+    DATA_KEYVAULT_SECRETS = ('azure.keyvault.secrets', 'SecretClient')
     DATA_PRIVATE_KEYVAULT = ('azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1', 'KeyVaultClient')
     DATA_KEYVAULT_ADMINISTRATION_BACKUP = ('azure.keyvault.administration', 'KeyVaultBackupClient')
     DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL = ('azure.keyvault.administration', 'KeyVaultAccessControlClient')
+    DATA_KEYVAULT_ADMINISTRATION_SETTING = ('azure.keyvault.administration', 'KeyVaultSettingsClient')
     MGMT_EVENTHUB = ('azure.mgmt.eventhub', 'EventHubManagementClient')
     MGMT_SERVICEBUS = ('azure.mgmt.servicebus', 'ServiceBusManagementClient')
     MGMT_APPSERVICE = ('azure.mgmt.web', 'WebSiteManagementClient')
@@ -198,11 +201,14 @@ AZURE_API_PROFILES = {
         }),
         # The order does make things different.
         # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
+        ResourceType.DATA_KEYVAULT_CERTIFICATES: None,
         ResourceType.DATA_KEYVAULT_KEYS: None,
+        ResourceType.DATA_KEYVAULT_SECRETS: None,
+        ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING: None,
         ResourceType.DATA_KEYVAULT: '7.0',
         ResourceType.DATA_PRIVATE_KEYVAULT: '7.2',
-        ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.2-preview',
-        ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL: '7.2-preview',
+        ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.4',
+        ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL: '7.4',
         ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_STORAGE_BLOB: '2021-06-08',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2021-08-06',
@@ -252,7 +258,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2022-09-04',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2023-02-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2023-04-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
         }),
@@ -291,7 +297,9 @@ AZURE_API_PROFILES = {
         }),
         # The order does make things different.
         # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
+        ResourceType.DATA_KEYVAULT_CERTIFICATES: None,
         ResourceType.DATA_KEYVAULT_KEYS: None,
+        ResourceType.DATA_KEYVAULT_SECRETS: None,
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_STORAGE_BLOB: '2019-07-07',
@@ -336,7 +344,9 @@ AZURE_API_PROFILES = {
         }),
         # The order does make things different.
         # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
+        ResourceType.DATA_KEYVAULT_CERTIFICATES: None,
         ResourceType.DATA_KEYVAULT_KEYS: None,
+        ResourceType.DATA_KEYVAULT_SECRETS: None,
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2017-11-09',
         ResourceType.DATA_STORAGE_BLOB: '2017-11-09',
@@ -373,7 +383,9 @@ AZURE_API_PROFILES = {
         }),
         # The order does make things different.
         # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
+        ResourceType.DATA_KEYVAULT_CERTIFICATES: None,
         ResourceType.DATA_KEYVAULT_KEYS: None,
+        ResourceType.DATA_KEYVAULT_SECRETS: None,
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2017-04-17',
         ResourceType.DATA_STORAGE_BLOB: '2017-04-17',
@@ -402,7 +414,9 @@ AZURE_API_PROFILES = {
         }),
         # The order does make things different.
         # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
+        ResourceType.DATA_KEYVAULT_CERTIFICATES: None,
         ResourceType.DATA_KEYVAULT_KEYS: None,
+        ResourceType.DATA_KEYVAULT_SECRETS: None,
         ResourceType.DATA_KEYVAULT: '2016-10-01',
         ResourceType.DATA_STORAGE: '2015-04-05',
         ResourceType.DATA_STORAGE_BLOB: '2015-04-05',

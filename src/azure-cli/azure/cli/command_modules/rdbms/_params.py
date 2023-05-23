@@ -16,8 +16,7 @@ from azure.cli.core.commands.parameters import (
     get_three_state_flag)
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, \
     tls_validator, public_access_validator, maintenance_window_validator, ip_address_validator, \
-    retention_validator, firewall_rule_name_validator, validate_identity, validate_byok_identity, validate_identities, \
-    high_availability_validator
+    retention_validator, firewall_rule_name_validator, validate_identity, validate_byok_identity, validate_identities
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 
 from .randomname.generate import generate_username
@@ -384,10 +383,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         )
 
         high_availability_arg_type = CLIArgumentType(
-            arg_type=get_enum_type(['ZoneRedundant', 'SameZone', 'Disabled', 'Enabled']),
+            arg_type=get_enum_type(['ZoneRedundant', 'SameZone', 'Disabled']),
             options_list=['--high-availability'],
-            help='Enable (ZoneRedundant or SameZone) or disable high availability feature.',
-            validator=high_availability_validator
+            help='Enable (ZoneRedundant or SameZone) or disable high availability feature.'
         )
 
         mysql_version_upgrade_arg_type = CLIArgumentType(
@@ -705,6 +703,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('byok_key', arg_type=key_arg_type)
                 c.argument('byok_identity', arg_type=identity_arg_type)
                 c.argument('yes', arg_type=yes_arg_type)
+            if command_group == 'mysql':
+                c.argument('public_access', options_list=['--public-access'], arg_type=get_enum_type(['Enabled', 'Disabled']),
+                           help='Determines the public access. ')
 
         with self.argument_context('{} flexible-server replica stop-replication'.format(command_group)) as c:
             c.argument('server_name', arg_type=server_name_arg_type)

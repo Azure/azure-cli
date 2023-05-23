@@ -73,8 +73,6 @@ class WebappBasicE2ETest(ScenarioTest):
             JMESPathCheck('httpsOnly', 'True'),
             JMESPathCheck('publicNetworkAccess', 'Enabled')
         ])
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group,
-                                                              webapp_name, plan))  # test idempotency
         self.cmd('webapp list -g {}'.format(resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', webapp_name),
@@ -124,17 +122,9 @@ class WebappBasicE2ETest(ScenarioTest):
         result = self.cmd('webapp deployment list-publishing-credentials -g {} -n {}'.format(
             resource_group, webapp_name)).get_output_in_json()
         self.assertTrue('scm' in result['scmUri'])
-        # verify httpsOnly is false
-        self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp_name), checks=[
-            JMESPathCheck('httpsOnly', False),
-        ])
-
-        # verify creating an non node app using --runtime
-        self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "php|7.4"'.format(resource_group, webapp_name, plan))
 
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
-            JMESPathCheck('phpVersion', '7.4')
+            JMESPathCheck('phpVersion', '5.6')
         ])
 
     def test_webapp_runtimes(self):

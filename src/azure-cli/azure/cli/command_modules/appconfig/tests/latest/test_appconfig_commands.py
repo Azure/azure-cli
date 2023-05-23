@@ -2286,13 +2286,14 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
                          self.check('label', entry_label),
                          self.check('state', on_state)])
 
-        # Add new feature flag using --key only
-        feature_name_2 = "MyApp:GlobalFeature"
-        feature_key_2 = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature_name_2
+        feature_name_2 = "GlobalFeature"
+        feature_key_2 = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature_prefix + feature_name_2
         self.kwargs.update({
             'key': feature_key_2,
+            'feature': feature_name_2
         })
-        self.cmd('appconfig feature set -n {config_store_name} --key {key}  --label {label} -y',
+
+        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --key {key}  --label {label} -y',
                  checks=[self.check('locked', default_locked),
                          self.check('name', feature_name_2),
                          self.check('key', feature_key_2),
@@ -2324,7 +2325,16 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         with self.assertRaisesRegex(CLIError, "Please provide either `--key` or `--feature` value."):
             self.cmd('appconfig feature delete -n {config_store_name}')
 
+        # Invalid feature name
+        invalid_feature_name = "invalid:feature"
+        self.kwargs.update({
+            'feature': invalid_feature_name
+        })
 
+        with self.assertRaisesRegex(CLIError, "Feature name cannot contain the following characters: '%', ':'"):
+            self.cmd('appconfig feature set -n {config_store_name} --feature {feature}')
+
+  
 class AppConfigFeatureFilterScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
@@ -2635,7 +2645,7 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
         self.kwargs.update({
             'feature': 'Beta%'
         })
-        with self.assertRaisesRegex(CLIError, "Feature name cannot contain the '%' character."):
+        with self.assertRaisesRegex(CLIError, "Feature name cannot contain the following characters: '%', ':'."):
             self.cmd('appconfig feature set --connection-string {connection_string} --feature {feature} -y')
 
         self.kwargs.update({

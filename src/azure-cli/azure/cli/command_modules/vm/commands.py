@@ -306,6 +306,11 @@ def load_command_table(self, _):
         g.custom_command('remove', 'remove_template_output', supports_local_cache=True)
         g.custom_command('clear', 'clear_template_output', supports_local_cache=True)
 
+    with self.command_group('image builder output versioning', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
+        g.custom_command('set', 'set_template_output_versioning', supports_local_cache=True)
+        g.custom_command('remove', 'remove_template_output_versioning', supports_local_cache=True)
+        g.custom_show_command('show', 'show_template_output_versioning', supports_local_cache=True)
+
     with self.command_group('image builder validator', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('add', 'add_template_validator', supports_local_cache=True)
         g.custom_command('remove', 'remove_template_validator', supports_local_cache=True)

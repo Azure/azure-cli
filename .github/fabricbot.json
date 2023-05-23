@@ -1592,7 +1592,7 @@
               "App Configuration"
             ],
             "mentionees": [
-              "shenmuxiaosen",
+              "albertofori",
               "avanigupta"
             ]
           },
@@ -3342,7 +3342,7 @@
               "Serial Console"
             ],
             "mentionees": [
-              "CraigWiand"
+              "microsoft/azserialconsole"
             ]
           },
           {
@@ -3568,6 +3568,83 @@
                 {
                   "name": "titleContains",
                   "parameters": {
+                    "titlePattern": "[Aa]z network dns",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "[Aa]z network dns",
+                    "isRegex": true
+                  }
+                }
+              ]
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "isAction",
+                  "parameters": {
+                    "action": "opened"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Network - DNS"
+            }
+          },
+          {
+            "name": "addMilestone",
+            "parameters": {
+              "groupId": "",
+              "milestoneName": "Backlog"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Service Attention"
+            }
+          }
+        ],
+        "taskName": "[Network DNS] auto assign labels and users based on issue description."
+      },
+      "disabled": false
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
                     "titlePattern": "[Aa]z network",
                     "isRegex": true
                   }
@@ -3589,6 +3666,35 @@
                   "parameters": {
                     "action": "opened"
                   }
+                }
+              ]
+            },
+            {
+              "operator": "and",
+              "operands": [
+                {
+                  "operator": "not",
+                  "operands": [
+                    {
+                      "name": "titleContains",
+                      "parameters": {
+                        "isRegex": true,
+                        "titlePattern": "az network dns"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "operator": "not",
+                  "operands": [
+                    {
+                      "name": "bodyContains",
+                      "parameters": {
+                        "isRegex": true,
+                        "bodyPattern": "az network dns"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -4389,14 +4495,14 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "[Aa]z iot",
+                    "titlePattern": "\\b([Ii][Oo][Tt])\\b",
                     "isRegex": true
                   }
                 },
                 {
                   "name": "bodyContains",
                   "parameters": {
-                    "bodyPattern": "[Aa]z iot",
+                    "bodyPattern": "\\b([Ii][Oo][Tt])\\b",
                     "isRegex": true
                   }
                 }
@@ -5180,13 +5286,15 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "az container"
+                    "titlePattern": "az \\b(container)\\b",
+                    "isRegex": true
                   }
                 },
                 {
                   "name": "bodyContains",
                   "parameters": {
-                    "bodyPattern": "az container"
+                    "bodyPattern": "az \\b(container)\\b",
+                    "isRegex": true
                   }
                 }
               ]
@@ -5227,6 +5335,77 @@
             "name": "addLabel",
             "parameters": {
               "label": "CXP Attention"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "PullRequestResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isAction",
+              "parameters": {
+                "action": "opened"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "az \\b(container)\\b",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "az \\b(container)\\b",
+                    "isRegex": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "pull_request",
+        "eventNames": [
+          "pull_request",
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[container] Auto assign labels and reviewers based on PR title/description.",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "zhoxing-ms"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "yanzhudd"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "zhoxing-ms"
             }
           }
         ]
@@ -5325,6 +5504,12 @@
             "name": "addLabel",
             "parameters": {
               "label": "Functions"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+            "label": "CXP Attention"
             }
           }
         ]
@@ -5560,14 +5745,14 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "az ad",
+                    "titlePattern": "az \\b(ad)\\b",
                     "isRegex": true
                   }
                 },
                 {
                   "name": "bodyContains",
                   "parameters": {
-                    "bodyPattern": "az ad",
+                    "bodyPattern": "az \\b(ad)\\b",
                     "isRegex": true
                   }
                 },
@@ -5629,6 +5814,18 @@
             "name": "addMilestone",
             "parameters": {
               "milestoneName": "Backlog"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Azure CLI Team"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "question"
             }
           }
         ]
@@ -7025,6 +7222,13 @@
                     "titlePattern": "\\b([Ii][Oo][Tt])\\b",
                     "isRegex": true
                   }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "\\b([Ii][Oo][Tt])\\b",
+                    "isRegex": true
+                  }
                 }
               ]
             }
@@ -7053,7 +7257,7 @@
           {
             "name": "requestReviewer",
             "parameters": {
-              "reviewer": "wangzelin007"
+              "reviewer": "yanzhudd"
             }
           },
           {
@@ -7222,6 +7426,12 @@
             "name": "requestReviewer",
             "parameters": {
               "reviewer": "jsntcy"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "avanigupta"
             }
           },
           {
@@ -8943,14 +9153,14 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "az ad",
+                    "titlePattern": "az \\b(ad)\\b",
                     "isRegex": true
                   }
                 },
                 {
                   "name": "bodyContains",
                   "parameters": {
-                    "bodyPattern": "az ad",
+                    "bodyPattern": "az \\b(ad)\\b",
                     "isRegex": true
                   }
                 }
@@ -8982,12 +9192,6 @@
             "name": "addLabel",
             "parameters": {
               "label": "Auto-Assign"
-            }
-          },
-          {
-            "name": "requestReviewer",
-            "parameters": {
-              "reviewer": "wangzelin007"
             }
           },
           {
@@ -9324,7 +9528,7 @@
           {
             "name": "requestReviewer",
             "parameters": {
-              "reviewer": "wangzelin007"
+              "reviewer": "yanzhudd"
             }
           },
           {
@@ -12416,6 +12620,12 @@
             }
           },
           {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
+            }
+          },
+          {
             "name": "assignToUser",
             "parameters": {
               "user": "madsd"
@@ -12475,6 +12685,12 @@
             "name": "addLabel",
             "parameters": {
               "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
             }
           },
           {
@@ -12542,6 +12758,12 @@
             }
           },
           {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
+            }
+          },
+          {
             "name": "assignToUser",
             "parameters": {
               "user": "gsethdev"
@@ -12606,6 +12828,12 @@
             }
           },
           {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
+            }
+          },
+          {
             "name": "assignToUser",
             "parameters": {
               "user": "yutanglin16"
@@ -12665,6 +12893,12 @@
             "name": "addLabel",
             "parameters": {
               "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
             }
           },
           {
@@ -12732,6 +12966,12 @@
             }
           },
           {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
+            }
+          },
+          {
             "name": "assignToUser",
             "parameters": {
               "user": "seligj95"
@@ -12791,6 +13031,12 @@
             "name": "addLabel",
             "parameters": {
               "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
             }
           },
           {
@@ -12858,6 +13104,12 @@
             }
           },
           {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
+            }
+          },
+          {
             "name": "assignToUser",
             "parameters": {
               "user": "yutanglin16"
@@ -12922,6 +13174,12 @@
             }
           },
           {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
+            }
+          },
+          {
             "name": "assignToUser",
             "parameters": {
               "user": "madsd"
@@ -12983,6 +13241,12 @@
             "name": "addLabel",
             "parameters": {
               "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
             }
           },
           {

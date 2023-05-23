@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.48.1"
+VERSION = "2.49.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -58,8 +58,10 @@ DEPENDENCIES = [
     'azure-data-tables==12.4.0',
     'azure-datalake-store~=0.0.49',
     'azure-graphrbac~=0.60.0',
-    'azure-keyvault-administration==4.0.0b3',
+    'azure-keyvault-administration==4.3.0',
+    'azure-keyvault-certificates==4.7.0',
     'azure-keyvault-keys==4.8.0b2',
+    'azure-keyvault-secrets==4.7.0',
     'azure-keyvault~=1.1.0',
     'azure-loganalytics~=0.1.0',
     'azure-mgmt-advisor==9.0.0',
@@ -76,10 +78,10 @@ DEPENDENCIES = [
     'azure-mgmt-cognitiveservices~=13.3.0',
     'azure-mgmt-compute~=29.1.0',
     'azure-mgmt-consumption~=2.0',
-    'azure-mgmt-containerinstance==10.1.0b1',
+    'azure-mgmt-containerinstance==10.1.0',
     'azure-mgmt-containerregistry==10.1.0',
-    'azure-mgmt-containerservice~=22.0.0',
-    'azure-mgmt-cosmosdb==9.0.0',
+    'azure-mgmt-containerservice~=23.0.0',
+    'azure-mgmt-cosmosdb==9.2.0',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
@@ -90,7 +92,7 @@ DEPENDENCIES = [
     'azure-mgmt-eventhub~=10.1.0',
     'azure-mgmt-extendedlocation==1.0.0b2',
     'azure-mgmt-hdinsight~=9.0.0',
-    'azure-mgmt-imagebuilder~=1.1.0',
+    'azure-mgmt-imagebuilder~=1.2.0',
     'azure-mgmt-iotcentral~=10.0.0b1',
     'azure-mgmt-iothub==2.3.0',
     'azure-mgmt-iothubprovisioningservices==1.1.0',
@@ -104,11 +106,11 @@ DEPENDENCIES = [
     'azure-mgmt-media~=9.0',
     'azure-mgmt-monitor~=5.0.0',
     'azure-mgmt-msi~=7.0.0',
-    'azure-mgmt-netapp~=9.0.1',
+    'azure-mgmt-netapp~=10.0.0',
     'azure-mgmt-policyinsights~=1.1.0b2',
     'azure-mgmt-privatedns~=1.0.0',
-    'azure-mgmt-rdbms~=10.2.0b7',
-    'azure-mgmt-recoveryservicesbackup~=5.1.0',
+    'azure-mgmt-rdbms~=10.2.0b8',
+    'azure-mgmt-recoveryservicesbackup~=6.0.0',
     'azure-mgmt-recoveryservices~=2.2.0',
     'azure-mgmt-redhatopenshift~=1.2.0',
     'azure-mgmt-redis~=14.1.0',

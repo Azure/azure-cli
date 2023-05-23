@@ -70,7 +70,7 @@ def load_arguments(self, _):
              "use 'Windows_Client'. For more information see the Azure Windows VM online docs.",
         arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'RHEL_BYOS', 'SLES_BYOS', 'RHEL_BASE',
                                 'RHEL_SAPAPPS', 'RHEL_SAPHA', 'RHEL_EUS', 'RHEL_BASESAPAPPS', 'RHEL_BASESAPHA', 'SLES_STANDARD', 'SLES', 'SLES_SAP', 'SLES_HPC',
-                                'None', 'RHEL_ELS_6']))
+                                'None', 'RHEL_ELS_6', 'UBUNTU_PRO', 'UBUNTU']))
 
     # StorageAccountTypes renamed to DiskStorageAccountTypes in 2018_06_01 of azure-mgmt-compute
     DiskStorageAccountTypes = DiskStorageAccountTypes or self.get_models('StorageAccountTypes')
@@ -284,6 +284,8 @@ def load_arguments(self, _):
         c.argument('subnet', help='Name or ID of subnet to deploy the build virtual machine')
         c.argument('proxy_vm_size', help='Size of the virtual machine used to build, customize and capture images (Standard_D1_v2 for Gen1 images and Standard_D2ds_v4 for Gen2 images).')
         c.argument('build_vm_identities', nargs='+', help='Optional configuration of the virtual network to use to deploy the build virtual machine in. Omit if no specific virtual network needs to be used.')
+        c.argument('validator', nargs='+', min_api='2022-07-01',
+                   help='The type of validation you want to use on the Image. For example, "Shell" can be shell validation.')
 
         # Image Source Arguments
         c.argument('source', arg_type=ib_source_type)
@@ -323,8 +325,14 @@ def load_arguments(self, _):
         c.argument('gallery_replication_regions', arg_group="Shared Image Gallery", nargs='+', help=ib_sig_regions_help + ib_default_loc_help)
         c.argument('managed_image_location', arg_group="Managed Image", help=ib_img_location_help + ib_default_loc_help)
         c.argument('is_vhd', arg_group="VHD", help="The output is a VHD distributor.", action='store_true')
+        c.argument('vhd_uri', arg_group="VHD", help="Optional Azure Storage URI for the distributed VHD blob. Omit to use the default (empty string) in which case VHD would be published to the storage account in the staging resource group.")
+        c.argument('versioning', get_enum_type(['Latest', 'Source']), help="Describe how to generate new x.y.z version number for distribution.")
         c.argument('tags', arg_type=ib_artifact_tags_type)
         c.ignore('location')
+
+    with self.argument_context('image builder output versioning set') as c:
+        c.argument('scheme', get_enum_type(['Latest', 'Source']), help='Version numbering scheme to be used.')
+        c.argument('major', type=int, help='Major version for the generated version number. Determine what is "latest" based on versions with this value as the major version. -1 is equivalent to leaving it unset.')
 
     with self.argument_context('image builder customizer') as c:
         ib_win_restart_type = CLIArgumentType(arg_group="Windows Restart")

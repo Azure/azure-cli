@@ -1757,7 +1757,7 @@ class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instanc
 class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_secrets')
-    @KeyVaultPreparer(name_prefix='vmlinuxkv', name_len=20, key='vault', additional_params='--enabled-for-deployment --enabled-for-template-deployment')
+    @KeyVaultPreparer(name_prefix='vmlinuxkv', name_len=20, key='vault', additional_params='--enabled-for-deployment --enabled-for-template-deployment', skip_purge=True)
     def test_vm_create_linux_secrets(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -1790,7 +1790,7 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
         ])
 
     @ResourceGroupPreparer()
-    @KeyVaultPreparer(name_prefix='vmkeyvault', name_len=20, key='vault', additional_params='--enabled-for-deployment --enabled-for-template-deployment')
+    @KeyVaultPreparer(name_prefix='vmkeyvault', name_len=20, key='vault', additional_params='--enabled-for-deployment --enabled-for-template-deployment', skip_purge=True)
     def test_vm_create_windows_secrets(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -1826,7 +1826,7 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
 class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_linux_secrets')
-    @KeyVaultPreparer(name_prefix='vmsslinuxkv', name_len=20, key='vault', additional_params='--enabled-for-deployment --enabled-for-template-deployment')
+    @KeyVaultPreparer(name_prefix='vmsslinuxkv', name_len=20, key='vault', additional_params='--enabled-for-deployment --enabled-for-template-deployment', skip_purge=True)
     @AllowLargeResponse()
     def test_vmss_create_linux_secrets(self, resource_group):
         self.kwargs.update({
@@ -2433,7 +2433,7 @@ class VMCreateWithExistingNic(ScenarioTest):
 class VMSecretTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_secrets')
-    @KeyVaultPreparer(name_prefix='vmsecretkv', name_len=20, key='vault', additional_params='--enabled-for-disk-encryption --enabled-for-deployment')
+    @KeyVaultPreparer(name_prefix='vmsecretkv', name_len=20, key='vault', additional_params='--enabled-for-disk-encryption --enabled-for-deployment', skip_purge=True)
     def test_vm_secret_e2e_test(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': 'vm1',

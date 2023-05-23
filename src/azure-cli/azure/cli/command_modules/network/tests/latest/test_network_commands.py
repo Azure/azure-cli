@@ -183,13 +183,7 @@ class NetworkPrivateEndpoints(ScenarioTest):
         )
 
         # check ip configuration operations
-        self.cmd(
-            "network private-endpoint ip-config remove -n {ipconfig2} -g {rg} --endpoint-name {pe}",
-            checks=[
-                self.check("length(ipConfigurations)", 1),
-                self.check("ipConfigurations[0].name", self.kwargs["ipconfig1"]),
-            ]
-        )
+        self.cmd("network private-endpoint ip-config remove -n {ipconfig2} -g {rg} --endpoint-name {pe}")
         self.cmd(
             "network private-endpoint ip-config add -n {ipconfig2} -g {rg} --endpoint-name {pe} --group-id {group_id} --member-name blob2 --private-ip-address 10.0.0.6",
             checks=[
@@ -256,13 +250,7 @@ class NetworkPrivateEndpoints(ScenarioTest):
         )
 
         # check application security group operations
-        self.cmd(
-            "network private-endpoint asg remove -g {rg} --endpoint-name {pe} --asg-id {id2}",
-            checks=[
-                self.check("length(applicationSecurityGroups)", 1),
-                self.check("applicationSecurityGroups[0].id", self.kwargs["id1"]),
-            ]
-        )
+        self.cmd("network private-endpoint asg remove -g {rg} --endpoint-name {pe} --asg-id {id2}")
         self.cmd(
             "network private-endpoint asg add -g {rg} --endpoint-name {pe} --asg-id {id2}",
             checks=[
@@ -375,10 +363,7 @@ class NetworkPrivateEndpoints(ScenarioTest):
             self.check('length(@)', 1)
         ])
         self.cmd('network private-endpoint dns-zone-group remove --endpoint-name {pe} -g {rg} -n {private_dns_zone_group_name} '
-                 '--zone-name {private_zone_name2}',
-                 checks=[
-                     self.check('length(privateDnsZoneConfigs)', 1)
-                 ])
+                 '--zone-name {private_zone_name2}')
         self.cmd('network private-endpoint dns-zone-group show --endpoint-name {pe} -g {rg} -n {private_dns_zone_group_name}', checks=[
             self.check('length(privateDnsZoneConfigs)', 1)
         ])
@@ -1005,8 +990,7 @@ class NetworkAppGatewayTrustedClientCertScenarioTest(ScenarioTest):
         self.cmd('network application-gateway client-cert show -g {rg} --gateway-name {gw} --name {cname1}',
                  checks=[self.check('data', cert['data'])])
 
-        self.cmd('network application-gateway client-cert remove -g {rg} --gateway-name {gw} --name {cname1}',
-                 checks=[self.check('length(trustedClientCertificates)', 1)])
+        self.cmd('network application-gateway client-cert remove -g {rg} --gateway-name {gw} --name {cname1}')
 
 
 class NetworkAppGatewaySslProfileScenarioTest(ScenarioTest):
@@ -1056,8 +1040,7 @@ class NetworkAppGatewaySslProfileScenarioTest(ScenarioTest):
         self.cmd('network application-gateway ssl-profile list -g {rg} --gateway-name {gw}',
                  checks=[self.check('length(@)', 2)])
 
-        self.cmd('network application-gateway ssl-profile remove -g {rg} --gateway-name {gw} --name {name} ',
-                 checks=[self.check('length(sslProfiles)', 1)])
+        self.cmd('network application-gateway ssl-profile remove -g {rg} --gateway-name {gw} --name {name} ')
 
 
 class NetworkAppGatewayZoneScenario(ScenarioTest):
@@ -3471,7 +3454,7 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
 
         self.cmd('network cross-region-lb address-pool address add -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address2} --frontend-ip-address {regional_lb_frontend_ip_address2}', checks=self.check('name', self.kwargs['address_pool']))
 
-        self.cmd('network cross-region-lb address-pool address remove -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address2}', checks=self.check('name', self.kwargs['address_pool']))
+        self.cmd('network cross-region-lb address-pool address remove -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address2}')
 
         self.cmd('network cross-region-lb address-pool address list -g {rg} --lb-name {lb} --pool-name {address_pool}', checks=self.check('length(@)', 1))
 
@@ -3479,7 +3462,7 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 2))
         self.cmd('network cross-region-lb address-pool show -g {rg} --lb-name {lb} -n {address_pool}',
                  checks=self.check('name', self.kwargs['address_pool']))
-        self.cmd('network cross-region-lb address-pool address remove -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address1}', checks=self.check('name', self.kwargs['address_pool']))
+        self.cmd('network cross-region-lb address-pool address remove -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address1}')
         self.cmd('network cross-region-lb address-pool delete -g {rg} --lb-name {lb} -n {address_pool}',
                  checks=self.is_empty())
         self.cmd('network cross-region-lb address-pool list -g {rg} --lb-name {lb}',
@@ -3501,7 +3484,7 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
 
         self.cmd('network cross-region-lb rule list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 2))
-        self.cmd('network cross-region-lb rule update -g {rg} --lb-name {lb} -n rule1 --floating-ip true --idle-timeout 20 --load-distribution sourceip --protocol udp')
+        self.cmd('network cross-region-lb rule update -g {rg} --lb-name {lb} -n rule1 --floating-ip true --load-distribution sourceip --protocol udp')
         self.cmd('network cross-region-lb rule update -g {rg} --lb-name {lb} -n rule2 --backend-pool-name bap2 --load-distribution sourceipprotocol')
         self.cmd('network cross-region-lb rule show -g {rg} --lb-name {lb} -n rule1', checks=[
             self.check('enableFloatingIP', True),
@@ -3846,7 +3829,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
                      self.check('loadBalancerBackendAddresses[3].adminState', 'Drain')
                  ])
 
-        self.cmd('network lb address-pool address remove -g {rg} --lb-name {lb} --pool-name bap1 --name addr2', checks=self.check('name', 'bap1'))
+        self.cmd('network lb address-pool address remove -g {rg} --lb-name {lb} --pool-name bap1 --name addr2')
 
         self.cmd('network lb address-pool address list -g {rg} --lb-name {lb} --pool-name bap1', checks=self.check('length(@)', '3'))
 
@@ -4229,13 +4212,11 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
                  checks=self.check('privateIPAddress', '10.0.0.50'))
 
         # test ability to add and remove IDs one at a time with subcommands
-        self.cmd('network nic ip-config inbound-nat-rule remove -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --inbound-nat-rule rule1',
-                 checks=self.check('length(loadBalancerInboundNatRules)', 1))
+        self.cmd('network nic ip-config inbound-nat-rule remove -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --inbound-nat-rule rule1')
         self.cmd('network nic ip-config inbound-nat-rule add -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --inbound-nat-rule rule1',
                  checks=self.check('length(loadBalancerInboundNatRules)', 2))
 
-        self.cmd('network nic ip-config address-pool remove -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --address-pool bap1',
-                 checks=self.check('length(loadBalancerBackendAddressPools)', 1))
+        self.cmd('network nic ip-config address-pool remove -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --address-pool bap1')
         self.cmd('network nic ip-config address-pool add -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --address-pool bap1',
                  checks=self.check('length(loadBalancerBackendAddressPools)', 2))
 
@@ -4320,12 +4301,10 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
 
         self.cmd('network nic ip-config address-pool add -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --address-pool {pool}',
                  checks=self.check('length(loadBalancerBackendAddressPools)', 1))
-        self.cmd('network nic ip-config address-pool remove -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --address-pool {pool}',
-                 checks=self.check('loadBalancerBackendAddressPools', None))
+        self.cmd('network nic ip-config address-pool remove -g {rg} --lb-name {lb} --nic-name {nic} --ip-config-name {config} --address-pool {pool}')
         self.cmd('network nic ip-config address-pool add -g {rg} --nic-name {nic} --ip-config-name {config} --address-pool {lb_pool_id}',
                  checks=self.check('length(loadBalancerBackendAddressPools)', 1))
-        self.cmd('network nic ip-config address-pool remove -g {rg} --nic-name {nic} --ip-config-name {config} --address-pool {lb_pool_id}',
-                 checks=self.check('loadBalancerBackendAddressPools', None))
+        self.cmd('network nic ip-config address-pool remove -g {rg} --nic-name {nic} --ip-config-name {config} --address-pool {lb_pool_id}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_nic_ag_address_pools')
     def test_network_nic_ag_address_pools(self, resource_group):
@@ -4351,12 +4330,10 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
 
         self.cmd('network nic ip-config address-pool add -g {rg} --gateway-name {ag} --nic-name {nic} --ip-config-name {config} --address-pool {pool}',
                  checks=self.check('length(applicationGatewayBackendAddressPools)', 1))
-        self.cmd('network nic ip-config address-pool remove -g {rg} --gateway-name {ag} --nic-name {nic} --ip-config-name {config} --address-pool {pool}',
-                 checks=self.check('applicationGatewayBackendAddressPools', None))
+        self.cmd('network nic ip-config address-pool remove -g {rg} --gateway-name {ag} --nic-name {nic} --ip-config-name {config} --address-pool {pool}')
         self.cmd('network nic ip-config address-pool add -g {rg} --nic-name {nic} --ip-config-name {config} --address-pool {ag_pool_id}',
                  checks=self.check('length(applicationGatewayBackendAddressPools)', 1))
-        self.cmd('network nic ip-config address-pool remove -g {rg} --nic-name {nic} --ip-config-name {config} --address-pool {ag_pool_id}',
-                 checks=self.check('applicationGatewayBackendAddressPools', None))
+        self.cmd('network nic ip-config address-pool remove -g {rg} --nic-name {nic} --ip-config-name {config} --address-pool {ag_pool_id}')
 
 
 class NetworkNicConvenienceCommandsScenarioTest(ScenarioTest):
@@ -5306,6 +5283,35 @@ class NetworkSubnetScenarioTests(ScenarioTest):
 
         self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
         self.cmd('network nsg delete --resource-group {rg} --name {nsg}')
+
+    @ResourceGroupPreparer(name_prefix='cli_subnet_detach_nat_gateway_', location="eastus2")
+    def test_subnet_detach_nat_gateway(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'vnet_prefix': '123.0.0.0/16',
+            'subnet': 'default',
+            'subnet_prefix': '123.0.0.0/24',
+            'nat': 'test-nat',
+            'idle_timeout': 4,
+            'sku': "Standard",
+            'ip_addr': "pip",
+            'ip_prefix': "prefix",
+            'idle_timeout_updated': 5,
+            'zone': 2,
+            'location': resource_group_location,
+            'resource_type': 'Microsoft.Network/NatGateways'
+        })
+
+        self.cmd('network public-ip create -g {rg} -n {ip_addr} --location {location} --zone {zone} --sku Standard ')
+        self.cmd('network public-ip prefix create --length 29 --location {location} --name {ip_prefix} --resource-group {rg} --zone {zone}')
+        self.cmd('network nat gateway create --resource-group {rg} --location {location} --public-ip-prefixes {ip_prefix} --name {nat} --public-ip-addresses {ip_addr} --idle-timeout {idle_timeout} --zone {zone}')
+        self.cmd('network vnet create --resource-group {rg} --name {vnet} --address-prefix {vnet_prefix}')
+
+        self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefixes {subnet_prefix} --nat-gateway {nat}',
+                 checks=self.check('ends_with(@.natGateway.id, `/{nat}`)', True))
+        self.cmd('network vnet subnet update --resource-group {rg} --vnet-name {vnet} --name {subnet} --nat-gateway \"\"',
+                 checks=self.check('natGateway', None))
+
 
     @ResourceGroupPreparer(name_prefix='cli_subnet_endpoint_service_test')
     def test_network_subnet_endpoint_service(self, resource_group):
@@ -6434,8 +6440,7 @@ class NetworkLoadBalancerWithSkuGateway(ScenarioTest):
         self.cmd('network lb address-pool tunnel-interface list -g {rg} --lb-name {lb} --address-pool {bap}',
                  checks=self.check('length(@)', 2))
         self.cmd('network lb address-pool tunnel-interface remove -g {rg} --lb-name {lb} --address-pool {bap} '
-                 '--index 0',
-                 checks=self.check('length(tunnelInterfaces)', 1))
+                 '--index 0')
         self.cmd('network lb address-pool tunnel-interface update -g {rg} --lb-name {lb} --address-pool {bap} '
                  '--type {type1} --protocol {protocol} --identifier {identifier1} --port 10000 --index 0',
                  checks=self.check('tunnelInterfaces[0].type', '{type1}'))
