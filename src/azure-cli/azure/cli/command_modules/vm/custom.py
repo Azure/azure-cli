@@ -3160,7 +3160,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         if image in ["RHEL", "Debian", "CentOS", "Flatcar"]:
             logger.warning('Consider using the image alias including the version of the distribution you want to use. '
                            'For example: please use Debian11 instead of Debian. In Ignite (November) 2023, '
-                           'the aliases `UbuntuLTS`, `CentOS`, `Debian`, `Flatcar`, and `RHEL` will be removed.')
+                           'the aliases without version suffix (such as: `UbuntuLTS`, `CentOS`, `Debian`, `Flatcar`, and `RHEL`) will be removed.')
 
     # The default load balancer will be expected to be changed from Basic to Standard.
     # In order to avoid breaking change which has a big impact to users,
