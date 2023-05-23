@@ -47,13 +47,25 @@ import azure.cli.command_modules.backup.custom_help as cust_help
 logger = get_logger(__name__)
 
 # Mapping of workload type
-secondary_region_map = {"eastasia": "southeastasia",
+secondary_region_map = {"ussecwest": "usseceast",
+                        "usseceast": "ussecwest",
+                        "usnateast": "usnatwest",
+                        "usnatwest": "usnateast",
+                        "swedencentral": "swedensouth",
+                        "swedensouth": "swedencentral",
+                        "norwaywest": "norwayeast",
+                        "norwayeast": "norwaywest",
+                        "germanynorth": "germanywestcentral",
+                        "germanywestcentral": "germanynorth",
+                        "westus3": "eastus",
+                        "eastasia": "southeastasia",
                         "southeastasia": "eastasia",
                         "australiaeast": "australiasoutheast",
                         "australiasoutheast": "australiaeast",
                         "australiacentral": "australiacentral2",
                         "australiacentral2": "australiacentral",
                         "brazilsouth": "southcentralus",
+                        "brazilsoutheast": "brazilsouth",
                         "canadacentral": "canadaeast",
                         "canadaeast": "canadacentral",
                         "chinanorth": "chinaeast",
@@ -68,8 +80,6 @@ secondary_region_map = {"eastasia": "southeastasia",
                         "francesouth": "francecentral",
                         "germanycentral": "germanynortheast",
                         "germanynortheast": "germanycentral",
-                        "germanywestcentral": "germanynorth",
-                        "germanynorth": "germanywestcentral",
                         "centralindia": "southindia",
                         "southindia": "centralindia",
                         "westindia": "southindia",
@@ -100,7 +110,10 @@ secondary_region_map = {"eastasia": "southeastasia",
                         "usgovarizona": "usgovtexas",
                         "usgovtexas": "usgovarizona",
                         "usgoviowa": "usgovvirginia",
-                        "usgovvirginia": "usgovtexas"}
+                        "usgovvirginia": "usgovtexas",
+                        "malaysiasouth": "japanwest",
+                        "jioindiacentral": "jioindiawest",
+                        "jioindiawest":"jioindiacentral"}
 
 fabric_name = "Azure"
 default_policy_name = "DefaultPolicy"
