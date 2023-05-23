@@ -113,7 +113,7 @@ secondary_region_map = {"ussecwest": "usseceast",
                         "usgovvirginia": "usgovtexas",
                         "malaysiasouth": "japanwest",
                         "jioindiacentral": "jioindiawest",
-                        "jioindiawest":"jioindiacentral"}
+                        "jioindiawest": "jioindiacentral"}
 
 fabric_name = "Azure"
 default_policy_name = "DefaultPolicy"
