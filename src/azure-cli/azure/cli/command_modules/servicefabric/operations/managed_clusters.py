@@ -13,6 +13,7 @@ from azure.cli.command_modules.servicefabric._sf_utils import (
     _create_resource_group_name
 )
 from azure.mgmt.servicefabricmanagedclusters.models import (
+    NetworkSecurityRule,
     ManagedCluster,
     Sku,
     ClientCertificate
@@ -206,3 +207,42 @@ def _get_resource_group_location(cli_ctx, resource_group_name):
     resource_client = resource_client_factory(cli_ctx).resource_groups
     rg = resource_client.get(resource_group_name)
     return rg.location
+
+def add_network_security_rule(cmd,
+                              client,
+                              resource_group_name,
+                              cluster_name,
+                              name=None,
+                              access=None,
+                              description=None,
+                              direction=None,
+                              protocol=None,
+                              priority=None,
+                              sourcePortRanges=None,
+                              destinationPortRanges=None,
+                              destinationAddressPrefixes=None,
+                              sourceAddressPrefixes=None):
+    try:
+        cluster = client.managed_clusters.get(resource_group_name, cluster_name)
+
+        if cluster.network_security_rules is None:
+            cluster.network_security_rules = []
+
+        newNetworkSecurityRule = NetworkSecurityRule(name=name,
+                                     access=access,
+                                     description=description,
+                                     direction=direction,
+                                     protocol= '*' if protocol == 'any' else protocol,
+                                     priority=priority,
+                                     source_port_ranges=sourcePortRanges,
+                                     destination_port_ranges=destinationPortRanges,
+                                     destination_address_prefixes=destinationAddressPrefixes,
+                                     source_address_prefixes=sourceAddressPrefixes)
+
+        cluster.network_security_rules.append(newNetworkSecurityRule)
+
+        poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
+        return LongRunningOperation(cmd.cli_ctx)(poller)
+    except HttpResponseError as ex:
+        logger.error("HttpResponseError: %s", ex)
+        raise
