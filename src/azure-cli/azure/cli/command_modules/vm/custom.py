@@ -928,7 +928,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         if image in ["RHEL", "Debian", "CentOS", "Flatcar"]:
             logger.warning('Consider using the image alias including the version of the distribution you want to use. '
                            'For example: please use Debian11 instead of Debian. In Ignite (November) 2023, '
-                           'the aliases `UbuntuLTS`, `CentOS`, `Debian`, `Flatcar`, and `RHEL` will be removed.')
+                           'the aliases without version suffix (such as: `UbuntuLTS`, `CentOS`, `Debian`, `Flatcar`, and `RHEL`) will be removed.')
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if os_disk_encryption_set is not None and not is_valid_resource_id(os_disk_encryption_set):
