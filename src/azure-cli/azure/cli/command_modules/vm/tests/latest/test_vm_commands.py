@@ -1173,7 +1173,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'disk4': 'd4',
             'disk5': 'd5',
             'disk6': 'd6',
-            'image': '/Subscriptions/' + subs_id + '/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202002180',
+            'image': '/Subscriptions/' + subs_id + '/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/0001-com-ubuntu-server-jammy/Skus/22_04-lts-gen2/Versions/22.04.202305160',
             'image2': 'image2',
             'g1': self.create_random_name('g1', 20),
             'vm': 'vm1'
@@ -1347,7 +1347,7 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
         # Expecting no results
         self.cmd('vm list --resource-group {rg}',
                  checks=self.is_empty())
-        self.cmd('vm create --resource-group {rg} --location {loc} --name {vm} --admin-username ubuntu --image Ubuntu2204 --admin-password testPassword0 --authentication-type password --tags firsttag=1 secondtag=2 thirdtag --nsg {nsg} --public-ip-address {ip} --vnet-name {vnet} --storage-account {sa} --use-unmanaged-disk --nsg-rule NONE')
+        self.cmd('vm create --resource-group {rg} --location {loc} --name {vm} --admin-username admin --image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 --authentication-type password --tags firsttag=1 secondtag=2 thirdtag --nsg {nsg} --public-ip-address {ip} --vnet-name {vnet} --storage-account {sa} --use-unmanaged-disk --nsg-rule NONE')
 
         # Expecting one result, the one we created
         self.cmd('vm list --resource-group {rg}', checks=[
@@ -1428,7 +1428,7 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
             'vmss': self.create_random_name('vmss', 10)
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --image Ubuntu2204 --size Standard_D2s_v3 --v-cpus-available 1 --v-cpus-per-core 1 --admin-username vmtest --admin-username vmtest')
+        self.cmd('vm create -g {rg} -n {vm} --image OpenLogic:CentOS:7.5:latest --size Standard_D2s_v3 --v-cpus-available 1 --v-cpus-per-core 1 --admin-username vmtest --admin-username vmtest')
         self.cmd('vm show -g {rg} -n {vm} ', checks=[
             self.check('hardwareProfile.vmSizeProperties.vCpusAvailable', 1),
             self.check('hardwareProfile.vmSizeProperties.vCpusPerCore', 1)
