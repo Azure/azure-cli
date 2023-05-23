@@ -216,12 +216,12 @@ examples:
   - name: Create an Azure IoT Hub Device Provisioning Service with enabled disaster recovery and set the secondary region to 'eastus'.
     text: >
         az iot dps create --name MyDps --resource-group MyResourceGroup --region eastus
-  - name: Create an Azure IoT Hub Device Provisioning Service with the standard pricing tier S1, in the region of the resource group, enable system identity, and assign a role
+  - name: Create an Azure IoT Hub Device Provisioning Service with the standard pricing tier S1, in the region of the resource group, enable system identity, and assign a role and scope to an IoT Hub for the created identity.
     text: >
-        az iot dps create --name MyDps --resource-group MyResourceGroup
-  - name: Create an Azure IoT Hub Device Provisioning Service with the standard pricing tier S1, in the region of the resource group, enable system identity, and assign a role
+        az iot dps create --name MyDps --resource-group MyResourceGroup --mi-system-assigned --role 'Iot Hub Data Contributor' --scopes {hubResourceId}
+  - name: Create an Azure IoT Hub Device Provisioning Service with the standard pricing tier S1, in the region of the resource group, and assign two User Assigned Identities.
     text: >
-        az iot dps create --name MyDps --resource-group MyResourceGroup
+        az iot dps create --name MyDps --resource-group MyResourceGroup --mi-user-assigned {userIdentityResourceId1} {userIdentityResourceId2}
 """
 
 helps['iot dps delete'] = """
