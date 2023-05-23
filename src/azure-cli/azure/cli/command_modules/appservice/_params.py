@@ -730,6 +730,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('environment', help="Name of the container app environment.", is_preview=True)
         c.argument('image', options_list=['--image', '-i', c.deprecate(target='--deployment-container-image-name', redirect='--image')],
                    help='Container image, e.g. publisher/image-name:tag')
+        c.argument('registry_server', help="The container registry server hostname, e.g. myregistry.azurecr.io.", is_preview=True)
         c.argument('registry_username', options_list=['--registry-username', '-d', c.deprecate(target='--docker-registry-server-user', redirect='--registry-username')], help='The container registry server username.')
         c.argument('registry_password', options_list=['--registry-password', '-w', c.deprecate(target='--docker-registry-server-password', redirect='--registry-password')],
                    help='The container registry server password. Required for private registries.')

@@ -2,6 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import unittest
+
 from azure.cli.testsdk import ResourceGroupPreparer, KeyVaultPreparer, JMESPathCheck
 from azure.cli.testsdk import ScenarioTest
 from .scenario_mixin import CdnScenarioMixin
@@ -168,6 +170,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         with self.assertRaises(HttpResponseError):
             self.custom_domain_disable_https_cmd(resource_group, profile_name, endpoint_name, custom_domain_name)
 
+    @unittest.skip("Duplicate cdn endpoint name, cannot rerun live.")
     @ResourceGroupPreparer()
     @KeyVaultPreparer(location='centralus', name_prefix='cdncli-byoc', name_len=24)
     def test_cdn_custom_domain_https_msft(self, resource_group, key_vault):
@@ -237,6 +240,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
                                                     user_cert_secret_version=version,
                                                     user_cert_protocol_type='sni')
 
+    @unittest.skip("Duplicate cdn endpoint name, cannot rerun live.")
     @ResourceGroupPreparer()
     @KeyVaultPreparer(location='centralus', name_prefix='cdnclibyoc-latest', name_len=24)
     def test_cdn_custom_domain_byoc_latest(self, resource_group, key_vault):
