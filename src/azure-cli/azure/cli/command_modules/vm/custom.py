@@ -927,7 +927,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                            'The "UbuntuLTS" will be removed with the breaking change release of Fall 2023.')
         if image in ["RHEL", "Debian", "CentOS", "Flatcar"]:
             logger.warning('Consider using the image alias including the version of the distribution you want to use. '
-                           'For example: please use Debian11 instead of Debian. In Ignite (November) 2023, '
+                           'For example: please use Debian11 instead of Debian.\nIn Ignite (November) 2023, '
                            'the aliases without version suffix (such as: `UbuntuLTS`, `CentOS`, `Debian`, `Flatcar`, '
                            'and `RHEL`) will be removed.')
 
@@ -3160,7 +3160,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                            'The "UbuntuLTS" will be removed with the breaking change release of Fall 2023.')
         if image in ["RHEL", "Debian", "CentOS", "Flatcar"]:
             logger.warning('Consider using the image alias including the version of the distribution you want to use. '
-                           'For example: please use Debian11 instead of Debian. In Ignite (November) 2023, '
+                           'For example: please use Debian11 instead of Debian.\nIn Ignite (November) 2023, '
                            'the aliases without version suffix (such as: `UbuntuLTS`, `CentOS`, `Debian`, `Flatcar`, '
                            'and `RHEL`) will be removed.')
 
