@@ -1528,7 +1528,7 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
         if max_replicas is not None:
             setattr(configs, 'function_app_scale_limit', max_replicas)
         return update_configuration_polling(cmd, resource_group_name, name, slot, configs)
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    return update_flex_functionapp_configuration(cmd, resource_group_name, name, configs)
 
 
 def update_configuration_polling(cmd, resource_group_name, name, slot, configs):
@@ -3651,6 +3651,18 @@ def create_flex_functionapp(cmd, resource_group_name, name, functionapp_def):
     site_url = site_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + site_url
     response = send_raw_request(cmd.cli_ctx, "PUT", request_url, body=body)
+    return response.json()
+
+
+def update_flex_functionapp_configuration(cmd, resource_group_name, name, configs):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    client = web_client_factory(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    update_configuration_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/config/web?api-version={}'
+    update_configuration_url = update_configuration_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + update_configuration_url
+    body = json.dumps(configs)
+    response = send_raw_request(cmd.cli_ctx, "PATCH", request_url, body=body)
     return response.json()
 
 
