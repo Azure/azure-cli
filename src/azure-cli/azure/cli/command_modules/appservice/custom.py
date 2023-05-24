@@ -447,6 +447,28 @@ def get_configuration(cmd, resource_group_name, name):
     return response.json()
 
 
+def update_flex_functionapp(cmd, resource_group_name, name, updated_app):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    get_configuration_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?stamp={}&api-version={}'
+    get_configuration_url = get_configuration_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2014-11-01-privatepreview')
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + get_configuration_url
+    updated_app_json = updated_app.serialize()
+    body = json.dumps(updated_app_json)
+    response = send_raw_request(cmd.cli_ctx, "PATCH", request_url, body=body)
+    return response.json()
+
+
+def list_vnet_connections(cmd, resource_group_name, name):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    get_vnet_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/virtualNetworkConnections?stamp={}&api-version={}'
+    get_vnet_url = get_vnet_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2014-11-01-privatepreview')
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + get_vnet_url
+    response = send_raw_request(cmd.cli_ctx, "GET", request_url)
+    return response.json()
+
+
 def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
     if not settings and not slot_settings:
         raise MutuallyExclusiveArgumentError('Usage Error: --settings |--slot-settings')
@@ -1362,15 +1384,30 @@ def delete_webapp(cmd, resource_group_name, name, keep_metrics=None, keep_empty_
 
 
 def stop_webapp(cmd, resource_group_name, name, slot=None):
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'stop', slot)
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    stop_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/stop?stamp={}&api-version={}'
+    stop_url = stop_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2014-11-01-privatepreview')
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + stop_url
+    send_raw_request(cmd.cli_ctx, "POST", request_url)
 
 
 def start_webapp(cmd, resource_group_name, name, slot=None):
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'start', slot)
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    start_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/start?stamp={}&api-version={}'
+    start_url = start_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2014-11-01-privatepreview')
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + start_url
+    send_raw_request(cmd.cli_ctx, "POST", request_url)
 
 
 def restart_webapp(cmd, resource_group_name, name, slot=None):
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'restart', slot)
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    restart_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/restart?stamp={}&api-version={}'
+    restart_url = restart_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2014-11-01-privatepreview')
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + restart_url
+    send_raw_request(cmd.cli_ctx, "POST", request_url)
 
 
 def get_site_configs(cmd, resource_group_name, name, slot=None):
@@ -1548,9 +1585,8 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
                         always_ready_instances=None,
                         maximum_instances=None,
                         instance_size=None):
-    configs = get_site_configs(cmd, resource_group_name, name, slot)
-    app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
-                                           'list_application_settings', slot)
+    configs = get_configuration(cmd, resource_group_name, name)
+    app_settings = list_application_settings(cmd, resource_group_name, name)
     if number_of_workers is not None:
         number_of_workers = validate_range_of_int_flag('--number-of-workers', number_of_workers, min_val=0, max_val=20)
     if linux_fx_version:
@@ -1576,7 +1612,7 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
         if arg in int_flags and values[arg] is not None:
             values[arg] = validate_and_convert_to_int(arg, values[arg])
         if arg != 'generic_configurations' and values.get(arg, None):
-            setattr(configs, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
+            configs[arg] = values[arg] if arg not in bool_flags else values[arg] == 'true'
 
     generic_configurations = generic_configurations or []
     # https://github.com/Azure/azure-cli/issues/14857
@@ -1600,21 +1636,21 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
         setattr(configs, config_name, value)
 
     if not updating_ip_security_restrictions:
-        setattr(configs, 'ip_security_restrictions', None)
-        setattr(configs, 'scm_ip_security_restrictions', None)
+        configs['properties']['ipSecurityRestrictions'] = None
+        configs['properties']['scmIpSecurityRestrictions'] = None
 
     if always_ready_instances:
-        setattr(configs, 'minimum_elastic_instance_count', always_ready_instances)
+        configs['properties']['minimumElasticInstanceCount'] = always_ready_instances
 
     if maximum_instances:
-        setattr(configs, 'function_app_scale_limit', maximum_instances)
+        configs['properties']['functionAppScaleLimit'] = maximum_instances
 
     if instance_size:
         client = web_client_factory(cmd.cli_ctx)
-        webapp = client.web_apps.get(resource_group_name, name)
+        webapp = get_app(cmd, resource_group_name, name)
         Site = cmd.get_models('Site')
-        updated_webapp = Site(container_size=instance_size, location=webapp.location)
-        _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update', slot, updated_webapp)
+        updated_webapp = Site(container_size=instance_size, location=webapp['location'])
+        update_flex_functionapp(cmd, resource_group_name, name, updated_webapp)
 
     if is_centauri_functionapp(cmd, resource_group_name, name):
         if min_replicas is not None:
