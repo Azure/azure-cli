@@ -68,7 +68,7 @@ from .utils import (_normalize_sku,
                     _normalize_location,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
                     get_resource_if_exists, repo_url_to_name, get_token,
-                    app_service_plan_exists, is_centauri_functionapp, is_flex_functionapp)
+                    app_service_plan_exists, is_centauri_functionapp, is_flex_functionapp, is_flex_functionapp_tmp)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -595,7 +595,10 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
 
 def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_remote=False, timeout=None, slot=None):
     client = web_client_factory(cmd.cli_ctx)
-    app = client.web_apps.get(resource_group_name, name)
+    params = {}
+    params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'
+    app = client.web_apps.get(resource_group_name, name, api_version='2014-11-01-privatepreview', params = params)
+    # app = client.web_apps.get(resource_group_name, name)
     if app is None:
         raise ResourceNotFoundError('The function app \'{}\' was not found in resource group \'{}\'. '
                                     'Please make sure these values are correct.'.format(name, resource_group_name))
@@ -620,8 +623,8 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
     if is_consumption and app.reserved:
         validate_zip_deploy_app_setting_exists(cmd, resource_group_name, name, slot)
 
-    if is_flex_functionapp(cmd, resource_group_name, name):
-        return enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout, slot, build_remote)
+    if is_flex_functionapp_tmp(cmd, resource_group_name, name):
+        return enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout, slot, build_remote, app)
 
     if (not build_remote) and is_consumption and app.reserved:
         return upload_zip_to_storage(cmd, resource_group_name, name, src, slot)
@@ -637,11 +640,11 @@ def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, 
     return enable_zip_deploy(cmd, resource_group_name, name, src, timeout=timeout, slot=slot)
 
 
-def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, slot=None, build_remote=False):
+def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, slot=None, build_remote=False, app=None):
     logger.warning("Getting scm site credentials for zip deployment")
 
     try:
-        scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
+        scm_url = _get_scm_url_flex(app)
     except ValueError:
         raise ResourceNotFoundError('Failed to fetch scm url for function app')
 
@@ -649,7 +652,7 @@ def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, sl
     deployment_status_url = scm_url + '/api/deployments/latest'
 
     additional_headers = {"Content-Type": "application/zip", "Cache-Control": "no-cache"}
-    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group_name, slot,
+    headers = get_scm_site_headers_flex(cmd.cli_ctx, name, resource_group_name, slot,
                                    additional_headers=additional_headers)
 
     import os
@@ -660,7 +663,7 @@ def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, sl
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
         zip_content = fs.read()
         logger.warning("Starting zip deployment. This operation can take a while to complete ...")
-        res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
+        res = requests.post(zip_url, data=zip_content, headers=headers, verify=False)
         logger.warning("Deployment endpoint responded with status code %d", res.status_code)
 
     # check the status of async deployment
@@ -2513,6 +2516,16 @@ def _get_scm_url(cmd, resource_group_name, name, slot=None):
     # this should not happen, but throw anyway
     raise ResourceNotFoundError('Failed to retrieve Scm Uri')
 
+# temporary workaround for flex
+def _get_scm_url_flex(app):
+    from azure.mgmt.web.models import HostType
+    for host in app.host_name_ssl_states or []:
+        if host.host_type == '1':
+            return "https://{}".format(host.name)
+
+    # this should not happen, but throw anyway
+    raise ResourceNotFoundError('Failed to retrieve Scm Uri')
+
 
 def get_publishing_user(cmd):
     client = web_client_factory(cmd.cli_ctx)
@@ -2903,6 +2916,23 @@ def get_scm_site_headers(cli_ctx, name, resource_group_name, slot=None, addition
         logger.info("[AUTH]: AAD")
         headers = urllib3.util.make_headers()
         headers["Authorization"] = f"Bearer {get_bearer_token(cli_ctx)}"
+    headers['User-Agent'] = get_az_user_agent()
+    headers['x-ms-client-request-id'] = cli_ctx.data['headers']['x-ms-client-request-id']
+    # allow setting Content-Type, Cache-Control, etc. headers
+    if additional_headers:
+        for k, v in additional_headers.items():
+            headers[k] = v
+
+    return headers
+
+#For cv2 only use aad token
+def get_scm_site_headers_flex(cli_ctx, name, resource_group_name, slot=None, additional_headers=None):
+    import urllib3
+
+    logger.info("[AUTH]: AAD")
+    headers = urllib3.util.make_headers()
+    headers["Authorization"] = f"Bearer {get_bearer_token(cli_ctx)}"
+    print(headers["Authorization"])
     headers['User-Agent'] = get_az_user_agent()
     headers['x-ms-client-request-id'] = cli_ctx.data['headers']['x-ms-client-request-id']
     # allow setting Content-Type, Cache-Control, etc. headers
@@ -4370,7 +4400,7 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, head
     while num_trials < total_trials:
         time.sleep(2)
         response = requests.get(deployment_status_url, headers=headers,
-                                verify=not should_disable_connection_verify())
+                                verify=False)
         try:
             res_dict = response.json()
         except json.decoder.JSONDecodeError:
