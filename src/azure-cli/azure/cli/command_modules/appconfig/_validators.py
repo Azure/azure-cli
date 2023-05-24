@@ -34,8 +34,13 @@ def validate_datetime(namespace):
             'The input datetime is invalid. Correct format should be YYYY-MM-DDThh:mm:ssZ ')
 
 
-def validate_connection_string(namespace):
+def validate_connection_string(cmd, namespace):
     ''' Endpoint=https://example.azconfig.io;Id=xxxxx;Secret=xxxx'''
+    # Only use defaults when both name and connection string not specified
+    if not (namespace.connection_string or namespace.name):
+        namespace.connection_string = cmd.cli_ctx.config.get('defaults', 'appconfig_connection_string', None) or cmd.cli_ctx.config.get('appconfig', 'connection_string', None)
+        namespace.name = cmd.cli_ctx.config.get('defaults', 'app_configuration_store', None)
+
     connection_string = namespace.connection_string
     if connection_string:
         if not is_valid_connection_string(connection_string):
