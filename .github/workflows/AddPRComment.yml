@@ -10,6 +10,11 @@ jobs:
     runs-on: ubuntu-20.04
     name: Say thanks for the PR
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@128a63446a954579617e875aaab7d2978154e969 # v2.4.0
+        with:
+          egress-policy: audit
+
       - name: get message
         env:
           TITLE: ${{ github.event.pull_request.title }}
@@ -20,7 +25,7 @@ jobs:
               echo "message=$(echo 'Thank you for your contribution! We will review the pull request and get back to you soon.')" >> $GITHUB_ENV
           fi
       - name: comment on the pull request
-        uses: mshick/add-pr-comment@v2
+        uses: mshick/add-pr-comment@7c0890544fb33b0bdd2e59467fbacb62e028a096 # v2.8.1
         with:
           repo-token: ${{ secrets.CLI_BOT }}
           message: "${{ env.message }}"

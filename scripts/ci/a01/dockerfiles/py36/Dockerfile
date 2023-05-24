@@ -1,4 +1,4 @@
-FROM python:3.6-stretch
+FROM python:3.6-stretch@sha256:654dd3f75f34c7075c118de1d7733613983140ab63bebdd2a5857e50b300924b
 
 LABEL a01.product="azurecli"
 LABEL a01.index.schema="v2"

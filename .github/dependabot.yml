@@ -1,0 +1,56 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /scripts/ci/a01/dockerfiles/py36
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /scripts/release/debian
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /scripts/release/homebrew/docker
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /src/azure-cli/azure/cli/command_modules/appservice/sample-repo-for-deployment-test
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /src/azure-cli/azure/cli/command_modules/appservice/tests/latest/data/sample_multiple_csx_function_httptrigger
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /src/azure-cli/azure/cli/command_modules/appservice/tests/latest/sample_csx_function_httptrigger
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /src/azure-cli/azure/cli/command_modules/appservice/tests/latest/sample_dotnet_function
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /src/azure-cli/azure/cli/command_modules/appservice/tests/latest/sample_web
+    schedule:
+      interval: daily
