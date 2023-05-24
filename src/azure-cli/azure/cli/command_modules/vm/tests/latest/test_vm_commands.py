@@ -4025,7 +4025,7 @@ class AcceleratedNetworkingTest(ScenarioTest):
         })
         # Note: CLI turns sets accelerated_networking to true based on vm size and os image.
         # See _validate_vm_vmss_accelerated_networking for more info.
-        self.cmd("vm create -n {vm} -g {rg} --size Standard_DS4_v2 --image OpenLogic:CentOS:7.5:latestOpenLogic:CentOS:7.5:latest --admin-username clittester --generate-ssh-keys --nsg-rule NONE")
+        self.cmd("vm create -n {vm} -g {rg} --size Standard_DS4_v2 --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username clittester --generate-ssh-keys --nsg-rule NONE")
         self.cmd('network nic show -n {vm}vmnic -g {rg}', checks=self.check('enableAcceleratedNetworking', True))
 
 
