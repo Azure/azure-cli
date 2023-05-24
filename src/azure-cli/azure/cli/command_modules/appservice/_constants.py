@@ -134,10 +134,10 @@ FLEX_RUNTIMES = [
     },
     {
         'runtime': 'python',
-        'version': '3.10',
+        'version': '3.9',
         'site_config': {
             'use32_bit_worker_process': False,
-            'linux_fx_version': 'Python|3.10'
+            'linux_fx_version': 'Python|3.9'
         },
         'app_settings': {
             'FUNCTIONS_WORKER_RUNTIME': 'python'

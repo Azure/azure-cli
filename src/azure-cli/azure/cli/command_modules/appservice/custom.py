@@ -4410,7 +4410,7 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, head
             num_trials = num_trials + 1
 
         if res_dict.get('status', 0) == 3:
-            if not is_flex_functionapp(cmd, rg_name, name):
+            if not is_flex_functionapp_tmp(cmd, rg_name, name):
                 _configure_default_logging(cmd, rg_name, name)
             raise CLIError("Zip deployment failed. {}. Please run the command az webapp log deployment show "
                            "-n {} -g {}".format(res_dict, name, rg_name))
