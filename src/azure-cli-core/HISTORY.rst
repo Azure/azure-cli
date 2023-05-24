@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.49.0
+++++++
+* Dynamically install extensions without prompt when not in a TTY (#26219)
+
 2.48.1
 ++++++
 * No changes
