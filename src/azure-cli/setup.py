@@ -149,7 +149,7 @@ DEPENDENCIES = [
     'semver==2.13.0',
     'six>=1.10.0',  # six is still used by countless extensions
     'sshtunnel~=0.1.4',
-    'urllib3[secure]',
+    'urllib3',
     'websocket-client~=1.3.1',
     'xmltodict~=0.12'
 ]
