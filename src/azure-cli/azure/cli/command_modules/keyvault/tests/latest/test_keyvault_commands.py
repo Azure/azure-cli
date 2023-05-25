@@ -2152,7 +2152,8 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
         self.cmd('keyvault certificate list-versions --vault-name {kv} -n cert1',
                  checks=[self.check('length(@)', 1)])
         self.cmd('keyvault certificate show --vault-name {kv} -n cert1', checks=[
-            self.check('policy.x509CertificateProperties.validityInMonths', 60)
+            self.check('policy.x509CertificateProperties.validityInMonths', 60),
+            self.check('policy.x509CertificateProperties.subjectAlternativeNames.dns_names', ["1", "2"])
         ])
 
         # create a new certificate version
