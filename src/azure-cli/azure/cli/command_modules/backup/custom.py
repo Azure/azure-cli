@@ -1115,7 +1115,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
             raise ArgumentUsageError(
                 """
                 Cross Subscription Restore is not allowed on this Vault. Please either enable CSR on the vault or
-                remove --target-subscription-id from the command.
+                try restoring in the same subscription.
                 """)
     item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
                      item_name, "AzureIaasVM", "VM", use_secondary_region)

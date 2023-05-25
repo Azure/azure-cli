@@ -531,7 +531,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
             raise ArgumentUsageError(
                 """
                 Cross Subscription Restore is not allowed on this Vault. Please either enable CSR on the vault or
-                remove --target-subscription-id from the command.
+                try restoring in the same subscription.
                 """)
     target_resource_group = resource_group_name if target_resource_group is None else target_resource_group
     target_vault_name = vault_name if target_vault_name is None else target_vault_name
