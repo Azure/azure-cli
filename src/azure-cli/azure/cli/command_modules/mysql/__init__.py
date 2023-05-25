@@ -9,6 +9,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.mysql.commands import load_command_table
 from azure.cli.command_modules.mysql._params import load_arguments
 from azure.cli.command_modules.mysql._util import MysqlArgumentContext
+import azure.cli.command_modules.mysql._help    # pylint: disable=unused-import
 
 
 class MysqlCommandsLoader(AzCommandsLoader):
