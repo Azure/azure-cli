@@ -17,7 +17,8 @@ from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, KeyVaultPrep
 from azure.cli.testsdk.checkers import NoneCheck
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants, ImportExportProfiles, AppServiceConstants
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.core.azclierror import ResourceNotFoundError
+from azure.core.exceptions import ResourceNotFoundError
+from azure.cli.core.azclierror import ResourceNotFoundError as CliResourceNotFoundError
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -2907,7 +2908,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
     def test_azconfig_snapshot_mgmt(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='SnapshotStore', length=24)
         snapshot_name = "TestSnapshot"
-        store_location = 'swedencentral'
+        store_location = 'eastus2euap'
         sku = 'standard'
 
         self.kwargs.update({
@@ -3005,7 +3006,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
             'snapshot_name': non_existent_snapshot_name
         })
 
-        with self.assertRaisesRegex(ResourceNotFoundError, f'No snapshot with name \'{non_existent_snapshot_name}\' was found.'):
+        with self.assertRaisesRegex(CliResourceNotFoundError, f'No snapshot with name \'{non_existent_snapshot_name}\' was found.'):
             self.cmd('appconfig kv list --connection-string {connection_string} --snapshot {snapshot_name}')
 
 
