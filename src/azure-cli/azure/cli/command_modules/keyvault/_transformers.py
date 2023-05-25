@@ -335,7 +335,7 @@ def transform_certificate_policy(policy, policy_id):
                 "subjectAlternativeNames": {
                     "emails": getattr(policy, "san_emails", None),
                     "upns": getattr(policy, "san_user_principal_names", None),
-                    "dns_names": getattr(policy, "san_dns_names", None)
+                    "dnsNames": getattr(policy, "san_dns_names", None)
                 },
                 "validityInMonths": getattr(policy, "validity_in_months", None)
             }
