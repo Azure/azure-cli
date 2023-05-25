@@ -107,11 +107,7 @@ def _get_resource_group_from_resource_name(cli_ctx, vault_name, hsm_name=None):
 
     if vault_name:
         client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
-        if cli_ctx.cloud.profile == 'latest':
-            vaults = client.list()
-        else:
-            vaults = client.list(filter="resourceType eq 'Microsoft.KeyVault/vaults'", api_version='2015-11-01')
-        for vault in vaults:
+        for vault in client.list():
             id_comps = parse_resource_id(vault.id)
             if id_comps.get('name', None) and id_comps['name'].lower() == vault_name.lower():
                 return id_comps['resource_group']
