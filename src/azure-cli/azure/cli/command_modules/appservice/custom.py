@@ -476,7 +476,10 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
     settings = settings or []
     slot_settings = slot_settings or []
 
-    app_settings = list_application_settings(cmd, resource_group_name, name)
+    params = {}
+    params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'
+    client = web_client_factory(cmd.cli_ctx)
+    app_settings = client.web_apps.list_application_settings(resource_group_name, name, api_version='2022-03-01-privatepreview', params=params)
 
     result, slot_result = {}, {}
     # pylint: disable=too-many-nested-blocks
@@ -499,8 +502,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                 result.update(dest)
 
     for setting_name, value in result.items():
-        app_settings['properties'][setting_name] = value
-    client = web_client_factory(cmd.cli_ctx)
+        app_settings.properties[setting_name] = value
 
 
 # TODO: Centauri currently return wrong payload for update appsettings, remove this once backend has the fix.
@@ -508,7 +510,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
         update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client)
         result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     else:
-        result = update_application_settings(cmd, resource_group_name, name, app_settings)
+        result = client.web_apps.update_application_settings(resource_group_name, name, app_settings, api_version='2022-03-01-privatepreview', params=params)
 
     app_settings_slot_cfg_names = []
     if slot_result:
@@ -523,7 +525,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
         app_settings_slot_cfg_names = slot_cfg_names.app_setting_names
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
-    return _build_app_settings_output(result['properties'], app_settings_slot_cfg_names)
+    return _build_app_settings_output(result.properties, app_settings_slot_cfg_names)
 
 
 # TODO: Update manual polling to use LongRunningOperation once backend API & new SDK supports polling
@@ -1430,7 +1432,9 @@ def get_app_settings(cmd, resource_group_name, name, slot=None):
     params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'
     client = web_client_factory(cmd.cli_ctx)
     result = client.web_apps.list_application_settings(resource_group_name, name, api_version='2022-03-01-privatepreview', params=params)
-    slot_app_setting_names = [] if is_centauri_functionapp(cmd, resource_group_name, name) \
+    is_centauri = is_centauri_functionapp(cmd, resource_group_name, name)
+    is_cv2 = is_flex_functionapp_tmp(cmd, resource_group_name, name)
+    slot_app_setting_names = [] if (is_centauri or is_cv2) \
         else client.web_apps.list_slot_configuration_names(resource_group_name, name) \
         .app_setting_names
     return _build_app_settings_output(result.properties, slot_app_setting_names)
@@ -1694,10 +1698,13 @@ def update_configuration_polling(cmd, resource_group_name, name, slot, configs):
 
 
 def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None):
-    app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
+    params = {}
+    params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'
     client = web_client_factory(cmd.cli_ctx)
-    centauri_functionapp = is_centauri_functionapp(cmd, resource_group_name, name)
-    slot_cfg_names = {} if centauri_functionapp \
+    app_settings = client.web_apps.list_application_settings(resource_group_name, name, api_version='2022-03-01-privatepreview', params=params)
+    is_centauri = is_centauri_functionapp(cmd, resource_group_name, name)
+    is_cv2 = is_flex_functionapp_tmp(cmd, resource_group_name, name)
+    slot_cfg_names = {} if (is_centauri or is_cv2) \
         else client.web_apps.list_slot_configuration_names(resource_group_name, name)
     is_slot_settings = False
 
@@ -1711,13 +1718,11 @@ def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
 # TODO: Centauri currently return wrong payload for update appsettings, remove this once backend has the fix.
-    if centauri_functionapp:
+    if is_centauri:
         update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client)
         result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     else:
-        result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
-                                             'update_application_settings',
-                                             app_settings, slot, client)
+        result = client.web_apps.update_application_settings(resource_group_name, name, app_settings, api_version='2022-03-01-privatepreview', params=params)
     return _build_app_settings_output(result.properties, slot_cfg_names.app_setting_names if slot_cfg_names else [])
 
 
