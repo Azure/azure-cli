@@ -76,3 +76,9 @@ class ImportExportProfiles:
 
 class SnapshotConstants:
     API_VERSION = "2022-11-01-preview"
+
+
+class JsonDiff:
+    ADD = "add"
+    DELETE = "delete"
+    UPDATE = "update"

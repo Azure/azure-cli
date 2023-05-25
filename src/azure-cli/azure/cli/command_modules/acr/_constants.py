@@ -32,7 +32,8 @@ ACR_AUDIENCE_RESOURCE_NAME = "containerregistry"
 ALLOWED_TASK_FILE_TYPES = ('.yaml', '.yml', '.toml', '.json', '.sh', '.bash', '.zsh', '.ps1',
                            '.ps', '.cmd', '.bat', '.ts', '.js', '.php', '.py', '.rb', '.lua')
 
-REF_KEY = "referrers"
+# https://github.com/opencontainers/distribution-spec/blob/main/spec.md#listing-referrers
+REF_KEY = "manifests"
 
 
 def get_classic_sku(cmd):

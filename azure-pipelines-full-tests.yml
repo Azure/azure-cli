@@ -33,6 +33,7 @@ jobs:
       pythonVersion: '$(python.version)'
       profile: '2020-09-01-hybrid'
       fullTest: true
+      jobName: 'FullTest'
 
 - job: AutomationTest20190301
   displayName: Automation Test (Profile 2019-03-01)
@@ -51,6 +52,7 @@ jobs:
       pythonVersion: '$(python.version)'
       profile: '2019-03-01-hybrid'
       fullTest: true
+      jobName: 'FullTest'
 
 - job: AutomationTest20180301
   displayName: Automation Test (Profile 2018-03-01)
@@ -69,6 +71,7 @@ jobs:
       pythonVersion: '$(python.version)'
       profile: '2018-03-01-hybrid'
       fullTest: true
+      jobName: 'FullTest'
 
 - job: AutomationFullTestPython39ProfileLatest
   displayName: Automation Full Test Python39 Profile Latest
@@ -102,6 +105,7 @@ jobs:
       instance_cnt: '8'
       instance_idx: '$(Instance_idx)'
       fullTest: true
+      jobName: 'FullTest'
 
 - job: AutomationFullTestPython310ProfileLatest
   displayName: Automation Full Test Python310 Profile Latest
@@ -135,3 +139,38 @@ jobs:
       instance_cnt: '8'
       instance_idx: '$(Instance_idx)'
       fullTest: true
+      jobName: 'FullTest'
+
+- job: NotifyCIErrors
+  dependsOn:
+    - AutomationTest20200901
+    - AutomationTest20190301
+    - AutomationTest20180301
+    - AutomationFullTestPython39ProfileLatest
+    - AutomationFullTestPython310ProfileLatest
+  condition: and(failed(), in(variables['Build.Reason'], 'BatchedCI'))
+  displayName: Notify CI Errors
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.10'
+    inputs:
+      versionSpec: 3.10
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: 'Azure CLI'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        pip install requests
+        teams_api_url=$(az keyvault secret show --vault-name $(TEAMS_BOT_VAULT_NAME) --name $(TEAMS_BOT_API_URL_SECRET_NAME) --query value -otsv)
+        teams_api_key=$(az keyvault secret show --vault-name $(TEAMS_BOT_VAULT_NAME) --name $(TEAMS_BOT_API_KEY_SECRET_NAME) --query value -otsv)
+        echo "If any task fails, notify to teams channel"
+        python scripts/ci/notify_ci_errors.py $teams_api_url $teams_api_key $(TEAMS_CHANNEL_ID)
+    displayName: 'Notify To Teams Channel'
+    env:
+      BASE_URI: $(System.CollectionUri)
+      PROJECT_TYPE: $(System.TeamProject)
+      BUILD_ID: $(Build.BuildId)
+      JOB_ID: $(System.JobId)

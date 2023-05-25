@@ -5,11 +5,6 @@
 # Turn off python byte compilation
 %global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
 
-# .el7.centos -> .el7
-%if 0%{?rhel}
-  %define dist .el%{?rhel}
-%endif
-
 # The Python package name for dnf/yum/tdnf, such as python39, python3
 %define python_package %{getenv:PYTHON_PACKAGE}
 # The Python executable name, such as python3.9, python3
@@ -27,7 +22,6 @@ Name:           %{name}
 Version:        %{version}
 Release:        %{release}
 Url:            https://docs.microsoft.com/cli/azure/install-azure-cli
-BuildArch:      x86_64
 Requires:       %{python_package}
 Prefix:         /usr
 Prefix:         /etc
@@ -52,8 +46,10 @@ A great cloud needs great tools; we're excited to introduce Azure CLI,
 # Create a fully instantiated virtual environment, ready to use the CLI.
 %{python_cmd} -m venv %{buildroot}%{cli_lib_dir}
 source %{buildroot}%{cli_lib_dir}/bin/activate
-%{python_cmd} -m pip install --upgrade pip
+%{python_cmd} -m pip install --upgrade pip setuptools
 source %{repo_path}/scripts/install_full.sh
+# Remove unused SDK version
+%{python_cmd} %{repo_path}/scripts/trim_sdk.py
 
 # cffi 1.15.0 doesn't work with RPM: https://foss.heptapod.net/pypy/cffi/-/issues/513
 %{python_cmd} -m pip install cffi==1.14.6
@@ -83,11 +79,6 @@ if command -v ${python_version} &>/dev/null; then python_cmd=${python_version}; 
 AZ_INSTALLER=RPM PYTHONPATH=\"\$bin_dir/../lib64/az/lib/${python_version}/site-packages\" \$python_cmd -sm azure.cli \"\$@\"
 " > %{buildroot}%{_bindir}/az
 rm %{buildroot}%{cli_lib_dir}/bin/python* %{buildroot}%{cli_lib_dir}/bin/pip*
-
-# Remove unused Network SDK API versions
-pushd %{buildroot}%{cli_lib_dir}/lib/${python_version}/site-packages/azure/mgmt/network/ > /dev/null
-rm -rf v2016_09_01 v2016_12_01 v2017_03_01 v2017_06_01 v2017_08_01 v2017_09_01 v2017_11_01 v2018_02_01 v2018_04_01 v2018_06_01 v2018_10_01 v2018_12_01 v2019_04_01 v2019_08_01 v2019_09_01 v2019_11_01 v2019_12_01 v2020_03_01
-popd > /dev/null
 
 # Set up tab completion
 mkdir -p %{buildroot}%{_sysconfdir}/bash_completion.d/

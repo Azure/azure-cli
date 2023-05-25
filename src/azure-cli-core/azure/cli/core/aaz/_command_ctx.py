@@ -12,6 +12,7 @@ from ._arg_action import AAZArgActionOperations, AAZGenericUpdateAction
 from ._base import AAZUndefined
 from ._field_type import AAZObjectType
 from ._field_value import AAZObject
+from ._selector import AAZSelectors
 from .exceptions import AAZInvalidArgValueError
 
 
@@ -29,9 +30,15 @@ class AAZCommandCtx:
                     cmd_arg.apply(self.args, dest)
                 elif cmd_arg != AAZUndefined:
                     self.args[dest] = cmd_arg
+            elif dest == "subscription":
+                # support to specify the command's subscription when call AAZCommand directly in code
+                if isinstance(cmd_arg, str):
+                    self._subscription_id = cmd_arg
+
         self._clients = {}
         self._vars_schema = AAZObjectType()
         self.vars = AAZObject(schema=self._vars_schema, data={})
+        self.selectors = AAZSelectors()
         self.generic_update_args = command_args.get(AAZGenericUpdateAction.DEST, None)
         # support no wait
         self.lro_no_wait = command_args.get(no_wait_arg, False) if no_wait_arg else False

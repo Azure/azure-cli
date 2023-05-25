@@ -549,6 +549,100 @@ examples:
     text: az acr repository update -n MyRegistry --image hello-world@sha256:abc123 --write-enabled false
 """
 
+helps['acr cache'] = """
+type: group
+short-summary: Manage cache rules in Azure Container Registries.
+"""
+
+helps['acr cache show'] = """
+type: command
+short-summary: Show a cache rule.
+examples:
+  - name: Show a cache rule.
+    text: az acr cache show -r MyRegistry -n MyRule
+"""
+
+helps['acr cache list'] = """
+type: command
+short-summary: List the cache rules in an Azure Container Registry.
+examples:
+  - name: List the cache rules in an Azure Container Registry.
+    text: az acr cache list -r MyRegistry
+"""
+
+helps['acr cache create'] = """
+type: command
+short-summary: Create a cache rule.
+examples:
+  - name: Create a cache rule without a credential set.
+    text: az acr cache create -r MyRegistry -n MyRule -s docker.io/library/ubuntu -t ubuntu
+  - name: Create a cache rule with a credential set.
+    text: az acr cache create -r MyRegistry -n MyRule -s docker.io/library/ubuntu -t ubuntu -c MyCredSet
+"""
+
+helps['acr cache update'] = """
+type: command
+short-summary: Update the credential set on a cache rule.
+examples:
+  - name: Change or add a credential set to an existing cache rule.
+    text: az acr cache update -r MyRegistry -n MyRule -c NewCredSet
+  - name: Remove a credential set from an existing cache rule.
+    text: az acr cache update -r MyRegistry -n MyRule --remove-cred-set
+"""
+
+helps['acr cache delete'] = """
+type: command
+short-summary: Delete a cache rule.
+examples:
+  - name: Delete a cache rule.
+    text: az acr cache delete -r MyRegistry -n MyRule
+"""
+
+helps['acr credential-set'] = """
+type: group
+short-summary: Manage credential sets in Azure Container Registries.
+"""
+
+helps['acr credential-set show'] = """
+type: command
+short-summary: Show a credential set.
+examples:
+  - name: Show a credential set rule.
+    text: az acr credential-set show -r MyRegistry -n MyCredSet
+"""
+
+helps['acr credential-set list'] = """
+type: command
+short-summary: List the credential sets in an Azure Container Registry.
+examples:
+  - name: List the credential sets in an Azure Container Registry.
+    text: az acr credential-set list -r MyRegistry
+"""
+
+helps['acr credential-set create'] = """
+type: command
+short-summary: Create a credential set.
+examples:
+  - name: Create a credential set.
+    text: az acr credential-set create -r MyRegistry -n MyRule -l docker.io -u https://MyKeyvault.vault.azure.net/secrets/usernamesecret -p https://MyKeyvault.vault.azure.net/secrets/passwordsecret
+"""
+
+helps['acr credential-set update'] = """
+type: command
+short-summary: Update the username or password Azure Key Vault secret ID on a credential set.
+examples:
+  - name: Update the password Azure Key Vault secret ID.
+    text: az acr credential-set update -r MyRegistry -n MyRule -p https://MyKeyvault.vault.azure.net/secrets/newsecretname
+"""
+
+helps['acr credential-set delete'] = """
+type: command
+short-summary: Delete a credential set.
+examples:
+  - name: Delete a credential set.
+    text: az acr credential-set delete -r MyRegistry -n MyCredSet
+"""
+
 helps['acr manifest'] = """
 type: group
 short-summary: Manage artifact manifests in Azure Container Registries.
@@ -592,7 +686,7 @@ examples:
 
 helps['acr manifest list-referrers'] = """
 type: command
-short-summary: List the ORAS referrers to a manifest in an Azure Container Registry.
+short-summary: List the referrers to a manifest in an Azure Container Registry.
 examples:
   - name: List the referrers to the manifest of the artifact 'hello-world:latest'.
     text: az acr manifest list-referrers -r MyRegistry -n hello-world:latest

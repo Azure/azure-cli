@@ -20,22 +20,22 @@ from azure.cli.core.azclierror import (ValidationError, ArgumentUsageError, Requ
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
-from azure.cli.command_modules.vm._vm_utils import (check_existence, get_storage_blob_uri, list_sku_info)
+from azure.cli.command_modules.vm._vm_utils import (check_existence, get_storage_blob_uri, list_sku_info,
+                                                    import_aaz_by_profile)
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 from azure.cli.core import keys
 from azure.core.exceptions import ResourceNotFoundError
 
 from ._client_factory import _compute_client_factory
 from ._actions import _get_latest_image_version
+
+
 logger = get_logger(__name__)
 
 
 def validate_asg_names_or_ids(cmd, namespace):
     from msrestazure.tools import resource_id, is_valid_resource_id
-    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_subscription_id
-    ApplicationSecurityGroup = cmd.get_models('ApplicationSecurityGroup',
-                                              resource_type=ResourceType.MGMT_NETWORK)
 
     resource_group = namespace.resource_group_name
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -53,7 +53,7 @@ def validate_asg_names_or_ids(cmd, namespace):
                 namespace='Microsoft.Network', type='applicationSecurityGroups',
                 name=val
             )
-        ids.append(ApplicationSecurityGroup(id=val))
+        ids.append({'id': val})
     setattr(namespace, 'application_security_groups', ids)
 
 
@@ -734,28 +734,31 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
         logger.debug('no subnet specified. Attempting to find an existing Vnet and subnet...')
 
         # if nothing specified, try to find an existing vnet and subnet in the target resource group
-        client = get_network_client(cmd.cli_ctx).virtual_networks
+        VnetList = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.vnet").List
+
+        vnet_list = VnetList(cli_ctx=cmd.cli_ctx)(command_args={
+            "resource_group": rg
+        })
 
         # find VNET in target resource group that matches the VM's location with a matching subnet
-        for vnet_match in (v for v in client.list(rg) if v.location == location and v.subnets):
-
+        for vnet_match in (v for v in vnet_list if bool(v['location'] == location and v['subnets'])):
             # 1 - find a suitable existing vnet/subnet
             result = None
             if not for_scale_set:
-                result = next((s for s in vnet_match.subnets if s.name.lower() != 'gatewaysubnet'), None)
+                result = next((s for s in vnet_match['subnets'] if s['name'].lower() != 'gatewaysubnet'), None)
             else:
                 def _check_subnet(s):
-                    if s.name.lower() == 'gatewaysubnet':
+                    if s['name'].lower() == 'gatewaysubnet':
                         return False
-                    subnet_mask = s.address_prefix.split('/')[-1]
+                    subnet_mask = s['addressPrefix'].split('/')[-1]
                     return _subnet_capacity_check(subnet_mask, namespace.instance_count,
                                                   not namespace.disable_overprovision)
 
-                result = next((s for s in vnet_match.subnets if _check_subnet(s)), None)
+                result = next((s for s in vnet_match['subnets'] if _check_subnet(s)), None)
             if not result:
                 continue
-            namespace.subnet = result.name
-            namespace.vnet_name = vnet_match.name
+            namespace.subnet = result['name']
+            namespace.vnet_name = vnet_match['name']
             namespace.vnet_type = 'existing'
             logger.debug("existing vnet '%s' and subnet '%s' found", namespace.vnet_name, namespace.subnet)
             return
@@ -981,18 +984,15 @@ def _validate_vm_vmss_create_public_ip(cmd, namespace):
         namespace.public_ip_address_type = 'new'
         logger.debug('new public IP address will be created')
 
-    from azure.cli.core.profiles import ResourceType
-    PublicIPAddressSkuName, IPAllocationMethod = cmd.get_models('PublicIPAddressSkuName', 'IPAllocationMethod',
-                                                                resource_type=ResourceType.MGMT_NETWORK)
     # Use standard public IP address automatically when using zones.
     if hasattr(namespace, 'zone') and namespace.zone is not None:
-        namespace.public_ip_sku = PublicIPAddressSkuName.standard.value
+        namespace.public_ip_sku = 'Standard'
 
     # Public-IP SKU is only exposed for VM. VMSS has no such needs so far
     if getattr(namespace, 'public_ip_sku', None):
-        if namespace.public_ip_sku == PublicIPAddressSkuName.standard.value:
+        if namespace.public_ip_sku == 'Standard':
             if not namespace.public_ip_address_allocation:
-                namespace.public_ip_address_allocation = IPAllocationMethod.static.value
+                namespace.public_ip_address_allocation = 'Static'
 
 
 def _validate_vmss_create_public_ip(cmd, namespace):
@@ -1269,6 +1269,12 @@ def _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=False):
         if not namespace.identity_scope and role_is_explicitly_specified:
             raise ArgumentUsageError(
                 "usage error: please specify --scope when assigning a role to the managed identity")
+        if not role_is_explicitly_specified and namespace.identity_scope:
+            logger.warning(
+                "Please note that the default value of '--role' will be removed in the breaking change release of the "
+                "fall. So specify '--role' and '--scope' at the same time when assigning a role to the managed "
+                "identity to avoid breaking your automation script when the default value of '--role' is removed."
+            )
 
     # Assign managed identity
     if is_identity_assign or namespace.assign_identity is not None:
@@ -1321,6 +1327,86 @@ def _validate_trusted_launch(namespace):
         namespace.enable_secure_boot = True
 
 
+def _validate_generation_version_and_trusted_launch(cmd, namespace):
+    from azure.cli.core.profiles import ResourceType
+    if not cmd.supported_api_version(resource_type=ResourceType.MGMT_COMPUTE, min_api='2020-12-01'):
+        return
+    from ._vm_utils import trusted_launch_warning_log
+    if namespace.image is not None:
+        from ._vm_utils import parse_shared_gallery_image_id, parse_community_gallery_image_id,\
+            is_valid_image_version_id, parse_gallery_image_id
+        if is_valid_image_version_id(namespace.image):
+            image_info = parse_gallery_image_id(namespace.image)
+            compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=image_info[0])
+            gallery_image_info = compute_client.gallery_images.get(
+                resource_group_name=image_info[1], gallery_name=image_info[2], gallery_image_name=image_info[3])
+            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
+                                                                                  'hyper_v_generation') else None
+            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
+            trusted_launch_warning_log(namespace, generation_version, features)
+            return
+
+        image_type = _parse_image_argument(cmd, namespace)
+
+        if image_type == 'image_id':
+            # managed image does not support trusted launch
+            return
+
+        if image_type == 'uri':
+            # vhd does not support trusted launch
+            return
+
+        if image_type == 'shared_gallery_image_id':
+            from ._client_factory import cf_shared_gallery_image
+            image_info = parse_shared_gallery_image_id(namespace.image)
+            gallery_image_info = cf_shared_gallery_image(cmd.cli_ctx).get(
+                location=namespace.location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
+            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
+                                                                                  'hyper_v_generation') else None
+            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
+            trusted_launch_warning_log(namespace, generation_version, features)
+            return
+
+        if image_type == 'community_gallery_image_id':
+            from ._client_factory import cf_community_gallery_image
+            image_info = parse_community_gallery_image_id(namespace.image)
+            gallery_image_info = cf_community_gallery_image(cmd.cli_ctx).get(
+                location=namespace.location, public_gallery_name=image_info[0], gallery_image_name=image_info[1])
+            generation_version = gallery_image_info.hyper_v_generation if hasattr(gallery_image_info,
+                                                                                  'hyper_v_generation') else None
+            features = gallery_image_info.features if hasattr(gallery_image_info, 'features') else None
+            trusted_launch_warning_log(namespace, generation_version, features)
+            return
+
+        if image_type == 'urn':
+            client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
+            os_version = namespace.os_version
+            if os_version.lower() == 'latest':
+                os_version = _get_latest_image_version(cmd.cli_ctx, namespace.location, namespace.os_publisher,
+                                                       namespace.os_offer, namespace.os_sku)
+            vm_image_info = client.get(namespace.location, namespace.os_publisher, namespace.os_offer,
+                                       namespace.os_sku, os_version)
+            generation_version = vm_image_info.hyper_v_generation if hasattr(vm_image_info,
+                                                                             'hyper_v_generation') else None
+            features = vm_image_info.features if hasattr(vm_image_info, 'features') else None
+            trusted_launch_warning_log(namespace, generation_version, features)
+            return
+
+    # create vm with os disk
+    if hasattr(namespace, 'attach_os_disk') and namespace.attach_os_disk is not None:
+        from msrestazure.tools import parse_resource_id
+        if urlparse(namespace.attach_os_disk).scheme and "://" in namespace.attach_os_disk:
+            # vhd does not support trusted launch
+            return
+        client = _compute_client_factory(cmd.cli_ctx).disks
+        attach_os_disk_name = parse_resource_id(namespace.attach_os_disk)['name']
+        attach_os_disk_info = client.get(namespace.resource_group_name, attach_os_disk_name)
+        generation_version = attach_os_disk_info.hyper_v_generation if hasattr(attach_os_disk_info,
+                                                                               'hyper_v_generation') else None
+        features = attach_os_disk_info.features if hasattr(attach_os_disk_info, 'features') else None
+        trusted_launch_warning_log(namespace, generation_version, features)
+
+
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
     if namespace.application_configuration_overrides and \
        len(namespace.application_version_ids) != len(namespace.application_configuration_overrides):
@@ -1369,6 +1455,11 @@ def _resolve_role_id(cli_ctx, role, scope):
 def process_vm_create_namespace(cmd, namespace):
     validate_tags(namespace)
     _validate_location(cmd, namespace, namespace.zone, namespace.size)
+
+    # Currently, only `az vm create` supports this feature, so it is temporarily placed in process_vm_create_namespace()
+    from ._vm_utils import display_region_recommendation
+    display_region_recommendation(cmd, namespace)
+
     validate_edge_zone(cmd, namespace)
     if namespace.count is not None:
         _validate_count(namespace)
@@ -1394,6 +1485,7 @@ def process_vm_create_namespace(cmd, namespace):
         _validate_secrets(namespace.secrets, namespace.os_type)
     _validate_trusted_launch(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
+    _validate_generation_version_and_trusted_launch(cmd, namespace)
     if namespace.boot_diagnostics_storage:
         namespace.boot_diagnostics_storage = get_storage_blob_uri(cmd.cli_ctx, namespace.boot_diagnostics_storage)
 
@@ -1413,12 +1505,19 @@ def process_vm_update_namespace(cmd, namespace):
 # region VMSS Create Validators
 def _get_default_address_pool(cli_ctx, resource_group, balancer_name, balancer_type):
     option_name = '--backend-pool-name'
-    client = getattr(get_network_client(cli_ctx), balancer_type, None)
-    if not client:
+
+    if balancer_type == 'application_gateways':
+        client = import_aaz_by_profile(cli_ctx.cloud.profile, "network.application_gateway")
+    elif balancer_type == 'load_balancers':
+        client = import_aaz_by_profile(cli_ctx.cloud.profile, "network.lb")
+    else:
         raise CLIError('unrecognized balancer type: {}'.format(balancer_type))
 
-    balancer = client.get(resource_group, balancer_name)
-    values = [x.name for x in balancer.backend_address_pools]
+    balancer = client.Show(cli_ctx=cli_ctx)(command_args={
+        'name': balancer_name,
+        'resource_group': resource_group
+    })
+    values = [x['name'] for x in balancer['backendAddressPools']]
     if len(values) > 1:
         raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' "
                        "explicitly.".format(option_name, ', '.join(values)))
@@ -1463,12 +1562,15 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
     if balancer_type == 'applicationGateway':
 
         if namespace.application_gateway:
-            client = get_network_client(cmd.cli_ctx).application_gateways
+            client = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.application_gateway")
             try:
                 rg = parse_resource_id(namespace.application_gateway).get(
                     'resource_group', namespace.resource_group_name)
                 ag_name = parse_resource_id(namespace.application_gateway)['name']
-                client.get(rg, ag_name)
+                client.Show(cli_ctx=cmd.cli_ctx)(command_args={
+                    'name': ag_name,
+                    'resource_group': rg
+                })
                 namespace.app_gateway_type = 'existing'
                 namespace.backend_pool_name = namespace.backend_pool_name or \
                     _get_default_address_pool(cmd.cli_ctx, rg, ag_name, 'application_gateways')
@@ -1511,11 +1613,11 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
                 namespace.backend_pool_name = namespace.backend_pool_name or \
                     _get_default_address_pool(cmd.cli_ctx, rg, lb_name, 'load_balancers')
                 if not namespace.nat_pool_name:
-                    if len(lb.inbound_nat_pools) > 1:
+                    if len(lb['inboundNatPools']) > 1:
                         raise CLIError("Multiple possible values found for '{0}': {1}\nSpecify '{0}' explicitly.".format(  # pylint: disable=line-too-long
-                            '--nat-pool-name', ', '.join([n.name for n in lb.inbound_nat_pools])))
-                    if lb.inbound_nat_pools:
-                        namespace.nat_pool_name = lb.inbound_nat_pools[0].name
+                            '--nat-pool-name', ', '.join([n['name'] for n in lb['inboundNatPools']])))
+                    if lb['inboundNatPools']:
+                        namespace.nat_pool_name = lb['inboundNatPools'][0]['name']
                 logger.debug("using specified existing load balancer '%s'", namespace.load_balancer)
             else:
                 namespace.load_balancer_type = 'new'
@@ -1528,11 +1630,10 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
             logger.debug('new load balancer will be created')
 
         if namespace.load_balancer_type == 'new' and namespace.single_placement_group is False and std_lb_is_available:
-            LBSkuName = cmd.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
             if namespace.load_balancer_sku is None:
-                namespace.load_balancer_sku = LBSkuName.standard.value
+                namespace.load_balancer_sku = 'Standard'
                 logger.debug("use Standard sku as single placement group is turned off")
-            elif namespace.load_balancer_sku == LBSkuName.basic.value:
+            elif namespace.load_balancer_sku == 'Basic':
                 if namespace.zones:
                     err = "'Standard' load balancer is required for zonal scale-sets"
                 elif namespace.instance_count > 100:
@@ -1543,25 +1644,29 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
                 raise CLIError('usage error:{}'.format(err))
 
 
-def get_network_client(cli_ctx):
-    from azure.cli.core.profiles import ResourceType
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)
-
-
 def get_network_lb(cli_ctx, resource_group_name, lb_name):
     from azure.core.exceptions import HttpResponseError
-    network_client = get_network_client(cli_ctx)
+    LBShow = import_aaz_by_profile(cli_ctx.cloud.profile, "network.lb").Show
     try:
-        return network_client.load_balancers.get(resource_group_name, lb_name)
+        return LBShow(cli_ctx=cli_ctx)({
+            "name": lb_name,
+            "resource_group": resource_group_name
+        })
     except HttpResponseError:
         return None
 
 
 def process_vmss_create_namespace(cmd, namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
-    # uniform_str = 'Uniform'
+    uniform_str = 'Uniform'
     flexible_str = 'Flexible'
+
+    if namespace.orchestration_mode is None:
+        namespace.orchestration_mode = uniform_str
+        logger.warning(
+            'Starting Ignite (November) 2023, the "az vmss create" command will use the new default '
+            'orchestration mode: Flexible. To learn more about Flexible Orchestration mode, '
+            'please visit https://aka.ms/orchestrationModeVMSS')
 
     if namespace.os_disk_delete_option is not None or namespace.data_disk_delete_option is not None:
         if namespace.orchestration_mode.lower() != flexible_str.lower():
@@ -1692,6 +1797,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vm_vmss_create_auth(namespace, cmd)
     _validate_trusted_launch(namespace)
     _validate_vm_vmss_msi(cmd, namespace)
+    _validate_generation_version_and_trusted_launch(cmd, namespace)
     _validate_proximity_placement_group(cmd, namespace)
     _validate_vmss_terminate_notification(cmd, namespace)
     _validate_vmss_create_automatic_repairs(cmd, namespace)
@@ -2020,11 +2126,10 @@ def process_set_applications_namespace(cmd, namespace):  # pylint: disable=unuse
 
 def process_gallery_image_version_namespace(cmd, namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
-    TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption, ConfidentialVMEncryptionType = \
-        cmd.get_models('TargetRegion', 'EncryptionImages', 'OSDiskImageEncryption', 'DataDiskImageEncryption',
-                       'ConfidentialVMEncryptionType')
-    storage_account_types_list = [item.lower() for item in ['Standard_LRS', 'Standard_ZRS', 'Premium_LRS']]
-    storage_account_types_str = ", ".join(storage_account_types_list)
+    TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption, \
+        ConfidentialVMEncryptionType, GalleryTargetExtendedLocation, GalleryExtendedLocation = cmd.get_models(
+            'TargetRegion', 'EncryptionImages', 'OSDiskImageEncryption', 'DataDiskImageEncryption',
+            'ConfidentialVMEncryptionType', 'GalleryTargetExtendedLocation', 'GalleryExtendedLocation')
 
     if namespace.target_regions:
         if hasattr(namespace, 'target_region_encryption') and namespace.target_region_encryption:
@@ -2038,6 +2143,9 @@ def process_gallery_image_version_namespace(cmd, namespace):
                 raise InvalidArgumentValueError(
                     'usage error: Length of --target_region_cvm_encryption should be as same as '
                     'length of target regions')
+
+        storage_account_types_list = [item.lower() for item in ['Standard_LRS', 'Standard_ZRS', 'Premium_LRS']]
+        storage_account_types_str = ", ".join(storage_account_types_list)
 
         regions_info = []
         for i, t in enumerate(namespace.target_regions):
@@ -2136,6 +2244,108 @@ def process_gallery_image_version_namespace(cmd, namespace):
                                                  encryption=encryption))
 
         namespace.target_regions = regions_info
+
+    if hasattr(namespace, 'target_edge_zones') and namespace.target_edge_zones:
+        if len(namespace.target_edge_zones) == 1 and namespace.target_edge_zones[0].lower() == 'none':
+            namespace.target_edge_zones = []
+            return
+        if hasattr(namespace, 'target_zone_encryption') and namespace.target_zone_encryption:
+            if len(namespace.target_edge_zones) != len(namespace.target_zone_encryption):
+                raise InvalidArgumentValueError(
+                    'usage error: Length of --target-edge-zone-encryption '
+                    'should be as same as length of --target-edge-zones')
+
+        storage_account_types_list = [item.lower() for item in
+                                      ['Standard_LRS', 'Standard_ZRS', 'Premium_LRS', 'StandardSSD_LRS']]
+        storage_account_types_str = ", ".join(storage_account_types_list)
+
+        edge_zone_info = []
+        for i, t in enumerate(namespace.target_edge_zones):
+            parts = t.split('=', 3)
+            # At least the region and edge zone are specified
+            if len(parts) < 2:
+                continue
+
+            region = parts[0]
+            edge_zone = parts[1]
+            replica_count = None
+            storage_account_type = None
+
+            # Both "region" and "edge zone" are specified,
+            # but only one of "replica count" and "storage account type" is specified
+            if len(parts) == 3:
+                try:
+                    replica_count = int(parts[2])
+                except ValueError:
+                    storage_account_type = parts[2]
+                    if parts[2].lower() not in storage_account_types_list:
+                        raise ArgumentUsageError(
+                            "usage error: {} is an invalid target edge zone argument. "
+                            "The third part is neither an integer replica count or a valid storage account type. "
+                            "Storage account types must be one of {}.".format(t, storage_account_types_str))
+
+            # Not only "region" and "edge zone" are specified,
+            # but also "replica count" and "storage account type" are specified
+            elif len(parts) == 4:
+                try:
+                    replica_count = int(parts[2])  # raises ValueError if this is not a replica count, try other order.
+                    storage_account_type = parts[3]
+                    if storage_account_type not in storage_account_types_list:
+                        raise ArgumentUsageError(
+                            "usage error: {} is an invalid target edge zone argument. "
+                            "The forth part is not a valid storage account type. "
+                            "Storage account types must be one of {}.".format(t, storage_account_types_str))
+                except ValueError:
+                    raise ArgumentUsageError(
+                        "usage error: {} is an invalid target edge zone argument. "
+                        "The third part must be a valid integer replica count.".format(t))
+
+            # Parse target edge zone encryption,
+            # example: ['microsoftlosangeles1', 'des1, 0, des2, 1, des3', 'null', 'des4']
+            encryption = None
+            os_disk_image = None
+            data_disk_images = None
+            if hasattr(namespace, 'target_zone_encryption') and namespace.target_zone_encryption:
+                terms = namespace.target_zone_encryption[i].split(',')
+                if len(terms) < 2:
+                    break
+                # OS disk
+                os_disk_image = terms[1]
+                if os_disk_image == 'null':
+                    os_disk_image = None
+                else:
+                    des_id = _disk_encryption_set_format(cmd, namespace, os_disk_image)
+                    os_disk_image = OSDiskImageEncryption(disk_encryption_set_id=des_id)
+                # Data disk
+                if len(terms) > 2:
+                    data_disk_images = terms[2:]
+                    data_disk_images_len = len(data_disk_images)
+                    if data_disk_images_len % 2 != 0:
+                        raise ArgumentUsageError(
+                            'usage error: LUN and disk encryption set for data disk should appear in pair in '
+                            '--target-edge-zone-encryption. Example: 1,osdes,0,datades0,1,datades1')
+                    data_disk_image_encryption_list = []
+                    for j in range(int(data_disk_images_len / 2)):
+                        lun = data_disk_images[j * 2]
+                        des_id = data_disk_images[j * 2 + 1]
+                        des_id = _disk_encryption_set_format(cmd, namespace, des_id)
+                        data_disk_image_encryption_list.append(DataDiskImageEncryption(
+                            lun=lun, disk_encryption_set_id=des_id))
+                    data_disk_images = data_disk_image_encryption_list
+
+            if os_disk_image or data_disk_images:
+                encryption = EncryptionImages(os_disk_image=os_disk_image, data_disk_images=data_disk_images)
+
+            extended_location = GalleryExtendedLocation(name=edge_zone, type='EdgeZone')
+
+            edge_zone_info.append(
+                GalleryTargetExtendedLocation(name=region, extended_location_replica_count=replica_count,
+                                              extended_location=extended_location,
+                                              storage_account_type=storage_account_type,
+                                              encryption=encryption)
+            )
+
+        namespace.target_edge_zones = edge_zone_info
 
 
 def _disk_encryption_set_format(cmd, namespace, name):

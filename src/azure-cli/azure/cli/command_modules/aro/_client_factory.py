@@ -10,6 +10,6 @@ from azure.mgmt.redhatopenshift import AzureRedHatOpenShiftClient
 
 def cf_aro(cli_ctx, *_):
     client = get_mgmt_service_client(
-        cli_ctx, AzureRedHatOpenShiftClient).open_shift_clusters
+        cli_ctx, AzureRedHatOpenShiftClient)
 
     return client

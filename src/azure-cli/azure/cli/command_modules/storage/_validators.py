@@ -6,6 +6,7 @@
 # pylint: disable=protected-access
 import os
 import argparse
+from ipaddress import ip_network
 
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
@@ -624,6 +625,8 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None, 
                 filename = ns.get('file_name')
                 account_kwargs["share_name"] = share
                 account_kwargs["snapshot"] = ns.get('snapshot')
+                if ns.get('enable_file_backup_request_intent', None):
+                    account_kwargs["enable_file_backup_request_intent"] = ns.get("enable_file_backup_request_intent")
                 if is_storagev2(prefix):
                     client = cf_share_client(cmd.cli_ctx, account_kwargs).\
                         get_directory_client(directory_path=directory).\
@@ -2166,6 +2169,12 @@ def validate_policy(namespace):
                        "policy.")
 
 
+def validate_allow_blob_public_access():
+    logger.warning("The public access to all blobs or containers in the storage account will be "
+                   "disallowed by default in the future, which means default value for --allow-blob-public-access "
+                   "is still null but will be equivalent to false.")
+
+
 def validate_immutability_arguments(namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
     if not namespace.enable_alw:
@@ -2227,6 +2236,24 @@ def validate_fs_file_set_expiry(namespace):
         namespace.expires_on = get_datetime_type(False)(namespace.expires_on)
     except ValueError:
         pass
+
+
+def validate_ip_address(namespace):
+    # if there are overlapping ip ranges, throw an exception
+    ip_address = namespace.ip_address
+
+    if not ip_address:
+        return
+
+    ip_address_networks = [ip_network(ip) for ip in ip_address]
+    for idx, ip_address_network in enumerate(ip_address_networks):
+        for idx2, ip_address_network2 in enumerate(ip_address_networks):
+            if idx == idx2:
+                continue
+            if ip_address_network.overlaps(ip_address_network2):
+                from azure.cli.core.azclierror import InvalidArgumentValueError
+                raise InvalidArgumentValueError(f"ip addresses {ip_address_network} and {ip_address_network2} "
+                                                f"provided are overlapping: --ip_address ip1 [ip2]...")
 
 
 # pylint: disable=too-few-public-methods

@@ -3,8 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import json
+import os
+import re
 
 from azure.cli.command_modules.acs._client_factory import get_resource_groups_client, get_resources_client
+from azure.cli.core.util import get_file_json
 from azure.cli.command_modules.acs._consts import (
     CONST_INGRESS_APPGW_ADDON_NAME,
     CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID,
@@ -16,7 +19,7 @@ from azure.cli.command_modules.acs._consts import (
 )
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._roleassignments import add_role_assignment
-from azure.cli.core.azclierror import AzCLIError, ClientRequestError, CLIError
+from azure.cli.core.azclierror import AzCLIError, ClientRequestError, CLIError, InvalidArgumentValueError
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import send_raw_request
 from azure.core.exceptions import HttpResponseError
@@ -275,38 +278,6 @@ def get_existing_container_insights_extension_dcr_tags(cmd, dcr_url):
     return tags
 
 
-def getRegionCodeForAzureRegion(cmd, cluster_region):
-    region_code = "EUS"
-    cloud_name = cmd.cli_ctx.cloud.name
-    if cloud_name.lower() == "azurecloud":
-        region_code = AzureCloudLocationToOmsRegionCodeMap.get(
-            cluster_region, "EUS"
-        )
-    elif cloud_name.lower() == "azurechinacloud":
-        region_code = AzureChinaLocationToOmsRegionCodeMap.get(
-            cluster_region, "EAST2"
-        )
-    elif cloud_name.lower() == "azureusgovernment":
-        region_code = AzureFairfaxLocationToOmsRegionCodeMap.get(
-            cluster_region, "USGV"
-        )
-    else:
-        logger.error(
-            "AKS Monitoring addon not supported in cloud : %s", cloud_name
-        )
-    return region_code
-
-
-def sanitize_dcr_name(name):
-    name = name[0:43]
-    lastIndexAlphaNumeric = len(name) - 1
-    while ((name[lastIndexAlphaNumeric].isalnum() is False) and lastIndexAlphaNumeric > -1):
-        lastIndexAlphaNumeric = lastIndexAlphaNumeric - 1
-    if lastIndexAlphaNumeric < 0:
-        return ""
-    return name[0:lastIndexAlphaNumeric + 1]
-
-
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements,line-too-long
 def ensure_container_insights_for_monitoring(
     cmd,
@@ -320,6 +291,7 @@ def ensure_container_insights_for_monitoring(
     create_dcr=False,
     create_dcra=False,
     enable_syslog=False,
+    data_collection_settings=None
 ):
     """
     Either adds the ContainerInsights solution to a LA Workspace OR sets up a DCR (Data Collection Rule) and DCRA
@@ -361,6 +333,7 @@ def ensure_container_insights_for_monitoring(
             "Could not locate resource group in workspace-resource-id URL."
         )
 
+    location = ""
     # region of workspace can be different from region of RG so find the location of the workspace_resource_id
     if not remove_monitoring:
         resources = get_resources_client(cmd.cli_ctx, subscription_id)
@@ -379,8 +352,9 @@ def ensure_container_insights_for_monitoring(
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
             f"providers/Microsoft.ContainerService/managedClusters/{cluster_name}"
         )
-        region_code = getRegionCodeForAzureRegion(cmd, cluster_region)
-        dataCollectionRuleName = sanitize_dcr_name(f"MSCI-{region_code}-{cluster_name}")
+        dataCollectionRuleName = f"MSCI-{location}-{cluster_name}"
+        # Max length of the DCR name is 64 chars
+        dataCollectionRuleName = dataCollectionRuleName[0:64]
         dcr_resource_id = (
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
             f"providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
@@ -441,6 +415,12 @@ def ensure_container_insights_for_monitoring(
             # get existing tags on the container insights extension DCR if the customer added any
             existing_tags = get_existing_container_insights_extension_dcr_tags(
                 cmd, dcr_url)
+            # get data collection settings
+            extensionSettings = {}
+            if data_collection_settings is not None:
+                dataCollectionSettings = _get_data_collection_settings(data_collection_settings)
+                validate_data_collection_settings(dataCollectionSettings)
+                extensionSettings["dataCollectionSettings"] = dataCollectionSettings
             # create the DCR
             dcr_creation_body_without_syslog = json.dumps(
                 {
@@ -455,6 +435,7 @@ def ensure_container_insights_for_monitoring(
                                         "Microsoft-ContainerInsights-Group-Default"
                                     ],
                                     "extensionName": "ContainerInsights",
+                                    "extensionSettings": extensionSettings,
                                 }
                             ]
                         },
@@ -531,6 +512,7 @@ def ensure_container_insights_for_monitoring(
                                         "Microsoft-ContainerInsights-Group-Default"
                                     ],
                                     "extensionName": "ContainerInsights",
+                                    "extensionSettings": extensionSettings,
                                 }
                             ]
                         },
@@ -599,6 +581,24 @@ def ensure_container_insights_for_monitoring(
                     error = e
             else:
                 raise error
+
+
+def validate_data_collection_settings(dataCollectionSettings):
+    if 'interval' in dataCollectionSettings.keys():
+        intervalValue = dataCollectionSettings["interval"]
+    if (bool(re.match(r'^[0-9]+[m]$', intervalValue))) is False:
+        raise InvalidArgumentValueError('interval format must be in <number>m')
+    intervalValue = int(intervalValue.rstrip("m"))
+    if intervalValue <= 0 or intervalValue > 30:
+        raise InvalidArgumentValueError('interval value MUST be in the range from 1m to 30m')
+    if 'namespaceFilteringMode' in dataCollectionSettings.keys():
+        namespaceFilteringModeValue = dataCollectionSettings["namespaceFilteringMode"].lower()
+        if namespaceFilteringModeValue not in ["off", "exclude", "include"]:
+            raise InvalidArgumentValueError('namespaceFilteringMode value MUST be either Off or Exclude or Include')
+    if 'namespaces' in dataCollectionSettings.keys():
+        namspaces = dataCollectionSettings["namespaces"]
+        if isinstance(namspaces, list) is False:
+            raise InvalidArgumentValueError('namespaces must be an array type')
 
 
 def add_monitoring_role_assignment(result, cluster_resource_id, cmd):
@@ -813,3 +813,13 @@ def add_virtual_node_role_assignment(cmd, result, vnet_subnet_id):
             "Could not find service principal or user assigned MSI for role"
             "assignment"
         )
+
+
+def _get_data_collection_settings(file_path):
+    if not os.path.isfile(file_path):
+        raise InvalidArgumentValueError("{} is not valid file, or not accessable.".format(file_path))
+    data_collection_settings = get_file_json(file_path)
+    if not isinstance(data_collection_settings, dict):
+        msg = "Error reading data_collection_settings."
+        raise InvalidArgumentValueError(msg.format(file_path))
+    return data_collection_settings

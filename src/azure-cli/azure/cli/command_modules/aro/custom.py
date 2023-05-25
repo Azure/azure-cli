@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import random
-import os
 
 import azure.mgmt.redhatopenshift.models as openshiftcluster
 
@@ -58,6 +57,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
                apiserver_visibility=None,
                ingress_visibility=None,
                tags=None,
+               version=None,
                no_wait=False):
 
     resource_client = get_mgmt_service_client(
@@ -102,6 +102,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
             resource_group_id=(f"/subscriptions/{subscription_id}"
                                f"/resourceGroups/{cluster_resource_group or 'aro-' + random_id}"),
             fips_validated_modules='Enabled' if fips_validated_modules else 'Disabled',
+            version=version or '',
         ),
         service_principal_profile=openshiftcluster.ServicePrincipalProfile(
             client_id=client_id,
@@ -142,7 +143,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
     sp_obj_ids = [client_sp_id, rp_client_sp_id]
     ensure_resource_permissions(cmd.cli_ctx, oc, True, sp_obj_ids)
 
-    return sdk_no_wait(no_wait, client.begin_create_or_update,
+    return sdk_no_wait(no_wait, client.open_shift_clusters.begin_create_or_update,
                        resource_group_name=resource_group_name,
                        resource_name=resource_name,
                        parameters=oc)
@@ -153,7 +154,7 @@ def aro_delete(cmd, client, resource_group_name, resource_name, no_wait=False):
     rp_client_sp_id = None
 
     try:
-        oc = client.get(resource_group_name, resource_name)
+        oc = client.open_shift_clusters.get(resource_group_name, resource_name)
     except CloudError as e:
         if e.status_code == 404:
             raise ResourceNotFoundError(e.message) from e
@@ -176,23 +177,31 @@ def aro_delete(cmd, client, resource_group_name, resource_name, no_wait=False):
     if rp_client_sp_id:
         ensure_resource_permissions(cmd.cli_ctx, oc, False, [rp_client_sp_id])
 
-    return sdk_no_wait(no_wait, client.begin_delete,
+    return sdk_no_wait(no_wait, client.open_shift_clusters.begin_delete,
                        resource_group_name=resource_group_name,
                        resource_name=resource_name)
 
 
 def aro_list(client, resource_group_name=None):
     if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list()
+        return client.open_shift_clusters.list_by_resource_group(resource_group_name)
+    return client.open_shift_clusters.list()
 
 
 def aro_show(client, resource_group_name, resource_name):
-    return client.get(resource_group_name, resource_name)
+    return client.open_shift_clusters.get(resource_group_name, resource_name)
 
 
 def aro_list_credentials(client, resource_group_name, resource_name):
-    return client.list_credentials(resource_group_name, resource_name)
+    return client.open_shift_clusters.list_credentials(resource_group_name, resource_name)
+
+
+def aro_get_versions(client, location):
+    items = client.open_shift_versions.list(location)
+    versions = []
+    for item in items:
+        versions.append(item.version)
+    return sorted(versions)
 
 
 def aro_update(cmd,
@@ -204,7 +213,7 @@ def aro_update(cmd,
                client_secret=None,
                no_wait=False):
     # if we can't read cluster spec, we will not be able to do much. Fail.
-    oc = client.get(resource_group_name, resource_name)
+    oc = client.open_shift_clusters.get(resource_group_name, resource_name)
 
     ocUpdate = openshiftcluster.OpenShiftClusterUpdate()
 
@@ -220,18 +229,10 @@ def aro_update(cmd,
         if client_id is not None:
             ocUpdate.service_principal_profile.client_id = client_id
 
-    return sdk_no_wait(no_wait, client.begin_update,
+    return sdk_no_wait(no_wait, client.open_shift_clusters.begin_update,
                        resource_group_name=resource_group_name,
                        resource_name=resource_name,
                        parameters=ocUpdate)
-
-
-def rp_mode_development():
-    return os.environ.get('RP_MODE', '').lower() == 'development'
-
-
-def rp_mode_production():
-    return os.environ.get('RP_MODE', '') == ''
 
 
 def generate_random_id():
@@ -241,21 +242,26 @@ def generate_random_id():
     return random_id
 
 
-def get_route_tables_from_subnets(cli_ctx, subnets):
-    network_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)
+def get_network_resources_from_subnets(cli_ctx, subnets):
+    from .aaz.latest.network.vnet.subnet import Show
 
-    route_tables = set()
+    subnet_resources = set()
     for sn in subnets:
         sid = parse_resource_id(sn)
 
-        subnet = network_client.subnets.get(resource_group_name=sid['resource_group'],
-                                            virtual_network_name=sid['name'],
-                                            subnet_name=sid['resource_name'])
+        subnet = Show(cli_ctx=cli_ctx)(command_args={
+            "name": sid['resource_name'],
+            "vnet_name": sid['name'],
+            "resource_group": sid['resource_group']
+        })
 
-        if subnet.route_table is not None:
-            route_tables.add(subnet.route_table.id)
+        if subnet.get("routeTable", None):
+            subnet_resources.add(subnet["routeTable"]["id"])
 
-    return route_tables
+        if subnet.get("natGateway", None):
+            subnet_resources.add(subnet["natGateway"]["id"])
+
+    return subnet_resources
 
 
 def get_cluster_network_resources(cli_ctx, oc):
@@ -280,11 +286,11 @@ def get_cluster_network_resources(cli_ctx, oc):
 
 
 def get_network_resources(cli_ctx, subnets, vnet):
-    route_tables = get_route_tables_from_subnets(cli_ctx, subnets)
+    subnet_resources = get_network_resources_from_subnets(cli_ctx, subnets)
 
     resources = set()
     resources.add(vnet)
-    resources.update(route_tables)
+    resources.update(subnet_resources)
 
     return resources
 
@@ -400,5 +406,6 @@ def ensure_resource_permissions(cli_ctx, oc, fail, sp_obj_ids):
                         logger.error(e.message)
                         raise
                     logger.info(e.message)
+
                 if not resource_contributor_exists:
                     assign_role_to_resource(cli_ctx, resource, sp_id, role)

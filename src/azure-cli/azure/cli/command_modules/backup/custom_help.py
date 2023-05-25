@@ -543,7 +543,7 @@ def validate_and_extract_container_type(container_name, backup_management_type):
     container_type = container_name.split(";")[0].lower()
     container_type_mappings = {"iaasvmcontainer": "AzureIaasVM", "storagecontainer": "AzureStorage",
                                "vmappcontainer": "AzureWorkload", "windows": "MAB",
-                               "sqlagworkloadcontainer": "AzureWorkload"}
+                               "sqlagworkloadcontainer": "AzureWorkload", "hanahsrcontainer": "AzureWorkload"}
 
     if container_type in container_type_mappings:
         return container_type_mappings[container_type]

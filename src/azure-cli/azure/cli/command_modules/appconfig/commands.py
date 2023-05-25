@@ -78,7 +78,7 @@ def load_command_table(self, _):
         g.show_command('show', 'show_configstore')
         g.show_command('show-deleted', 'show_deleted_configstore', table_transformer=deleted_configstore_output_format)
 
-    with self.command_group('appconfig replica', configstore_replica_util, is_preview=True) as g:
+    with self.command_group('appconfig replica', configstore_replica_util) as g:
         g.command('list', 'list_replica')
         g.command('create', 'create_replica')
         g.command('delete', 'delete_replica', confirmation=True)

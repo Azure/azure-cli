@@ -47,10 +47,13 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.extension_name = None
         self.extension_version = None
         self.event_id = str(uuid.uuid4())
+        self.cli_recommendation = None
         self.feedback = None
         self.extension_management_detail = None
         self.raw_command = None
         self.show_survey_message = False
+        self.region_input = None
+        self.region_identified = None
         self.mode = 'default'
         # The AzCLIError sub-class name
         self.error_type = 'None'
@@ -143,6 +146,10 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
             'Context.Default.VS.Core.OS.Type': platform.system().lower(),  # eg. darwin, windows
             'Context.Default.VS.Core.OS.Version': platform.version().lower(),  # eg. 10.0.14942
             'Context.Default.VS.Core.OS.Platform': platform.platform().lower(),  # eg. windows-10-10.0.19041-sp0
+            # the distro info is complement of platform info for linux
+            'Context.Default.VS.Core.Distro.Name': _get_distro_name(),  # eg. 'CentOS Linux 8'
+            'Context.Default.VS.Core.Distro.Id': _get_distro_id(),  # eg. 'centos'
+            'Context.Default.VS.Core.Distro.Version': _get_distro_version(),  # eg. '8.4.2105'
             'Context.Default.VS.Core.User.Id': _get_installation_id(),
             'Context.Default.VS.Core.User.IsMicrosoftInternal': 'False',
             'Context.Default.VS.Core.User.IsOptedIn': 'True',
@@ -172,8 +179,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'Source', source)
         set_custom_properties(result,
                               'ClientRequestId',
-                              lambda: self.application.data['headers'][
-                                  'x-ms-client-request-id'])
+                              lambda: self.application.data['headers'].get('x-ms-client-request-id', ''))
         set_custom_properties(result, 'CoreVersion', _get_core_version)
         set_custom_properties(result, 'TelemetryVersion', "2.0")
         set_custom_properties(result, 'InstallationId', _get_installation_id)
@@ -195,6 +201,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'PythonVersion', platform.python_version())
         set_custom_properties(result, 'ModuleCorrelation', self.module_correlation)
         set_custom_properties(result, 'ExtensionName', ext_info)
+        set_custom_properties(result, 'CLIRecommendation', self.cli_recommendation)
         set_custom_properties(result, 'Feedback', self.feedback)
         set_custom_properties(result, 'ExtensionManagementDetail', self.extension_management_detail)
         set_custom_properties(result, 'Mode', self.mode)
@@ -207,6 +214,8 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'PollEndTime', str(self.poll_end_time))
         set_custom_properties(result, 'CloudName', _get_cloud_name())
         set_custom_properties(result, 'ShowSurveyMessage', str(self.show_survey_message))
+        set_custom_properties(result, 'RegionInput', self.region_input)
+        set_custom_properties(result, 'RegionIdentified', self.region_identified)
         set_custom_properties(result, 'AllowBroker', str(self.allow_broker))
 
         return result
@@ -396,6 +405,14 @@ def set_feedback(feedback):
 
 
 @decorators.suppress_all_exceptions()
+def set_cli_recommendation(api_version, feedback):
+    # This function returns the user's selection and feedback on the cli-recommendation results
+    # Please refer to feedback_design.md of cli-recommendation for detailed information
+    _session.cli_recommendation = {"api_version": api_version,
+                                   "feedback": feedback}
+
+
+@decorators.suppress_all_exceptions()
 def set_extension_management_detail(ext_name, ext_version):
     content = '{}@{}'.format(ext_name, ext_version)
     _session.extension_management_detail = content[:512]
@@ -425,6 +442,14 @@ def set_raw_command_name(command):
 def set_survey_info(show_survey_message):
     # whether showed the intercept survey message or not
     _session.show_survey_message = show_survey_message
+
+
+@decorators.suppress_all_exceptions()
+def set_region_identified(region_input, region_identified):
+    # Record the region input by customers
+    _session.region_input = region_input
+    # Record the region we have recommended to customers
+    _session.region_identified = region_identified
 
 
 @decorators.suppress_all_exceptions()
@@ -554,6 +579,33 @@ def _get_hash_mac_address():
 def _get_hash_machine_id():
     # Definition: Take first 128bit of the SHA256 hashed MAC address and convert them into a GUID
     return str(uuid.UUID(_get_hash_mac_address()[0:32]))
+
+
+@decorators.suppress_all_exceptions(fallback_return='')
+def _get_distro_name():
+    try:
+        import distro
+        return distro.name(pretty=True)
+    except ImportError:
+        return ''
+
+
+@decorators.suppress_all_exceptions(fallback_return='')
+def _get_distro_id():
+    try:
+        import distro
+        return distro.id()
+    except ImportError:
+        return ''
+
+
+@decorators.suppress_all_exceptions(fallback_return='')
+def _get_distro_version():
+    try:
+        import distro
+        return distro.version()
+    except ImportError:
+        return ''
 
 
 @decorators.suppress_all_exceptions(fallback_return='')

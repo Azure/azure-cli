@@ -33,7 +33,9 @@ def escape_apply_kwargs(val):
 
 
 class MSGraphUpnReplacer(RecordingProcessor):
-    """Replace UPN with encoded #
+    """Replace UPN with encoded #.
+    azure.cli.testsdk.scenario_tests.recording_processors.GeneralNameReplacer can't replace encoded UPN in URL, that's
+    why this replacer is needed.
     """
     def __init__(self, test_name, mock_name):
         self.test_name = test_name

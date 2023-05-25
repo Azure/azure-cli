@@ -243,11 +243,11 @@ class List(AAZCommand):
 
             virtual_machines_allocated = cls._schema_on_200.value.Element.properties.instance_view.utilization_info.virtual_machines_allocated
             virtual_machines_allocated.Element = AAZObjectType()
-            _build_schema_sub_resource_read_only_read(virtual_machines_allocated.Element)
+            _ListHelper._build_schema_sub_resource_read_only_read(virtual_machines_allocated.Element)
 
             virtual_machines_associated = cls._schema_on_200.value.Element.properties.virtual_machines_associated
             virtual_machines_associated.Element = AAZObjectType()
-            _build_schema_sub_resource_read_only_read(virtual_machines_associated.Element)
+            _ListHelper._build_schema_sub_resource_read_only_read(virtual_machines_associated.Element)
 
             sku = cls._schema_on_200.value.Element.sku
             sku.capacity = AAZIntType()
@@ -263,23 +263,25 @@ class List(AAZCommand):
             return cls._schema_on_200
 
 
-_schema_sub_resource_read_only_read = None
+class _ListHelper:
+    """Helper class for List"""
 
+    _schema_sub_resource_read_only_read = None
 
-def _build_schema_sub_resource_read_only_read(_schema):
-    global _schema_sub_resource_read_only_read
-    if _schema_sub_resource_read_only_read is not None:
-        _schema.id = _schema_sub_resource_read_only_read.id
-        return
+    @classmethod
+    def _build_schema_sub_resource_read_only_read(cls, _schema):
+        if cls._schema_sub_resource_read_only_read is not None:
+            _schema.id = cls._schema_sub_resource_read_only_read.id
+            return
 
-    _schema_sub_resource_read_only_read = AAZObjectType()
+        cls._schema_sub_resource_read_only_read = _schema_sub_resource_read_only_read = AAZObjectType()
 
-    sub_resource_read_only_read = _schema_sub_resource_read_only_read
-    sub_resource_read_only_read.id = AAZStrType(
-        flags={"read_only": True},
-    )
+        sub_resource_read_only_read = _schema_sub_resource_read_only_read
+        sub_resource_read_only_read.id = AAZStrType(
+            flags={"read_only": True},
+        )
 
-    _schema.id = _schema_sub_resource_read_only_read.id
+        _schema.id = cls._schema_sub_resource_read_only_read.id
 
 
 __all__ = ["List"]

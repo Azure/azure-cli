@@ -13,14 +13,15 @@ from knack.util import status_tag_messages
 
 from ._arg_action import AAZSimpleTypeArgAction, AAZObjectArgAction, AAZDictArgAction, AAZFreeFormDictArgAction, \
     AAZListArgAction, AAZGenericUpdateAction, AAZGenericUpdateForceStringAction
-from ._base import AAZBaseType, AAZUndefined, AAZBaseValue
+from ._base import AAZBaseType, AAZUndefined
 from ._field_type import AAZObjectType, AAZStrType, AAZIntType, AAZBoolType, AAZFloatType, AAZListType, AAZDictType, \
     AAZSimpleType, AAZFreeFormDictType
 from ._field_value import AAZObject
 from ._arg_fmt import AAZObjectArgFormat, AAZListArgFormat, AAZDictArgFormat, AAZFreeFormDictArgFormat, \
     AAZSubscriptionIdArgFormat, AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZUuidFormat, AAZDateFormat, \
-    AAZTimeFormat, AAZDateTimeFormat, AAZDurationFormat
+    AAZTimeFormat, AAZDateTimeFormat, AAZDurationFormat, AAZFileArgTextFormat
 from .exceptions import AAZUnregisteredArg
+from ._prompt import AAZPromptInput
 
 # pylint: disable=redefined-builtin, protected-access, too-few-public-methods
 
@@ -134,6 +135,12 @@ class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
 
         if self._blank != AAZUndefined:
             arg.nargs = '?'
+            if isinstance(self._blank, AAZPromptInput):
+                short_summary = arg.type.settings.get('help', None) or ''
+                if short_summary:
+                    short_summary += '  '
+                short_summary += self._blank.help_message
+                arg.help = short_summary
 
         cli_ctx = kwargs.get('cli_ctx', None)
         if cli_ctx is None:
@@ -268,6 +275,13 @@ class AAZUuidArg(AAZStrArg):
     @property
     def _type_in_help(self):
         return "GUID/UUID"
+
+
+class AAZPasswordArg(AAZStrArg):
+
+    @property
+    def _type_in_help(self):
+        return "Password"
 
 
 class AAZIntArg(AAZSimpleTypeArg, AAZIntType):
@@ -520,6 +534,13 @@ class AAZSubscriptionIdArg(AAZStrArg):
         return arg
 
 
+class AAZFileArg(AAZStrArg):
+
+    def __init__(self, fmt=None, **kwargs):
+        fmt = fmt or AAZFileArgTextFormat()
+        super().__init__(fmt=fmt, **kwargs)
+
+
 # Generic Update arguments
 class AAZGenericUpdateForceStringArg(AAZBoolArg):
 
@@ -630,10 +651,3 @@ class AAZGenericUpdateRemoveArg(AAZGenericUpdateArg):
         class Action(AAZGenericUpdateAction):
             ACTION_NAME = "remove"
         return Action
-
-
-def has_value(arg_value):
-    if isinstance(arg_value, AAZBaseValue):
-        # handle patch value for list, object, dict
-        return arg_value.to_serialized_data() != AAZUndefined
-    return arg_value != AAZUndefined

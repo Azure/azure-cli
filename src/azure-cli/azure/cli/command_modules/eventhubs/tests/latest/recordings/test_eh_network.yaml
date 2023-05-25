@@ -13,12 +13,12 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001","name":"cli_test_eh_network000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-10-07T02:43:54Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001","name":"cli_test_eh_network000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-04-12T07:55:09Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:43:59 GMT
+      - Wed, 12 Apr 2023 07:55:16 GMT
       expires:
       - '-1'
       pragma:
@@ -42,8 +42,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
-      ["10.0.0.0/16"]}, "dhcpOptions": {}}}'
+    body: '{"location": "westus", "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "enableDdosProtection": false, "enableVmProtection": false}}'
     headers:
       Accept:
       - application/json
@@ -54,39 +54,38 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '123'
+      - '152'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"sbehvnettest1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1\",\r\n
-        \ \"etag\": \"W/\\\"6e827123-569d-4720-bc57-9838d8ff4916\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"e331ee05-b68c-46ac-8514-3ede26662a88\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"6d8d7e12-f2d7-4558-b65b-bfd47606574e\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"1c1794c2-c0c4-4c4b-83e7-8d52bab829e7\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [],\r\n
+        \   \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\": false\r\n
+        \ }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/56eec16d-eb48-4620-a300-939560264661?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/59553787-af0b-4bc3-8b06-7a14f19990de?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '698'
+      - '629'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:44:05 GMT
+      - Wed, 12 Apr 2023 07:55:24 GMT
       expires:
       - '-1'
       pragma:
@@ -99,9 +98,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d1419d26-3fbb-4600-a479-20d502ebad33
+      - 42ffce39-dddc-48ed-b025-171e480f2636
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1197'
     status:
       code: 201
       message: Created
@@ -119,9 +118,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/56eec16d-eb48-4620-a300-939560264661?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/59553787-af0b-4bc3-8b06-7a14f19990de?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -133,7 +132,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:44:08 GMT
+      - Wed, 12 Apr 2023 07:55:27 GMT
       expires:
       - '-1'
       pragma:
@@ -150,7 +149,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6d3901dd-4f54-4ca7-8522-680a6e3f22c0
+      - dc0f5331-d964-4078-84f5-b1f9e6643df9
     status:
       code: 200
       message: OK
@@ -168,31 +167,30 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"sbehvnettest1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1\",\r\n
-        \ \"etag\": \"W/\\\"b0b887c1-8bc9-4146-9e5e-368d2189f3a3\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"a5981e68-4245-41a5-80d0-1ab832882880\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"6d8d7e12-f2d7-4558-b65b-bfd47606574e\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"1c1794c2-c0c4-4c4b-83e7-8d52bab829e7\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [],\r\n
+        \   \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\": false\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '699'
+      - '630'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:44:08 GMT
+      - Wed, 12 Apr 2023 07:55:28 GMT
       etag:
-      - W/"b0b887c1-8bc9-4146-9e5e-368d2189f3a3"
+      - W/"a5981e68-4245-41a5-80d0-1ab832882880"
       expires:
       - '-1'
       pragma:
@@ -209,7 +207,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8ec0d433-b153-4ee2-9270-01769af6640b
+      - f6659dce-7f88-42a8-b63e-abe6a17d66d7
     status:
       code: 200
       message: OK
@@ -227,12 +225,12 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001","name":"cli_test_eh_network000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-10-07T02:43:54Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001","name":"cli_test_eh_network000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-04-12T07:55:09Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -241,7 +239,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:44:09 GMT
+      - Wed, 12 Apr 2023 07:55:28 GMT
       expires:
       - '-1'
       pragma:
@@ -256,8 +254,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
-      ["10.0.0.0/16"]}, "dhcpOptions": {}}}'
+    body: '{"location": "westus", "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "enableDdosProtection": false, "enableVmProtection": false}}'
     headers:
       Accept:
       - application/json
@@ -268,39 +266,38 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '123'
+      - '152'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"sbehvnettest2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2\",\r\n
-        \ \"etag\": \"W/\\\"f435ec17-0234-4e0c-9121-4058d456af56\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"fa76612b-7a87-49bc-9058-8f64670845d2\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"5db5d897-45ee-404e-8c85-190ff22c6b52\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"d8ab00f2-92bc-4147-81c7-89f6e00e9530\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [],\r\n
+        \   \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\": false\r\n
+        \ }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/995cbcb6-8ed0-4946-bfb4-90333bbd40ac?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/23e7fab1-9a37-4684-8bc9-50a2b0c9598c?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '698'
+      - '629'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:44:14 GMT
+      - Wed, 12 Apr 2023 07:55:36 GMT
       expires:
       - '-1'
       pragma:
@@ -313,9 +310,221 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 70cbf469-b774-4c16-bcce-fe09d01de879
+      - 11d02ca5-a2cd-40c7-95fd-8e192d862ad4
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1197'
+    status:
+      code: 201
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/23e7fab1-9a37-4684-8bc9-50a2b0c9598c?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Apr 2023 07:55:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c3d5141f-f26f-481b-8729-49ee3ac84d77
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"sbehvnettest2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2\",\r\n
+        \ \"etag\": \"W/\\\"6881b7dc-206e-48bc-a236-67837b58e082\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"d8ab00f2-92bc-4147-81c7-89f6e00e9530\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [],\r\n
+        \   \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\": false\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '630'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Apr 2023 07:55:41 GMT
+      etag:
+      - W/"6881b7dc-206e-48bc-a236-67837b58e082"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ff6719ff-2141-45f2-9620-7ff7850bfe03
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001?api-version=2022-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001","name":"cli_test_eh_network000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-04-12T07:55:09Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '328'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Apr 2023 07:55:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "enableDdosProtection": false, "enableVmProtection": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '152'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"sbehvnettest3\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3\",\r\n
+        \ \"etag\": \"W/\\\"9ab4f6dd-11e2-42ce-8d57-4319f5e610de\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"8a761b3e-b27f-457a-97f3-1517dd82ffe0\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [],\r\n
+        \   \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\": false\r\n
+        \ }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ab91c711-f7f6-4ca4-893b-c81d95299b8f?api-version=2022-01-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '629'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Apr 2023 07:55:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - d660b16a-1bf9-45fe-8118-1048ef8e68e9
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
     status:
       code: 201
       message: Created
@@ -333,9 +542,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/995cbcb6-8ed0-4946-bfb4-90333bbd40ac?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ab91c711-f7f6-4ca4-893b-c81d95299b8f?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -347,7 +556,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:44:17 GMT
+      - Wed, 12 Apr 2023 07:55:48 GMT
       expires:
       - '-1'
       pragma:
@@ -364,7 +573,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 3bf30e9b-a7da-4244-8daf-992e0dc2fedb
+      - 73155bd7-d5c9-4207-afe0-2105c07cd836
     status:
       code: 200
       message: OK
@@ -382,31 +591,30 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"sbehvnettest2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2\",\r\n
-        \ \"etag\": \"W/\\\"17ac577f-ae53-4d03-91ab-8496d79773f1\\\"\",\r\n  \"type\":
+      string: "{\r\n  \"name\": \"sbehvnettest3\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3\",\r\n
+        \ \"etag\": \"W/\\\"952348a4-f929-4f8a-bacf-ba0c2b99ed7c\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"5db5d897-45ee-404e-8c85-190ff22c6b52\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"8a761b3e-b27f-457a-97f3-1517dd82ffe0\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [],\r\n
+        \   \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\": false\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '699'
+      - '630'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:44:17 GMT
+      - Wed, 12 Apr 2023 07:55:49 GMT
       etag:
-      - W/"17ac577f-ae53-4d03-91ab-8496d79773f1"
+      - W/"952348a4-f929-4f8a-bacf-ba0c2b99ed7c"
       expires:
       - '-1'
       pragma:
@@ -423,76 +631,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 80be7309-aefb-425c-a03b-4edd8c7eb976
+      - 86ec663f-e284-4e12-aa50-1003b5369d14
     status:
       code: 200
       message: OK
 - request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name --vnet-name --address-prefixes
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1?api-version=2022-01-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"sbehvnettest1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1\",\r\n
-        \ \"etag\": \"W/\\\"b0b887c1-8bc9-4146-9e5e-368d2189f3a3\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"6d8d7e12-f2d7-4558-b65b-bfd47606574e\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '699'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 07 Oct 2022 02:44:18 GMT
-      etag:
-      - W/"b0b887c1-8bc9-4146-9e5e-368d2189f3a3"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - e51c6ad6-2d83-4070-8f50-bacc5d8111cd
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1",
-      "location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
-      ["10.0.0.0/16"]}, "dhcpOptions": {"dnsServers": []}, "subnets": [{"name": "default",
-      "properties": {"addressPrefix": "10.0.0.0/24", "privateEndpointNetworkPolicies":
-      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}}], "virtualNetworkPeerings":
-      [], "enableDdosProtection": false}}'
+    body: '{"name": "default", "properties": {"addressPrefix": "10.0.0.0/24"}}'
     headers:
       Accept:
       - application/json
@@ -503,46 +647,36 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '536'
+      - '67'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --vnet-name --address-prefixes
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"sbehvnettest1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1\",\r\n
-        \ \"etag\": \"W/\\\"94f77f9a-8d3c-445c-8d66-978adf9b9fba\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"6d8d7e12-f2d7-4558-b65b-bfd47606574e\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [\r\n      {\r\n        \"name\": \"default\",\r\n        \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default\",\r\n
-        \       \"etag\": \"W/\\\"94f77f9a-8d3c-445c-8d66-978adf9b9fba\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
-        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
-        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
-        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default\",\r\n
+        \ \"etag\": \"W/\\\"e6fb51db-57df-4811-a0cd-ff72778f77b8\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/806d0e4d-4f09-4607-9d31-193803a704d9?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6af9892e-8aca-4535-b6bc-8ee71c3b0132?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '1328'
+      - '544'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:44:21 GMT
+      - Wed, 12 Apr 2023 07:55:50 GMT
       expires:
       - '-1'
       pragma:
@@ -552,19 +686,15 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b7a55123-58f2-465f-9e6f-54d99287f1a8
+      - 92f43b71-4fa6-4952-aa8d-50831f1bffdd
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1195'
     status:
-      code: 200
-      message: OK
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
@@ -579,9 +709,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --vnet-name --address-prefixes
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/806d0e4d-4f09-4607-9d31-193803a704d9?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6af9892e-8aca-4535-b6bc-8ee71c3b0132?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -593,7 +723,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:44:24 GMT
+      - Wed, 12 Apr 2023 07:55:53 GMT
       expires:
       - '-1'
       pragma:
@@ -610,7 +740,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 937636e9-2bd4-4d65-b3a5-860081e2c5e0
+      - d4123022-d69a-4682-b7e2-ae757ecc69dc
     status:
       code: 200
       message: OK
@@ -628,38 +758,28 @@ interactions:
       ParameterSetName:
       - --resource-group --name --vnet-name --address-prefixes
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"sbehvnettest1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1\",\r\n
-        \ \"etag\": \"W/\\\"05aaa605-f97a-4082-9324-cd336291ca25\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"6d8d7e12-f2d7-4558-b65b-bfd47606574e\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [\r\n      {\r\n        \"name\": \"default\",\r\n        \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default\",\r\n
-        \       \"etag\": \"W/\\\"05aaa605-f97a-4082-9324-cd336291ca25\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
-        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
-        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default\",\r\n
+        \ \"etag\": \"W/\\\"6914f5b2-0597-456f-98f8-090424f13b1b\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1330'
+      - '545'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:44:25 GMT
+      - Wed, 12 Apr 2023 07:55:53 GMT
       etag:
-      - W/"05aaa605-f97a-4082-9324-cd336291ca25"
+      - W/"6914f5b2-0597-456f-98f8-090424f13b1b"
       expires:
       - '-1'
       pragma:
@@ -676,76 +796,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5377cf10-3c70-4c33-9b59-d5f5c549cc07
+      - b686941c-b1fb-4a1c-911a-a4306ce81ce2
     status:
       code: 200
       message: OK
 - request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name --vnet-name --address-prefixes
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2?api-version=2022-01-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"sbehvnettest2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2\",\r\n
-        \ \"etag\": \"W/\\\"17ac577f-ae53-4d03-91ab-8496d79773f1\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"5db5d897-45ee-404e-8c85-190ff22c6b52\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '699'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 07 Oct 2022 02:44:25 GMT
-      etag:
-      - W/"17ac577f-ae53-4d03-91ab-8496d79773f1"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 6b4c76b1-7083-4a73-b07d-979291588566
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2",
-      "location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
-      ["10.0.0.0/16"]}, "dhcpOptions": {"dnsServers": []}, "subnets": [{"name": "secondvnet",
-      "properties": {"addressPrefix": "10.0.0.0/24", "privateEndpointNetworkPolicies":
-      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}}], "virtualNetworkPeerings":
-      [], "enableDdosProtection": false}}'
+    body: '{"name": "secondvnet", "properties": {"addressPrefix": "10.0.0.0/24"}}'
     headers:
       Accept:
       - application/json
@@ -756,46 +812,36 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '539'
+      - '70'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --vnet-name --address-prefixes
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"sbehvnettest2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2\",\r\n
-        \ \"etag\": \"W/\\\"d89abc40-7418-466b-9422-3f655a9f0177\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"5db5d897-45ee-404e-8c85-190ff22c6b52\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [\r\n      {\r\n        \"name\": \"secondvnet\",\r\n        \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet\",\r\n
-        \       \"etag\": \"W/\\\"d89abc40-7418-466b-9422-3f655a9f0177\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
-        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
-        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
-        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"secondvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet\",\r\n
+        \ \"etag\": \"W/\\\"b82bce1a-c085-4dc5-ad54-3eb403fb1602\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/bf509fc2-705a-442b-a9c3-15e0331c6f46?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/34e8d657-4a99-453e-8823-31c42f70532a?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '1334'
+      - '550'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:44:28 GMT
+      - Wed, 12 Apr 2023 07:55:58 GMT
       expires:
       - '-1'
       pragma:
@@ -805,19 +851,15 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 124e111c-f550-4479-9ac6-f069acb6a42d
+      - 7b0233db-d71b-4f0a-921f-64470739329f
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1194'
     status:
-      code: 200
-      message: OK
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
@@ -832,9 +874,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --vnet-name --address-prefixes
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/bf509fc2-705a-442b-a9c3-15e0331c6f46?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/34e8d657-4a99-453e-8823-31c42f70532a?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -846,7 +888,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:44:31 GMT
+      - Wed, 12 Apr 2023 07:56:01 GMT
       expires:
       - '-1'
       pragma:
@@ -863,7 +905,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 882555cd-cb4d-43d5-a27f-4734e63c4bf6
+      - 86bf8d61-7132-45d4-8d9c-dbe2bf1f9f48
     status:
       code: 200
       message: OK
@@ -881,38 +923,28 @@ interactions:
       ParameterSetName:
       - --resource-group --name --vnet-name --address-prefixes
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-network/21.0.1 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"name\": \"sbehvnettest2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2\",\r\n
-        \ \"etag\": \"W/\\\"4c2ac629-fccb-4340-99df-8a20a1de792c\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"5db5d897-45ee-404e-8c85-190ff22c6b52\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [\r\n      {\r\n        \"name\": \"secondvnet\",\r\n        \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet\",\r\n
-        \       \"etag\": \"W/\\\"4c2ac629-fccb-4340-99df-8a20a1de792c\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
-        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
-        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"secondvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet\",\r\n
+        \ \"etag\": \"W/\\\"84f29623-95ac-4813-9400-cfff8defa92d\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1336'
+      - '551'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:44:32 GMT
+      - Wed, 12 Apr 2023 07:56:03 GMT
       etag:
-      - W/"4c2ac629-fccb-4340-99df-8a20a1de792c"
+      - W/"84f29623-95ac-4813-9400-cfff8defa92d"
       expires:
       - '-1'
       pragma:
@@ -929,10 +961,175 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 27a64074-fef8-46f4-be33-b99dc62a1817
+      - 260bc00f-cc81-4414-8217-0a1fb435137c
     status:
       code: 200
       message: OK
+- request:
+    body: '{"name": "thirdvnet", "properties": {"addressPrefix": "10.0.0.0/24"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '69'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --name --vnet-name --address-prefixes
+      User-Agent:
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"thirdvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet\",\r\n
+        \ \"etag\": \"W/\\\"405acf86-d102-4dce-a98e-a3559dc6f1f6\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/32628c0f-3e1e-4507-8c1e-f6334f7b3d13?api-version=2022-01-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '548'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Apr 2023 07:56:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - f103d686-d516-4140-9cf7-40013448bb9a
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 201
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --vnet-name --address-prefixes
+      User-Agent:
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/32628c0f-3e1e-4507-8c1e-f6334f7b3d13?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Apr 2023 07:56:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - bbdcc61a-bc49-4d6a-a924-bc37a9f5504a
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --vnet-name --address-prefixes
+      User-Agent:
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"thirdvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet\",\r\n
+        \ \"etag\": \"W/\\\"32a5f7e1-555e-476a-9772-288298b6ff5f\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '549'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Apr 2023 07:56:07 GMT
+      etag:
+      - W/"32a5f7e1-555e-476a-9772-288298b6ff5f"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 99732a22-3f8e-4dd0-a91e-df939b8f557d
+    status:
+      code: 200
+      message: ''
 - request:
     body: '{"name": "eventhubs-cli000002"}'
     headers:
@@ -951,7 +1148,7 @@ interactions:
       ParameterSetName:
       - --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/checkNameAvailability?api-version=2022-01-01-preview
   response:
@@ -965,7 +1162,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:44:32 GMT
+      - Wed, 12 Apr 2023 07:56:10 GMT
       expires:
       - '-1'
       pragma:
@@ -1002,21 +1199,23 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags --sku
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001","name":"cli_test_eh_network000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-10-07T02:43:54Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001","name":"cli_test_eh_network000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-04-12T07:55:09Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
+      connection:
+      - close
       content-length:
       - '328'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:44:32 GMT
+      - Wed, 12 Apr 2023 07:56:11 GMT
       expires:
       - '-1'
       pragma:
@@ -1031,8 +1230,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "tags": {"{tag1": "value1}"}, "sku": {"name": "Standard",
-      "tier": "Standard"}, "properties": {"publicNetworkAccess": "Enabled"}}'
+    body: '{"identity": {"type": "None"}, "location": "westus", "sku": {"name": "Standard",
+      "tier": "Standard"}, "tags": {"{tag1": "value1}"}}'
     headers:
       Accept:
       - application/json
@@ -1043,37 +1242,37 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '151'
+      - '131'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --tags --sku
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002","name":"eventhubs-cli000002","type":"Microsoft.EventHub/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-cli000002","createdAt":"2022-10-07T02:44:36.983Z","updatedAt":"2022-10-07T02:44:36.983Z","serviceBusEndpoint":"https://eventhubs-cli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{"{tag1":"value1}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-cli000002","createdAt":"2023-04-12T07:56:15.97Z","updatedAt":"2023-04-12T07:56:15.97Z","serviceBusEndpoint":"https://eventhubs-cli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '809'
+      - '807'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:44:37 GMT
+      - Wed, 12 Apr 2023 07:56:18 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1101,31 +1300,31 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags --sku
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002","name":"eventhubs-cli000002","type":"Microsoft.EventHub/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-cli000002","createdAt":"2022-10-07T02:44:36.983Z","updatedAt":"2022-10-07T02:44:36.983Z","serviceBusEndpoint":"https://eventhubs-cli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{"{tag1":"value1}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-cli000002","createdAt":"2023-04-12T07:56:15.97Z","updatedAt":"2023-04-12T07:56:15.97Z","serviceBusEndpoint":"https://eventhubs-cli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '809'
+      - '807'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:45:09 GMT
+      - Wed, 12 Apr 2023 07:56:48 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1151,81 +1350,31 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags --sku
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002","name":"eventhubs-cli000002","type":"Microsoft.EventHub/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-cli000002","createdAt":"2022-10-07T02:44:36.983Z","updatedAt":"2022-10-07T02:45:28.737Z","serviceBusEndpoint":"https://eventhubs-cli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"{tag1":"value1}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-cli000002","createdAt":"2023-04-12T07:56:15.97Z","updatedAt":"2023-04-12T07:57:03.853Z","serviceBusEndpoint":"https://eventhubs-cli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '807'
+      - '806'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:45:39 GMT
+      - Wed, 12 Apr 2023 07:57:19 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name --tags --sku
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002","name":"eventhubs-cli000002","type":"Microsoft.EventHub/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-cli000002","createdAt":"2022-10-07T02:44:36.983Z","updatedAt":"2022-10-07T02:45:28.737Z","serviceBusEndpoint":"https://eventhubs-cli000002.servicebus.windows.net:443/","status":"Active"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '807'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 07 Oct 2022 02:45:39 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1251,31 +1400,31 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002?api-version=2022-01-01-preview
   response:
     body:
       string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002","name":"eventhubs-cli000002","type":"Microsoft.EventHub/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-cli000002","createdAt":"2022-10-07T02:44:36.983Z","updatedAt":"2022-10-07T02:45:28.737Z","serviceBusEndpoint":"https://eventhubs-cli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"{tag1":"value1}"},"properties":{"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-cli000002","createdAt":"2023-04-12T07:56:15.97Z","updatedAt":"2023-04-12T07:57:03.853Z","serviceBusEndpoint":"https://eventhubs-cli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '807'
+      - '806'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:45:40 GMT
+      - Wed, 12 Apr 2023 07:57:23 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1295,28 +1444,28 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule list
+      - eventhubs namespace network-rule-set list
       Connection:
       - keep-alive
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]}}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '387'
+      - '399'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:45:41 GMT
+      - Wed, 12 Apr 2023 07:57:26 GMT
       expires:
       - '-1'
       pragma:
@@ -1345,13 +1494,13 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule add
+      - eventhubs namespace network-rule-set ip-rule add
       Connection:
       - keep-alive
       ParameterSetName:
-      - --resource-group --name --ip-address --action
+      - --resource-group --name --ip-rule --ip-rule
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
@@ -1366,16 +1515,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:45:42 GMT
+      - Wed, 12 Apr 2023 07:57:29 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1384,63 +1533,6 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"defaultAction": "Allow", "virtualNetworkRules": [], "ipRules":
-      [{"ipMask": "1.1.1.1", "action": "Allow"}], "publicNetworkAccess": "Enabled"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace network-rule add
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '158'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --resource-group --name --ip-address --action
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '424'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 07 Oct 2022 02:45:50 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
     status:
       code: 200
       message: OK
@@ -1452,37 +1544,37 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule add
+      - eventhubs namespace network-rule-set ip-rule add
       Connection:
       - keep-alive
       ParameterSetName:
-      - --resource-group --name --ip-address --action
+      - --resource-group --name --ip-rule --ip-rule
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '424'
+      - '387'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:45:52 GMT
+      - Wed, 12 Apr 2023 07:57:34 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1495,16 +1587,16 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"defaultAction": "Allow", "virtualNetworkRules": [], "ipRules":
-      [{"ipMask": "1.1.1.1", "action": "Allow"}, {"ipMask": "2.2.2.2", "action": "Allow"}],
-      "publicNetworkAccess": "Enabled"}}'
+    body: '{"properties": {"defaultAction": "Allow", "ipRules": [{"action": "Allow",
+      "ipMask": "1.1.1.1"}, {"action": "Allow", "ipMask": "2.2.2.2"}], "publicNetworkAccess":
+      "Enabled", "virtualNetworkRules": []}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule add
+      - eventhubs namespace network-rule-set ip-rule add
       Connection:
       - keep-alive
       Content-Length:
@@ -1512,9 +1604,9 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - --resource-group --name --ip-address --action
+      - --resource-group --name --ip-rule --ip-rule
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
@@ -1529,16 +1621,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:46:00 GMT
+      - Wed, 12 Apr 2023 07:57:42 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1560,13 +1652,13 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule list
+      - eventhubs namespace network-rule-set show
       Connection:
       - keep-alive
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
@@ -1581,7 +1673,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:46:01 GMT
+      - Wed, 12 Apr 2023 07:57:48 GMT
       expires:
       - '-1'
       pragma:
@@ -1610,13 +1702,13 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule remove
+      - eventhubs namespace network-rule-set ip-rule remove
       Connection:
       - keep-alive
       ParameterSetName:
-      - --resource-group --name --ip-address
+      - --resource-group --name --ip-rule
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
@@ -1631,7 +1723,57 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:46:02 GMT
+      - Wed, 12 Apr 2023 07:57:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace network-rule-set ip-rule remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --ip-rule
+      User-Agent:
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"},{"ipMask":"2.2.2.2","action":"Allow"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '462'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Apr 2023 07:57:57 GMT
       expires:
       - '-1'
       pragma:
@@ -1653,15 +1795,16 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"defaultAction": "Allow", "virtualNetworkRules": [], "ipRules":
-      [{"ipMask": "1.1.1.1", "action": "Allow"}], "publicNetworkAccess": "Enabled"}}'
+    body: '{"properties": {"defaultAction": "Allow", "ipRules": [{"action": "Allow",
+      "ipMask": "1.1.1.1"}], "publicNetworkAccess": "Enabled", "virtualNetworkRules":
+      []}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule remove
+      - eventhubs namespace network-rule-set ip-rule remove
       Connection:
       - keep-alive
       Content-Length:
@@ -1669,9 +1812,9 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - --resource-group --name --ip-address
+      - --resource-group --name --ip-rule
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
@@ -1686,7 +1829,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:46:09 GMT
+      - Wed, 12 Apr 2023 07:58:07 GMT
       expires:
       - '-1'
       pragma:
@@ -1696,115 +1839,6 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       server-sb:
       - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace network-rule add
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --name --subnet --ignore-missing-endpoint
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '424'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 07 Oct 2022 02:46:10 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"defaultAction": "Allow", "virtualNetworkRules": [{"subnet":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},
-      "ignoreMissingVnetServiceEndpoint": true}], "ipRules": [{"ipMask": "1.1.1.1",
-      "action": "Allow"}], "publicNetworkAccess": "Enabled"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace network-rule add
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '388'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --resource-group --name --subnet --ignore-missing-endpoint
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '650'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 07 Oct 2022 02:46:23 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1826,28 +1860,78 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule add
+      - eventhubs namespace network-rule-set virtual-network-rule add
       Connection:
       - keep-alive
       ParameterSetName:
-      - --resource-group --name --subnet --ignore-missing-endpoint
+      - --resource-group --name --subnet --subnet
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '650'
+      - '424'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:46:25 GMT
+      - Wed, 12 Apr 2023 07:58:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace network-rule-set virtual-network-rule add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --subnet --subnet
+      User-Agent:
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '424'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Apr 2023 07:58:12 GMT
       expires:
       - '-1'
       pragma:
@@ -1869,18 +1953,17 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"defaultAction": "Allow", "virtualNetworkRules": [{"subnet":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},
-      "ignoreMissingVnetServiceEndpoint": true}, {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},
-      "ignoreMissingVnetServiceEndpoint": true}], "ipRules": [{"ipMask": "1.1.1.1",
-      "action": "Allow"}], "publicNetworkAccess": "Enabled"}}'
+    body: '{"properties": {"defaultAction": "Allow", "ipRules": [{"action": "Allow",
+      "ipMask": "1.1.1.1"}], "publicNetworkAccess": "Enabled", "virtualNetworkRules":
+      [{"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"}},
+      {"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"}}]}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule add
+      - eventhubs namespace network-rule-set virtual-network-rule add
       Connection:
       - keep-alive
       Content-Length:
@@ -1888,15 +1971,15 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - --resource-group --name --subnet --ignore-missing-endpoint
+      - --resource-group --name --subnet --subnet
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -1905,7 +1988,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:46:39 GMT
+      - Wed, 12 Apr 2023 07:58:33 GMT
       expires:
       - '-1'
       pragma:
@@ -1936,19 +2019,19 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule update
+      - eventhubs namespace network-rule-set virtual-network-rule add
       Connection:
       - keep-alive
       ParameterSetName:
-      - --resource-group --name --public-network-access
+      - --resource-group --name --subnet
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -1957,16 +2040,16 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:46:41 GMT
+      - Wed, 12 Apr 2023 07:58:37 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1975,66 +2058,6 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"defaultAction": "Allow", "virtualNetworkRules": [{"subnet":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},
-      "ignoreMissingVnetServiceEndpoint": true}, {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},
-      "ignoreMissingVnetServiceEndpoint": true}], "ipRules": [{"ipMask": "1.1.1.1",
-      "action": "Allow"}], "publicNetworkAccess": "Disabled"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventhubs namespace network-rule update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '624'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --resource-group --name --public-network-access
-      User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Disabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '881'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 07 Oct 2022 02:46:50 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/CH3
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/CH3
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
     status:
       code: 200
       message: OK
@@ -2046,28 +2069,28 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule update
+      - eventhubs namespace network-rule-set virtual-network-rule add
       Connection:
       - keep-alive
       ParameterSetName:
-      - --resource-group --name --public-network-access
+      - --resource-group --name --subnet
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Disabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '881'
+      - '880'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:46:51 GMT
+      - Wed, 12 Apr 2023 07:58:39 GMT
       expires:
       - '-1'
       pragma:
@@ -2089,43 +2112,43 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"defaultAction": "Allow", "virtualNetworkRules": [{"subnet":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},
-      "ignoreMissingVnetServiceEndpoint": true}, {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},
-      "ignoreMissingVnetServiceEndpoint": true}], "ipRules": [{"ipMask": "1.1.1.1",
-      "action": "Allow"}], "publicNetworkAccess": "Enabled"}}'
+    body: '{"properties": {"defaultAction": "Allow", "ipRules": [{"action": "Allow",
+      "ipMask": "1.1.1.1"}], "publicNetworkAccess": "Enabled", "virtualNetworkRules":
+      [{"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"}},
+      {"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"}},
+      {"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"}}]}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule update
+      - eventhubs namespace network-rule-set virtual-network-rule add
       Connection:
       - keep-alive
       Content-Length:
-      - '623'
+      - '857'
       Content-Type:
       - application/json
       ParameterSetName:
-      - --resource-group --name --public-network-access
+      - --resource-group --name --subnet
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '880'
+      - '1109'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:47:01 GMT
+      - Wed, 12 Apr 2023 07:58:56 GMT
       expires:
       - '-1'
       pragma:
@@ -2156,28 +2179,28 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule update
+      - eventhubs namespace network-rule-set update
       Connection:
       - keep-alive
       ParameterSetName:
       - --resource-group --name --public-network-access
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '880'
+      - '1109'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:47:02 GMT
+      - Wed, 12 Apr 2023 07:58:58 GMT
       expires:
       - '-1'
       pragma:
@@ -2199,43 +2222,43 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"defaultAction": "Allow", "virtualNetworkRules": [{"subnet":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},
-      "ignoreMissingVnetServiceEndpoint": true}, {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},
-      "ignoreMissingVnetServiceEndpoint": true}], "ipRules": [{"ipMask": "1.1.1.1",
-      "action": "Allow"}], "publicNetworkAccess": "Enabled"}}'
+    body: '{"properties": {"defaultAction": "Allow", "ipRules": [{"action": "Allow",
+      "ipMask": "1.1.1.1"}], "publicNetworkAccess": "Disabled", "virtualNetworkRules":
+      [{"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"}},
+      {"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"}},
+      {"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"}}]}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule update
+      - eventhubs namespace network-rule-set update
       Connection:
       - keep-alive
       Content-Length:
-      - '623'
+      - '858'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --public-network-access
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US","properties":{"publicNetworkAccess":"Disabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '880'
+      - '1110'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:47:10 GMT
+      - Wed, 12 Apr 2023 07:59:09 GMT
       expires:
       - '-1'
       pragma:
@@ -2245,6 +2268,226 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       server-sb:
       - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace network-rule-set update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --public-network-access
+      User-Agent:
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
+        US","properties":{"publicNetworkAccess":"Disabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1110'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Apr 2023 07:59:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"defaultAction": "Allow", "ipRules": [{"action": "Allow",
+      "ipMask": "1.1.1.1"}], "publicNetworkAccess": "Enabled", "virtualNetworkRules":
+      [{"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"}},
+      {"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"}},
+      {"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace network-rule-set update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '857'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --name --public-network-access
+      User-Agent:
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1109'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Apr 2023 07:59:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace network-rule-set update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --public-network-access
+      User-Agent:
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1109'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Apr 2023 07:59:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"defaultAction": "Allow", "ipRules": [{"action": "Allow",
+      "ipMask": "1.1.1.1"}], "publicNetworkAccess": "Enabled", "virtualNetworkRules":
+      [{"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"}},
+      {"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"}},
+      {"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace network-rule-set update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '857'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --name --public-network-access
+      User-Agent:
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1109'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Apr 2023 07:59:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -2266,28 +2509,28 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule update
+      - eventhubs namespace network-rule-set update
       Connection:
       - keep-alive
       ParameterSetName:
       - --resource-group --name --default-action
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '880'
+      - '1109'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:47:11 GMT
+      - Wed, 12 Apr 2023 07:59:39 GMT
       expires:
       - '-1'
       pragma:
@@ -2309,43 +2552,43 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"defaultAction": "Deny", "virtualNetworkRules": [{"subnet":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},
-      "ignoreMissingVnetServiceEndpoint": true}, {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},
-      "ignoreMissingVnetServiceEndpoint": true}], "ipRules": [{"ipMask": "1.1.1.1",
-      "action": "Allow"}], "publicNetworkAccess": "Enabled"}}'
+    body: '{"properties": {"defaultAction": "Deny", "ipRules": [{"action": "Allow",
+      "ipMask": "1.1.1.1"}], "publicNetworkAccess": "Enabled", "virtualNetworkRules":
+      [{"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"}},
+      {"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"}},
+      {"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"}}]}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule update
+      - eventhubs namespace network-rule-set update
       Connection:
       - keep-alive
       Content-Length:
-      - '622'
+      - '856'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --default-action
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Deny","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Deny","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '879'
+      - '1108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:47:20 GMT
+      - Wed, 12 Apr 2023 07:59:51 GMT
       expires:
       - '-1'
       pragma:
@@ -2364,7 +2607,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -2376,37 +2619,37 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule update
+      - eventhubs namespace network-rule-set update
       Connection:
       - keep-alive
       ParameterSetName:
       - --resource-group --name --default-action
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Deny","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Deny","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '879'
+      - '1108'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:47:23 GMT
+      - Wed, 12 Apr 2023 07:59:54 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -2419,52 +2662,52 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"defaultAction": "Allow", "virtualNetworkRules": [{"subnet":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},
-      "ignoreMissingVnetServiceEndpoint": true}, {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},
-      "ignoreMissingVnetServiceEndpoint": true}], "ipRules": [{"ipMask": "1.1.1.1",
-      "action": "Allow"}], "publicNetworkAccess": "Enabled"}}'
+    body: '{"properties": {"defaultAction": "Allow", "ipRules": [{"action": "Allow",
+      "ipMask": "1.1.1.1"}], "publicNetworkAccess": "Enabled", "virtualNetworkRules":
+      [{"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"}},
+      {"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"}},
+      {"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"}}]}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule update
+      - eventhubs namespace network-rule-set update
       Connection:
       - keep-alive
       Content-Length:
-      - '623'
+      - '857'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --default-action
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '880'
+      - '1109'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:47:31 GMT
+      - Wed, 12 Apr 2023 08:00:05 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -2486,37 +2729,37 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule update
+      - eventhubs namespace network-rule-set update
       Connection:
       - keep-alive
       ParameterSetName:
       - --resource-group --name --enable-trusted-service-access
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '880'
+      - '1109'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:47:32 GMT
+      - Wed, 12 Apr 2023 08:00:08 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -2529,52 +2772,53 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"trustedServiceAccessEnabled": true, "defaultAction": "Allow",
-      "virtualNetworkRules": [{"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},
-      "ignoreMissingVnetServiceEndpoint": true}, {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},
-      "ignoreMissingVnetServiceEndpoint": true}], "ipRules": [{"ipMask": "1.1.1.1",
-      "action": "Allow"}], "publicNetworkAccess": "Enabled"}}'
+    body: '{"properties": {"defaultAction": "Allow", "ipRules": [{"action": "Allow",
+      "ipMask": "1.1.1.1"}], "publicNetworkAccess": "Enabled", "trustedServiceAccessEnabled":
+      true, "virtualNetworkRules": [{"ignoreMissingVnetServiceEndpoint": true, "subnet":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"}},
+      {"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"}},
+      {"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"}}]}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule update
+      - eventhubs namespace network-rule-set update
       Connection:
       - keep-alive
       Content-Length:
-      - '660'
+      - '894'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --enable-trusted-service-access
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}],"trustedServiceAccessEnabled":true}}'
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}],"trustedServiceAccessEnabled":true}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '915'
+      - '1144'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:47:40 GMT
+      - Wed, 12 Apr 2023 08:00:22 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -2584,7 +2828,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1197'
     status:
       code: 200
       message: OK
@@ -2596,28 +2840,28 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule update
+      - eventhubs namespace network-rule-set update
       Connection:
       - keep-alive
       ParameterSetName:
       - --resource-group --name --enable-trusted-service-access
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}],"trustedServiceAccessEnabled":true}}'
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}],"trustedServiceAccessEnabled":true}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '915'
+      - '1144'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:47:41 GMT
+      - Wed, 12 Apr 2023 08:00:26 GMT
       expires:
       - '-1'
       pragma:
@@ -2639,43 +2883,44 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"trustedServiceAccessEnabled": false, "defaultAction":
-      "Allow", "virtualNetworkRules": [{"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},
-      "ignoreMissingVnetServiceEndpoint": true}, {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},
-      "ignoreMissingVnetServiceEndpoint": true}], "ipRules": [{"ipMask": "1.1.1.1",
-      "action": "Allow"}], "publicNetworkAccess": "Enabled"}}'
+    body: '{"properties": {"defaultAction": "Allow", "ipRules": [{"action": "Allow",
+      "ipMask": "1.1.1.1"}], "publicNetworkAccess": "Enabled", "trustedServiceAccessEnabled":
+      false, "virtualNetworkRules": [{"ignoreMissingVnetServiceEndpoint": true, "subnet":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"}},
+      {"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"}},
+      {"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"}}]}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule update
+      - eventhubs namespace network-rule-set update
       Connection:
       - keep-alive
       Content-Length:
-      - '661'
+      - '895'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --enable-trusted-service-access
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '880'
+      - '1109'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:47:51 GMT
+      - Wed, 12 Apr 2023 08:00:38 GMT
       expires:
       - '-1'
       pragma:
@@ -2694,7 +2939,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -2706,37 +2951,37 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule list
+      - eventhubs namespace network-rule-set list
       Connection:
       - keep-alive
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '880'
+      - '1121'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:47:52 GMT
+      - Wed, 12 Apr 2023 08:00:43 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/CH3
+      - Service-Bus-Resource-Provider/SN1
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -2756,28 +3001,28 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule remove
+      - eventhubs namespace network-rule-set virtual-network-rule remove
       Connection:
       - keep-alive
       ParameterSetName:
       - --resource-group --name --subnet
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '880'
+      - '1109'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:47:53 GMT
+      - Wed, 12 Apr 2023 08:00:46 GMT
       expires:
       - '-1'
       pragma:
@@ -2799,42 +3044,92 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"defaultAction": "Allow", "virtualNetworkRules": [{"subnet":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},
-      "ignoreMissingVnetServiceEndpoint": true}], "ipRules": [{"ipMask": "1.1.1.1",
-      "action": "Allow"}], "publicNetworkAccess": "Enabled"}}'
+    body: null
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - eventhubs namespace network-rule remove
+      - eventhubs namespace network-rule-set virtual-network-rule remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --subnet
+      User-Agent:
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1109'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Apr 2023 08:00:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"defaultAction": "Allow", "ipRules": [{"action": "Allow",
+      "ipMask": "1.1.1.1"}], "publicNetworkAccess": "Enabled", "virtualNetworkRules":
+      [{"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"}},
+      {"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace network-rule-set virtual-network-rule remove
       Connection:
       - keep-alive
       Content-Length:
-      - '388'
+      - '625'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --subnet
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '650'
+      - '882'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 07 Oct 2022 02:48:02 GMT
+      - Wed, 12 Apr 2023 08:01:00 GMT
       expires:
       - '-1'
       pragma:
@@ -2853,7 +3148,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1197'
     status:
       code: 200
       message: OK
@@ -2862,6 +3157,164 @@ interactions:
     headers:
       Accept:
       - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace network-rule-set virtual-network-rule remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --subnet
+      User-Agent:
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '882'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Apr 2023 08:01:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace network-rule-set virtual-network-rule remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --subnet
+      User-Agent:
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '882'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Apr 2023 08:01:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"defaultAction": "Allow", "ipRules": [{"action": "Allow",
+      "ipMask": "1.1.1.1"}], "publicNetworkAccess": "Enabled", "virtualNetworkRules":
+      [{"ignoreMissingVnetServiceEndpoint": true, "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace network-rule-set virtual-network-rule remove
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '390'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --name --subnet
+      User-Agent:
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default?api-version=2022-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.EventHub/Namespaces/NetworkRuleSets","location":"West
+        US","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest3/subnets/thirdvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '652'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Apr 2023 08:01:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2873,7 +3326,7 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_network000001/providers/Microsoft.EventHub/namespaces/eventhubs-cli000002?api-version=2022-01-01-preview
   response:
@@ -2885,7 +3338,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 07 Oct 2022 02:48:06 GMT
+      - Wed, 12 Apr 2023 08:01:25 GMT
       expires:
       - '-1'
       location:
@@ -2893,10 +3346,10 @@ interactions:
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
@@ -2920,7 +3373,7 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.40.0 azsdk-python-azure-mgmt-eventhub/10.1.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+      - AZURECLI/2.47.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.0 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_network000001/providers/Microsoft.EventHub/locations/westus/operationStatus/eventhubs-cli000002?api-version=2022-01-01-preview&resourceType=Namespace
   response:
@@ -2930,16 +3383,16 @@ interactions:
       cache-control:
       - no-cache
       date:
-      - Fri, 07 Oct 2022 02:48:36 GMT
+      - Wed, 12 Apr 2023 08:01:55 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       - Microsoft-HTTPAPI/2.0
       server-sb:
-      - Service-Bus-Resource-Provider/SN1
+      - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:

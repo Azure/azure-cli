@@ -44,7 +44,7 @@ backup_type_help = """'Full, Differential, Log, CopyOnlyFull' for backup Item ty
 retain_until_help = """The date until which this backed up copy will be available for retrieval, in UTC (d-m-Y). In case of VM and AzureFileShare a default value of 30 days is taken. For MSSQL workload, retain-until min value is 2 days and max value is 99 years for backup-type 'CopyOnlyFull'. For MSSQL and SAPHANA, retain-until min value is 45 days and max value is 99 years for backup-type 'Full'. For any other backup-type, retain-until value is overriden by Policy. If not specified, a default value of 30 days will be taken for backup-type 'CopyOnlyFull', and a value of 45 days for backup-type 'Full' and no default value for other backup types."""
 diskslist_help = """List of disks to be excluded or included."""
 disk_list_setting_help = """option to decide whether to include or exclude the disk or reset any previous settings to default behavior"""
-target_container_name_help = """The target container to which the DB recovery point should be downloaded as files."""
+target_container_name_help = """The target container to which the DB recovery point should be restored."""
 target_tier_help = """ The destination/target tier to which a particular recovery point has to be moved."""
 tier_help = """ Provide 'tier' parameter to filter recovery points."""
 rehyd_priority_type_help = """The type of priority to be maintained while rehydrating a recovery point """
@@ -99,7 +99,9 @@ def load_arguments(self, _):
     with self.argument_context('backup vault create') as c:
         c.argument('tags', arg_type=tags_type)
         c.argument('classic_alerts', arg_type=get_enum_type(['Enable', 'Disable']), help='Use this property to specify whether backup alerts from the classic solution should be received.')
+        c.argument('public_network_access', arg_type=get_enum_type(['Enable', 'Disable']), help='Use this property to specify whether public network access for the vault should be enabled or disabled. It is enabled by default. For setting up private endpoints, it has to be disabled.')
         c.argument('azure_monitor_alerts_for_job_failures', options_list=['--job-failure-alerts'], arg_type=get_enum_type(['Enable', 'Disable']), help='Use this property to specify whether built-in Azure Monitor alerts should be received for every job failure.')
+        c.argument('immutability_state', arg_type=get_enum_type(['Disabled', 'Locked', 'Unlocked']), help='Use this parameter to configure immutability settings for the vault. By default, immutability is "Disabled" for the vault. "Unlocked" means that immutability is enabled for the vault and can be reversed. "Locked" means that immutability is enabled for the vault and cannot be reversed.')
 
     with self.argument_context('backup vault backup-properties set') as c:
         c.argument('backup_storage_redundancy', arg_type=get_enum_type(['GeoRedundant', 'LocallyRedundant', 'ZoneRedundant']), help='Set backup storage properties for a Recovery Services vault.')
@@ -292,6 +294,7 @@ def load_arguments(self, _):
 
     with self.argument_context('backup protection disable') as c:
         c.argument('delete_backup_data', arg_type=get_three_state_flag(), help='Option to delete existing backed up data in the Recovery services vault.')
+        c.argument('retain_recovery_points_as_per_policy', arg_type=get_three_state_flag(), options_list=['--retain-recovery-points-as-per-policy', '--retain-as-per-policy'], help='Switch parameter that specifies that existing recovery points should be retained for the duration specified by the backup policy')
         c.argument('backup_management_type', backup_management_type)
         c.argument('workload_type', workload_type)
         c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')

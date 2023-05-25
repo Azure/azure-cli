@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 LOCATION = "westus2"
+VNET_LOCATION = "westus2"
 
 # No tidy up of tests required. The resource group is automatically removed
 
@@ -12,6 +13,37 @@ LOCATION = "westus2"
 
 
 class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
+    def setup_vnet(self, vnet_name, subnet_name):
+        self.cmd("az network vnet create -n %s -g {rg} -l %s --address-prefix 10.5.0.0/16" %
+                 (vnet_name, VNET_LOCATION))
+        self.cmd("az network vnet subnet create -n %s --vnet-name %s --address-prefixes '10.5.0.0/24' "
+                 "--delegations 'Microsoft.Netapp/volumes' -g {rg}" % (subnet_name, vnet_name))
+
+    def create_volume(self, account_name, pool_name, volume_name, volume_only=False, backup_id=None, vnet_name=None):
+        if vnet_name is None:
+            vnet_name = self.create_random_name(prefix='cli-vnet-backup', length=24)
+        subnet_name = "default"
+
+        if not volume_only:
+            # create vnet, account and pool
+            self.setup_vnet(vnet_name, subnet_name)
+            self.cmd("netappfiles account create -g {rg} -a '%s' -l %s" % (account_name, LOCATION))
+            self.cmd("netappfiles pool create -g {rg} -a %s -p %s -l %s --service-level 'Premium' --size 4" %
+                     (account_name, pool_name, LOCATION))
+
+        # create volume
+        if backup_id is None:
+            return self.cmd("netappfiles volume create -g {rg} -a %s -p %s -v %s -l %s --vnet %s --subnet %s "
+                            "--file-path %s --usage-threshold 100" %
+                            (account_name, pool_name, volume_name, LOCATION, vnet_name, subnet_name, volume_name)
+                            ).get_output_in_json()
+        else:
+            return self.cmd("netappfiles volume create -g {rg} -a %s -p %s -v %s -l %s --vnet %s --subnet %s "
+                            "--file-path %s --usage-threshold 100 --backup-id %s" %
+                            (account_name, pool_name, volume_name, LOCATION, vnet_name, subnet_name, volume_name,
+                             backup_id)).get_output_in_json()
+
+
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_policy_', additional_tags={'owner': 'cli_test'})
     def test_create_delete_backup_policies(self):
         # create account
@@ -159,3 +191,42 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         assert backup_policy['monthlyBackupsToKeep'] == monthly_backups_to_keep
         assert backup_policy['enabled'] == enabled
         assert backup_policy['tags']['Tag1'] == 'Value2'
+
+
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_policy_', additional_tags={'owner': 'cli_test'})
+    def test_assign_backup_policy_to_volume(self):
+        # create account
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)        
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+
+        self.cmd("az netappfiles account create -g {rg} -a '%s' -l %s" % (account_name, LOCATION)).get_output_in_json()
+
+        # create backup policy
+        backup_policy_name = self.create_random_name(prefix='cli-ba-pol-', length=16)
+        self.cmd("az netappfiles account backup-policy create -g {rg} -a %s --backup-policy-name %s -l %s "
+                 "--daily-backups 2 --enabled true" % (account_name, backup_policy_name, LOCATION)).get_output_in_json()
+
+        # get backup policy by name and validate
+        backup_policy = self.cmd("az netappfiles account backup-policy show -g {rg} -a %s --backup-policy-name %s" %
+                                 (account_name, backup_policy_name)).get_output_in_json()
+        assert backup_policy['name'] == account_name + '/' + backup_policy_name
+        assert backup_policy['dailyBackupsToKeep'] == 2
+
+        # get backup policy by resource id and validate
+        backup_policy_from_id = self.cmd("az netappfiles account backup-policy show --ids %s" %
+                                         backup_policy['id']).get_output_in_json()
+        assert backup_policy_from_id['name'] == account_name + '/' + backup_policy_name
+        assert backup_policy['dailyBackupsToKeep'] == 2
+
+        # create account, pool and volume
+        self.create_volume(account_name, pool_name, volume_name )
+
+
+        # volume update with backup policy
+        self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --backup-enabled %s --backup-policy-id %s" %
+                     (account_name, pool_name, volume_name, True, backup_policy['id']))
+
+        volume = self.cmd("az netappfiles volume show --resource-group {rg} -a %s -p %s -v %s" % (account_name, pool_name, volume_name)).get_output_in_json()
+        assert volume['dataProtection'] is not None
+        assert volume['dataProtection']['backup']['backupPolicyId'] is not None

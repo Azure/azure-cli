@@ -56,7 +56,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                  '--protocol Tcp '
                  '--tcp-port 2048 ')
 
-    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='westeurope')
+    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='westus')
     @AllowLargeResponse()
     def test_nw_connection_monitor_v2_creation(self, resource_group, resource_group_location):
         # create a V2 connection monitor with --location and TCP configuration
@@ -79,7 +79,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         self.cmd('network watcher connection-monitor show -l {location} -n {cmv2}')
         self.cmd('network watcher connection-monitor show -l {location} -n cmv2-01')
 
-    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
+    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='westus')
     @AllowLargeResponse()
     def test_nw_connection_monitor_v2_endpoint(self, resource_group, resource_group_location):
         self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
