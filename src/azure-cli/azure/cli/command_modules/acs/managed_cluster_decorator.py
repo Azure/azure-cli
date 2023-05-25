@@ -2608,6 +2608,12 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         # read the original value passed by the command
         enable_msi_auth_for_monitoring = self.raw_param.get("enable_msi_auth_for_monitoring")
+        if (
+            self.mc and
+            self.mc.service_principal_profile and
+            self.mc.service_principal_profile.client_id is not None
+        ):
+            return False
         # try to read the property value corresponding to the parameter from the `mc` object
         if (
             self.mc and
@@ -5373,9 +5379,9 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             enabled=True,
             config={
                 CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: self.context.get_workspace_resource_id(),
-                CONST_MONITORING_USING_AAD_MSI_AUTH: "True"
+                CONST_MONITORING_USING_AAD_MSI_AUTH: "true"
                 if self.context.get_enable_msi_auth_for_monitoring()
-                else "False",
+                else "false",
             },
         )
         # post-process, create a deployment
