@@ -200,7 +200,7 @@ class ErrorDetail:
 
 class OperationStatusResponse:
     '''
-    Class representing the required data needed in tracking snapshot creation 
+    Class representing the required data needed in tracking snapshot creation
     :ivar OperationStatus operation_status:
         Status of the Snapshot being created.
     :ivar int retry_after:
@@ -241,5 +241,5 @@ class BadSnapshotRequestException(HttpResponseError):
                     return error_msg
 
             return super().__str__()
-        except:
+        except Exception:  # pylint: disable=broad-except
             return super().__str__()

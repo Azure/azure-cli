@@ -259,13 +259,12 @@ class AppConfigSnapshotClient:
             if_none_match=None,
             **kwargs):
         """
-        Poll the operation status after a given interval based on the retry-after header (default 10s) to ensure that 
+        Poll the operation status after a given interval based on the retry-after header (default 10s) to ensure that
         the snapshot creation has succeeded or failed.
         The request times out after 10 mins by default unless otherwise specified.
         """
         timeout = kwargs.pop("timeout", 600)
         default_polling_interval = kwargs.pop("polling_interval", 10)
-
 
         from datetime import datetime
         import time
@@ -317,7 +316,7 @@ class AppConfigSnapshotClient:
         error = current_state.operation_status.error
 
         raise HttpResponseError('Snapshot creation failed with status code {}. Reason: {}'.format(
-           error.code, error.message))
+            error.code, error.message))
 
     def _get_operation_status(self, status_link):
         request = HttpRequest(RequestMethod.GET, url=status_link)
