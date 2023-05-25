@@ -1493,7 +1493,8 @@ def load_arguments(self, _):
                    arg_type=read_replicas_param_type)
 
         c.argument('preferred_enclave_type',
-                   arg_type=preferred_enclave_param_type)
+                   arg_type=preferred_enclave_param_type,
+                   help='The preferred enclave type for the Azure SQL Elastic Pool. Allowed values include: Default, VBS.')
 
     with self.argument_context('sql elastic-pool create') as c:
         # Create args that will be used to build up the ElasticPool object

@@ -127,6 +127,8 @@ examples:
     text: az sql db create -g mygroup -s myserver -n mydb -e Hyperscale -f Gen5 -c 2 --read-replicas 2
   - name: Create a GeneralPurpose database with locally redundant backup storage
     text: az sql db create -g mygroup -s myserver -n mydb -e GeneralPurpose --backup-storage-redundancy Local
+  - name: Create a database with VBS enclave enabled.
+    text: az sql db create -g mygroup -s myserver -n mydb --preferred-enclave-type VBS
 """
 
 helps['sql db delete'] = """
@@ -531,6 +533,8 @@ examples:
     text: az sql db update -g mygroup -s myserver -n mydb --edition GeneralPurpose --capacity 2 --family Gen5 --compute-model Serverless
   - name: Update database with locally redundant backup storage
     text: az sql db update -g mygroup -s myserver -n mydb --backup-storage-redundancy Local
+  - name: Update database with VBS enclave enabled.
+    text: az sql db update -g mygroup -s myserver -n mydb --preferred-enclave-type VBS
 
 """
 
@@ -603,6 +607,8 @@ examples:
     text: az sql elastic-pool create -g mygroup -s myserver -n mydb -e GeneralPurpose -f Gen4 -c 1
   - name: Create an elastic pool with Hyperscale edition, Gen5 hardware, 4 vcore and 2 high availability replicas.
     text: az sql elastic-pool create -g mygroup -s myserver -n mydb -e Hyperscale -f Gen5 -c 4 --ha-replicas 2
+  - name: Create an elastic pool with VBS enclave.
+    text: az sql elastic-pool create -g mygroup -s myserver -n mydb --preferred-enclave-type VBS
 """
 
 helps['sql elastic-pool list-editions'] = """
@@ -642,6 +648,8 @@ examples:
     text: az sql elastic-pool update -g mygroup -s myserver -n mypool -z false
   - name: Update elastic pool with 2 high availability replicas
     text: az sql elastic-pool update -g mygroup -s myserver -n mypool --ha-replicas 2
+  - name: Update elastic pool with VBS enclave
+    text: az sql elastic-pool update -g mygroup -s myserver -n mypool --preferred-enclave-type VBS
 """
 
 helps['sql failover-group'] = """
