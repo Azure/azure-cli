@@ -2710,7 +2710,10 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
         rs_name = rs_name[:-(len(origin) + 1)] if rs_name != origin else '@'
         try:
             record_count = len(rs[_type_to_property_name(rs_type)[0]])
-        except TypeError:
+        except (TypeError, KeyError):
+            # There is some bug with `alias records` being mapped from `AZURE ALIAS A` to `ARecords`,
+            # but `rs` does not contain `a_records`.  We could fix it, but this is just logging, so
+            # lets not fail the whole import and hope someone refactors this method
             record_count = 1
         total_records += record_count
     cum_records = 0
@@ -2729,7 +2732,7 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
 
         try:
             record_count = len(rs[_type_to_property_name(rs_type)[0]])
-        except TypeError:
+        except (TypeError, KeyError):
             record_count = 1
         if rs_name == '@' and rs_type == 'soa':
             root_soa = client.record_sets.get(resource_group_name, zone_name, '@', 'SOA')
@@ -4518,28 +4521,8 @@ def add_nic_ip_config_address_pool(cmd, resource_group_name, network_interface_n
 
 def remove_nic_ip_config_address_pool(cmd, resource_group_name, network_interface_name, ip_config_name,
                                       backend_address_pool, load_balancer_name=None, application_gateway_name=None):
-    from .aaz.latest.network.nic.ip_config.lb_pool import Remove as _LBPoolRemove
-    from .aaz.latest.network.nic.ip_config.ag_pool import Remove as _AGPoolRemove
-
-    class LBPoolRemove(_LBPoolRemove):
-        def _handler(self, command_args):
-            lro_poller = super()._handler(command_args)
-            lro_poller._result_callback = self._output
-            return lro_poller
-
-        def _output(self, *args, **kwargs):
-            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-            return result["ipConfigurations"][0]
-
-    class AGPoolRemove(_AGPoolRemove):
-        def _handler(self, command_args):
-            lro_poller = super()._handler(command_args)
-            lro_poller._result_callback = self._output
-            return lro_poller
-
-        def _output(self, *args, **kwargs):
-            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-            return result["ipConfigurations"][0]
+    from .aaz.latest.network.nic.ip_config.lb_pool import Remove as LBPoolRemove
+    from .aaz.latest.network.nic.ip_config.ag_pool import Remove as AGPoolRemove
 
     arguments = {
         "ip_config_name": ip_config_name,
@@ -4574,10 +4557,6 @@ class NICIPConfigNATAdd(_NICIPConfigNATAdd):
 
 
 class NICIPConfigNATRemove(_NICIPConfigNATRemove):
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -4592,10 +4571,6 @@ class NICIPConfigNATRemove(_NICIPConfigNATRemove):
                      "/loadBalancers/{lb_name}/inboundNatRules/{}",
         )
         return args_schema
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result["ipConfigurations"][0]
 # endregion
 
 

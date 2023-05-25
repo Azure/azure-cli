@@ -2312,7 +2312,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         addon_profiles_1 = {
             CONST_MONITORING_ADDON_NAME: self.models.ManagedClusterAddonProfile(
                 enabled=True,
-                config={CONST_MONITORING_USING_AAD_MSI_AUTH: "True"},
+                config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
             )
         }
         mc = self.models.ManagedCluster(location="test_location", addon_profiles=addon_profiles_1)
@@ -6016,7 +6016,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 enabled=True,
                 config={
                     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "/test_workspace_resource_id",
-                    CONST_MONITORING_USING_AAD_MSI_AUTH: "False",
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: "false",
                 },
             )
             self.assertEqual(monitoring_addon_profile, ground_truth_monitoring_addon_profile)
@@ -6291,7 +6291,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 enabled=True,
                 config={
                     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: "/test_workspace_resource_id",
-                    CONST_MONITORING_USING_AAD_MSI_AUTH: "False",
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: "false",
                 },
             ),
             CONST_VIRTUAL_NODE_ADDON_NAME
