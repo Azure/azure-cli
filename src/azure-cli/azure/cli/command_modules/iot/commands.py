@@ -13,6 +13,7 @@ CS_DEPRECATION_INFO = 'IoT Extension (azure-iot) connection-string command (az i
 ROUTE_DEPRECATION_INFO = 'IoT Extension (azure-iot) message-route command group (az iot hub message-route)'
 ENDPOINT_DEPRECATION_INFO = 'IoT Extension (azure-iot) message-endpoint command group (az iot hub message-endpoint)'
 
+
 class PolicyUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
     def __call__(self, poller):
         result = super(PolicyUpdateResultTransform, self).__call__(poller)
