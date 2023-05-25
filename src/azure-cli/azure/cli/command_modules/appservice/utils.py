@@ -212,8 +212,8 @@ def _list_app(cli_ctx, resource_group_name=None):
 
 def _rename_server_farm_props(webapp):
     # Should be renamed in SDK in a future release
-    webapp['properties']['appServerPlanId'] = webapp['properties']['serverFarmId']
-    del webapp['properties']['serverFarmId']
+    setattr(webapp, 'app_service_plan_id', webapp.server_farm_id)
+    del webapp.server_farm_id
     return webapp
 
 

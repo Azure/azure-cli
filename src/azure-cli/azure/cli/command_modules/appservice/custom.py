@@ -1092,11 +1092,14 @@ def list_function_app(cmd, resource_group_name=None):
 
 
 def show_functionapp(cmd, resource_group_name, name, slot=None):
-    app = get_app(cmd, resource_group_name, name)
+    params = {}
+    params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'
+    client = web_client_factory(cmd.cli_ctx)
+    app = client.web_apps.get(resource_group_name, name, api_version='2014-11-01-privatepreview', params=params)
     if not app:
         raise ResourceNotFoundError("Unable to find resource'{}', in ResourceGroup '{}'.".format(name,
                                                                                                  resource_group_name))
-    app['properties']['siteConfig'] = get_configuration(cmd, resource_group_name, name)
+    app.site_config = client.web_apps.get_configuration(resource_group_name, name, api_version='2022-03-01-privatepreview', params=params)
     if not is_centauri_functionapp(cmd, resource_group_name, name):
         _rename_server_farm_props(app)
         _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
@@ -1117,11 +1120,13 @@ def show_app(cmd, resource_group_name, name, slot=None):
 
 
 def _list_app(cli_ctx, resource_group_name=None):
+    params = {}
+    params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'
     client = web_client_factory(cli_ctx)
     if resource_group_name:
-        result = list(client.web_apps.list_by_resource_group(resource_group_name))
+        result = list(client.web_apps.list_by_resource_group(resource_group_name, api_version='2022-03-01-privatepreview', params=params))
     else:
-        result = list(client.web_apps.list())
+        result = list(client.web_apps.list(api_version='2022-03-01-privatepreview', params=params))
     for webapp in result:
         _rename_server_farm_props(webapp)
     return result
@@ -1414,12 +1419,17 @@ def restart_webapp(cmd, resource_group_name, name, slot=None):
 
 
 def get_site_configs(cmd, resource_group_name, name, slot=None):
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
+    params = {}
+    params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'
+    client = web_client_factory(cmd.cli_ctx)
+    return client.web_apps.get_configuration(resource_group_name, name, api_version='2022-03-01-privatepreview', params=params)
 
 
 def get_app_settings(cmd, resource_group_name, name, slot=None):
-    result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
+    params = {}
+    params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'
     client = web_client_factory(cmd.cli_ctx)
+    result = client.web_apps.list_application_settings(resource_group_name, name, api_version='2022-03-01-privatepreview', params=params)
     slot_app_setting_names = [] if is_centauri_functionapp(cmd, resource_group_name, name) \
         else client.web_apps.list_slot_configuration_names(resource_group_name, name) \
         .app_setting_names
@@ -1494,7 +1504,7 @@ def _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot=None):
     profiles = list_publish_profiles(cmd, resource_group_name, name, slot)
     try:
         url = next(p['publishUrl'] for p in profiles if p['publishMethod'] == 'FTP')
-        webapp['properties']['ftpPublishingUrl'] = url
+        setattr(webapp, 'ftpPublishingUrl', url)
     except StopIteration:
         pass
     return webapp
@@ -2591,19 +2601,12 @@ def list_publishing_credentials(cmd, resource_group_name, name, slot=None):
     return content.result()
 
 
-def publish_xml(cmd, resource_group_name, name):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    get_configuration_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/publishxml?stamp={}&api-version={}'
-    get_configuration_url = get_configuration_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2022-03-01-privatepreview')
-    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + get_configuration_url
-    response = send_raw_request(cmd.cli_ctx, "POST", request_url, body=json.dumps({"format": "WebDeploy"}))
-    return response
-
-
 def list_publish_profiles(cmd, resource_group_name, name, slot=None, xml=False):
     import xmltodict
-    content = publish_xml(cmd, resource_group_name, name)
+    params = {}
+    params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'
+    client = web_client_factory(cmd.cli_ctx)
+    content = client.web_apps.list_publishing_profile_xml_with_secrets(resource_group_name, name, {"format": "WebDeploy"}, api_version='2022-03-01-privatepreview', params=params)
     full_xml = ''
     for f in content:
         full_xml += f.decode()
@@ -5620,10 +5623,12 @@ def update_host_key(cmd, resource_group_name, name, key_type, key_name, key_valu
 
 
 def list_host_keys(cmd, resource_group_name, name, slot=None):
+    params = {}
+    params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'
     client = web_client_factory(cmd.cli_ctx)
     if slot:
         return client.web_apps.list_host_keys_slot(resource_group_name, name, slot)
-    return client.web_apps.list_host_keys(resource_group_name, name)
+    return client.web_apps.list_host_keys(resource_group_name, name, api_version='2022-03-01-privatepreview', params=params)
 
 
 def delete_host_key(cmd, resource_group_name, name, key_type, key_name, slot=None):
