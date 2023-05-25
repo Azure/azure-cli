@@ -56,14 +56,12 @@ from azure.mgmt.iothub.models import (IotHubSku,
 from azure.mgmt.iothubprovisioningservices.models import (CertificateBodyDescription,
                                                           ProvisioningServiceDescription,
                                                           IotDpsPropertiesDescription,
-                                                          IotDpsPropertiesDescriptionDpsFailoverDescription,
                                                           IotHubDefinitionDescription,
                                                           IotDpsSkuInfo,
                                                           IotDpsSku,
                                                           OperationInputs as DpsOperationInputs,
                                                           SharedAccessSignatureAuthorizationRuleAccessRightsDescription,
                                                           VerificationCodeRequest,
-                                                          CustomerInitiatedFailoverInput,
                                                           ManagedServiceIdentity)
 
 
@@ -124,17 +122,12 @@ def iot_dps_create(cmd, client, dps_name, resource_group_name, location=None,
                    identity_role=None,
                    identity_scopes=None,
                    enable_data_residency=None,
-                #    enable_customer_initiated_failover=None,
                    ):
     cli_ctx = cmd.cli_ctx
     _check_dps_name_availability(client.iot_dps_resource, dps_name)
     location = _ensure_location(cli_ctx, resource_group_name, location)
 
-    # dps_failover_description = IotDpsPropertiesDescriptionDpsFailoverDescription(failover_region=failover_region)
-    dps_property = IotDpsPropertiesDescription(enable_data_residency=enable_data_residency,
-                                            #    enable_customer_initiated_failover=enable_customer_initiated_failover,
-                                            #    dps_failover_description=dps_failover_description
-                                               )
+    dps_property = IotDpsPropertiesDescription(enable_data_residency=enable_data_residency)
     dps_description = ProvisioningServiceDescription(location=location,
                                                      properties=dps_property,
                                                      sku=IotDpsSkuInfo(name=sku, capacity=unit),
@@ -535,18 +528,6 @@ def iot_dps_identity_remove(cmd, client, dps_name, system_identity=None, user_id
     poller = client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps)
     lro = LongRunningOperation(cmd.cli_ctx)(poller)
     return lro.identity
-
-
-# DPS Failover
-def iot_dps_manual_failover(cmd, client, dps_name, resource_group_name=None, no_wait=False):
-    dps = iot_dps_get(cmd, client, dps_name, resource_group_name)
-    resource_group_name = dps.resourcegroup if hasattr(dps, "resourcegroup") else dps.additional_properties['resourcegroup']
-    failover_region = next(x.location for x in dps.properties.locations if x.role.lower() == 'secondary')
-    failover_input = CustomerInitiatedFailoverInput(failover_region=failover_region)
-    if no_wait:
-        return client.iot_dps_resource.failover(dps_name, resource_group_name, failover_input)
-    LongRunningOperation(cmd.cli_ctx)(client.iot_dps.failover(dps_name, resource_group_name, failover_input))
-    return iot_dps_get(cmd, client, dps_name, resource_group_name)
 
 
 # CUSTOM METHODS

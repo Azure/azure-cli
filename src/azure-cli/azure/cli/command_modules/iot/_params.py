@@ -80,10 +80,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Enforce data residency for this IoT Hub Device Provisioning Service by disabling '
                    'cross geo-pair disaster recovery. This property is immutable once set on the resource. '
                    'Only available in select regions. Learn more at https://aka.ms/dpsdr')
-        c.argument('enable_customer_initiated_failover', arg_type=get_three_state_flag(),
-                   options_list=['--enable-customer-initiated-failover', '--ecif'],
-                   help='See if this param is even needed... or if we can just get away with region',
-                   is_preview=True)
         c.argument('system_identity', options_list=['--mi-system-assigned'],
                    arg_type=get_three_state_flag(),
                    help="Enable system-assigned managed identity for this DPS", is_preview=True)

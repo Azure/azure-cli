@@ -25,7 +25,7 @@ class IoTDpsTest(ScenarioTest):
             method_name, recording_processors=[KeyReplacer()]
         )
 
-    @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')
+    @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location', location="eastus2euap")
     def test_dps_lifecycle(self, group_name, group_location):
         dps_name = self.create_random_name('dps', 20)
 
@@ -103,22 +103,22 @@ class IoTDpsTest(ScenarioTest):
         # Delete DPS
         self.cmd('az iot dps delete -g {} -n {}'.format(group_name, dps_name))
 
-        # Data Residency tests - TODO change these
-        # dr_dps_name = self.create_random_name('dps-dr', 20)
+        # Data Residency tests
+        dr_dps_name = self.create_random_name('dps-dr', 20)
 
-        # # Data residency not enabled in this region
-        # with self.assertRaises(HttpResponseError):
-        #     self.cmd('az iot dps create -g {} -n {} --edr'.format(group_name, dr_dps_name))
+        # Data residency not enabled in this region
+        with self.assertRaises(HttpResponseError):
+            self.cmd('az iot dps create -g {} -n {} --edr'.format(group_name, dr_dps_name))
 
-        # # Successfully create in this region
-        # self.cmd('az iot dps create -g {} -n {} --location southeastasia --edr'.format(group_name, dr_dps_name),
-        #          checks=[self.check('name', dr_dps_name),
-        #                  self.check('location', 'southeastasia'),
-        #                  self.check('properties.enableDataResidency', True)])
-        # self.cmd('az iot dps delete -g {} -n {}'.format(group_name, dr_dps_name))
+        # Successfully create in this region
+        self.cmd('az iot dps create -g {} -n {} --location southeastasia --edr'.format(group_name, dr_dps_name),
+                 checks=[self.check('name', dr_dps_name),
+                         self.check('location', 'southeastasia'),
+                         self.check('properties.enableDataResidency', True)])
+        self.cmd('az iot dps delete -g {} -n {}'.format(group_name, dr_dps_name))
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')
+    @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location', location="eastus2euap")
     def test_dps_identity_lifecycle(self, group_name, group_location):
         rg = group_name
         dps_name = self.create_random_name('dps', 20)
@@ -242,7 +242,7 @@ class IoTDpsTest(ScenarioTest):
                      self.check('type', IdentityType.none.value)])
 
     @pytest.mark.skip("Service is not ready yet.")
-    @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')
+    @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location', location="eastus2euap")
     def test_dps_failover_lifecycle(self, group_name, group_location):
         dps_name = self.create_random_name('dps', 20)
         # find region pair
@@ -271,7 +271,7 @@ class IoTDpsTest(ScenarioTest):
         # Delete DPS
         self.cmd('az iot dps delete -g {} -n {}'.format(group_name, dps_name))
 
-    @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')
+    @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location', location="eastus2euap")
     def test_dps_certificate_lifecycle(self, group_name, group_location):
         dps_name = self.create_random_name('dps', 20)
 
@@ -369,7 +369,7 @@ class IoTDpsTest(ScenarioTest):
         self.cmd('az iot dps delete -g {} -n {}'.format(group_name, dps_name))
 
     @AllowLargeResponse(size_kb=4096)
-    @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')
+    @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location', location="eastus2euap")
     def test_dps_linked_hub_lifecycle(self, group_name, group_location):
         dps_name = self.create_random_name('dps', 20)
         hub_name = self.create_random_name('iot', 20)

@@ -189,16 +189,6 @@ examples:
         az iot dps identity remove --name MyIoTDPS --resource-group MyResourceGroup --system-assigned --user-assigned
 """
 
-
-helps['iot dps manual-failover'] = """
-type: command
-short-summary: Initiate a manual failover for the Azure IoT Hub Device Provisioning Service instance to the (TODO- what terms to use) disaster recovery region.
-examples:
-  - name: Initiate failover MyDps from primary to secondary region.
-    text: >
-        az iot dps manual-failover --dps-name MyDps
-"""
-
 helps['iot dps create'] = """
 type: command
 short-summary: Create an Azure IoT Hub Device Provisioning Service instance.
@@ -210,12 +200,9 @@ examples:
   - name: Create an Azure IoT Hub Device Provisioning Service with the standard pricing tier S1, in the 'eastus' region.
     text: >
         az iot dps create --name MyDps --resource-group MyResourceGroup --location eastus
-  - name: Create an Azure IoT Hub Device Provisioning Service with data residency enforced. This will disable cross-region disaster recovery. TODO- possibly remove this
+  - name: Create an Azure IoT Hub Device Provisioning Service with data residency enforced.
     text: >
         az iot dps create --name MyDps --resource-group MyResourceGroup --edr
-  - name: Create an Azure IoT Hub Device Provisioning Service with enabled disaster recovery and set the secondary region to 'eastus'.
-    text: >
-        az iot dps create --name MyDps --resource-group MyResourceGroup --region eastus
   - name: Create an Azure IoT Hub Device Provisioning Service with the standard pricing tier S1, in the region of the resource group, enable system identity, and assign a role and scope to an IoT Hub for the created identity.
     text: >
         az iot dps create --name MyDps --resource-group MyResourceGroup --mi-system-assigned --role 'Iot Hub Data Contributor' --scopes {hubResourceId}

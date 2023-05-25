@@ -72,7 +72,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('delete', 'iot_dps_delete')
         g.generic_update_command('update', getter_name='iot_dps_get', setter_name='iot_dps_update',
                                  command_type=update_custom_util)
-        # g.custom_command('manual-failover', 'iot_dps_manual_failover', supports_no_wait=True, is_preview=True)
 
     # iot dps linked-hub commands
     with self.command_group('iot dps linked-hub', client_factory=iot_service_provisioning_factory) as g:
