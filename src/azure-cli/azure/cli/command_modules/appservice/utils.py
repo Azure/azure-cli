@@ -187,6 +187,17 @@ def is_flex_functionapp(cmd, resource_group, name):
             return plan_info.sku.tier.lower() == 'flexconsumption'
     return False
 
+#temporary function to check if the function app is flex
+def is_flex_functionapp_tmp(cmd, resource_group, name):
+    client = web_client_factory(cmd.cli_ctx)
+    params = {}
+    params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'    
+    name = name+'FlexPlan'
+    plan_info = client.app_service_plans.get(resource_group, name, api_version='2014-11-01-privatepreview', params = params)
+    if plan_info:
+        return True
+    return False
+
 
 def _list_app(cli_ctx, resource_group_name=None):
     client = web_client_factory(cli_ctx)
