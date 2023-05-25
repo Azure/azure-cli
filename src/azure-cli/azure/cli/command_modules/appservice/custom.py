@@ -1286,7 +1286,8 @@ def get_site_configs(cmd, resource_group_name, name, slot=None):
 def get_app_settings(cmd, resource_group_name, name, slot=None):
     result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory(cmd.cli_ctx)
-    slot_app_setting_names = [] if is_centauri_functionapp(cmd, resource_group_name, name) \
+    is_centauri = is_centauri_functionapp(cmd, resource_group_name, name)
+    slot_app_setting_names = [] if is_centauri \
         else client.web_apps.list_slot_configuration_names(resource_group_name, name) \
         .app_setting_names
     return _build_app_settings_output(result.properties, slot_app_setting_names)
@@ -3658,9 +3659,9 @@ def update_flex_functionapp_configuration(cmd, resource_group_name, name, config
     from azure.cli.core.commands.client_factory import get_subscription_id
     client = web_client_factory(cmd.cli_ctx)
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    update_configuration_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/config/web?api-version={}'
-    update_configuration_url = update_configuration_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
-    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + update_configuration_url
+    config_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/config/web?api-version={}'
+    config_url = config_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + config_url
     body = json.dumps(configs)
     response = send_raw_request(cmd.cli_ctx, "PATCH", request_url, body=body)
     return response.json()
