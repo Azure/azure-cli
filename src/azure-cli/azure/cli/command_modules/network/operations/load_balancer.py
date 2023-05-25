@@ -25,7 +25,7 @@ from ..aaz.latest.network.lb.address_pool.address import Add as _LBAddressPoolAd
 from ..aaz.latest.network.lb.address_pool.basic import Create as _LBAddressPoolBasicCreate, \
     Delete as _LBAddressPoolBasicDelete
 from ..aaz.latest.network.lb.address_pool.tunnel_interface import Add as _LBAddressPoolTunnelInterfaceAdd, \
-    Update as _LBAddressPoolTunnelInterfaceUpdate, Remove as _LBAddressPoolTunnelInterfaceRemove
+    Update as _LBAddressPoolTunnelInterfaceUpdate
 from ..aaz.latest.network.lb.probe import Create as _LBProbeCreate, Update as _LBProbeUpdate
 
 
@@ -613,18 +613,6 @@ class LBAddressPoolAddressAdd(_LBAddressPoolAddressAdd):
         return result
 
 
-class LBAddressPoolAddressRemove(_LBAddressPoolAddressRemove):
-
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
-
-    def _output(self, *args, **kwargs):  # pylint: disable=unused-argument
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
 class LBAddressPoolAddressUpdate(_LBAddressPoolAddressUpdate):
 
     @classmethod
@@ -676,18 +664,6 @@ class LBAddressPoolTunnelInterfaceAdd(_LBAddressPoolTunnelInterfaceAdd):
         return args_schema
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class LBAddressPoolTunnelInterfaceRemove(_LBAddressPoolTunnelInterfaceRemove):
-
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
-
-    def _output(self, *args, **kwargs):  # pylint: disable=unused-argument
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
@@ -1155,19 +1131,9 @@ class CrossRegionLoadBalancerAddressPoolAddressAdd(_LBAddressPoolAddressAdd):
 @register_command("network cross-region-lb address-pool address remove")
 class CrossRegionLoadBalancerAddressPoolAddressRemove(_LBAddressPoolAddressRemove):
     """Remove one backend address from the load balance backend address pool.
-
     :example: Remove one backend address from the load balance backend address pool.
         az network cross-region-lb address-pool address remove -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress
     """
-
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
-
-    def _output(self, *args, **kwargs):  # pylint: disable=unused-argument
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
 
 
 @register_command("network cross-region-lb address-pool address update")
