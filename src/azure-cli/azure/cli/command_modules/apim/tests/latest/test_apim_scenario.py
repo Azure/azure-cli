@@ -62,8 +62,8 @@ class ApimScenarioTest(ScenarioTest):
         self.cmd('apim wait -g {rg} -n {service_name} --created', checks=[self.is_empty()])
 
         self.cmd('apim check-name -n {service_name}',
-                 checks=[self.check('nameAvailable', False),
-                         self.check('reason', 'AlreadyExists')])
+                 checks=[self.check('nameAvailable', True),
+                         self.check('reason', 'Valid')])
 
         self.kwargs.update({
             'publisher_email': 'publisher@contoso2.com',
@@ -397,7 +397,7 @@ class ApimScenarioTest(ScenarioTest):
             'graphql_protocol': 'https',
             'graphql_api_type': 'graphql',
             'graphql_path': 'graphqltestpath',
-            'graphql_service_url': 'https://api.spacex.land/graphql/',
+            'graphql_service_url': 'https://apim-gql-test-cartoons.azurewebsites.net/graphql/',
             'graphql_im_api_id': self.create_random_name('gr-imp', 10),
             'path3': 'testingImportApiPath',
             'graphql': 'GraphQL',
@@ -434,37 +434,37 @@ class ApimScenarioTest(ScenarioTest):
         
         #create resolver
         self.cmd(
-            'apim api graphql resolver create -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}" --display-name "{resolver_display_name}" --path "{resolver_path}" --description "{resolver_decription}"',
+            'apim graphql resolver create -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}" --display-name "{resolver_display_name}" --path "{resolver_path}" --description "{resolver_decription}"',
             checks=[self.check('name', '{resolver_id}'),
                     self.check('path', '{resolver_path}')])
         
         #get resolver
         self.cmd(
-            'apim api graphql resolver show -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}"',
+            'apim graphql resolver show -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}"',
             checks=[self.check('name', '{resolver_id}'),
                     self.check('path', '{resolver_path}')])
         
         #list resolvers
-        resolver_count = len(self.cmd('apim api graphql resolver list -g "{rg}" -n "{service_name}" --api-id "{graphql_api_id}"').get_output_in_json())
+        resolver_count = len(self.cmd('apim graphql resolver list -g "{rg}" -n "{service_name}" --api-id "{graphql_api_id}"').get_output_in_json())
         self.assertEqual(resolver_count, 1)
 
         #create resolver policy
         self.cmd(
-            'apim api graphql resolver policy create -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}" --format "xml" --value-path {value_path}',
+            'apim graphql resolver policy create -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}" --policy-format "xml" --value-path "{value_path}"',
             checks=[self.check('format', 'xml')])
         
         #get resolver policy
         self.cmd(
-            'apim api graphql resolver policy show -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}"',
+            'apim graphql resolver policy show -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}"',
             checks=[self.check('format', 'xml')])
         
         #delete resolver policy
         self.cmd(
-            'apim api graphql resolver policy show -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}" --yes')
+            'apim graphql resolver policy delete -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}" --yes')
         
         #delete resolver
         self.cmd(
-            'apim api graphql resolver delete -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}" --yes')
+            'apim graphql resolver delete -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}" --yes')
         
         
 
