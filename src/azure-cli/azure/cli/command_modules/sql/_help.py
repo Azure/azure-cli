@@ -801,7 +801,7 @@ examples:
 
 helps['sql mi'] = """
 type: group
-short-summary: Manage SQL managed instances.
+short-summary: Manage SQL Managed Instances.
 """
 
 helps['sql mi ad-admin'] = """
@@ -914,12 +914,12 @@ examples:
 
 helps['sql mi advanced-threat-protection-setting'] = """
 type: group
-short-summary: Manage a SQL managed instance's advanced threat protection setting.
+short-summary: Manage a SQL Managed Instance's advanced threat protection setting.
 """
 
 helps['sql mi advanced-threat-protection-setting update'] = """
 type: command
-short-summary: Update a SQL managed instance's advanced threat protection setting.
+short-summary: Update a SQL Managed Instance's advanced threat protection setting.
 parameters:
   - name: --state
     type: string
@@ -1025,17 +1025,17 @@ examples:
 
 helps['sql midb'] = """
 type: group
-short-summary: Manage SQL managed instance databases.
+short-summary: Manage SQL Managed Instance databases.
 """
 
 helps['sql midb advanced-threat-protection-setting'] = """
 type: group
-short-summary: Manage a SQL managed instance database's advanced threat protection setting.
+short-summary: Manage a SQL Managed Instance database's advanced threat protection setting.
 """
 
 helps['sql midb advanced-threat-protection-setting update'] = """
 type: command
-short-summary: Update a SQL managed instance database's advanced threat protection setting.
+short-summary: Update a SQL Managed Instance database's advanced threat protection setting.
 parameters:
   - name: --state
     type: string
