@@ -3061,7 +3061,7 @@ class CredentialResponseSanitizer(RecordingProcessor):
                                 idx + 1)
 
                             endpoint = next(
-                                filter(lambda x: x.startswith("Endpoint="), credential["connectionString"].split(";")))
+                                filter(lambda x: x.startswith("Endpoint="), credential["connectionString"].split(";")))[len("Endpoint="):]
 
                             credential["connectionString"] = "Endpoint={};Id={};Secret={}".format(
                                 endpoint, credential["id"], credential["value"])
