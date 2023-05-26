@@ -130,7 +130,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('create', 'iot_hub_create', supports_no_wait=True)
         g.custom_command('list', 'iot_hub_list')
         g.custom_command('show-connection-string', 'iot_hub_show_connection_string',
-                         deprecate_info=self.deprecate(redirect=CS_DEPRECATION_INFO))
+                         deprecate_info=self.deprecate(redirect=CS_DEPRECATION_INFO),
+                         hide=True)
         g.custom_show_command('show', 'iot_hub_get')
         g.generic_update_command('update', getter_name='iot_hub_get', setter_name='iot_hub_update',
                                  command_type=update_custom_util, custom_func_name='update_iot_hub_custom')
@@ -165,7 +166,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     # iot hub routing endpoint commands
     with self.command_group('iot hub routing-endpoint', client_factory=iot_hub_service_factory,
-                            deprecate_info=self.deprecate(redirect=ENDPOINT_DEPRECATION_INFO)) as g:
+                            deprecate_info=self.deprecate(redirect=ENDPOINT_DEPRECATION_INFO),
+                            hide=True) as g:
         g.custom_command('create', 'iot_hub_routing_endpoint_create',
                          transform=EndpointUpdateResultTransform(self.cli_ctx))
         g.custom_show_command('show', 'iot_hub_routing_endpoint_show')
@@ -183,7 +185,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     # iot hub route commands
     with self.command_group('iot hub route', client_factory=iot_hub_service_factory,
-                            deprecate_info=self.deprecate(redirect=ROUTE_DEPRECATION_INFO)) as g:
+                            deprecate_info=self.deprecate(redirect=ROUTE_DEPRECATION_INFO),
+                            hide=True) as g:
         g.custom_command('create', 'iot_hub_route_create', transform=RouteUpdateResultTransform(self.cli_ctx))
         g.custom_show_command('show', 'iot_hub_route_show')
         g.custom_command('list', 'iot_hub_route_list')
