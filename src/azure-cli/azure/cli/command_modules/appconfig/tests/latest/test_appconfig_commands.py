@@ -16,9 +16,11 @@ from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, KeyVaultPreparer, live_only, LiveScenarioTest)
 from azure.cli.testsdk.checkers import NoneCheck
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants, ImportExportProfiles, AppServiceConstants
-from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse, RecordingProcessor
+from azure.cli.testsdk.scenario_tests.utilities import is_json_payload
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core.azclierror import ResourceNotFoundError as CliResourceNotFoundError
+from azure.cli.core.util import shell_safe_json_parse
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -2903,6 +2905,12 @@ class AppconfigReplicaLiveScenarioTest(ScenarioTest):
 
 
 class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
+
+    def __init__(self, *args, **kwargs):
+        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
+        super(AppConfigSnapshotLiveScenarioTest, self).__init__(*args, **kwargs)
+    
+    
     @ResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
     def test_azconfig_snapshot_mgmt(self, resource_group, location):
@@ -3037,3 +3045,30 @@ def _format_datetime(date_string):
     except ValueError:
         print("Unable to parse date_string '%s'", date_string)
         return date_string or ' '
+
+
+class CredentialResponseSanitizer(RecordingProcessor):
+    def process_response(self, response):
+        if is_json_payload(response):
+            try:
+                json_data = shell_safe_json_parse(response["body"]["string"])
+
+                if isinstance(json_data["value"], list):
+                    for idx, credential in enumerate(json_data["value"]):
+                        if "connectionString" in credential:
+                            credential["id"] = "sanitized_id{}".format(idx + 1)
+                            credential["value"] = "sanitized_secret{}".format(
+                                idx + 1)
+
+                            endpoint = next(
+                                filter(lambda x: x.startswith("Endpoint="), credential["connectionString"].split(";")))
+
+                            credential["connectionString"] = "Endpoint={};Id={};Secret={}".format(
+                                endpoint, credential["id"], credential["value"])
+
+                response["body"]["string"] = json.dumps(json_data)
+
+            except Exception:
+                pass
+
+        return response

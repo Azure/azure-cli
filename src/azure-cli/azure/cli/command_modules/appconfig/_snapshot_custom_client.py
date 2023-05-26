@@ -15,7 +15,8 @@ from msrest import Serializer
 import json
 
 from ._constants import SnapshotConstants
-from ._snapshotmodels import Snapshot, SnapshotListResult, OperationStatusResponse, BadSnapshotRequestException
+from ._snapshotmodels import Snapshot, SnapshotListResult, OperationStatusResponse
+from ._snapshot_exceptions import BadSnapshotRequestException
 
 
 class ProvisioningStatus:

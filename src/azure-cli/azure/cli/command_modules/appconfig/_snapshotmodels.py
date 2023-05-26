@@ -3,10 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.core.exceptions import HttpResponseError
 from datetime import datetime
 from enum import Enum
-from ._constants import StatusCodes
 
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-instance-attributes
@@ -147,7 +145,7 @@ class SnapshotListResult:
 class OperationStatus:
     '''
     Class representing the current create status of a snapshot
-    :ivar str id:
+    :ivar str operation_id:
         Name of the Snapshot being created.
     :ivar str status:
         The creation status of the snapshot
@@ -156,17 +154,17 @@ class OperationStatus:
     '''
 
     def __init__(self,
-                 id,
+                 operation_id,
                  status,
                  error=None):
-        self.id = id
+        self.operation_id = operation_id
         self.status = status
         self.error = error
 
     @classmethod
     def from_json(cls, data_dict):
         return cls(
-            id=data_dict.get("id", None),
+            operation_id=data_dict.get("id", None),
             status=data_dict.get("status", None),
             error=ErrorDetail.from_json(data_dict.get("error", None)),
         )
@@ -222,24 +220,3 @@ class OperationStatusResponse:
             operation_status=OperationStatus.from_json(response.json()),
             retry_after=int(retry_seconds) if retry_seconds else None
         )
-
-
-class BadSnapshotRequestException(HttpResponseError):
-    def __init__(self, *args, **kwargs):
-        super(BadSnapshotRequestException, self).__init__(*args, **kwargs)
-
-    def __str__(self):
-        try:
-            if self.status_code == StatusCodes.BAD_REQUEST:
-                json_response = self.response.json()
-                error_msg = ""
-                title = json_response.get("title", None)
-                error_msg += "{}.".format(title) if title else ""
-                error_msg += json_response.get("detail", "")
-
-                if error_msg:
-                    return error_msg
-
-            return super().__str__()
-        except Exception:  # pylint: disable=broad-except
-            return super().__str__()

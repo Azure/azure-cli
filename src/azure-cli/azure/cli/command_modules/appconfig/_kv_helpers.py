@@ -11,6 +11,7 @@ from difflib import Differ
 from itertools import filterfalse
 from json import JSONDecodeError
 from urllib.parse import urlparse
+from ._snapshot_custom_client import AppConfigSnapshotClient
 
 import chardet
 import javaproperties
@@ -38,7 +39,6 @@ from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
 from._featuremodels import (map_keyvalue_to_featureflag,
                             map_featureflag_to_keyvalue,
                             FeatureFlagValue)
-from ._snapshot_custom_client import AppConfigSnapshotClient
 
 logger = get_logger(__name__)
 FEATURE_MANAGEMENT_KEYWORDS = ["FeatureManagement", "featureManagement", "feature_management", "feature-management"]
