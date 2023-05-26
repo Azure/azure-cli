@@ -38,6 +38,7 @@ class TestVMImage(unittest.TestCase):
         # assert
         win_images = [i for i in images if i['publisher'] == 'MicrosoftWindowsServer']
         self.assertTrue(len(win_images) > 0)
+        # UbuntuLTS will be deprecated, use new versioned alias with version suffix
         ubuntu_image = next(i for i in images if i['publisher'] == 'Canonical' and i['sku'] == '22_04-lts-gen2')
         self.assertEqual(ubuntu_image['publisher'], 'Canonical')
         self.assertEqual(ubuntu_image['offer'], '0001-com-ubuntu-server-jammy')
