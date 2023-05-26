@@ -2794,13 +2794,6 @@ def get_scm_site_headers(cli_ctx, name, resource_group_name, slot=None, addition
 
 
 def _get_log(url, headers, log_file=None):
-    import urllib3
-    try:
-        import urllib3.contrib.pyopenssl
-        urllib3.contrib.pyopenssl.inject_into_urllib3()
-    except ImportError:
-        pass
-
     http = get_pool_manager(url)
     r = http.request(
         'GET',
