@@ -70,6 +70,32 @@ type: group
 short-summary: Manage content-trust policy for Azure Container Registries.
 """
 
+helps['acr config authentication-as-arm'] = """
+type: group
+short-summary: Manage 'Azure AD authenticate as ARM' policy for Azure Container Registries.
+"""
+
+helps['acr config authentication-as-arm show'] = """
+type: command
+short-summary: Show the configured 'Azure AD authenticate as ARM' policy for an Azure Container Registry.
+examples:
+  - name: Show the configured 'Azure AD authenticate as ARM' policy for an Azure Container Registry
+    text: >
+        az acr config authentication-as-arm show -r MyRegistry
+"""
+
+helps['acr config authentication-as-arm update'] = """
+type: command
+short-summary: Update 'Azure AD authenticate as ARM' policy for an Azure Container Registry.
+examples:
+  - name: Disable 'Azure AD authenticate as ARM' policy for an Azure Container Registry, so only ACR audienced tokens can be used for authentication
+    text: >
+        az acr config authentication-as-arm update -r MyRegistry --status Disabled
+  - name: Enable 'Azure AD authenticate as ARM' policy for an Azure Container Registry, it will allow both ACR and ARM audienced tokens to be used for authentication
+    text: >
+        az acr config authentication-as-arm update -r MyRegistry --status Enabled
+"""
+
 helps['acr config content-trust show'] = """
 type: command
 short-summary: Show the configured content-trust policy for an Azure Container Registry.
@@ -112,6 +138,29 @@ examples:
   - name: Enable retention policy for an Azure Container Registry to delete a manifest as soon as it gets untagged.
     text: >
         az acr config retention update -r MyRegistry --status Enabled --days 0 --type UntaggedManifests
+"""
+
+helps['acr config soft-delete'] = """
+type: group
+short-summary: Manage soft-delete policy for Azure Container Registries.
+"""
+
+helps['acr config soft-delete show'] = """
+type: command
+short-summary: Show the configured soft-delete policy for an Azure Container Registry.
+examples:
+  - name: Show the configured soft-delete policy for an Azure Container Registry
+    text: >
+        az acr config soft-delete show -r myregistry
+"""
+
+helps['acr config soft-delete update'] = """
+type: command
+short-summary: Update soft-delete policy for an Azure Container Registry.
+examples:
+  - name: Enable soft-delete policy for an Azure Container Registry to purge a soft-deleted manifest after 30 days.
+    text: >
+        az acr config soft-delete update -r myregistry --status Enabled --days 30
 """
 
 helps['acr create'] = """
@@ -435,6 +484,14 @@ examples:
     text: az acr repository list -n MyRegistry
 """
 
+helps['acr repository list-deleted'] = """
+type: command
+short-summary: List soft-deleted repositories in an Azure Container Registry.
+examples:
+  - name: List soft-deleted repositories in a given Azure Container Registry.
+    text: az acr repository list-deleted -n MyRegistry
+"""
+
 helps['acr repository show'] = """
 type: command
 short-summary: Get the attributes of a repository or image in an Azure Container Registry.
@@ -492,6 +549,100 @@ examples:
     text: az acr repository update -n MyRegistry --image hello-world@sha256:abc123 --write-enabled false
 """
 
+helps['acr cache'] = """
+type: group
+short-summary: Manage cache rules in Azure Container Registries.
+"""
+
+helps['acr cache show'] = """
+type: command
+short-summary: Show a cache rule.
+examples:
+  - name: Show a cache rule.
+    text: az acr cache show -r MyRegistry -n MyRule
+"""
+
+helps['acr cache list'] = """
+type: command
+short-summary: List the cache rules in an Azure Container Registry.
+examples:
+  - name: List the cache rules in an Azure Container Registry.
+    text: az acr cache list -r MyRegistry
+"""
+
+helps['acr cache create'] = """
+type: command
+short-summary: Create a cache rule.
+examples:
+  - name: Create a cache rule without a credential set.
+    text: az acr cache create -r MyRegistry -n MyRule -s docker.io/library/ubuntu -t ubuntu
+  - name: Create a cache rule with a credential set.
+    text: az acr cache create -r MyRegistry -n MyRule -s docker.io/library/ubuntu -t ubuntu -c MyCredSet
+"""
+
+helps['acr cache update'] = """
+type: command
+short-summary: Update the credential set on a cache rule.
+examples:
+  - name: Change or add a credential set to an existing cache rule.
+    text: az acr cache update -r MyRegistry -n MyRule -c NewCredSet
+  - name: Remove a credential set from an existing cache rule.
+    text: az acr cache update -r MyRegistry -n MyRule --remove-cred-set
+"""
+
+helps['acr cache delete'] = """
+type: command
+short-summary: Delete a cache rule.
+examples:
+  - name: Delete a cache rule.
+    text: az acr cache delete -r MyRegistry -n MyRule
+"""
+
+helps['acr credential-set'] = """
+type: group
+short-summary: Manage credential sets in Azure Container Registries.
+"""
+
+helps['acr credential-set show'] = """
+type: command
+short-summary: Show a credential set.
+examples:
+  - name: Show a credential set rule.
+    text: az acr credential-set show -r MyRegistry -n MyCredSet
+"""
+
+helps['acr credential-set list'] = """
+type: command
+short-summary: List the credential sets in an Azure Container Registry.
+examples:
+  - name: List the credential sets in an Azure Container Registry.
+    text: az acr credential-set list -r MyRegistry
+"""
+
+helps['acr credential-set create'] = """
+type: command
+short-summary: Create a credential set.
+examples:
+  - name: Create a credential set.
+    text: az acr credential-set create -r MyRegistry -n MyRule -l docker.io -u https://MyKeyvault.vault.azure.net/secrets/usernamesecret -p https://MyKeyvault.vault.azure.net/secrets/passwordsecret
+"""
+
+helps['acr credential-set update'] = """
+type: command
+short-summary: Update the username or password Azure Key Vault secret ID on a credential set.
+examples:
+  - name: Update the password Azure Key Vault secret ID.
+    text: az acr credential-set update -r MyRegistry -n MyRule -p https://MyKeyvault.vault.azure.net/secrets/newsecretname
+"""
+
+helps['acr credential-set delete'] = """
+type: command
+short-summary: Delete a credential set.
+examples:
+  - name: Delete a credential set.
+    text: az acr credential-set delete -r MyRegistry -n MyCredSet
+"""
+
 helps['acr manifest'] = """
 type: group
 short-summary: Manage artifact manifests in Azure Container Registries.
@@ -504,7 +655,7 @@ examples:
   - name: Get the manifest of the artifact 'hello-world:latest'.
     text: az acr manifest show -r MyRegistry -n hello-world:latest
   - name: Get the manifest of the artifact 'hello-world:latest'.
-    text: az acr manifest show MyRegistry.azurecr.io/hello-world:latest
+    text: az acr manifest show myregistry.azurecr.io/hello-world:latest
   - name: Get the manifest of the artifact referenced by digest 'hello-world@sha256:abc123'.
     text: az acr manifest show -r MyRegistry -n hello-world@sha256:abc123
   - name: Get the raw, unformatted manifest of the artifact 'hello-world:latest'.
@@ -518,7 +669,7 @@ examples:
   - name: List the manifests of the repository 'hello-world'.
     text: az acr manifest list -r MyRegistry -n hello-world
   - name: List the manifests of the repository 'hello-world'.
-    text: az acr manifest list MyRegistry.azurecr.io/hello-world
+    text: az acr manifest list myregistry.azurecr.io/hello-world
 """
 
 helps['acr manifest delete'] = """
@@ -528,26 +679,21 @@ examples:
   - name: Delete the manifest of the artifact 'hello-world:latest'.
     text: az acr manifest delete -r MyRegistry -n hello-world:latest
   - name: Delete the manifest of the artifact 'hello-world:latest'.
-    text: az acr manifest delete MyRegistry.azurecr.io/hello-world:latest
+    text: az acr manifest delete myregistry.azurecr.io/hello-world:latest
   - name: Delete the manifest of the artifact referenced by digest 'hello-world@sha256:abc123'.
     text: az acr manifest delete -r MyRegistry -n hello-world@sha256:abc123
 """
 
 helps['acr manifest list-referrers'] = """
 type: command
-short-summary: List the ORAS referrers to a manifest in an Azure Container Registry.
+short-summary: List the referrers to a manifest in an Azure Container Registry.
 examples:
   - name: List the referrers to the manifest of the artifact 'hello-world:latest'.
     text: az acr manifest list-referrers -r MyRegistry -n hello-world:latest
   - name: List the referrers to the manifest of the artifact 'hello-world:latest'.
-    text: az acr manifest list-referrers MyRegistry.azurecr.io/hello-world:latest
+    text: az acr manifest list-referrers myregistry.azurecr.io/hello-world:latest
   - name: List the referrers to the manifest of the artifact referenced by digest 'hello-world@sha256:abc123'.
     text: az acr manifest list-referrers -r MyRegistry -n hello-world@sha256:abc123
-"""
-
-helps['acr manifest metadata'] = """
-type: group
-short-summary: Manage artifact manifest metadata in Azure Container Registries.
 """
 
 helps['acr manifest show-metadata'] = """
@@ -557,7 +703,7 @@ examples:
   - name: Get the metadata of the tag 'hello-world:latest'.
     text: az acr manifest show-metadata -r MyRegistry -n hello-world:latest
   - name: Get the metadata of the tag 'hello-world:latest'.
-    text: az acr manifest show-metadata MyRegistry.azurecr.io/hello-world:latest
+    text: az acr manifest show-metadata myregistry.azurecr.io/hello-world:latest
   - name: Get the metadata of the manifest referenced by digest 'hello-world@sha256:abc123'.
     text: az acr manifest show-metadata -r MyRegistry -n hello-world@sha256:abc123
 """
@@ -569,7 +715,7 @@ examples:
   - name: List the metadata of the manifests in the repository 'hello-world'.
     text: az acr manifest list-metadata -r MyRegistry -n hello-world
   - name: List the metadata of the manifests in the repository 'hello-world'.
-    text: az acr manifest list-metadata MyRegistry.azurecr.io/hello-world
+    text: az acr manifest list-metadata myregistry.azurecr.io/hello-world
 """
 
 helps['acr manifest update-metadata'] = """
@@ -579,9 +725,15 @@ examples:
   - name: Update the metadata of the tag 'hello-world:latest'.
     text: az acr manifest update-metadata -r MyRegistry -n hello-world:latest --write-enabled false
   - name: Update the metadata of the tag 'hello-world:latest'.
-    text: az acr manifest update-metadata MyRegistry.azurecr.io/hello-world:latest --write-enabled false
+    text: az acr manifest update-metadata myregistry.azurecr.io/hello-world:latest --write-enabled false
   - name: Update the metadata of the artifact referenced by digest 'hello-world@sha256:abc123'.
     text: az acr manifest update-metadata -r MyRegistry -n hello-world@sha256:abc123 --write-enabled false
+"""
+
+# Deprecated
+helps['acr manifest metadata'] = """
+type: group
+short-summary: Manage artifact manifest metadata in Azure Container Registries.
 """
 
 helps['acr manifest metadata show'] = """
@@ -597,6 +749,44 @@ short-summary: List the metadata of the manifests in a repository in an Azure Co
 helps['acr manifest metadata update'] = """
 type: command
 short-summary: Update the manifest metadata of an artifact in an Azure Container Registry.
+"""
+
+helps['acr manifest list-deleted'] = """
+type: command
+short-summary: List the soft-deleted manifests in a repository in an Azure Container Registry.
+examples:
+  - name: List the soft-deleted manifests in the repository 'hello-world'.
+    text: az acr manifest list-deleted -r MyRegistry -n hello-world
+  - name: List the soft-deleted manifests in the repository 'hello-world'.
+    text: az acr manifest list-deleted myregistry.azurecr.io/hello-world
+"""
+
+helps['acr manifest list-deleted-tags'] = """
+type: command
+short-summary: List the soft-deleted tags in a repository in an Azure Container Registry.
+examples:
+  - name: List the soft-deleted tags in the repository 'hello-world'.
+    text: az acr manifest list-deleted-tags -r MyRegistry -n hello-world
+  - name: List the soft-deleted tags in the repository 'hello-world'.
+    text: az acr manifest list-deleted-tags myregistry.azurecr.io/hello-world
+  - name: List the soft-deleted tags that match tag 'latest' in the repository 'hello-world'.
+    text: az acr manifest list-deleted-tags -r MyRegistry -n hello-world:latest
+  - name: List the soft-deleted tags that match tag 'latest' in the repository 'hello-world'.
+    text: az acr manifest list-deleted-tags myregistry.azurecr.io/hello-world:latest
+"""
+
+helps['acr manifest restore'] = """
+type: command
+short-summary: Restore a soft-deleted artifact and tag in an Azure Container Registry.
+examples:
+  - name: Restore the manifest matching digest 'sha256:abc123' with tag 'latest' in the repository 'hello-world'.
+    text: az acr manifest restore -r MyRegistry -n hello-world:latest -d sha256:abc123
+  - name: Restore the manifest matching digest 'sha256:abc123' with tag 'latest' in the repository 'hello-world'.
+    text: az acr manifest restore myregistry.azurecr.io/hello-world:latest -d sha256:abc123
+  - name: Restore the most recently deleted manifest associated with the tag 'latest' in the repository 'hello-world'.
+    text: az acr manifest restore -r MyRegistry -n hello-world:latest
+  - name: Restore the most recently deleted manifest associated with the tag 'latest' in the repository 'hello-world'.
+    text: az acr manifest restore myregistry.azurecr.io/hello-world:latest
 """
 
 helps['acr run'] = """

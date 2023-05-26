@@ -225,7 +225,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
                            '--continue-on-failure false'.format(item['name'], filesystem, removal_acl, storage_account))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(kind="StorageV2", hns=True)
+    @StorageAccountPreparer(kind="StorageV2", allow_blob_public_access=True, hns=True)
     def test_adls_filesystem_scenarios(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         connection_str = self.cmd('storage account show-connection-string -n {} -g {} -otsv'

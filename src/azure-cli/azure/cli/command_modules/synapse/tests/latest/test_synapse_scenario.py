@@ -1156,7 +1156,6 @@ class SynapseScenarioTests(ScenarioTest):
             self.check('managedVirtualNetwork', 'default')
         ])
 
-    #@record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_spark_pool(self):
@@ -1177,7 +1176,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # create spark pool
         spark_pool = self.cmd('az synapse spark pool create --name {spark-pool} --spark-version {spark-version}'
-                              ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size Medium'
+                              ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size XLarge'
                               ' --spark-config-file-path "{file}"',
                               checks=[
                                   self.check('name', self.kwargs['spark-pool']),
@@ -1203,13 +1202,15 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update spark pool
         self.cmd('az synapse spark pool update --ids {pool-id} --tags key1=value1'
-                 ' --spark-config-file-path "{file}"',
+                 ' --spark-config-file-path "{file}"'
+                 ' --enable-dynamic-exec --min-executors 1 --max-executors 2',
                  checks=[
                     self.check('tags.key1', 'value1'),
                     self.check('name', self.kwargs['spark-pool']),
                     self.check('type', 'Microsoft.Synapse/workspaces/bigDataPools'),
                     self.check('provisioningState', 'Succeeded'),
-                    self.check('sparkConfigProperties.filename','sparkconfigfile')
+                    self.check('sparkConfigProperties.filename','sparkconfigfile'),
+                    self.check('dynamicExecutorAllocation.maxExecutors',2)
                  ])
 
         # delete spark pool with spark pool name
@@ -2656,7 +2657,6 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse notebook show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
-    @unittest.skip('UnicodeDecodeError')
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_workspace_package(self):
@@ -2833,7 +2833,7 @@ class SynapseScenarioTests(ScenarioTest):
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_managed_private_endpoints(self):
         self.kwargs.update({
-            'name': 'AzureDataLakeStoragePE',
+            'name': 'myPrivateLinkService',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'managedprivateendpoints.json')})
 
         # create a workspace
@@ -2859,7 +2859,7 @@ class SynapseScenarioTests(ScenarioTest):
         # wait some time to improve robustness
         if self.is_live or self.in_recording:
             import time
-            time.sleep(90)
+            time.sleep(240)
         # get managed private endpoint
         self.cmd(
             'az synapse  managed-private-endpoints show --workspace-name {workspace} --pe-name {name}',
@@ -2879,7 +2879,7 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse  managed-private-endpoints delete --workspace-name {workspace} --pe-name {name} -y')
         if self.is_live or self.in_recording:
             import time
-            time.sleep(60)    
+            time.sleep(120)
         self.cmd(
             'az synapse managed-private-endpoints show --workspace-name {workspace} --pe-name {name}',
             expect_failure=True)
@@ -3087,6 +3087,7 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('status', 'Starting')
             ])
 
+        time.sleep(120)
         # stop a link connnection
         self.cmd(
             'az synapse link-connection stop --workspace-name {workspace_name} --name {link_connection_name}')

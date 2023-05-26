@@ -7,6 +7,8 @@ assignees: ''
 
 ---
 
+<!--- 🛑 Please check existing issues first before continuing: https://github.com/Azure/azure-cli/issues --->
+
 > ### `az feedback` auto-generates most of the information requested below, as of CLI version 2.0.62
 
 **Related command**

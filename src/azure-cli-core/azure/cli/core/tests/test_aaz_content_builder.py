@@ -10,7 +10,8 @@ class TestAAZContentBuilder(unittest.TestCase):
 
     @staticmethod
     def _define_args_schema():
-        from azure.cli.core.aaz._arg import AAZArgumentsSchema, AAZStrArg, AAZObjectArg, AAZListArg, AAZDictArg
+        from azure.cli.core.aaz._arg import AAZArgumentsSchema, AAZStrArg, AAZObjectArg, AAZListArg, AAZDictArg, \
+            AAZFreeFormDictArg
         _schema = AAZArgumentsSchema()
 
         # str
@@ -73,12 +74,15 @@ class TestAAZContentBuilder(unittest.TestCase):
         element.action_c = AAZStrArg()
         element.action_d = AAZStrArg()
 
+        _schema.freeform = AAZFreeFormDictArg(nullable=True)
+        _schema.h_freeform = AAZFreeFormDictArg(nullable=True)
+
         return _schema
 
     def test_aaz_content_builder_for_create(self):
         from azure.cli.core.aaz._content_builder import AAZContentBuilder
         from azure.cli.core.aaz._arg_browser import AAZArgBrowser
-        from azure.cli.core.aaz._field_type import AAZStrType, AAZObjectType, AAZListType, AAZDictType
+        from azure.cli.core.aaz._field_type import AAZStrType, AAZObjectType, AAZListType, AAZDictType, AAZFreeFormDictType
 
         _args_schema = self._define_args_schema()
         arg_value = _args_schema(data={
@@ -126,6 +130,14 @@ class TestAAZContentBuilder(unittest.TestCase):
                     "b1": "3",
                     "b2": "6",
                 }
+            },
+            "freeform": {
+                "a": 1,
+                "b": "string",
+                "c": None,
+                "d": True,
+                "e": [1, "str", False],
+                "f": {"a": 1, "b": "str"},
             }
         })
         arg_data = arg_value.to_serialized_data(keep_undefined_in_list=True)
@@ -267,6 +279,17 @@ class TestAAZContentBuilder(unittest.TestCase):
         if elements:
             elements.set_prop('name', AAZStrType, '.')
 
+        _builder.set_prop('freeForm', AAZFreeFormDictType, '.freeform')
+        _builder.set_prop('hideFreeForm', AAZFreeFormDictType, '.h_freeform')
+
+        freeform = _builder.get('.freeForm')
+        if freeform:
+            freeform.set_anytype_elements('.')
+
+        h_freeform = _builder.get('.hideFreeForm')
+        if h_freeform:
+            h_freeform.set_anytype_elements('.')
+
         self.assertTrue(_value.to_serialized_data()['properties']['conns'] == {
             'a': {
                 'a1': {'name': '0'},
@@ -292,10 +315,18 @@ class TestAAZContentBuilder(unittest.TestCase):
                                                      'b': {'name': '1'},
                                                      'c': {'name': '2'}}, 'conns': {
                                   'a': {'a1': {'name': '0'}, 'a2': {'name': '1'}},
-                                  'b': {'b1': {'name': '3'}, 'b2': {'name': '6'}}}}})
+                                  'b': {'b1': {'name': '3'}, 'b2': {'name': '6'}}}},
+                          "freeForm": {
+                              "a": 1,
+                              "b": "string",
+                              "c": None,
+                              "d": True,
+                              "e": [1, "str", False],
+                              "f": {"a": 1, "b": "str"},
+                          }})
 
     def _define_instance_value(self):
-        from azure.cli.core.aaz._field_type import AAZStrType, AAZObjectType, AAZListType, AAZDictType
+        from azure.cli.core.aaz._field_type import AAZStrType, AAZObjectType, AAZListType, AAZDictType, AAZFreeFormDictType
         from azure.cli.core.aaz._field_value import AAZObject
 
         _schema = AAZObjectType()
@@ -329,6 +360,8 @@ class TestAAZContentBuilder(unittest.TestCase):
         _schema.properties.conns.Element = AAZDictType()
         _schema.properties.conns.Element.Element = AAZObjectType()
         _schema.properties.conns.Element.Element.name = AAZStrType()
+        _schema.freeForm = AAZFreeFormDictType()
+        _schema.hideFreeForm = AAZFreeFormDictType(nullable=True)
 
         value = AAZObject(_schema, data=_schema.process_data({
             'name': 'a',
@@ -344,7 +377,9 @@ class TestAAZContentBuilder(unittest.TestCase):
                          [{'name': '2'}, {'name': '3'}]],
                 'domains': {'a': {'name': '0'}, 'b': {'name': '1'}, 'c': {'name': '2'}},
                 'conns': {'a': {'a1': {'name': '0'}, 'a2': {'name': '1'}}, 'b': {'b1': {'name': '3'}}}
-            }
+            },
+            "freeForm": {"a": 1, "b": "string", "c": None},
+            "hideFreeForm": {"h_a": 1, "h_b": "string", "h_c": None},
         }))
 
         return value
@@ -352,7 +387,7 @@ class TestAAZContentBuilder(unittest.TestCase):
     def test_aaz_content_builder_for_update(self):
         from azure.cli.core.aaz._content_builder import AAZContentBuilder
         from azure.cli.core.aaz._arg_browser import AAZArgBrowser
-        from azure.cli.core.aaz._field_type import AAZStrType, AAZObjectType, AAZListType, AAZDictType
+        from azure.cli.core.aaz._field_type import AAZStrType, AAZObjectType, AAZListType, AAZDictType, AAZFreeFormDictType
 
         _value = self._define_instance_value()
 
@@ -388,6 +423,8 @@ class TestAAZContentBuilder(unittest.TestCase):
         arg_value.conns['b']['b1'] = 'b1'
         arg_value.conns['b']['b3'] = "b3"
         arg_value.conns['d'] = {"d": "d"}
+
+        arg_value.freeform = {"b": 123}
 
         _builder = AAZContentBuilder(
             values=[_value],
@@ -523,6 +560,17 @@ class TestAAZContentBuilder(unittest.TestCase):
         if elements:
             elements.set_prop('name', AAZStrType, '.')
 
+        _builder.set_prop('freeForm', AAZFreeFormDictType, '.freeform')
+        _builder.set_prop('hideFreeForm', AAZFreeFormDictType, '.h_freeform')
+
+        freeform = _builder.get('.freeForm')
+        if freeform:
+            freeform.set_anytype_elements('.')
+
+        h_freeform = _builder.get('.hideFreeForm')
+        if h_freeform:
+            h_freeform.set_anytype_elements('.')
+
         self.assertEqual(_value.to_serialized_data()['properties']['conns'], {
             'a': {
                 'f1': {'name': 'f1'},
@@ -551,13 +599,15 @@ class TestAAZContentBuilder(unittest.TestCase):
                 'domains': {'a': {'name': 'a'}, 'b': {'name': '1'}, 'c': {'name': '2'}, 'd': {'name': 'd'}},
                 'conns': {'a': {'f1': {'name': 'f1'}}, 'b': {'b1': {'name': 'b1'}, 'b3': {'name': 'b3'}},
                           'd': {'d': {'name': 'd'}}}
-            }
+            },
+            "freeForm": {"b": 123},
+            "hideFreeForm": {"h_a": 1, "h_b": "string", "h_c": None},
         })
 
     def test_aaz_content_builder_for_update_with_nullable(self):
         from azure.cli.core.aaz._content_builder import AAZContentBuilder
         from azure.cli.core.aaz._arg_browser import AAZArgBrowser
-        from azure.cli.core.aaz._field_type import AAZStrType, AAZObjectType, AAZListType, AAZDictType, AAZUndefined
+        from azure.cli.core.aaz._field_type import AAZStrType, AAZObjectType, AAZListType, AAZDictType, AAZUndefined, AAZFreeFormDictType
 
         _value = self._define_instance_value()
 
@@ -580,6 +630,9 @@ class TestAAZContentBuilder(unittest.TestCase):
 
         arg_value.conns['a'] = None
         arg_value.conns['d'] = None
+
+        arg_value.freeform = None
+        arg_value.h_freeform = None
 
         _builder = AAZContentBuilder(
             values=[_value],
@@ -716,12 +769,23 @@ class TestAAZContentBuilder(unittest.TestCase):
         if elements:
             elements.set_prop('name', AAZStrType, '.')
 
+        _builder.set_prop('freeForm', AAZFreeFormDictType, '.freeform')
+        _builder.set_prop('hideFreeForm', AAZFreeFormDictType, '.h_freeform')
+
+        freeform = _builder.get('.freeForm')
+        if freeform:
+            freeform.set_anytype_elements('.')
+
+        h_freeform = _builder.get('.hideFreeForm')
+        if h_freeform:
+            h_freeform.set_anytype_elements('.')
+
         self.assertEqual(_value.to_serialized_data()['properties']['conns'], {
             'b': {'b1': {'name': '3'}}
         })
 
         self.assertEqual(_value.to_serialized_data(), {
-            'hideObj': None, 'hideTags': None, 'hidePermissions': None,
+            'hideObj': None, 'hideTags': None, 'hidePermissions': None, "hideFreeForm": None,
             'properties': {
                 'subnets': [None, {'name': 'net2'}],
                 'adds': [[{'name': '0'}, {'name': '1'}, {'name': '2'}], [{'name': '2'}, {'name': '3'}]],

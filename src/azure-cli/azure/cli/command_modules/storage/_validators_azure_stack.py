@@ -1131,7 +1131,7 @@ def validate_azcopy_remove_arguments(cmd, namespace):
                                              'specified'))
     if valid_blob:
         client = blob_data_service_factory(cmd.cli_ctx, {
-            'account_name': namespace.account_name})
+            'account_name': namespace.account_name, 'connection_string': namespace.connection_string})
         if not blob:
             blob = ''
         url = client.make_blob_url(container, blob)

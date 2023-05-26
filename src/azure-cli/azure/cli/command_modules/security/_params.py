@@ -10,7 +10,7 @@
 from azure.cli.core.commands.parameters import (get_three_state_flag,
                                                 get_enum_type,
                                                 resource_group_name_type)
-from azure.mgmt.security.models._security_center_enums import Enum69
+from azure.mgmt.security.models import SettingName
 from knack.arguments import CLIArgumentType
 from ._validators import (validate_alert_status,
                           validate_auto_provisioning_toggle,
@@ -23,7 +23,7 @@ home_region_arg_type = CLIArgumentType(options_list=('--home-region', '-hr'), me
 location_arg_type = CLIArgumentType(options_list=('--location', '-l'), metavar='LOCATION', help='location of the resource')
 
 # Alerts
-alert_status_arg_type = CLIArgumentType(options_list=('--status'), metavar='STATUS', help='target status of the alert. possible values are "dismiss" and "activate"')
+alert_status_arg_type = CLIArgumentType(options_list=('--status'), metavar='STATUS', help='target status of the alert. possible values are "dismiss", "activate", "resolve" and "inprogress"')
 
 
 # Alerts Suppression Rules
@@ -103,6 +103,7 @@ adaptive_network_hardenings_resource_adaptive_network_hardenings_resource_name =
 
 # Adaptive Application Controls
 adaptive_application_controls_group_name = CLIArgumentType(option_list=('--group-name'), metave='GROUPNAME', help='Name of an application control VM/server group')
+adaptive_application_controls_location = CLIArgumentType(options_list=('--location', '-l'), metavar='LOCATION', help='Location of the resource. Possible values are "centralsus", "westeurope". Please use "list" operation to get all resources and locations')
 
 # Automations
 automation_scopes_arg_type = CLIArgumentType(options_list=('--scopes'), metavar='SCOPES', help='A collection of scopes on which the security automations logic is applied')
@@ -447,10 +448,13 @@ def load_arguments(self, _):
             c.argument(
                 'group_name',
                 arg_type=adaptive_application_controls_group_name)
+            c.argument(
+                'location',
+                arg_type=adaptive_application_controls_location)
 
     for scope in ['setting']:
         with self.argument_context('security {}'.format(scope)) as c:
-            c.argument('setting_name', options_list=['--name', '-n'], help='The name of the setting', arg_type=get_enum_type(Enum69))
+            c.argument('setting_name', options_list=['--name', '-n'], help='The name of the setting', arg_type=get_enum_type(SettingName))
             c.argument('enabled', help='Enable or disable the setting status.', arg_type=get_three_state_flag())
 
     for scope in ['automation create_or_update', 'automation validate']:

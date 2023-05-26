@@ -2,12 +2,18 @@
 max-line-length = 120
 max-complexity = 10
 ignore =
-    E501,  # line too long, it is covered by pylint
-    E722,  # bare except, bad practice, to be removed in the future
-    F401,  # imported but unused, too many violations, to be removed in the future
-    F811,  # redefinition of unused, to be removed in the future
-    C901   # code flow is too complex, too many violations, to be removed in the future
-    W504   # line break after binary operator effect on readability is subjective
+    # line too long, it is covered by pylint
+    E501
+    # bare except, bad practice, to be removed in the future
+    E722
+    # imported but unused, too many violations, to be removed in the future
+    F401
+    # redefinition of unused, to be removed in the future
+    F811
+    # code flow is too complex, too many violations, to be removed in the future
+    C901
+    # line break after binary operator effect on readability is subjective
+    W504
 per-file-ignores =
     # module level import not at top of file, elevate timer to measure import time
     src/azure-cli/azure/cli/__main__.py:E402
@@ -21,3 +27,4 @@ exclude =
     */grammar/
     vendored_sdks
     tests
+    */command_modules/*/aaz

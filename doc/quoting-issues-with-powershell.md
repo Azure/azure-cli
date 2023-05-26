@@ -1,6 +1,6 @@
 # Quoting issues with PowerShell
 
-This issue is being tracked at [#15529](https://github.com/Azure/azure-cli/issues/15529).
+These issues are being tracked at [#15529](https://github.com/Azure/azure-cli/issues/15529).
 
 ## Symptom
 
@@ -20,7 +20,7 @@ As `az` is a Command Prompt script (at `C:\Program Files (x86)\Microsoft SDKs\Az
 some quoted text
 ```
 
-In order for a symbol to be received by Azure CLI, you will have to take both PowerShell and Command Prompt's parsing into consideration. If a symbol still exists after 2 rounds of parsing, Azure CLI will receive it. 
+In order for a symbol to be received by Azure CLI, you will have to take both PowerShell and Command Prompt's parsing into consideration. If a symbol still exists after 2 rounds of parsing, Azure CLI will receive it.
 
 ## Workaround: the stop-parsing symbol
 To prevent this, you may use [stop-parsing symbol](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing) `--%` between `az` and arguments.
@@ -47,7 +47,7 @@ But keep in mind that **the command still needs to be escaped following the Comm
 
 ### Ampersand `&` is interpreted by Command Prompt
 
- This causes the argument to be parsed again by Command Prompt and breaks the argument. This typically happens when passing a URL with query string to `az`:
+This causes the argument to be parsed again by Command Prompt and breaks the argument. This typically happens when passing a URL with query string to `az`:
 
 ```powershell
 > az 'https://graph.microsoft.com/v1.0/me/events?$orderby=createdDateTime&$skip=20' --debug
@@ -73,7 +73,7 @@ This is what `cmd.exe` or Windows system sees:
 
 ```cmd
 >az a&b --debug
-az: 'a' is not in the 'az' command group. 
+az: 'a' is not in the 'az' command group.
 'b' is not recognized as an internal or external command,
 operable program or batch file.
 ```
@@ -81,7 +81,7 @@ operable program or batch file.
 To solve it:
 
 ```powershell
-# When quoted by single quotes ('), double quotes (") are preserved by PowerShell and sent 
+# When quoted by single quotes ('), double quotes (") are preserved by PowerShell and sent
 # to Command Prompt, so that ampersand (&) is treated as a literal character
 > az '"a&b"' --debug
 Command arguments: ['a&b', '--debug']

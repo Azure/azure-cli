@@ -13,21 +13,22 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_policy_identity_userassigned000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_policy_identity_userassigned000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","name":"cli_test_policy_identity_userassigned000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-11-23T23:50:54Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","name":"cli_test_policy_identity_userassigned000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2023-03-13T08:54:51Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '428'
+      - '364'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 23 Nov 2021 23:50:56 GMT
+      - Mon, 13 Mar 2023 08:54:51 GMT
       expires:
       - '-1'
       pragma:
@@ -42,7 +43,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "tags": {"tag1": "d1"}}'
+    body: '{"tags": {"tag1": "d1"}, "location": "westus"}'
     headers:
       Accept:
       - application/json
@@ -55,28 +56,26 @@ interactions:
       Content-Length:
       - '46'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - python/3.8.8 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-msi/0.2.0 Azure-SDK-For-Python AZURECLI/2.30.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-msi/7.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi?api-version=2021-09-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi?api-version=2023-01-31
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi","name":"policyCliTestMsi","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus","tags":{"tag1":"d1"},"properties":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"931e9f2b-532c-4477-8ea4-ae5ed6297ed3","clientId":"2c46f9c4-2de0-4b7e-b38e-da20090ef80d","clientSecretUrl":"https://control-westus.identity.azure.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi/credentials?tid=72f988bf-86f1-41af-91ab-2d7cd011db47&oid=931e9f2b-532c-4477-8ea4-ae5ed6297ed3&aid=2c46f9c4-2de0-4b7e-b38e-da20090ef80d"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi","name":"policyCliTestMsi","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus","tags":{"tag1":"d1"},"properties":{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","principalId":"92b2850c-14c1-4371-aa8d-b0ae816578fa","clientId":"d1607aa9-a1f6-4ce2-ae24-24e84fb0fd7d"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '935'
+      - '488'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 23 Nov 2021 23:50:58 GMT
+      - Mon, 13 Mar 2023 08:54:53 GMT
       expires:
       - '-1'
       location:
@@ -88,7 +87,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1197'
     status:
       code: 201
       message: Created
@@ -106,7 +105,8 @@ interactions:
       ParameterSetName:
       - --policy -n -g --location --mi-user-assigned --enforcement-mode
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d?api-version=2021-06-01
   response:
@@ -121,7 +121,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 23 Nov 2021 23:50:58 GMT
+      - Mon, 13 Mar 2023 08:54:53 GMT
       expires:
       - '-1'
       pragma:
@@ -149,7 +149,8 @@ interactions:
       ParameterSetName:
       - --policy -n -g --location --mi-user-assigned --enforcement-mode
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d?api-version=2021-06-01
   response:
@@ -164,7 +165,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 23 Nov 2021 23:50:58 GMT
+      - Mon, 13 Mar 2023 08:54:53 GMT
       expires:
       - '-1'
       pragma:
@@ -197,27 +198,28 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '480'
+      - '448'
       Content-Type:
       - application/json
       ParameterSetName:
       - --policy -n -g --location --mi-user-assigned --enforcement-mode
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002?api-version=2021-06-01
   response:
     body:
-      string: '{"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi":{"principalId":"931e9f2b-532c-4477-8ea4-ae5ed6297ed3","clientId":"2c46f9c4-2de0-4b7e-b38e-da20090ef80d"}}},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","metadata":{"createdBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","createdOn":"2021-11-23T23:50:59.1036119Z","updatedBy":null,"updatedOn":null},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"robga@microsoft.com","createdByType":"User","createdAt":"2021-11-23T23:50:58.6633846Z","lastModifiedBy":"robga@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-23T23:50:58.6633846Z"}}'
+      string: '{"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi":{"principalId":"92b2850c-14c1-4371-aa8d-b0ae816578fa","clientId":"d1607aa9-a1f6-4ce2-ae24-24e84fb0fd7d"}}},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","metadata":{"createdBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","createdOn":"2023-03-13T08:54:55.6553293Z","updatedBy":null,"updatedOn":null},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-03-13T08:54:54.6462633Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-03-13T08:54:54.6462633Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1438'
+      - '1374'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 23 Nov 2021 23:50:59 GMT
+      - Mon, 13 Mar 2023 08:54:54 GMT
       expires:
       - '-1'
       pragma:
@@ -229,7 +231,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1192'
     status:
       code: 201
       message: Created
@@ -247,21 +249,22 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002?api-version=2021-06-01
   response:
     body:
-      string: '{"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi":{"principalId":"931e9f2b-532c-4477-8ea4-ae5ed6297ed3","clientId":"2c46f9c4-2de0-4b7e-b38e-da20090ef80d"}}},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","metadata":{"createdBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","createdOn":"2021-11-23T23:50:59.1036119Z","updatedBy":null,"updatedOn":null},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"robga@microsoft.com","createdByType":"User","createdAt":"2021-11-23T23:50:58.6633846Z","lastModifiedBy":"robga@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-23T23:50:58.6633846Z"}}'
+      string: '{"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi":{"principalId":"92b2850c-14c1-4371-aa8d-b0ae816578fa","clientId":"d1607aa9-a1f6-4ce2-ae24-24e84fb0fd7d"}}},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","metadata":{"createdBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","createdOn":"2023-03-13T08:54:55.6553293Z","updatedBy":null,"updatedOn":null},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-03-13T08:54:54.6462633Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-03-13T08:54:54.6462633Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1438'
+      - '1374'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 23 Nov 2021 23:50:59 GMT
+      - Mon, 13 Mar 2023 08:54:55 GMT
       expires:
       - '-1'
       pragma:
@@ -293,21 +296,22 @@ interactions:
       ParameterSetName:
       - -n -g --description
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002?api-version=2021-06-01
   response:
     body:
-      string: '{"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi":{"principalId":"931e9f2b-532c-4477-8ea4-ae5ed6297ed3","clientId":"2c46f9c4-2de0-4b7e-b38e-da20090ef80d"}}},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","metadata":{"createdBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","createdOn":"2021-11-23T23:50:59.1036119Z","updatedBy":null,"updatedOn":null},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"robga@microsoft.com","createdByType":"User","createdAt":"2021-11-23T23:50:58.6633846Z","lastModifiedBy":"robga@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-23T23:50:58.6633846Z"}}'
+      string: '{"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi":{"principalId":"92b2850c-14c1-4371-aa8d-b0ae816578fa","clientId":"d1607aa9-a1f6-4ce2-ae24-24e84fb0fd7d"}}},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","metadata":{"createdBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","createdOn":"2023-03-13T08:54:55.6553293Z","updatedBy":null,"updatedOn":null},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-03-13T08:54:54.6462633Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-03-13T08:54:54.6462633Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1438'
+      - '1374'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 23 Nov 2021 23:50:59 GMT
+      - Mon, 13 Mar 2023 08:54:55 GMT
       expires:
       - '-1'
       pragma:
@@ -329,8 +333,8 @@ interactions:
     body: '{"location": "westus", "identity": {"type": "UserAssigned", "userAssignedIdentities":
       {"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi":
       {}}}, "properties": {"policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d",
-      "description": "New description", "metadata": {"createdBy": "0dc80135-ae53-4da3-8695-220a2d93aad8",
-      "createdOn": "2021-11-23T23:50:59.1036119Z", "updatedBy": null, "updatedOn":
+      "description": "New description", "metadata": {"createdBy": "6b30bdc6-696a-46fb-82d7-739c2fb147b7",
+      "createdOn": "2023-03-13T08:54:55.6553293Z", "updatedBy": null, "updatedOn":
       null}, "enforcementMode": "DoNotEnforce"}}'
     headers:
       Accept:
@@ -342,28 +346,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '664'
+      - '632'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g --description
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002?api-version=2021-06-01
   response:
     body:
-      string: '{"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi":{"principalId":"931e9f2b-532c-4477-8ea4-ae5ed6297ed3","clientId":"2c46f9c4-2de0-4b7e-b38e-da20090ef80d"}}},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","description":"New
-        description","metadata":{"createdBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","createdOn":"2021-11-23T23:50:59.1036119Z","updatedBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","updatedOn":"2021-11-23T23:51:00.324374Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"robga@microsoft.com","createdByType":"User","createdAt":"2021-11-23T23:50:58.6633846Z","lastModifiedBy":"robga@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-23T23:51:00.1780169Z"}}'
+      string: '{"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi":{"principalId":"92b2850c-14c1-4371-aa8d-b0ae816578fa","clientId":"d1607aa9-a1f6-4ce2-ae24-24e84fb0fd7d"}}},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","description":"New
+        description","metadata":{"createdBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","createdOn":"2023-03-13T08:54:55.6553293Z","updatedBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","updatedOn":"2023-03-13T08:54:56.4413358Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-03-13T08:54:54.6462633Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-03-13T08:54:56.0296858Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1529'
+      - '1466'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 23 Nov 2021 23:51:00 GMT
+      - Mon, 13 Mar 2023 08:54:55 GMT
       expires:
       - '-1'
       pragma:
@@ -375,7 +380,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1192'
     status:
       code: 201
       message: Created
@@ -393,22 +398,23 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002?api-version=2021-06-01
   response:
     body:
-      string: '{"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi":{"principalId":"931e9f2b-532c-4477-8ea4-ae5ed6297ed3","clientId":"2c46f9c4-2de0-4b7e-b38e-da20090ef80d"}}},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","description":"New
-        description","metadata":{"createdBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","createdOn":"2021-11-23T23:50:59.1036119Z","updatedBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","updatedOn":"2021-11-23T23:51:00.324374Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"robga@microsoft.com","createdByType":"User","createdAt":"2021-11-23T23:50:58.6633846Z","lastModifiedBy":"robga@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-23T23:51:00.1780169Z"}}'
+      string: '{"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi":{"principalId":"92b2850c-14c1-4371-aa8d-b0ae816578fa","clientId":"d1607aa9-a1f6-4ce2-ae24-24e84fb0fd7d"}}},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","description":"New
+        description","metadata":{"createdBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","createdOn":"2023-03-13T08:54:55.6553293Z","updatedBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","updatedOn":"2023-03-13T08:54:56.4413358Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-03-13T08:54:54.6462633Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-03-13T08:54:56.0296858Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1529'
+      - '1466'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 23 Nov 2021 23:51:00 GMT
+      - Mon, 13 Mar 2023 08:54:55 GMT
       expires:
       - '-1'
       pragma:
@@ -429,9 +435,9 @@ interactions:
 - request:
     body: '{"location": "westus", "identity": {"type": "None"}, "properties": {"policyDefinitionId":
       "/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d",
-      "description": "New description", "metadata": {"createdBy": "0dc80135-ae53-4da3-8695-220a2d93aad8",
-      "createdOn": "2021-11-23T23:50:59.1036119Z", "updatedBy": "0dc80135-ae53-4da3-8695-220a2d93aad8",
-      "updatedOn": "2021-11-23T23:51:00.324374Z"}, "enforcementMode": "DoNotEnforce"}}'
+      "description": "New description", "metadata": {"createdBy": "6b30bdc6-696a-46fb-82d7-739c2fb147b7",
+      "createdOn": "2023-03-13T08:54:55.6553293Z", "updatedBy": "6b30bdc6-696a-46fb-82d7-739c2fb147b7",
+      "updatedOn": "2023-03-13T08:54:56.4413358Z"}, "enforcementMode": "DoNotEnforce"}}'
     headers:
       Accept:
       - application/json
@@ -442,28 +448,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '461'
+      - '462'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002?api-version=2021-06-01
   response:
     body:
       string: '{"identity":{"type":"None"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","description":"New
-        description","metadata":{"createdBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","createdOn":"2021-11-23T23:50:59.1036119Z","updatedBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","updatedOn":"2021-11-23T23:51:01.2529809Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"robga@microsoft.com","createdByType":"User","createdAt":"2021-11-23T23:50:58.6633846Z","lastModifiedBy":"robga@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-23T23:51:01.231952Z"}}'
+        description","metadata":{"createdBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","createdOn":"2023-03-13T08:54:55.6553293Z","updatedBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","updatedOn":"2023-03-13T08:54:56.7281594Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-03-13T08:54:54.6462633Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-03-13T08:54:56.7099583Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1168'
+      - '1137'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 23 Nov 2021 23:51:01 GMT
+      - Mon, 13 Mar 2023 08:54:56 GMT
       expires:
       - '-1'
       pragma:
@@ -475,7 +482,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1196'
     status:
       code: 201
       message: Created
@@ -493,22 +500,23 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002?api-version=2021-06-01
   response:
     body:
       string: '{"identity":{"type":"None"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","description":"New
-        description","metadata":{"createdBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","createdOn":"2021-11-23T23:50:59.1036119Z","updatedBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","updatedOn":"2021-11-23T23:51:01.2529809Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"robga@microsoft.com","createdByType":"User","createdAt":"2021-11-23T23:50:58.6633846Z","lastModifiedBy":"robga@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-23T23:51:01.231952Z"}}'
+        description","metadata":{"createdBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","createdOn":"2023-03-13T08:54:55.6553293Z","updatedBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","updatedOn":"2023-03-13T08:54:56.7281594Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-03-13T08:54:54.6462633Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-03-13T08:54:56.7099583Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1168'
+      - '1137'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 23 Nov 2021 23:51:01 GMT
+      - Mon, 13 Mar 2023 08:54:56 GMT
       expires:
       - '-1'
       pragma:
@@ -540,22 +548,23 @@ interactions:
       ParameterSetName:
       - --user-assigned -n -g
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002?api-version=2021-06-01
   response:
     body:
       string: '{"identity":{"type":"None"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","description":"New
-        description","metadata":{"createdBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","createdOn":"2021-11-23T23:50:59.1036119Z","updatedBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","updatedOn":"2021-11-23T23:51:01.2529809Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"robga@microsoft.com","createdByType":"User","createdAt":"2021-11-23T23:50:58.6633846Z","lastModifiedBy":"robga@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-23T23:51:01.231952Z"}}'
+        description","metadata":{"createdBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","createdOn":"2023-03-13T08:54:55.6553293Z","updatedBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","updatedOn":"2023-03-13T08:54:56.7281594Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-03-13T08:54:54.6462633Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-03-13T08:54:56.7099583Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1168'
+      - '1137'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 23 Nov 2021 23:51:01 GMT
+      - Mon, 13 Mar 2023 08:54:56 GMT
       expires:
       - '-1'
       pragma:
@@ -577,9 +586,9 @@ interactions:
     body: '{"location": "westus", "identity": {"type": "UserAssigned", "userAssignedIdentities":
       {"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi":
       {}}}, "properties": {"policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d",
-      "description": "New description", "metadata": {"createdBy": "0dc80135-ae53-4da3-8695-220a2d93aad8",
-      "createdOn": "2021-11-23T23:50:59.1036119Z", "updatedBy": "0dc80135-ae53-4da3-8695-220a2d93aad8",
-      "updatedOn": "2021-11-23T23:51:01.2529809Z"}, "enforcementMode": "DoNotEnforce"}}'
+      "description": "New description", "metadata": {"createdBy": "6b30bdc6-696a-46fb-82d7-739c2fb147b7",
+      "createdOn": "2023-03-13T08:54:55.6553293Z", "updatedBy": "6b30bdc6-696a-46fb-82d7-739c2fb147b7",
+      "updatedOn": "2023-03-13T08:54:56.7281594Z"}, "enforcementMode": "DoNotEnforce"}}'
     headers:
       Accept:
       - application/json
@@ -590,28 +599,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '724'
+      - '692'
       Content-Type:
       - application/json
       ParameterSetName:
       - --user-assigned -n -g
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002?api-version=2021-06-01
   response:
     body:
-      string: '{"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi":{"principalId":"931e9f2b-532c-4477-8ea4-ae5ed6297ed3","clientId":"2c46f9c4-2de0-4b7e-b38e-da20090ef80d"}}},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","description":"New
-        description","metadata":{"createdBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","createdOn":"2021-11-23T23:50:59.1036119Z","updatedBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","updatedOn":"2021-11-23T23:51:02.5673731Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"robga@microsoft.com","createdByType":"User","createdAt":"2021-11-23T23:50:58.6633846Z","lastModifiedBy":"robga@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-23T23:51:02.2781443Z"}}'
+      string: '{"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi":{"principalId":"92b2850c-14c1-4371-aa8d-b0ae816578fa","clientId":"d1607aa9-a1f6-4ce2-ae24-24e84fb0fd7d"}}},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","description":"New
+        description","metadata":{"createdBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","createdOn":"2023-03-13T08:54:55.6553293Z","updatedBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","updatedOn":"2023-03-13T08:54:58.1608063Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-03-13T08:54:54.6462633Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-03-13T08:54:57.0836901Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1530'
+      - '1466'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 23 Nov 2021 23:51:02 GMT
+      - Mon, 13 Mar 2023 08:54:58 GMT
       expires:
       - '-1'
       pragma:
@@ -623,7 +633,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1194'
     status:
       code: 201
       message: Created
@@ -641,22 +651,23 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002?api-version=2021-06-01
   response:
     body:
-      string: '{"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi":{"principalId":"931e9f2b-532c-4477-8ea4-ae5ed6297ed3","clientId":"2c46f9c4-2de0-4b7e-b38e-da20090ef80d"}}},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","description":"New
-        description","metadata":{"createdBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","createdOn":"2021-11-23T23:50:59.1036119Z","updatedBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","updatedOn":"2021-11-23T23:51:02.5673731Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"robga@microsoft.com","createdByType":"User","createdAt":"2021-11-23T23:50:58.6633846Z","lastModifiedBy":"robga@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-23T23:51:02.2781443Z"}}'
+      string: '{"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi":{"principalId":"92b2850c-14c1-4371-aa8d-b0ae816578fa","clientId":"d1607aa9-a1f6-4ce2-ae24-24e84fb0fd7d"}}},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","description":"New
+        description","metadata":{"createdBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","createdOn":"2023-03-13T08:54:55.6553293Z","updatedBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","updatedOn":"2023-03-13T08:54:58.1608063Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-03-13T08:54:54.6462633Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-03-13T08:54:57.0836901Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1530'
+      - '1466'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 23 Nov 2021 23:51:02 GMT
+      - Mon, 13 Mar 2023 08:54:57 GMT
       expires:
       - '-1'
       pragma:
@@ -688,22 +699,23 @@ interactions:
       ParameterSetName:
       - --system-assigned -n -g
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002?api-version=2021-06-01
   response:
     body:
-      string: '{"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi":{"principalId":"931e9f2b-532c-4477-8ea4-ae5ed6297ed3","clientId":"2c46f9c4-2de0-4b7e-b38e-da20090ef80d"}}},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","description":"New
-        description","metadata":{"createdBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","createdOn":"2021-11-23T23:50:59.1036119Z","updatedBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","updatedOn":"2021-11-23T23:51:02.5673731Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"robga@microsoft.com","createdByType":"User","createdAt":"2021-11-23T23:50:58.6633846Z","lastModifiedBy":"robga@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-23T23:51:02.2781443Z"}}'
+      string: '{"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/policyCliTestMsi":{"principalId":"92b2850c-14c1-4371-aa8d-b0ae816578fa","clientId":"d1607aa9-a1f6-4ce2-ae24-24e84fb0fd7d"}}},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","description":"New
+        description","metadata":{"createdBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","createdOn":"2023-03-13T08:54:55.6553293Z","updatedBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","updatedOn":"2023-03-13T08:54:58.1608063Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-03-13T08:54:54.6462633Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-03-13T08:54:57.0836901Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1530'
+      - '1466'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 23 Nov 2021 23:51:03 GMT
+      - Mon, 13 Mar 2023 08:54:57 GMT
       expires:
       - '-1'
       pragma:
@@ -724,9 +736,9 @@ interactions:
 - request:
     body: '{"location": "westus", "identity": {"type": "SystemAssigned"}, "properties":
       {"policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d",
-      "description": "New description", "metadata": {"createdBy": "0dc80135-ae53-4da3-8695-220a2d93aad8",
-      "createdOn": "2021-11-23T23:50:59.1036119Z", "updatedBy": "0dc80135-ae53-4da3-8695-220a2d93aad8",
-      "updatedOn": "2021-11-23T23:51:02.5673731Z"}, "enforcementMode": "DoNotEnforce"}}'
+      "description": "New description", "metadata": {"createdBy": "6b30bdc6-696a-46fb-82d7-739c2fb147b7",
+      "createdOn": "2023-03-13T08:54:55.6553293Z", "updatedBy": "6b30bdc6-696a-46fb-82d7-739c2fb147b7",
+      "updatedOn": "2023-03-13T08:54:58.1608063Z"}, "enforcementMode": "DoNotEnforce"}}'
     headers:
       Accept:
       - application/json
@@ -743,22 +755,23 @@ interactions:
       ParameterSetName:
       - --system-assigned -n -g
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002?api-version=2021-06-01
   response:
     body:
-      string: '{"identity":{"principalId":"15a01840-5249-4d23-8eea-242eb9afb95e","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","description":"New
-        description","metadata":{"createdBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","createdOn":"2021-11-23T23:50:59.1036119Z","updatedBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","updatedOn":"2021-11-23T23:51:04.7355909Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"robga@microsoft.com","createdByType":"User","createdAt":"2021-11-23T23:50:58.6633846Z","lastModifiedBy":"robga@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-23T23:51:03.6380336Z"}}'
+      string: '{"identity":{"principalId":"ee31b418-fa52-4cae-974d-4b1343f5f279","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","description":"New
+        description","metadata":{"createdBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","createdOn":"2023-03-13T08:54:55.6553293Z","updatedBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","updatedOn":"2023-03-13T08:54:59.2446078Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-03-13T08:54:54.6462633Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-03-13T08:54:58.4703353Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1282'
+      - '1250'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 23 Nov 2021 23:51:04 GMT
+      - Mon, 13 Mar 2023 08:54:58 GMT
       expires:
       - '-1'
       pragma:
@@ -770,7 +783,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1195'
     status:
       code: 201
       message: Created
@@ -788,22 +801,23 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002?api-version=2021-06-01
   response:
     body:
-      string: '{"identity":{"principalId":"15a01840-5249-4d23-8eea-242eb9afb95e","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","description":"New
-        description","metadata":{"createdBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","createdOn":"2021-11-23T23:50:59.1036119Z","updatedBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","updatedOn":"2021-11-23T23:51:04.7355909Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"robga@microsoft.com","createdByType":"User","createdAt":"2021-11-23T23:50:58.6633846Z","lastModifiedBy":"robga@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-23T23:51:03.6380336Z"}}'
+      string: '{"identity":{"principalId":"ee31b418-fa52-4cae-974d-4b1343f5f279","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","description":"New
+        description","metadata":{"createdBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","createdOn":"2023-03-13T08:54:55.6553293Z","updatedBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","updatedOn":"2023-03-13T08:54:59.2446078Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-03-13T08:54:54.6462633Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-03-13T08:54:58.4703353Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1282'
+      - '1250'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 23 Nov 2021 23:51:05 GMT
+      - Mon, 13 Mar 2023 08:54:59 GMT
       expires:
       - '-1'
       pragma:
@@ -835,22 +849,23 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002?api-version=2021-06-01
   response:
     body:
-      string: '{"identity":{"principalId":"15a01840-5249-4d23-8eea-242eb9afb95e","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","description":"New
-        description","metadata":{"createdBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","createdOn":"2021-11-23T23:50:59.1036119Z","updatedBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","updatedOn":"2021-11-23T23:51:04.7355909Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"robga@microsoft.com","createdByType":"User","createdAt":"2021-11-23T23:50:58.6633846Z","lastModifiedBy":"robga@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-23T23:51:03.6380336Z"}}'
+      string: '{"identity":{"principalId":"ee31b418-fa52-4cae-974d-4b1343f5f279","tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","type":"SystemAssigned"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","description":"New
+        description","metadata":{"createdBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","createdOn":"2023-03-13T08:54:55.6553293Z","updatedBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","updatedOn":"2023-03-13T08:54:59.2446078Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-03-13T08:54:54.6462633Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-03-13T08:54:58.4703353Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1282'
+      - '1250'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 23 Nov 2021 23:51:05 GMT
+      - Mon, 13 Mar 2023 08:54:59 GMT
       expires:
       - '-1'
       pragma:
@@ -871,9 +886,9 @@ interactions:
 - request:
     body: '{"location": "westus", "identity": {"type": "None"}, "properties": {"policyDefinitionId":
       "/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d",
-      "description": "New description", "metadata": {"createdBy": "0dc80135-ae53-4da3-8695-220a2d93aad8",
-      "createdOn": "2021-11-23T23:50:59.1036119Z", "updatedBy": "0dc80135-ae53-4da3-8695-220a2d93aad8",
-      "updatedOn": "2021-11-23T23:51:04.7355909Z"}, "enforcementMode": "DoNotEnforce"}}'
+      "description": "New description", "metadata": {"createdBy": "6b30bdc6-696a-46fb-82d7-739c2fb147b7",
+      "createdOn": "2023-03-13T08:54:55.6553293Z", "updatedBy": "6b30bdc6-696a-46fb-82d7-739c2fb147b7",
+      "updatedOn": "2023-03-13T08:54:59.2446078Z"}, "enforcementMode": "DoNotEnforce"}}'
     headers:
       Accept:
       - application/json
@@ -890,22 +905,23 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002?api-version=2021-06-01
   response:
     body:
       string: '{"identity":{"type":"None"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","description":"New
-        description","metadata":{"createdBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","createdOn":"2021-11-23T23:50:59.1036119Z","updatedBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","updatedOn":"2021-11-23T23:51:06.8910367Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"robga@microsoft.com","createdByType":"User","createdAt":"2021-11-23T23:50:58.6633846Z","lastModifiedBy":"robga@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-23T23:51:06.3712388Z"}}'
+        description","metadata":{"createdBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","createdOn":"2023-03-13T08:54:55.6553293Z","updatedBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","updatedOn":"2023-03-13T08:55:00.7908272Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-03-13T08:54:54.6462633Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-03-13T08:54:59.6152243Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1169'
+      - '1137'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 23 Nov 2021 23:51:07 GMT
+      - Mon, 13 Mar 2023 08:55:00 GMT
       expires:
       - '-1'
       pragma:
@@ -917,7 +933,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1195'
     status:
       code: 201
       message: Created
@@ -937,22 +953,23 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.46.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.10 (Linux-5.15.0-1033-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002?api-version=2021-06-01
   response:
     body:
       string: '{"identity":{"type":"None"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001","description":"New
-        description","metadata":{"createdBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","createdOn":"2021-11-23T23:50:59.1036119Z","updatedBy":"0dc80135-ae53-4da3-8695-220a2d93aad8","updatedOn":"2021-11-23T23:51:06.8910367Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"robga@microsoft.com","createdByType":"User","createdAt":"2021-11-23T23:50:58.6633846Z","lastModifiedBy":"robga@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-23T23:51:06.3712388Z"}}'
+        description","metadata":{"createdBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","createdOn":"2023-03-13T08:54:55.6553293Z","updatedBy":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","updatedOn":"2023-03-13T08:55:00.7908272Z"},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy_identity_userassigned000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-assignment000002","location":"westus","systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-03-13T08:54:54.6462633Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-03-13T08:54:59.6152243Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1169'
+      - '1137'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 23 Nov 2021 23:51:08 GMT
+      - Mon, 13 Mar 2023 08:55:00 GMT
       expires:
       - '-1'
       pragma:
@@ -968,7 +985,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14998'
+      - '14999'
     status:
       code: 200
       message: OK

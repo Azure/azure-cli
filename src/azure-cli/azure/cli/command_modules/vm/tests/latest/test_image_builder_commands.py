@@ -5,13 +5,12 @@
 import time
 import unittest
 from unittest import mock
-from knack.testsdk import record_only
-from knack.util import CLIError
 
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
 from azure.core.exceptions import HttpResponseError
-
+from knack.util import CLIError
 from msrestazure.tools import parse_resource_id
+
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
@@ -453,6 +452,166 @@ class ImageTemplateTest(ScenarioTest):
         self.assertEqual(img_tmpl['source']['imageVersionId'].lower(), self.kwargs['image_id'].lower())
         self.assertEqual(img_tmpl['source']['type'].lower(), 'sharedimageversion')
 
+    @ResourceGroupPreparer(name_prefix='img_tmpl_versioning_')
+    def test_image_build_output_versioning(self, resource_group):
+        self._identity_role(resource_group)
+
+        self.kwargs.update({
+            'img_src': LINUX_IMAGE_SOURCE,
+            'gallery': self.create_random_name("ib_sig", 10),
+            'sig1': 'image1',
+            'tmpl': 'template01',
+            'script': TEST_SHELL_SCRIPT_URL
+        })
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', self.kwargs['gallery']))
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1} '
+                 '--os-type linux -p publisher1 -f offer1 -s sku1')
+        self.cmd('image builder create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src} --identity {ide} --defer')
+
+        self.cmd('image builder output add -n {tmpl} -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1}'
+                 ' --gallery-replication-regions westus --versioning Source --defer',
+                 checks=[
+                     self.check('properties.distribute[0].replicationRegions[0]', 'westus'),
+                     self.check('properties.distribute[0].runOutputName', '{sig1}'),
+                     self.check('properties.distribute[0].versioning.scheme', 'Source')
+                 ])
+
+        self.cmd('image builder output versioning remove -n {tmpl} -g {rg} --output-name {sig1} --defer',
+                 checks=[
+                     self.check('properties.distribute[0].replicationRegions[0]', 'westus'),
+                     self.check('properties.distribute[0].runOutputName', '{sig1}'),
+                     self.check('properties.distribute[0].versioning', 'None')
+                 ])
+
+        self.cmd(
+            'image builder output versioning set -n {tmpl} -g {rg} --output-name {sig1} --scheme Latest --major 1 --defer',
+            checks=[
+                self.check('properties.distribute[0].replicationRegions[0]', 'westus'),
+                self.check('properties.distribute[0].runOutputName', '{sig1}'),
+                self.check('properties.distribute[0].versioning.scheme', 'Latest'),
+                self.check('properties.distribute[0].versioning.major', '1')
+            ])
+
+        self.cmd(
+            'image builder output versioning set -n {tmpl} -g {rg} --output-name {sig1} --scheme Source --defer',
+            checks=[
+                self.check('properties.distribute[0].replicationRegions[0]', 'westus'),
+                self.check('properties.distribute[0].runOutputName', '{sig1}'),
+                self.check('properties.distribute[0].versioning.scheme', 'Source')
+            ])
+
+        self.cmd('image builder output versioning show -n {tmpl} -g {rg} --output-name {sig1} --defer',
+                 checks=[
+                     self.check('scheme', 'Source')
+                 ])
+
+        # send put request using cached template object
+        self.cmd('image builder update -n {tmpl} -g {rg}', checks=[
+            self.check('distribute[0].replicationRegions[0]', 'westus'),
+            self.check('distribute[0].runOutputName', '{sig1}')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='img_tmpl_trigger_')
+    def test_image_build_trigger(self, resource_group):
+        self._identity_role(resource_group)
+
+        self.kwargs.update({
+            'img_src': 'Canonical:UbuntuServer:18.04-LTS:latest',
+            'tmpl': 'template01',
+            'script': TEST_SHELL_SCRIPT_URL,
+            'img': 'new_img',
+            'loc': 'southcentralus',
+            'trigger': 'trigger'
+        })
+
+        self.cmd(
+            'image builder create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src} --identity {ide} --defer')
+
+        self.cmd(
+            'image builder output add -n {tmpl} -g {rg} --managed-image {img} --managed-image-location {loc} --defer')
+
+        # send put request using cached template object
+        self.cmd('image builder update -n {tmpl} -g {rg}')
+
+        self.cmd(
+            'image builder trigger create --image-template-name {tmpl} -g {rg} --trigger-name {trigger} --kind SourceImage',
+            checks=[
+                self.check('kind', 'SourceImage')
+            ])
+        self.cmd('image builder trigger show --image-template-name {tmpl} -g {rg} --trigger-name {trigger}',
+                 checks=[
+                     self.check('kind', 'SourceImage')
+                 ])
+        self.cmd('image builder trigger list --image-template-name {tmpl} -g {rg}',
+                 checks=[
+                     self.check('[0].kind', 'SourceImage')
+                 ])
+        self.cmd('image builder trigger delete --image-template-name {tmpl} -g {rg} --trigger-name {trigger} --yes')
+
+    @ResourceGroupPreparer(name_prefix='img_tmpl_identity_')
+    def test_image_build_identity(self, resource_group):
+        self._identity_role(resource_group)
+
+        self.kwargs.update({
+            'img_src': LINUX_IMAGE_SOURCE,
+            'gallery': self.create_random_name("sig_", 10),
+            'sig1': 'image1',
+            'tmpl': 'template01',
+            'script': TEST_SHELL_SCRIPT_URL
+        })
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery}')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1} '
+                 '--os-type linux -p publisher1 -f offer1 -s sku1')
+
+        self.cmd(
+            'image builder create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src} --identity {ide} --defer')
+        self.cmd('image builder output add -n {tmpl} -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1}'
+                 ' --gallery-replication-regions westus --defer')
+
+        # send put request using cached template object
+        self.cmd('image builder update -n {tmpl} -g {rg}')
+
+        ide_id = self.cmd('identity show -n {ide} -g {rg}').get_output_in_json()['id']
+
+        # remove identity
+        self.cmd('image builder identity remove -n {tmpl} -g {rg} --user-assigned --yes',
+                 checks=[
+                     self.check('type', 'None'),
+                     self.check('userAssignedIdentities', None)
+                 ])
+
+        # assign identity
+        result = self.cmd('image builder identity assign -n {tmpl} -g {rg} --user-assigned {ide}',
+                          checks=[
+                              self.check('type', 'UserAssigned')
+                          ]).get_output_in_json()
+        result_identities = [x.lower() for x in result['userAssignedIdentities'].keys()]
+        self.assertEqual(result_identities, [ide_id.lower()])
+
+        # show identity
+        result = self.cmd('image builder identity show -n {tmpl} -g {rg}',
+                          checks=[
+                              self.check('type', 'UserAssigned')
+                          ]).get_output_in_json()
+        result_identities = [x.lower() for x in result['userAssignedIdentities'].keys()]
+        self.assertEqual(result_identities, [ide_id.lower()])
+
+        # remove identity
+        self.cmd('image builder identity remove -n {tmpl} -g {rg} --user-assigned {ide} --yes',
+                 checks=[
+                     self.check('type', 'None'),
+                     self.check('userAssignedIdentities', None)
+                 ])
+
+        # show identity
+        self.cmd('image builder identity show -n {tmpl} -g {rg}',
+                 checks=[
+                     self.check('type', 'None'),
+                     self.check('userAssignedIdentities', None)
+                 ])
+
     @ResourceGroupPreparer(name_prefix='img_tmpl_customizers')
     def test_image_builder_customizers(self, resource_group, resource_group_location):
         self._identity_role(resource_group)
@@ -559,7 +718,8 @@ class ImageTemplateTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_outputs', location='westus2')
-    def test_image_template_outputs(self, resource_group, resource_group_location):
+    @StorageAccountPreparer(name_prefix='clitestoutputs', sku='Standard_LRS')
+    def test_image_template_outputs(self, resource_group, resource_group_location, storage_account):
         self._identity_role(resource_group)
 
         self.kwargs.update({
@@ -570,10 +730,14 @@ class ImageTemplateTest(ScenarioTest):
             'img_1': 'managed_img_1',
             'img_2': 'managed_img_2',
             'vhd_out': 'vhd_1',
+            'container': self.create_random_name('container', 15),
         })
+        self.cmd(
+            'storage container create -g {rg} --account-name {sa} -n {container} --public-access blob')
+        self.kwargs['storage_uri'] = 'https://{}.blob.core.windows.net/{}'.format(self.kwargs['sa'], self.kwargs['container'])
 
-        self.cmd('image builder create -n {tmpl_01} -g {rg} --scripts {script} --image-source {img_src} --identity {ide} --defer')
-
+        self.cmd(
+            'image builder create -n {tmpl_01} -g {rg} --scripts {script} --image-source {img_src} --identity {ide} --defer')
         self.cmd('image builder output add -n {tmpl_01} -g {rg} --managed-image {img_1} --managed-image-location {loc} --defer',
                  checks=[
                      self.check('properties.distribute[0].location', '{loc}'),
@@ -588,11 +752,12 @@ class ImageTemplateTest(ScenarioTest):
                      self.check('properties.distribute[1].type', 'ManagedImage')
                  ])
 
-        self.cmd('image builder output add -n {tmpl_01} -g {rg} --output-name {vhd_out} --artifact-tags "is_vhd=True" --is-vhd --defer',
+        self.cmd('image builder output add -n {tmpl_01} -g {rg} --output-name {vhd_out} --artifact-tags "is_vhd=True" --is-vhd --vhd-uri {storage_uri} --defer',
                  checks=[
                      self.check('properties.distribute[2].artifactTags.is_vhd', 'True'),
                      self.check('properties.distribute[2].runOutputName', '{vhd_out}'),
-                     self.check('properties.distribute[2].type', 'VHD')
+                     self.check('properties.distribute[2].type', 'VHD'),
+                     self.check('properties.distribute[2].uri', '{storage_uri}')
                  ])
 
         self.cmd('image builder output remove -n {tmpl_01} -g {rg} --output-name {img_2} --defer',

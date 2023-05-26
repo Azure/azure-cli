@@ -182,7 +182,7 @@ examples:
 
 helps['signalr upstream clear'] = """
 type: command
-short-summary: List upstream settings of an existing SignalR Service.
+short-summary: Clear upstream settings of an existing SignalR Service.
 """
 
 helps['signalr network-rule list'] = """

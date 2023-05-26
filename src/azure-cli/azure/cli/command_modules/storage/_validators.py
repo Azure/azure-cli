@@ -6,10 +6,12 @@
 # pylint: disable=protected-access
 import os
 import argparse
+from ipaddress import ip_network
 
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
+from azure.cli.core.azclierror import UnrecognizedArgumentError
 
 from azure.cli.command_modules.storage._client_factory import (get_storage_data_service_client,
                                                                blob_data_service_factory,
@@ -25,7 +27,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from ._client_factory import cf_blob_service, cf_share_service, cf_share_client
 
-storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
+storage_account_key_options = {'primary': '1', 'secondary': '2', 'key1': '1', 'key2': '2'}
 logger = get_logger(__name__)
 
 
@@ -623,6 +625,8 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None, 
                 filename = ns.get('file_name')
                 account_kwargs["share_name"] = share
                 account_kwargs["snapshot"] = ns.get('snapshot')
+                if ns.get('enable_file_backup_request_intent', None):
+                    account_kwargs["enable_file_backup_request_intent"] = ns.get("enable_file_backup_request_intent")
                 if is_storagev2(prefix):
                     client = cf_share_client(cmd.cli_ctx, account_kwargs).\
                         get_directory_client(directory_path=directory).\
@@ -845,13 +849,15 @@ def validate_included_datasets_validator(include_class):
 
 
 def validate_key_name(namespace):
-    key_options = {'primary': '1', 'secondary': '2'}
-    if hasattr(namespace, 'key_type') and namespace.key_type:
-        namespace.key_name = namespace.key_type + key_options[namespace.key_name]
-    else:
-        namespace.key_name = storage_account_key_options[namespace.key_name]
+    key_type = 'key'
     if hasattr(namespace, 'key_type'):
+        key_type = namespace.key_type or 'key'
         del namespace.key_type
+
+    if namespace.key_name in ['primary', 'secondary']:
+        logger.warning("The 'primary' and 'secondary' options for --key are deprecated and "
+                       "will be removed in future release, please use 'key1' and 'key2' instead.")
+    namespace.key_name = key_type + storage_account_key_options[namespace.key_name]
 
 
 def validate_metadata(namespace):
@@ -1332,6 +1338,8 @@ def process_file_batch_source_parameters(cmd, namespace):
         if not namespace.account_name:
             namespace.account_name = identifier.account_name
 
+    namespace.share_name = namespace.source
+
 
 def process_file_download_namespace(namespace):
     get_file_path_validator()(namespace)
@@ -1659,7 +1667,7 @@ def validate_azcopy_remove_arguments(cmd, namespace):
                                              'specified'))
     if valid_blob:
         client = blob_data_service_factory(cmd.cli_ctx, {
-            'account_name': namespace.account_name})
+            'account_name': namespace.account_name, 'connection_string': namespace.connection_string})
         if not blob:
             blob = ''
         url = client.make_blob_url(container, blob)
@@ -1818,7 +1826,7 @@ def validate_encryption_scope_parameter(ns):
             (not ns.default_encryption_scope and ns.prevent_encryption_scope_override is not None):
         raise CLIError("usage error: You need to specify both --default-encryption-scope and "
                        "--prevent-encryption-scope-override to set encryption scope information "
-                       "when creating container.")
+                       "when creating container/file system.")
 
 
 def validate_encryption_scope_client_params(ns):
@@ -2161,6 +2169,12 @@ def validate_policy(namespace):
                        "policy.")
 
 
+def validate_allow_blob_public_access():
+    logger.warning("The public access to all blobs or containers in the storage account will be "
+                   "disallowed by default in the future, which means default value for --allow-blob-public-access "
+                   "is still null but will be equivalent to false.")
+
+
 def validate_immutability_arguments(namespace):
     from azure.cli.core.azclierror import InvalidArgumentValueError
     if not namespace.enable_alw:
@@ -2222,3 +2236,71 @@ def validate_fs_file_set_expiry(namespace):
         namespace.expires_on = get_datetime_type(False)(namespace.expires_on)
     except ValueError:
         pass
+
+
+def validate_ip_address(namespace):
+    # if there are overlapping ip ranges, throw an exception
+    ip_address = namespace.ip_address
+
+    if not ip_address:
+        return
+
+    ip_address_networks = [ip_network(ip) for ip in ip_address]
+    for idx, ip_address_network in enumerate(ip_address_networks):
+        for idx2, ip_address_network2 in enumerate(ip_address_networks):
+            if idx == idx2:
+                continue
+            if ip_address_network.overlaps(ip_address_network2):
+                from azure.cli.core.azclierror import InvalidArgumentValueError
+                raise InvalidArgumentValueError(f"ip addresses {ip_address_network} and {ip_address_network2} "
+                                                f"provided are overlapping: --ip_address ip1 [ip2]...")
+
+
+# pylint: disable=too-few-public-methods
+class PermissionScopeAddAction(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        if not namespace.permission_scope:
+            namespace.permission_scope = []
+        PermissionScope = namespace._cmd.get_models('PermissionScope')
+        try:
+            permissions, service, resource_name = '', '', ''
+            for s in values:
+                k, v = s.split('=', 1)
+                if k == "permissions":
+                    permissions = v
+                elif k == "service":
+                    service = v
+                elif k == "resource-name":
+                    resource_name = v
+                else:
+                    raise UnrecognizedArgumentError(
+                        'key error: key must be one of permissions, service, resource-name for --permission-scope')
+        except (ValueError, TypeError, IndexError):
+            raise CLIError('usage error: --permission-scope [Key=Value ...]')
+        namespace.permission_scope.append(PermissionScope(
+            permissions=permissions,
+            service=service,
+            resource_name=resource_name
+        ))
+
+
+# pylint: disable=too-few-public-methods
+class SshPublicKeyAddAction(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        if not namespace.ssh_authorized_key:
+            namespace.ssh_authorized_key = []
+        SshPublicKey = namespace._cmd.get_models('SshPublicKey')
+        try:
+            description, key = '', ''
+            for s in values:
+                k, v = s.split('=', 1)
+                if k == "description":
+                    description = v
+                elif k == "key":
+                    key = v
+                else:
+                    raise UnrecognizedArgumentError(
+                        'key error: key must be one of description, key for --ssh-authorized-key')
+        except (ValueError, TypeError, IndexError):
+            raise CLIError('usage error: --ssh-authorized-key [Key=Value ...]')
+        namespace.ssh_authorized_key.append(SshPublicKey(description=description, key=key))

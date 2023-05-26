@@ -13,7 +13,7 @@ from knack.log import get_logger
 
 from azure.cli.core.azclierror import (RequiredArgumentMissingError, ValidationError, ResourceNotFoundError)
 from azure.cli.core.commands.parameters import get_subscription_locations
-from azure.cli.core.util import should_disable_connection_verify
+from azure.cli.core.util import should_disable_connection_verify, send_raw_request
 from azure.cli.core.commands.client_factory import get_subscription_id
 
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
@@ -78,15 +78,19 @@ def get_sku_tier(name):  # pylint: disable=too-many-return-statements
         return 'PREMIUM'
     if name in ['P1V2', 'P2V2', 'P3V2']:
         return 'PREMIUMV2'
+    if name in ['P0V3']:
+        return 'PREMIUM0V3'
     if name in ['P1V3', 'P2V3', 'P3V3']:
         return 'PREMIUMV3'
+    if name in ['P1MV3', 'P2MV3', 'P3MV3', 'P4MV3', 'P5MV3']:
+        return 'PREMIUMMV3'
     if name in ['PC2', 'PC3', 'PC4']:
         return 'PremiumContainer'
     if name in ['EP1', 'EP2', 'EP3']:
         return 'ElasticPremium'
     if name in ['I1', 'I2', 'I3']:
         return 'Isolated'
-    if name in ['I1V2', 'I2V2', 'I3V2']:
+    if name in ['I1V2', 'I2V2', 'I3V2', 'I4V2', 'I5V2', 'I6V2']:
         return 'IsolatedV2'
     if name in ['WS1', 'WS2', 'WS3']:
         return 'WorkflowStandard'
@@ -124,10 +128,10 @@ def retryable_method(retries=3, interval_sec=5, excpt_type=Exception):
             while True:
                 try:
                     return func(*args, **kwargs)
-                except excpt_type as exception:  # pylint: disable=broad-except
+                except excpt_type:  # pylint: disable=broad-except
                     current_retry -= 1
                     if current_retry <= 0:
-                        raise exception
+                        raise
                 time.sleep(interval_sec)
         return call
     return decorate
@@ -141,12 +145,35 @@ def raise_missing_token_suggestion():
                                        "the steps found at the following link:\n{0}".format(pat_documentation))
 
 
+def raise_missing_ado_token_suggestion():
+    pat_documentation = ("https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-"
+                         "tokens-to-authenticate?view=azure-devops&tabs=Windows#create-a-pat")
+    raise RequiredArgumentMissingError("If this repo is an Azure Dev Ops repo, please provide a Personal Access Token."
+                                       "Please run with the '--login-with-ado' flag or follow "
+                                       "the steps found at the following link:\n{0}".format(pat_documentation))
+
+
 def _get_location_from_resource_group(cli_ctx, resource_group_name):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
     client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     group = client.resource_groups.get(resource_group_name)
     return group.location
+
+
+def show_raw_functionapp(cmd, resource_group_name, name):
+    client = web_client_factory(cmd.cli_ctx)
+    site_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    site_url = site_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + site_url
+    response = send_raw_request(cmd.cli_ctx, "GET", request_url)
+    return response.json()
+
+
+def is_centauri_functionapp(cmd, resource_group, name):
+    function_app = show_raw_functionapp(cmd, resource_group, name)
+    return function_app.get("properties", {}).get("managedEnvironmentId", None) is not None
 
 
 def _list_app(cli_ctx, resource_group_name=None):
@@ -221,6 +248,17 @@ def get_app_service_plan_from_webapp(cmd, webapp, api_version=None):
     client = web_client_factory(cmd.cli_ctx, api_version=api_version)
     plan = parse_resource_id(webapp.server_farm_id)
     return client.app_service_plans.get(plan['resource_group'], plan['name'])
+
+
+def app_service_plan_exists(cmd, resource_group_name, plan, api_version=None):
+    from azure.core.exceptions import ResourceNotFoundError as RNFR
+    exists = True
+    try:
+        client = web_client_factory(cmd.cli_ctx, api_version=api_version)
+        client.app_service_plans.get(resource_group_name, plan)
+    except RNFR:
+        exists = False
+    return exists
 
 
 # Allows putting additional properties on an SDK model instance

@@ -9,6 +9,7 @@ from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import user_confirmation
 from ._utils import (
     get_registry_by_name,
@@ -367,19 +368,18 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
                     update_trigger_payload_type=None,
                     target=None,
                     auth_mode=None,
-                    log_template=None):
+                    log_template=None,
+                    cmd_value=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     AgentProperties, AuthInfoUpdateParameters, BaseImageTriggerUpdateParameters, \
-        DockerBuildStepUpdateParameters, FileTaskStepUpdateParameters, PlatformUpdateParameters, \
-        SourceControlType, SourceUpdateParameters, SourceTriggerUpdateParameters, \
-        TaskUpdateParameters, TriggerStatus, TriggerUpdateParameters = cmd.get_models(
+        PlatformUpdateParameters, SourceControlType, SourceUpdateParameters, \
+        SourceTriggerUpdateParameters, TaskUpdateParameters, \
+        TriggerStatus, TriggerUpdateParameters = cmd.get_models(
             'AgentProperties',
             'AuthInfoUpdateParameters',
             'BaseImageTriggerUpdateParameters',
-            'DockerBuildStepUpdateParameters',
-            'FileTaskStepUpdateParameters',
             'PlatformUpdateParameters',
             'SourceControlType',
             'SourceUpdateParameters',
@@ -401,56 +401,52 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
 
     step = task.step
     branch = None
+
+    # If no context is given, use the existing context.
+    # If given context is /dev/null, set it to None.
+    # Otherwise, use the given context.
     if context_path is None:
         context_path = step.context_path
+    elif context_path.lower() == ACR_NULL_CONTEXT:
+        context_path = None
     else:
         branch = _get_branch_name(context_path)
 
+    encoded_task_content = None
+    if context_path is None:
+        # When cmd_value is given or file is given,
+        # regenerate encoded_task_content
+        if cmd_value is not None or file is not None:
+            yaml_template = get_yaml_template(
+                cmd_value, timeout, file)
+            import base64
+            encoded_task_content = base64.b64encode(
+                yaml_template.encode()).decode()
+        # When only timeout is given,
+        # encoded_task_content cannot be patched
+        elif timeout is not None:
+            raise IncorrectUsageError(
+                "cannot update the task with change of 'timeout' only, please use create instead")
+
     if git_access_token is None:
         git_access_token = step.context_access_token
-    arguments = _get_all_override_arguments(arg, secret_arg)
-    set_values = _get_all_override_arguments(set_value, set_secret)
 
-    if file and file.endswith(ALLOWED_TASK_FILE_TYPES):
-        step = FileTaskStepUpdateParameters(
-            task_file_path=file,
-            values_file_path=values,
-            context_path=context_path,
-            context_access_token=git_access_token,
-            values=set_values
-        )
-    elif file and not file.endswith(ALLOWED_TASK_FILE_TYPES):
-        step = DockerBuildStepUpdateParameters(
-            image_names=image_names,
-            is_push_enabled=not no_push,
-            no_cache=no_cache,
-            docker_file_path=file,
-            arguments=arguments,
-            context_path=context_path,
-            context_access_token=git_access_token,
-            target=target
-        )
-    elif step:
-        if hasattr(step, 'docker_file_path'):
-            step = DockerBuildStepUpdateParameters(
-                image_names=image_names,
-                is_push_enabled=not no_push,
-                no_cache=no_cache,
-                docker_file_path=file,
-                arguments=arguments,
-                context_path=context_path,
-                context_access_token=git_access_token,
-                target=target
-            )
-
-        elif hasattr(step, 'task_file_path'):
-            step = FileTaskStepUpdateParameters(
-                task_file_path=file,
-                values_file_path=values,
-                context_path=context_path,
-                context_access_token=git_access_token,
-                values=set_values
-            )
+    step = update_task_step(
+        step=step,  # Need exisiting step for update
+        context_path=context_path,
+        cmd=cmd,
+        encoded_task_content=encoded_task_content,
+        file=file,
+        image_names=image_names,
+        values=values,
+        git_access_token=git_access_token,
+        set_value=set_value,
+        set_secret=set_secret,
+        no_push=no_push,
+        no_cache=no_cache,
+        arg=arg,
+        secret_arg=secret_arg,
+        target=target)
 
     source_control_type = None
     if context_path:
@@ -528,8 +524,88 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
         agent_pool_name=agent_pool_name,
         log_template=log_template
     )
-
     return client.begin_update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+
+
+def update_task_step(step,
+                     context_path,
+                     cmd,
+                     encoded_task_content,
+                     file,
+                     image_names,
+                     values,
+                     git_access_token,
+                     set_value,
+                     set_secret,
+                     no_push,
+                     no_cache,
+                     arg,
+                     secret_arg,
+                     target):
+    DockerBuildStepUpdateParameters, EncodedTaskStepUpdateParameters, \
+        FileTaskStepUpdateParameters = cmd.get_models(
+            'DockerBuildStepUpdateParameters',
+            'EncodedTaskStepUpdateParameters',
+            'FileTaskStepUpdateParameters',
+            operation_group='tasks')
+    arguments = _get_all_override_arguments(arg, secret_arg)
+    set_values = _get_all_override_arguments(set_value, set_secret)
+    # If context_path is not None, check if file is provided
+    if context_path:
+        if file:
+            if file.endswith(ALLOWED_TASK_FILE_TYPES):
+                step = FileTaskStepUpdateParameters(
+                    task_file_path=file,
+                    values_file_path=values,
+                    context_path=context_path,
+                    context_access_token=git_access_token,
+                    values=set_values
+                )
+            else:
+                step = DockerBuildStepUpdateParameters(
+                    image_names=image_names,
+                    is_push_enabled=not no_push,
+                    no_cache=no_cache,
+                    docker_file_path=file,
+                    arguments=arguments,
+                    context_path=context_path,
+                    context_access_token=git_access_token,
+                    target=target
+                )
+        # If file is not provided, use the existing step
+        elif step:
+            if hasattr(step, 'docker_file_path'):
+                step = DockerBuildStepUpdateParameters(
+                    image_names=image_names,
+                    is_push_enabled=not no_push,
+                    no_cache=no_cache,
+                    docker_file_path=file,
+                    arguments=arguments,
+                    context_path=context_path,
+                    context_access_token=git_access_token,
+                    target=target
+                )
+
+            elif hasattr(step, 'task_file_path'):
+                step = FileTaskStepUpdateParameters(
+                    task_file_path=file,
+                    values_file_path=values,
+                    context_path=context_path,
+                    context_access_token=git_access_token,
+                    values=set_values
+                )
+    # If context_path is None, update the encoded task
+    else:
+        # If encoded_task_content is None, use the existing one
+        if encoded_task_content is None:
+            encoded_task_content = step.encoded_task_content
+        step = EncodedTaskStepUpdateParameters(
+            encoded_task_content=encoded_task_content,
+            context_path=context_path,
+            context_access_token=git_access_token,
+            values=set_values
+        )
+    return step
 
 
 def acr_task_identity_assign(cmd,

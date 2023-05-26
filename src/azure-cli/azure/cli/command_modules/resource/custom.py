@@ -10,7 +10,6 @@ from collections import OrderedDict
 import codecs
 import json
 import os
-import platform
 import re
 import ssl
 import sys
@@ -48,6 +47,7 @@ from ._formatters import format_what_if_operation_result
 from ._bicep import (
     run_bicep_command,
     is_bicep_file,
+    is_bicepparam_file,
     ensure_bicep_installation,
     remove_bicep_installation,
     get_bicep_latest_release_tag,
@@ -270,6 +270,16 @@ def _get_missing_parameters(parameters, template, prompt_fn, no_prompt=False):
     return parameters
 
 
+def _is_bicepparam_file_provided(parameters):
+    if not parameters or len(parameters) < 1:
+        return False
+
+    for parameter in parameters:
+        if is_bicepparam_file(parameter[0]):
+            return True
+    return False
+
+
 def _ssl_context():
     if sys.version_info < (3, 4):
         return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
@@ -322,7 +332,7 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     else:
         template_content = (
-            run_bicep_command(["build", "--stdout", template_file])
+            run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
             if is_bicep_file(template_file)
             else read_file_content(template_file)
         )
@@ -601,7 +611,7 @@ def deploy_arm_template_at_management_group(cmd,
                                             no_wait=False, handle_extended_json_format=None, no_prompt=False,
                                             confirm_with_what_if=None, what_if_result_format=None,
                                             what_if_exclude_change_types=None, template_spec=None, query_string=None,
-                                            what_if=None, proceed_if_no_change=None):
+                                            what_if=None, proceed_if_no_change=None, mode=None):
     if confirm_with_what_if or what_if:
         what_if_result = _what_if_deploy_arm_template_at_management_group_core(cmd,
                                                                                management_group_id=management_group_id,
@@ -629,7 +639,8 @@ def deploy_arm_template_at_management_group(cmd,
                                                     template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                     deployment_name=deployment_name, deployment_location=deployment_location,
                                                     validate_only=False, no_wait=no_wait,
-                                                    no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
+                                                    no_prompt=no_prompt, template_spec=template_spec, query_string=query_string,
+                                                    mode=mode)
 
 
 # pylint: disable=unused-argument
@@ -644,17 +655,19 @@ def validate_arm_template_at_management_group(cmd,
                                                     template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                     deployment_name=deployment_name, deployment_location=deployment_location,
                                                     validate_only=True, no_wait=no_wait,
-                                                    no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
+                                                    no_prompt=no_prompt, template_spec=template_spec, query_string=query_string,
+                                                    mode='Incremental')
 
 
 def _deploy_arm_template_at_management_group(cmd,
                                              management_group_id=None,
                                              template_file=None, template_uri=None, parameters=None,
                                              deployment_name=None, deployment_location=None, validate_only=False,
-                                             no_wait=False, no_prompt=False, template_spec=None, query_string=None):
+                                             no_wait=False, no_prompt=False, template_spec=None, query_string=None,
+                                             mode=None):
     deployment_properties = _prepare_deployment_properties_unmodified(cmd, 'managementGroup', template_file=template_file,
                                                                       template_uri=template_uri,
-                                                                      parameters=parameters, mode='Incremental',
+                                                                      parameters=parameters, mode=mode,
                                                                       no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
 
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
@@ -769,13 +782,13 @@ def _deploy_arm_template_at_tenant_scope(cmd,
 
 def what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name,
                                                   template_file=None, template_uri=None, parameters=None,
-                                                  deployment_name=None, mode=DeploymentMode.incremental,
+                                                  deployment_name=None, mode=None,
                                                   aux_tenants=None, result_format=None,
                                                   no_pretty_print=None, no_prompt=False,
                                                   exclude_change_types=None, template_spec=None, query_string=None):
     return _what_if_deploy_arm_template_at_resource_group_core(cmd, resource_group_name,
                                                                template_file, template_uri, parameters,
-                                                               deployment_name, DeploymentMode.incremental,
+                                                               deployment_name, mode,
                                                                aux_tenants, result_format,
                                                                no_pretty_print, no_prompt,
                                                                exclude_change_types, template_spec, query_string)
@@ -909,24 +922,7 @@ def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print, 
     if no_pretty_print:
         return what_if_result
 
-    try:
-        if cli_ctx.enable_color:
-            # Disabling colorama since it will silently strip out the Xterm 256 color codes the What-If formatter
-            # is using. Unfortunately, the colors that colorama supports are very limited, which doesn't meet our needs.
-            from colorama import deinit
-            deinit()
-
-            # Enable virtual terminal mode for Windows console so it processes color codes.
-            if platform.system() == "Windows":
-                from ._win_vt import enable_vt_mode
-                enable_vt_mode()
-
-        print(format_what_if_operation_result(what_if_result, cli_ctx.enable_color))
-    finally:
-        if cli_ctx.enable_color:
-            from colorama import init
-            init()
-
+    print(format_what_if_operation_result(what_if_result, cli_ctx.enable_color))
     return what_if_result
 
 
@@ -972,11 +968,29 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS)
         template_obj = show_resource(cmd=cmd, resource_ids=[template_spec], api_version=api_version).properties['mainTemplate']
     else:
-        template_content = (
-            run_bicep_command(["build", "--stdout", template_file])
-            if is_bicep_file(template_file)
-            else read_file_content(template_file)
-        )
+        if _is_bicepparam_file_provided(parameters):
+            ensure_bicep_installation(cli_ctx)
+
+            minimum_supported_version = "0.14.85"
+            if not bicep_version_greater_than_or_equal_to(minimum_supported_version):
+                raise ArgumentUsageError(f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to {minimum_supported_version} or later.")
+            if len(parameters) > 1:
+                raise ArgumentUsageError("Can not use --parameters argument more than once when using a .bicepparam file")
+            bicepparam_file = parameters[0][0]
+            if not is_bicep_file(template_file):
+                raise ArgumentUsageError("Only a .bicep template is allowed with a .bicepparam parameter file")
+
+            build_bicepparam_output = run_bicep_command(cmd.cli_ctx, ["build-params", bicepparam_file, "--bicep-file", template_file, "--stdout"])
+            build_bicepparam_output_json = json.loads(build_bicepparam_output)
+            template_content = build_bicepparam_output_json["templateJson"]
+            bicepparam_json_content = build_bicepparam_output_json["parametersJson"]
+        else:
+            template_content = (
+                run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
+                if is_bicep_file(template_file)
+                else read_file_content(template_file)
+            )
+
         template_obj = _remove_comments_from_json(template_content, file_path=template_file)
 
         if is_bicep_file(template_file):
@@ -990,9 +1004,13 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
 
     template_param_defs = template_obj.get('parameters', {})
     template_obj['resources'] = template_obj.get('resources', [])
-    parameters = _process_parameters(template_param_defs, parameters) or {}
-    parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
-    parameters = json.loads(json.dumps(parameters))
+
+    if _is_bicepparam_file_provided(parameters):
+        parameters = json.loads(bicepparam_json_content).get('parameters', {})
+    else:
+        parameters = _process_parameters(template_param_defs, parameters) or {}
+        parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
+        parameters = json.loads(json.dumps(parameters))
 
     properties = DeploymentProperties(template=template_content, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
@@ -1392,7 +1410,7 @@ def create_application(cmd, resource_group_name,
     :param str plan_version:the managed application package plan version
     :param str tags:tags in 'a=b c' format
     """
-    from azure.mgmt.resource.managedapplications.models import Application, Plan
+    Application, Plan = cmd.get_models('Application', 'Plan')
     racf = _resource_managedapps_client_factory(cmd.cli_ctx)
     rcf = _resource_client_factory(cmd.cli_ctx)
     if not location:
@@ -1463,7 +1481,8 @@ def create_or_update_applicationdefinition(cmd, resource_group_name,
     :param str main_template:the managed application definition main template
     :param str tags:tags in 'a=b c' format
     """
-    from azure.mgmt.resource.managedapplications.models import ApplicationDefinition, ApplicationProviderAuthorization
+    ApplicationDefinition, ApplicationProviderAuthorization = cmd.get_models('ApplicationDefinition',
+                                                                             'ApplicationProviderAuthorization')
     if not package_file_uri and not create_ui_definition and not main_template:
         raise CLIError('usage error: --package-file-uri <url> | --create-ui-definition --main-template')
     if package_file_uri:
@@ -1794,6 +1813,30 @@ def update_resource(cmd, parameters, resource_ids=None,
          for id_dict in parsed_ids])
 
 
+def patch_resource(cmd, properties, resource_ids=None, resource_group_name=None,
+                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
+                   resource_name=None, api_version=None, latest_include_preview=False, is_full_object=False):
+    parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(cmd.cli_ctx,
+                                                                              resource_group_name,
+                                                                              resource_provider_namespace,
+                                                                              parent_resource_path,
+                                                                              resource_type,
+                                                                              resource_name)]
+
+    try:
+        res = json.loads(properties)
+    except json.decoder.JSONDecodeError as ex:
+        raise CLIError('Error parsing JSON.\n{}\n{}'.format(properties, ex))
+
+    if not is_full_object:
+        res = GenericResource(properties=res)
+
+    return _single_or_collection(
+        [_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version, latest_include_preview)
+         .patch(res) for id_dict in parsed_ids]
+    )
+
+
 def tag_resource(cmd, tags, resource_ids=None, resource_group_name=None, resource_provider_namespace=None,
                  parent_resource_path=None, resource_type=None, resource_name=None, api_version=None,
                  is_incremental=None, latest_include_preview=False):
@@ -1935,7 +1978,7 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
         if template_file:
             from azure.cli.command_modules.resource._packing_engine import (pack)
             if is_bicep_file(template_file):
-                template_content = run_bicep_command(["build", "--stdout", template_file])
+                template_content = run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
                 input_content = _remove_comments_from_json(template_content, file_path=template_file)
                 input_template = json.loads(json.dumps(input_content))
                 artifacts = []
@@ -1985,7 +2028,7 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
     if template_file:
         from azure.cli.command_modules.resource._packing_engine import (pack)
         if is_bicep_file(template_file):
-            template_content = run_bicep_command(["build", "--stdout", template_file])
+            template_content = run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
             input_content = _remove_comments_from_json(template_content, file_path=template_file)
             input_template = json.loads(json.dumps(input_content))
             artifacts = []
@@ -2156,7 +2199,7 @@ def show_provider_operations(cmd, resource_provider_namespace):
     version = getattr(get_api_version(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION), 'provider_operations_metadata')
     auth_client = _authorization_management_client(cmd.cli_ctx)
     if version == '2015-07-01':
-        return auth_client.provider_operations_metadata.get(resource_provider_namespace, version)
+        return auth_client.provider_operations_metadata.get(resource_provider_namespace, api_version=version)
     return auth_client.provider_operations_metadata.get(resource_provider_namespace)
 
 
@@ -3211,7 +3254,7 @@ def create_lock(cmd, lock_name, level,
     :type notes: str
     """
     ManagementLockObject = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_LOCKS, 'ManagementLockObject', mod='models')
-    parameters = ManagementLockObject(level=level, notes=notes, name=lock_name)
+    parameters = ManagementLockObject(level=level, notes=notes)
 
     lock_client = _resource_lock_client_factory(cmd.cli_ctx)
     lock_resource = _extract_lock_params(resource_group, resource_provider_namespace,
@@ -3337,7 +3380,7 @@ def create_or_update_tag_at_scope(cmd, resource_id=None, tags=None, tag_name=Non
         tag_obj = Tags(tags=tags)
         TagsResource = cmd.get_models('TagsResource')
         tags_resource = TagsResource(properties=tag_obj)
-        return rcf.tags.create_or_update_at_scope(scope=resource_id, parameters=tags_resource)
+        return rcf.tags.begin_create_or_update_at_scope(scope=resource_id, parameters=tags_resource)
 
     return rcf.tags.create_or_update(tag_name=tag_name)
 
@@ -3345,7 +3388,7 @@ def create_or_update_tag_at_scope(cmd, resource_id=None, tags=None, tag_name=Non
 def delete_tag_at_scope(cmd, resource_id=None, tag_name=None):
     rcf = _resource_client_factory(cmd.cli_ctx)
     if resource_id is not None:
-        return rcf.tags.delete_at_scope(scope=resource_id)
+        return rcf.tags.begin_delete_at_scope(scope=resource_id)
 
     return rcf.tags.delete(tag_name=tag_name)
 
@@ -3358,7 +3401,7 @@ def update_tag_at_scope(cmd, resource_id, tags, operation):
     tag_obj = Tags(tags=tags)
     TagsPatchResource = cmd.get_models('TagsPatchResource')
     tags_resource = TagsPatchResource(properties=tag_obj, operation=operation)
-    return rcf.tags.update_at_scope(scope=resource_id, parameters=tags_resource)
+    return rcf.tags.begin_update_at_scope(scope=resource_id, parameters=tags_resource)
 # endregion
 
 
@@ -3481,6 +3524,19 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
                                                          self.api_version,
                                                          parameters)
 
+    def patch(self, parameters):
+        if self.resource_id:
+            return self.rcf.resources.begin_update_by_id(self.resource_id,
+                                                         self.api_version,
+                                                         parameters)
+        return self.rcf.resources.begin_update(self.resource_group_name,
+                                               self.resource_provider_namespace,
+                                               self.parent_resource_path,
+                                               self.resource_type,
+                                               self.resource_name,
+                                               self.api_version,
+                                               parameters)
+
     def tag(self, tags, is_incremental=False):
         resource = self.get_resource()
 
@@ -3497,7 +3553,7 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
         need_patch_service = ['Microsoft.RecoveryServices/vaults', 'Microsoft.Resources/resourceGroups',
                               'Microsoft.ContainerRegistry/registries/webhooks',
                               'Microsoft.ContainerInstance/containerGroups',
-                              'Microsoft.Network/publicIPAddresses']
+                              'Microsoft.Network/publicIPAddresses', 'Microsoft.insights/workbooks']
 
         if resource is not None and resource.type in need_patch_service:
             parameters = GenericResource(tags=tags)
@@ -3660,16 +3716,16 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
 
 def install_bicep_cli(cmd, version=None, target_platform=None):
     # The parameter version is actually a git tag here.
-    ensure_bicep_installation(release_tag=version, target_platform=target_platform)
+    ensure_bicep_installation(cmd.cli_ctx, release_tag=version, target_platform=target_platform)
 
 
 def uninstall_bicep_cli(cmd):
-    remove_bicep_installation()
+    remove_bicep_installation(cmd.cli_ctx)
 
 
 def upgrade_bicep_cli(cmd, target_platform=None):
     latest_release_tag = get_bicep_latest_release_tag()
-    ensure_bicep_installation(release_tag=latest_release_tag, target_platform=target_platform)
+    ensure_bicep_installation(cmd.cli_ctx, release_tag=latest_release_tag, target_platform=target_platform)
 
 
 def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_restore=None):
@@ -3683,31 +3739,73 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_resto
     if stdout:
         args += ["--stdout"]
 
-    output = run_bicep_command(args)
+    output = run_bicep_command(cmd.cli_ctx, args)
 
     if stdout:
         print(output)
 
 
-def publish_bicep_file(cmd, file, target):
-    ensure_bicep_installation()
+def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline=None, indent_kind=None, indent_size=None, insert_final_newline=None):
+    ensure_bicep_installation(cmd.cli_ctx)
+
+    minimum_supported_version = "0.12.1"
+    if bicep_version_greater_than_or_equal_to(minimum_supported_version):
+        args = ["format", file]
+        if outdir:
+            args += ["--outdir", outdir]
+        if outfile:
+            args += ["--outfile", outfile]
+        if stdout:
+            args += ["--stdout"]
+        if newline:
+            args += ["--newline", newline]
+        if indent_kind:
+            args += ["--indentKind", indent_kind]
+        if indent_size:
+            args += ["--indentSize", indent_size]
+        if insert_final_newline:
+            args += ["--insertFinalNewline"]
+
+        output = run_bicep_command(cmd.cli_ctx, args)
+
+        if stdout:
+            print(output)
+    else:
+        logger.error("az bicep format could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
+
+
+def publish_bicep_file(cmd, file, target, documentationUri=None, force=None):
+    ensure_bicep_installation(cmd.cli_ctx)
 
     minimum_supported_version = "0.4.1008"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
-        run_bicep_command(["publish", file, "--target", target])
+        args = ["publish", file, "--target", target]
+        if documentationUri:
+            minimum_supported_version_for_documentationUri_parameter = "0.14.46"
+            if bicep_version_greater_than_or_equal_to(minimum_supported_version_for_documentationUri_parameter):
+                args += ["--documentationUri", documentationUri]
+            else:
+                logger.error("az bicep publish with --documentationUri/-d parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_documentationUri_parameter)
+        if force:
+            minimum_supported_version_for_publish_force = "0.17.1"
+            if bicep_version_greater_than_or_equal_to(minimum_supported_version_for_publish_force):
+                args += ["--force"]
+            else:
+                logger.error("az bicep publish with --force parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_publish_force)
+        run_bicep_command(cmd.cli_ctx, args)
     else:
         logger.error("az bicep publish could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
 
 def restore_bicep_file(cmd, file, force=None):
-    ensure_bicep_installation()
+    ensure_bicep_installation(cmd.cli_ctx)
 
     minimum_supported_version = "0.4.1008"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["restore", file]
         if force:
             args += ["--force"]
-        run_bicep_command(args)
+        run_bicep_command(cmd.cli_ctx, args)
     else:
         logger.error("az bicep restore could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
@@ -3716,11 +3814,11 @@ def decompile_bicep_file(cmd, file, force=None):
     args = ["decompile", file]
     if force:
         args += ["--force"]
-    run_bicep_command(args)
+    run_bicep_command(cmd.cli_ctx, args)
 
 
 def show_bicep_cli_version(cmd):
-    print(run_bicep_command(["--version"], auto_install=False))
+    print(run_bicep_command(cmd.cli_ctx, ["--version"], auto_install=False))
 
 
 def list_bicep_cli_versions(cmd):
@@ -3728,7 +3826,7 @@ def list_bicep_cli_versions(cmd):
 
 
 def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, stdout=None):
-    ensure_bicep_installation()
+    ensure_bicep_installation(cmd.cli_ctx)
 
     minimum_supported_version = "0.7.4"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
@@ -3742,7 +3840,7 @@ def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, 
         if stdout:
             args += ["--stdout"]
 
-        output = run_bicep_command(args)
+        output = run_bicep_command(cmd.cli_ctx, args)
 
         if stdout:
             print(output)

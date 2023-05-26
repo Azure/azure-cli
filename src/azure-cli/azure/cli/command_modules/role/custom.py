@@ -50,16 +50,20 @@ CREDENTIAL_WARNING = (
     "The output includes credentials that you must protect. Be sure that you do not include these credentials in "
     "your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli")
 
+SCOPE_WARNING = (
+    "--scope argument will become required for creating a role assignment in the breaking change release of the fall "
+    "of 2023. Please explicitly specify --scope.")
+
 logger = get_logger(__name__)
 
-# pylint: disable=too-many-lines
+# pylint: disable=too-many-lines, protected-access
 
 
 def list_role_definitions(cmd, name=None, resource_group_name=None, scope=None,
                           custom_role_only=False):
     definitions_client = _auth_client_factory(cmd.cli_ctx, scope).role_definitions
     scope = _build_role_scope(resource_group_name, scope,
-                              definitions_client.config.subscription_id)
+                              definitions_client._config.subscription_id)
     return _search_role_definitions(cmd.cli_ctx, definitions_client, name, [scope], custom_role_only)
 
 
@@ -94,7 +98,7 @@ def _create_update_role_definition(cmd, role_definition, for_update):
         definitions_client = _auth_client_factory(cmd.cli_ctx, scope=role_resource_id).role_definitions
         scopes_in_definition = role_definition.get('assignableScopes', None)
         scopes = (scopes_in_definition if scopes_in_definition else
-                  ['/subscriptions/' + definitions_client.config.subscription_id])
+                  ['/subscriptions/' + definitions_client._config.subscription_id])
         if role_resource_id:
             from msrestazure.tools import parse_resource_id
             role_id = parse_resource_id(role_resource_id)['name']
@@ -125,7 +129,7 @@ def delete_role_definition(cmd, name, resource_group_name=None, scope=None,
                            custom_role_only=False):
     definitions_client = _auth_client_factory(cmd.cli_ctx, scope).role_definitions
     scope = _build_role_scope(resource_group_name, scope,
-                              definitions_client.config.subscription_id)
+                              definitions_client._config.subscription_id)
     roles = _search_role_definitions(cmd.cli_ctx, definitions_client, name, [scope], custom_role_only)
     for r in roles:
         definitions_client.delete(role_definition_id=r.name, scope=scope)
@@ -146,8 +150,11 @@ def _search_role_definitions(cli_ctx, definitions_client, name, scopes, custom_r
 
 def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, resource_group_name=None,
                            scope=None, assignee_principal_type=None, description=None,
-                           condition=None, condition_version=None):
+                           condition=None, condition_version=None, assignment_name=None):
     """Check parameters are provided correctly, then call _create_role_assignment."""
+    if not scope:
+        logger.warning(SCOPE_WARNING)
+
     if bool(assignee) == bool(assignee_object_id):
         raise CLIError('usage error: --assignee STRING | --assignee-object-id GUID')
 
@@ -178,7 +185,8 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
     try:
         return _create_role_assignment(cmd.cli_ctx, role, object_id, resource_group_name, scope, resolve_assignee=False,
                                        assignee_principal_type=principal_type, description=description,
-                                       condition=condition, condition_version=condition_version)
+                                       condition=condition, condition_version=condition_version,
+                                       assignment_name=assignment_name)
     except Exception as ex:  # pylint: disable=broad-except
         if _error_caused_by_role_assignment_exists(ex):  # for idempotent
             return list_role_assignments(cmd, assignee, role, resource_group_name, scope)[0]
@@ -187,18 +195,19 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
 
 def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None,
                             resolve_assignee=True, assignee_principal_type=None, description=None,
-                            condition=None, condition_version=None):
+                            condition=None, condition_version=None, assignment_name=None):
     """Prepare scope, role ID and resolve object ID from Graph API."""
+    assignment_name = assignment_name or _gen_guid()
     factory = _auth_client_factory(cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
     scope = _build_role_scope(resource_group_name, scope,
-                              assignments_client.config.subscription_id)
+                              assignments_client._config.subscription_id)
 
     role_id = _resolve_role_id(role, scope, definitions_client)
     object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
     worker = MultiAPIAdaptor(cli_ctx)
-    return worker.create_role_assignment(assignments_client, _gen_guid(), role_id, object_id, scope,
+    return worker.create_role_assignment(assignments_client, assignment_name, role_id, object_id, scope,
                                          assignee_principal_type, description=description,
                                          condition=condition, condition_version=condition_version)
 
@@ -211,9 +220,9 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
     member(transitively).
     '''
     graph_client = _graph_client_factory(cmd.cli_ctx)
-    factory = _auth_client_factory(cmd.cli_ctx, scope)
-    assignments_client = factory.role_assignments
-    definitions_client = factory.role_definitions
+    authorization_client = _auth_client_factory(cmd.cli_ctx, scope)
+    assignments_client = authorization_client.role_assignments
+    definitions_client = authorization_client.role_definitions
 
     if show_all:
         if resource_group_name or scope:
@@ -221,7 +230,7 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
         scope = None
     else:
         scope = _build_role_scope(resource_group_name, scope,
-                                  definitions_client.config.subscription_id)
+                                  definitions_client._config.subscription_id)
 
     assignments = _search_role_assignments(cmd.cli_ctx, assignments_client, definitions_client,
                                            scope, assignee, role,
@@ -229,7 +238,7 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
 
     results = todict(assignments) if assignments else []
     if include_classic_administrators:
-        results += _backfill_assignments_for_co_admins(cmd.cli_ctx, factory, assignee)
+        results += _backfill_assignments_for_co_admins(cmd.cli_ctx, authorization_client, assignee)
 
     if not results:
         return []
@@ -238,7 +247,7 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
     # (it's possible that associated roles and principals were deleted, and we just do nothing.)
     # 2. fill in role names
     role_defs = list(definitions_client.list(
-        scope=scope or ('/subscriptions/' + definitions_client.config.subscription_id)))
+        scope=scope or ('/subscriptions/' + definitions_client._config.subscription_id)))
     worker = MultiAPIAdaptor(cmd.cli_ctx)
     role_dics = {i.id: worker.get_role_property(i, 'role_name') for i in role_defs}
     for i in results:
@@ -468,7 +477,7 @@ def _backfill_assignments_for_co_admins(cli_ctx, auth_client, assignee=None):
             'principalName': email,
             'roleDefinitionName': admin.role,
             'roleDefinitionId': 'NA(classic admin role)',
-            'scope': '/subscriptions/' + auth_client.config.subscription_id
+            'scope': '/subscriptions/' + auth_client._config.subscription_id
         }
         if worker.old_api:
             result[-1]['properties'] = properties
@@ -495,8 +504,24 @@ def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_gr
     definitions_client = factory.role_definitions
     ids = ids or []
     if ids:
-        if assignee or role or resource_group_name or scope or include_inherited:
-            raise CLIError('When assignment ids are used, other parameter values are not required')
+        # Warn that other arguments are overriden.
+        # We can't reuse the logic of `azure.cli.core.commands.arm.register_ids_argument`, because in that function,
+        # `ids_metadata` is built by checking `id_part` of each argument.
+        # Commands like `az vm delete` require a resource ID with fixed parts, such as
+        # /subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/virtualMachines/{}
+        # But for `az role assignment delete`, `--id` can have variable parts:
+        # - subscription level:   /subscriptions/{}
+        # - resource group level: /subscriptions/{}/resourceGroups/{}
+        # - resource level:       /subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/virtualMachines/{}
+        # so it can't be parsed into pre-defined parts and is passed to SDK as is.
+        ids_override_args = ['assignee', 'role', 'resource_group_name', 'scope', 'include_inherited']
+        for arg in ids_override_args:
+            if locals()[arg]:
+                # This is different with `register_ids_argument`'s `--ids` handling.
+                # `register_ids_argument` doesn't show warning if `is_default` of an argument value is true,
+                # but we do here. I feel being explicit is better than being implicit.
+                logger.warning("option '%s' will be ignored due to use of '--ids'.",
+                               cmd.arguments[arg].type.settings['options_list'][0])
         for i in ids:
             assignments_client.delete_by_id(i)
         return
@@ -507,7 +532,7 @@ def delete_role_assignments(cmd, ids=None, assignee=None, role=None, resource_gr
             return
 
     scope = _build_role_scope(resource_group_name, scope,
-                              assignments_client.config.subscription_id)
+                              assignments_client._config.subscription_id)
     assignments = _search_role_assignments(cmd.cli_ctx, assignments_client, definitions_client,
                                            scope, assignee, role, include_inherited,
                                            include_groups=False)
@@ -538,9 +563,9 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
             f = "assignedTo('{}')".format(assignee_object_id)
         else:
             f = "principalId eq '{}'".format(assignee_object_id)
-        assignments = list(assignments_client.list(filter=f))
+        assignments = list(assignments_client.list_for_subscription(filter=f))
     else:
-        assignments = list(assignments_client.list())
+        assignments = list(assignments_client.list_for_subscription())
 
     worker = MultiAPIAdaptor(cli_ctx)
     if assignments:
@@ -586,7 +611,7 @@ def _resolve_role_id(role, scope, definitions_client):
     else:
         if is_guid(role):
             role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(
-                definitions_client.config.subscription_id, role)
+                definitions_client._config.subscription_id, role)
         if not role_id:  # retrieve role id
             role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
             if not role_defs:
@@ -1191,7 +1216,7 @@ def create_service_principal_for_rbac(
     # Password credential is created *after* application creation.
     # https://docs.microsoft.com/en-us/graph/api/resources/passwordcredential
     if not use_cert:
-        result = _application_add_password(graph_client, aad_application, app_start_date, app_end_date, 'rbac')
+        result = _application_add_password(graph_client, aad_application, 'rbac', app_start_date, app_end_date)
         password = result['secretText']
 
     # retry till server replication is done
@@ -1564,15 +1589,9 @@ def _gen_guid():
     return uuid.uuid4()
 
 
-def _application_add_password(client, app, start_datetime, end_datetime, display_name):
+def _application_add_password(client, app, display_name, start_datetime, end_datetime):
     """Let graph service generate a random password."""
-    body = {
-        "passwordCredential": {
-            "startDateTime": _datetime_to_utc(start_datetime),
-            "endDateTime": _datetime_to_utc(end_datetime),
-            "displayName": display_name
-        }
-    }
+    body = _build_add_password_credential_body(display_name, start_datetime, end_datetime)
     result = client.application_add_password(app[ID], body)
     return result
 

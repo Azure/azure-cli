@@ -2,19 +2,15 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+
 import json
-import os
-import sys
-from unittest import mock
 import unittest
-import datetime
-import dateutil
-import dateutil.parser
+from unittest import mock
+
+from azure.cli.testsdk import MSGraphNameReplacer
+from ..util import MSGraphUpnReplacer
+from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk.scenario_tests.const import MOCKED_TENANT_ID
-from azure.cli.testsdk import ScenarioTest, MSGraphNameReplacer, MOCKED_USER_NAME
-from knack.util import CLIError
-from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
 
 
 # This test example is from
@@ -936,7 +932,7 @@ class GroupScenarioTest(GraphScenarioTestBase):
 
 
 class MiscellaneousScenarioTest(GraphScenarioTestBase):
-    def test_special_characters(self):
+    def test_special_characters_in_query(self):
         # Test special characters in object names. Ensure these characters are correctly percent-encoded.
         # For example, displayName with +(%2B), /(%2F)
         from azure.cli.testsdk.scenario_tests.utilities import create_random_name
@@ -962,6 +958,40 @@ class MiscellaneousScenarioTest(GraphScenarioTestBase):
         self.cmd('ad group delete --group {display_name}')
         self.cmd('ad group list --display-name {display_name}',
                  checks=self.check('length(@)', 0))
+
+    def test_special_characters_in_upn(self):
+        # Test special characters in upn
+        from azure.cli.testsdk.scenario_tests.utilities import create_random_name
+        prefix = '$azure-cli-test-user#'
+        mock_name = prefix + '000001'
+        if self.in_recording:
+            display_name = create_random_name(prefix=prefix, length=32)
+            self.recording_processors.append(MSGraphNameReplacer(display_name, mock_name))
+            self.recording_processors.append(MSGraphUpnReplacer(display_name, mock_name))
+        else:
+            display_name = mock_name
+
+        self.kwargs = {
+            'display_name': display_name,
+            'upn': f'{display_name}@AzureSDKTeam.onmicrosoft.com',
+            'password': self.create_random_name(prefix='password-', length=40),
+        }
+        self.cmd('ad user create --display-name {display_name} --password {password} '
+                 '--user-principal-name {upn}',
+                 checks=self.check('displayName', '{display_name}'))
+
+        self.cmd('ad user update --id {upn} --force-change-password-next-sign-in true')
+
+        self.cmd('ad user show --id {upn}',
+                 checks=self.check('displayName', '{display_name}'))
+
+        self.cmd('ad user list --display-name {display_name}',
+                 checks=self.check('[0].displayName', '{display_name}'))
+
+        self.cmd('ad user get-member-groups --id {upn}',
+                 checks=self.is_empty())
+
+        self.cmd('ad user delete --id {upn}')
 
 
 def _get_id_from_value(permissions, value):

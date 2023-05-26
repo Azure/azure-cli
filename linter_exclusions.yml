@@ -38,6 +38,16 @@ acr manifest list:
     repo_id:
       rule_exclusions:
       - no_positional_parameters
+acr manifest list-deleted:
+  parameters:
+    repo_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest list-deleted-tags:
+  parameters:
+    perm_repo_id:
+      rule_exclusions:
+      - no_positional_parameters
 acr manifest list-referrers:
   parameters:
     manifest_id:
@@ -59,6 +69,11 @@ acr manifest metadata show:
       rule_exclusions:
       - no_positional_parameters
 acr manifest metadata update:
+  parameters:
+    manifest_id:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest restore:
   parameters:
     manifest_id:
       rule_exclusions:
@@ -312,6 +327,12 @@ aks create:
     enable_msi_auth_for_monitoring:
       rule_exclusions:
       - option_length_too_long
+    enable_syslog:
+      rule_exclusions:
+      - option_length_too_long
+    data_collection_settings:
+      rule_exclusions:
+      - option_length_too_long
     node_osdisk_diskencryptionset_id:
       rule_exclusions:
       - option_length_too_long
@@ -339,6 +360,12 @@ aks enable-addons:
       rule_exclusions:
       - option_length_too_long
     enable_msi_auth_for_monitoring:
+      rule_exclusions:
+      - option_length_too_long
+    enable_syslog:
+      rule_exclusions:
+      - option_length_too_long
+    data_collection_settings:
       rule_exclusions:
       - option_length_too_long
 aks install-cli:
@@ -897,6 +924,9 @@ backup restore restore-disks:
     target_vnet_resource_group:
       rule_exclusions:
       - option_length_too_long
+    storage_account_resource_group:
+      rule_exclusions:
+      - option_length_too_long
 backup vault backup-properties set:
   parameters:
     backup_storage_redundancy:
@@ -1401,6 +1431,14 @@ cosmosdb create:
     virtual_network_rules:
       rule_exclusions:
       - option_length_too_long
+    gremlin_databases_to_restore:
+      rule_exclusions:
+      - option_length_too_long
+cosmosdb restore:
+  parameters:
+    gremlin_databases_to_restore:
+      rule_exclusions:
+      - option_length_too_long
 cosmosdb mongodb collection create:
   parameters:
     analytical_storage_ttl:
@@ -1454,71 +1492,6 @@ cosmosdb collection:
     db_resource_group_name:
       rule_exclusions:
         - parameter_should_not_end_in_resource_group
-deploymentmanager service create:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-    target_subscription_id:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service delete:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service list:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service show:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service update:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-    target_subscription_id:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service-unit create:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-    target_resource_group:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service-unit delete:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service-unit list:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service-unit show:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service-unit update:
-  parameters:
-    deployment_mode:
-      rule_exclusions:
-      - no_parameter_defaults_for_update_commands
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-    target_resource_group:
-      rule_exclusions:
-      - option_length_too_long
 disk create:
   parameters:
     gallery_image_reference:
@@ -2883,6 +2856,16 @@ openshift create:
     customer_admin_group_id:
       rule_exclusions:
       - option_length_too_long
+policy attestation create:
+  parameters:
+    definition_reference_id:
+      rule_exclusions:
+        - option_length_too_long
+policy attestation update:
+  parameters:
+    definition_reference_id:
+      rule_exclusions:
+        - option_length_too_long
 policy assignment list:
   parameters:
     disable_scope_strict_match:
@@ -3000,21 +2983,6 @@ relay wcfrelay update:
     relay_type:
       rule_exclusions:
       - no_parameter_defaults_for_update_commands
-reservations catalog show:
-  parameters:
-    reserved_resource_type:
-      rule_exclusions:
-      - option_length_too_long
-reservations reservation-order calculate:
-  parameters:
-    reserved_resource_type:
-      rule_exclusions:
-      - option_length_too_long
-reservations reservation-order purchase:
-  parameters:
-    reserved_resource_type:
-      rule_exclusions:
-      - option_length_too_long
 resource move:
   parameters:
     destination_subscription_id:

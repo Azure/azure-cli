@@ -21,6 +21,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_SCALE_SET_PRIORITY_SPOT,
     CONST_SPOT_EVICTION_POLICY_DELETE,
     CONST_VIRTUAL_MACHINE_SCALE_SETS,
+    CONST_OS_SKU_WINDOWS2019,
+    CONST_OS_SKU_WINDOWS2022,
     AgentPoolDecoratorMode,
     DecoratorEarlyExitException,
     DecoratorMode,
@@ -477,7 +479,6 @@ class AKSAgentPoolContext(BaseAKSContext):
             snapshot = self.get_snapshot()
             if snapshot:
                 value_obtained_from_snapshot = snapshot.os_type
-
         # set default value
         if value_obtained_from_agentpool is not None:
             os_type = value_obtained_from_agentpool
@@ -487,7 +488,6 @@ class AKSAgentPoolContext(BaseAKSContext):
             os_type = value_obtained_from_snapshot
         else:
             os_type = CONST_DEFAULT_NODE_OS_TYPE
-
         # validation
         if (
             self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER and
@@ -495,6 +495,21 @@ class AKSAgentPoolContext(BaseAKSContext):
         ):
             if os_type.lower() == "windows":
                 raise InvalidArgumentValueError("System node pool must be linux.")
+        # validation of Windows OS SKU's against OS Type
+        if (
+            self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE and
+            self.decorator_mode == DecoratorMode.CREATE and
+            os_type == CONST_DEFAULT_NODE_OS_TYPE
+        ):
+            # read the original value passed by the command
+            raw_os_sku = self.raw_param.get("os_sku")
+            sku_2019 = CONST_OS_SKU_WINDOWS2019
+            sku_2022 = CONST_OS_SKU_WINDOWS2022
+            if raw_os_sku == sku_2019 or raw_os_sku == sku_2022:
+                raise InvalidArgumentValueError(
+                    "OS SKU is invalid for Linux OS Type."
+                    " Please specify '--os-type Windows' for Windows SKUs"
+                )
         return os_type
 
     def get_os_type(self) -> Union[str, None]:
@@ -536,7 +551,6 @@ class AKSAgentPoolContext(BaseAKSContext):
             os_sku = value_obtained_from_snapshot
         else:
             os_sku = raw_value
-
         # this parameter does not need validation
         return os_sku
 
@@ -1200,6 +1214,25 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need validation
         return no_wait
 
+    def get_gpu_instance_profile(self) -> Union[str, None]:
+        """Obtain the value of gpu_instance_profile.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        gpu_instance_profile = self.raw_param.get("gpu_instance_profile")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.agentpool and
+            hasattr(self.agentpool, "gpu_instance_profile") and
+            self.agentpool.gpu_instance_profile is not None
+        ):
+            gpu_instance_profile = self.agentpool.gpu_instance_profile
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return gpu_instance_profile
+
 
 class AKSAgentPoolAddDecorator:
     def __init__(
@@ -1469,6 +1502,16 @@ class AKSAgentPoolAddDecorator:
         agentpool.linux_os_config = self.context.get_linux_os_config()
         return agentpool
 
+    def set_up_gpu_properties(self, agentpool: AgentPool) -> AgentPool:
+        """Set up gpu related properties for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        agentpool.gpu_instance_profile = self.context.get_gpu_instance_profile()
+        return agentpool
+
     def construct_agentpool_profile_default(self, bypass_restore_defaults: bool = False) -> AgentPool:
         """The overall controller used to construct the AgentPool profile by default.
 
@@ -1501,6 +1544,8 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_vm_properties(agentpool)
         # set up custom node config
         agentpool = self.set_up_custom_node_config(agentpool)
+        # set up gpu instance profile
+        agentpool = self.set_up_gpu_properties(agentpool)
         # restore defaults
         if not bypass_restore_defaults:
             agentpool = self._restore_defaults_in_agentpool(agentpool)

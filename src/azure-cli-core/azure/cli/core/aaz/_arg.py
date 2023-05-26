@@ -7,18 +7,23 @@ import copy
 
 from azure.cli.core import azclierror
 from knack.arguments import CLICommandArgument, CaseInsensitiveList
+from knack.preview import PreviewItem
+from knack.experimental import ExperimentalItem
+from knack.util import status_tag_messages
 
-from ._arg_action import AAZSimpleTypeArgAction, AAZObjectArgAction, AAZDictArgAction, AAZListArgAction, \
-    AAZGenericUpdateAction
+from ._arg_action import AAZSimpleTypeArgAction, AAZObjectArgAction, AAZDictArgAction, AAZFreeFormDictArgAction, \
+    AAZListArgAction, AAZGenericUpdateAction, AAZGenericUpdateForceStringAction
 from ._base import AAZBaseType, AAZUndefined
 from ._field_type import AAZObjectType, AAZStrType, AAZIntType, AAZBoolType, AAZFloatType, AAZListType, AAZDictType, \
-    AAZSimpleType
+    AAZSimpleType, AAZFreeFormDictType
 from ._field_value import AAZObject
-from ._arg_fmt import AAZObjectArgFormat, AAZListArgFormat, AAZDictArgFormat, AAZSubscriptionIdArgFormat, \
-    AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZUuidFormat, AAZDateFormat, AAZTimeFormat, \
-    AAZDateTimeFormat, AAZDurationFormat
+from ._arg_fmt import AAZObjectArgFormat, AAZListArgFormat, AAZDictArgFormat, AAZFreeFormDictArgFormat, \
+    AAZSubscriptionIdArgFormat, AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZUuidFormat, AAZDateFormat, \
+    AAZTimeFormat, AAZDateTimeFormat, AAZDurationFormat, AAZFileArgTextFormat
+from .exceptions import AAZUnregisteredArg
+from ._prompt import AAZPromptInput
 
-# pylint: disable=redefined-builtin, protected-access
+# pylint: disable=redefined-builtin, protected-access, too-few-public-methods
 
 
 class AAZArgumentsSchema(AAZObjectType):
@@ -72,7 +77,7 @@ class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
     """Base argument"""
 
     def __init__(self, options=None, required=False, help=None, arg_group=None, is_preview=False, is_experimental=False,
-                 id_part=None, default=AAZUndefined, blank=AAZUndefined, nullable=False, fmt=None):
+                 id_part=None, default=AAZUndefined, blank=AAZUndefined, nullable=False, fmt=None, registered=True):
         """
 
         :param options: argument optional names.
@@ -87,6 +92,7 @@ class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
         :param blank: when the argument flag is used without value data, the blank value will be used.
         :param nullable: argument can accept `None` as value
         :param fmt: argument format
+        :param registered: control whether register argument into command display
         """
         super().__init__(options=options, nullable=nullable)
         self._help = {}  # the key in self._help can be 'name', 'short-summary', 'long-summary', 'populator-commands'
@@ -106,12 +112,18 @@ class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
         self._default = default
         self._blank = blank
         self._fmt = fmt
+        self._registered = registered
 
-    def to_cmd_arg(self, name):
+    def to_cmd_arg(self, name, **kwargs):
         """ convert AAZArg to CLICommandArgument """
+        if not self._registered:
+            # argument will not registered in command display
+            raise AAZUnregisteredArg()
+
+        options_list = [*self._options] if self._options else None
         arg = CLICommandArgument(
             dest=name,
-            options_list=[*self._options] if self._options else None,
+            options_list=options_list,
             # if default is not None, arg is not required.
             required=self._required if self._default == AAZUndefined else False,
             help=self._help.get('short-summary', None),
@@ -123,6 +135,48 @@ class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
 
         if self._blank != AAZUndefined:
             arg.nargs = '?'
+            if isinstance(self._blank, AAZPromptInput):
+                short_summary = arg.type.settings.get('help', None) or ''
+                if short_summary:
+                    short_summary += '  '
+                short_summary += self._blank.help_message
+                arg.help = short_summary
+
+        cli_ctx = kwargs.get('cli_ctx', None)
+        if cli_ctx is None:
+            # define mock cli_ctx for PreviewItem and ExperimentalItem
+            class _CLI_CTX:
+                enable_color = False
+            cli_ctx = _CLI_CTX
+
+        if options_list is None:
+            target = f"--{name.replace('_', '-')}"
+        else:
+            target = sorted(options_list, key=len)[-1]
+
+        if self._is_preview:
+            def _get_preview_arg_message(self):
+                subject = "{} '{}'".format(self.object_type.capitalize(), self.target)
+                return status_tag_messages['preview'].format(subject)
+            arg.preview_info = PreviewItem(
+                cli_ctx=cli_ctx,
+                target=target,
+                object_type="argument",
+                message_func=_get_preview_arg_message
+            )
+
+        if self._is_experimental:
+            def _get_experimental_arg_message(self):
+                # "Argument xxx"
+                subject = "{} '{}'".format(self.object_type.capitalize(), self.target)
+                return status_tag_messages['experimental'].format(subject)
+
+            arg.experimental_info = ExperimentalItem(
+                cli_ctx=cli_ctx,
+                target=target,
+                object_type="argument",
+                message_func=_get_experimental_arg_message
+            )
 
         action = self._build_cmd_action()   # call sub class's implementation to build CLICommandArgument action
         if action:
@@ -148,8 +202,8 @@ class AAZSimpleTypeArg(AAZBaseArg, AAZSimpleType):
         super().__init__(**kwargs)
         self.enum = AAZArgEnum(enum, case_sensitive=enum_case_sensitive) if enum else None
 
-    def to_cmd_arg(self, name):
-        arg = super().to_cmd_arg(name)
+    def to_cmd_arg(self, name, **kwargs):
+        arg = super().to_cmd_arg(name, **kwargs)
         if self.enum:
             arg.choices = self.enum.to_choices()    # convert it's enum value into choices in arg
         return arg
@@ -223,6 +277,13 @@ class AAZUuidArg(AAZStrArg):
         return "GUID/UUID"
 
 
+class AAZPasswordArg(AAZStrArg):
+
+    @property
+    def _type_in_help(self):
+        return "Password"
+
+
 class AAZIntArg(AAZSimpleTypeArg, AAZIntType):
 
     @property
@@ -260,9 +321,9 @@ class AAZCompoundTypeArg(AAZBaseArg):
     def _build_cmd_action(self):
         raise NotImplementedError()
 
-    def to_cmd_arg(self, name):
+    def to_cmd_arg(self, name, **kwargs):
         from ._help import shorthand_help_messages
-        arg = super().to_cmd_arg(name)
+        arg = super().to_cmd_arg(name, **kwargs)
         short_summary = arg.type.settings.get('help', None) or ''
         if short_summary:
             short_summary += '  '
@@ -281,8 +342,8 @@ class AAZObjectArg(AAZCompoundTypeArg, AAZObjectType):
         fmt = fmt or AAZObjectArgFormat()
         super().__init__(fmt=fmt, **kwargs)
 
-    def to_cmd_arg(self, name):
-        arg = super().to_cmd_arg(name)
+    def to_cmd_arg(self, name, **kwargs):
+        arg = super().to_cmd_arg(name, **kwargs)
         if self._blank != AAZUndefined:
             arg.nargs = '*'
         else:
@@ -306,8 +367,8 @@ class AAZDictArg(AAZCompoundTypeArg, AAZDictType):
         fmt = fmt or AAZDictArgFormat()
         super().__init__(fmt=fmt, **kwargs)
 
-    def to_cmd_arg(self, name):
-        arg = super().to_cmd_arg(name)
+    def to_cmd_arg(self, name, **kwargs):
+        arg = super().to_cmd_arg(name, **kwargs)
         if self._blank != AAZUndefined:
             arg.nargs = '*'
         else:
@@ -325,6 +386,32 @@ class AAZDictArg(AAZCompoundTypeArg, AAZDictType):
         return f"Dict<String,{self.Element._type_in_help}>"
 
 
+class AAZFreeFormDictArg(AAZBaseArg, AAZFreeFormDictType):
+
+    def __init__(self, fmt=None, **kwargs):
+        fmt = fmt or AAZFreeFormDictArgFormat()
+        super().__init__(fmt=fmt, **kwargs)
+
+    def to_cmd_arg(self, name, **kwargs):
+        arg = super().to_cmd_arg(name, **kwargs)
+        short_summary = arg.type.settings.get('help', None) or ''
+        if short_summary:
+            short_summary += '  '
+        short_summary += "Support json-file and yaml-file."
+        arg.help = short_summary
+        return arg
+
+    def _build_cmd_action(self):
+        class Action(AAZFreeFormDictArgAction):
+            _schema = self  # bind action class with current schema
+
+        return Action
+
+    @property
+    def _type_in_help(self):
+        return "Dict<String, Any>"
+
+
 class AAZListArg(AAZCompoundTypeArg, AAZListType):
 
     def __init__(self, fmt=None, singular_options=None, **kwargs):
@@ -332,8 +419,8 @@ class AAZListArg(AAZCompoundTypeArg, AAZListType):
         super().__init__(fmt=fmt, **kwargs)
         self.singular_options = singular_options
 
-    def to_cmd_arg(self, name):
-        arg = super().to_cmd_arg(name)
+    def to_cmd_arg(self, name, **kwargs):
+        arg = super().to_cmd_arg(name, **kwargs)
         if self.singular_options:
             assert arg.options_list
             arg.options_list.extend(self.singular_options)  # support to parse singular options
@@ -369,11 +456,10 @@ class AAZResourceGroupNameArg(AAZStrArg):
             **kwargs
         )
 
-    def to_cmd_arg(self, name):
+    def to_cmd_arg(self, name, **kwargs):
         from azure.cli.core.commands.parameters import get_resource_group_completion_list
         from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
-        arg = super().to_cmd_arg(name)
-
+        arg = super().to_cmd_arg(name, **kwargs)
         arg.completer = get_resource_group_completion_list
         arg.configured_default = 'group'
         arg.local_context_attribute = LocalContextAttribute(
@@ -400,10 +486,10 @@ class AAZResourceLocationArg(AAZStrArg):
             **kwargs
         )
 
-    def to_cmd_arg(self, name):
+    def to_cmd_arg(self, name, **kwargs):
         from azure.cli.core.commands.parameters import get_location_completion_list
         from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
-        arg = super().to_cmd_arg(name)
+        arg = super().to_cmd_arg(name, **kwargs)
         if self._required and \
                 isinstance(self._fmt, AAZResourceLocationArgFormat) and self._fmt._resource_group_arg is not None:
             # when location is required and it will be retrived from resource group by default, arg is not required.
@@ -441,15 +527,22 @@ class AAZSubscriptionIdArg(AAZStrArg):
             **kwargs
         )
 
-    def to_cmd_arg(self, name):
+    def to_cmd_arg(self, name, **kwargs):
         from azure.cli.core._completers import get_subscription_id_list
-        arg = super().to_cmd_arg(name)
+        arg = super().to_cmd_arg(name, **kwargs)
         arg.completer = get_subscription_id_list
         return arg
 
 
+class AAZFileArg(AAZStrArg):
+
+    def __init__(self, fmt=None, **kwargs):
+        fmt = fmt or AAZFileArgTextFormat()
+        super().__init__(fmt=fmt, **kwargs)
+
+
 # Generic Update arguments
-class AAZGenericUpdateForceString(AAZBoolArg):
+class AAZGenericUpdateForceStringArg(AAZBoolArg):
 
     def __init__(
             self, options=('--force-string',), arg_group='Generic Update',
@@ -461,6 +554,11 @@ class AAZGenericUpdateForceString(AAZBoolArg):
             arg_group=arg_group,
             **kwargs,
         )
+
+    def _build_cmd_action(self):
+        class Action(AAZGenericUpdateForceStringAction):
+            _schema = self  # bind action class with current schema
+        return Action
 
 
 class AAZGenericUpdateArg(AAZBaseArg, AAZListType):
@@ -489,14 +587,16 @@ class AAZGenericUpdateSetArg(AAZGenericUpdateArg):
             **kwargs,
         )
 
-    def to_cmd_arg(self, name):
-        arg = super().to_cmd_arg(name)
+    def to_cmd_arg(self, name, **kwargs):
+        arg = super().to_cmd_arg(name, **kwargs)
         arg.nargs = '+'
         arg.metavar = 'KEY=VALUE'
         return arg
 
     def _build_cmd_action(self):
-        return AAZGenericUpdateAction
+        class Action(AAZGenericUpdateAction):
+            ACTION_NAME = "set"
+        return Action
 
 
 class AAZGenericUpdateAddArg(AAZGenericUpdateArg):
@@ -514,14 +614,16 @@ class AAZGenericUpdateAddArg(AAZGenericUpdateArg):
             **kwargs,
         )
 
-    def to_cmd_arg(self, name):
-        arg = super().to_cmd_arg(name)
+    def to_cmd_arg(self, name, **kwargs):
+        arg = super().to_cmd_arg(name, **kwargs)
         arg.nargs = '+'
         arg.metavar = 'LIST KEY=VALUE'
         return arg
 
     def _build_cmd_action(self):
-        return AAZGenericUpdateAction
+        class Action(AAZGenericUpdateAction):
+            ACTION_NAME = "add"
+        return Action
 
 
 class AAZGenericUpdateRemoveArg(AAZGenericUpdateArg):
@@ -539,15 +641,13 @@ class AAZGenericUpdateRemoveArg(AAZGenericUpdateArg):
             **kwargs,
         )
 
-    def to_cmd_arg(self, name):
-        arg = super().to_cmd_arg(name)
+    def to_cmd_arg(self, name, **kwargs):
+        arg = super().to_cmd_arg(name, **kwargs)
         arg.nargs = '+'
         arg.metavar = 'LIST INDEX'
         return arg
 
     def _build_cmd_action(self):
-        return AAZGenericUpdateAction
-
-
-def has_value(arg_value):
-    return arg_value != AAZUndefined
+        class Action(AAZGenericUpdateAction):
+            ACTION_NAME = "remove"
+        return Action

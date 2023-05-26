@@ -2,8 +2,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+import base64
 import json
+import random
 import unittest
 
 from azure.cli.core import azclierror
@@ -640,6 +641,50 @@ class TestAAZArgBaseFmt(unittest.TestCase):
             }
         })
 
+    def test_freeform_dict_fmt(self):
+        from azure.cli.core.aaz import AAZFreeFormDictArgFormat
+        from azure.cli.core.aaz import AAZFreeFormDictArg
+
+        schema = AAZArgumentsSchema()
+        schema.tags = AAZFreeFormDictArg(fmt=AAZFreeFormDictArgFormat(max_properties=3, min_properties=2), nullable=True)
+
+        args = self.format_arg(schema, {
+            "tags": {
+                "flag1": "v1",
+                "flag2": 2,
+            },
+        })
+        self.assertEqual(args.to_serialized_data(), {
+            "tags": {
+                "flag1": "v1",
+                "flag2": 2,
+            }
+        })
+
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            self.format_arg(schema, {
+                "tags": {
+                    "flag1": "v1",
+                },
+            })
+
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            self.format_arg(schema, {
+                "tags": {
+                    "flag1": "v1",
+                    "flag2": "v2",
+                    "flag3": "v3",
+                    "flag4": "v4",
+                },
+            })
+
+        args = self.format_arg(schema, {
+            "tags": None,
+        })
+        self.assertEqual(args.to_serialized_data(), {
+            "tags": None
+        })
+
     def test_list_fmt(self):
         from azure.cli.core.aaz import AAZObjectArgFormat, AAZListArgFormat, AAZStrArgFormat, AAZIntArgFormat
         from azure.cli.core.aaz import AAZObjectArg, AAZListArg, AAZStrArg, AAZIntArg
@@ -704,3 +749,50 @@ class TestAAZArgBaseFmt(unittest.TestCase):
             "tags": ['v1', 'v2', None],
             "actions": None,
         })
+
+    def test_aaz_file_arg_fmt(self):
+        from azure.cli.core.aaz import AAZArgumentsSchema, AAZFileArg, AAZFileArgTextFormat, \
+            AAZFileArgBase64EncodeFormat
+        import os
+        import random
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.text = AAZFileArg(fmt=AAZFileArgTextFormat())
+        test_file = "test_aaz_file_arg_fmt.txt"
+        content = "This is test"
+        with open(test_file, 'w') as f:
+            f.write(content)
+
+        args = self.format_arg(schema, {
+            "text": test_file,
+        })
+
+        self.assertEqual(args.to_serialized_data(), {
+            "text": content
+        })
+
+        os.remove(test_file)
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            self.format_arg(schema, {
+                "text": test_file,
+            })
+
+        schema.data = AAZFileArg(fmt=AAZFileArgBase64EncodeFormat())
+        data_file = "test_aaz_file_arg_fmt.data"
+        data = bytes([random.randrange(0, 256) for _ in range(0, 128)])
+        with open(data_file, 'wb') as f:
+            f.write(data)
+
+        args = self.format_arg(schema, {
+            "data": data_file,
+        })
+        self.assertEqual(args.to_serialized_data(), {
+            "data": base64.b64encode(data).decode("utf-8")
+        })
+
+        os.remove(data_file)
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            self.format_arg(schema, {
+                "data": data_file,
+            })

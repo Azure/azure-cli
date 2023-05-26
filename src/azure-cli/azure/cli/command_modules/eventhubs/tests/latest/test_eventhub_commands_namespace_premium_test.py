@@ -19,7 +19,6 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_eh_namespace')
-    @KeyVaultPreparer(name_prefix='cli', name_len=15, additional_params='--enable-soft-delete --enable-purge-protection')
     def test_eh_namespace_premium_standard(self, resource_group):
         self.kwargs.update({
             'loc': 'eastus',

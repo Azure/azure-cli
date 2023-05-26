@@ -93,6 +93,94 @@ examples:
          --name testserver --location testLocation \\
         --subnet /subscriptions/{SubId2}/resourceGroups/{testGroup2}/providers/Microsoft.Network/virtualNetworks/tesetVnet/subnets/testSubnet \\
         --private-dns-zone /subscriptions/{SubId2}/resourceGroups/{testGroup2}/providers/Microsoft.Network/privateDnsZones/testDNS.mysql.database.azure.com
+  - name: >
+      Create a MySQL flexible server with data encryption.
+    text: >
+      # create keyvault
+
+      az keyvault create -g testGroup -n testVault --location testLocation \\
+        --enable-purge-protection true
+
+
+      # create key in keyvault and save its key identifier
+
+      keyIdentifier=$(az keyvault key create --name testKey -p software \\
+        --vault-name testVault --query key.kid -o tsv)
+
+
+      # create identity and save its principalId
+
+      identityPrincipalId=$(az identity create -g testGroup --name testIdentity \\
+        --location testLocation --query principalId -o tsv)
+
+
+      # add testIdentity as an access policy with key permissions 'Wrap Key', 'Unwrap Key', 'Get' and 'List' inside testVault
+
+      az keyvault set-policy -g testGroup -n testVault --object-id $identityPrincipalId \\
+        --key-permissions wrapKey unwrapKey get list
+
+
+      # create flexible server with data encryption enabled
+
+      az mysql flexible-server create -g testGroup -n testServer --location testLocation \\
+        --key $keyIdentifier --identity testIdentity
+  - name: >
+      Create a MySQL flexible server with geo redundant backup and data encryption.
+    text: >
+      # create keyvault
+
+      az keyvault create -g testGroup -n testVault --location testLocation \\
+        --enable-purge-protection true
+
+
+      # create key in keyvault and save its key identifier
+
+      keyIdentifier=$(az keyvault key create --name testKey -p software \\
+        --vault-name testVault --query key.kid -o tsv)
+
+
+      # create identity and save its principalId
+
+      identityPrincipalId=$(az identity create -g testGroup --name testIdentity \\
+        --location testLocation --query principalId -o tsv)
+
+
+      # add testIdentity as an access policy with key permissions 'Wrap Key', 'Unwrap Key', 'Get' and 'List' inside testVault
+
+      az keyvault set-policy -g testGroup -n testVault --object-id $identityPrincipalId \\
+        --key-permissions wrapKey unwrapKey get list
+
+
+      # create backup keyvault
+
+      az keyvault create -g testGroup -n testBackupVault --location testBackupLocation \\
+        --enable-purge-protection true
+
+
+      # create backup key in backup keyvault and save its key identifier
+
+      backupKeyIdentifier=$(az keyvault key create --name testBackupKey -p software \\
+        --vault-name testBackupVault --query key.kid -o tsv)
+
+
+      # create backup identity and save its principalId
+
+      backupIdentityPrincipalId=$(az identity create -g testGroup --name testBackupIdentity \\
+        --location testBackupLocation --query principalId -o tsv)
+
+
+      # add testBackupIdentity as an access policy with key permissions 'Wrap Key', 'Unwrap Key', 'Get' and 'List' inside testBackupVault
+
+      az keyvault set-policy -g testGroup -n testBackupVault \\
+        --object-id $backupIdentityPrincipalId --key-permissions wrapKey unwrapKey get list
+
+
+      # create flexible server with geo redundant backup and data encryption enabled
+
+      az mysql flexible-server create -g testGroup -n testServer --location testLocation \\
+        --geo-redundant-backup Enabled \\
+        --key $keyIdentifier --identity testIdentity \\
+        --backup-key $backupKeyIdentifier --backup-identity testBackupIdentity
 """
 
 helps['mysql flexible-server show'] = """
@@ -125,6 +213,38 @@ examples:
   - name: Update a flexible server's tags.
     text: az mysql flexible-server update --resource-group testGroup --name testserver --tags "k1=v1" "k2=v2"
     crafted: true
+  - name: Set or change key and identity for data encryption.
+    text: >
+      # get key identifier of the existing key
+
+      newKeyIdentifier=$(az keyvault key show --vault-name testVault --name testKey \\
+        --query key.kid -o tsv)
+
+
+      # update server with new key/identity
+
+      az mysql flexible-server update --resource-group testGroup --name testserver \\
+        --key $newKeyIdentifier --identity newIdentity
+  - name: Set or change key, identity, backup key and backup identity for data encryption with geo redundant backup.
+    text: >
+      # get key identifier of the existing key and backup key
+
+      newKeyIdentifier=$(az keyvault key show --vault-name testVault --name testKey \\
+        --query key.kid -o tsv)
+
+      newBackupKeyIdentifier=$(az keyvault key show --vault-name testBackupVault \\
+        --name testBackupKey --query key.kid -o tsv)
+
+
+      # update server with new key/identity and backup key/identity
+
+      az mysql flexible-server update --resource-group testGroup --name testserver \\
+        --key $newKeyIdentifier --identity newIdentity \\
+        --backup-key $newBackupKeyIdentifier --backup-identity newBackupIdentity
+  - name: Disable data encryption for flexible server.
+    text: >
+      az mysql flexible-server update --resource-group testGroup --name testserver \\
+        --disable-data-encryption
 """
 
 helps['mysql flexible-server delete'] = """
@@ -167,14 +287,14 @@ examples:
       Private access server will use different private dns zone.
     text: az mysql flexible-server geo-restore --resource-group testGroup --name testserverNew --source-server testserver --location newLocation
   - name: >
-      Geo-estore public access or private access server 'testserver' as a new server 'testserverNew' with new subnet.
+      Geo-restore public access or private access server 'testserver' as a new server 'testserverNew' with new subnet.
       New vnet, subnet, and private dns zone for the restored server will be provisioned. Please refer to 'flexible-server create' command for more private access scenarios.
     text: >
       az mysql flexible-server geo-restore --resource-group testGroup --name testserverNew \\
         --source-server testserver --vnet newVnet --subnet newSubnet \\
         --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
         --private-dns-zone testDNS.mysql.database.azure.com --location newLocation
-  - name: Gep-estore private access server 'testserver' as a new server 'testserverNew' with public access.
+  - name: Geo-restore private access server 'testserver' as a new server 'testserverNew' with public access.
     text: >
       az mysql flexible-server geo-restore --resource-group testGroup --name testserverNew  --source-server testserver --public-access Enabled --location newLocation
 """
@@ -378,7 +498,7 @@ type: command
 short-summary: List all read replicas for a given server.
 examples:
   - name: List all read replicas for master server 'testserver'.
-    text: az mysql flexible-server replica list -g testGroup -n primaryservername
+    text: az mysql flexible-server replica list -g testGroup -n testserver
 """
 
 helps['mysql flexible-server replica stop-replication'] = """
@@ -453,4 +573,146 @@ examples:
     text: az mysql flexible-server server-logs list -g testgroup -s testsvr --file-last-written 10
   - name: List log files for 'testsvr' less than 30Kb in size.
     text: az mysql flexible-server server-logs list -g testgroup -s testsvr --max-file-size 30
+"""
+
+helps['mysql flexible-server upgrade'] = """
+type: command
+short-summary: Upgrade the major version of a flexible server.
+examples:
+  - name: Upgrade server 'testsvr' to MySQL major version 8.
+    text: >
+      # make sure that sql_mode only contains values allowed in new version, for example:
+
+      az mysql flexible-server parameter set -g testgroup -s testsvr -n sql_mode \\
+        -v "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO"
+
+      # upgrade server to MySQL major version 8.
+
+      az mysql flexible-server upgrade -g testgroup -n testsvr -v 8
+"""
+
+helps['mysql flexible-server backup'] = """
+type: group
+short-summary: Manage flexible server backups.
+"""
+
+helps['mysql flexible-server backup list'] = """
+type: command
+short-summary: List all the backups for a given server.
+examples:
+  - name: List all backups for 'testsvr'.
+    text: az mysql flexible-server backup list -g testgroup -n testsvr
+"""
+
+helps['mysql flexible-server backup show'] = """
+type: command
+short-summary: Show the details of a specific backup for a given server.
+examples:
+  - name: Show the details of backup 'testbackup' for 'testsvr'.
+    text: az mysql flexible-server backup show -g testgroup -n testsvr --backup-name testbackup
+"""
+
+helps['mysql flexible-server backup create'] = """
+type: command
+short-summary: Create a backup for a given server with specified backup name.
+examples:
+  - name: Create a backup for 'testsvr' with backup name 'testbackup'.
+    text: az mysql flexible-server backup create -g testgroup -n testsvr --backup-name testbackup
+"""
+
+helps['mysql flexible-server identity'] = """
+type: group
+short-summary: Manage server user assigned identities.
+"""
+
+helps['mysql flexible-server identity assign'] = """
+type: command
+short-summary: Add user asigned managed identities to the server.
+examples:
+  - name: Add identities 'test-identity' and 'test-identity-2' to server 'testsvr'.
+    text: az mysql flexible-server identity assign -g testgroup -s testsvr --identity test-identity test-identity-2
+"""
+
+helps['mysql flexible-server identity remove'] = """
+type: command
+short-summary: Remove user asigned managed identites from the server.
+examples:
+  - name: Remove identity 'test-identity' from server 'testsvr'.
+    text: az mysql flexible-server identity remove -g testgroup -s testsvr --identity test-identity
+"""
+
+helps['mysql flexible-server identity show'] = """
+type: command
+short-summary: Get an user assigned managed identity from the server.
+examples:
+  - name: Get identity 'test-identity' from server 'testsvr'.
+    text: az mysql flexible-server identity show -g testgroup -s testsvr --identity test-identity
+"""
+
+helps['mysql flexible-server identity list'] = """
+type: command
+short-summary: List all user assigned managed identities from the server.
+examples:
+  - name: List all identities from server 'testsvr'.
+    text: az mysql flexible-server identity list -g testgroup -s testsvr
+"""
+
+helps['mysql flexible-server ad-admin'] = """
+type: group
+short-summary: Manage server Active Directory administrator.
+"""
+
+helps['mysql flexible-server ad-admin create'] = """
+type: command
+short-summary: Create an Active Directory administrator.
+examples:
+  - name: Create Active Directory administrator with user 'john@contoso.com', administrator ID '00000000-0000-0000-0000-000000000000' and identity 'test-identity'.
+    text: az mysql flexible-server ad-admin create -g testgroup -s testsvr -u john@contoso.com -i 00000000-0000-0000-0000-000000000000 --identity test-identity
+"""
+
+helps['mysql flexible-server ad-admin delete'] = """
+type: command
+short-summary: Delete an Active Directory administrator.
+examples:
+  - name: Delete Active Directory administrator.
+    text: az mysql flexible-server ad-admin delete -g testgroup -s testsvr
+"""
+
+helps['mysql flexible-server ad-admin list'] = """
+type: command
+short-summary: List all Active Directory administrators.
+examples:
+  - name: List Active Directory administrators.
+    text: az mysql flexible-server ad-admin list -g testgroup -s testsvr
+"""
+
+helps['mysql flexible-server ad-admin show'] = """
+type: command
+short-summary: Get an Active Directory administrator.
+examples:
+  - name: Get Active Directory administrator.
+    text: az mysql flexible-server ad-admin show -g testgroup -s testsvr
+"""
+
+helps['mysql flexible-server ad-admin wait'] = """
+type: command
+short-summary: Wait for the Active Directory administrator to satisfy certain conditions.
+examples:
+  - name: Wait until the Active Directory administrator exists.
+    text: az mysql flexible-server ad-admin wait -g testgroup -s testsvr --exists
+  - name: Wait for the Active Directory administrator to be deleted.
+    text: az mysql flexible-server ad-admin wait -g testgroup -s testsvr --deleted
+"""
+
+helps['mysql flexible-server gtid'] = """
+type: group
+short-summary: Manage GTID on a server.
+"""
+
+helps['mysql flexible-server gtid reset'] = """
+type: command
+short-summary: Resets GTID on a server.
+examples:
+  - name: Resets GTID '3E11FA47-71CA-11E1-9E33-C80AA9429562:23' on server 'testsvr'.
+    text: az mysql flexible-server gtid reset -g testgroup -s testsvr --gtid-set 3E11FA47-71CA-11E1-9E33-C80AA9429562:23
 """

@@ -66,6 +66,7 @@ class CredentialAdaptor:
         return token
 
     def get_auxiliary_tokens(self, *scopes, **kwargs):
+        # To test cross-tenant authentication, see https://github.com/Azure/azure-cli/issues/16691
         if self._auxiliary_credentials:
             return [cred.get_token(*scopes, **kwargs) for cred in self._auxiliary_credentials]
         return None

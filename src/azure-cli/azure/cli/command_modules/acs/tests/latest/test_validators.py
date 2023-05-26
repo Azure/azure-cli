@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
+from unittest.mock import Mock
 from types import SimpleNamespace
 
 from azure.cli.command_modules.acs import _validators as validators
@@ -528,6 +529,28 @@ class TestValidateAzureKeyVaultKmsKeyId(unittest.TestCase):
             validators.validate_azure_keyvault_kms_key_id(namespace)
         self.assertEqual(str(cm.exception), err)
 
+class ImageCleanerNamespace:
+    def __init__(
+        self,
+        enable_image_cleaner=False,
+        disable_image_cleaner=False,
+        image_cleaner_interval_hours=None,
+    ):
+        self.enable_image_cleaner = enable_image_cleaner 
+        self.disable_image_cleaner = disable_image_cleaner 
+        self.image_cleaner_interval_hours = image_cleaner_interval_hours 
+
+class TestValidateImageCleanerEnableDiasble(unittest.TestCase):
+    def test_invalid_image_cleaner_enable_disable_not_existing_together(self):
+        namespace = ImageCleanerNamespace(
+            enable_image_cleaner=True,
+            disable_image_cleaner=True,
+        )
+        err = 'Cannot specify --enable-image-cleaner and --disable-image-cleaner at the same time.'
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_image_cleaner_enable_disable_mutually_exclusive(namespace)
+        self.assertEqual(str(cm.exception), err)
 
 class AzureKeyVaultKmsKeyVaultResourceIdNamespace:
 
@@ -616,6 +639,24 @@ class TestValidateNodepoolName(unittest.TestCase):
         validators.validate_agent_pool_name(
             namespace
         )
+
+
+class TestValidateRegistryName(unittest.TestCase):
+    def test_append_suffix(self):
+        from azure.cli.core.cloud import HARD_CODED_CLOUD_LIST, CloudSuffixNotSetException
+        for hard_coded_cloud in HARD_CODED_CLOUD_LIST:
+            namespace = SimpleNamespace(
+                **{
+                    "acr": "myacr",
+                }
+            )
+            try:
+                acr_suffix = hard_coded_cloud.suffixes.acr_login_server_endpoint
+            except CloudSuffixNotSetException:
+                acr_suffix = ""
+            cmd = Mock(cli_ctx=Mock(cloud=hard_coded_cloud))
+            validators.validate_registry_name(cmd, namespace)
+            self.assertEqual(namespace.acr, "myacr" + acr_suffix)
 
 
 if __name__ == "__main__":

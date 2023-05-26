@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from ._base import AAZBaseValue, AAZUndefined
-from ._field_value import AAZSimpleValue, AAZDict, AAZList, AAZObject
+from ._field_value import AAZSimpleValue, AAZBaseDictValue, AAZDict, AAZFreeFormDict, AAZList, AAZObject
 from ._field_type import AAZObjectType
 from ._arg_browser import AAZArgBrowser
 
@@ -72,7 +72,7 @@ class AAZContentBuilder:
                             value[prop_name] = None
                         else:
                             value[prop_name] = []
-                    elif isinstance(value[prop_name], (AAZDict, AAZObject)):
+                    elif isinstance(value[prop_name], (AAZBaseDictValue, AAZObject)):
                         if sub_arg.data is None:
                             value[prop_name] = None
                         else:
@@ -98,37 +98,51 @@ class AAZContentBuilder:
                 schema.Element = typ(**typ_kwargs) if typ_kwargs else typ()
             else:
                 assert isinstance(schema.Element, typ)
-            if isinstance(value, (AAZDict, AAZList)):
-                for key, sub_arg in arg.get_elements():
-                    if sub_arg is not None and sub_arg.data != AAZUndefined:
-                        sub_arg = sub_arg.get_prop(arg_key)
-
-                    if sub_arg is not None and sub_arg.data != AAZUndefined:
-                        if not sub_arg.is_patch and arg_key:
-                            if isinstance(value[key], AAZSimpleValue):
-                                value[key] = sub_arg.data
-                            elif isinstance(value[key], AAZList):
-                                if sub_arg.data is None:
-                                    value[key] = None
-                                else:
-                                    value[key] = []
-                            elif isinstance(value[key], (AAZDict, AAZObject)):
-                                if sub_arg.data is None:
-                                    value[key] = None
-                                else:
-                                    value[key] = {}
-                            else:
-                                raise NotImplementedError()
-                        sub_values.append(value[key])
-                        sub_args.append(sub_arg)
-            else:
+            if not isinstance(value, (AAZDict, AAZList)):
                 raise NotImplementedError()
+
+            for key, sub_arg in arg.get_elements():
+                if sub_arg is not None and sub_arg.data != AAZUndefined:
+                    sub_arg = sub_arg.get_prop(arg_key)
+
+                if sub_arg is not None and sub_arg.data != AAZUndefined:
+                    if not sub_arg.is_patch and arg_key:
+                        if isinstance(value[key], AAZSimpleValue):
+                            value[key] = sub_arg.data
+                        elif isinstance(value[key], AAZList):
+                            if sub_arg.data is None:
+                                value[key] = None
+                            else:
+                                value[key] = []
+                        elif isinstance(value[key], (AAZBaseDictValue, AAZObject)):
+                            if sub_arg.data is None:
+                                value[key] = None
+                            else:
+                                value[key] = {}
+                        else:
+                            raise NotImplementedError()
+                    sub_values.append(value[key])
+                    sub_args.append(sub_arg)
 
         if sub_values:
             self._sub_elements_builder = AAZContentBuilder(sub_values, sub_args)
             return self._sub_elements_builder
 
         return None
+
+    def set_anytype_elements(self, arg_key=None):
+        """Set any type elements of free from dictionary"""
+        for value, arg in zip(self._values, self._args):
+            if not isinstance(value, AAZFreeFormDict):
+                raise NotImplementedError()
+
+            for key, sub_arg in arg.get_anytype_elements():
+                if sub_arg is not None and sub_arg.data != AAZUndefined:
+                    sub_arg = sub_arg.get_prop(arg_key)
+
+                if sub_arg is not None and sub_arg.data != AAZUndefined:
+                    if not sub_arg.is_patch and arg_key:
+                        value[key] = sub_arg.data
 
     def discriminate_by(self, prop_name, prop_value):
         """discriminate object by a specify property"""

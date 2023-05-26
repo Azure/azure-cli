@@ -10,6 +10,13 @@ import re
 from ipaddress import ip_network
 from math import isclose, isnan
 
+from azure.cli.command_modules.acs._consts import (
+    CONST_MANAGED_CLUSTER_SKU_TIER_FREE,
+    CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD,
+    CONST_OS_SKU_AZURELINUX,
+    CONST_OS_SKU_CBLMARINER,
+    CONST_OS_SKU_MARINER,
+)
 from azure.cli.core import keys
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
@@ -17,9 +24,11 @@ from azure.cli.core.azclierror import (
     MutuallyExclusiveArgumentError,
     RequiredArgumentMissingError,
 )
+
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
 from knack.log import get_logger
+
 
 logger = get_logger(__name__)
 
@@ -53,11 +62,6 @@ def validate_ssh_key(namespace):
             raise CLIError('An RSA key file or key value must be supplied to SSH Key Value. '
                            'You can use --generate-ssh-keys to let CLI generate one for you')
     namespace.ssh_key_value = content
-
-
-def validate_list_of_integers(string):
-    # extract comma-separated list of integers
-    return list(map(int, string.split(',')))
 
 
 def validate_create_parameters(namespace):
@@ -192,6 +196,15 @@ def validate_load_balancer_sku(namespace):
             raise CLIError("--load-balancer-sku can only be standard or basic")
 
 
+def validate_sku_tier(namespace):
+    """Validates the sku tier string."""
+    if namespace.tier is not None:
+        if namespace.tier == '':
+            return
+        if namespace.tier.lower() not in (CONST_MANAGED_CLUSTER_SKU_TIER_FREE, CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD):
+            raise InvalidArgumentValueError("--tier can only be free or standard")
+
+
 def validate_load_balancer_outbound_ips(namespace):
     """validate load balancer profile outbound IP ids"""
     if namespace.load_balancer_outbound_ips is not None:
@@ -222,6 +235,12 @@ def validate_load_balancer_idle_timeout(namespace):
     if namespace.load_balancer_idle_timeout is not None:
         if namespace.load_balancer_idle_timeout < 4 or namespace.load_balancer_idle_timeout > 100:
             raise CLIError("--load-balancer-idle-timeout must be in the range [4,100]")
+
+
+def validate_network_policy(namespace):
+    """validate network policy to be in lowercase"""
+    if namespace.network_policy is not None and namespace.network_policy.islower() is False:
+        raise InvalidArgumentValueError("--network-policy should be provided in lowercase")
 
 
 def validate_nat_gateway_managed_outbound_ip_count(namespace):
@@ -571,3 +590,73 @@ def validate_azure_keyvault_kms_key_vault_resource_id(namespace):
     from msrestazure.tools import is_valid_resource_id
     if not is_valid_resource_id(key_vault_resource_id):
         raise InvalidArgumentValueError("--azure-keyvault-kms-key-vault-resource-id is not a valid Azure resource ID.")
+
+
+def validate_image_cleaner_enable_disable_mutually_exclusive(namespace):
+    enable_image_cleaner = namespace.enable_image_cleaner
+    disable_image_cleaner = namespace.disable_image_cleaner
+
+    if enable_image_cleaner and disable_image_cleaner:
+        raise MutuallyExclusiveArgumentError(
+            "Cannot specify --enable-image-cleaner and --disable-image-cleaner at the same time."
+        )
+
+
+def validate_registry_name(cmd, namespace):
+    """Append login server endpoint suffix."""
+    registry = namespace.acr
+    suffixes = cmd.cli_ctx.cloud.suffixes
+    # Some clouds do not define 'acr_login_server_endpoint' (e.g. AzureGermanCloud)
+    from azure.cli.core.cloud import CloudSuffixNotSetException
+    try:
+        acr_suffix = suffixes.acr_login_server_endpoint
+    except CloudSuffixNotSetException:
+        acr_suffix = None
+    if registry and acr_suffix:
+        pos = registry.find(acr_suffix)
+        if pos == -1:
+            logger.warning("The login server endpoint suffix '%s' is automatically appended.", acr_suffix)
+            namespace.acr = registry + acr_suffix
+
+
+def sanitize_resource_id(resource_id):
+    resource_id = resource_id.strip()
+    if not resource_id.startswith("/"):
+        resource_id = "/" + resource_id
+    if resource_id.endswith("/"):
+        resource_id = resource_id.rstrip("/")
+    return resource_id.lower()
+
+
+# pylint:disable=line-too-long
+def validate_azuremonitorworkspaceresourceid(namespace):
+    resource_id = namespace.azure_monitor_workspace_resource_id
+    if resource_id is None:
+        return
+    resource_id = sanitize_resource_id(resource_id)
+    if (bool(re.match(r'/subscriptions/.*/resourcegroups/.*/providers/microsoft.monitor/accounts/.*', resource_id))) is False:
+        raise InvalidArgumentValueError("--azure-monitor-workspace-resource-id not in the correct format. It should match `/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/microsoft.monitor/accounts/<resourceName>`")
+
+
+# pylint:disable=line-too-long
+def validate_grafanaresourceid(namespace):
+    resource_id = namespace.grafana_resource_id
+    if resource_id is None:
+        return
+    resource_id = sanitize_resource_id(resource_id)
+    if (bool(re.match(r'/subscriptions/.*/resourcegroups/.*/providers/microsoft.dashboard/grafana/.*', resource_id))) is False:
+        raise InvalidArgumentValueError("--grafana-resource-id not in the correct format. It should match `/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/microsoft.dashboard/grafana/<resourceName>`")
+
+
+def validate_os_sku(namespace):
+    os_sku = namespace.os_sku
+    if os_sku in [CONST_OS_SKU_MARINER, CONST_OS_SKU_CBLMARINER]:
+        logger.warning(
+            'The osSKU "%s" should be used going forward instead of "%s" or "%s". '
+            'The osSKUs "%s" and "%s" will eventually be deprecated.',
+            CONST_OS_SKU_AZURELINUX,
+            CONST_OS_SKU_CBLMARINER,
+            CONST_OS_SKU_MARINER,
+            CONST_OS_SKU_CBLMARINER,
+            CONST_OS_SKU_MARINER,
+        )

@@ -90,9 +90,6 @@ class AzCliCommandParser(CLICommandParser):
                 continue
 
             command_verb = command_name.split()[-1]
-            # To work around http://bugs.python.org/issue9253, we artificially add any new
-            # parsers we add to the "choices" section of the subparser.
-            subparser.choices[command_verb] = command_verb
 
             # inject command_module designer's help formatter -- default is HelpFormatter
             fc = metadata.formatter_class or argparse.HelpFormatter

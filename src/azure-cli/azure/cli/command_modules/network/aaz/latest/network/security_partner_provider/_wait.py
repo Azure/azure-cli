@@ -52,7 +52,17 @@ class Wait(AAZWaitCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         self.SecurityPartnerProvidersGet(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
@@ -178,6 +188,10 @@ class Wait(AAZWaitCommand):
             tags.Element = AAZStrType()
 
             return cls._schema_on_200
+
+
+class _WaitHelper:
+    """Helper class for Wait"""
 
 
 __all__ = ["Wait"]

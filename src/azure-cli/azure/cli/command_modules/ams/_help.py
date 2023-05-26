@@ -375,6 +375,10 @@ helps['ams content-key-policy update'] = """
 helps['ams content-key-policy list'] = """
     type: command
     short-summary: List all the content key policies within an Azure Media Services account.
+    examples:
+        - name: list the content key policies within an Azure Media Services account with a filter clause.
+          text: >
+            az ams content-key-policy list -a amsAccount -g resourceGroup --filter "properties/lastModified gt 2022-08-16 or properties/created lt 2022-08-17"
 """
 
 helps['ams content-key-policy option'] = """

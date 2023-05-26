@@ -8,6 +8,7 @@ import base64
 import binascii
 import getpass
 import json
+import yaml
 import logging
 import os
 import platform
@@ -62,11 +63,6 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
     from requests.exceptions import SSLError, HTTPError
     from azure.cli.core import azclierror
     from msal_extensions.persistence import PersistenceError
-    import traceback
-
-    logger.debug("azure.cli.core.util.handle_exception is called with an exception:")
-    # Print the traceback and exception message
-    logger.debug(traceback.format_exc())
 
     error_msg = getattr(ex, 'message', str(ex))
     exit_code = 1
@@ -96,6 +92,14 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
 
     elif isinstance(ex, ValidationError):
         az_error = azclierror.ValidationError(error_msg)
+
+    elif isinstance(ex, azclierror.HTTPError):
+        # For resources that don't support CAE - 401 can't be handled
+        if ex.response.status_code == 401 and 'WWW-Authenticate' in ex.response.headers:
+            az_error = azclierror.AuthenticationError(ex)
+            az_error.set_recommendation("Interactive authentication is needed. Please run:\naz logout\naz login")
+        else:
+            az_error = azclierror.UnclassifiedUserFault(ex)
 
     elif isinstance(ex, CLIError):
         # TODO: Fine-grained analysis here
@@ -158,7 +162,8 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
         error_msg = "The command failed with an unexpected error. Here is the traceback:"
         az_error = azclierror.CLIInternalError(error_msg)
         az_error.set_exception_trace(ex)
-        az_error.set_recommendation("To open an issue, please run: 'az feedback'")
+        az_error.set_recommendation(
+            "To check existing issues, please visit: https://github.com/Azure/azure-cli/issues")
 
     if isinstance(az_error, azclierror.ResourceNotFoundError):
         exit_code = 3
@@ -308,7 +313,7 @@ def get_latest_from_github(package_path='azure-cli'):
 
 
 def _update_latest_from_github(versions):
-    if not check_connectivity(max_retries=0):
+    if not check_connectivity(url='https://raw.githubusercontent.com', max_retries=0):
         return versions, False
     success = True
     for pkg in ['azure-cli-core', 'azure-cli-telemetry']:
@@ -490,9 +495,9 @@ def show_updates(updates_available_components, only_show_when_updates_available=
             logger.warning('Unable to check if your CLI is up-to-date. Check your internet connection.')
     elif updates_available_components:  # pylint: disable=too-many-nested-blocks
         if in_cloud_console():
-            warning_msg = 'You have %i updates available. They will be updated with the next build of Cloud Shell.'
+            warning_msg = 'You have %i update(s) available. They will be updated with the next build of Cloud Shell.'
         else:
-            warning_msg = "You have %i updates available."
+            warning_msg = "You have %i update(s) available."
             if CLI_PACKAGE_NAME in updates_available_components:
                 warning_msg = "{} Consider updating your CLI installation with 'az upgrade'".format(warning_msg)
         logger.warning(warning_msg, len(updates_available_components))
@@ -525,6 +530,18 @@ def get_file_json(file_path, throw_on_empty=True, preserve_order=False):
     except CLIError as ex:
         # Reading file bypasses shell interpretation, so we discard the recommendation for shell quoting.
         raise CLIError("Failed to parse file '{}' with exception:\n{}".format(file_path, ex))
+
+
+def get_file_yaml(file_path, throw_on_empty=True):
+    content = read_file_content(file_path)
+    if not content:
+        if throw_on_empty:
+            raise CLIError("Failed to parse file '{}' with exception:\nNo content in the file.".format(file_path))
+        return None
+    try:
+        return yaml.safe_load(content)
+    except yaml.parser.ParserError as ex:
+        raise CLIError("Failed to parse file '{}' with exception:\n{}".format(file_path, ex)) from ex
 
 
 def read_file_content(file_path, allow_binary=False):

@@ -171,13 +171,6 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
         self._print_detailed_help(cli_name, help_file)
         from azure.cli.core.util import show_updates_available
         show_updates_available(new_line_after=True)
-        show_link = self.cli_ctx.config.getboolean('output', 'show_survey_link', True)
-        from azure.cli.core.commands.constants import (SURVEY_PROMPT_STYLED, UX_SURVEY_PROMPT_STYLED)
-        from azure.cli.core.style import print_styled_text
-        if show_link:
-            print_styled_text(SURVEY_PROMPT_STYLED)
-            if not nouns:
-                print_styled_text(UX_SURVEY_PROMPT_STYLED)
 
     def get_examples(self, command, parser, is_group):
         """Get examples of a certain command from the help file.

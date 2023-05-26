@@ -28,22 +28,23 @@ class EHNamespaceAppl(ScenarioTest):
             'appgroup2': self.create_random_name(prefix='app-group-nscli2', length=20),
             'appgroup3': self.create_random_name(prefix='app-group-nscli3', length=20),
             'appgroup4': self.create_random_name(prefix='app-group-nscli4', length=20),
-            'identifier1': 'SASKeyName=' + self.create_random_name(prefix='saskey', length=24),
-            'identifier2': 'SASKeyName=' + self.create_random_name(prefix='saskey', length=24),
-            'identifier3': 'SASKeyName=' + self.create_random_name(prefix='saskey', length=24)
+            'identifier1': 'NamespaceSASKeyName=' + self.create_random_name(prefix='saskey', length=24),
+            'identifier2': 'NamespaceSASKeyName=' + self.create_random_name(prefix='saskey', length=24),
+            'identifier3': 'NamespaceSASKeyName=' + self.create_random_name(prefix='saskey', length=24)
         })
         from azure.cli.core import CLIError
 
         self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --sku Premium')
-
-        AppGroup = self.cmd('eventhubs namespace application-group create --resource-group {rg} --namespace-name {namespacename} '
-                            '--name {appgroup1} --client-app-group-identifier {identifier1} --is-enabled true '
-                            '--throttling-policy-config name=policy1 rate-limit-threshold=10000 metric-id=IncomingBytes '
-                            '--throttling-policy-config name=policy2 rate-limit-threshold=15000 metric-id=outgoingMessages '
-                            '--throttling-policy-config name=policy3 rate-limit-threshold=10000 metric-id=IncomingMessages').get_output_in_json()
+        key = self.cmd('eventhubs namespace authorization-rule create --resource-group {rg} --namespace-name {namespacename} --name key1 --rights Send Listen').get_output_in_json()
+        self.kwargs.update({'id4': "NamespaceSASKeyName="+key['name']})
+        AppGroup = self.cmd('eventhubs namespace application-group create --resource-group {rg} --namespace-name {namespacename} ' +
+                            '--name {appgroup1} --client-app-group-identifier {id4} --is-enabled true ' +
+                            '--throttling-policy-config name=policy1 rate-limit-threshold=10000 metric-id=IncomingBytes ' +
+                            '--throttling-policy-config name=policy2 rate-limit-threshold=15000 metric-id=outgoingMessages ' +
+                            '--throttling-policy-config name=policy3 rate-limit-threshold=10000 metric-id=IncomingMessages ').get_output_in_json()
 
         self.assertEqual(self.kwargs['appgroup1'], AppGroup['name'])
-        self.assertEqual(self.kwargs['identifier1'], AppGroup['clientAppGroupIdentifier'])
+        self.assertEqual(self.kwargs['id4'], AppGroup['clientAppGroupIdentifier'])
         self.assertEqual(True, AppGroup['isEnabled'])
         n = [i for i in AppGroup['policies']]
         assert len(n) == 3
@@ -63,7 +64,7 @@ class EHNamespaceAppl(ScenarioTest):
             '--throttling-policy-config name=policy4 rate-limit-threshold=19000 metric-id=outgoingbytes').get_output_in_json()
 
         self.assertEqual(self.kwargs['appgroup1'], AppGroup['name'])
-        self.assertEqual(self.kwargs['identifier1'], AppGroup['clientAppGroupIdentifier'])
+        self.assertEqual(self.kwargs['id4'], AppGroup['clientAppGroupIdentifier'])
         self.assertEqual(True, AppGroup['isEnabled'])
         n = [i for i in AppGroup['policies']]
         assert len(n) == 4
@@ -83,10 +84,10 @@ class EHNamespaceAppl(ScenarioTest):
         AppGroup = self.cmd(
             'eventhubs namespace application-group policy remove --resource-group {rg} --namespace-name {namespacename} '
             '--name {appgroup1} '
-            '--throttling-policy-config name=policy4 rate-limit-threshold=19000 metric-id=OutgoingBytes').get_output_in_json()
+            '--policy name=policy4').get_output_in_json()
 
         self.assertEqual(self.kwargs['appgroup1'], AppGroup['name'])
-        self.assertEqual(self.kwargs['identifier1'], AppGroup['clientAppGroupIdentifier'])
+        self.assertEqual(self.kwargs['id4'], AppGroup['clientAppGroupIdentifier'])
         self.assertEqual(True, AppGroup['isEnabled'])
         n = [i for i in AppGroup['policies']]
         assert len(n) == 3
@@ -103,11 +104,11 @@ class EHNamespaceAppl(ScenarioTest):
         AppGroup = self.cmd(
             'eventhubs namespace application-group policy remove --resource-group {rg} --namespace-name {namespacename} '
             '--name {appgroup1} '
-            '--throttling-policy-config name=policy2 rate-limit-threshold=15000 metric-id=outgoingMessages '
-            '--throttling-policy-config name=policy3 rate-limit-threshold=10000 metric-id=IncomingMessages').get_output_in_json()
+            '--policy name=policy2 '
+            '--policy name=policy3 ').get_output_in_json()
 
         self.assertEqual(self.kwargs['appgroup1'], AppGroup['name'])
-        self.assertEqual(self.kwargs['identifier1'], AppGroup['clientAppGroupIdentifier'])
+        self.assertEqual(self.kwargs['id4'], AppGroup['clientAppGroupIdentifier'])
         self.assertEqual(True, AppGroup['isEnabled'])
         n = [i for i in AppGroup['policies']]
         assert len(n) == 1
@@ -122,7 +123,7 @@ class EHNamespaceAppl(ScenarioTest):
             '--throttling-policy-config name=policy3 rate-limit-threshold=12000 metric-id=IncomingMessages').get_output_in_json()
 
         self.assertEqual(self.kwargs['appgroup1'], AppGroup['name'])
-        self.assertEqual(self.kwargs['identifier1'], AppGroup['clientAppGroupIdentifier'])
+        self.assertEqual(self.kwargs['id4'], AppGroup['clientAppGroupIdentifier'])
         self.assertEqual(True, AppGroup['isEnabled'])
         n = [i for i in AppGroup['policies']]
         assert len(n) == 3
@@ -139,7 +140,7 @@ class EHNamespaceAppl(ScenarioTest):
         AppGroup = self.cmd('eventhubs namespace application-group show --resource-group {rg} --namespace-name {namespacename} --name {appgroup1}').get_output_in_json()
 
         self.assertEqual(self.kwargs['appgroup1'], AppGroup['name'])
-        self.assertEqual(self.kwargs['identifier1'], AppGroup['clientAppGroupIdentifier'])
+        self.assertEqual(self.kwargs['id4'], AppGroup['clientAppGroupIdentifier'])
         self.assertEqual(True, AppGroup['isEnabled'])
         n = [i for i in AppGroup['policies']]
         assert len(n) == 3
@@ -157,7 +158,7 @@ class EHNamespaceAppl(ScenarioTest):
                             '--is-enabled false').get_output_in_json()
 
         self.assertEqual(self.kwargs['appgroup1'], AppGroup['name'])
-        self.assertEqual(self.kwargs['identifier1'], AppGroup['clientAppGroupIdentifier'])
+        self.assertEqual(self.kwargs['id4'], AppGroup['clientAppGroupIdentifier'])
         self.assertEqual(False, AppGroup['isEnabled'])
         n = [i for i in AppGroup['policies']]
         assert len(n) == 3
@@ -176,7 +177,7 @@ class EHNamespaceAppl(ScenarioTest):
             '--is-enabled').get_output_in_json()
 
         self.assertEqual(self.kwargs['appgroup1'], AppGroup['name'])
-        self.assertEqual(self.kwargs['identifier1'], AppGroup['clientAppGroupIdentifier'])
+        self.assertEqual(self.kwargs['id4'], AppGroup['clientAppGroupIdentifier'])
         self.assertEqual(True, AppGroup['isEnabled'])
         n = [i for i in AppGroup['policies']]
         assert len(n) == 3
@@ -190,16 +191,19 @@ class EHNamespaceAppl(ScenarioTest):
         self.assertEqual('IncomingMessages', AppGroup['policies'][2]['metricId'])
         self.assertEqual(12000, AppGroup['policies'][2]['rateLimitThreshold'])
 
+        key5 = self.cmd(
+            'eventhubs namespace authorization-rule create --resource-group {rg} --namespace-name {namespacename} --name key5 --rights Send Listen').get_output_in_json()
+        self.kwargs.update({'id5': "NamespaceSASKeyName=" + key5['name']})
         AppGroup = self.cmd(
             'eventhubs namespace application-group create --resource-group {rg} --namespace-name {namespacename} '
-            '--name {appgroup2} --client-app-group-identifier {identifier2} '
+            '--name {appgroup2} --client-app-group-identifier {id5} '
             '--throttling-policy-config name=policy1 rate-limit-threshold=10000 metric-id=IncomingBytes '
             '--throttling-policy-config name=policy2 rate-limit-threshold=15000 metric-id=outgoingMessages '
             '--throttling-policy-config name=policy3 rate-limit-threshold=10000 metric-id=IncomingMessages '
             '--throttling-policy-config name=policy4 rate-limit-threshold=182000 metric-id=outgoingbytes').get_output_in_json()
 
         self.assertEqual(self.kwargs['appgroup2'], AppGroup['name'])
-        self.assertEqual(self.kwargs['identifier2'], AppGroup['clientAppGroupIdentifier'])
+        self.assertEqual(self.kwargs['id5'], AppGroup['clientAppGroupIdentifier'])
         self.assertEqual(True, AppGroup['isEnabled'])
         n = [i for i in AppGroup['policies']]
         assert len(n) == 4
@@ -216,21 +220,15 @@ class EHNamespaceAppl(ScenarioTest):
         self.assertEqual('OutgoingBytes', AppGroup['policies'][3]['metricId'])
         self.assertEqual(182000, AppGroup['policies'][3]['rateLimitThreshold'])
 
-        with self.assertRaisesRegex(CLIError, 'The following policy was not found: Name: policy4, RateLimitThreshold: 10000, MetricId: OutgoingBytes'):
+        with self.assertRaisesRegex(CLIError, 'The following policy was not found: Name: policy5'):
             self.cmd('eventhubs namespace application-group policy remove --resource-group {rg} --namespace-name {namespacename} --name {appgroup2} '
-                     '--throttling-policy-config name=policy4 rate-limit-threshold=10000 metric-id=outgoingbytes')
-
-        with self.assertRaisesRegex(CLIError, 'The following policy was not found: Name: policy4, RateLimitThreshold: 182000, MetricId: OutgoingMessages'):
-            self.cmd('eventhubs namespace application-group policy remove --resource-group {rg} --namespace-name {namespacename} --name {appgroup2} '
-                     '--throttling-policy-config name=policy4 rate-limit-threshold=182000 metric-id=outgoingmessages',
-                     checks=[
-                     ])
+                     '--policy name=policy5')
 
         AppGroup = self.cmd(
                 'eventhubs namespace application-group show --resource-group {rg} --namespace-name {namespacename} --name {appgroup2}').get_output_in_json()
 
         self.assertEqual(self.kwargs['appgroup2'], AppGroup['name'])
-        self.assertEqual(self.kwargs['identifier2'], AppGroup['clientAppGroupIdentifier'])
+        self.assertEqual(self.kwargs['id5'], AppGroup['clientAppGroupIdentifier'])
         self.assertEqual(True, AppGroup['isEnabled'])
         n = [i for i in AppGroup['policies']]
         assert len(n) == 4
@@ -250,10 +248,10 @@ class EHNamespaceAppl(ScenarioTest):
         AppGroup = self.cmd(
             'eventhubs namespace application-group policy remove --resource-group {rg} --namespace-name {namespacename} '
             '--name {appgroup2} '
-            '--throttling-policy-config name=policy4 rate-limit-threshold=182000 metric-id=OutgoingBytes').get_output_in_json()
+            '--policy name=policy4 ').get_output_in_json()
 
         self.assertEqual(self.kwargs['appgroup2'], AppGroup['name'])
-        self.assertEqual(self.kwargs['identifier2'], AppGroup['clientAppGroupIdentifier'])
+        self.assertEqual(self.kwargs['id5'], AppGroup['clientAppGroupIdentifier'])
         self.assertEqual(True, AppGroup['isEnabled'])
         n = [i for i in AppGroup['policies']]
         assert len(n) == 3
@@ -267,13 +265,17 @@ class EHNamespaceAppl(ScenarioTest):
         self.assertEqual('IncomingMessages', AppGroup['policies'][2]['metricId'])
         self.assertEqual(10000, AppGroup['policies'][2]['rateLimitThreshold'])
 
+        key6 = self.cmd(
+            'eventhubs namespace authorization-rule create --resource-group {rg} --namespace-name {namespacename} --name key6 --rights Send Listen').get_output_in_json()
+        self.kwargs.update({'id6': "NamespaceSASKeyName=" + key6['name']})
+
         AppGroup = self.cmd(
             'eventhubs namespace application-group create --resource-group {rg} --namespace-name {namespacename} '
-            '--name {appgroup3} --client-app-group-identifier {identifier3} '
+            '--name {appgroup3} --client-app-group-identifier {id6} '
             '--throttling-policy-config name=policy1 rate-limit-threshold=10000 metric-id=IncomingBytes').get_output_in_json()
 
         self.assertEqual(self.kwargs['appgroup3'], AppGroup['name'])
-        self.assertEqual(self.kwargs['identifier3'], AppGroup['clientAppGroupIdentifier'])
+        self.assertEqual(self.kwargs['id6'], AppGroup['clientAppGroupIdentifier'])
         self.assertEqual(True, AppGroup['isEnabled'])
         n = [i for i in AppGroup['policies']]
         assert len(n) == 1

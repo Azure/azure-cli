@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: ''
+    body: null
     headers:
       Accept:
       - application/json
@@ -9,16 +9,14 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - 0
+      - '0'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       User-Agent:
-      - python/3.9.5 (Windows-10-10.0.19044-SP0) msrest/0.7.0 msrest_azure/0.6.4 azure-keyvault/7.0
-        Azure-SDK-For-Python
-      accept-language:
-      - en-US
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: POST
-    uri: https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/create?api-version=7.0
+    uri: https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/create?api-version=7.4
   response:
     body:
       string: '{"error":{"code":"Unauthorized","message":"AKV10000: Request is missing
@@ -31,7 +29,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 04 Aug 2022 01:40:54 GMT
+      - Mon, 15 May 2023 12:51:53 GMT
       expires:
       - '-1'
       pragma:
@@ -39,25 +37,25 @@ interactions:
       strict-transport-security:
       - max-age=31536000;includeSubDomains
       www-authenticate:
-      - Bearer authorization="https://login.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+      - Bearer authorization="https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
         resource="https://vault.azure.net"
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=36.158.114.133;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=13.90.45.74;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.9.472.5
+      - 1.9.787.1
     status:
       code: 401
       message: Unauthorized
 - request:
     body: '{"policy": {"key_props": {"exportable": true, "kty": "RSA", "key_size":
       2048, "reuse_key": true}, "secret_props": {"contentType": "application/x-pkcs12"},
-      "x509_props": {"subject": "CN=CLIGetDefaultPolicy", "key_usage": ["cRLSign",
-      "dataEncipherment", "digitalSignature", "keyEncipherment", "keyAgreement", "keyCertSign"],
-      "validity_months": 12}, "lifetime_actions": [{"trigger": {"days_before_expiry":
+      "x509_props": {"subject": "CN=CLIGetDefaultPolicy", "sans": {}, "key_usage":
+      ["cRLSign", "dataEncipherment", "digitalSignature", "keyEncipherment", "keyAgreement",
+      "keyCertSign"], "validity_months": 12}, "lifetime_actions": [{"trigger": {"days_before_expiry":
       90}, "action": {"action_type": "AutoRenew"}}], "issuer": {"name": "Self"}},
       "attributes": {"enabled": true}}'
     headers:
@@ -68,21 +66,19 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '511'
+      - '523'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       User-Agent:
-      - python/3.9.5 (Windows-10-10.0.19044-SP0) msrest/0.7.0 msrest_azure/0.6.4 azure-keyvault/7.0
-        Azure-SDK-For-Python
-      accept-language:
-      - en-US
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: POST
-    uri: https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/create?api-version=7.0
+    uri: https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/create?api-version=7.4
   response:
     body:
-      string: '{"id":"https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/pending","issuer":{"name":"Self"},"csr":"MIICrjCCAZYCAQAwHjEcMBoGA1UEAxMTQ0xJR2V0RGVmYXVsdFBvbGljeTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANVOzGb7QImwE8uo9dxphMHoc9jDms3Fl/1NMLaPsGhKOE8OZ9UppHx9Uq/ONdwZXs9HyyXEjeUDR/v+vF+yQY/3ifX7gxp+SUubgbdmlFQkjbCf8/XJ8dg7DA/CsG/J/nsOVwKUEsSXE0sxOfNbsdzNow3AMDNDTCNKsrvOwK0dWhiSgNvqb7m4ppR7LjnavolGiC7nFqwjRPwW6xSRM3RbcwiyPW+thvqOScaX/kyAZ2cbauugWXVKQGVT30w03ePxn37YEueKGSPo1ML610up1fT3+n3aERXMx5/kRyEIDHXBAm6P4T5wbEIKz59UAmQwyonHTc97PhxIAukYvSECAwEAAaBLMEkGCSqGSIb3DQEJDjE8MDowDgYDVR0PAQH/BAQDAgG+MB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAJBgNVHRMEAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQAsZl78rFNbynt8J/jXSNu6z6VoIYmoiJAFHwRtzSOUUa9ntQ0rcFhqJGVtyMkSUhDQz90qd+GuenOjQ70PkcWB9xPov4DR+6zBbi7lP67udzyJHLhQ7YjBpU67+L6tNFQDIhHopqFT84hoWF5SvcNqgywgePMUalFs8id3Cc/s4p7bHGwfOvyeL6okyyzqgMbzM4opm0YgZ9ojbryieAiP3cGXcd957ZgaA3/Bf5AqdW4x8coDLNDGWgB7lVZEOBxbAJgZNmaxLcoFURtbUfKkh3o/CGkGduxRTtxXpXDASiY9YgI/ya5ljRTDk2jiHiklrQeux6MAFHUWCJgAxT41","cancellation_requested":false,"status":"inProgress","status_details":"Pending
+      string: '{"id":"https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/pending","issuer":{"name":"Self"},"csr":"MIICrjCCAZYCAQAwHjEcMBoGA1UEAxMTQ0xJR2V0RGVmYXVsdFBvbGljeTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMtA5jXQ5urJJZ4PTiraFIvXEfjvDUM2pg4zvrHShCM8wE2RXej1Jj9pJDhRQVqRoOFX3ZJ0/29aSfZAUo+0mwgU55jObt4RV00lBztOVJ24k9e6gaYbSH4BOzKmwr5EKdrqazpa8UmRT/aLRp5BQI0uzN60Hl3IfwGxR9k+kM82iqAAp8xjdbSf9Pod1Z4Owq8e7CRUM9F03eOvXCqLz/1aPcDUkP1X1pJPuryZI1k83UREYy5uBcohnuPXzoIhuV/VOJdhpdfeNohpElSpEU7Ah7Bm6ueHZb9Id53XTSwX2enVJ8KzqG8uXs8FJcp43G/OGNE3ewjVSjVqRGMDqgUCAwEAAaBLMEkGCSqGSIb3DQEJDjE8MDowDgYDVR0PAQH/BAQDAgG+MB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAJBgNVHRMEAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQB3hw1zn8H2YFk4/UfN/x3B3WGVka28qf7Gh2q5XNT/4UNL787p1Qv7kFc6EdXuoe4+BMm8Vs3Vtfic/X6Zve94t+UEAe1c2BUsdSbaIrYJCiGJxK7IeKmwy5ssI4MDKgUjoKz2HkuDhBoQ4Dop3K6/5sRRcy2L01WrXVEjxiCgZwk4YUB8mmY3ZGuUIPT02YQUlJBaJAcl6SDCyymtgvfeNv6UlcSpazwH8EL37S/QtPSMosR8dVw5HME2iEkHa+xwyleEUUPxie0j66q9QUemRVm8wzAHKsJdvF+5NA6X7caWpibxOc4jfkhPCFY+dTmvOIP4FacoJakNfAU5NoHX","cancellation_requested":false,"status":"inProgress","status_details":"Pending
         certificate created. Certificate request is in progress. This may take some
-        time based on the issuer provider. Please check again later.","request_id":"af83cb34f6224c5ba1f5ac70f7ed3401"}'
+        time based on the issuer provider. Please check again later.","request_id":"67070fe3e3464be08d16819a6d3c4694"}'
     headers:
       cache-control:
       - no-cache
@@ -91,11 +87,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 04 Aug 2022 01:40:56 GMT
+      - Mon, 15 May 2023 12:51:54 GMT
       expires:
       - '-1'
       location:
-      - https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/pending?api-version=7.0&request_id=af83cb34f6224c5ba1f5ac70f7ed3401
+      - https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/pending?api-version=7.4&request_id=67070fe3e3464be08d16819a6d3c4694
       pragma:
       - no-cache
       strict-transport-security:
@@ -103,11 +99,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=36.158.114.133;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=13.90.45.74;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.9.472.5
+      - 1.9.787.1
     status:
       code: 202
       message: Accepted
@@ -120,20 +116,16 @@ interactions:
       - gzip, deflate
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       User-Agent:
-      - python/3.9.5 (Windows-10-10.0.19044-SP0) msrest/0.7.0 msrest_azure/0.6.4 azure-keyvault/7.0
-        Azure-SDK-For-Python
-      accept-language:
-      - en-US
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/pending?api-version=7.0
+    uri: https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/pending?api-version=7.4
   response:
     body:
-      string: '{"id":"https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/pending","issuer":{"name":"Self"},"csr":"MIICrjCCAZYCAQAwHjEcMBoGA1UEAxMTQ0xJR2V0RGVmYXVsdFBvbGljeTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANVOzGb7QImwE8uo9dxphMHoc9jDms3Fl/1NMLaPsGhKOE8OZ9UppHx9Uq/ONdwZXs9HyyXEjeUDR/v+vF+yQY/3ifX7gxp+SUubgbdmlFQkjbCf8/XJ8dg7DA/CsG/J/nsOVwKUEsSXE0sxOfNbsdzNow3AMDNDTCNKsrvOwK0dWhiSgNvqb7m4ppR7LjnavolGiC7nFqwjRPwW6xSRM3RbcwiyPW+thvqOScaX/kyAZ2cbauugWXVKQGVT30w03ePxn37YEueKGSPo1ML610up1fT3+n3aERXMx5/kRyEIDHXBAm6P4T5wbEIKz59UAmQwyonHTc97PhxIAukYvSECAwEAAaBLMEkGCSqGSIb3DQEJDjE8MDowDgYDVR0PAQH/BAQDAgG+MB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAJBgNVHRMEAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQAsZl78rFNbynt8J/jXSNu6z6VoIYmoiJAFHwRtzSOUUa9ntQ0rcFhqJGVtyMkSUhDQz90qd+GuenOjQ70PkcWB9xPov4DR+6zBbi7lP67udzyJHLhQ7YjBpU67+L6tNFQDIhHopqFT84hoWF5SvcNqgywgePMUalFs8id3Cc/s4p7bHGwfOvyeL6okyyzqgMbzM4opm0YgZ9ojbryieAiP3cGXcd957ZgaA3/Bf5AqdW4x8coDLNDGWgB7lVZEOBxbAJgZNmaxLcoFURtbUfKkh3o/CGkGduxRTtxXpXDASiY9YgI/ya5ljRTDk2jiHiklrQeux6MAFHUWCJgAxT41","cancellation_requested":false,"status":"inProgress","status_details":"Pending
+      string: '{"id":"https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/pending","issuer":{"name":"Self"},"csr":"MIICrjCCAZYCAQAwHjEcMBoGA1UEAxMTQ0xJR2V0RGVmYXVsdFBvbGljeTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMtA5jXQ5urJJZ4PTiraFIvXEfjvDUM2pg4zvrHShCM8wE2RXej1Jj9pJDhRQVqRoOFX3ZJ0/29aSfZAUo+0mwgU55jObt4RV00lBztOVJ24k9e6gaYbSH4BOzKmwr5EKdrqazpa8UmRT/aLRp5BQI0uzN60Hl3IfwGxR9k+kM82iqAAp8xjdbSf9Pod1Z4Owq8e7CRUM9F03eOvXCqLz/1aPcDUkP1X1pJPuryZI1k83UREYy5uBcohnuPXzoIhuV/VOJdhpdfeNohpElSpEU7Ah7Bm6ueHZb9Id53XTSwX2enVJ8KzqG8uXs8FJcp43G/OGNE3ewjVSjVqRGMDqgUCAwEAAaBLMEkGCSqGSIb3DQEJDjE8MDowDgYDVR0PAQH/BAQDAgG+MB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAJBgNVHRMEAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQB3hw1zn8H2YFk4/UfN/x3B3WGVka28qf7Gh2q5XNT/4UNL787p1Qv7kFc6EdXuoe4+BMm8Vs3Vtfic/X6Zve94t+UEAe1c2BUsdSbaIrYJCiGJxK7IeKmwy5ssI4MDKgUjoKz2HkuDhBoQ4Dop3K6/5sRRcy2L01WrXVEjxiCgZwk4YUB8mmY3ZGuUIPT02YQUlJBaJAcl6SDCyymtgvfeNv6UlcSpazwH8EL37S/QtPSMosR8dVw5HME2iEkHa+xwyleEUUPxie0j66q9QUemRVm8wzAHKsJdvF+5NA6X7caWpibxOc4jfkhPCFY+dTmvOIP4FacoJakNfAU5NoHX","cancellation_requested":false,"status":"inProgress","status_details":"Pending
         certificate created. Certificate request is in progress. This may take some
-        time based on the issuer provider. Please check again later.","request_id":"af83cb34f6224c5ba1f5ac70f7ed3401"}'
+        time based on the issuer provider. Please check again later.","request_id":"67070fe3e3464be08d16819a6d3c4694"}'
     headers:
       cache-control:
       - no-cache
@@ -142,7 +134,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 04 Aug 2022 01:40:58 GMT
+      - Mon, 15 May 2023 12:51:54 GMT
       expires:
       - '-1'
       pragma:
@@ -152,11 +144,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=36.158.114.133;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=13.90.45.74;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.9.472.5
+      - 1.9.787.1
     status:
       code: 200
       message: OK
@@ -169,18 +161,14 @@ interactions:
       - gzip, deflate
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       User-Agent:
-      - python/3.9.5 (Windows-10-10.0.19044-SP0) msrest/0.7.0 msrest_azure/0.6.4 azure-keyvault/7.0
-        Azure-SDK-For-Python
-      accept-language:
-      - en-US
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/pending?api-version=7.0
+    uri: https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/pending?api-version=7.4
   response:
     body:
-      string: '{"id":"https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/pending","issuer":{"name":"Self"},"csr":"MIICrjCCAZYCAQAwHjEcMBoGA1UEAxMTQ0xJR2V0RGVmYXVsdFBvbGljeTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANVOzGb7QImwE8uo9dxphMHoc9jDms3Fl/1NMLaPsGhKOE8OZ9UppHx9Uq/ONdwZXs9HyyXEjeUDR/v+vF+yQY/3ifX7gxp+SUubgbdmlFQkjbCf8/XJ8dg7DA/CsG/J/nsOVwKUEsSXE0sxOfNbsdzNow3AMDNDTCNKsrvOwK0dWhiSgNvqb7m4ppR7LjnavolGiC7nFqwjRPwW6xSRM3RbcwiyPW+thvqOScaX/kyAZ2cbauugWXVKQGVT30w03ePxn37YEueKGSPo1ML610up1fT3+n3aERXMx5/kRyEIDHXBAm6P4T5wbEIKz59UAmQwyonHTc97PhxIAukYvSECAwEAAaBLMEkGCSqGSIb3DQEJDjE8MDowDgYDVR0PAQH/BAQDAgG+MB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAJBgNVHRMEAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQAsZl78rFNbynt8J/jXSNu6z6VoIYmoiJAFHwRtzSOUUa9ntQ0rcFhqJGVtyMkSUhDQz90qd+GuenOjQ70PkcWB9xPov4DR+6zBbi7lP67udzyJHLhQ7YjBpU67+L6tNFQDIhHopqFT84hoWF5SvcNqgywgePMUalFs8id3Cc/s4p7bHGwfOvyeL6okyyzqgMbzM4opm0YgZ9ojbryieAiP3cGXcd957ZgaA3/Bf5AqdW4x8coDLNDGWgB7lVZEOBxbAJgZNmaxLcoFURtbUfKkh3o/CGkGduxRTtxXpXDASiY9YgI/ya5ljRTDk2jiHiklrQeux6MAFHUWCJgAxT41","cancellation_requested":false,"status":"completed","target":"https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003","request_id":"af83cb34f6224c5ba1f5ac70f7ed3401"}'
+      string: '{"id":"https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/pending","issuer":{"name":"Self"},"csr":"MIICrjCCAZYCAQAwHjEcMBoGA1UEAxMTQ0xJR2V0RGVmYXVsdFBvbGljeTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMtA5jXQ5urJJZ4PTiraFIvXEfjvDUM2pg4zvrHShCM8wE2RXej1Jj9pJDhRQVqRoOFX3ZJ0/29aSfZAUo+0mwgU55jObt4RV00lBztOVJ24k9e6gaYbSH4BOzKmwr5EKdrqazpa8UmRT/aLRp5BQI0uzN60Hl3IfwGxR9k+kM82iqAAp8xjdbSf9Pod1Z4Owq8e7CRUM9F03eOvXCqLz/1aPcDUkP1X1pJPuryZI1k83UREYy5uBcohnuPXzoIhuV/VOJdhpdfeNohpElSpEU7Ah7Bm6ueHZb9Id53XTSwX2enVJ8KzqG8uXs8FJcp43G/OGNE3ewjVSjVqRGMDqgUCAwEAAaBLMEkGCSqGSIb3DQEJDjE8MDowDgYDVR0PAQH/BAQDAgG+MB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAJBgNVHRMEAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQB3hw1zn8H2YFk4/UfN/x3B3WGVka28qf7Gh2q5XNT/4UNL787p1Qv7kFc6EdXuoe4+BMm8Vs3Vtfic/X6Zve94t+UEAe1c2BUsdSbaIrYJCiGJxK7IeKmwy5ssI4MDKgUjoKz2HkuDhBoQ4Dop3K6/5sRRcy2L01WrXVEjxiCgZwk4YUB8mmY3ZGuUIPT02YQUlJBaJAcl6SDCyymtgvfeNv6UlcSpazwH8EL37S/QtPSMosR8dVw5HME2iEkHa+xwyleEUUPxie0j66q9QUemRVm8wzAHKsJdvF+5NA6X7caWpibxOc4jfkhPCFY+dTmvOIP4FacoJakNfAU5NoHX","cancellation_requested":false,"status":"completed","target":"https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003","request_id":"67070fe3e3464be08d16819a6d3c4694"}'
     headers:
       cache-control:
       - no-cache
@@ -189,7 +177,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 04 Aug 2022 01:41:09 GMT
+      - Mon, 15 May 2023 12:51:59 GMT
       expires:
       - '-1'
       pragma:
@@ -199,11 +187,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=36.158.114.133;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=13.90.45.74;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.9.472.5
+      - 1.9.787.1
     status:
       code: 200
       message: OK
@@ -216,27 +204,23 @@ interactions:
       - gzip, deflate
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       User-Agent:
-      - python/3.9.5 (Windows-10-10.0.19044-SP0) msrest/0.7.0 msrest_azure/0.6.4 azure-keyvault/7.0
-        Azure-SDK-For-Python
-      accept-language:
-      - en-US
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/?api-version=7.0
+    uri: https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/?api-version=7.4
   response:
     body:
-      string: '{"id":"https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/f7c70e9a0eca45669345726643069fa5","kid":"https://sfrp-cli-kv-000002.vault.azure.net/keys/sfrp-cli-000003/f7c70e9a0eca45669345726643069fa5","sid":"https://sfrp-cli-kv-000002.vault.azure.net/secrets/sfrp-cli-000003/f7c70e9a0eca45669345726643069fa5","x5t":"YzFSaCB4i-oOH2hEIOpO5evgLxw","cer":"MIIDQjCCAiqgAwIBAgIQGQQnkHtbRKOzSIjocJTW5jANBgkqhkiG9w0BAQsFADAeMRwwGgYDVQQDExNDTElHZXREZWZhdWx0UG9saWN5MB4XDTIyMDgwNDAxMzEwNFoXDTIzMDgwNDAxNDEwNFowHjEcMBoGA1UEAxMTQ0xJR2V0RGVmYXVsdFBvbGljeTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANVOzGb7QImwE8uo9dxphMHoc9jDms3Fl/1NMLaPsGhKOE8OZ9UppHx9Uq/ONdwZXs9HyyXEjeUDR/v+vF+yQY/3ifX7gxp+SUubgbdmlFQkjbCf8/XJ8dg7DA/CsG/J/nsOVwKUEsSXE0sxOfNbsdzNow3AMDNDTCNKsrvOwK0dWhiSgNvqb7m4ppR7LjnavolGiC7nFqwjRPwW6xSRM3RbcwiyPW+thvqOScaX/kyAZ2cbauugWXVKQGVT30w03ePxn37YEueKGSPo1ML610up1fT3+n3aERXMx5/kRyEIDHXBAm6P4T5wbEIKz59UAmQwyonHTc97PhxIAukYvSECAwEAAaN8MHowDgYDVR0PAQH/BAQDAgG+MAkGA1UdEwQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMB8GA1UdIwQYMBaAFHgtj7+GHyDIAS+smNPuizSQgVh7MB0GA1UdDgQWBBR4LY+/hh8gyAEvrJjT7os0kIFYezANBgkqhkiG9w0BAQsFAAOCAQEACCqM1v0n2d8AfvZ+GOwWOpXoOu5nO4jTXXBZtrs1Z8h63GSJcjdg0RQYqAzwQ0z75gsoAxKVyCPGX6ElaXc7qU3ahg9zXL3x78wcJsZrIvZPVsukNUUEL95T51mxEqR+xIT5MPQwc9mFUfW+mAZ/4QlUV7+ih7BpCtoUcQwnCqrVgb6Fbpsl036PC4jh2NSK1Yr2muejBtpanUYaw0TSWKRyA3xKP9BEaCtu/Z4bmTyLq39VH+2rKxmLwnM/zPXOcr18nGxUeEoPp1FJOr98jz/Q1ZRk+LeAt4qp4zkJrcDSedv1tPk/ZH7jAWkgwN87g3ervkOUBS2LUOcWbCfMdg==","attributes":{"enabled":true,"nbf":1659576664,"exp":1691113264,"created":1659577264,"updated":1659577264,"recoveryLevel":"CustomizedRecoverable+Purgeable"},"policy":{"id":"https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/policy","key_props":{"exportable":true,"kty":"RSA","key_size":2048,"reuse_key":true},"secret_props":{"contentType":"application/x-pkcs12"},"x509_props":{"subject":"CN=CLIGetDefaultPolicy","ekus":["1.3.6.1.5.5.7.3.1","1.3.6.1.5.5.7.3.2"],"key_usage":["cRLSign","dataEncipherment","digitalSignature","keyAgreement","keyCertSign","keyEncipherment"],"validity_months":12,"basic_constraints":{"ca":false}},"lifetime_actions":[{"trigger":{"days_before_expiry":90},"action":{"action_type":"AutoRenew"}}],"issuer":{"name":"Self"},"attributes":{"enabled":true,"created":1659577257,"updated":1659577257}},"pending":{"id":"https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/pending"}}'
+      string: '{"id":"https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/a3edab8a2fc14e51b58fb12ed71a64b0","kid":"https://sfrp-cli-kv-000002.vault.azure.net/keys/sfrp-cli-000003/a3edab8a2fc14e51b58fb12ed71a64b0","sid":"https://sfrp-cli-kv-000002.vault.azure.net/secrets/sfrp-cli-000003/a3edab8a2fc14e51b58fb12ed71a64b0","x5t":"1uoVwH5EVF3jK0YSwrk7TEnH7Bc","cer":"MIIDQjCCAiqgAwIBAgIQaUGsmi6mSBOM1Yk/wdbE3DANBgkqhkiG9w0BAQsFADAeMRwwGgYDVQQDExNDTElHZXREZWZhdWx0UG9saWN5MB4XDTIzMDUxNTEyNDE1NVoXDTI0MDUxNTEyNTE1NVowHjEcMBoGA1UEAxMTQ0xJR2V0RGVmYXVsdFBvbGljeTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMtA5jXQ5urJJZ4PTiraFIvXEfjvDUM2pg4zvrHShCM8wE2RXej1Jj9pJDhRQVqRoOFX3ZJ0/29aSfZAUo+0mwgU55jObt4RV00lBztOVJ24k9e6gaYbSH4BOzKmwr5EKdrqazpa8UmRT/aLRp5BQI0uzN60Hl3IfwGxR9k+kM82iqAAp8xjdbSf9Pod1Z4Owq8e7CRUM9F03eOvXCqLz/1aPcDUkP1X1pJPuryZI1k83UREYy5uBcohnuPXzoIhuV/VOJdhpdfeNohpElSpEU7Ah7Bm6ueHZb9Id53XTSwX2enVJ8KzqG8uXs8FJcp43G/OGNE3ewjVSjVqRGMDqgUCAwEAAaN8MHowDgYDVR0PAQH/BAQDAgG+MAkGA1UdEwQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMB8GA1UdIwQYMBaAFCs53oMp2acg/WOKuEe8wVaGOl7VMB0GA1UdDgQWBBQrOd6DKdmnIP1jirhHvMFWhjpe1TANBgkqhkiG9w0BAQsFAAOCAQEAPmLqaGvxpQLzPKDHapby8fClAd+HQoJ+72r2rGM9E2kqUyGJn90pXlaQAEiLdXeCABBJ7IrW8LizCukLX3X4i82Jh/NfpMN+AmnxBRN+Tl/Y/C63YBgrjMWJnXZBWJpc+V+X5vJ6aKqroErxxEhRDWE7NJTKovfOkdEGV/fpAHmnhfzxN6vs2+hpRmI3VXKa4hbHkDDDOPfkEghXlLUyFLE5U3EDEjnc9hxblvl0Z5eHyRqBab8YsHV8C/vRDyySCUcq87wGRsMaDfhDyS9HKOtHm4v0CerdV4ZmvWxJc933Qx7747/6oGOONFCOldt0CefUKNi0+e0NH5kK+EJckQ==","attributes":{"enabled":true,"nbf":1684154515,"exp":1715777515,"created":1684155116,"updated":1684155116,"recoveryLevel":"CustomizedRecoverable+Purgeable","recoverableDays":7},"policy":{"id":"https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/policy","key_props":{"exportable":true,"kty":"RSA","key_size":2048,"reuse_key":true},"secret_props":{"contentType":"application/x-pkcs12"},"x509_props":{"subject":"CN=CLIGetDefaultPolicy","sans":{},"ekus":["1.3.6.1.5.5.7.3.1","1.3.6.1.5.5.7.3.2"],"key_usage":["cRLSign","dataEncipherment","digitalSignature","keyAgreement","keyCertSign","keyEncipherment"],"validity_months":12,"basic_constraints":{"ca":false}},"lifetime_actions":[{"trigger":{"days_before_expiry":90},"action":{"action_type":"AutoRenew"}}],"issuer":{"name":"Self"},"attributes":{"enabled":true,"created":1684155115,"updated":1684155115}},"pending":{"id":"https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/pending"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2429'
+      - '2459'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 04 Aug 2022 01:41:10 GMT
+      - Mon, 15 May 2023 12:51:59 GMT
       expires:
       - '-1'
       pragma:
@@ -246,11 +230,97 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=36.158.114.133;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=13.90.45.74;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.9.472.5
+      - 1.9.787.1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/pending?api-version=7.4
+  response:
+    body:
+      string: '{"id":"https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/pending","issuer":{"name":"Self"},"csr":"MIICrjCCAZYCAQAwHjEcMBoGA1UEAxMTQ0xJR2V0RGVmYXVsdFBvbGljeTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMtA5jXQ5urJJZ4PTiraFIvXEfjvDUM2pg4zvrHShCM8wE2RXej1Jj9pJDhRQVqRoOFX3ZJ0/29aSfZAUo+0mwgU55jObt4RV00lBztOVJ24k9e6gaYbSH4BOzKmwr5EKdrqazpa8UmRT/aLRp5BQI0uzN60Hl3IfwGxR9k+kM82iqAAp8xjdbSf9Pod1Z4Owq8e7CRUM9F03eOvXCqLz/1aPcDUkP1X1pJPuryZI1k83UREYy5uBcohnuPXzoIhuV/VOJdhpdfeNohpElSpEU7Ah7Bm6ueHZb9Id53XTSwX2enVJ8KzqG8uXs8FJcp43G/OGNE3ewjVSjVqRGMDqgUCAwEAAaBLMEkGCSqGSIb3DQEJDjE8MDowDgYDVR0PAQH/BAQDAgG+MB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAJBgNVHRMEAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQB3hw1zn8H2YFk4/UfN/x3B3WGVka28qf7Gh2q5XNT/4UNL787p1Qv7kFc6EdXuoe4+BMm8Vs3Vtfic/X6Zve94t+UEAe1c2BUsdSbaIrYJCiGJxK7IeKmwy5ssI4MDKgUjoKz2HkuDhBoQ4Dop3K6/5sRRcy2L01WrXVEjxiCgZwk4YUB8mmY3ZGuUIPT02YQUlJBaJAcl6SDCyymtgvfeNv6UlcSpazwH8EL37S/QtPSMosR8dVw5HME2iEkHa+xwyleEUUPxie0j66q9QUemRVm8wzAHKsJdvF+5NA6X7caWpibxOc4jfkhPCFY+dTmvOIP4FacoJakNfAU5NoHX","cancellation_requested":false,"status":"completed","target":"https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003","request_id":"67070fe3e3464be08d16819a6d3c4694"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1225'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 15 May 2023 12:52:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=13.90.45.74;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.9.787.1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azsdk-python-keyvault-certificates/4.7.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/?api-version=7.4
+  response:
+    body:
+      string: '{"id":"https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/a3edab8a2fc14e51b58fb12ed71a64b0","kid":"https://sfrp-cli-kv-000002.vault.azure.net/keys/sfrp-cli-000003/a3edab8a2fc14e51b58fb12ed71a64b0","sid":"https://sfrp-cli-kv-000002.vault.azure.net/secrets/sfrp-cli-000003/a3edab8a2fc14e51b58fb12ed71a64b0","x5t":"1uoVwH5EVF3jK0YSwrk7TEnH7Bc","cer":"MIIDQjCCAiqgAwIBAgIQaUGsmi6mSBOM1Yk/wdbE3DANBgkqhkiG9w0BAQsFADAeMRwwGgYDVQQDExNDTElHZXREZWZhdWx0UG9saWN5MB4XDTIzMDUxNTEyNDE1NVoXDTI0MDUxNTEyNTE1NVowHjEcMBoGA1UEAxMTQ0xJR2V0RGVmYXVsdFBvbGljeTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMtA5jXQ5urJJZ4PTiraFIvXEfjvDUM2pg4zvrHShCM8wE2RXej1Jj9pJDhRQVqRoOFX3ZJ0/29aSfZAUo+0mwgU55jObt4RV00lBztOVJ24k9e6gaYbSH4BOzKmwr5EKdrqazpa8UmRT/aLRp5BQI0uzN60Hl3IfwGxR9k+kM82iqAAp8xjdbSf9Pod1Z4Owq8e7CRUM9F03eOvXCqLz/1aPcDUkP1X1pJPuryZI1k83UREYy5uBcohnuPXzoIhuV/VOJdhpdfeNohpElSpEU7Ah7Bm6ueHZb9Id53XTSwX2enVJ8KzqG8uXs8FJcp43G/OGNE3ewjVSjVqRGMDqgUCAwEAAaN8MHowDgYDVR0PAQH/BAQDAgG+MAkGA1UdEwQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMB8GA1UdIwQYMBaAFCs53oMp2acg/WOKuEe8wVaGOl7VMB0GA1UdDgQWBBQrOd6DKdmnIP1jirhHvMFWhjpe1TANBgkqhkiG9w0BAQsFAAOCAQEAPmLqaGvxpQLzPKDHapby8fClAd+HQoJ+72r2rGM9E2kqUyGJn90pXlaQAEiLdXeCABBJ7IrW8LizCukLX3X4i82Jh/NfpMN+AmnxBRN+Tl/Y/C63YBgrjMWJnXZBWJpc+V+X5vJ6aKqroErxxEhRDWE7NJTKovfOkdEGV/fpAHmnhfzxN6vs2+hpRmI3VXKa4hbHkDDDOPfkEghXlLUyFLE5U3EDEjnc9hxblvl0Z5eHyRqBab8YsHV8C/vRDyySCUcq87wGRsMaDfhDyS9HKOtHm4v0CerdV4ZmvWxJc933Qx7747/6oGOONFCOldt0CefUKNi0+e0NH5kK+EJckQ==","attributes":{"enabled":true,"nbf":1684154515,"exp":1715777515,"created":1684155116,"updated":1684155116,"recoveryLevel":"CustomizedRecoverable+Purgeable","recoverableDays":7},"policy":{"id":"https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/policy","key_props":{"exportable":true,"kty":"RSA","key_size":2048,"reuse_key":true},"secret_props":{"contentType":"application/x-pkcs12"},"x509_props":{"subject":"CN=CLIGetDefaultPolicy","sans":{},"ekus":["1.3.6.1.5.5.7.3.1","1.3.6.1.5.5.7.3.2"],"key_usage":["cRLSign","dataEncipherment","digitalSignature","keyAgreement","keyCertSign","keyEncipherment"],"validity_months":12,"basic_constraints":{"ca":false}},"lifetime_actions":[{"trigger":{"days_before_expiry":90},"action":{"action_type":"AutoRenew"}}],"issuer":{"name":"Self"},"attributes":{"enabled":true,"created":1684155115,"updated":1684155115}},"pending":{"id":"https://sfrp-cli-kv-000002.vault.azure.net/certificates/sfrp-cli-000003/pending"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2459'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 15 May 2023 12:52:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=13.90.45.74;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.9.787.1
     status:
       code: 200
       message: OK
@@ -268,21 +338,22 @@ interactions:
       ParameterSetName:
       - -g -c -l --secret-identifier --vm-password --cluster-size
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-08-04T01:40:02Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_create_cluster_with_separate_kv","date":"2023-05-15T12:51:18Z","module":"servicefabric"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '310'
+      - '381'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 04 Aug 2022 01:41:12 GMT
+      - Mon, 15 May 2023 12:52:06 GMT
       expires:
       - '-1'
       pragma:
@@ -310,21 +381,22 @@ interactions:
       ParameterSetName:
       - -g -c -l --secret-identifier --vm-password --cluster-size
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-08-04T01:40:02Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_create_cluster_with_separate_kv","date":"2023-05-15T12:51:18Z","module":"servicefabric"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '310'
+      - '381'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 04 Aug 2022 01:41:13 GMT
+      - Mon, 15 May 2023 12:52:06 GMT
       expires:
       - '-1'
       pragma:
@@ -352,21 +424,22 @@ interactions:
       ParameterSetName:
       - -g -c -l --secret-identifier --vm-password --cluster-size
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-azure-mgmt-keyvault/10.2.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.KeyVault%2Fvaults%27&api-version=2015-11-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.KeyVault/vaults/bez-kv","name":"bez-kv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.KeyVault/vaults/bez-kv0630","name":"bez-kv0630","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.KeyVault/vaults/bez-kv063001","name":"bez-kv063001","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.KeyVault/vaults/bez-kv0705","name":"bez-kv0705","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_identityb4ttxwi727tvr5ppsqlxftzn6wwm7annl5nh6i7naequktbcwr3nefx/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-t4e7xo","name":"cli-test-keyvault-t4e7xo","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg2tu54m7kgsxyuqndqlrgo2texbmeepwaypybplkpwcdxd7rs6fls5v6feiozll5wo/providers/Microsoft.KeyVault/vaults/sfrp-cli-kv-23iqy6vz22mq","name":"sfrp-cli-kv-23iqy6vz22mq","type":"Microsoft.KeyVault/vaults","location":"eastasia","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/sfrp-cli-kv-000002","name":"sfrp-cli-kv-000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hang-rg/providers/Microsoft.KeyVault/vaults/hangkey","name":"hangkey","type":"Microsoft.KeyVault/vaults","location":"koreasouth","tags":{"kk":"kk"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/python-sdk-test/providers/Microsoft.KeyVault/vaults/python-devops-key","name":"python-devops-key","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/python-sdk-test/providers/Microsoft.KeyVault/vaults/SDKAutoPipelineSecrets","name":"SDKAutoPipelineSecrets","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yishitest/providers/Microsoft.KeyVault/vaults/ystestkv","name":"ystestkv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzurePowerShellLiveTest/providers/Microsoft.KeyVault/vaults/LiveTestKeyVault","name":"LiveTestKeyVault","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.KeyVault/vaults/bez-kv","name":"bez-kv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bez-rg/providers/Microsoft.KeyVault/vaults/bez-kv-test","name":"bez-kv-test","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/sfrp-cli-kv-000002","name":"sfrp-cli-kv-000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgs7wvhgnbjhfwnzpr63eok2atrawltomjxem3phqclz7uxugxfkdtri63e2rafmaqa/providers/Microsoft.KeyVault/vaults/sfrp-cli-kv-se33ee2xxylt","name":"sfrp-cli-kv-se33ee2xxylt","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hang-rg/providers/Microsoft.KeyVault/vaults/hangkey","name":"hangkey","type":"Microsoft.KeyVault/vaults","location":"koreasouth","tags":{"kk":"kk","zz":"kk","--kk":"zz"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hang-rg/providers/Microsoft.KeyVault/vaults/similar0327002194","name":"similar0327002194","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/nori-rg/providers/Microsoft.KeyVault/vaults/nori-kv765","name":"nori-kv765","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shiying-rg/providers/Microsoft.KeyVault/vaults/shiyingkv","name":"shiyingkv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testkvv2rg/providers/Microsoft.KeyVault/vaults/testkvtrack2","name":"testkvtrack2","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yishitest/providers/Microsoft.KeyVault/vaults/ystestkv","name":"ystestkv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2657'
+      - '2578'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 04 Aug 2022 01:41:14 GMT
+      - Mon, 15 May 2023 12:52:06 GMT
       expires:
       - '-1'
       pragma:
@@ -394,21 +467,22 @@ interactions:
       ParameterSetName:
       - -g -c -l --secret-identifier --vm-password --cluster-size
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-keyvault/9.3.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-azure-mgmt-keyvault/10.2.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/sfrp-cli-kv-000002?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/sfrp-cli-kv-000002?api-version=2023-02-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/sfrp-cli-kv-000002","name":"sfrp-cli-kv-000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"systemData":{"createdBy":"v-taoxuzeng@microsoft.com","createdByType":"User","createdAt":"2022-08-04T01:40:09.578Z","lastModifiedBy":"v-taoxuzeng@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-08-04T01:40:09.578Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"674368bb-7eaa-4100-aef7-138f65f50648","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":true,"enabledForTemplateDeployment":true,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://sfrp-cli-kv-000002.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/sfrp-cli-kv-000002","name":"sfrp-cli-kv-000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"systemData":{"createdBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","createdByType":"User","createdAt":"2023-05-15T12:51:22.028Z","lastModifiedBy":"azureclilivetest@azuresdkteam.onmicrosoft.com","lastModifiedByType":"User","lastModifiedAt":"2023-05-15T12:51:22.028Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"6b30bdc6-696a-46fb-82d7-739c2fb147b7","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":true,"enabledForTemplateDeployment":true,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://sfrp-cli-kv-000002.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1028'
+      - '1068'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 04 Aug 2022 01:41:15 GMT
+      - Mon, 15 May 2023 12:52:07 GMT
       expires:
       - '-1'
       pragma:
@@ -426,12 +500,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.5.468.0
+      - 1.5.770.0
     status:
       code: 200
       message: OK
 - request:
-    body: null
+    body: ''
     headers:
       Accept:
       - application/json
@@ -439,18 +513,75 @@ interactions:
       - gzip, deflate
       Connection:
       - keep-alive
+      Content-Length:
+      - 0
       Content-Type:
       - application/json; charset=utf-8
       User-Agent:
-      - python/3.9.5 (Windows-10-10.0.19044-SP0) msrest/0.7.0 msrest_azure/0.6.4 azure-keyvault/7.0
+      - python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31) msrest/0.7.1
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0 msrest_azure/0.6.4 azure-keyvault/7.0
         Azure-SDK-For-Python
       accept-language:
       - en-US
     method: GET
-    uri: https://sfrp-cli-kv-000002.vault.azure.net/secrets/sfrp-cli-000003/f7c70e9a0eca45669345726643069fa5?api-version=7.0
+    uri: https://sfrp-cli-kv-000002.vault.azure.net/secrets/sfrp-cli-000003/a3edab8a2fc14e51b58fb12ed71a64b0?api-version=7.0
   response:
     body:
-      string: '{"value":"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","contentType":"application/x-pkcs12","id":"https://sfrp-cli-kv-000002.vault.azure.net/secrets/sfrp-cli-000003/f7c70e9a0eca45669345726643069fa5","managed":true,"attributes":{"enabled":true,"nbf":1659576664,"exp":1691113264,"created":1659577264,"updated":1659577264,"recoveryLevel":"CustomizedRecoverable+Purgeable"},"kid":"https://sfrp-cli-kv-000002.vault.azure.net/keys/sfrp-cli-000003/f7c70e9a0eca45669345726643069fa5"}'
+      string: '{"error":{"code":"Unauthorized","message":"AKV10000: Request is missing
+        a Bearer or PoP token."}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '97'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 15 May 2023 12:52:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      www-authenticate:
+      - Bearer authorization="https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+        resource="https://vault.azure.net"
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=13.90.45.74;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.9.787.1
+    status:
+      code: 401
+      message: Unauthorized
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - 0
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31) msrest/0.7.1
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0 msrest_azure/0.6.4 azure-keyvault/7.0
+        Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://sfrp-cli-kv-000002.vault.azure.net/secrets/sfrp-cli-000003/a3edab8a2fc14e51b58fb12ed71a64b0?api-version=7.0
+  response:
+    body:
+      string: '{"value":"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","contentType":"application/x-pkcs12","id":"https://sfrp-cli-kv-000002.vault.azure.net/secrets/sfrp-cli-000003/a3edab8a2fc14e51b58fb12ed71a64b0","managed":true,"attributes":{"enabled":true,"nbf":1684154515,"exp":1715777515,"created":1684155116,"updated":1684155116,"recoveryLevel":"CustomizedRecoverable+Purgeable"},"kid":"https://sfrp-cli-kv-000002.vault.azure.net/keys/sfrp-cli-000003/a3edab8a2fc14e51b58fb12ed71a64b0"}'
     headers:
       cache-control:
       - no-cache
@@ -459,7 +590,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 04 Aug 2022 01:41:17 GMT
+      - Mon, 15 May 2023 12:52:07 GMT
       expires:
       - '-1'
       pragma:
@@ -469,11 +600,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=36.158.114.133;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=13.90.45.74;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.9.472.5
+      - 1.9.787.1
     status:
       code: 200
       message: OK
@@ -685,9 +816,9 @@ interactions:
       "Standard_D2_V2"}, "vmImageOffer": {"value": "WindowsServer"}, "vmImageSku":
       {"value": "2016-Datacenter"}, "vmImageVersion": {"value": "latest"}, "loadBalancedAppPort1":
       {"value": 80}, "loadBalancedAppPort2": {"value": 8081}, "certificateStorevalue":
-      {"value": "My"}, "certificateThumbprint": {"value": "6331526820788BEA0E1F684420EA4EE5EBE02F1C"},
+      {"value": "My"}, "certificateThumbprint": {"value": "D6EA15C07E44545DE32B4612C2B93B4C49C7EC17"},
       "sourceVaultvalue": {"value": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/sfrp-cli-kv-000002"},
-      "certificateUrlvalue": {"value": "https://sfrp-cli-kv-000002.vault.azure.net/secrets/sfrp-cli-000003/f7c70e9a0eca45669345726643069fa5"},
+      "certificateUrlvalue": {"value": "https://sfrp-cli-kv-000002.vault.azure.net/secrets/sfrp-cli-000003/a3edab8a2fc14e51b58fb12ed71a64b0"},
       "clusterProtectionLevel": {"value": "EncryptAndSign"}, "storageAccountType":
       {"value": "Standard_LRS"}, "supportLogStorageAccountType": {"value": "Standard_LRS"},
       "applicationDiagnosticsStorageAccountType": {"value": "Standard_LRS"}, "nt0InstanceCount":
@@ -709,12 +840,13 @@ interactions:
       ParameterSetName:
       - -g -c -l --secret-identifier --vm-password --cluster-size
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/AzurePSDeployment-202208040941","name":"AzurePSDeployment-202208040941","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6038264192997917175","parameters":{"clusterLocation":{"type":"String","value":"westus"},"clusterName":{"type":"String","value":"sfrp-cli-000004"},"adminUserName":{"type":"String","value":"adminuser"},"durabilityLevel":{"type":"String","value":"Bronze"},"reliabilityLevel":{"type":"String","value":"Bronze"},"adminPassword":{"type":"SecureString"},"vmImagePublisher":{"type":"String","value":"MicrosoftWindowsServer"},"vmImageOffer":{"type":"String","value":"WindowsServer"},"vmImageSku":{"type":"String","value":"2016-Datacenter"},"vmSku":{"type":"String","value":"Standard_D2_V2"},"vmImageVersion":{"type":"String","value":"latest"},"loadBalancedAppPort1":{"type":"Int","value":80},"loadBalancedAppPort2":{"type":"Int","value":8081},"certificateStoreValue":{"type":"String","value":"My"},"certificateThumbprint":{"type":"String","value":"6331526820788BEA0E1F684420EA4EE5EBE02F1C"},"sourceVaultValue":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/sfrp-cli-kv-000002"},"certificateUrlValue":{"type":"String","value":"https://sfrp-cli-kv-000002.vault.azure.net/secrets/sfrp-cli-000003/f7c70e9a0eca45669345726643069fa5"},"clusterProtectionLevel":{"type":"String","value":"EncryptAndSign"},"storageAccountType":{"type":"String","value":"Standard_LRS"},"supportLogStorageAccountType":{"type":"String","value":"Standard_LRS"},"applicationDiagnosticsStorageAccountType":{"type":"String","value":"Standard_LRS"},"nt0InstanceCount":{"type":"Int","value":3}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"0001-01-01T00:00:00Z","duration":"PT0S","correlationId":"c2c88fa1-f23b-4dcb-a0f0-9a0ebd7a8c1b","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"loadBalancers","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["westus"]}]},{"namespace":"Microsoft.ServiceFabric","resourceTypes":[{"resourceType":"clusters","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/PublicIP-LB-FE-0","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"PublicIP-LB-FE-0"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/loadBalancers/LB-sfrp-cli-000004-nt1vm","resourceType":"Microsoft.Network/loadBalancers","resourceName":"LB-sfrp-cli-000004-nt1vm"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/VNet","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"VNet"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/loadBalancers/LB-sfrp-cli-000004-nt1vm","resourceType":"Microsoft.Network/loadBalancers","resourceName":"LB-sfrp-cli-000004-nt1vm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogsg7ek26uqxmxsm2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogsg7ek26uqxmxsm2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/g7ek26uqxmxsm3","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"g7ek26uqxmxsm3"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogsg7ek26uqxmxsm2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogsg7ek26uqxmxsm2","actionName":"listKeys","apiVersion":"2015-05-01-preview"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004","resourceType":"Microsoft.ServiceFabric/clusters","resourceName":"sfrp-cli-000004"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/g7ek26uqxmxsm3","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"g7ek26uqxmxsm3","actionName":"listKeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachineScaleSets/nt1vm","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"nt1vm"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogsg7ek26uqxmxsm2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogsg7ek26uqxmxsm2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogsg7ek26uqxmxsm2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogsg7ek26uqxmxsm2","apiVersion":"2016-01-01"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/PublicIP-LB-FE-0","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"PublicIP-LB-FE-0"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004","resourceType":"Microsoft.ServiceFabric/clusters","resourceName":"sfrp-cli-000004"}],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogsg7ek26uqxmxsm2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/g7ek26uqxmxsm3"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/VNet"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/PublicIP-LB-FE-0"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/loadBalancers/LB-sfrp-cli-000004-nt1vm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachineScaleSets/nt1vm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/AzurePSDeployment-202305151252","name":"AzurePSDeployment-202305151252","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6038264192997917175","parameters":{"clusterLocation":{"type":"String","value":"westus"},"clusterName":{"type":"String","value":"sfrp-cli-000004"},"adminUserName":{"type":"String","value":"adminuser"},"durabilityLevel":{"type":"String","value":"Bronze"},"reliabilityLevel":{"type":"String","value":"Bronze"},"adminPassword":{"type":"SecureString"},"vmImagePublisher":{"type":"String","value":"MicrosoftWindowsServer"},"vmImageOffer":{"type":"String","value":"WindowsServer"},"vmImageSku":{"type":"String","value":"2016-Datacenter"},"vmSku":{"type":"String","value":"Standard_D2_V2"},"vmImageVersion":{"type":"String","value":"latest"},"loadBalancedAppPort1":{"type":"Int","value":80},"loadBalancedAppPort2":{"type":"Int","value":8081},"certificateStoreValue":{"type":"String","value":"My"},"certificateThumbprint":{"type":"String","value":"D6EA15C07E44545DE32B4612C2B93B4C49C7EC17"},"sourceVaultValue":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/sfrp-cli-kv-000002"},"certificateUrlValue":{"type":"String","value":"https://sfrp-cli-kv-000002.vault.azure.net/secrets/sfrp-cli-000003/a3edab8a2fc14e51b58fb12ed71a64b0"},"clusterProtectionLevel":{"type":"String","value":"EncryptAndSign"},"storageAccountType":{"type":"String","value":"Standard_LRS"},"supportLogStorageAccountType":{"type":"String","value":"Standard_LRS"},"applicationDiagnosticsStorageAccountType":{"type":"String","value":"Standard_LRS"},"nt0InstanceCount":{"type":"Int","value":3}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"0001-01-01T00:00:00Z","duration":"PT0S","correlationId":"720d36c4-6502-4c1c-b5bf-3ac84813b54f","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"loadBalancers","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["westus"]}]},{"namespace":"Microsoft.ServiceFabric","resourceTypes":[{"resourceType":"clusters","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/PublicIP-LB-FE-0","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"PublicIP-LB-FE-0"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/loadBalancers/LB-sfrp-cli-000004-nt1vm","resourceType":"Microsoft.Network/loadBalancers","resourceName":"LB-sfrp-cli-000004-nt1vm"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/VNet","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"VNet"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/loadBalancers/LB-sfrp-cli-000004-nt1vm","resourceType":"Microsoft.Network/loadBalancers","resourceName":"LB-sfrp-cli-000004-nt1vm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogs422vfpmcmxh3y2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogs422vfpmcmxh3y2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/422vfpmcmxh3y3","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"422vfpmcmxh3y3"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogs422vfpmcmxh3y2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogs422vfpmcmxh3y2","actionName":"listKeys","apiVersion":"2015-05-01-preview"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004","resourceType":"Microsoft.ServiceFabric/clusters","resourceName":"sfrp-cli-000004"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/422vfpmcmxh3y3","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"422vfpmcmxh3y3","actionName":"listKeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachineScaleSets/nt1vm","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"nt1vm"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogs422vfpmcmxh3y2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogs422vfpmcmxh3y2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogs422vfpmcmxh3y2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogs422vfpmcmxh3y2","apiVersion":"2016-01-01"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/PublicIP-LB-FE-0","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"PublicIP-LB-FE-0"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004","resourceType":"Microsoft.ServiceFabric/clusters","resourceName":"sfrp-cli-000004"}],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogs422vfpmcmxh3y2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/422vfpmcmxh3y3"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/VNet"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/PublicIP-LB-FE-0"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/loadBalancers/LB-sfrp-cli-000004-nt1vm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachineScaleSets/nt1vm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -723,7 +855,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 04 Aug 2022 01:41:22 GMT
+      - Mon, 15 May 2023 12:52:11 GMT
       expires:
       - '-1'
       pragma:
@@ -949,9 +1081,9 @@ interactions:
       "Standard_D2_V2"}, "vmImageOffer": {"value": "WindowsServer"}, "vmImageSku":
       {"value": "2016-Datacenter"}, "vmImageVersion": {"value": "latest"}, "loadBalancedAppPort1":
       {"value": 80}, "loadBalancedAppPort2": {"value": 8081}, "certificateStorevalue":
-      {"value": "My"}, "certificateThumbprint": {"value": "6331526820788BEA0E1F684420EA4EE5EBE02F1C"},
+      {"value": "My"}, "certificateThumbprint": {"value": "D6EA15C07E44545DE32B4612C2B93B4C49C7EC17"},
       "sourceVaultvalue": {"value": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/sfrp-cli-kv-000002"},
-      "certificateUrlvalue": {"value": "https://sfrp-cli-kv-000002.vault.azure.net/secrets/sfrp-cli-000003/f7c70e9a0eca45669345726643069fa5"},
+      "certificateUrlvalue": {"value": "https://sfrp-cli-kv-000002.vault.azure.net/secrets/sfrp-cli-000003/a3edab8a2fc14e51b58fb12ed71a64b0"},
       "clusterProtectionLevel": {"value": "EncryptAndSign"}, "storageAccountType":
       {"value": "Standard_LRS"}, "supportLogStorageAccountType": {"value": "Standard_LRS"},
       "applicationDiagnosticsStorageAccountType": {"value": "Standard_LRS"}, "nt0InstanceCount":
@@ -973,15 +1105,16 @@ interactions:
       ParameterSetName:
       - -g -c -l --secret-identifier --vm-password --cluster-size
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/AzurePSDeployment-202208040941","name":"AzurePSDeployment-202208040941","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6038264192997917175","parameters":{"clusterLocation":{"type":"String","value":"westus"},"clusterName":{"type":"String","value":"sfrp-cli-000004"},"adminUserName":{"type":"String","value":"adminuser"},"durabilityLevel":{"type":"String","value":"Bronze"},"reliabilityLevel":{"type":"String","value":"Bronze"},"adminPassword":{"type":"SecureString"},"vmImagePublisher":{"type":"String","value":"MicrosoftWindowsServer"},"vmImageOffer":{"type":"String","value":"WindowsServer"},"vmImageSku":{"type":"String","value":"2016-Datacenter"},"vmSku":{"type":"String","value":"Standard_D2_V2"},"vmImageVersion":{"type":"String","value":"latest"},"loadBalancedAppPort1":{"type":"Int","value":80},"loadBalancedAppPort2":{"type":"Int","value":8081},"certificateStoreValue":{"type":"String","value":"My"},"certificateThumbprint":{"type":"String","value":"6331526820788BEA0E1F684420EA4EE5EBE02F1C"},"sourceVaultValue":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/sfrp-cli-kv-000002"},"certificateUrlValue":{"type":"String","value":"https://sfrp-cli-kv-000002.vault.azure.net/secrets/sfrp-cli-000003/f7c70e9a0eca45669345726643069fa5"},"clusterProtectionLevel":{"type":"String","value":"EncryptAndSign"},"storageAccountType":{"type":"String","value":"Standard_LRS"},"supportLogStorageAccountType":{"type":"String","value":"Standard_LRS"},"applicationDiagnosticsStorageAccountType":{"type":"String","value":"Standard_LRS"},"nt0InstanceCount":{"type":"Int","value":3}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-08-04T01:41:28.7729272Z","duration":"PT0.0007043S","correlationId":"7e35b903-c6b5-4de5-94e1-c9a3bfc1a160","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"loadBalancers","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["westus"]}]},{"namespace":"Microsoft.ServiceFabric","resourceTypes":[{"resourceType":"clusters","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/PublicIP-LB-FE-0","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"PublicIP-LB-FE-0"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/loadBalancers/LB-sfrp-cli-000004-nt1vm","resourceType":"Microsoft.Network/loadBalancers","resourceName":"LB-sfrp-cli-000004-nt1vm"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/VNet","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"VNet"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/loadBalancers/LB-sfrp-cli-000004-nt1vm","resourceType":"Microsoft.Network/loadBalancers","resourceName":"LB-sfrp-cli-000004-nt1vm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogsg7ek26uqxmxsm2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogsg7ek26uqxmxsm2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/g7ek26uqxmxsm3","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"g7ek26uqxmxsm3"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogsg7ek26uqxmxsm2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogsg7ek26uqxmxsm2","actionName":"listKeys","apiVersion":"2015-05-01-preview"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004","resourceType":"Microsoft.ServiceFabric/clusters","resourceName":"sfrp-cli-000004"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/g7ek26uqxmxsm3","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"g7ek26uqxmxsm3","actionName":"listKeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachineScaleSets/nt1vm","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"nt1vm"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogsg7ek26uqxmxsm2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogsg7ek26uqxmxsm2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogsg7ek26uqxmxsm2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogsg7ek26uqxmxsm2","apiVersion":"2016-01-01"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/PublicIP-LB-FE-0","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"PublicIP-LB-FE-0"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004","resourceType":"Microsoft.ServiceFabric/clusters","resourceName":"sfrp-cli-000004"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/AzurePSDeployment-202305151252","name":"AzurePSDeployment-202305151252","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6038264192997917175","parameters":{"clusterLocation":{"type":"String","value":"westus"},"clusterName":{"type":"String","value":"sfrp-cli-000004"},"adminUserName":{"type":"String","value":"adminuser"},"durabilityLevel":{"type":"String","value":"Bronze"},"reliabilityLevel":{"type":"String","value":"Bronze"},"adminPassword":{"type":"SecureString"},"vmImagePublisher":{"type":"String","value":"MicrosoftWindowsServer"},"vmImageOffer":{"type":"String","value":"WindowsServer"},"vmImageSku":{"type":"String","value":"2016-Datacenter"},"vmSku":{"type":"String","value":"Standard_D2_V2"},"vmImageVersion":{"type":"String","value":"latest"},"loadBalancedAppPort1":{"type":"Int","value":80},"loadBalancedAppPort2":{"type":"Int","value":8081},"certificateStoreValue":{"type":"String","value":"My"},"certificateThumbprint":{"type":"String","value":"D6EA15C07E44545DE32B4612C2B93B4C49C7EC17"},"sourceVaultValue":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/sfrp-cli-kv-000002"},"certificateUrlValue":{"type":"String","value":"https://sfrp-cli-kv-000002.vault.azure.net/secrets/sfrp-cli-000003/a3edab8a2fc14e51b58fb12ed71a64b0"},"clusterProtectionLevel":{"type":"String","value":"EncryptAndSign"},"storageAccountType":{"type":"String","value":"Standard_LRS"},"supportLogStorageAccountType":{"type":"String","value":"Standard_LRS"},"applicationDiagnosticsStorageAccountType":{"type":"String","value":"Standard_LRS"},"nt0InstanceCount":{"type":"Int","value":3}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2023-05-15T12:52:13.6300864Z","duration":"PT0.0008498S","correlationId":"2acd2c5e-e837-4707-a3c9-7e327c04a012","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"loadBalancers","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["westus"]}]},{"namespace":"Microsoft.ServiceFabric","resourceTypes":[{"resourceType":"clusters","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/PublicIP-LB-FE-0","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"PublicIP-LB-FE-0"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/loadBalancers/LB-sfrp-cli-000004-nt1vm","resourceType":"Microsoft.Network/loadBalancers","resourceName":"LB-sfrp-cli-000004-nt1vm"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/VNet","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"VNet"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/loadBalancers/LB-sfrp-cli-000004-nt1vm","resourceType":"Microsoft.Network/loadBalancers","resourceName":"LB-sfrp-cli-000004-nt1vm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogs422vfpmcmxh3y2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogs422vfpmcmxh3y2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/422vfpmcmxh3y3","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"422vfpmcmxh3y3"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogs422vfpmcmxh3y2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogs422vfpmcmxh3y2","actionName":"listKeys","apiVersion":"2015-05-01-preview"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004","resourceType":"Microsoft.ServiceFabric/clusters","resourceName":"sfrp-cli-000004"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/422vfpmcmxh3y3","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"422vfpmcmxh3y3","actionName":"listKeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachineScaleSets/nt1vm","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"nt1vm"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogs422vfpmcmxh3y2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogs422vfpmcmxh3y2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogs422vfpmcmxh3y2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogs422vfpmcmxh3y2","apiVersion":"2016-01-01"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/PublicIP-LB-FE-0","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"PublicIP-LB-FE-0"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004","resourceType":"Microsoft.ServiceFabric/clusters","resourceName":"sfrp-cli-000004"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/AzurePSDeployment-202208040941/operationStatuses/08585420295995600637?api-version=2021-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/AzurePSDeployment-202305151252/operationStatuses/08585174517529359537?api-version=2022-09-01
       cache-control:
       - no-cache
       content-length:
@@ -989,7 +1122,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 04 Aug 2022 01:41:29 GMT
+      - Mon, 15 May 2023 12:52:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1017,21 +1150,22 @@ interactions:
       ParameterSetName:
       - -g -c -l --secret-identifier --vm-password --cluster-size
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585420295995600637?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585174517529359537?api-version=2022-09-01
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"status":"Accepted"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '21'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 04 Aug 2022 01:41:59 GMT
+      - Mon, 15 May 2023 12:52:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1059,9 +1193,10 @@ interactions:
       ParameterSetName:
       - -g -c -l --secret-identifier --vm-password --cluster-size
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585420295995600637?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585174517529359537?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1073,7 +1208,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 04 Aug 2022 01:42:30 GMT
+      - Mon, 15 May 2023 12:52:44 GMT
       expires:
       - '-1'
       pragma:
@@ -1101,9 +1236,10 @@ interactions:
       ParameterSetName:
       - -g -c -l --secret-identifier --vm-password --cluster-size
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585420295995600637?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585174517529359537?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1115,7 +1251,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 04 Aug 2022 01:43:01 GMT
+      - Mon, 15 May 2023 12:53:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1143,9 +1279,10 @@ interactions:
       ParameterSetName:
       - -g -c -l --secret-identifier --vm-password --cluster-size
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585420295995600637?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585174517529359537?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1157,7 +1294,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 04 Aug 2022 01:43:31 GMT
+      - Mon, 15 May 2023 12:53:44 GMT
       expires:
       - '-1'
       pragma:
@@ -1185,9 +1322,10 @@ interactions:
       ParameterSetName:
       - -g -c -l --secret-identifier --vm-password --cluster-size
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585420295995600637?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585174517529359537?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1199,7 +1337,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 04 Aug 2022 01:44:02 GMT
+      - Mon, 15 May 2023 12:54:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1227,9 +1365,10 @@ interactions:
       ParameterSetName:
       - -g -c -l --secret-identifier --vm-password --cluster-size
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585420295995600637?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585174517529359537?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1241,7 +1380,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 04 Aug 2022 01:44:32 GMT
+      - Mon, 15 May 2023 12:54:44 GMT
       expires:
       - '-1'
       pragma:
@@ -1269,9 +1408,10 @@ interactions:
       ParameterSetName:
       - -g -c -l --secret-identifier --vm-password --cluster-size
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585420295995600637?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585174517529359537?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1283,7 +1423,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 04 Aug 2022 01:45:02 GMT
+      - Mon, 15 May 2023 12:55:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1311,9 +1451,10 @@ interactions:
       ParameterSetName:
       - -g -c -l --secret-identifier --vm-password --cluster-size
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585420295995600637?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585174517529359537?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1325,7 +1466,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 04 Aug 2022 01:45:32 GMT
+      - Mon, 15 May 2023 12:55:44 GMT
       expires:
       - '-1'
       pragma:
@@ -1353,51 +1494,10 @@ interactions:
       ParameterSetName:
       - -g -c -l --secret-identifier --vm-password --cluster-size
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585420295995600637?api-version=2021-04-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 04 Aug 2022 01:46:04 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sf cluster create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -c -l --secret-identifier --vm-password --cluster-size
-      User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585420295995600637?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585174517529359537?api-version=2022-09-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -1409,7 +1509,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 04 Aug 2022 01:46:34 GMT
+      - Mon, 15 May 2023 12:56:15 GMT
       expires:
       - '-1'
       pragma:
@@ -1437,12 +1537,13 @@ interactions:
       ParameterSetName:
       - -g -c -l --secret-identifier --vm-password --cluster-size
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-azure-mgmt-resource/21.1.0b1 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/AzurePSDeployment-202208040941","name":"AzurePSDeployment-202208040941","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6038264192997917175","parameters":{"clusterLocation":{"type":"String","value":"westus"},"clusterName":{"type":"String","value":"sfrp-cli-000004"},"adminUserName":{"type":"String","value":"adminuser"},"durabilityLevel":{"type":"String","value":"Bronze"},"reliabilityLevel":{"type":"String","value":"Bronze"},"adminPassword":{"type":"SecureString"},"vmImagePublisher":{"type":"String","value":"MicrosoftWindowsServer"},"vmImageOffer":{"type":"String","value":"WindowsServer"},"vmImageSku":{"type":"String","value":"2016-Datacenter"},"vmSku":{"type":"String","value":"Standard_D2_V2"},"vmImageVersion":{"type":"String","value":"latest"},"loadBalancedAppPort1":{"type":"Int","value":80},"loadBalancedAppPort2":{"type":"Int","value":8081},"certificateStoreValue":{"type":"String","value":"My"},"certificateThumbprint":{"type":"String","value":"6331526820788BEA0E1F684420EA4EE5EBE02F1C"},"sourceVaultValue":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/sfrp-cli-kv-000002"},"certificateUrlValue":{"type":"String","value":"https://sfrp-cli-kv-000002.vault.azure.net/secrets/sfrp-cli-000003/f7c70e9a0eca45669345726643069fa5"},"clusterProtectionLevel":{"type":"String","value":"EncryptAndSign"},"storageAccountType":{"type":"String","value":"Standard_LRS"},"supportLogStorageAccountType":{"type":"String","value":"Standard_LRS"},"applicationDiagnosticsStorageAccountType":{"type":"String","value":"Standard_LRS"},"nt0InstanceCount":{"type":"Int","value":3}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-08-04T01:46:17.1246754Z","duration":"PT4M48.3524525S","correlationId":"7e35b903-c6b5-4de5-94e1-c9a3bfc1a160","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"loadBalancers","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["westus"]}]},{"namespace":"Microsoft.ServiceFabric","resourceTypes":[{"resourceType":"clusters","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/PublicIP-LB-FE-0","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"PublicIP-LB-FE-0"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/loadBalancers/LB-sfrp-cli-000004-nt1vm","resourceType":"Microsoft.Network/loadBalancers","resourceName":"LB-sfrp-cli-000004-nt1vm"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/VNet","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"VNet"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/loadBalancers/LB-sfrp-cli-000004-nt1vm","resourceType":"Microsoft.Network/loadBalancers","resourceName":"LB-sfrp-cli-000004-nt1vm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogsg7ek26uqxmxsm2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogsg7ek26uqxmxsm2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/g7ek26uqxmxsm3","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"g7ek26uqxmxsm3"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogsg7ek26uqxmxsm2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogsg7ek26uqxmxsm2","actionName":"listKeys","apiVersion":"2015-05-01-preview"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004","resourceType":"Microsoft.ServiceFabric/clusters","resourceName":"sfrp-cli-000004"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/g7ek26uqxmxsm3","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"g7ek26uqxmxsm3","actionName":"listKeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachineScaleSets/nt1vm","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"nt1vm"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogsg7ek26uqxmxsm2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogsg7ek26uqxmxsm2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogsg7ek26uqxmxsm2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogsg7ek26uqxmxsm2","apiVersion":"2016-01-01"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/PublicIP-LB-FE-0","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"PublicIP-LB-FE-0"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004","resourceType":"Microsoft.ServiceFabric/clusters","resourceName":"sfrp-cli-000004"}],"outputs":{"clusterProperties":{"type":"Object","value":{"provisioningState":"Succeeded","clusterId":"bb4f21b8-10ac-4319-ab8b-5aa5d31f6437","clusterCodeVersion":"9.0.1048.9590","clusterState":"WaitingForNodes","managementEndpoint":"https://sfrp-cli-000004.westus.cloudapp.azure.com:19080","clusterEndpoint":"https://westus.servicefabric.azure.com/runtime/clusters/bb4f21b8-10ac-4319-ab8b-5aa5d31f6437","certificate":{"thumbprint":"6331526820788BEA0E1F684420EA4EE5EBE02F1C","x509StoreName":"My"},"clientCertificateThumbprints":[],"clientCertificateCommonNames":[],"fabricSettings":[{"name":"Security","parameters":[{"name":"ClusterProtectionLevel","value":"EncryptAndSign"}]}],"vmImage":"Windows","reliabilityLevel":"Bronze","nodeTypes":[{"name":"nt1vm","vmInstanceCount":3,"clientConnectionEndpointPort":19000,"httpGatewayEndpointPort":19080,"applicationPorts":{"startPort":20000,"endPort":30000},"ephemeralPorts":{"startPort":49152,"endPort":65534},"isPrimary":true,"durabilityLevel":"Bronze"}],"diagnosticsStorageAccountConfig":{"storageAccountName":"sflogsg7ek26uqxmxsm2","primaryAccessKey":"","secondaryAccessKey":"","protectedAccountKeyName":"StorageAccountKey1","blobEndpoint":"https://sflogsg7ek26uqxmxsm2.blob.core.windows.net/","queueEndpoint":"https://sflogsg7ek26uqxmxsm2.queue.core.windows.net/","tableEndpoint":"https://sflogsg7ek26uqxmxsm2.table.core.windows.net/"},"upgradeMode":"Automatic","availableClusterVersions":[{"codeVersion":"9.0.1048.9590","supportExpiryUtc":"9999-12-31T23:59:59.9999999","environment":"Windows"}],"addonFeatures":["DnsService"]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachineScaleSets/nt1vm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/loadBalancers/LB-sfrp-cli-000004-nt1vm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/PublicIP-LB-FE-0"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/VNet"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/g7ek26uqxmxsm3"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogsg7ek26uqxmxsm2"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/AzurePSDeployment-202305151252","name":"AzurePSDeployment-202305151252","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6038264192997917175","parameters":{"clusterLocation":{"type":"String","value":"westus"},"clusterName":{"type":"String","value":"sfrp-cli-000004"},"adminUserName":{"type":"String","value":"adminuser"},"durabilityLevel":{"type":"String","value":"Bronze"},"reliabilityLevel":{"type":"String","value":"Bronze"},"adminPassword":{"type":"SecureString"},"vmImagePublisher":{"type":"String","value":"MicrosoftWindowsServer"},"vmImageOffer":{"type":"String","value":"WindowsServer"},"vmImageSku":{"type":"String","value":"2016-Datacenter"},"vmSku":{"type":"String","value":"Standard_D2_V2"},"vmImageVersion":{"type":"String","value":"latest"},"loadBalancedAppPort1":{"type":"Int","value":80},"loadBalancedAppPort2":{"type":"Int","value":8081},"certificateStoreValue":{"type":"String","value":"My"},"certificateThumbprint":{"type":"String","value":"D6EA15C07E44545DE32B4612C2B93B4C49C7EC17"},"sourceVaultValue":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.KeyVault/vaults/sfrp-cli-kv-000002"},"certificateUrlValue":{"type":"String","value":"https://sfrp-cli-kv-000002.vault.azure.net/secrets/sfrp-cli-000003/a3edab8a2fc14e51b58fb12ed71a64b0"},"clusterProtectionLevel":{"type":"String","value":"EncryptAndSign"},"storageAccountType":{"type":"String","value":"Standard_LRS"},"supportLogStorageAccountType":{"type":"String","value":"Standard_LRS"},"applicationDiagnosticsStorageAccountType":{"type":"String","value":"Standard_LRS"},"nt0InstanceCount":{"type":"Int","value":3}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2023-05-15T12:55:51.7030481Z","duration":"PT3M38.0738115S","correlationId":"2acd2c5e-e837-4707-a3c9-7e327c04a012","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"loadBalancers","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["westus"]}]},{"namespace":"Microsoft.ServiceFabric","resourceTypes":[{"resourceType":"clusters","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/PublicIP-LB-FE-0","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"PublicIP-LB-FE-0"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/loadBalancers/LB-sfrp-cli-000004-nt1vm","resourceType":"Microsoft.Network/loadBalancers","resourceName":"LB-sfrp-cli-000004-nt1vm"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/VNet","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"VNet"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/loadBalancers/LB-sfrp-cli-000004-nt1vm","resourceType":"Microsoft.Network/loadBalancers","resourceName":"LB-sfrp-cli-000004-nt1vm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogs422vfpmcmxh3y2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogs422vfpmcmxh3y2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/422vfpmcmxh3y3","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"422vfpmcmxh3y3"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogs422vfpmcmxh3y2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogs422vfpmcmxh3y2","actionName":"listKeys","apiVersion":"2015-05-01-preview"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004","resourceType":"Microsoft.ServiceFabric/clusters","resourceName":"sfrp-cli-000004"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/422vfpmcmxh3y3","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"422vfpmcmxh3y3","actionName":"listKeys","apiVersion":"2015-05-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachineScaleSets/nt1vm","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"nt1vm"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogs422vfpmcmxh3y2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogs422vfpmcmxh3y2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogs422vfpmcmxh3y2","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"sflogs422vfpmcmxh3y2","apiVersion":"2016-01-01"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/PublicIP-LB-FE-0","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"PublicIP-LB-FE-0"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004","resourceType":"Microsoft.ServiceFabric/clusters","resourceName":"sfrp-cli-000004"}],"outputs":{"clusterProperties":{"type":"Object","value":{"provisioningState":"Succeeded","clusterId":"c6365416-91a2-416c-83d9-3c1e43660922","clusterCodeVersion":"9.1.1653.9590","clusterState":"WaitingForNodes","managementEndpoint":"https://sfrp-cli-000004.westus.cloudapp.azure.com:19080","clusterEndpoint":"https://westus.servicefabric.azure.com/runtime/clusters/c6365416-91a2-416c-83d9-3c1e43660922","certificate":{"thumbprint":"D6EA15C07E44545DE32B4612C2B93B4C49C7EC17","x509StoreName":"My"},"clientCertificateThumbprints":[],"clientCertificateCommonNames":[],"fabricSettings":[{"name":"Security","parameters":[{"name":"ClusterProtectionLevel","value":"EncryptAndSign"}]}],"vmImage":"Windows","reliabilityLevel":"Bronze","nodeTypes":[{"name":"nt1vm","vmInstanceCount":3,"clientConnectionEndpointPort":19000,"httpGatewayEndpointPort":19080,"applicationPorts":{"startPort":20000,"endPort":30000},"ephemeralPorts":{"startPort":49152,"endPort":65534},"isPrimary":true,"durabilityLevel":"Bronze"}],"diagnosticsStorageAccountConfig":{"storageAccountName":"sflogs422vfpmcmxh3y2","primaryAccessKey":"","secondaryAccessKey":"","protectedAccountKeyName":"StorageAccountKey1","blobEndpoint":"https://sflogs422vfpmcmxh3y2.blob.core.windows.net/","queueEndpoint":"https://sflogs422vfpmcmxh3y2.queue.core.windows.net/","tableEndpoint":"https://sflogs422vfpmcmxh3y2.table.core.windows.net/"},"upgradeMode":"Automatic","availableClusterVersions":[{"codeVersion":"9.1.1653.9590","supportExpiryUtc":"9999-12-31T23:59:59.9999999","environment":"Windows"}],"addonFeatures":["DnsService"]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachineScaleSets/nt1vm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/loadBalancers/LB-sfrp-cli-000004-nt1vm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/PublicIP-LB-FE-0"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/VNet"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/422vfpmcmxh3y3"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/sflogs422vfpmcmxh3y2"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -1451,7 +1552,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 04 Aug 2022 01:46:34 GMT
+      - Mon, 15 May 2023 12:56:16 GMT
       expires:
       - '-1'
       pragma:
@@ -1479,7 +1580,8 @@ interactions:
       ParameterSetName:
       - -g -c -l --secret-identifier --vm-password --cluster-size
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-mgmt-servicefabric/1.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-mgmt-servicefabric/1.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004?api-version=2020-03-01
   response:
@@ -1488,16 +1590,17 @@ interactions:
         \"westus\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004\",\r\n
         \ \"name\": \"sfrp-cli-000004\",\r\n  \"tags\": {\r\n    \"resourceType\":
         \"Service Fabric\",\r\n    \"clusterName\": \"sfrp-cli-000004\"\r\n  },\r\n
-        \ \"etag\": \"W/\\\"637951741211859813\\\"\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"v-taoxuzeng@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2022-08-04T01:42:01.1528465+00:00\",\r\n    \"lastModifiedBy\": \"v-taoxuzeng@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2022-08-04T01:42:01.1528465+00:00\"\r\n
+        \ \"etag\": \"W/\\\"638197519633111450\\\"\",\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"azureclilivetest@azuresdkteam.onmicrosoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2023-05-15T12:52:43.2913146+00:00\",\r\n
+        \   \"lastModifiedBy\": \"azureclilivetest@azuresdkteam.onmicrosoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-05-15T12:52:43.2913146+00:00\"\r\n
         \ },\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"clusterId\": \"bb4f21b8-10ac-4319-ab8b-5aa5d31f6437\",\r\n    \"clusterCodeVersion\":
-        \"9.0.1048.9590\",\r\n    \"clusterState\": \"Deploying\",\r\n    \"managementEndpoint\":
+        \   \"clusterId\": \"c6365416-91a2-416c-83d9-3c1e43660922\",\r\n    \"clusterCodeVersion\":
+        \"9.1.1653.9590\",\r\n    \"clusterState\": \"Deploying\",\r\n    \"managementEndpoint\":
         \"https://sfrp-cli-000004.westus.cloudapp.azure.com:19080\",\r\n    \"clusterEndpoint\":
-        \"https://westus.servicefabric.azure.com/runtime/clusters/bb4f21b8-10ac-4319-ab8b-5aa5d31f6437\",\r\n
-        \   \"certificate\": {\r\n      \"thumbprint\": \"6331526820788BEA0E1F684420EA4EE5EBE02F1C\",\r\n
+        \"https://westus.servicefabric.azure.com/runtime/clusters/c6365416-91a2-416c-83d9-3c1e43660922\",\r\n
+        \   \"certificate\": {\r\n      \"thumbprint\": \"D6EA15C07E44545DE32B4612C2B93B4C49C7EC17\",\r\n
         \     \"x509StoreName\": \"My\"\r\n    },\r\n    \"clientCertificateThumbprints\":
         [],\r\n    \"clientCertificateCommonNames\": [],\r\n    \"fabricSettings\":
         [\r\n      {\r\n        \"name\": \"Security\",\r\n        \"parameters\":
@@ -1511,25 +1614,25 @@ interactions:
         \       \"ephemeralPorts\": {\r\n          \"startPort\": 49152,\r\n          \"endPort\":
         65534\r\n        },\r\n        \"isPrimary\": true,\r\n        \"durabilityLevel\":
         \"Bronze\"\r\n      }\r\n    ],\r\n    \"diagnosticsStorageAccountConfig\":
-        {\r\n      \"storageAccountName\": \"sflogsg7ek26uqxmxsm2\",\r\n      \"primaryAccessKey\":
+        {\r\n      \"storageAccountName\": \"sflogs422vfpmcmxh3y2\",\r\n      \"primaryAccessKey\":
         \"\",\r\n      \"secondaryAccessKey\": \"\",\r\n      \"protectedAccountKeyName\":
-        \"StorageAccountKey1\",\r\n      \"blobEndpoint\": \"https://sflogsg7ek26uqxmxsm2.blob.core.windows.net/\",\r\n
-        \     \"queueEndpoint\": \"https://sflogsg7ek26uqxmxsm2.queue.core.windows.net/\",\r\n
-        \     \"tableEndpoint\": \"https://sflogsg7ek26uqxmxsm2.table.core.windows.net/\",\r\n
+        \"StorageAccountKey1\",\r\n      \"blobEndpoint\": \"https://sflogs422vfpmcmxh3y2.blob.core.windows.net/\",\r\n
+        \     \"queueEndpoint\": \"https://sflogs422vfpmcmxh3y2.queue.core.windows.net/\",\r\n
+        \     \"tableEndpoint\": \"https://sflogs422vfpmcmxh3y2.table.core.windows.net/\",\r\n
         \     \"protectedAccountKeyName2\": \"\"\r\n    },\r\n    \"upgradeMode\":
         \"Automatic\",\r\n    \"addonFeatures\": [\r\n      \"DnsService\"\r\n    ],\r\n
         \   \"availableClusterVersions\": [\r\n      {\r\n        \"codeVersion\":
-        \"9.0.1048.9590\",\r\n        \"supportExpiryUtc\": \"9999-12-31T23:59:59.9999999\",\r\n
+        \"9.1.1653.9590\",\r\n        \"supportExpiryUtc\": \"9999-12-31T23:59:59.9999999\",\r\n
         \       \"environment\": \"Windows\"\r\n      }\r\n    ]\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2840'
+      - '2880'
       content-type:
       - application/json
       date:
-      - Thu, 04 Aug 2022 01:46:36 GMT
+      - Mon, 15 May 2023 12:56:16 GMT
       expires:
       - '-1'
       pragma:
@@ -1562,7 +1665,8 @@ interactions:
       ParameterSetName:
       - -g -c
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-mgmt-servicefabric/1.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-mgmt-servicefabric/1.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004?api-version=2020-03-01
   response:
@@ -1571,16 +1675,17 @@ interactions:
         \"westus\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004\",\r\n
         \ \"name\": \"sfrp-cli-000004\",\r\n  \"tags\": {\r\n    \"resourceType\":
         \"Service Fabric\",\r\n    \"clusterName\": \"sfrp-cli-000004\"\r\n  },\r\n
-        \ \"etag\": \"W/\\\"637951741211859813\\\"\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"v-taoxuzeng@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2022-08-04T01:42:01.1528465+00:00\",\r\n    \"lastModifiedBy\": \"v-taoxuzeng@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2022-08-04T01:42:01.1528465+00:00\"\r\n
+        \ \"etag\": \"W/\\\"638197519633111450\\\"\",\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"azureclilivetest@azuresdkteam.onmicrosoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2023-05-15T12:52:43.2913146+00:00\",\r\n
+        \   \"lastModifiedBy\": \"azureclilivetest@azuresdkteam.onmicrosoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-05-15T12:52:43.2913146+00:00\"\r\n
         \ },\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"clusterId\": \"bb4f21b8-10ac-4319-ab8b-5aa5d31f6437\",\r\n    \"clusterCodeVersion\":
-        \"9.0.1048.9590\",\r\n    \"clusterState\": \"Deploying\",\r\n    \"managementEndpoint\":
+        \   \"clusterId\": \"c6365416-91a2-416c-83d9-3c1e43660922\",\r\n    \"clusterCodeVersion\":
+        \"9.1.1653.9590\",\r\n    \"clusterState\": \"Deploying\",\r\n    \"managementEndpoint\":
         \"https://sfrp-cli-000004.westus.cloudapp.azure.com:19080\",\r\n    \"clusterEndpoint\":
-        \"https://westus.servicefabric.azure.com/runtime/clusters/bb4f21b8-10ac-4319-ab8b-5aa5d31f6437\",\r\n
-        \   \"certificate\": {\r\n      \"thumbprint\": \"6331526820788BEA0E1F684420EA4EE5EBE02F1C\",\r\n
+        \"https://westus.servicefabric.azure.com/runtime/clusters/c6365416-91a2-416c-83d9-3c1e43660922\",\r\n
+        \   \"certificate\": {\r\n      \"thumbprint\": \"D6EA15C07E44545DE32B4612C2B93B4C49C7EC17\",\r\n
         \     \"x509StoreName\": \"My\"\r\n    },\r\n    \"clientCertificateThumbprints\":
         [],\r\n    \"clientCertificateCommonNames\": [],\r\n    \"fabricSettings\":
         [\r\n      {\r\n        \"name\": \"Security\",\r\n        \"parameters\":
@@ -1594,25 +1699,25 @@ interactions:
         \       \"ephemeralPorts\": {\r\n          \"startPort\": 49152,\r\n          \"endPort\":
         65534\r\n        },\r\n        \"isPrimary\": true,\r\n        \"durabilityLevel\":
         \"Bronze\"\r\n      }\r\n    ],\r\n    \"diagnosticsStorageAccountConfig\":
-        {\r\n      \"storageAccountName\": \"sflogsg7ek26uqxmxsm2\",\r\n      \"primaryAccessKey\":
+        {\r\n      \"storageAccountName\": \"sflogs422vfpmcmxh3y2\",\r\n      \"primaryAccessKey\":
         \"\",\r\n      \"secondaryAccessKey\": \"\",\r\n      \"protectedAccountKeyName\":
-        \"StorageAccountKey1\",\r\n      \"blobEndpoint\": \"https://sflogsg7ek26uqxmxsm2.blob.core.windows.net/\",\r\n
-        \     \"queueEndpoint\": \"https://sflogsg7ek26uqxmxsm2.queue.core.windows.net/\",\r\n
-        \     \"tableEndpoint\": \"https://sflogsg7ek26uqxmxsm2.table.core.windows.net/\",\r\n
+        \"StorageAccountKey1\",\r\n      \"blobEndpoint\": \"https://sflogs422vfpmcmxh3y2.blob.core.windows.net/\",\r\n
+        \     \"queueEndpoint\": \"https://sflogs422vfpmcmxh3y2.queue.core.windows.net/\",\r\n
+        \     \"tableEndpoint\": \"https://sflogs422vfpmcmxh3y2.table.core.windows.net/\",\r\n
         \     \"protectedAccountKeyName2\": \"\"\r\n    },\r\n    \"upgradeMode\":
         \"Automatic\",\r\n    \"addonFeatures\": [\r\n      \"DnsService\"\r\n    ],\r\n
         \   \"availableClusterVersions\": [\r\n      {\r\n        \"codeVersion\":
-        \"9.0.1048.9590\",\r\n        \"supportExpiryUtc\": \"9999-12-31T23:59:59.9999999\",\r\n
+        \"9.1.1653.9590\",\r\n        \"supportExpiryUtc\": \"9999-12-31T23:59:59.9999999\",\r\n
         \       \"environment\": \"Windows\"\r\n      }\r\n    ]\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2840'
+      - '2880'
       content-type:
       - application/json
       date:
-      - Thu, 04 Aug 2022 01:46:38 GMT
+      - Mon, 15 May 2023 12:56:17 GMT
       expires:
       - '-1'
       pragma:
@@ -1645,7 +1750,8 @@ interactions:
       ParameterSetName:
       - -g -c
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-mgmt-servicefabric/1.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-mgmt-servicefabric/1.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004?api-version=2020-03-01
   response:
@@ -1654,16 +1760,17 @@ interactions:
         \"westus\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004\",\r\n
         \ \"name\": \"sfrp-cli-000004\",\r\n  \"tags\": {\r\n    \"resourceType\":
         \"Service Fabric\",\r\n    \"clusterName\": \"sfrp-cli-000004\"\r\n  },\r\n
-        \ \"etag\": \"W/\\\"637951741211859813\\\"\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"v-taoxuzeng@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2022-08-04T01:42:01.1528465+00:00\",\r\n    \"lastModifiedBy\": \"v-taoxuzeng@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2022-08-04T01:42:01.1528465+00:00\"\r\n
+        \ \"etag\": \"W/\\\"638197519633111450\\\"\",\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"azureclilivetest@azuresdkteam.onmicrosoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2023-05-15T12:52:43.2913146+00:00\",\r\n
+        \   \"lastModifiedBy\": \"azureclilivetest@azuresdkteam.onmicrosoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-05-15T12:52:43.2913146+00:00\"\r\n
         \ },\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"clusterId\": \"bb4f21b8-10ac-4319-ab8b-5aa5d31f6437\",\r\n    \"clusterCodeVersion\":
-        \"9.0.1048.9590\",\r\n    \"clusterState\": \"Deploying\",\r\n    \"managementEndpoint\":
+        \   \"clusterId\": \"c6365416-91a2-416c-83d9-3c1e43660922\",\r\n    \"clusterCodeVersion\":
+        \"9.1.1653.9590\",\r\n    \"clusterState\": \"Deploying\",\r\n    \"managementEndpoint\":
         \"https://sfrp-cli-000004.westus.cloudapp.azure.com:19080\",\r\n    \"clusterEndpoint\":
-        \"https://westus.servicefabric.azure.com/runtime/clusters/bb4f21b8-10ac-4319-ab8b-5aa5d31f6437\",\r\n
-        \   \"certificate\": {\r\n      \"thumbprint\": \"6331526820788BEA0E1F684420EA4EE5EBE02F1C\",\r\n
+        \"https://westus.servicefabric.azure.com/runtime/clusters/c6365416-91a2-416c-83d9-3c1e43660922\",\r\n
+        \   \"certificate\": {\r\n      \"thumbprint\": \"D6EA15C07E44545DE32B4612C2B93B4C49C7EC17\",\r\n
         \     \"x509StoreName\": \"My\"\r\n    },\r\n    \"clientCertificateThumbprints\":
         [],\r\n    \"clientCertificateCommonNames\": [],\r\n    \"fabricSettings\":
         [\r\n      {\r\n        \"name\": \"Security\",\r\n        \"parameters\":
@@ -1677,25 +1784,25 @@ interactions:
         \       \"ephemeralPorts\": {\r\n          \"startPort\": 49152,\r\n          \"endPort\":
         65534\r\n        },\r\n        \"isPrimary\": true,\r\n        \"durabilityLevel\":
         \"Bronze\"\r\n      }\r\n    ],\r\n    \"diagnosticsStorageAccountConfig\":
-        {\r\n      \"storageAccountName\": \"sflogsg7ek26uqxmxsm2\",\r\n      \"primaryAccessKey\":
+        {\r\n      \"storageAccountName\": \"sflogs422vfpmcmxh3y2\",\r\n      \"primaryAccessKey\":
         \"\",\r\n      \"secondaryAccessKey\": \"\",\r\n      \"protectedAccountKeyName\":
-        \"StorageAccountKey1\",\r\n      \"blobEndpoint\": \"https://sflogsg7ek26uqxmxsm2.blob.core.windows.net/\",\r\n
-        \     \"queueEndpoint\": \"https://sflogsg7ek26uqxmxsm2.queue.core.windows.net/\",\r\n
-        \     \"tableEndpoint\": \"https://sflogsg7ek26uqxmxsm2.table.core.windows.net/\",\r\n
+        \"StorageAccountKey1\",\r\n      \"blobEndpoint\": \"https://sflogs422vfpmcmxh3y2.blob.core.windows.net/\",\r\n
+        \     \"queueEndpoint\": \"https://sflogs422vfpmcmxh3y2.queue.core.windows.net/\",\r\n
+        \     \"tableEndpoint\": \"https://sflogs422vfpmcmxh3y2.table.core.windows.net/\",\r\n
         \     \"protectedAccountKeyName2\": \"\"\r\n    },\r\n    \"upgradeMode\":
         \"Automatic\",\r\n    \"addonFeatures\": [\r\n      \"DnsService\"\r\n    ],\r\n
         \   \"availableClusterVersions\": [\r\n      {\r\n        \"codeVersion\":
-        \"9.0.1048.9590\",\r\n        \"supportExpiryUtc\": \"9999-12-31T23:59:59.9999999\",\r\n
+        \"9.1.1653.9590\",\r\n        \"supportExpiryUtc\": \"9999-12-31T23:59:59.9999999\",\r\n
         \       \"environment\": \"Windows\"\r\n      }\r\n    ]\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2840'
+      - '2880'
       content-type:
       - application/json
       date:
-      - Thu, 04 Aug 2022 01:46:40 GMT
+      - Mon, 15 May 2023 12:56:17 GMT
       expires:
       - '-1'
       pragma:
@@ -1728,7 +1835,8 @@ interactions:
       ParameterSetName:
       - -g -c
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-mgmt-servicefabric/1.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-mgmt-servicefabric/1.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004?api-version=2020-03-01
   response:
@@ -1737,16 +1845,17 @@ interactions:
         \"westus\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004\",\r\n
         \ \"name\": \"sfrp-cli-000004\",\r\n  \"tags\": {\r\n    \"resourceType\":
         \"Service Fabric\",\r\n    \"clusterName\": \"sfrp-cli-000004\"\r\n  },\r\n
-        \ \"etag\": \"W/\\\"637951741211859813\\\"\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"v-taoxuzeng@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2022-08-04T01:42:01.1528465+00:00\",\r\n    \"lastModifiedBy\": \"v-taoxuzeng@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2022-08-04T01:42:01.1528465+00:00\"\r\n
+        \ \"etag\": \"W/\\\"638197519633111450\\\"\",\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"azureclilivetest@azuresdkteam.onmicrosoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2023-05-15T12:52:43.2913146+00:00\",\r\n
+        \   \"lastModifiedBy\": \"azureclilivetest@azuresdkteam.onmicrosoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-05-15T12:52:43.2913146+00:00\"\r\n
         \ },\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"clusterId\": \"bb4f21b8-10ac-4319-ab8b-5aa5d31f6437\",\r\n    \"clusterCodeVersion\":
-        \"9.0.1048.9590\",\r\n    \"clusterState\": \"Deploying\",\r\n    \"managementEndpoint\":
+        \   \"clusterId\": \"c6365416-91a2-416c-83d9-3c1e43660922\",\r\n    \"clusterCodeVersion\":
+        \"9.1.1653.9590\",\r\n    \"clusterState\": \"Deploying\",\r\n    \"managementEndpoint\":
         \"https://sfrp-cli-000004.westus.cloudapp.azure.com:19080\",\r\n    \"clusterEndpoint\":
-        \"https://westus.servicefabric.azure.com/runtime/clusters/bb4f21b8-10ac-4319-ab8b-5aa5d31f6437\",\r\n
-        \   \"certificate\": {\r\n      \"thumbprint\": \"6331526820788BEA0E1F684420EA4EE5EBE02F1C\",\r\n
+        \"https://westus.servicefabric.azure.com/runtime/clusters/c6365416-91a2-416c-83d9-3c1e43660922\",\r\n
+        \   \"certificate\": {\r\n      \"thumbprint\": \"D6EA15C07E44545DE32B4612C2B93B4C49C7EC17\",\r\n
         \     \"x509StoreName\": \"My\"\r\n    },\r\n    \"clientCertificateThumbprints\":
         [],\r\n    \"clientCertificateCommonNames\": [],\r\n    \"fabricSettings\":
         [\r\n      {\r\n        \"name\": \"Security\",\r\n        \"parameters\":
@@ -1760,25 +1869,25 @@ interactions:
         \       \"ephemeralPorts\": {\r\n          \"startPort\": 49152,\r\n          \"endPort\":
         65534\r\n        },\r\n        \"isPrimary\": true,\r\n        \"durabilityLevel\":
         \"Bronze\"\r\n      }\r\n    ],\r\n    \"diagnosticsStorageAccountConfig\":
-        {\r\n      \"storageAccountName\": \"sflogsg7ek26uqxmxsm2\",\r\n      \"primaryAccessKey\":
+        {\r\n      \"storageAccountName\": \"sflogs422vfpmcmxh3y2\",\r\n      \"primaryAccessKey\":
         \"\",\r\n      \"secondaryAccessKey\": \"\",\r\n      \"protectedAccountKeyName\":
-        \"StorageAccountKey1\",\r\n      \"blobEndpoint\": \"https://sflogsg7ek26uqxmxsm2.blob.core.windows.net/\",\r\n
-        \     \"queueEndpoint\": \"https://sflogsg7ek26uqxmxsm2.queue.core.windows.net/\",\r\n
-        \     \"tableEndpoint\": \"https://sflogsg7ek26uqxmxsm2.table.core.windows.net/\",\r\n
+        \"StorageAccountKey1\",\r\n      \"blobEndpoint\": \"https://sflogs422vfpmcmxh3y2.blob.core.windows.net/\",\r\n
+        \     \"queueEndpoint\": \"https://sflogs422vfpmcmxh3y2.queue.core.windows.net/\",\r\n
+        \     \"tableEndpoint\": \"https://sflogs422vfpmcmxh3y2.table.core.windows.net/\",\r\n
         \     \"protectedAccountKeyName2\": \"\"\r\n    },\r\n    \"upgradeMode\":
         \"Automatic\",\r\n    \"addonFeatures\": [\r\n      \"DnsService\"\r\n    ],\r\n
         \   \"availableClusterVersions\": [\r\n      {\r\n        \"codeVersion\":
-        \"9.0.1048.9590\",\r\n        \"supportExpiryUtc\": \"9999-12-31T23:59:59.9999999\",\r\n
+        \"9.1.1653.9590\",\r\n        \"supportExpiryUtc\": \"9999-12-31T23:59:59.9999999\",\r\n
         \       \"environment\": \"Windows\"\r\n      }\r\n    ]\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2840'
+      - '2880'
       content-type:
       - application/json
       date:
-      - Thu, 04 Aug 2022 01:47:42 GMT
+      - Mon, 15 May 2023 12:57:18 GMT
       expires:
       - '-1'
       pragma:
@@ -1811,7 +1920,8 @@ interactions:
       ParameterSetName:
       - -g -c
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-mgmt-servicefabric/1.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-mgmt-servicefabric/1.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004?api-version=2020-03-01
   response:
@@ -1820,16 +1930,17 @@ interactions:
         \"westus\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004\",\r\n
         \ \"name\": \"sfrp-cli-000004\",\r\n  \"tags\": {\r\n    \"resourceType\":
         \"Service Fabric\",\r\n    \"clusterName\": \"sfrp-cli-000004\"\r\n  },\r\n
-        \ \"etag\": \"W/\\\"637951741211859813\\\"\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"v-taoxuzeng@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2022-08-04T01:42:01.1528465+00:00\",\r\n    \"lastModifiedBy\": \"v-taoxuzeng@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2022-08-04T01:42:01.1528465+00:00\"\r\n
+        \ \"etag\": \"W/\\\"638197519633111450\\\"\",\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"azureclilivetest@azuresdkteam.onmicrosoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2023-05-15T12:52:43.2913146+00:00\",\r\n
+        \   \"lastModifiedBy\": \"azureclilivetest@azuresdkteam.onmicrosoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-05-15T12:52:43.2913146+00:00\"\r\n
         \ },\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"clusterId\": \"bb4f21b8-10ac-4319-ab8b-5aa5d31f6437\",\r\n    \"clusterCodeVersion\":
-        \"9.0.1048.9590\",\r\n    \"clusterState\": \"Deploying\",\r\n    \"managementEndpoint\":
+        \   \"clusterId\": \"c6365416-91a2-416c-83d9-3c1e43660922\",\r\n    \"clusterCodeVersion\":
+        \"9.1.1653.9590\",\r\n    \"clusterState\": \"Deploying\",\r\n    \"managementEndpoint\":
         \"https://sfrp-cli-000004.westus.cloudapp.azure.com:19080\",\r\n    \"clusterEndpoint\":
-        \"https://westus.servicefabric.azure.com/runtime/clusters/bb4f21b8-10ac-4319-ab8b-5aa5d31f6437\",\r\n
-        \   \"certificate\": {\r\n      \"thumbprint\": \"6331526820788BEA0E1F684420EA4EE5EBE02F1C\",\r\n
+        \"https://westus.servicefabric.azure.com/runtime/clusters/c6365416-91a2-416c-83d9-3c1e43660922\",\r\n
+        \   \"certificate\": {\r\n      \"thumbprint\": \"D6EA15C07E44545DE32B4612C2B93B4C49C7EC17\",\r\n
         \     \"x509StoreName\": \"My\"\r\n    },\r\n    \"clientCertificateThumbprints\":
         [],\r\n    \"clientCertificateCommonNames\": [],\r\n    \"fabricSettings\":
         [\r\n      {\r\n        \"name\": \"Security\",\r\n        \"parameters\":
@@ -1843,25 +1954,25 @@ interactions:
         \       \"ephemeralPorts\": {\r\n          \"startPort\": 49152,\r\n          \"endPort\":
         65534\r\n        },\r\n        \"isPrimary\": true,\r\n        \"durabilityLevel\":
         \"Bronze\"\r\n      }\r\n    ],\r\n    \"diagnosticsStorageAccountConfig\":
-        {\r\n      \"storageAccountName\": \"sflogsg7ek26uqxmxsm2\",\r\n      \"primaryAccessKey\":
+        {\r\n      \"storageAccountName\": \"sflogs422vfpmcmxh3y2\",\r\n      \"primaryAccessKey\":
         \"\",\r\n      \"secondaryAccessKey\": \"\",\r\n      \"protectedAccountKeyName\":
-        \"StorageAccountKey1\",\r\n      \"blobEndpoint\": \"https://sflogsg7ek26uqxmxsm2.blob.core.windows.net/\",\r\n
-        \     \"queueEndpoint\": \"https://sflogsg7ek26uqxmxsm2.queue.core.windows.net/\",\r\n
-        \     \"tableEndpoint\": \"https://sflogsg7ek26uqxmxsm2.table.core.windows.net/\",\r\n
+        \"StorageAccountKey1\",\r\n      \"blobEndpoint\": \"https://sflogs422vfpmcmxh3y2.blob.core.windows.net/\",\r\n
+        \     \"queueEndpoint\": \"https://sflogs422vfpmcmxh3y2.queue.core.windows.net/\",\r\n
+        \     \"tableEndpoint\": \"https://sflogs422vfpmcmxh3y2.table.core.windows.net/\",\r\n
         \     \"protectedAccountKeyName2\": \"\"\r\n    },\r\n    \"upgradeMode\":
         \"Automatic\",\r\n    \"addonFeatures\": [\r\n      \"DnsService\"\r\n    ],\r\n
         \   \"availableClusterVersions\": [\r\n      {\r\n        \"codeVersion\":
-        \"9.0.1048.9590\",\r\n        \"supportExpiryUtc\": \"9999-12-31T23:59:59.9999999\",\r\n
+        \"9.1.1653.9590\",\r\n        \"supportExpiryUtc\": \"9999-12-31T23:59:59.9999999\",\r\n
         \       \"environment\": \"Windows\"\r\n      }\r\n    ]\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2840'
+      - '2880'
       content-type:
       - application/json
       date:
-      - Thu, 04 Aug 2022 01:48:43 GMT
+      - Mon, 15 May 2023 12:58:19 GMT
       expires:
       - '-1'
       pragma:
@@ -1894,7 +2005,8 @@ interactions:
       ParameterSetName:
       - -g -c
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-mgmt-servicefabric/1.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-mgmt-servicefabric/1.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004?api-version=2020-03-01
   response:
@@ -1903,16 +2015,17 @@ interactions:
         \"westus\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004\",\r\n
         \ \"name\": \"sfrp-cli-000004\",\r\n  \"tags\": {\r\n    \"resourceType\":
         \"Service Fabric\",\r\n    \"clusterName\": \"sfrp-cli-000004\"\r\n  },\r\n
-        \ \"etag\": \"W/\\\"637951741211859813\\\"\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"v-taoxuzeng@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2022-08-04T01:42:01.1528465+00:00\",\r\n    \"lastModifiedBy\": \"v-taoxuzeng@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2022-08-04T01:42:01.1528465+00:00\"\r\n
+        \ \"etag\": \"W/\\\"638197519633111450\\\"\",\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"azureclilivetest@azuresdkteam.onmicrosoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2023-05-15T12:52:43.2913146+00:00\",\r\n
+        \   \"lastModifiedBy\": \"azureclilivetest@azuresdkteam.onmicrosoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-05-15T12:52:43.2913146+00:00\"\r\n
         \ },\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"clusterId\": \"bb4f21b8-10ac-4319-ab8b-5aa5d31f6437\",\r\n    \"clusterCodeVersion\":
-        \"9.0.1048.9590\",\r\n    \"clusterState\": \"Deploying\",\r\n    \"managementEndpoint\":
+        \   \"clusterId\": \"c6365416-91a2-416c-83d9-3c1e43660922\",\r\n    \"clusterCodeVersion\":
+        \"9.1.1653.9590\",\r\n    \"clusterState\": \"Deploying\",\r\n    \"managementEndpoint\":
         \"https://sfrp-cli-000004.westus.cloudapp.azure.com:19080\",\r\n    \"clusterEndpoint\":
-        \"https://westus.servicefabric.azure.com/runtime/clusters/bb4f21b8-10ac-4319-ab8b-5aa5d31f6437\",\r\n
-        \   \"certificate\": {\r\n      \"thumbprint\": \"6331526820788BEA0E1F684420EA4EE5EBE02F1C\",\r\n
+        \"https://westus.servicefabric.azure.com/runtime/clusters/c6365416-91a2-416c-83d9-3c1e43660922\",\r\n
+        \   \"certificate\": {\r\n      \"thumbprint\": \"D6EA15C07E44545DE32B4612C2B93B4C49C7EC17\",\r\n
         \     \"x509StoreName\": \"My\"\r\n    },\r\n    \"clientCertificateThumbprints\":
         [],\r\n    \"clientCertificateCommonNames\": [],\r\n    \"fabricSettings\":
         [\r\n      {\r\n        \"name\": \"Security\",\r\n        \"parameters\":
@@ -1926,25 +2039,25 @@ interactions:
         \       \"ephemeralPorts\": {\r\n          \"startPort\": 49152,\r\n          \"endPort\":
         65534\r\n        },\r\n        \"isPrimary\": true,\r\n        \"durabilityLevel\":
         \"Bronze\"\r\n      }\r\n    ],\r\n    \"diagnosticsStorageAccountConfig\":
-        {\r\n      \"storageAccountName\": \"sflogsg7ek26uqxmxsm2\",\r\n      \"primaryAccessKey\":
+        {\r\n      \"storageAccountName\": \"sflogs422vfpmcmxh3y2\",\r\n      \"primaryAccessKey\":
         \"\",\r\n      \"secondaryAccessKey\": \"\",\r\n      \"protectedAccountKeyName\":
-        \"StorageAccountKey1\",\r\n      \"blobEndpoint\": \"https://sflogsg7ek26uqxmxsm2.blob.core.windows.net/\",\r\n
-        \     \"queueEndpoint\": \"https://sflogsg7ek26uqxmxsm2.queue.core.windows.net/\",\r\n
-        \     \"tableEndpoint\": \"https://sflogsg7ek26uqxmxsm2.table.core.windows.net/\",\r\n
+        \"StorageAccountKey1\",\r\n      \"blobEndpoint\": \"https://sflogs422vfpmcmxh3y2.blob.core.windows.net/\",\r\n
+        \     \"queueEndpoint\": \"https://sflogs422vfpmcmxh3y2.queue.core.windows.net/\",\r\n
+        \     \"tableEndpoint\": \"https://sflogs422vfpmcmxh3y2.table.core.windows.net/\",\r\n
         \     \"protectedAccountKeyName2\": \"\"\r\n    },\r\n    \"upgradeMode\":
         \"Automatic\",\r\n    \"addonFeatures\": [\r\n      \"DnsService\"\r\n    ],\r\n
         \   \"availableClusterVersions\": [\r\n      {\r\n        \"codeVersion\":
-        \"9.0.1048.9590\",\r\n        \"supportExpiryUtc\": \"9999-12-31T23:59:59.9999999\",\r\n
+        \"9.1.1653.9590\",\r\n        \"supportExpiryUtc\": \"9999-12-31T23:59:59.9999999\",\r\n
         \       \"environment\": \"Windows\"\r\n      }\r\n    ]\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2840'
+      - '2880'
       content-type:
       - application/json
       date:
-      - Thu, 04 Aug 2022 01:49:45 GMT
+      - Mon, 15 May 2023 12:59:19 GMT
       expires:
       - '-1'
       pragma:
@@ -1977,7 +2090,8 @@ interactions:
       ParameterSetName:
       - -g -c
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-mgmt-servicefabric/1.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-mgmt-servicefabric/1.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004?api-version=2020-03-01
   response:
@@ -1986,16 +2100,17 @@ interactions:
         \"westus\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004\",\r\n
         \ \"name\": \"sfrp-cli-000004\",\r\n  \"tags\": {\r\n    \"resourceType\":
         \"Service Fabric\",\r\n    \"clusterName\": \"sfrp-cli-000004\"\r\n  },\r\n
-        \ \"etag\": \"W/\\\"637951741211859813\\\"\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"v-taoxuzeng@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2022-08-04T01:42:01.1528465+00:00\",\r\n    \"lastModifiedBy\": \"v-taoxuzeng@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2022-08-04T01:42:01.1528465+00:00\"\r\n
+        \ \"etag\": \"W/\\\"638197519633111450\\\"\",\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"azureclilivetest@azuresdkteam.onmicrosoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2023-05-15T12:52:43.2913146+00:00\",\r\n
+        \   \"lastModifiedBy\": \"azureclilivetest@azuresdkteam.onmicrosoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-05-15T12:52:43.2913146+00:00\"\r\n
         \ },\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"clusterId\": \"bb4f21b8-10ac-4319-ab8b-5aa5d31f6437\",\r\n    \"clusterCodeVersion\":
-        \"9.0.1048.9590\",\r\n    \"clusterState\": \"BaselineUpgrade\",\r\n    \"managementEndpoint\":
+        \   \"clusterId\": \"c6365416-91a2-416c-83d9-3c1e43660922\",\r\n    \"clusterCodeVersion\":
+        \"9.1.1653.9590\",\r\n    \"clusterState\": \"BaselineUpgrade\",\r\n    \"managementEndpoint\":
         \"https://sfrp-cli-000004.westus.cloudapp.azure.com:19080\",\r\n    \"clusterEndpoint\":
-        \"https://westus.servicefabric.azure.com/runtime/clusters/bb4f21b8-10ac-4319-ab8b-5aa5d31f6437\",\r\n
-        \   \"certificate\": {\r\n      \"thumbprint\": \"6331526820788BEA0E1F684420EA4EE5EBE02F1C\",\r\n
+        \"https://westus.servicefabric.azure.com/runtime/clusters/c6365416-91a2-416c-83d9-3c1e43660922\",\r\n
+        \   \"certificate\": {\r\n      \"thumbprint\": \"D6EA15C07E44545DE32B4612C2B93B4C49C7EC17\",\r\n
         \     \"x509StoreName\": \"My\"\r\n    },\r\n    \"clientCertificateThumbprints\":
         [],\r\n    \"clientCertificateCommonNames\": [],\r\n    \"fabricSettings\":
         [\r\n      {\r\n        \"name\": \"Security\",\r\n        \"parameters\":
@@ -2009,25 +2124,25 @@ interactions:
         \       \"ephemeralPorts\": {\r\n          \"startPort\": 49152,\r\n          \"endPort\":
         65534\r\n        },\r\n        \"isPrimary\": true,\r\n        \"durabilityLevel\":
         \"Bronze\"\r\n      }\r\n    ],\r\n    \"diagnosticsStorageAccountConfig\":
-        {\r\n      \"storageAccountName\": \"sflogsg7ek26uqxmxsm2\",\r\n      \"primaryAccessKey\":
+        {\r\n      \"storageAccountName\": \"sflogs422vfpmcmxh3y2\",\r\n      \"primaryAccessKey\":
         \"\",\r\n      \"secondaryAccessKey\": \"\",\r\n      \"protectedAccountKeyName\":
-        \"StorageAccountKey1\",\r\n      \"blobEndpoint\": \"https://sflogsg7ek26uqxmxsm2.blob.core.windows.net/\",\r\n
-        \     \"queueEndpoint\": \"https://sflogsg7ek26uqxmxsm2.queue.core.windows.net/\",\r\n
-        \     \"tableEndpoint\": \"https://sflogsg7ek26uqxmxsm2.table.core.windows.net/\",\r\n
+        \"StorageAccountKey1\",\r\n      \"blobEndpoint\": \"https://sflogs422vfpmcmxh3y2.blob.core.windows.net/\",\r\n
+        \     \"queueEndpoint\": \"https://sflogs422vfpmcmxh3y2.queue.core.windows.net/\",\r\n
+        \     \"tableEndpoint\": \"https://sflogs422vfpmcmxh3y2.table.core.windows.net/\",\r\n
         \     \"protectedAccountKeyName2\": \"\"\r\n    },\r\n    \"upgradeMode\":
         \"Automatic\",\r\n    \"addonFeatures\": [\r\n      \"DnsService\"\r\n    ],\r\n
         \   \"availableClusterVersions\": [\r\n      {\r\n        \"codeVersion\":
-        \"9.0.1048.9590\",\r\n        \"supportExpiryUtc\": \"9999-12-31T23:59:59.9999999\",\r\n
+        \"9.1.1653.9590\",\r\n        \"supportExpiryUtc\": \"9999-12-31T23:59:59.9999999\",\r\n
         \       \"environment\": \"Windows\"\r\n      }\r\n    ]\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2846'
+      - '2886'
       content-type:
       - application/json
       date:
-      - Thu, 04 Aug 2022 01:50:47 GMT
+      - Mon, 15 May 2023 13:00:20 GMT
       expires:
       - '-1'
       pragma:
@@ -2060,7 +2175,8 @@ interactions:
       ParameterSetName:
       - -g -c
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-mgmt-servicefabric/1.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-mgmt-servicefabric/1.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004?api-version=2020-03-01
   response:
@@ -2069,16 +2185,17 @@ interactions:
         \"westus\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004\",\r\n
         \ \"name\": \"sfrp-cli-000004\",\r\n  \"tags\": {\r\n    \"resourceType\":
         \"Service Fabric\",\r\n    \"clusterName\": \"sfrp-cli-000004\"\r\n  },\r\n
-        \ \"etag\": \"W/\\\"637951741211859813\\\"\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"v-taoxuzeng@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2022-08-04T01:42:01.1528465+00:00\",\r\n    \"lastModifiedBy\": \"v-taoxuzeng@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2022-08-04T01:42:01.1528465+00:00\"\r\n
+        \ \"etag\": \"W/\\\"638197519633111450\\\"\",\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"azureclilivetest@azuresdkteam.onmicrosoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2023-05-15T12:52:43.2913146+00:00\",\r\n
+        \   \"lastModifiedBy\": \"azureclilivetest@azuresdkteam.onmicrosoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-05-15T12:52:43.2913146+00:00\"\r\n
         \ },\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"clusterId\": \"bb4f21b8-10ac-4319-ab8b-5aa5d31f6437\",\r\n    \"clusterCodeVersion\":
-        \"9.0.1048.9590\",\r\n    \"clusterState\": \"BaselineUpgrade\",\r\n    \"managementEndpoint\":
+        \   \"clusterId\": \"c6365416-91a2-416c-83d9-3c1e43660922\",\r\n    \"clusterCodeVersion\":
+        \"9.1.1653.9590\",\r\n    \"clusterState\": \"BaselineUpgrade\",\r\n    \"managementEndpoint\":
         \"https://sfrp-cli-000004.westus.cloudapp.azure.com:19080\",\r\n    \"clusterEndpoint\":
-        \"https://westus.servicefabric.azure.com/runtime/clusters/bb4f21b8-10ac-4319-ab8b-5aa5d31f6437\",\r\n
-        \   \"certificate\": {\r\n      \"thumbprint\": \"6331526820788BEA0E1F684420EA4EE5EBE02F1C\",\r\n
+        \"https://westus.servicefabric.azure.com/runtime/clusters/c6365416-91a2-416c-83d9-3c1e43660922\",\r\n
+        \   \"certificate\": {\r\n      \"thumbprint\": \"D6EA15C07E44545DE32B4612C2B93B4C49C7EC17\",\r\n
         \     \"x509StoreName\": \"My\"\r\n    },\r\n    \"clientCertificateThumbprints\":
         [],\r\n    \"clientCertificateCommonNames\": [],\r\n    \"fabricSettings\":
         [\r\n      {\r\n        \"name\": \"Security\",\r\n        \"parameters\":
@@ -2092,25 +2209,25 @@ interactions:
         \       \"ephemeralPorts\": {\r\n          \"startPort\": 49152,\r\n          \"endPort\":
         65534\r\n        },\r\n        \"isPrimary\": true,\r\n        \"durabilityLevel\":
         \"Bronze\"\r\n      }\r\n    ],\r\n    \"diagnosticsStorageAccountConfig\":
-        {\r\n      \"storageAccountName\": \"sflogsg7ek26uqxmxsm2\",\r\n      \"primaryAccessKey\":
+        {\r\n      \"storageAccountName\": \"sflogs422vfpmcmxh3y2\",\r\n      \"primaryAccessKey\":
         \"\",\r\n      \"secondaryAccessKey\": \"\",\r\n      \"protectedAccountKeyName\":
-        \"StorageAccountKey1\",\r\n      \"blobEndpoint\": \"https://sflogsg7ek26uqxmxsm2.blob.core.windows.net/\",\r\n
-        \     \"queueEndpoint\": \"https://sflogsg7ek26uqxmxsm2.queue.core.windows.net/\",\r\n
-        \     \"tableEndpoint\": \"https://sflogsg7ek26uqxmxsm2.table.core.windows.net/\",\r\n
+        \"StorageAccountKey1\",\r\n      \"blobEndpoint\": \"https://sflogs422vfpmcmxh3y2.blob.core.windows.net/\",\r\n
+        \     \"queueEndpoint\": \"https://sflogs422vfpmcmxh3y2.queue.core.windows.net/\",\r\n
+        \     \"tableEndpoint\": \"https://sflogs422vfpmcmxh3y2.table.core.windows.net/\",\r\n
         \     \"protectedAccountKeyName2\": \"\"\r\n    },\r\n    \"upgradeMode\":
         \"Automatic\",\r\n    \"addonFeatures\": [\r\n      \"DnsService\"\r\n    ],\r\n
         \   \"availableClusterVersions\": [\r\n      {\r\n        \"codeVersion\":
-        \"9.0.1048.9590\",\r\n        \"supportExpiryUtc\": \"9999-12-31T23:59:59.9999999\",\r\n
+        \"9.1.1653.9590\",\r\n        \"supportExpiryUtc\": \"9999-12-31T23:59:59.9999999\",\r\n
         \       \"environment\": \"Windows\"\r\n      }\r\n    ]\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2846'
+      - '2886'
       content-type:
       - application/json
       date:
-      - Thu, 04 Aug 2022 01:51:49 GMT
+      - Mon, 15 May 2023 13:01:21 GMT
       expires:
       - '-1'
       pragma:
@@ -2143,7 +2260,8 @@ interactions:
       ParameterSetName:
       - -g -c
       User-Agent:
-      - AZURECLI/2.39.0 azsdk-python-mgmt-servicefabric/1.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.1 azsdk-python-mgmt-servicefabric/1.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004?api-version=2020-03-01
   response:
@@ -2152,16 +2270,17 @@ interactions:
         \"westus\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004\",\r\n
         \ \"name\": \"sfrp-cli-000004\",\r\n  \"tags\": {\r\n    \"resourceType\":
         \"Service Fabric\",\r\n    \"clusterName\": \"sfrp-cli-000004\"\r\n  },\r\n
-        \ \"etag\": \"W/\\\"637951741211859813\\\"\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"v-taoxuzeng@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2022-08-04T01:42:01.1528465+00:00\",\r\n    \"lastModifiedBy\": \"v-taoxuzeng@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2022-08-04T01:42:01.1528465+00:00\"\r\n
+        \ \"etag\": \"W/\\\"638197519633111450\\\"\",\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"azureclilivetest@azuresdkteam.onmicrosoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2023-05-15T12:52:43.2913146+00:00\",\r\n
+        \   \"lastModifiedBy\": \"azureclilivetest@azuresdkteam.onmicrosoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-05-15T12:52:43.2913146+00:00\"\r\n
         \ },\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"clusterId\": \"bb4f21b8-10ac-4319-ab8b-5aa5d31f6437\",\r\n    \"clusterCodeVersion\":
-        \"9.0.1048.9590\",\r\n    \"clusterState\": \"Ready\",\r\n    \"managementEndpoint\":
+        \   \"clusterId\": \"c6365416-91a2-416c-83d9-3c1e43660922\",\r\n    \"clusterCodeVersion\":
+        \"9.1.1653.9590\",\r\n    \"clusterState\": \"BaselineUpgrade\",\r\n    \"managementEndpoint\":
         \"https://sfrp-cli-000004.westus.cloudapp.azure.com:19080\",\r\n    \"clusterEndpoint\":
-        \"https://westus.servicefabric.azure.com/runtime/clusters/bb4f21b8-10ac-4319-ab8b-5aa5d31f6437\",\r\n
-        \   \"certificate\": {\r\n      \"thumbprint\": \"6331526820788BEA0E1F684420EA4EE5EBE02F1C\",\r\n
+        \"https://westus.servicefabric.azure.com/runtime/clusters/c6365416-91a2-416c-83d9-3c1e43660922\",\r\n
+        \   \"certificate\": {\r\n      \"thumbprint\": \"D6EA15C07E44545DE32B4612C2B93B4C49C7EC17\",\r\n
         \     \"x509StoreName\": \"My\"\r\n    },\r\n    \"clientCertificateThumbprints\":
         [],\r\n    \"clientCertificateCommonNames\": [],\r\n    \"fabricSettings\":
         [\r\n      {\r\n        \"name\": \"Security\",\r\n        \"parameters\":
@@ -2175,25 +2294,195 @@ interactions:
         \       \"ephemeralPorts\": {\r\n          \"startPort\": 49152,\r\n          \"endPort\":
         65534\r\n        },\r\n        \"isPrimary\": true,\r\n        \"durabilityLevel\":
         \"Bronze\"\r\n      }\r\n    ],\r\n    \"diagnosticsStorageAccountConfig\":
-        {\r\n      \"storageAccountName\": \"sflogsg7ek26uqxmxsm2\",\r\n      \"primaryAccessKey\":
+        {\r\n      \"storageAccountName\": \"sflogs422vfpmcmxh3y2\",\r\n      \"primaryAccessKey\":
         \"\",\r\n      \"secondaryAccessKey\": \"\",\r\n      \"protectedAccountKeyName\":
-        \"StorageAccountKey1\",\r\n      \"blobEndpoint\": \"https://sflogsg7ek26uqxmxsm2.blob.core.windows.net/\",\r\n
-        \     \"queueEndpoint\": \"https://sflogsg7ek26uqxmxsm2.queue.core.windows.net/\",\r\n
-        \     \"tableEndpoint\": \"https://sflogsg7ek26uqxmxsm2.table.core.windows.net/\",\r\n
+        \"StorageAccountKey1\",\r\n      \"blobEndpoint\": \"https://sflogs422vfpmcmxh3y2.blob.core.windows.net/\",\r\n
+        \     \"queueEndpoint\": \"https://sflogs422vfpmcmxh3y2.queue.core.windows.net/\",\r\n
+        \     \"tableEndpoint\": \"https://sflogs422vfpmcmxh3y2.table.core.windows.net/\",\r\n
         \     \"protectedAccountKeyName2\": \"\"\r\n    },\r\n    \"upgradeMode\":
         \"Automatic\",\r\n    \"addonFeatures\": [\r\n      \"DnsService\"\r\n    ],\r\n
         \   \"availableClusterVersions\": [\r\n      {\r\n        \"codeVersion\":
-        \"9.0.1048.9590\",\r\n        \"supportExpiryUtc\": \"9999-12-31T23:59:59.9999999\",\r\n
+        \"9.1.1653.9590\",\r\n        \"supportExpiryUtc\": \"9999-12-31T23:59:59.9999999\",\r\n
         \       \"environment\": \"Windows\"\r\n      }\r\n    ]\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2836'
+      - '2886'
       content-type:
       - application/json
       date:
-      - Thu, 04 Aug 2022 01:52:51 GMT
+      - Mon, 15 May 2023 13:02:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sf cluster show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -c
+      User-Agent:
+      - AZURECLI/2.48.1 azsdk-python-mgmt-servicefabric/1.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"type\": \"Microsoft.ServiceFabric/clusters\",\r\n  \"location\":
+        \"westus\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004\",\r\n
+        \ \"name\": \"sfrp-cli-000004\",\r\n  \"tags\": {\r\n    \"resourceType\":
+        \"Service Fabric\",\r\n    \"clusterName\": \"sfrp-cli-000004\"\r\n  },\r\n
+        \ \"etag\": \"W/\\\"638197519633111450\\\"\",\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"azureclilivetest@azuresdkteam.onmicrosoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2023-05-15T12:52:43.2913146+00:00\",\r\n
+        \   \"lastModifiedBy\": \"azureclilivetest@azuresdkteam.onmicrosoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-05-15T12:52:43.2913146+00:00\"\r\n
+        \ },\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"clusterId\": \"c6365416-91a2-416c-83d9-3c1e43660922\",\r\n    \"clusterCodeVersion\":
+        \"9.1.1653.9590\",\r\n    \"clusterState\": \"BaselineUpgrade\",\r\n    \"managementEndpoint\":
+        \"https://sfrp-cli-000004.westus.cloudapp.azure.com:19080\",\r\n    \"clusterEndpoint\":
+        \"https://westus.servicefabric.azure.com/runtime/clusters/c6365416-91a2-416c-83d9-3c1e43660922\",\r\n
+        \   \"certificate\": {\r\n      \"thumbprint\": \"D6EA15C07E44545DE32B4612C2B93B4C49C7EC17\",\r\n
+        \     \"x509StoreName\": \"My\"\r\n    },\r\n    \"clientCertificateThumbprints\":
+        [],\r\n    \"clientCertificateCommonNames\": [],\r\n    \"fabricSettings\":
+        [\r\n      {\r\n        \"name\": \"Security\",\r\n        \"parameters\":
+        [\r\n          {\r\n            \"name\": \"ClusterProtectionLevel\",\r\n
+        \           \"value\": \"EncryptAndSign\"\r\n          }\r\n        ]\r\n
+        \     }\r\n    ],\r\n    \"vmImage\": \"Windows\",\r\n    \"reliabilityLevel\":
+        \"Bronze\",\r\n    \"nodeTypes\": [\r\n      {\r\n        \"name\": \"nt1vm\",\r\n
+        \       \"vmInstanceCount\": 3,\r\n        \"clientConnectionEndpointPort\":
+        19000,\r\n        \"httpGatewayEndpointPort\": 19080,\r\n        \"applicationPorts\":
+        {\r\n          \"startPort\": 20000,\r\n          \"endPort\": 30000\r\n        },\r\n
+        \       \"ephemeralPorts\": {\r\n          \"startPort\": 49152,\r\n          \"endPort\":
+        65534\r\n        },\r\n        \"isPrimary\": true,\r\n        \"durabilityLevel\":
+        \"Bronze\"\r\n      }\r\n    ],\r\n    \"diagnosticsStorageAccountConfig\":
+        {\r\n      \"storageAccountName\": \"sflogs422vfpmcmxh3y2\",\r\n      \"primaryAccessKey\":
+        \"\",\r\n      \"secondaryAccessKey\": \"\",\r\n      \"protectedAccountKeyName\":
+        \"StorageAccountKey1\",\r\n      \"blobEndpoint\": \"https://sflogs422vfpmcmxh3y2.blob.core.windows.net/\",\r\n
+        \     \"queueEndpoint\": \"https://sflogs422vfpmcmxh3y2.queue.core.windows.net/\",\r\n
+        \     \"tableEndpoint\": \"https://sflogs422vfpmcmxh3y2.table.core.windows.net/\",\r\n
+        \     \"protectedAccountKeyName2\": \"\"\r\n    },\r\n    \"upgradeMode\":
+        \"Automatic\",\r\n    \"addonFeatures\": [\r\n      \"DnsService\"\r\n    ],\r\n
+        \   \"availableClusterVersions\": [\r\n      {\r\n        \"codeVersion\":
+        \"9.1.1653.9590\",\r\n        \"supportExpiryUtc\": \"9999-12-31T23:59:59.9999999\",\r\n
+        \       \"environment\": \"Windows\"\r\n      }\r\n    ]\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2886'
+      content-type:
+      - application/json
+      date:
+      - Mon, 15 May 2023 13:03:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sf cluster show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -c
+      User-Agent:
+      - AZURECLI/2.48.1 azsdk-python-mgmt-servicefabric/1.0.0 Python/3.10.11 (Linux-5.15.0-1036-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"type\": \"Microsoft.ServiceFabric/clusters\",\r\n  \"location\":
+        \"westus\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ServiceFabric/clusters/sfrp-cli-000004\",\r\n
+        \ \"name\": \"sfrp-cli-000004\",\r\n  \"tags\": {\r\n    \"resourceType\":
+        \"Service Fabric\",\r\n    \"clusterName\": \"sfrp-cli-000004\"\r\n  },\r\n
+        \ \"etag\": \"W/\\\"638197519633111450\\\"\",\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"azureclilivetest@azuresdkteam.onmicrosoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2023-05-15T12:52:43.2913146+00:00\",\r\n
+        \   \"lastModifiedBy\": \"azureclilivetest@azuresdkteam.onmicrosoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-05-15T12:52:43.2913146+00:00\"\r\n
+        \ },\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"clusterId\": \"c6365416-91a2-416c-83d9-3c1e43660922\",\r\n    \"clusterCodeVersion\":
+        \"9.1.1653.9590\",\r\n    \"clusterState\": \"Ready\",\r\n    \"managementEndpoint\":
+        \"https://sfrp-cli-000004.westus.cloudapp.azure.com:19080\",\r\n    \"clusterEndpoint\":
+        \"https://westus.servicefabric.azure.com/runtime/clusters/c6365416-91a2-416c-83d9-3c1e43660922\",\r\n
+        \   \"certificate\": {\r\n      \"thumbprint\": \"D6EA15C07E44545DE32B4612C2B93B4C49C7EC17\",\r\n
+        \     \"x509StoreName\": \"My\"\r\n    },\r\n    \"clientCertificateThumbprints\":
+        [],\r\n    \"clientCertificateCommonNames\": [],\r\n    \"fabricSettings\":
+        [\r\n      {\r\n        \"name\": \"Security\",\r\n        \"parameters\":
+        [\r\n          {\r\n            \"name\": \"ClusterProtectionLevel\",\r\n
+        \           \"value\": \"EncryptAndSign\"\r\n          }\r\n        ]\r\n
+        \     }\r\n    ],\r\n    \"vmImage\": \"Windows\",\r\n    \"reliabilityLevel\":
+        \"Bronze\",\r\n    \"nodeTypes\": [\r\n      {\r\n        \"name\": \"nt1vm\",\r\n
+        \       \"vmInstanceCount\": 3,\r\n        \"clientConnectionEndpointPort\":
+        19000,\r\n        \"httpGatewayEndpointPort\": 19080,\r\n        \"applicationPorts\":
+        {\r\n          \"startPort\": 20000,\r\n          \"endPort\": 30000\r\n        },\r\n
+        \       \"ephemeralPorts\": {\r\n          \"startPort\": 49152,\r\n          \"endPort\":
+        65534\r\n        },\r\n        \"isPrimary\": true,\r\n        \"durabilityLevel\":
+        \"Bronze\"\r\n      }\r\n    ],\r\n    \"diagnosticsStorageAccountConfig\":
+        {\r\n      \"storageAccountName\": \"sflogs422vfpmcmxh3y2\",\r\n      \"primaryAccessKey\":
+        \"\",\r\n      \"secondaryAccessKey\": \"\",\r\n      \"protectedAccountKeyName\":
+        \"StorageAccountKey1\",\r\n      \"blobEndpoint\": \"https://sflogs422vfpmcmxh3y2.blob.core.windows.net/\",\r\n
+        \     \"queueEndpoint\": \"https://sflogs422vfpmcmxh3y2.queue.core.windows.net/\",\r\n
+        \     \"tableEndpoint\": \"https://sflogs422vfpmcmxh3y2.table.core.windows.net/\",\r\n
+        \     \"protectedAccountKeyName2\": \"\"\r\n    },\r\n    \"upgradeMode\":
+        \"Automatic\",\r\n    \"addonFeatures\": [\r\n      \"DnsService\"\r\n    ],\r\n
+        \   \"availableClusterVersions\": [\r\n      {\r\n        \"codeVersion\":
+        \"9.1.1653.9590\",\r\n        \"supportExpiryUtc\": \"9999-12-31T23:59:59.9999999\",\r\n
+        \       \"environment\": \"Windows\"\r\n      }\r\n    ]\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2876'
+      content-type:
+      - application/json
+      date:
+      - Mon, 15 May 2023 13:04:22 GMT
       expires:
       - '-1'
       pragma:

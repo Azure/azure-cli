@@ -25,7 +25,10 @@ def load_command_table(self, _):
     redis_linked_server = CliCommandType(
         operations_tmpl='azure.mgmt.redis.operations#LinkedServerOperations.{}',
         client_factory=cf_linked_server)
-
+    redis_operations_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.redis.custom#{}',
+        client_factory=cf_redis
+    )
     redis_patch_schedules_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.redis.custom#{}',
         client_factory=cf_patch_schedules)
@@ -47,7 +50,7 @@ def load_command_table(self, _):
         g.command('list-keys', 'list_keys')
         g.custom_command('regenerate-keys', 'cli_redis_regenerate_key')
         g.show_command('show', 'get')
-        g.generic_update_command('update', setter_name='update', custom_func_name='cli_redis_update')
+        g.generic_update_command('update', setter_name='custom_update_setter', setter_type=redis_operations_custom, custom_func_name='cli_redis_update')
 
     with self.command_group('redis patch-schedule', redis_patch, custom_command_type=redis_patch_schedules_custom) as g:
         g.custom_command('create', 'cli_redis_patch_schedule_create_or_update')
@@ -64,7 +67,7 @@ def load_command_table(self, _):
 
     with self.command_group('redis server-link', redis_linked_server, custom_command_type=redis_linked_server_custom) as g:
         g.custom_command('create', 'cli_redis_create_server_link')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.command('list', 'list')
 

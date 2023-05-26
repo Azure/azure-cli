@@ -32,13 +32,10 @@ KEYS_DIR = os.path.join(TEST_DIR, 'keys')
 
 def _create_keyvault(test, kwargs, additional_args=None):
     # need premium KeyVault to store keys in HSM
-    # if --enable-soft-delete is not specified, turn that off to prevent the tests from leaving waste behind
     if additional_args is None:
         additional_args = ''
-    if '--enable-soft-delete' not in additional_args:
-        additional_args += ' --enable-soft-delete false'
     kwargs['add'] = additional_args
-    return test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium {add}')
+    return test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium {add} --retention-days 7')
 
 
 class DateTimeParseTest(unittest.TestCase):
@@ -66,14 +63,13 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         })
 
         # test create keyvault with default access policy set
-        keyvault = self.cmd('keyvault create -g {rg} -n {kv} -l {loc} --enable-soft-delete false', checks=[
+        keyvault = self.cmd('keyvault create -g {rg} -n {kv} -l {loc}', checks=[
             self.check('name', '{kv}'),
             self.check('location', '{loc}'),
             self.check('resourceGroup', '{rg}'),
             self.check('type(properties.accessPolicies)', 'array'),
             self.check('length(properties.accessPolicies)', 1),
             self.check('properties.sku.name', 'standard'),
-            self.check('properties.enableSoftDelete', False),
             self.check('properties.enablePurgeProtection', None),
             self.check('properties.softDeleteRetentionInDays', 90)
         ]).get_output_in_json()
@@ -98,7 +94,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
             self.check('properties.sku.name', 'premium'),
         ])
         # test updating updating other properties
-        self.cmd('keyvault update -g {rg} -n {kv} --enable-soft-delete '
+        self.cmd('keyvault update -g {rg} -n {kv} '
                  '--enabled-for-deployment --enabled-for-disk-encryption --enabled-for-template-deployment '
                  '--bypass AzureServices --default-action Deny',
                  checks=[
@@ -149,9 +145,9 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault delete -n {kv2}')
         self.cmd('keyvault purge -n {kv2}')
 
-        # test explicitly set '--enable-soft-delete true --enable-purge-protection true'
+        # test explicitly set '--enable-purge-protection true'
         # unfortunately this will leave some waste behind, so make it the last test to lowered the execution count
-        self.cmd('keyvault create -g {rg} -n {kv4} -l {loc} --enable-soft-delete true --enable-purge-protection true',
+        self.cmd('keyvault create -g {rg} -n {kv4} -l {loc} --enable-purge-protection true --retention-days 7',
                  checks=[self.check('properties.enableSoftDelete', True),
                          self.check('properties.enablePurgeProtection', True)])
 
@@ -347,7 +343,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
 #             'loc': 'westus',
 #             'sec': 'secret1'
 #         })
-#         _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete')
+#         _create_keyvault(self, self.kwargs)
 #         self.cmd('keyvault show -n {kv}', checks=self.check('properties.enableSoftDelete', True))
 
 #         max_timeout = 100
@@ -885,7 +881,7 @@ def _generate_certificate(path, keyfile=None, password=None):
 #             'loc': 'eastus2'
 #         })
 
-#         vault = _create_keyvault(self, self.kwargs, additional_args=' --enable-soft-delete true').get_output_in_json()
+#         vault = _create_keyvault(self, self.kwargs).get_output_in_json()
 
 #         # add all purge permissions to default the access policy
 #         default_policy = vault['properties']['accessPolicies'][0]
@@ -958,7 +954,7 @@ def _generate_certificate(path, keyfile=None, password=None):
 #         self.cmd('keyvault purge -n {kv}')
 
 #         # recover and purge with location
-#         _create_keyvault(self, self.kwargs, additional_args=' --enable-soft-delete true').get_output_in_json()
+#         _create_keyvault(self, self.kwargs).get_output_in_json()
 #         self.cmd('keyvault delete -n {kv}')
 #         self.cmd('keyvault recover -n {kv} -l {loc}', checks=self.check('name', '{kv}'))
 #         self.cmd('keyvault delete -n {kv}')

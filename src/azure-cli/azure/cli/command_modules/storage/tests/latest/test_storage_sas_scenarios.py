@@ -11,7 +11,7 @@ from knack.util import CLIError
 
 class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(location='EastUS2')
     def test_storage_file_sas_scenario(self, resource_group, storage_account):
         from datetime import datetime, timedelta
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
@@ -310,3 +310,30 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage fs file list -f {fs} --exclude-dir --account-name {account} --sas-token "{fs_sas}"', checks=[
             self.check('length(@)', 3)
         ])
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(hns=True, kind='StorageV2')
+    def test_storage_fs_sas_with_encryption_scope(self, resource_group, storage_account_info):
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        storage_account, account_key = storage_account_info
+        file_system = self.create_file_system(storage_account_info)
+
+        self.cmd("storage account encryption-scope create -i --account-name {sa} -g {rg} -n testencryption")
+
+        fs_sas = self.storage_cmd('storage fs generate-sas -n {} --permissions r --expiry {} --encryption-scope testencryption -o tsv',
+                                  storage_account_info, file_system, expiry).output.strip()
+        self.assertIn('sig=', fs_sas, 'SAS token {} does not contain sig segment'.format(fs_sas))
+        self.assertIn('se=', fs_sas, 'SAS token {} does not contain se(expiry) segment'.format(fs_sas))
+        self.assertIn('sp=r', fs_sas, 'SAS token {} does not contain permission segment'.format(fs_sas))
+        self.assertIn('ses=', fs_sas, 'SAS token {} does not contain ses segment'.format(fs_sas))
+
+        self.storage_cmd('storage fs directory create -f {} -n dir', storage_account_info, file_system)
+        dir_sas = self.storage_cmd('storage fs directory generate-sas -n dir -f {} --permission r --expiry {} --encryption-scope testencryption -o tsv',
+                                   storage_account_info, file_system, expiry).output.strip()
+        self.assertIn('sig=', dir_sas, 'SAS token {} does not contain sig segment'.format(dir_sas))
+        self.assertIn('se=', dir_sas, 'SAS token {} does not contain se(expiry) segment'.format(dir_sas))
+        self.assertIn('sp=r', dir_sas, 'SAS token {} does not contain permission segment'.format(dir_sas))
+        self.assertIn('ses=', dir_sas, 'SAS token {} does not contain ses segment'.format(dir_sas))
+

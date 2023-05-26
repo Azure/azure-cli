@@ -103,9 +103,13 @@ def load_arguments(self, _):
     bicep_outdir_type = CLIArgumentType(options_list=['--outdir'], completer=DirectoriesCompleter(), help="When set, saves the output at the specified directory.")
     bicep_outfile_type = CLIArgumentType(options_list=['--outfile'], completer=FilesCompleter(), help="When set, saves the output as the specified file path.")
     bicep_stdout_type = CLIArgumentType(options_list=['--stdout'], action='store_true', help="When set, prints all output to stdout instead of corresponding files.")
+    bicep_indentkind_type = CLIArgumentType(options_list=['--indent-kind'], help="Set indentation kind. Valid values are ( Space | Tab ).")
+    bicep_indentsize_type = CLIArgumentType(options_list=['--indent-size'], help="Number of spaces to indent with (Only valid with --indent-kind set to Space).")
+    bicep_insertfinalnewline_type = CLIArgumentType(options_list=['--insert-final-newline'], action='store_true', help="Insert a final newline.")
+    bicep_newline_type = CLIArgumentType(options_list=['--newline'], help="Set newline char. Valid values are ( Auto | LF | CRLF | CR ).")
     bicep_target_platform_type = CLIArgumentType(options_list=['--target-platform', '-t'],
                                                  arg_type=get_enum_type(
-                                                     ["win-x64", "linux-musl-x64", "linux-x64", "osx-x64"]),
+                                                     ["win-x64", "linux-musl-x64", "linux-x64", "osx-x64", "linux-arm64", "osx-arm64"]),
                                                  help="The platform the Bicep CLI will be running on. Set this to skip automatic platform detection if it does not work properly.")
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
@@ -137,8 +141,14 @@ def load_arguments(self, _):
 
     with self.argument_context('resource create') as c:
         c.argument('resource_id', options_list=['--id'], help='Resource ID.', action=None)
-        c.argument('properties', options_list=['--properties', '-p'], help='a JSON-formatted string containing resource properties')
+        c.argument('properties', options_list=['--properties', '-p'], help='A JSON-formatted string containing resource properties.')
         c.argument('is_full_object', action='store_true', help='Indicate that the properties object includes other options such as location, tags, sku, and/or plan.')
+
+    with self.argument_context('resource patch') as c:
+        c.argument('properties', options_list=['--properties', '-p'],
+                   help='A JSON-formatted string containing resource properties.')
+        c.argument('is_full_object', action='store_true',
+                   help='Indicate that the properties object includes other options such as location, tags, sku, and/or plan.')
 
     with self.argument_context('resource link') as c:
         c.argument('target_id', options_list=['--target', c.deprecate(target='--target-id', redirect='--target', hide=True)], help='Fully-qualified resource ID of the resource link target.')
@@ -204,15 +214,15 @@ def load_arguments(self, _):
 
     with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('name', options_list=['--name', '-n'], completer=get_policy_assignment_completion_list, help='Name of the policy assignment.')
-        c.argument('scope', help='Scope to which this policy assignment applies.')
+        c.argument('scope', help='Scope at which this policy assignment subcommand applies. Defaults to current context subscription.')
         c.argument('disable_scope_strict_match', action='store_true', help='Include policy assignments either inherited from parent scope or at child scope.')
         c.argument('display_name', help='Display name of the policy assignment.')
         c.argument('description', help='Description of the policy assignment.', min_api='2016-12-01')
-        c.argument('policy', help='Name or id of the policy definition.', completer=get_policy_completion_list)
+        c.argument('policy', help='Name or id of the policy definition. If not provided, a policy set definition parameter must be provided.', completer=get_policy_completion_list)
         c.argument('params', options_list=['--params', '-p'], help='JSON formatted string or a path to a file or uri with parameter values of the policy rule.', type=file_type, completer=FilesCompleter(), min_api='2016-12-01')
 
     with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as c:
-        c.argument('policy_set_definition', options_list=['--policy-set-definition', '-d'], help='Name or id of the policy set definition.')
+        c.argument('policy_set_definition', options_list=['--policy-set-definition', '-d'], help='Name or id of the policy set definition. If not provided, a policy definition parameter must be provided.')
         c.argument('sku', options_list=['--sku', '-s'], help='policy sku.', arg_type=get_enum_type(['free', 'standard']), deprecate_info=c.deprecate(hide=True))
         c.argument('notscopes', options_list='--not-scopes', nargs='+')
 
@@ -277,6 +287,10 @@ def load_arguments(self, _):
         c.argument('tag', tag_type)
         c.argument('tags', tags_type)
         c.argument('resource_group_name', resource_group_name_type, options_list=['--name', '-n', '--resource-group', '-g'])
+
+    with self.argument_context('group update') as c:
+        c.argument('properties_to_add', deprecate_info=c.deprecate(hide=True))
+        c.argument('properties_to_remove', deprecate_info=c.deprecate(hide=True))
 
     with self.argument_context('group deployment') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list)
@@ -441,6 +455,7 @@ def load_arguments(self, _):
                    min_api="2019-10-01")
         c.argument('what_if', arg_type=deployment_what_if_type)
         c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
+        c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'), help='The mode that is used to deploy resources. This value can be either Incremental or Complete. In Incremental mode, resources are deployed without deleting existing resources that are not included in the template. In Complete mode, resources are deployed and existing resources in the resource group that are not included in the template are deleted. Be careful when using Complete mode as you may unintentionally delete resources.')
 
     with self.argument_context('deployment mg what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -538,6 +553,9 @@ def load_arguments(self, _):
 
     with self.argument_context('group lock') as c:
         c.argument('resource_group', resource_group_name_type, validator=validate_group_lock, id_part=None)
+
+    with self.argument_context('group lock list') as c:
+        c.argument('resource_group', resource_group_name_type, id_part=None, required=True)
 
     with self.argument_context('group lock create') as c:
         c.argument('resource_group', required=True)
@@ -653,6 +671,16 @@ def load_arguments(self, _):
         c.argument('stdout', arg_type=bicep_stdout_type)
         c.argument('no_restore', arg_type=bicep_no_restore_type, help="When set, builds the bicep file without restoring external modules.")
 
+    with self.argument_context('bicep format') as c:
+        c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep file to format in the file system.")
+        c.argument('outdir', arg_type=bicep_outdir_type)
+        c.argument('outfile', arg_type=bicep_outfile_type)
+        c.argument('stdout', arg_type=bicep_stdout_type)
+        c.argument('indent_kind', arg_type=bicep_indentkind_type)
+        c.argument('indent_size', arg_type=bicep_indentsize_type)
+        c.argument('insert_final_newline', arg_type=bicep_insertfinalnewline_type)
+        c.argument('newline', arg_type=bicep_newline_type)
+
     with self.argument_context('bicep decompile') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the ARM template to decompile in the file system.")
         c.argument('force', arg_type=bicep_force_type, help="Allows overwriting the output file if it exists.")
@@ -665,6 +693,9 @@ def load_arguments(self, _):
         c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep module file to publish in the file system.")
         c.argument('target', arg_type=CLIArgumentType(options_list=['--target', '-t'],
                                                       help="The target location where the Bicep module will be published."))
+        c.argument('documentationUri', arg_type=CLIArgumentType(options_list=['--documentationUri', '-d'],
+                                                                help="The documentation uri of the Bicep module."))
+        c.argument('force', arg_type=bicep_force_type, help="Allow overwriting an existing Bicep module version.")
 
     with self.argument_context('bicep install') as c:
         c.argument('version', options_list=['--version', '-v'], help='The version of Bicep CLI to be installed. Default to the latest if not specified.')

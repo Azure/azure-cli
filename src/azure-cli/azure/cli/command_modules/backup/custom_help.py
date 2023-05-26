@@ -221,6 +221,17 @@ def get_sub_protection_policy(policy, sub_policy_type):
     return None
 
 
+def replace_min_value_in_subtask(response):
+    # For a task in progress: replace min_value in start and end times with null.
+    tasks_list = response.properties.extended_info.tasks_list
+    for task in tasks_list:
+        if task.start_time == datetime.min:
+            task.start_time = None
+        if task.end_time == datetime.min:
+            task.end_time = None
+    return response
+
+
 def validate_container(container):
     validate_object(container, "Container not found. Please provide a valid container_name.")
 
@@ -532,7 +543,7 @@ def validate_and_extract_container_type(container_name, backup_management_type):
     container_type = container_name.split(";")[0].lower()
     container_type_mappings = {"iaasvmcontainer": "AzureIaasVM", "storagecontainer": "AzureStorage",
                                "vmappcontainer": "AzureWorkload", "windows": "MAB",
-                               "sqlagworkloadcontainer": "AzureWorkload"}
+                               "sqlagworkloadcontainer": "AzureWorkload", "hanahsrcontainer": "AzureWorkload"}
 
     if container_type in container_type_mappings:
         return container_type_mappings[container_type]

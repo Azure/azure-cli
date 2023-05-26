@@ -130,14 +130,16 @@ def glob_files_remotely(cmd, client, share_name, pattern, snapshot=None):
                 queue.appendleft(os.path.join(current_dir, f.name))
 
 
-def glob_files_remotely_track2(client, share_name, pattern, snapshot=None):
+def glob_files_remotely_track2(client, share_name, pattern, snapshot=None, is_share_client=False):
     """glob the files in remote file share based on the given pattern"""
     from collections import deque
 
+    if not is_share_client:
+        client = client.get_share_client(share_name, snapshot=snapshot)
     queue = deque([""])
     while queue:
         current_dir = queue.pop()
-        for f in client.get_share_client(share_name, snapshot=snapshot).list_directories_and_files(current_dir):
+        for f in client.list_directories_and_files(current_dir):
             if not f['is_directory']:
                 if not pattern or _match_path(os.path.join(current_dir, f['name']), pattern):
                     yield current_dir, f['name']
