@@ -988,29 +988,26 @@ def apim_graphql_resolver_delete(
 
 
 def apim_graphql_resolver_show(client, resource_group_name, service_name, api_id, resolver_id):
-    
-        return client.graph_ql_api_resolver.get(
-            resource_group_name=resource_group_name,
-            service_name=service_name,
-            api_id=api_id,
-            resolver_id=resolver_id)
+    """Shows details of a Resolver. """
+    return client.graph_ql_api_resolver.get(
+        resource_group_name=resource_group_name,
+        service_name=service_name,
+        api_id=api_id,
+        resolver_id=resolver_id)
 
 
 def apim_graphql_resolver_list(client, resource_group_name, service_name, api_id):
-    
-        return client.graph_ql_api_resolver.list_by_api(resource_group_name, service_name, api_id)
-
+    """Lists a collection of Resolver. """
+    return client.graph_ql_api_resolver.list_by_api(resource_group_name, service_name, api_id)
 
 
 # Graphql Resolver Policy Operations
-
 def apim_graphql_resolver_policy_create(
         client, resource_group_name, service_name, api_id, resolver_id, value_path, policy_format=None, no_wait=False):
     """Creates a new Resolver policy. """
     api_file = open(value_path, 'r')
     content_value = api_file.read()
     value = content_value
-
 
     parameters = PolicyContract(
         format=policy_format,
@@ -1037,17 +1034,17 @@ def apim_graphql_resolver_policy_show(client, resource_group_name, service_name,
 
 
 def apim_graphql_resolver_policy_list(client, resource_group_name, service_name, api_id, resolver_id):
-    
-        return client.graph_ql_api_resolver_policy.list_by_resolver(
-            resource_group_name=resource_group_name,
-            service_name=service_name,
-            api_id=api_id,
-            resolver_id=resolver_id)
+
+    return client.graph_ql_api_resolver_policy.list_by_resolver(
+        resource_group_name=resource_group_name,
+        service_name=service_name,
+        api_id=api_id,
+        resolver_id=resolver_id)
 
 
 def apim_graphql_resolver_policy_delete(
         client, resource_group_name, service_name, api_id, resolver_id, no_wait=False, if_match=None):
-    
+
     return sdk_no_wait(no_wait, client.graph_ql_api_resolver_policy.delete,
                        resource_group_name=resource_group_name,
                        service_name=service_name,
