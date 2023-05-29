@@ -272,9 +272,10 @@ class ImageTemplateTest(ScenarioTest):
         # create image template in local cache
         self.cmd('image builder create -n {tmpl_02} -g {rg} --scripts {script} --image-source {img_src} '
                  '--managed-image-destinations {image_def}={loc} --identity {ide} --defer '
-                 '--staging-resource-group {staging_resource_group2}',
+                 '--staging-resource-group {staging_resource_group2} --validator shell',
                  checks=[
-                     self.check('properties.stagingResourceGroup', '{staging_resource_group2}')
+                     self.check('properties.stagingResourceGroup', '{staging_resource_group2}'),
+                     self.check('properties.validate.inVMValidations[0].type', 'shell')
                  ])
 
         # add validate to template
