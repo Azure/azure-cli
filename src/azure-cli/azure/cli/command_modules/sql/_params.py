@@ -256,7 +256,7 @@ database_availability_zone_param_type = CLIArgumentType(
 
 managed_instance_param_type = CLIArgumentType(
     options_list=['--managed-instance', '--mi'],
-    help='Name of the Azure SQL managed instance.')
+    help='Name of the Azure SQL Managed Instance.')
 
 kid_param_type = CLIArgumentType(
     options_list=['--kid', '-k'],
@@ -2612,7 +2612,7 @@ def load_arguments(self, _):
 
         c.argument('managed_instance_name',
                    options_list=['--managed-instance', '--mi'],
-                   help='Name of the Azure SQL managed instance. '
+                   help='Name of the Azure SQL Managed Instance. '
                    'If specified, retrieves all requested backups under this managed instance.')
 
         c.argument('database_state',
