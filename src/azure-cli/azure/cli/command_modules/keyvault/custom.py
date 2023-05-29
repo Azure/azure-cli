@@ -408,7 +408,7 @@ def recover_hsm(cmd, client, hsm_name, resource_group_name, location, no_wait=Fa
 
     # tenantId and sku shouldn't be required
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    tenant_id = profile.get_subscription(subscription=cmd.cli_ctx.data['subscription_id'])[_TENANT_ID]
+    tenant_id = profile.get_subscription(subscription=cmd.cli_ctx.data.get('subscription_id', None))[_TENANT_ID]
 
     # Use 'Recover' as 'create_mode' temporarily since it's a bug from service side making 'create_mode' case-sensitive
     # Will change it back to CreateMode.recover.value('recover') from SDK definition after service fix
@@ -435,7 +435,7 @@ def recover_vault(cmd, client, vault_name, resource_group_name, location, no_wai
     Sku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_KEYVAULT)
     SkuName = cmd.get_models('SkuName', resource_type=ResourceType.MGMT_KEYVAULT)
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    tenant_id = profile.get_subscription(subscription=cmd.cli_ctx.data['subscription_id'])[_TENANT_ID]
+    tenant_id = profile.get_subscription(subscription=cmd.cli_ctx.data.get('subscription_id', None))[_TENANT_ID]
 
     params = VaultCreateOrUpdateParameters(location=location,
                                            properties={'tenant_id': tenant_id,
@@ -604,7 +604,7 @@ def create_hsm(cmd, client,
     ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_KEYVAULT)
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    tenant_id = profile.get_subscription(subscription=cmd.cli_ctx.data['subscription_id'])[_TENANT_ID]
+    tenant_id = profile.get_subscription(subscription=cmd.cli_ctx.data.get('subscription_id', None))[_TENANT_ID]
 
     properties = ManagedHsmProperties(tenant_id=tenant_id,
                                       enable_purge_protection=enable_purge_protection,
@@ -669,7 +669,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
     graph_client = graph_client_factory(cmd.cli_ctx)
-    subscription = profile.get_subscription(subscription=cmd.cli_ctx.data['subscription_id'])
+    subscription = profile.get_subscription(subscription=cmd.cli_ctx.data.get('subscription_id', None))
     tenant_id = subscription[_TENANT_ID]
 
     # if bypass or default_action was specified create a NetworkRuleSet
