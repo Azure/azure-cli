@@ -417,10 +417,12 @@ def ensure_container_insights_for_monitoring(
                 cmd, dcr_url)
             # get data collection settings
             extensionSettings = {}
+            cistreams =  ["Microsoft-ContainerInsights-Group-Default"]
             if data_collection_settings is not None:
                 dataCollectionSettings = _get_data_collection_settings(data_collection_settings)
                 validate_data_collection_settings(dataCollectionSettings)
                 extensionSettings["dataCollectionSettings"] = dataCollectionSettings
+                cistreams = dataCollectionSettings["streams"]
             # create the DCR
             dcr_creation_body_without_syslog = json.dumps(
                 {
@@ -431,9 +433,7 @@ def ensure_container_insights_for_monitoring(
                             "extensions": [
                                 {
                                     "name": "ContainerInsightsExtension",
-                                    "streams": [
-                                        "Microsoft-ContainerInsights-Group-Default"
-                                    ],
+                                    "streams": cistreams,
                                     "extensionName": "ContainerInsights",
                                     "extensionSettings": extensionSettings,
                                 }
@@ -441,9 +441,7 @@ def ensure_container_insights_for_monitoring(
                         },
                         "dataFlows": [
                             {
-                                "streams": [
-                                    "Microsoft-ContainerInsights-Group-Default"
-                                ],
+                                "streams": cistreams,
                                 "destinations": ["la-workspace"],
                             }
                         ],
@@ -508,9 +506,7 @@ def ensure_container_insights_for_monitoring(
                             "extensions": [
                                 {
                                     "name": "ContainerInsightsExtension",
-                                    "streams": [
-                                        "Microsoft-ContainerInsights-Group-Default"
-                                    ],
+                                    "streams":cistreams,
                                     "extensionName": "ContainerInsights",
                                     "extensionSettings": extensionSettings,
                                 }
@@ -518,8 +514,11 @@ def ensure_container_insights_for_monitoring(
                         },
                         "dataFlows": [
                             {
-                                "streams": [
-                                    "Microsoft-ContainerInsights-Group-Default",
+                                "streams": cistreams,
+                                "destinations": ["la-workspace"],
+                            },
+                            {
+                                  "streams": [
                                     "Microsoft-Syslog"
                                 ],
                                 "destinations": ["la-workspace"],
@@ -599,6 +598,10 @@ def validate_data_collection_settings(dataCollectionSettings):
         namspaces = dataCollectionSettings["namespaces"]
         if isinstance(namspaces, list) is False:
             raise InvalidArgumentValueError('namespaces must be an array type')
+    if 'streams' in dataCollectionSettings.keys():
+        streams = dataCollectionSettings["streams"]
+        if isinstance(streams, list) is False:
+            raise InvalidArgumentValueError('streams must be an array type')
 
 
 def add_monitoring_role_assignment(result, cluster_resource_id, cmd):
