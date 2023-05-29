@@ -33,16 +33,11 @@ from azure.cli.command_modules.monitor.actions import get_period_type
 # pylint: disable=too-many-statements, too-many-branches, too-many-locals, too-many-lines
 def load_arguments(self, _):
     # Model imports
-    DiskStorageAccountTypes = self.get_models('DiskStorageAccountTypes', operation_group='disks')
-    SnapshotStorageAccountTypes = self.get_models('SnapshotStorageAccountTypes', operation_group='snapshots')
-    UpgradeMode, CachingTypes, OperatingSystemTypes = self.get_models('UpgradeMode', 'CachingTypes', 'OperatingSystemTypes')
-    HyperVGenerationTypes = self.get_models('HyperVGenerationTypes')
-    DedicatedHostLicenseTypes = self.get_models('DedicatedHostLicenseTypes')
-    OrchestrationServiceNames, OrchestrationServiceStateAction = self.get_models('OrchestrationServiceNames', 'OrchestrationServiceStateAction', operation_group='virtual_machine_scale_sets')
-    RebootSetting, VMGuestPatchClassificationWindows, VMGuestPatchClassificationLinux = self.get_models('VMGuestPatchRebootSetting', 'VMGuestPatchClassificationWindows', 'VMGuestPatchClassificationLinux')
-    GallerySharingPermissionTypes = self.get_models('GallerySharingPermissionTypes', operation_group='shared_galleries')
-    ReplicationMode = self.get_models('ReplicationMode', operation_group='gallery_image_versions')
-    DiskControllerTypes = self.get_models('DiskControllerTypes', operation_group='virtual_machines')
+    from azure.mgmt.compute.models import DiskStorageAccountTypes, SnapshotStorageAccountTypes, UpgradeMode, \
+        CachingTypes, OperatingSystemTypes, HyperVGenerationTypes, DedicatedHostLicenseTypes, \
+        OrchestrationServiceNames, OrchestrationServiceStateAction, VMGuestPatchRebootSetting, \
+        VMGuestPatchClassificationWindows, VMGuestPatchClassificationLinux, GallerySharingPermissionTypes, \
+        ReplicationMode, DiskControllerTypes
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -486,7 +481,7 @@ def load_arguments(self, _):
 
     with self.argument_context('vm install-patches') as c:
         c.argument('maximum_duration', type=str, help='Specify the maximum amount of time that the operation will run. It must be an ISO 8601-compliant duration string such as PT4H (4 hours)')
-        c.argument('reboot_setting', arg_type=get_enum_type(RebootSetting), help='Define when it is acceptable to reboot a VM during a software update operation.')
+        c.argument('reboot_setting', arg_type=get_enum_type(VMGuestPatchRebootSetting), help='Define when it is acceptable to reboot a VM during a software update operation.')
         c.argument('classifications_to_include_win', nargs='+', arg_type=get_enum_type(VMGuestPatchClassificationWindows), help='Space-separated list of classifications to include for Windows VM.')
         c.argument('classifications_to_include_linux', nargs='+', arg_type=get_enum_type(VMGuestPatchClassificationLinux), help='Space-separated list of classifications to include for Linux VM.')
         c.argument('kb_numbers_to_include', nargs='+', help='Space-separated list of KBs to include in the patch operation. Applicable to Windows VM only')
