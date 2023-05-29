@@ -875,6 +875,8 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
     msi_auth = False
     if instance.service_principal_profile.client_id == "msi":
         msi_auth = True
+    else:
+        enable_msi_auth_for_monitoring = False
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
     instance = _update_addons(cmd, instance, subscription_id, resource_group_name, name, addons, enable=True,

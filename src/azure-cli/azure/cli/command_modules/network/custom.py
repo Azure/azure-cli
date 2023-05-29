@@ -2710,7 +2710,10 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
         rs_name = rs_name[:-(len(origin) + 1)] if rs_name != origin else '@'
         try:
             record_count = len(rs[_type_to_property_name(rs_type)[0]])
-        except TypeError:
+        except (TypeError, KeyError):
+            # There is some bug with `alias records` being mapped from `AZURE ALIAS A` to `ARecords`,
+            # but `rs` does not contain `a_records`.  We could fix it, but this is just logging, so
+            # lets not fail the whole import and hope someone refactors this method
             record_count = 1
         total_records += record_count
     cum_records = 0
@@ -2729,7 +2732,7 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
 
         try:
             record_count = len(rs[_type_to_property_name(rs_type)[0]])
-        except TypeError:
+        except (TypeError, KeyError):
             record_count = 1
         if rs_name == '@' and rs_type == 'soa':
             root_soa = client.record_sets.get(resource_group_name, zone_name, '@', 'SOA')

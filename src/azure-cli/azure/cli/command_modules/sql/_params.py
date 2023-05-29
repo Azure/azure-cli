@@ -256,7 +256,7 @@ database_availability_zone_param_type = CLIArgumentType(
 
 managed_instance_param_type = CLIArgumentType(
     options_list=['--managed-instance', '--mi'],
-    help='Name of the Azure SQL managed instance.')
+    help='Name of the Azure SQL Managed Instance.')
 
 kid_param_type = CLIArgumentType(
     options_list=['--kid', '-k'],
@@ -1493,7 +1493,9 @@ def load_arguments(self, _):
                    arg_type=read_replicas_param_type)
 
         c.argument('preferred_enclave_type',
-                   arg_type=preferred_enclave_param_type)
+                   arg_type=preferred_enclave_param_type,
+                   help='The preferred enclave type for the Azure SQL Elastic Pool. '
+                   'Allowed values include: Default, VBS.')
 
     with self.argument_context('sql elastic-pool create') as c:
         # Create args that will be used to build up the ElasticPool object
@@ -2610,7 +2612,7 @@ def load_arguments(self, _):
 
         c.argument('managed_instance_name',
                    options_list=['--managed-instance', '--mi'],
-                   help='Name of the Azure SQL managed instance. '
+                   help='Name of the Azure SQL Managed Instance. '
                    'If specified, retrieves all requested backups under this managed instance.')
 
         c.argument('database_state',
