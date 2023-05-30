@@ -5693,12 +5693,19 @@ def sync_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_ne
         err_msg = f"Virtual network peering {virtual_network_name} doesn't exist."
         raise ResourceNotFoundError(err_msg)
 
-    from .aaz.latest.network.vnet.peering import Create
+    remote_vnet_id = peering["remoteVirtualNetwork"].pop("id")
+    remote_subscription = parse_resource_id(remote_vnet_id)["subscription"]
+
+    class Create(_VNetPeeringCreate):
+        def pre_operations(self):
+            # cross-tenant
+            self.ctx.update_aux_subscriptions(remote_subscription)
+
     return Create(cli_ctx=cmd.cli_ctx)(command_args={
         "name": virtual_network_peering_name,
         "resource_group": resource_group_name,
         "vnet_name": virtual_network_name,
-        "remote_vnet": peering["remoteVirtualNetwork"].pop("id", None),
+        "remote_vnet": remote_vnet_id,
         "allow_vnet_access": peering.pop("allowVirtualNetworkAccess", None),
         "allow_gateway_transit": peering.pop("allowGatewayTransit", None),
         "allow_forwarded_traffic": peering.pop("allowForwardedTraffic", None),
