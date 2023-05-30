@@ -7369,7 +7369,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
              self.cmd(get_cmd, checks=[
                 self.check('properties.dataSources.extensions[0].extensionSettings.dataCollectionSettings.streams[0]', f'Microsoft-ContainerLogV2')
             ])
-            self.cmd(get_cmd, checks=[
+             self.cmd(get_cmd, checks=[
                 self.check('properties.dataFlows[0].streams[0]', f'Microsoft-ContainerLogV2')
             ])
         # check that the DCR-A was created
