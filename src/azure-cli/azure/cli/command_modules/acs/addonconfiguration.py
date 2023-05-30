@@ -417,7 +417,7 @@ def ensure_container_insights_for_monitoring(
                 cmd, dcr_url)
             # get data collection settings
             extensionSettings = {}
-            cistreams =  ["Microsoft-ContainerInsights-Group-Default"]
+            cistreams = ["Microsoft-ContainerInsights-Group-Default"]
             if data_collection_settings is not None:
                 dataCollectionSettings = _get_data_collection_settings(data_collection_settings)
                 validate_data_collection_settings(dataCollectionSettings)
@@ -506,7 +506,7 @@ def ensure_container_insights_for_monitoring(
                             "extensions": [
                                 {
                                     "name": "ContainerInsightsExtension",
-                                    "streams":cistreams,
+                                    "streams": cistreams,
                                     "extensionName": "ContainerInsights",
                                     "extensionSettings": extensionSettings,
                                 }
@@ -518,7 +518,7 @@ def ensure_container_insights_for_monitoring(
                                 "destinations": ["la-workspace"],
                             },
                             {
-                                  "streams": [
+                                "streams": [
                                     "Microsoft-Syslog"
                                 ],
                                 "destinations": ["la-workspace"],
