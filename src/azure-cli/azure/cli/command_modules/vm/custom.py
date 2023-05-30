@@ -818,12 +818,10 @@ def show_vmss_identity(cmd, resource_group_name, vm_name):
 
 def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, identity_role='Contributor',
                        identity_role_id=None, identity_scope=None):
-    from azure.mgmt.compute.models import VirtualMachineIdentity, ResourceIdentityType, VirtualMachineUpdate
-    # VirtualMachineIdentity, ResourceIdentityType, VirtualMachineUpdate = cmd.get_models('VirtualMachineIdentity',
-    #                                                                                     'ResourceIdentityType',
-    #                                                                                     'VirtualMachineUpdate')
-    UserAssignedIdentitiesValue = cmd.get_models('UserAssignedIdentitiesValue')
+    from azure.mgmt.compute.models import VirtualMachineIdentity, ResourceIdentityType, \
+        VirtualMachineUpdate, UserAssignedIdentitiesValue
     from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
+
     client = _compute_client_factory(cmd.cli_ctx)
     _, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
 
@@ -4623,7 +4621,7 @@ def create_image_gallery(cmd, resource_group_name, gallery_name, description=Non
                                                                                   public_name_prefix=public_name_prefix)
 
     return sdk_no_wait(no_wait, client.galleries.begin_create_or_update,
-                       resource_group_name, gallery_name, gallery, api_version=cmd.get_api_version())
+                       resource_group_name, gallery_name, gallery, api_version=cmd.get_api_version(operation_group="galleries"))
 
 
 def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_name, os_type, publisher, offer, sku,
