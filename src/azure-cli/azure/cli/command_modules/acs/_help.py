@@ -239,6 +239,12 @@ parameters:
     type: string
     short-summary: The Kubernetes network plugin to use.
     long-summary: Specify "azure" for routable pod IPs from VNET, "kubenet" for non-routable pod IPs with an overlay network, or "none" for no networking configured. Defaults to "kubenet".
+  - name: --network-plugin-mode
+    type: string
+    short-summary: The network plugin mode to use.
+    long-summary: |
+        Used to control the mode the network plugin should operate in. For example, "overlay" used with
+        --network-plugin=azure will use an overlay network (non-VNET IPs) for pods in the cluster.
   - name: --network-policy
     type: string
     short-summary: The Kubernetes network policy to use.
@@ -246,6 +252,12 @@ parameters:
         Using together with "azure" network plugin.
         Specify "azure" for Azure network policy manager and "calico" for calico network policy controller.
         Defaults to "" (network policy disabled).
+  - name: --network-dataplane
+    type: string
+    short-summary: The network dataplane to use.
+    long-summary: |
+        Network dataplane used in the Kubernetes cluster.
+        Specify "azure" to use the Azure dataplane (default) or "cilium" to enable Cilium dataplane.
   - name: --no-ssh-key -x
     type: string
     short-summary: Do not use or create a local SSH key.
@@ -334,6 +346,9 @@ parameters:
   - name: --node-osdisk-diskencryptionset-id -d
     type: string
     short-summary: ResourceId of the disk encryption set to use for enabling encryption at rest on agent node os disk.
+  - name: --enable-workload-identity
+    type: bool
+    short-summary: Enable workload identity addon.
   - name: --aci-subnet-name
     type: string
     short-summary: The name of a subnet in an existing VNet into which to deploy the virtual nodes.
@@ -434,6 +449,12 @@ parameters:
   - name: --azure-keyvault-kms-key-vault-resource-id
     type: string
     short-summary: Resource ID of Azure Key Vault.
+  - name: --enable-image-cleaner
+    type: bool
+    short-summary: Enable ImageCleaner Service.
+  - name: --image-cleaner-interval-hours
+    type: int
+    short-summary: ImageCleaner scanning interval.
   - name: --disable-disk-driver
     type: bool
     short-summary: Disable AzureDisk CSI Driver.
@@ -458,6 +479,24 @@ parameters:
   - name: --enable-keda
     type: bool
     short-summary: Enable KEDA workload auto-scaler.
+  - name: --enable-azure-monitor-metrics
+    type: bool
+    short-summary: Enable Azure Monitor Metrics Profile
+  - name: --azure-monitor-workspace-resource-id
+    type: string
+    short-summary: Resource ID of the Azure Monitor Workspace
+  - name: --ksm-metric-labels-allow-list
+    type: string
+    short-summary: Comma-separated list of additional Kubernetes label keys that will be used in the resource' labels metric. By default the metric contains only name and namespace labels. To include additional labels provide a list of resource names in their plural form and Kubernetes label keys you would like to allow for them (e.g. '=namespaces=[k8s-label-1,k8s-label-n,...],pods=[app],...)'. A single '*' can be provided per resource instead to allow any labels, but that has severe performance implications (e.g. '=pods=[*]').
+  - name: --ksm-metric-annotations-allow-list
+    type: string
+    short-summary: Comma-separated list of additional Kubernetes label keys that will be used in the resource' labels metric. By default the metric contains only name and namespace labels. To include additional labels provide a list of resource names in their plural form and Kubernetes label keys you would like to allow for them (e.g.'=namespaces=[k8s-label-1,k8s-label-n,...],pods=[app],...)'. A single '*' can be provided per resource instead to allow any labels, but that has severe performance implications (e.g. '=pods=[*]').
+  - name: --grafana-resource-id
+    type: string
+    short-summary: Resource ID of the Azure Managed Grafana Workspace
+  - name: --enable-windows-recording-rules
+    type: bool
+    short-summary: Enable Windows Recording Rules when enabling the Azure Monitor Metrics addon
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -528,6 +567,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --network-plugin none
   - name: Create a kubernetes cluster with KEDA workload autoscaler enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-keda
+  - name: Create a kubernetes cluster with Azure Monitor Metrics enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-metrics
 """
 
 helps['aks update'] = """
@@ -558,6 +599,12 @@ parameters:
   - name: --tier
     type: string
     short-summary: Specify SKU tier for managed clusters. '--tier standard' enables a standard managed cluster service with a financially backed SLA. '--tier free' changes a standard managed cluster to a free one.
+  - name: --network-plugin-mode
+    type: string
+    short-summary: Update the mode of a network plugin to migrate to a different pod networking setup.
+  - name: --pod-cidr
+    type: string
+    short-summary: Update the pod CIDR for a cluster. Used when updating a cluster from Azure CNI to Azure CNI Overlay.
   - name: --load-balancer-managed-outbound-ip-count
     type: int
     short-summary: Load balancer managed outbound IP count.
@@ -664,6 +711,12 @@ parameters:
   - name: --aks-custom-headers
     type: string
     short-summary: Comma-separated key-value pairs to specify custom headers.
+  - name: --enable-workload-identity
+    type: bool
+    short-summary: Enable workload identity addon.
+  - name: --disable-workload-identity
+    type: bool
+    short-summary: Disable workload identity addon.
   - name: --enable-secret-rotation
     type: bool
     short-summary: Enable secret rotation. Use with azure-keyvault-secrets-provider addon.
@@ -713,6 +766,15 @@ parameters:
   - name: --azure-keyvault-kms-key-vault-resource-id
     type: string
     short-summary: Resource ID of Azure Key Vault.
+  - name: --enable-image-cleaner
+    type: bool
+    short-summary: Enable ImageCleaner Service.
+  - name: --disable-image-cleaner
+    type: bool
+    short-summary: Disable ImageCleaner Service.
+  - name: --image-cleaner-interval-hours
+    type: int
+    short-summary: ImageCleaner scanning interval.
   - name: --enable-disk-driver
     type: bool
     short-summary: Enable AzureDisk CSI Driver.
@@ -749,6 +811,27 @@ parameters:
   - name: --disable-keda
     type: bool
     short-summary: Disable KEDA workload auto-scaler.
+  - name: --enable-azure-monitor-metrics
+    type: bool
+    short-summary: Enable Azure Monitor Metrics Profile
+  - name: --azure-monitor-workspace-resource-id
+    type: string
+    short-summary: Resource ID of the Azure Monitor Workspace
+  - name: --ksm-metric-labels-allow-list
+    type: string
+    short-summary: Comma-separated list of additional Kubernetes label keys that will be used in the resource' labels metric. By default the metric contains only name and namespace labels. To include additional labels provide a list of resource names in their plural form and Kubernetes label keys you would like to allow for them (e.g. '=namespaces=[k8s-label-1,k8s-label-n,...],pods=[app],...)'. A single '*' can be provided per resource instead to allow any labels, but that has severe performance implications (e.g. '=pods=[*]').
+  - name: --ksm-metric-annotations-allow-list
+    type: string
+    short-summary: Comma-separated list of additional Kubernetes label keys that will be used in the resource' labels metric. By default the metric contains only name and namespace labels. To include additional labels provide a list of resource names in their plural form and Kubernetes label keys you would like to allow for them (e.g.'=namespaces=[k8s-label-1,k8s-label-n,...],pods=[app],...)'. A single '*' can be provided per resource instead to allow any labels, but that has severe performance implications (e.g. '=pods=[*]').
+  - name: --grafana-resource-id
+    type: string
+    short-summary: Resource ID of the Azure Managed Grafana Workspace
+  - name: --enable-windows-recording-rules
+    type: bool
+    short-summary: Enable Windows Recording Rules when enabling the Azure Monitor Metrics addon
+  - name: --disable-azure-monitor-metrics
+    type: bool
+    short-summary: Disable Azure Monitor Metrics Profile. This will delete all DCRA's associated with the cluster, any linked DCRs with the data stream = prometheus-stream and the recording rule groups created by the addon for this AKS cluster.
 
 examples:
   - name: Reconcile the cluster back to its current state.
@@ -1210,6 +1293,22 @@ helps['aks nodepool start'] = """
     examples:
         - name: Start agent pool in the managed cluster
           text: az aks nodepool start --nodepool-name nodepool1 -g MyResourceGroup --cluster-name MyManagedCluster
+"""
+
+helps['aks nodepool operation-abort'] = """
+    type: command
+    short-summary: Abort last running operation on nodepool.
+    examples:
+        - name: Abort operation on agent pool
+          text: az aks nodepool operation-abort -g myResourceGroup --nodepool-name nodepool1 --cluster-name myAKSCluster
+"""
+
+helps['aks operation-abort'] = """
+    type: command
+    short-summary: Abort last running operation on managed cluster.
+    examples:
+        - name: Abort operation on managed cluster
+          text: az aks operation-abort -g myResourceGroup -n myAKSCluster
 """
 
 helps['aks remove-dev-spaces'] = """

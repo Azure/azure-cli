@@ -6,6 +6,7 @@
 import json
 import os
 import re
+import importlib
 
 from azure.cli.core.commands.arm import ArmTemplateBuilder
 
@@ -553,9 +554,9 @@ def trusted_launch_warning_log(namespace, generation_version, features):
     if not generation_version:
         return
 
-    log_message = 'Starting Build 2023 event, "az vm/vmss create" command will deploy Trusted Launch VM by default.' \
-                  ' To know more about Trusted Launch, please visit' \
-                  ' https://docs.microsoft.com/en-us/azure/virtual-machines/trusted-launch'
+    log_message = 'Ignite (November) 2023 onwards "az vm/vmss create" command will deploy Gen2-Trusted ' \
+                  'Launch VM by default. To know more about the default change and Trusted Launch, ' \
+                  'please visit https://aka.ms/TLaD'
 
     if generation_version == 'V1':
         logger.warning(log_message)
@@ -574,6 +575,8 @@ def display_region_recommendation(cmd, namespace):
     }
 
     identified_region = identified_region_maps.get(namespace.location)
+    from azure.cli.core import telemetry
+    telemetry.set_region_identified(namespace.location, identified_region)
 
     if identified_region and cmd.cli_ctx.config.getboolean('core', 'display_region_identified', True):
         logger.warning('Selecting "%s" may reduce your costs. '
@@ -582,5 +585,8 @@ def display_region_recommendation(cmd, namespace):
                        ' "az config set core.display_region_identified=false". '
                        'Learn more at https://go.microsoft.com/fwlink/?linkid=222571 ',
                        identified_region)
-        from azure.cli.core import telemetry
-        telemetry.set_region_identified(namespace.location, identified_region)
+
+
+def import_aaz_by_profile(profile, module_name):
+    profile_module_name = profile.lower().replace('-', '_')
+    return importlib.import_module(f"azure.cli.command_modules.vm.aaz.{profile_module_name}.{module_name}")

@@ -52,13 +52,11 @@ class Create(AAZCommand):
             options=["-n", "--name"],
             help="Route name.",
             required=True,
-            id_part="child_name_1",
         )
         _args_schema.route_table_name = AAZStrArg(
             options=["--route-table-name"],
             help="Route table name.",
             required=True,
-            id_part="name",
         )
         _args_schema.address_prefix = AAZStrArg(
             options=["--address-prefix"],
@@ -80,7 +78,17 @@ class Create(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         yield self.RoutesCreateOrUpdate(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -238,6 +246,10 @@ class Create(AAZCommand):
             )
 
             return cls._schema_on_200_201
+
+
+class _CreateHelper:
+    """Helper class for Create"""
 
 
 __all__ = ["Create"]

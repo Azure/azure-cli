@@ -11,6 +11,7 @@ import time
 from unittest import mock
 import unittest
 from pathlib import Path
+import logging
 
 from azure.cli.core.parser import IncorrectUsageError, InvalidArgumentValueError
 from azure.cli.testsdk.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
@@ -244,6 +245,37 @@ class ResourceIDScenarioTest(ScenarioTest):
         self.cmd('resource delete --id {vnet_id}', checks=self.is_empty())
 
 
+class ResourcePatchTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_patch_')
+    def test_resource_patch(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm'
+        })
+        self.kwargs['vm_id'] = self.cmd(
+            'vm create -g {rg} -n {vm} --image UbuntuLTS --size Standard_D2s_v3 --v-cpus-available 1 '
+            '--v-cpus-per-core 1 --admin-username vmtest --generate-ssh-keys --nsg-rule NONE',
+        ).get_output_in_json()['id']
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('hardwareProfile.vmSize', 'Standard_D2s_v3'),
+            self.check('hardwareProfile.vmSizeProperties.vCpusAvailable', '1'),
+            self.check('hardwareProfile.vmSizeProperties.vCpusPerCore', '1'),
+            self.check('osProfile.adminUsername', 'vmtest'),
+            self.check('osProfile.allowExtensionOperations', True),
+            self.check('identity', None),
+        ])
+
+        self.cmd(
+            'resource patch --id {vm_id} --is-full-object --properties "{{\\"identity\\":{{\\"type\\":\\"SystemAssigned\\"}},'
+            ' \\"properties\\":{{\\"osProfile\\":{{\\"allowExtensionOperations\\":\\"false\\"}}}}}}"',
+            checks=[
+                self.check('id', '{vm_id}'),
+                self.check('properties.osProfile.allowExtensionOperations', False),
+                self.check('identity.type', 'SystemAssigned'),
+            ])
+
+
 class ResourceGenericUpdate(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_generic_update')
@@ -325,6 +357,9 @@ class ResourceCreateAndShowScenarioTest(ScenarioTest):
 
 
 class TagScenarioTest(ScenarioTest):
+
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, random_config_dir=True, **kwargs)
 
     def test_tag_scenario(self):
 
@@ -3979,10 +4014,17 @@ class BicepScenarioTest(ScenarioTest):
             self.greater_than('length(@)', 0)
         ])
 
-
 # Because don't want to record bicep cli binary
 class BicepBuildTest(LiveScenarioTest):
-    
+
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
     def test_bicep_build_decompile(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         tf = os.path.join(curr_dir, 'storage_account_deploy.bicep').replace('\\', '\\\\')
@@ -4004,6 +4046,14 @@ class BicepBuildTest(LiveScenarioTest):
             os.remove(decompile_path)
 
 class BicepGenerateParamsTest(LiveScenarioTest):
+
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
 
     def test_bicep_generate_params(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -4051,6 +4101,15 @@ class BicepInstallationTest(LiveScenarioTest):
 
 
 class BicepRestoreTest(LiveScenarioTest):
+
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
     def test_restore(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         bf = os.path.join(curr_dir, 'data', 'external_modules.bicep').replace('\\', '\\\\')
@@ -4068,7 +4127,33 @@ class BicepRestoreTest(LiveScenarioTest):
             os.remove(out_path)
 
 
+class BicepFormatTest(LiveScenarioTest):
+
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
+    def test_format(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        bf = os.path.join(curr_dir, 'storage_account_deploy.bicep').replace('\\', '\\\\')
+        out_file = os.path.join(curr_dir, 'storage_account_deploy.formatted.bicep').replace('\\', '\\\\')
+        self.kwargs.update({
+            'bf': bf,
+            'out_file': out_file,
+        })
+
+        self.cmd('az bicep format --file {bf} --outfile {out_file} --newline lf --indent-kind space --indent-size 2 --insert-final-newline')
+
+        if os.path.exists(out_file):
+            os.remove(out_file)
+
+
 class DeploymentWithBicepScenarioTest(LiveScenarioTest):
+
     def setup(self):
         super.setup()
         self.cmd('az bicep uninstall')
@@ -4096,6 +4181,61 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_with_bicepparam')
+    def test_resource_group_level_deployment_with_bicepparams(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'data\\bicepparam\\storage_account_template.bicep').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'data\\bicepparam\\storage_account_params.bicepparam').replace('\\', '\\\\')
+        })
+
+        self.cmd('deployment group validate --resource-group {rg} --template-file "{tf}" --parameters {params}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment group what-if --resource-group {rg} --template-file "{tf}" --parameters {params} --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ]) 
+       
+    def test_resource_deployment_with_bicepparam_and_incompatible_version(self):
+        self.kwargs.update({
+            'rg' : "exampleGroup",
+            'tf': "./main.json",
+            'params' : "./param.bicepparam"
+        })
+
+        self.cmd('az bicep install --version v0.13.1')
+        
+        minimum_supported_version = "0.14.85"
+        with self.assertRaisesRegex(CLIError, f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to { minimum_supported_version} or later."):
+            self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params}')   
+
+    def test_resource_deployment_with_bicepparam_and_json_template(self):
+        self.kwargs.update({
+            'rg' : "exampleGroup",
+            'tf': "./main.json",
+            'params' : "./param.bicepparam"
+        })
+        
+        with self.assertRaisesRegex(CLIError, "Only a .bicep template is allowed with a .bicepparam parameter file"):
+            self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params}')
+            
+
+    def test_resource_deployment_with_bicepparam_and_other_parameter_sources(self):
+        self.kwargs.update({
+            'rg' : "exampleGroup",
+            'tf': "./main.bicepparam",
+            'params1' : "./param1.bicepparam",
+            'params2' : "./param2.json",
+        })
+
+        with self.assertRaisesRegex(CLIError, "Can"):
+            self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params1} --parameters {params2}')
+        
     def test_subscription_level_deployment_with_bicep(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({

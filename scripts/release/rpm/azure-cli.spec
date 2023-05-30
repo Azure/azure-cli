@@ -48,6 +48,8 @@ A great cloud needs great tools; we're excited to introduce Azure CLI,
 source %{buildroot}%{cli_lib_dir}/bin/activate
 %{python_cmd} -m pip install --upgrade pip setuptools
 source %{repo_path}/scripts/install_full.sh
+# Remove unused SDK version
+%{python_cmd} %{repo_path}/scripts/trim_sdk.py
 
 # cffi 1.15.0 doesn't work with RPM: https://foss.heptapod.net/pypy/cffi/-/issues/513
 %{python_cmd} -m pip install cffi==1.14.6
@@ -77,11 +79,6 @@ if command -v ${python_version} &>/dev/null; then python_cmd=${python_version}; 
 AZ_INSTALLER=RPM PYTHONPATH=\"\$bin_dir/../lib64/az/lib/${python_version}/site-packages\" \$python_cmd -sm azure.cli \"\$@\"
 " > %{buildroot}%{_bindir}/az
 rm %{buildroot}%{cli_lib_dir}/bin/python* %{buildroot}%{cli_lib_dir}/bin/pip*
-
-# Remove unused Network SDK API versions
-pushd %{buildroot}%{cli_lib_dir}/lib/${python_version}/site-packages/azure/mgmt/network/ > /dev/null
-rm -rf v2016_09_01 v2016_12_01 v2017_03_01 v2017_06_01 v2017_08_01 v2017_09_01 v2017_11_01 v2018_02_01 v2018_04_01 v2018_06_01 v2018_10_01 v2018_12_01 v2019_04_01 v2019_08_01 v2019_09_01 v2019_11_01 v2019_12_01 v2020_03_01
-popd > /dev/null
 
 # Set up tab completion
 mkdir -p %{buildroot}%{_sysconfdir}/bash_completion.d/

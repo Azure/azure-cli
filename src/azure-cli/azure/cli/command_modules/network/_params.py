@@ -338,7 +338,7 @@ def load_arguments(self, _):
 
     for item in ['', 'a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
         with self.argument_context('network dns record-set {} create'.format(item)) as c:
-            c.argument('ttl', help='Record set TTL (time-to-live)')
+            c.argument('ttl', type=int, help='Record set TTL (time-to-live)')
             c.argument('if_none_match', help='Create the record set only if it does not already exist.', action='store_true')
 
     for item in ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
@@ -357,7 +357,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network dns record-set cname set-record') as c:
         c.argument('record_set_name', options_list=['--record-set-name', '-n'], help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
-        c.argument('ttl', help='Record set TTL (time-to-live)')
+        c.argument('ttl', type=int, help='Record set TTL (time-to-live)')
         c.argument('if_none_match', help='Create the record set only if it does not already exist.',
                    action='store_true')
 
@@ -397,11 +397,11 @@ def load_arguments(self, _):
     with self.argument_context('network dns record-set soa') as c:
         c.argument('host', options_list=['--host', '-t'], help='Host name.')
         c.argument('email', options_list=['--email', '-e'], help='Email address.')
-        c.argument('expire_time', options_list=['--expire-time', '-x'], help='Expire time (seconds).')
-        c.argument('minimum_ttl', options_list=['--minimum-ttl', '-m'], help='Minimum TTL (time-to-live, seconds).')
-        c.argument('refresh_time', options_list=['--refresh-time', '-f'], help='Refresh value (seconds).')
-        c.argument('retry_time', options_list=['--retry-time', '-r'], help='Retry time (seconds).')
-        c.argument('serial_number', options_list=['--serial-number', '-s'], help='Serial number.')
+        c.argument('expire_time', options_list=['--expire-time', '-x'], type=int, help='Expire time (seconds).')
+        c.argument('minimum_ttl', options_list=['--minimum-ttl', '-m'], type=int, help='Minimum TTL (time-to-live, seconds).')
+        c.argument('refresh_time', options_list=['--refresh-time', '-f'], type=int, help='Refresh value (seconds).')
+        c.argument('retry_time', options_list=['--retry-time', '-r'], type=int, help='Retry time (seconds).')
+        c.argument('serial_number', options_list=['--serial-number', '-s'], type=int, help='Serial number.')
 
     with self.argument_context('network dns record-set srv') as c:
         c.argument('priority', type=int, options_list=['--priority', '-p'], help='Priority metric.')
@@ -780,13 +780,14 @@ def load_arguments(self, _):
 
     with self.argument_context('network routeserver') as c:
         c.argument('virtual_hub_name', options_list=['--name', '-n'], id_part='name',
-                   help='The name of the Route Server.')
-        c.argument('hosted_subnet', help='The ID of a subnet where Route Server would be deployed')
+                   help='Name of the route server.')
+        c.argument('hosted_subnet', help='ID of a subnet where route server would be deployed')
         c.argument('allow_branch_to_branch_traffic', options_list=['--allow-b2b-traffic'],
-                   arg_type=get_three_state_flag(), help='Allow branch to branch traffic.')
+                   arg_type=get_three_state_flag(), help='Whether to allow branch to branch traffic.')
         c.argument('public_ip_address', validator=get_public_ip_validator(),
-                   help='The name or ID of the public IP address.',
+                   help='Name or ID of the public IP address.',
                    completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
+        c.argument("hub_routing_preference", help="Routing preference of the route server.", arg_type=get_enum_type(["ASPath", "ExpressRoute", "VpnGateway"]))
 
     with self.argument_context('network routeserver create') as c:
         c.argument('virtual_hub_name', id_part=None)

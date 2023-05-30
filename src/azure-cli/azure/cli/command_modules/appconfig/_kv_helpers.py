@@ -25,12 +25,13 @@ from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import user_confirmation
 from azure.cli.core.azclierror import (FileOperationError,
                                        AzureInternalError,
+                                       InvalidArgumentValueError,
                                        ValidationError,
                                        AzureResponseError,
                                        RequiredArgumentMissingError)
 
 from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles, AppServiceConstants, JsonDiff)
-from ._utils import prep_label_filter_for_url_encoding
+from ._utils import prep_label_filter_for_url_encoding, validate_feature_flag_name, validate_feature_flag_key
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
 from._featuremodels import (map_keyvalue_to_featureflag,
@@ -119,12 +120,20 @@ def validate_import_key(key):
 
 
 def validate_import_feature(feature):
-    if feature:
-        if '%' in feature:
-            logger.warning("Ignoring invalid feature '%s'. Feature name cannot contain the '%%' character.", feature)
-            return False
-    else:
-        logger.warning("Ignoring invalid feature ''. Feature name cannot be empty.")
+    try:
+        validate_feature_flag_name(feature)
+    except InvalidArgumentValueError as exception:
+        logger.warning("Ignoring invalid feature '%s'. %s", feature, exception.error_msg)
+        return False
+
+    return True
+
+
+def validate_import_feature_key(key):
+    try:
+        validate_feature_flag_key(key)
+    except InvalidArgumentValueError as exception:
+        logger.warning("Ignoring invalid feature with key '%s'. %s", key, exception.error_msg)
         return False
 
     return True
@@ -878,9 +887,9 @@ def __flatten_key_value(key, value, flattened_data, depth, separator):
             if key in flattened_data:
                 logger.debug(
                     "The key %s already exist, value has been overwritten.", key)
-            flattened_data[key] = str(value)
+            flattened_data[key] = value if isinstance(value, str) else json.dumps(value)  # Ensure boolean values are properly stringified.
     else:
-        flattened_data[key] = str(value)
+        flattened_data[key] = value if isinstance(value, str) else json.dumps(value)
 
 
 def __export_keyvalue(key_segments, value, constructed_data):
@@ -1184,11 +1193,12 @@ def __validate_import_keyvault_ref(kv):
 
 
 def __validate_import_feature_flag(kv):
-    if kv and validate_import_feature(kv.key):
+    if kv and validate_import_feature_key(kv.key):
         try:
             ff = json.loads(kv.value)
             if FEATURE_FLAG_PROPERTIES == ff.keys():
-                return True
+                return validate_import_feature(ff["id"])
+
             logger.warning("The feature flag with key '{%s}' is not a valid feature flag. It will not be imported.", kv.key)
         except JSONDecodeError as exception:
             logger.warning("The feature flag with key '{%s}' is not in a valid JSON format. It will not be imported.\n{%s}", kv.id, str(exception))

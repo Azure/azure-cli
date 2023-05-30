@@ -205,14 +205,16 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
             'keyVaultUri': "myUri",
             'keyName': "myKeyName",
             'keyVaultResourceId': "myKeyVaultResourceId",
-            'userAssignedIdentity': "myIdentity"
+            'userAssignedIdentity': "myIdentity",
+            'identityType': "UserAssigned"
         })
         
         with self.assertRaises(CLIError):
             # create account with encryption value
-            self.cmd("az netappfiles account create -g {rg} -a {acc_name} -l {loc} --key-source {keySource} --key-vault-uri {keyVaultUri} --key-name {keyName} --keyvault-resource-id {keyVaultResourceId} --user-assigned-identity {userAssignedIdentity}", checks=[
+            self.cmd("az netappfiles account create -g {rg} -a {acc_name} -l {loc} --key-source {keySource} --identity-type {identityType}  --key-vault-uri {keyVaultUri} --key-name {keyName} --keyvault-resource-id {keyVaultResourceId} --user-assigned-identity {userAssignedIdentity}", checks=[
                 self.check('name', '{acc_name}'),
-                self.check('encryption.keySource', '{keySource}')
+                self.check('encryption.keySource', '{keySource}'),
+                self.check('identity.type', '{identityType}')
             ])
 
         # create account without encryption value

@@ -42,7 +42,7 @@ class Wait(AAZWaitCommand):
         _args_schema = cls._args_schema
         _args_schema.address_pool_name = AAZStrArg(
             options=["-n", "--name", "--address-pool-name"],
-            help="The name of the backend address pool. If only one exists, omit to use as default.",
+            help="The name of the backend address pool.",
             required=True,
             id_part="child_name_1",
         )

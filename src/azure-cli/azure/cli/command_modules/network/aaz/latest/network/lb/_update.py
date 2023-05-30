@@ -87,27 +87,19 @@ class Update(AAZCommand):
         )
 
         _element = cls._args_schema.probes.Element
-        _element.id = AAZResourceIdArg(
-            options=["id"],
-            help="Resource ID.",
-            nullable=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/loadBalancers/{}/probes/{}",
-            ),
-        )
         _element.name = AAZStrArg(
             options=["name"],
             help="The name of the resource that is unique within the set of probes used by the load balancer. This name can be used to access the resource.",
             nullable=True,
         )
         _element.interval_in_seconds = AAZIntArg(
-            options=["interval-in-seconds"],
-            help="The interval, in seconds, for how frequently to probe the endpoint for health status. Typically, the interval is slightly less than half the allocated timeout period (in seconds) which allows two full probes before taking the instance out of rotation. The default value is 15, the minimum value is 5.",
+            options=["interval", "interval-in-seconds"],
+            help={"short-summary": "The interval, in seconds, for how frequently to probe the endpoint for health status.", "long-summary": "Typically, the interval is slightly less than half the allocated timeout period (in seconds) which allows two full probes before taking the instance out of rotation. The default value is 15, the minimum value is 5."},
             nullable=True,
         )
         _element.number_of_probes = AAZIntArg(
-            options=["number-of-probes"],
-            help="The number of probes where if no response, will result in stopping further traffic from being delivered to the endpoint. This values allows endpoints to be taken out of rotation faster or slower than the typical times used in Azure.",
+            options=["threshold", "number-of-probes"],
+            help={"short-summary": "The number of consecutive probe failures before an instance is deemed unhealthy.", "long-summary": "This values allows endpoints to be taken out of rotation faster or slower than the typical times used in Azure."},
             nullable=True,
         )
         _element.port = AAZIntArg(
@@ -116,17 +108,18 @@ class Update(AAZCommand):
         )
         _element.probe_threshold = AAZIntArg(
             options=["probe-threshold"],
-            help="The number of consecutive successful or failed probes in order to allow or deny traffic from being delivered to this endpoint. After failing the number of consecutive probes equal to this value, the endpoint will be taken out of rotation and require the same number of successful consecutive probes to be placed back in rotation.",
+            help={"short-summary": "The number of consecutive successful or failed probes in order to allow or deny traffic from being delivered to this endpoint. It is currently in preview and is not recommended for production workloads. For most scenarios, we recommend maintaining the default value of 1 by not specifying the value of the property.", "long-summary": "After failing the number of consecutive probes equal to this value, the endpoint will be taken out of rotation and require the same number of successful consecutive probes to be placed back in rotation."},
+            is_preview=True,
             nullable=True,
         )
         _element.protocol = AAZStrArg(
             options=["protocol"],
-            help="The protocol of the end point. If 'Tcp' is specified, a received ACK is required for the probe to be successful. If 'Http' or 'Https' is specified, a 200 OK response from the specifies URI is required for the probe to be successful.",
+            help={"short-summary": "The protocol of the end point.", "long-summary": "If 'Tcp' is specified, a received ACK is required for the probe to be successful. If 'Http' or 'Https' is specified, a 200 OK response from the specifies URI is required for the probe to be successful."},
             enum={"Http": "Http", "Https": "Https", "Tcp": "Tcp"},
         )
         _element.request_path = AAZStrArg(
-            options=["request-path"],
-            help="The URI used for requesting health status from the VM. Path is required if a protocol is set to http. Otherwise, it is not allowed. There is no default value.",
+            options=["path", "request-path"],
+            help="The URI used for requesting health status from the VM. Path is required if a protocol is set to http. Otherwise, it is not allowed.",
             nullable=True,
         )
         return cls._args_schema
@@ -766,7 +759,6 @@ class Update(AAZCommand):
 
             _elements = _builder.get(".properties.probes[]")
             if _elements is not None:
-                _elements.set_prop("id", AAZStrType, ".id")
                 _elements.set_prop("name", AAZStrType, ".name")
                 _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
@@ -859,8 +851,8 @@ class _UpdateHelper:
 
         _elements = _builder.get(".properties.ipTags[]")
         if _elements is not None:
-            _elements.set_prop("ipTagType", AAZStrType, "@PublicIPAddress_update.ip_tags.[].ip_tag_type")
-            _elements.set_prop("tag", AAZStrType, "@PublicIPAddress_update.ip_tags.[].tag")
+            _elements.set_prop("ipTagType", AAZStrType, ".ip_tag_type")
+            _elements.set_prop("tag", AAZStrType, ".tag")
 
         nat_gateway = _builder.get(".properties.natGateway")
         if nat_gateway is not None:

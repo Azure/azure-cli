@@ -27,7 +27,7 @@ jobs:
   displayName: Live Test Python 3.8
   timeoutInMinutes: 0
   strategy:
-    maxParallel: 5
+    maxParallel: 30
     matrix:
       acr:
         Target: acr
@@ -372,6 +372,9 @@ jobs:
           azdev extension add ${FinalTarget}
         fi
         echo ${FinalTarget}
+        
+        # Compact aaz folders of modules
+        python /mnt/vss/_work/1/s/scripts/compact_aaz.py
 
         az -v
         # az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
@@ -440,7 +443,7 @@ jobs:
 
 - job: SendEmail
   displayName: Send email
-  timeoutInMinutes: 180
+  timeoutInMinutes: 360
   dependsOn: LiveTestPython38
   condition: succeededOrFailed()
   pool:
@@ -475,7 +478,14 @@ jobs:
         echo "send email to grid"
         python /mnt/vss/_work/1/s/scripts/live_test/sendemail.py "$(SENDGRID_KEY)" "$(Build.BuildId)" "$(USER_REPO)" "$(USER_BRANCH)" "$(USER_TARGET)" "$(USER_LIVE)" "$(System.ArtifactsDirectory)" "$(Build.RequestedForEmail)" "$(ACCOUNT_KEY)" "$commit_id" "$(DB_PWD)" "$(DB_USER)" "$(DB_HOST)" "$(DB_PORT)" "$(DB_SCHEME)"
         # python /mnt/vss/_work/1/s/scripts/live_test/upload.py "$(System.ArtifactsDirectory)" "$(ACCOUNT_KEY)" "$(USER_LIVE)"
-        # Clean resources
+    - bash: |
+        set -o errexit
+        az -v
+        echo "login to user azureclilivetest"
+        az login -u azureclilivetest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
+        echo "set account"
+        az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
+        echo "clean resource"
         if [[ "$(USER_LIVE)" == "--live" && "$(USER_TARGET)" == "" ]]; then
           python /mnt/vss/_work/1/s/scripts/live_test/clean.py
         fi

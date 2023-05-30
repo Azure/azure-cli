@@ -191,7 +191,7 @@ long-summary: |
     -) source -> target :: task type
     1) SQL -> SQLDB :: OfflineMigration
     2) PostgreSQL -> AzureDbForPostgreSql :: OnlineMigration
-    3) MySQL -> AzureDbForMySQL :: OfflineMigration
+    3) MySQL -> AzureDbForMySQL :: OfflineMigration, OnlineMigration, ReplicateChanges
 parameters:
   - name: --task-type
     type: string
@@ -287,7 +287,9 @@ parameters:
                     // optional, migrates the enumerated events
                     'selected_events': [
                         'sourceSchema1.nightly_maintenance'
-                    ]
+                    ],
+                    // Optional. If true, DMS will migrate the source database schema to the target.
+                    "select_database_for_schema_migration": "true|false"
                 },
                 ...n
             ],

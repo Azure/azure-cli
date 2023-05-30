@@ -127,6 +127,8 @@ examples:
     text: az sql db create -g mygroup -s myserver -n mydb -e Hyperscale -f Gen5 -c 2 --read-replicas 2
   - name: Create a GeneralPurpose database with locally redundant backup storage
     text: az sql db create -g mygroup -s myserver -n mydb -e GeneralPurpose --backup-storage-redundancy Local
+  - name: Create a database with VBS enclave enabled.
+    text: az sql db create -g mygroup -s myserver -n mydb --preferred-enclave-type VBS
 """
 
 helps['sql db delete'] = """
@@ -531,6 +533,8 @@ examples:
     text: az sql db update -g mygroup -s myserver -n mydb --edition GeneralPurpose --capacity 2 --family Gen5 --compute-model Serverless
   - name: Update database with locally redundant backup storage
     text: az sql db update -g mygroup -s myserver -n mydb --backup-storage-redundancy Local
+  - name: Update database with VBS enclave enabled.
+    text: az sql db update -g mygroup -s myserver -n mydb --preferred-enclave-type VBS
 
 """
 
@@ -603,6 +607,8 @@ examples:
     text: az sql elastic-pool create -g mygroup -s myserver -n mydb -e GeneralPurpose -f Gen4 -c 1
   - name: Create an elastic pool with Hyperscale edition, Gen5 hardware, 4 vcore and 2 high availability replicas.
     text: az sql elastic-pool create -g mygroup -s myserver -n mydb -e Hyperscale -f Gen5 -c 4 --ha-replicas 2
+  - name: Create an elastic pool with VBS enclave.
+    text: az sql elastic-pool create -g mygroup -s myserver -n mydb --preferred-enclave-type VBS
 """
 
 helps['sql elastic-pool list-editions'] = """
@@ -642,6 +648,8 @@ examples:
     text: az sql elastic-pool update -g mygroup -s myserver -n mypool -z false
   - name: Update elastic pool with 2 high availability replicas
     text: az sql elastic-pool update -g mygroup -s myserver -n mypool --ha-replicas 2
+  - name: Update elastic pool with VBS enclave
+    text: az sql elastic-pool update -g mygroup -s myserver -n mypool --preferred-enclave-type VBS
 """
 
 helps['sql failover-group'] = """
@@ -793,7 +801,7 @@ examples:
 
 helps['sql mi'] = """
 type: group
-short-summary: Manage SQL managed instances.
+short-summary: Manage SQL Managed Instances.
 """
 
 helps['sql mi ad-admin'] = """
@@ -906,12 +914,12 @@ examples:
 
 helps['sql mi advanced-threat-protection-setting'] = """
 type: group
-short-summary: Manage a SQL managed instance's advanced threat protection setting.
+short-summary: Manage a SQL Managed Instance's advanced threat protection setting.
 """
 
 helps['sql mi advanced-threat-protection-setting update'] = """
 type: command
-short-summary: Update a SQL managed instance's advanced threat protection setting.
+short-summary: Update a SQL Managed Instance's advanced threat protection setting.
 parameters:
   - name: --state
     type: string
@@ -1017,17 +1025,17 @@ examples:
 
 helps['sql midb'] = """
 type: group
-short-summary: Manage SQL managed instance databases.
+short-summary: Manage SQL Managed Instance databases.
 """
 
 helps['sql midb advanced-threat-protection-setting'] = """
 type: group
-short-summary: Manage a SQL managed instance database's advanced threat protection setting.
+short-summary: Manage a SQL Managed Instance database's advanced threat protection setting.
 """
 
 helps['sql midb advanced-threat-protection-setting update'] = """
 type: command
-short-summary: Update a SQL managed instance database's advanced threat protection setting.
+short-summary: Update a SQL Managed Instance database's advanced threat protection setting.
 parameters:
   - name: --state
     type: string
@@ -1280,6 +1288,35 @@ examples:
     text: az sql midb log-replay wait --exists --resource-group mygroup --managed-instance myinstance --name mymanageddb
   - name: Place the CLI in a waiting state until a condition of the managed database is met after stopping log replay service.
     text: az sql midb log-replay wait --deleted --resource-group mygroup --managed-instance myinstance --name mymanageddb
+"""
+
+helps['sql midb ledger-digest-uploads'] = """
+type: group
+short-summary: Manage ledger digest upload settings.
+"""
+
+helps['sql midb ledger-digest-uploads enable'] = """
+type: command
+short-summary: Enable uploading ledger digests to an Azure Storage account or to Azure Confidential Ledger. If uploading ledger digests is already enabled, the cmdlet resets the digest storage endpoint to a new value.
+examples:
+  - name: Enable uploading ledger digests to an Azure Blob storage.
+    text: az sql midb ledger-digest-uploads enable --n midb -g MyResourceGroup --mi myinstance --endpoint https://mystorage.blob.core.windows.net
+"""
+
+helps['sql midb ledger-digest-uploads disable'] = """
+type: command
+short-summary: Disable uploading ledger digests.
+examples:
+  - name: Disable uploading ledger digests.
+    text: az sql midb ledger-digest-uploads disable --n midb -g MyResourceGroup --mi myinstance
+"""
+
+helps['sql midb ledger-digest-uploads show'] = """
+type: command
+short-summary: Show the current ledger digest settings.
+examples:
+  - name: Show the settings for uploading ledger digests.
+    text: az sql midb ledger-digest-uploads show --n midb -g MyResourceGroup --mi myinstance
 """
 
 helps['sql server'] = """
@@ -1641,6 +1678,15 @@ examples:
     text: az sql server outbound-firewall-rule delete -g mygroup -s myserver -n myrule
   - name: Delete the outbound firewall rule
     text: az sql server outbound-firewall-rule delete -g mygroup -s myserver --outbound-rule-fqdn allowedFQDN
+"""
+
+helps['sql server refresh-external-governance-status'] = """
+type: command
+short-summary: Refreshes external governance status.
+
+examples:
+  - name:  Refresh external governance status for server
+    text: az sql server refresh-external-governance-status  --resource-group MyResourceGroup --server MyServer
 """
 
 helps['sql server key'] = """

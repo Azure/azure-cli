@@ -1028,6 +1028,12 @@ examples:
         az synapse role assignment create --workspace-name testsynapseworkspace \\
         --item-type "bigDataPools" --item "bigDataPoolName" --role "Synapse Administrator" \\
         --assignee username@contoso.com
+  - name: When you are a user with permission to manage Azure RBAC role assignment on the workspace but not a Synapse Administrator, please create role assigment by -role roleid. The reason for this is , when you try to add a "Synapse Administrator" role, the cmdlet needs to get the role ID from the role name which requires workspace read permission, which the current user does not have.
+    text: |-
+        az synapse role assignment create \\
+        --workspace-name testsynapseworkspace \\
+        --role "6e4bf58a-b8e1-4cc3-bbf9-d73143322b78" \\
+        --assignee username@contoso.com
 """
 
 helps['synapse role assignment delete'] = """

@@ -138,7 +138,7 @@ subscription than the app service environment, please use the resource ID for --
                    configured_default='appserviceplan', id_part='name', local_context_attribute=None)
 
     with self.argument_context('webapp create') as c:
-        c.argument('name', options_list=['--name', '-n'], help='name of the new web app',
+        c.argument('name', options_list=['--name', '-n'], help='Name of the new web app. Web app name can contain only allow alphanumeric characters and hyphens, it cannot start or end in a hyphen, and must be less than 64 characters.',
                    validator=validate_site_create,
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.SET],
                                                                  scopes=['webapp', 'cupertino']))
@@ -223,10 +223,13 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp webjob triggered list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
 
-    for scope in ['webapp', 'functionapp', 'logicapp']:
+    for scope in ['webapp', 'logicapp']:
         with self.argument_context(scope + ' create') as c:
             c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'],
                        help='Container image name from Docker Hub, e.g. publisher/image-name:tag')
+
+    for scope in ['webapp', 'functionapp', 'logicapp']:
+        with self.argument_context(scope + ' create') as c:
             c.argument('deployment_local_git', action='store_true', options_list=['--deployment-local-git', '-l'],
                        help='enable local git')
             c.argument('deployment_zip', options_list=['--deployment-zip', '-z'],
@@ -353,16 +356,10 @@ subscription than the app service environment, please use the resource ID for --
                        arg_type=get_three_state_flag(return_label=True))
             c.argument('generic_configurations', nargs='+',
                        help='Provide site configuration list in a format of either `key=value` pair or `@<json_file>`. PowerShell and Windows Command Prompt users should use a JSON file to provide these configurations to avoid compatibility issues with escape characters.')
+            c.ignore('min_replicas')
+            c.ignore('max_replicas')
 
         with self.argument_context(scope + ' config container') as c:
-            c.argument('docker_registry_server_url', options_list=['--docker-registry-server-url', '-r'],
-                       help='the container registry server url')
-            c.argument('docker_custom_image_name', options_list=['--docker-custom-image-name', '-c', '-i'],
-                       help='the container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
-            c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'],
-                       help='the container registry server username')
-            c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-p'],
-                       help='the container registry server password')
             c.argument('websites_enable_app_service_storage', options_list=['--enable-app-service-storage', '-t'],
                        help='enables platform storage (custom container only)',
                        arg_type=get_three_state_flag(return_label=True))
@@ -376,6 +373,30 @@ subscription than the app service environment, please use the resource ID for --
         with self.argument_context(scope + ' deployment container config') as c:
             c.argument('enable', options_list=['--enable-cd', '-e'], help='enable/disable continuous deployment',
                        arg_type=get_three_state_flag(return_label=True))
+
+    with self.argument_context('webapp config container') as c:
+        c.argument('docker_registry_server_url', options_list=['--docker-registry-server-url', '-r'],
+                   help='the container registry server url')
+        c.argument('docker_custom_image_name', options_list=['--docker-custom-image-name', '-c', '-i'],
+                   help='the container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
+        c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'],
+                   help='the container registry server username')
+        c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-p'],
+                   help='the container registry server password')
+        c.ignore('min_replicas')
+        c.ignore('max_replicas')
+
+    with self.argument_context('functionapp config container') as c:
+        c.argument('registry_server', options_list=['--registry-server', '-r', c.deprecate(target='--docker-registry-server-url', redirect='--registry-server')],
+                   help='the container registry server url')
+        c.argument('image', options_list=['--image', '-c', '-i', c.deprecate(target='--docker-custom-image-name', redirect='--image')],
+                   help='the container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>)')
+        c.argument('registry_username', options_list=['--registry-username', '-u', c.deprecate(target='--docker-registry-server-user', redirect='--registry-username')],
+                   help='the container registry server username')
+        c.argument('registry_password', options_list=['--registry-password', '-p', c.deprecate(target='--docker-registry-server-password', redirect='--registry-password')],
+                   help='the container registry server password')
+        c.argument('min_replicas', type=int, help="The minimum number of replicas when create funtion app on container app", is_preview=True)
+        c.argument('max_replicas', type=int, help="The maximum number of replicas when create funtion app on container app", is_preview=True)
 
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -647,7 +668,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it",
                    default=False, action='store_true')
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
-        c.argument('launch_browser', help="Launch the created app using the default browser", default=False,
+        c.argument('launch_browser', help="Launch the created app using the default browser. This is not supported in Azure Cloud Shell.", default=False,
                    action='store_true', options_list=['--launch-browser', '-b'])
         c.argument('logs',
                    help="Configure default logging required to enable viewing log stream immediately after launching the webapp",
@@ -706,6 +727,15 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('functionapp create') as c:
         c.argument('vnet', options_list=['--vnet'], help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
         c.argument('subnet', options_list=['--subnet'], help="Name or resource ID of the pre-existing subnet to have the webapp join. The --vnet is argument also needed if specifying subnet by name.")
+        c.argument('environment', help="Name of the container app environment.", is_preview=True)
+        c.argument('image', options_list=['--image', '-i', c.deprecate(target='--deployment-container-image-name', redirect='--image')],
+                   help='Container image, e.g. publisher/image-name:tag')
+        c.argument('registry_server', help="The container registry server hostname, e.g. myregistry.azurecr.io.", is_preview=True)
+        c.argument('registry_username', options_list=['--registry-username', '-d', c.deprecate(target='--docker-registry-server-user', redirect='--registry-username')], help='The container registry server username.')
+        c.argument('registry_password', options_list=['--registry-password', '-w', c.deprecate(target='--docker-registry-server-password', redirect='--registry-password')],
+                   help='The container registry server password. Required for private registries.')
+        c.argument('min_replicas', type=int, help="The minimum number of replicas when create funtion app on container app", is_preview=True)
+        c.argument('max_replicas', type=int, help="The maximum number of replicas when create funtion app on container app", is_preview=True)
 
     with self.argument_context('functionapp cors credentials') as c:
         c.argument('enable', help='enable/disable access-control-allow-credentials', arg_type=get_three_state_flag())
@@ -747,9 +777,6 @@ subscription than the app service environment, please use the resource ID for --
                        "same resource group.")
             c.argument('disable_app_insights', arg_type=get_three_state_flag(return_label=True),
                        help="Disable creating application insights resource during {} create. No logs will be available.".format(scope))
-            c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-d'], help='The container registry server username.')
-            c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'],
-                       help='The container registry server password. Required for private registries.')
             if scope == 'functionapp':
                 c.argument('functions_version', help='The functions app version. NOTE: This will be required starting the next release cycle', arg_type=get_enum_type(FUNCTIONS_VERSIONS))
                 c.argument('runtime', help='The functions runtime stack. Use "az functionapp list-runtimes" to check supported runtimes and versions')
@@ -771,6 +798,11 @@ subscription than the app service environment, please use the resource ID for --
 
     with self.argument_context('logicapp') as c:
         c.argument('name', arg_type=logicapp_name_arg_type)
+
+    with self.argument_context('logicapp create') as c:
+        c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-d'], help='The container registry server username.')
+        c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'],
+                   help='The container registry server password. Required for private registries.')
 
     with self.argument_context('logicapp show') as c:
         c.argument('name', arg_type=logicapp_name_arg_type)
@@ -860,11 +892,11 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('functionapp deployment slot create') as c:
         c.argument('configuration_source',
                    help="source slot to clone configurations from. Use function app's name to refer to the production slot")
-        c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'],
-                   help='Container image name, e.g. publisher/image-name:tag')
-        c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-d'],
+        c.argument('image', options_list=['--image', '-i', c.deprecate(target='--deployment-container-image-name', redirect='--image')],
+                   help='Container image, e.g. publisher/image-name:tag')
+        c.argument('registry_password', options_list=['--registry-password', '-d', c.deprecate(target='--docker-registry-server-password', redirect='--registry-password')],
                    help='The container registry server password')
-        c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'], help='the container registry server username')
+        c.argument('registry_username', options_list=['--registry-username', '-u', c.deprecate(target='--docker-registry-server-user', redirect='--registry-username')], help='the container registry server username')
     with self.argument_context('functionapp deployment slot swap') as c:
         c.argument('action',
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
@@ -1077,6 +1109,7 @@ subscription than the app service environment, please use the resource ID for --
                    help="Validation method for the custom domain.",
                    arg_type=get_enum_type(["cname-delegation", "dns-txt-token"]))
     with self.argument_context('staticwebapp appsettings') as c:
+        c.argument('environment_name', help="Name of the environment of static site")
         c.argument('setting_pairs', options_list=['--setting-names'],
                    help="Space-separated app settings in 'key=value' format. ",
                    nargs='*')

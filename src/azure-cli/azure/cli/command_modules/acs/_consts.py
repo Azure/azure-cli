@@ -35,6 +35,7 @@ CONST_OS_SKU_CBLMARINER = "CBLMariner"
 CONST_OS_SKU_MARINER = "Mariner"
 CONST_OS_SKU_WINDOWS2019 = "Windows2019"
 CONST_OS_SKU_WINDOWS2022 = "Windows2022"
+CONST_OS_SKU_AZURELINUX = "AzureLinux"
 
 # vm set type
 CONST_VIRTUAL_MACHINE_SCALE_SETS = "VirtualMachineScaleSets"
@@ -88,6 +89,13 @@ CONST_NONE_UPGRADE_CHANNEL = "none"
 CONST_NETWORK_PLUGIN_KUBENET = "kubenet"
 CONST_NETWORK_PLUGIN_AZURE = "azure"
 CONST_NETWORK_PLUGIN_NONE = "none"
+
+# network plugin mode
+CONST_NETWORK_PLUGIN_MODE_OVERLAY = "overlay"
+
+# network dataplane
+CONST_NETWORK_DATAPLANE_AZURE = "azure"
+CONST_NETWORK_DATAPLANE_CILIUM = "cilium"
 
 # consts for addons
 # http application routing
