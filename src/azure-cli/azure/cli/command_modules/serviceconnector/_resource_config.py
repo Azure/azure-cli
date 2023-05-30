@@ -58,6 +58,7 @@ class RESOURCE(Enum):
 
         raise ValueError(f"'{cls.__name__}' enum not found for '{value}'")
 
+
 # The dict defines the auth types
 class AUTH_TYPE(Enum):
     Secret = 'secret'
