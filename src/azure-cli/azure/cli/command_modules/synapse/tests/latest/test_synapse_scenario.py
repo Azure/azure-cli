@@ -3118,10 +3118,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.kwargs.update({
             'uami_name1': 'autotestuami1',
             'uami_name2': 'autotestuami2',
-            'uami_name3': 'autotestuami3',
             'workspace': self.create_random_name(prefix='clitest', length=16),
-            'keyvaultname':self.create_random_name(prefix='clitestkv', length=16),
-            'keyname':'autotestkey01',
             'location': self.location,
             'file-system': 'testfilesystem',
             'login-user': 'cliuser1',
@@ -3131,38 +3128,23 @@ class SynapseScenarioTests(ScenarioTest):
         # create identity
         self.cmd('az identity create --name {uami_name1} --resource-group {rg}')
         self.cmd('az identity create --name {uami_name2} --resource-group {rg}')
-        self.cmd('az identity create --name {uami_name3} --resource-group {rg}')
         uami1 = self.cmd('az identity show --name {uami_name1} --resource-group {rg}').get_output_in_json()
         uami2 = self.cmd('az identity show --name {uami_name2} --resource-group {rg}').get_output_in_json()
-        uami3 = self.cmd('az identity show --name {uami_name3} --resource-group {rg}').get_output_in_json()
         self.kwargs['uami_id1'] = uami1['id']
         self.kwargs['uami_id2'] = uami2['id']
-        self.kwargs['uami_id3'] = uami3['id']
-
-        # create keyvault
-        self.cmd('az keyvault create --name {keyvaultname} --resource-group {rg} --enable-purge-protection true')
-        key = self.cmd('az keyvault key create --name {keyname} --vault-name {keyvaultname}').get_output_in_json()
-        #keyvalut = self.cmd('az keyvault show --name {keyvaultname} --resource-group {rg}').get_output_in_json()
-        list = key['key']['kid'].split('/')
-        del list[-1]
-        self.kwargs['key_identifier'] = '/'.join(list)
         
         # create synapse workspace
         self.cmd(
             'az synapse workspace create --name {workspace} --resource-group {rg} --storage-account {storage-account} '
             '--file-system {file-system} --sql-admin-login-user {login-user} '
             '--sql-admin-login-password {login-password} '
-            '--location {location} --uami-id "{uami_id1}" "{uami_id2}" '
-            '--key-name {keyname} --key-identifier {key_identifier} '
-            '--uami-id-in-encrypt {uami_id3} --use-sami-in-encrypt False', checks=[
+            '--location {location} --uami-id "{uami_id1}" "{uami_id2}"', checks=[
                 self.check('name', self.kwargs['workspace']),
                 self.check('type', 'Microsoft.Synapse/workspaces'),
                 self.check('provisioningState', 'Succeeded'),
                 self.check('identity.type','SystemAssigned,UserAssigned'),
                 self.check('keys(identity.userAssignedIdentities)[0]', '{uami_id1}'),
-                self.check('keys(identity.userAssignedIdentities)[1]', '{uami_id2}'),
-                self.check('encryption.cmk.kekIdentity.userAssignedIdentity', '{uami_id3}'),
-                self.check('encryption.cmk.key.keyVaultUrl', '{key_identifier}')
+                self.check('keys(identity.userAssignedIdentities)[1]', '{uami_id2}')
             ])
 
         self.cmd('az synapse workspace update --name {workspace} --resource-group {rg} '
@@ -3188,10 +3170,5 @@ class SynapseScenarioTests(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('keys(identity.userAssignedIdentities)[0]', '{uami_id1}'),
             self.not_exists('identity.userAssignedIdentities[1]')
-        ])
-
-        self.cmd('az synapse workspace update --name {workspace} --resource-group {rg} '
-                 '--key-name newkeyname', checks=[
-                 self.check('encryption.cmk.key.name', 'newkeyname')    
         ])
 

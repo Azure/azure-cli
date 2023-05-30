@@ -42,8 +42,8 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
 
     if key_identifier is not None:
         workspace_key_detail = WorkspaceKeyDetails(name=key_name, key_vault_url=key_identifier)
-        kek_identity = KekIdentityProperties(userAssignedIdentity=user_assigned_identity_in_encryption,
-                                             useSystemAssignedIdentity=use_system_assigned_identity_in_encryption)
+        kek_identity = KekIdentityProperties(user_assigned_identity=user_assigned_identity_in_encryption,
+                                             use_system_assigned_identity=use_system_assigned_identity_in_encryption)
         encryption = EncryptionDetails(cmk=CustomerManagedKeyDetails(key=workspace_key_detail,
                                                                      kek_identity=kek_identity))
 
@@ -117,8 +117,8 @@ def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin
             workspace_key_detail = existing_ws.encryption.cmk.key
 
         if user_assigned_identity_in_encryption or use_system_assigned_identity_in_encryption:
-            kek_identity = KekIdentityProperties(userAssignedIdentity=user_assigned_identity_in_encryption,
-                                                 useSystemAssignedIdentity=use_system_assigned_identity_in_encryption)
+            kek_identity = KekIdentityProperties(user_assigned_identity=user_assigned_identity_in_encryption,
+                                                 use_system_assigned_identity =use_system_assigned_identity_in_encryption)
         else:
             kek_identity = existing_ws.encryption.cmk.kek_identity
 
