@@ -396,79 +396,6 @@ def parse_docker_image_name(deployment_container_image_name, environment=None):
     return "https://{}".format(hostname)
 
 
-def list_application_settings(cmd, resource_group_name, name):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    appsettings_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/config/appsettings/list?stamp={}&api-version={}'
-    appsettings_url = appsettings_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2022-03-01-privatepreview')
-    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + appsettings_url
-    app_settings = send_raw_request(cmd.cli_ctx, "POST", request_url).json()
-    return app_settings
-
-
-def update_application_settings(cmd, resource_group_name, name, app_settings):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    appsettings_update_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/config/appsettings?stamp={}&api-version={}'
-    appsettings_update_url = appsettings_update_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2022-03-01-privatepreview')
-    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + appsettings_update_url
-    body = json.dumps(app_settings)
-    result = send_raw_request(cmd.cli_ctx, "PUT", request_url, body=body).json()
-    return result
-
-
-def get_app(cmd, resource_group_name, name):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    site_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?stamp={}&api-version={}'
-    site_url = site_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2014-11-01-privatepreview')
-    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + site_url
-    response = send_raw_request(cmd.cli_ctx, "GET", request_url)
-    return response.json()
-
-
-def get_app_service_plan(cmd, resource_group_name, name):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    server_farm_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/serverfarms/{}?stamp={}&api-version={}'
-    server_farm_url = server_farm_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2014-11-01-privatepreview')
-    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + server_farm_url
-    app_service_plan = send_raw_request(cmd.cli_ctx, "GET", request_url).json()
-    return app_service_plan
-
-
-def get_configuration(cmd, resource_group_name, name):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    get_configuration_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/config/web?stamp={}&api-version={}'
-    get_configuration_url = get_configuration_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2022-03-01-privatepreview')
-    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + get_configuration_url
-    response = send_raw_request(cmd.cli_ctx, "GET", request_url)
-    return response.json()
-
-
-def update_flex_functionapp(cmd, resource_group_name, name, updated_app):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    get_configuration_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?stamp={}&api-version={}'
-    get_configuration_url = get_configuration_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2022-03-01-privatepreview')
-    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + get_configuration_url
-    updated_app_json = updated_app.serialize()
-    body = json.dumps(updated_app_json)
-    response = send_raw_request(cmd.cli_ctx, "PATCH", request_url, body=body)
-    return response.json()
-
-
-def list_vnet_connections(cmd, resource_group_name, name):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    get_vnet_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/virtualNetworkConnections?stamp={}&api-version={}'
-    get_vnet_url = get_vnet_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2022-03-01-privatepreview')
-    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + get_vnet_url
-    response = send_raw_request(cmd.cli_ctx, "GET", request_url)
-    return response.json()
-
-
 def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
     if not settings and not slot_settings:
         raise MutuallyExclusiveArgumentError('Usage Error: --settings |--slot-settings')
@@ -477,7 +404,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
     slot_settings = slot_settings or []
 
     params = {}
-    params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'
+    params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
     client = web_client_factory(cmd.cli_ctx)
     app_settings = client.web_apps.list_application_settings(resource_group_name, name, api_version='2022-03-01-privatepreview', params=params)
 
@@ -620,7 +547,7 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
 def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_remote=False, timeout=None, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     params = {}
-    params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'
+    params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
     app = client.web_apps.get(resource_group_name, name, api_version='2014-11-01-privatepreview', params = params)
     # app = client.web_apps.get(resource_group_name, name)
     if app is None:
@@ -1095,7 +1022,7 @@ def list_function_app(cmd, resource_group_name=None):
 
 def show_functionapp(cmd, resource_group_name, name, slot=None):
     params = {}
-    params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'
+    params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name, api_version='2014-11-01-privatepreview', params=params)
     if not app:
@@ -1123,7 +1050,7 @@ def show_app(cmd, resource_group_name, name, slot=None):
 
 def _list_app(cli_ctx, resource_group_name=None):
     params = {}
-    params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'
+    params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
     client = web_client_factory(cli_ctx)
     if resource_group_name:
         result = list(client.web_apps.list_by_resource_group(resource_group_name, api_version='2022-03-01-privatepreview', params=params))
@@ -1371,13 +1298,16 @@ def delete_logic_app(cmd, resource_group_name, name, slot=None):
 
 
 def delete_function_app(cmd, resource_group_name, name, keep_empty_plan=None, slot=None):
+    params = {}
+    params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
     client = web_client_factory(cmd.cli_ctx)
     if slot:
         client.web_apps.delete_slot(resource_group_name, name, slot,
                                     delete_empty_server_farm=False if keep_empty_plan else None)
     else:
         client.web_apps.delete(resource_group_name, name,
-                               delete_empty_server_farm=False if keep_empty_plan else None)
+                               delete_empty_server_farm=False if keep_empty_plan else None,
+                               api_version='2022-03-01-privatepreview', params=params)
 
 
 def delete_webapp(cmd, resource_group_name, name, keep_metrics=None, keep_empty_plan=None,
@@ -1397,7 +1327,7 @@ def stop_webapp(cmd, resource_group_name, name, slot=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     subscription_id = get_subscription_id(cmd.cli_ctx)
     stop_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/stop?stamp={}&api-version={}'
-    stop_url = stop_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2022-03-01-privatepreview')
+    stop_url = stop_url_base.format(subscription_id, resource_group_name, name, 'kc11geo.eastus.cloudapp.azure.com', '2022-03-01-privatepreview')
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + stop_url
     send_raw_request(cmd.cli_ctx, "POST", request_url)
 
@@ -1406,7 +1336,7 @@ def start_webapp(cmd, resource_group_name, name, slot=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     subscription_id = get_subscription_id(cmd.cli_ctx)
     start_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/start?stamp={}&api-version={}'
-    start_url = start_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2022-03-01-privatepreview')
+    start_url = start_url_base.format(subscription_id, resource_group_name, name, 'kc11geo.eastus.cloudapp.azure.com', '2022-03-01-privatepreview')
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + start_url
     send_raw_request(cmd.cli_ctx, "POST", request_url)
 
@@ -1415,21 +1345,21 @@ def restart_webapp(cmd, resource_group_name, name, slot=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     subscription_id = get_subscription_id(cmd.cli_ctx)
     restart_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/restart?stamp={}&api-version={}'
-    restart_url = restart_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2022-03-01-privatepreview')
+    restart_url = restart_url_base.format(subscription_id, resource_group_name, name, 'kc11geo.eastus.cloudapp.azure.com', '2022-03-01-privatepreview')
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + restart_url
     send_raw_request(cmd.cli_ctx, "POST", request_url)
 
 
 def get_site_configs(cmd, resource_group_name, name, slot=None):
     params = {}
-    params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'
+    params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
     client = web_client_factory(cmd.cli_ctx)
     return client.web_apps.get_configuration(resource_group_name, name, api_version='2022-03-01-privatepreview', params=params)
 
 
 def get_app_settings(cmd, resource_group_name, name, slot=None):
     params = {}
-    params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'
+    params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
     client = web_client_factory(cmd.cli_ctx)
     result = client.web_apps.list_application_settings(resource_group_name, name, api_version='2022-03-01-privatepreview', params=params)
     is_centauri = is_centauri_functionapp(cmd, resource_group_name, name)
@@ -1602,8 +1532,11 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
                         always_ready_instances=None,
                         maximum_instances=None,
                         instance_size=None):
-    configs = get_configuration(cmd, resource_group_name, name)
-    app_settings = list_application_settings(cmd, resource_group_name, name)
+    params = {}
+    params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
+    client = web_client_factory(cmd.cli_ctx)
+    configs = get_site_configs(cmd, resource_group_name, name, slot)
+    app_settings = client.web_apps.list_application_settings(resource_group_name, name, api_version='2022-03-01-privatepreview', params=params)
     if number_of_workers is not None:
         number_of_workers = validate_range_of_int_flag('--number-of-workers', number_of_workers, min_val=0, max_val=20)
     if linux_fx_version:
@@ -1629,7 +1562,7 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
         if arg in int_flags and values[arg] is not None:
             values[arg] = validate_and_convert_to_int(arg, values[arg])
         if arg != 'generic_configurations' and values.get(arg, None):
-            configs[arg] = values[arg] if arg not in bool_flags else values[arg] == 'true'
+            setattr(configs, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 
     generic_configurations = generic_configurations or []
     # https://github.com/Azure/azure-cli/issues/14857
@@ -1653,21 +1586,21 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
         setattr(configs, config_name, value)
 
     if not updating_ip_security_restrictions:
-        configs['properties']['ipSecurityRestrictions'] = None
-        configs['properties']['scmIpSecurityRestrictions'] = None
+        setattr(configs, 'ip_security_restrictions', None)
+        setattr(configs, 'scm_ip_security_restrictions', None)
 
     if always_ready_instances:
-        configs['properties']['minimumElasticInstanceCount'] = always_ready_instances
+        setattr(configs, 'minimum_elastic_instance_count', always_ready_instances)
 
     if maximum_instances:
-        configs['properties']['functionAppScaleLimit'] = maximum_instances
+        setattr(configs, 'function_app_scale_limit', maximum_instances)
 
     if instance_size:
         client = web_client_factory(cmd.cli_ctx)
-        webapp = get_app(cmd, resource_group_name, name)
+        webapp = client.web_apps.get(resource_group_name, name, api_version='2014-11-01-privatepreview', params=params)
         Site = cmd.get_models('Site')
-        updated_webapp = Site(container_size=instance_size, location=webapp['location'])
-        update_flex_functionapp(cmd, resource_group_name, name, updated_webapp)
+        updated_webapp = Site(container_size=instance_size, location=webapp.location)
+        client.web_apps.update(resource_group_name, name, updated_webapp, api_version='2022-03-01-privatepreview', params=params)
 
     if is_centauri_functionapp(cmd, resource_group_name, name):
         if min_replicas is not None:
@@ -1699,7 +1632,7 @@ def update_configuration_polling(cmd, resource_group_name, name, slot, configs):
 
 def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None):
     params = {}
-    params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'
+    params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
     client = web_client_factory(cmd.cli_ctx)
     app_settings = client.web_apps.list_application_settings(resource_group_name, name, api_version='2022-03-01-privatepreview', params=params)
     is_centauri = is_centauri_functionapp(cmd, resource_group_name, name)
@@ -2609,7 +2542,7 @@ def list_publishing_credentials(cmd, resource_group_name, name, slot=None):
 def list_publish_profiles(cmd, resource_group_name, name, slot=None, xml=False):
     import xmltodict
     params = {}
-    params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'
+    params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
     client = web_client_factory(cmd.cli_ctx)
     content = client.web_apps.list_publishing_profile_xml_with_secrets(resource_group_name, name, {"format": "WebDeploy"}, api_version='2022-03-01-privatepreview', params=params)
     full_xml = ''
@@ -3819,7 +3752,7 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location):
     plan_def.additional_properties["properties"] = existing_properties
     plan_def.additional_properties["properties"]["sku"] = "FlexConsumption"
     params = {}
-    params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'
+    params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
     poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def, api_version='2014-11-01-privatepreview', params=params)
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
@@ -3830,7 +3763,7 @@ def create_flex_functionapp(cmd, resource_group_name, name, functionapp_def):
     body = json.dumps(functionapp_json)
     subscription_id = get_subscription_id(cmd.cli_ctx)
     site_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?stamp={}&api-version={}'
-    site_url = site_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2022-03-01-privatepreview')
+    site_url = site_url_base.format(subscription_id, resource_group_name, name, 'kc11geo.eastus.cloudapp.azure.com', '2022-03-01-privatepreview')
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + site_url
     response = send_raw_request(cmd.cli_ctx, "PUT", request_url, body=body)
     return response.json()
@@ -3841,7 +3774,7 @@ def update_flex_functionapp_configuration(cmd, resource_group_name, name, config
     client = web_client_factory(cmd.cli_ctx)
     subscription_id = get_subscription_id(cmd.cli_ctx)
     update_configuration_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/config/web?stamp={}&api-version={}'
-    update_configuration_url = update_configuration_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2022-03-01-privatepreview')
+    update_configuration_url = update_configuration_url_base.format(subscription_id, resource_group_name, name, 'kc11geo.eastus.cloudapp.azure.com', '2022-03-01-privatepreview')
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + update_configuration_url
     body = json.dumps(configs)
     response = send_raw_request(cmd.cli_ctx, "PATCH", request_url, body=body)
@@ -4745,9 +4678,11 @@ def list_functionapp_vnet_integration(cmd, name, resource_group_name, slot=None)
 
 
 def list_vnet_integration(cmd, name, resource_group_name, slot=None):
+    params = {}
+    params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
     client = web_client_factory(cmd.cli_ctx)
     if slot is None:
-        result = list(client.web_apps.list_vnet_connections(resource_group_name, name))
+        result = list(client.web_apps.list_vnet_connections(resource_group_name, name, api_version='2022-03-01-privatepreview', params=params))
     else:
         result = list(client.web_apps.list_vnet_connections_slot(resource_group_name, name, slot))
     mod_list = []
@@ -5629,7 +5564,7 @@ def update_host_key(cmd, resource_group_name, name, key_type, key_name, key_valu
 
 def list_host_keys(cmd, resource_group_name, name, slot=None):
     params = {}
-    params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'
+    params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
     client = web_client_factory(cmd.cli_ctx)
     if slot:
         return client.web_apps.list_host_keys_slot(resource_group_name, name, slot)
@@ -5644,13 +5579,17 @@ def delete_host_key(cmd, resource_group_name, name, key_type, key_name, slot=Non
 
 
 def list_functions(cmd, resource_group_name, name):
+    params = {}
+    params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
     client = web_client_factory(cmd.cli_ctx)
-    return client.web_apps.list_functions(resource_group_name, name)
+    return client.web_apps.list_functions(resource_group_name, name, api_version='2022-03-01-privatepreview', params=params)
 
 
 def show_function(cmd, resource_group_name, name, function_name):
+    params = {}
+    params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
     client = web_client_factory(cmd.cli_ctx)
-    result = client.web_apps.get_function(resource_group_name, name, function_name)
+    result = client.web_apps.get_function(resource_group_name, name, function_name, api_version='2022-03-01-privatepreview', params=params)
     if result is None:
         return "Function '{}' does not exist in app '{}'".format(function_name, name)
     return result

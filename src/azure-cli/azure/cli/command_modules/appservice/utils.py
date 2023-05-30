@@ -165,7 +165,7 @@ def show_raw_functionapp(cmd, resource_group_name, name):
     client = web_client_factory(cmd.cli_ctx)
     site_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?stamp={}&api-version={}'
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    site_url = site_url_base.format(subscription_id, resource_group_name, name, 'kc08geo.eastus.cloudapp.azure.com', '2014-11-01-privatepreview')
+    site_url = site_url_base.format(subscription_id, resource_group_name, name, 'kc11geo.eastus.cloudapp.azure.com', '2014-11-01-privatepreview')
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + site_url
     response = send_raw_request(cmd.cli_ctx, "GET", request_url)
     return response.json()
@@ -191,7 +191,7 @@ def is_flex_functionapp(cmd, resource_group, name):
 def is_flex_functionapp_tmp(cmd, resource_group, name):
     client = web_client_factory(cmd.cli_ctx)
     params = {}
-    params['stamp'] = 'kc08geo.eastus.cloudapp.azure.com'    
+    params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
     name = name+'FlexPlan'
     plan_info = client.app_service_plans.get(resource_group, name, api_version='2014-11-01-privatepreview', params = params)
     if plan_info:
