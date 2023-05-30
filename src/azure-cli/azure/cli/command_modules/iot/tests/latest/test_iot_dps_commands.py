@@ -108,7 +108,7 @@ class IoTDpsTest(ScenarioTest):
 
         # Data residency not enabled in this region
         with self.assertRaises(HttpResponseError):
-            self.cmd('az iot dps create -g {} -n {} --edr'.format(group_name, dr_dps_name))
+            self.cmd('az iot dps create -g {} -n {} --location westus2 --edr'.format(group_name, dr_dps_name))
 
         # Successfully create in this region
         self.cmd('az iot dps create -g {} -n {} --location southeastasia --edr'.format(group_name, dr_dps_name),
@@ -240,36 +240,6 @@ class IoTDpsTest(ScenarioTest):
                  checks=[
                      self.check('userAssignedIdentities', None),
                      self.check('type', IdentityType.none.value)])
-
-    @pytest.mark.skip("Service is not ready yet.")
-    @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location', location="eastus2euap")
-    def test_dps_failover_lifecycle(self, group_name, group_location):
-        dps_name = self.create_random_name('dps', 20)
-        # find region pair
-        failover_location = "westus" if group_location == "eastus" else "eastus"
-
-        # Create DPS with CEDR
-        self.cmd('az iot dps create -g {} -n {} --region {}'.format(group_name, dps_name, failover_location),
-                 checks=[self.check('name', dps_name),
-                         self.check('location', group_location)])
-
-        # Start Failover
-        self.cmd('az iot dps manual-failover -g {} -n {}'.format(group_name, dps_name))
-
-        # check that the region changed correctly
-        self.cmd('az iot dps show -g {} -n {}'.format(group_name, dps_name),
-                 checks=[self.check('name', dps_name),
-                         self.check('location', failover_location)])
-
-        # Failover again should put back to primary region
-        self.cmd('az iot dps manual-failover -g {} -n {}'.format(group_name, dps_name))
-
-        self.cmd('az iot dps show -g {} -n {}'.format(group_name, dps_name),
-                 checks=[self.check('name', dps_name),
-                         self.check('location', group_location)])
-
-        # Delete DPS
-        self.cmd('az iot dps delete -g {} -n {}'.format(group_name, dps_name))
 
     @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location', location="eastus2euap")
     def test_dps_certificate_lifecycle(self, group_name, group_location):
