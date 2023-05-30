@@ -706,6 +706,8 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
     if network_acls or network_acls_ips or network_acls_vnets:
         network_acls = _parse_network_acls(
             cmd, resource_group_name, network_acls, network_acls_ips, network_acls_vnets, bypass, default_action)
+    else:
+        network_acls = _create_network_rule_set(cmd, bypass, default_action)
 
     if no_self_perms or enable_rbac_authorization:
         access_policies = []
