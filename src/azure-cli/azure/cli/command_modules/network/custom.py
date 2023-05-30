@@ -5698,8 +5698,7 @@ def sync_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_ne
 
     class Create(_VNetPeeringCreate):
         def pre_operations(self):
-            # cross-tenant
-            self.ctx.update_aux_subscriptions(remote_subscription)
+            self.ctx.update_aux_subscriptions(remote_subscription)  # cross-tenant
 
     return Create(cli_ctx=cmd.cli_ctx)(command_args={
         "name": virtual_network_peering_name,
