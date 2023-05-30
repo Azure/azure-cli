@@ -889,9 +889,12 @@ def add_template_validator(cmd, client, resource_group_name, image_template_name
     existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
                                          resource_group_name=resource_group_name,
                                          image_template_name=image_template_name)
-    image_template_properties_validate = ImageTemplatePropertiesValidate(
-        continue_distribute_on_failure=dis_on_failure, source_validation_only=source_validation_only)
-    existing_image_template.validate = image_template_properties_validate
+    if not existing_image_template.validate:
+        existing_image_template.validate = ImageTemplatePropertiesValidate(
+            continue_distribute_on_failure=dis_on_failure, source_validation_only=source_validation_only)
+    else:
+        existing_image_template.validate.continue_distribute_on_failure = dis_on_failure
+        existing_image_template.validate.source_validation_only = source_validation_only
 
     return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update,
                       parameters=existing_image_template, resource_group_name=resource_group_name,
