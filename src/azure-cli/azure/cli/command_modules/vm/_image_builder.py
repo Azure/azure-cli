@@ -941,24 +941,6 @@ def add_or_update_template_optimizer(cmd, client, resource_group_name, image_tem
                       parameters=existing_image_template, resource_group_name=resource_group_name,
                       image_template_name=image_template_name)
 
-#
-# def update_template_optimizer(cmd, client, resource_group_name, image_template_name, enable_vm_boot=None):
-#     _require_defer(cmd)
-#     existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
-#                                          resource_group_name=resource_group_name,
-#                                          image_template_name=image_template_name)
-#
-#     from azure.mgmt.imagebuilder.models import ImageTemplatePropertiesOptimize, ImageTemplatePropertiesOptimizeVmBoot
-#
-#     if enable_vm_boot is not None:
-#         state = "Enabled" if enable_vm_boot else "Disabled"
-#         vm_boot = ImageTemplatePropertiesOptimizeVmBoot(state=state)
-#         image_template_properties_optimize = ImageTemplatePropertiesOptimize(vm_boot=vm_boot)
-#         existing_image_template.optimize = image_template_properties_optimize
-#
-#     return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
-#                       resource_group_name=resource_group_name, image_template_name=image_template_name)
-
 
 def remove_template_optimizer(cmd, client, resource_group_name, image_template_name):
     _require_defer(cmd)
