@@ -207,6 +207,7 @@ class VMShowListSizesListIPAddressesScenarioTest(ScenarioTest):
 
 class VMSizeListScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     def test_vm_size_list(self):
         self.cmd('vm list-sizes --location westus',
                  checks=self.check('type(@)', 'array'))
@@ -1511,6 +1512,7 @@ class VMNoWaitScenarioTest(ScenarioTest):
 
 class VMAvailSetScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     def test_vm_availset(self, resource_group):
 
