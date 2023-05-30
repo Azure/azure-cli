@@ -16,7 +16,8 @@ from ._validators import (validate_onedeploy_params, validate_staticsite_link_fu
                           validate_functionapp_on_containerapp_site_config_set,
                           validate_functionapp_on_containerapp_site_config_show,
                           validate_functionapp_on_containerapp_container_settings_delete,
-                          validate_functionapp_on_containerapp_update)
+                          validate_functionapp_on_containerapp_update,
+                          validate_functionapp)
 
 
 def output_slots_in_table(slots):
@@ -319,7 +320,7 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp') as g:
         g.custom_command('create', 'create_functionapp', exception_handler=ex_handler_factory(),
-                         validator=validate_vnet_integration)
+                         validator=validate_functionapp)
         g.custom_command('list-runtimes', 'list_function_app_runtimes')
         g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
         g.custom_show_command('show', 'show_functionapp', table_transformer=transform_web_output)
@@ -365,14 +366,14 @@ def load_command_table(self, _):
         g.custom_command('config-local-git', 'enable_local_git')
         g.custom_command('config-zip', 'enable_zip_deploy_functionapp')
         g.custom_command('config', 'config_source_control', exception_handler=ex_handler_factory())
-        g.custom_command('sync', 'sync_site_repo')
-        g.custom_show_command('show', 'show_source_control')
-        g.custom_command('delete', 'delete_source_control')
+        g.custom_command('sync', 'sync_site_repo', exception_handler=ex_handler_factory())
+        g.custom_show_command('show', 'show_source_control', exception_handler=ex_handler_factory())
+        g.custom_command('delete', 'delete_source_control', exception_handler=ex_handler_factory())
         g.custom_command('update-token', 'update_git_token', exception_handler=ex_handler_factory())
 
     with self.command_group('functionapp deployment user', webclient_sdk) as g:
         g.custom_command('set', 'set_deployment_user', exception_handler=ex_handler_factory())
-        g.show_command('show', 'get_publishing_user')
+        g.custom_show_command('show', 'get_publishing_user')
 
     with self.command_group('functionapp deployment') as g:
         g.custom_command('list-publishing-profiles', 'list_publish_profiles')

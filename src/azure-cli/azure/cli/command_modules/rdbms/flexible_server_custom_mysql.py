@@ -26,7 +26,7 @@ from .flexible_server_virtual_network import prepare_mysql_exist_private_dns_zon
     prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from .validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, \
     mysql_restore_tier_validator, mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, \
-    validate_mysql_replica, validate_server_name, validate_georestore_location, validate_georestore_network, \
+    validate_mysql_replica, validate_server_name, validate_georestore_location, \
     validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_replica_location
 
 logger = get_logger(__name__)
@@ -302,7 +302,16 @@ def flexible_server_restore(cmd, client,
     except Exception as e:
         raise ResourceNotFoundError(e)
 
-    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
+    resolve_poller(
+        client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx,
+        'Restore Server')
+
+    restore_server_object = client.get(resource_group_name, server_name)
+    restore_server_network = restore_server_object.network
+    restore_server_network.public_network_access = public_access if public_access else source_server_object.network.public_network_access
+    update_parameter = mysql_flexibleservers.models.ServerForUpdate(network=restore_server_network)
+
+    return sdk_no_wait(no_wait, client.begin_update, resource_group_name, server_name, update_parameter)
 
 
 def flexible_server_georestore(cmd, client,
@@ -371,7 +380,6 @@ def flexible_server_georestore(cmd, client,
 
         validate_server_name(db_context, server_name, provider + '/flexibleServers')
         validate_georestore_location(db_context, location)
-        validate_georestore_network(source_server_object, public_access, vnet, subnet, 'mysql')
 
         identity, data_encryption = get_identity_and_data_encryption(source_server_object)
 
@@ -418,7 +426,19 @@ def flexible_server_georestore(cmd, client,
     except Exception as e:
         raise ResourceNotFoundError(e)
 
-    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
+    resolve_poller(
+        client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx,
+        'GeoRestore Server')
+
+    restore_server_object = client.get(resource_group_name, server_name)
+    restore_server_network = restore_server_object.network
+
+    if public_access is not None:
+        restore_server_network.public_network_access = public_access
+
+    update_parameter = mysql_flexibleservers.models.ServerForUpdate(network=restore_server_network)
+
+    return sdk_no_wait(no_wait, client.begin_update, resource_group_name, server_name, update_parameter)
 
 
 # pylint: disable=too-many-branches
@@ -438,7 +458,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        tags=None,
                                        replication_role=None,
                                        byok_identity=None, backup_byok_identity=None, byok_key=None, backup_byok_key=None,
-                                       disable_data_encryption=False):
+                                       disable_data_encryption=False,
+                                       public_access=None):
     # validator
     location = ''.join(instance.location.lower().split())
     db_context = DbContext(
@@ -560,6 +581,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
     if auto_grow:
         instance.storage.auto_grow = auto_grow
 
+    if public_access:
+        instance.network.public_network_access = public_access
+
     params = ServerForUpdate(sku=instance.sku,
                              storage=instance.storage,
                              backup=instance.backup,
@@ -567,7 +591,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
                              high_availability=instance.high_availability,
                              tags=tags,
                              identity=identity,
-                             data_encryption=data_encryption)
+                             data_encryption=data_encryption,
+                             network=instance.network)
 
     return params
 
@@ -637,11 +662,15 @@ def flexible_server_provision_network_resource(cmd, resource_group_name, server_
                                                        yes=yes)
         network.delegated_subnet_resource_id = subnet_id
         network.private_dns_zone_resource_id = private_dns_zone_id
+        network.public_network_access = 'Disabled'
     elif subnet is None and vnet is None and private_dns_zone_arguments is not None:
         raise RequiredArgumentMissingError("Private DNS zone can only be used with private access setting. Use vnet or/and subnet parameters.")
     else:
         start_ip, end_ip = prepare_public_network(public_access, yes=yes)
-
+        if public_access is not None and str(public_access).lower() == 'Disabled'.lower():
+            network.public_network_access = 'Disabled'
+        else:
+            network.public_network_access = 'Enabled'
     return network, start_ip, end_ip
 
 
@@ -688,7 +717,7 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
 # Replica commands
 # Custom functions for server replica, will add MySQL part after backend ready in future
 def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, location=None,
-                            private_dns_zone_arguments=None, vnet=None, subnet=None, zone=None, no_wait=False):
+                            private_dns_zone_arguments=None, vnet=None, subnet=None, zone=None, public_access=None, no_wait=False):
     provider = 'Microsoft.DBforMySQL'
     replica_name = replica_name.lower()
 
@@ -741,8 +770,19 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
                                                                     private_dns_zone_arguments,
                                                                     vnet,
                                                                     subnet)
+    resolve_poller(
+        client.begin_create(resource_group_name, replica_name, parameters), cmd.cli_ctx,
+        'Create Replica')
 
-    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, replica_name, parameters)
+    replica_server_object = client.get(resource_group_name, replica_name)
+    replica_server_network = replica_server_object.network
+
+    if public_access is not None:
+        replica_server_network.public_network_access = public_access
+
+    update_parameter = mysql_flexibleservers.models.ServerForUpdate(network=replica_server_network)
+
+    return sdk_no_wait(no_wait, client.begin_update, resource_group_name, replica_name, update_parameter)
 
 
 def flexible_replica_stop(client, resource_group_name, server_name):
@@ -1161,6 +1201,27 @@ def flexible_server_ad_admin_show(client, resource_group_name, server_name):
         resource_group_name=resource_group_name,
         server_name=server_name,
         administrator_name='ActiveDirectory')
+
+
+def flexible_gtid_reset(client, resource_group_name, server_name, gtid_set, no_wait=False, yes=False):
+    try:
+        server_object = client.get(resource_group_name, server_name)
+    except Exception as e:
+        raise ResourceNotFoundError(e)
+
+    if server_object.backup.geo_redundant_backup.lower() == "enabled":
+        raise CLIError("GTID reset can't be performed on a Geo-redundancy backup enabled server. Please disable Geo-redundancy to perform GTID reset on the server. "
+                       "You can enable Geo-redundancy option again after GTID reset. GTID reset action invalidates all the available backups and therefore, "
+                       "once Geo-redundancy is enabled again, it may take a day before geo-restore can be performed on the server.")
+
+    user_confirmation("Resetting GTID will invalidate all the automated/on-demand backups that were taken before the reset action and you will not be able "
+                      "to perform PITR (point-in-time-restore) using fastest restore point or by custom restore point if the selected restore time is before"
+                      " the GTID reset time. Do you want to continue?", yes=yes)
+
+    parameters = mysql_flexibleservers.models.ServerGtidSetParameter(
+        gtid_set=gtid_set
+    )
+    return sdk_no_wait(no_wait, client.begin_reset_gtid, resource_group_name, server_name, parameters)
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance

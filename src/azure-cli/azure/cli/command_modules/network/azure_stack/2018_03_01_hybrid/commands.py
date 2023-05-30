@@ -108,12 +108,11 @@ def load_command_table(self, _):
     self.command_table['network vnet-gateway root-cert create'] = VnetGatewayRootCertCreate(loader=self)
 
     # region VirtualNetwork
-    from .operations.vnet import VNetCreate, VNetUpdate, VNetSubnetCreate, VNetSubnetUpdate, VNetPeeringCreate
+    from .operations.vnet import VNetCreate, VNetSubnetCreate, VNetSubnetUpdate, VNetPeeringCreate
     from .._format import transform_vnet_table_output
     vnet = import_aaz_by_profile("network.vnet")
     operations_tmpl = self.get_module_name_by_profile("operations.vnet#{}")
     self.command_table['network vnet create'] = VNetCreate(loader=self)
-    self.command_table['network vnet update'] = VNetUpdate(loader=self)
     self.command_table['network vnet list'] = vnet.List(loader=self, table_transformer=transform_vnet_table_output)
     with self.command_group('network vnet', operations_tmpl=operations_tmpl) as g:
         g.custom_command("list-available-ips", "list_available_ips", is_preview=True)

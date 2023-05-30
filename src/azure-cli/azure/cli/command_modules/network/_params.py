@@ -338,7 +338,7 @@ def load_arguments(self, _):
 
     for item in ['', 'a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
         with self.argument_context('network dns record-set {} create'.format(item)) as c:
-            c.argument('ttl', help='Record set TTL (time-to-live)')
+            c.argument('ttl', type=int, help='Record set TTL (time-to-live)')
             c.argument('if_none_match', help='Create the record set only if it does not already exist.', action='store_true')
 
     for item in ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
@@ -357,7 +357,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network dns record-set cname set-record') as c:
         c.argument('record_set_name', options_list=['--record-set-name', '-n'], help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
-        c.argument('ttl', help='Record set TTL (time-to-live)')
+        c.argument('ttl', type=int, help='Record set TTL (time-to-live)')
         c.argument('if_none_match', help='Create the record set only if it does not already exist.',
                    action='store_true')
 
@@ -397,11 +397,11 @@ def load_arguments(self, _):
     with self.argument_context('network dns record-set soa') as c:
         c.argument('host', options_list=['--host', '-t'], help='Host name.')
         c.argument('email', options_list=['--email', '-e'], help='Email address.')
-        c.argument('expire_time', options_list=['--expire-time', '-x'], help='Expire time (seconds).')
-        c.argument('minimum_ttl', options_list=['--minimum-ttl', '-m'], help='Minimum TTL (time-to-live, seconds).')
-        c.argument('refresh_time', options_list=['--refresh-time', '-f'], help='Refresh value (seconds).')
-        c.argument('retry_time', options_list=['--retry-time', '-r'], help='Retry time (seconds).')
-        c.argument('serial_number', options_list=['--serial-number', '-s'], help='Serial number.')
+        c.argument('expire_time', options_list=['--expire-time', '-x'], type=int, help='Expire time (seconds).')
+        c.argument('minimum_ttl', options_list=['--minimum-ttl', '-m'], type=int, help='Minimum TTL (time-to-live, seconds).')
+        c.argument('refresh_time', options_list=['--refresh-time', '-f'], type=int, help='Refresh value (seconds).')
+        c.argument('retry_time', options_list=['--retry-time', '-r'], type=int, help='Retry time (seconds).')
+        c.argument('serial_number', options_list=['--serial-number', '-s'], type=int, help='Serial number.')
 
     with self.argument_context('network dns record-set srv') as c:
         c.argument('priority', type=int, options_list=['--priority', '-p'], help='Priority metric.')

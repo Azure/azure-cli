@@ -70,7 +70,7 @@ def load_arguments(self, _):
              "use 'Windows_Client'. For more information see the Azure Windows VM online docs.",
         arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'RHEL_BYOS', 'SLES_BYOS', 'RHEL_BASE',
                                 'RHEL_SAPAPPS', 'RHEL_SAPHA', 'RHEL_EUS', 'RHEL_BASESAPAPPS', 'RHEL_BASESAPHA', 'SLES_STANDARD', 'SLES', 'SLES_SAP', 'SLES_HPC',
-                                'None', 'RHEL_ELS_6']))
+                                'None', 'RHEL_ELS_6', 'UBUNTU_PRO', 'UBUNTU']))
 
     # StorageAccountTypes renamed to DiskStorageAccountTypes in 2018_06_01 of azure-mgmt-compute
     DiskStorageAccountTypes = DiskStorageAccountTypes or self.get_models('StorageAccountTypes')
@@ -284,6 +284,8 @@ def load_arguments(self, _):
         c.argument('subnet', help='Name or ID of subnet to deploy the build virtual machine')
         c.argument('proxy_vm_size', help='Size of the virtual machine used to build, customize and capture images (Standard_D1_v2 for Gen1 images and Standard_D2ds_v4 for Gen2 images).')
         c.argument('build_vm_identities', nargs='+', help='Optional configuration of the virtual network to use to deploy the build virtual machine in. Omit if no specific virtual network needs to be used.')
+        c.argument('validator', nargs='+', min_api='2022-07-01',
+                   help='The type of validation you want to use on the Image. For example, "Shell" can be shell validation.')
 
         # Image Source Arguments
         c.argument('source', arg_type=ib_source_type)
@@ -323,8 +325,14 @@ def load_arguments(self, _):
         c.argument('gallery_replication_regions', arg_group="Shared Image Gallery", nargs='+', help=ib_sig_regions_help + ib_default_loc_help)
         c.argument('managed_image_location', arg_group="Managed Image", help=ib_img_location_help + ib_default_loc_help)
         c.argument('is_vhd', arg_group="VHD", help="The output is a VHD distributor.", action='store_true')
+        c.argument('vhd_uri', arg_group="VHD", help="Optional Azure Storage URI for the distributed VHD blob. Omit to use the default (empty string) in which case VHD would be published to the storage account in the staging resource group.")
+        c.argument('versioning', get_enum_type(['Latest', 'Source']), help="Describe how to generate new x.y.z version number for distribution.")
         c.argument('tags', arg_type=ib_artifact_tags_type)
         c.ignore('location')
+
+    with self.argument_context('image builder output versioning set') as c:
+        c.argument('scheme', get_enum_type(['Latest', 'Source']), help='Version numbering scheme to be used.')
+        c.argument('major', type=int, help='Major version for the generated version number. Determine what is "latest" based on versions with this value as the major version. -1 is equivalent to leaving it unset.')
 
     with self.argument_context('image builder customizer') as c:
         ib_win_restart_type = CLIArgumentType(arg_group="Windows Restart")
@@ -403,7 +411,7 @@ def load_arguments(self, _):
         c.argument('enable_vtpm', enable_vtpm_type)
         c.argument('size', help='The new size of the virtual machine. See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.', is_preview=True)
         c.argument('ephemeral_os_disk_placement', arg_type=ephemeral_placement_type,
-                   help='Only applicable when used with `--size`. Allows you to choose the Ephemeral OS disk provisioning location.', is_preview=True)
+                   help='Only applicable when used with `--size`. Allows you to choose the Ephemeral OS disk provisioning location.')
         c.argument('enable_hibernation', arg_type=get_three_state_flag(), min_api='2021-03-01', help='The flag that enable or disable hibernation capability on the VM.')
 
     with self.argument_context('vm create') as c:
@@ -762,7 +770,7 @@ def load_arguments(self, _):
                    help='Timeout value expressed as an ISO 8601 time duration after which the platform will not try to restore the VMSS SPOT instances')
         c.argument('vm_sku', help='The new size of the virtual machine instances in the scale set. Default to "Standard_DS1_v2". See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.', is_preview=True)
         c.argument('ephemeral_os_disk_placement', arg_type=ephemeral_placement_type,
-                   help='Only applicable when used with `--vm-sku`. Allows you to choose the Ephemeral OS disk provisioning location.', is_preview=True)
+                   help='Only applicable when used with `--vm-sku`. Allows you to choose the Ephemeral OS disk provisioning location.')
         c.argument('enable_secure_boot', enable_secure_boot_type)
         c.argument('enable_vtpm', enable_vtpm_type)
 
@@ -1027,9 +1035,9 @@ def load_arguments(self, _):
                        help="storage caching type for data disk(s), including 'None', 'ReadOnly', 'ReadWrite', etc. Use a singular value to apply on all disks, or use `<lun>=<vaule1> <lun>=<value2>` to configure individual disk")
             c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
             c.argument('ephemeral_os_disk', arg_type=get_three_state_flag(), min_api='2018-06-01',
-                       help='Allows you to create an OS disk directly on the host node, providing local disk performance and faster VM/VMSS reimage time.', is_preview=True)
+                       help='Allows you to create an OS disk directly on the host node, providing local disk performance and faster VM/VMSS reimage time.')
             c.argument('ephemeral_os_disk_placement', arg_type=ephemeral_placement_type,
-                       help='Only applicable when used with `--ephemeral-os-disk`. Allows you to choose the Ephemeral OS disk provisioning location.', is_preview=True)
+                       help='Only applicable when used with `--ephemeral-os-disk`. Allows you to choose the Ephemeral OS disk provisioning location.')
             c.argument('os_disk_encryption_set', min_api='2019-07-01', help='Name or ID of disk encryption set for OS disk.')
             c.argument('data_disk_encryption_sets', nargs='+', min_api='2019-07-01',
                        help='Names or IDs (space delimited) of disk encryption sets for data disks.')
@@ -1177,11 +1185,6 @@ def load_arguments(self, _):
     with self.argument_context('sig list-shared') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('shared_to', shared_to_type)
-
-    with self.argument_context('sig show-shared') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
-        c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
-                   id_part='child_name_1')
 
     for scope in ['sig share add', 'sig share remove']:
         with self.argument_context(scope) as c:
@@ -1335,10 +1338,6 @@ def load_arguments(self, _):
                             'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used. '
                             'If "--target-edge-zones None" is specified, the target extended locations will be cleared.')
             c.argument('allow_replicated_location_deletion', arg_type=get_three_state_flag(), min_api='2022-03-03', help='Indicate whether or not removing this gallery image version from replicated regions is allowed.')
-
-    with self.argument_context('sig show-community') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
-        c.argument('public_gallery_name', public_gallery_name_type)
 
     with self.argument_context('sig list-community') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx))

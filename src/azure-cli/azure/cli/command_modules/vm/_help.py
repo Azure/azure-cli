@@ -160,11 +160,6 @@ examples:
     crafted: true
 """
 
-helps['disk-access'] = """
-type: group
-short-summary: Manage disk access resources.
-"""
-
 helps['disk-access create'] = """
 type: command
 short-summary: Create a disk access resource.
@@ -181,33 +176,6 @@ examples:
   - name: Update a disk access resource.
     text: >
         az disk-access update -g MyResourceGroup -n MyDiskAccess --tags tag1=val1 tag2=val2
-"""
-
-helps['disk-access list'] = """
-type: command
-short-summary: List disk access resources.
-examples:
-  - name: List all disk access reosurces in a resource group.
-    text: |
-        az disk-access list -g MyResourceGroup
-"""
-
-helps['disk-access show'] = """
-type: command
-short-summary: Get information of a disk access resource.
-examples:
-  - name: Get information of a disk access reosurce.
-    text: |
-        az disk-access show -g MyResourceGroup -n MyDiskAccess
-"""
-
-helps['disk-access delete'] = """
-type: command
-short-summary: Delete a disk access resource.
-examples:
-  - name: Delete a disk access reosurce.
-    text: |
-        az disk-access delete -g MyResourceGroup -n MyDiskAccess
 """
 
 helps['disk-access wait'] = """
@@ -585,6 +553,10 @@ examples:
         az image builder output add -n mytemplate -g my-group \\
             --output-name my_vhd_image --is-vhd  --defer
 
+  - name: Add a VHD distributor with specifying storage uri to an image template in the cli object cache.
+    text: |
+        az image builder output add -n mytemplate -g my-group \\
+            --output-name my_vhd_image --is-vhd --vhd-uri https://mystorageaccount.blob.core.windows.net/container/path_to_vhd_file --defer
 """
 
 helps['image builder output clear'] = """
@@ -597,6 +569,51 @@ helps['image builder output remove'] = """
 type: command
 short-summary: Remove an image builder output distributor from an image builder template.
 long-summary: Must be used with --defer
+"""
+
+helps['image builder output versioning'] = """
+type: group
+short-summary: Manage image builder template output versioner.
+long-summary: >
+    Describe how to generate new x.y.z version number for distribution.
+"""
+
+helps['image builder output versioning set'] = """
+type: command
+short-summary: Set the image builder output versioner of an image builder template.
+long-summary: Must be used with --defer.
+examples:
+  - name: Set the image builder output versioner generating version number that will be latest based on existing version numbers.
+    text: |
+        az image builder output versioning set -n MyTemplate -g MyResourceGroup --output-name MyVhdImage --scheme Latest --defer
+
+  - name: Set the image builder output versioner generating version number that will be latest based on specified major version.
+    text: |
+        az image builder output versioning set -n MyTemplate -g MyResourceGroup --output-name MyVhdImage --scheme Latest --major 1 --defer
+
+  - name: Set the image builder output versioner generating version number based on version number of source image.
+    text: |
+        az image builder output versioning set -n MyTemplate -g MyResourceGroup --output-name MyVhdImage --scheme Source --defer
+"""
+
+helps['image builder output versioning remove'] = """
+type: command
+short-summary: Remove all versioning options on specified outputs.
+long-summary: Must be used with --defer
+examples:
+  - name: Remove the image builder output versioner of specified outputs.
+    text: |
+        az image builder output versioning remove -n MyTemplate -g MyResourceGroup --output-name MyVhdImage --defer
+"""
+
+helps['image builder output versioning show'] = """
+type: command
+short-summary: Show versioning options on specified outputs.
+long-summary: Must be used with --defer
+examples:
+  - name: Show the image builder output versioner of specified outputs.
+    text: |
+        az image builder output versioning show -n MyTemplate -g MyResourceGroup --output-name MyVhdImage --defer
 """
 
 helps['image builder run'] = """
@@ -1179,15 +1196,6 @@ examples:
         az sig list-community --location myLocation --marker nextMarker
 """
 
-helps['sig list'] = """
-type: command
-short-summary: list share image galleries.
-examples:
-  - name: List shared galleries by subscription id.
-    text: |
-        az sig list-shared --location myLocation
-"""
-
 helps['sig share'] = """
 type: group
 short-summary: Manage gallery sharing profile
@@ -1238,16 +1246,6 @@ examples:
   - name: Place the CLI in a waiting state until the gallery sharing object is updated.
     text: |
         az sig share wait --updated --resource-group MyResourceGroup --gallery-name Gallery
-"""
-
-helps['sig show-shared'] = """
-type: command
-short-summary: Get a gallery that has been shared directly to your subscription or tenant
-long-summary: Get a gallery that has been shared directly to your subscription or tenant
-examples:
-  - name: Get a gallery that has been shared directly to your subscription or tenant in the given location.
-    text: |
-        az sig show-shared --gallery-unique-name galleryUniqueName --location myLocation
 """
 
 helps['sig update'] = """

@@ -3,6 +3,20 @@
 Release History
 ===============
 
+2.49.0
+++++++
+* Dynamically install extensions without prompt when not in a TTY (#26219)
+
+2.48.1
+++++++
+* No changes
+
+2.48.0
+++++++
+* `aaz`: Support hidden secret properties of response in output (#26102)
+* `aaz`: Support `AAZPasswordArg` (#26134)
+* `aaz`: Support argument prompt input for simple type args (#26134)
+
 2.47.0
 ++++++
 * `aaz`: Add support for changing subscription of `AAZCommand` in customization code (#25745)

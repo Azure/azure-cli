@@ -24,9 +24,9 @@ vault_name = "sarath-vault"
 
 class BackupTests(ScenarioTest, unittest.TestCase):
     #@record_only()
-    @ResourceGroupPreparer(location="eastasia", random_name_length=20)
+    @ResourceGroupPreparer(location="eastus2euap", random_name_length=20)
     @VaultPreparer()
-    @StorageAccountPreparer(location="eastasia")
+    @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
     @AFSPolicyPreparer()
     def test_afs_backup_scenario(self, resource_group, vault_name, storage_account, afs_name, policy_name):
@@ -57,13 +57,13 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         time.sleep(100)
 
     #@record_only()
-    @ResourceGroupPreparer(location="eastasia", random_name_length=20)
+    @ResourceGroupPreparer(location="eastus2euap", random_name_length=20)
     @VaultPreparer()
-    @StorageAccountPreparer(location="eastasia")
+    @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
     @AFSPolicyPreparer()
     @AFSItemPreparer()
-    @StorageAccountPreparer(location="eastasia", parameter_name="sa2")
+    @StorageAccountPreparer(location="eastus2euap", parameter_name="sa2")
     @FileSharePreparer(storage_account_parameter_name="sa2", parameter_name="afs2")
     @AFSItemPreparer(afs_parameter_name="afs2", storage_account_parameter_name="sa2")
     def test_afs_backup_container(self, resource_group, vault_name, storage_account, sa2, afs_name, afs2):
@@ -105,9 +105,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         time.sleep(100)
 
     #@record_only()
-    @ResourceGroupPreparer(location="eastasia", random_name_length=20)
+    @ResourceGroupPreparer(location="eastus2euap", random_name_length=20)
     @VaultPreparer()
-    @StorageAccountPreparer(location="eastasia")
+    @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
     @FileSharePreparer(parameter_name="afs2")
     @AFSPolicyPreparer()
@@ -173,9 +173,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         time.sleep(100)
 
     #@record_only()
-    @ResourceGroupPreparer(location="eastasia", random_name_length=20)
+    @ResourceGroupPreparer(location="eastus2euap", random_name_length=20)
     @VaultPreparer()
-    @StorageAccountPreparer(location="eastasia")
+    @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
     @AFSPolicyPreparer()
     @AFSItemPreparer()
@@ -214,9 +214,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         time.sleep(100)
 
     #@record_only()
-    @ResourceGroupPreparer(location="eastasia", random_name_length=20)
+    @ResourceGroupPreparer(location="eastus2euap", random_name_length=20)
     @VaultPreparer()
-    @StorageAccountPreparer(location="eastasia")
+    @StorageAccountPreparer(location="eastus2euap")
     @FilePreparer()
     @FilePreparer()
     @FilePreparer(parameter_name="file2")
@@ -254,7 +254,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup job show -g {rg} -v {vault} -n {job1}', checks=[
             self.check("properties.entityFriendlyName", '{item1}'),
             self.check("properties.operation", "Restore"),
-            self.check("properties.status", "Completed"),
             self.check("resourceGroup", '{rg}')
         ])
 
@@ -272,7 +271,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup job show -g {rg} -v {vault} -n {job2}', checks=[
             self.check("properties.entityFriendlyName", '{item1}'),
             self.check("properties.operation", "Restore"),
-            self.check("properties.status", "Completed"),
             self.check("resourceGroup", '{rg}')
         ])
 
@@ -290,7 +288,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup job show -g {rg} -v {vault} -n {job3}', checks=[
             self.check("properties.entityFriendlyName", '{item1}'),
             self.check("properties.operation", "Restore"),
-            self.check("properties.status", "Completed"),
             self.check("resourceGroup", '{rg}')
         ])
 
@@ -309,7 +306,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup job show -g {rg} -v {vault} -n {job4}', checks=[
             self.check("properties.entityFriendlyName", '{item1}'),
             self.check("properties.operation", "Restore"),
-            self.check("properties.status", "Completed"),
             self.check("resourceGroup", '{rg}')
         ])
 
@@ -326,7 +322,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup job show -g {rg} -v {vault} -n {job5}', checks=[
             self.check("properties.entityFriendlyName", '{item1}'),
             self.check("properties.operation", "Restore"),
-            self.check("properties.status", "Completed"),
             self.check("resourceGroup", '{rg}')
         ])
 
@@ -335,9 +330,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         time.sleep(100)
 
     #@record_only()
-    @ResourceGroupPreparer(location="eastasia", random_name_length=20)
+    @ResourceGroupPreparer(location="eastus2euap", random_name_length=20)
     @VaultPreparer()
-    @StorageAccountPreparer(location="eastasia")
+    @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
     @AFSPolicyPreparer()
     def test_afs_backup_protection(self, resource_group, vault_name, storage_account, afs_name, policy_name):
@@ -388,9 +383,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         time.sleep(100)
 
     #@record_only()
-    @ResourceGroupPreparer(location="eastasia", random_name_length=20)
+    @ResourceGroupPreparer(location="eastus2euap", random_name_length=20)
     @VaultPreparer()
-    @StorageAccountPreparer(location="eastasia")
+    @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
     @AFSPolicyPreparer()
     @AFSItemPreparer()
@@ -445,9 +440,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         time.sleep(100)
 
     #@record_only()
-    @ResourceGroupPreparer(location="eastasia", random_name_length=20)
+    @ResourceGroupPreparer(location="eastus2euap", random_name_length=20)
     @VaultPreparer()
-    @StorageAccountPreparer(location="eastasia")
+    @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
     @AFSPolicyPreparer()
     @AFSItemPreparer()

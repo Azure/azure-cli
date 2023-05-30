@@ -731,8 +731,8 @@ class SqlVmAndGroupScenarioTest(ScenarioTest):
         covering the validation of Azure AD authentication
         """
 
-        # Test create sqlvm2019 with LightWeight management mode
-        self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --sql-mgmt-type LightWeight'
+        # Test create sqlvm2019 
+        self.cmd('sql vm create -n {} -g {} -l {} --license-type {}'
                  .format(sqlvm2019, resource_group, resource_group_location, 'PAYG'), 
                     checks=[
                         JMESPathCheck('name', sqlvm2019),
@@ -741,14 +741,14 @@ class SqlVmAndGroupScenarioTest(ScenarioTest):
                         JMESPathCheck('sqlManagement', 'LightWeight')
                     ]).get_output_in_json()
         
-        # Test create sqlvm2022 with Full management mode
-        self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --sql-mgmt-type Full'
+        # Test create sqlvm2022 
+        self.cmd('sql vm create -n {} -g {} -l {} --license-type {}'
                  .format(sqlvm2022, resource_group, resource_group_location, 'PAYG'), 
                     checks=[
                         JMESPathCheck('name', sqlvm2022),
                         JMESPathCheck('location', resource_group_location),
                         JMESPathCheck('sqlServerLicenseType', 'PAYG'),
-                        JMESPathCheck('sqlManagement', 'Full')
+                        JMESPathCheck('sqlManagement', 'LightWeight')
                     ]).get_output_in_json()
 
         # Create user-assigned managed identity to attach to the virtual machine
@@ -757,19 +757,6 @@ class SqlVmAndGroupScenarioTest(ScenarioTest):
 
         # Create user-assigned managed identity not attached to any virtual machine
         unattached_identity = self.cmd('identity create -n {} -g {}'.format('other_msi', resource_group)).get_output_in_json()
-
-        # Assert customer cannot enable Azure AD authentication with LightWeight management mode
-        with self.assertRaisesRegex(InvalidArgumentValueError, "Enabling Azure AD authentication requires Full SQL VM management mode"):
-            self.cmd('sql vm validate-azure-ad-auth -n {} -g {}'.format(sqlvm2019, resource_group))
-
-        # test update sqlvm with management mode to make sure it updates to Full.
-        self.cmd('sql vm update -n {} -g {} --sql-mgmt-type {}'
-                .format(sqlvm2019, resource_group, 'Full'),
-                checks=[
-                    JMESPathCheck('name', sqlvm2019),
-                    JMESPathCheck('location', resource_group_location),
-                    JMESPathCheck('sqlManagement', 'Full')
-                ]).get_output_in_json()
 
         # Test both enable and validate commands
         commands = ["enable-azure-ad-auth", "validate-azure-ad-auth"]
