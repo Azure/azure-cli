@@ -548,7 +548,7 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
     client = web_client_factory(cmd.cli_ctx)
     params = {}
     params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
-    app = client.web_apps.get(resource_group_name, name, api_version='2014-11-01-privatepreview', params = params)
+    app = client.web_apps.get(resource_group_name, name, api_version='2022-03-01-privatepreview', params = params)
     # app = client.web_apps.get(resource_group_name, name)
     if app is None:
         raise ResourceNotFoundError('The function app \'{}\' was not found in resource group \'{}\'. '
@@ -1024,7 +1024,7 @@ def show_functionapp(cmd, resource_group_name, name, slot=None):
     params = {}
     params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
     client = web_client_factory(cmd.cli_ctx)
-    app = client.web_apps.get(resource_group_name, name, api_version='2014-11-01-privatepreview', params=params)
+    app = client.web_apps.get(resource_group_name, name, api_version='2022-03-01-privatepreview', params=params)
     if not app:
         raise ResourceNotFoundError("Unable to find resource'{}', in ResourceGroup '{}'.".format(name,
                                                                                                  resource_group_name))
@@ -1597,7 +1597,7 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
 
     if instance_size:
         client = web_client_factory(cmd.cli_ctx)
-        webapp = client.web_apps.get(resource_group_name, name, api_version='2014-11-01-privatepreview', params=params)
+        webapp = client.web_apps.get(resource_group_name, name, api_version='2022-03-01-privatepreview', params=params)
         Site = cmd.get_models('Site')
         updated_webapp = Site(container_size=instance_size, location=webapp.location)
         client.web_apps.update(resource_group_name, name, updated_webapp, api_version='2022-03-01-privatepreview', params=params)
@@ -3747,13 +3747,9 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location):
         kind="functionapp",
         name=name
     )
-    plan_def.enable_additional_properties_sending()
-    existing_properties = plan_def.serialize()["properties"]
-    plan_def.additional_properties["properties"] = existing_properties
-    plan_def.additional_properties["properties"]["sku"] = "FlexConsumption"
     params = {}
     params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
-    poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def, api_version='2014-11-01-privatepreview', params=params)
+    poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def, api_version='2022-03-01-privatepreview', params=params)
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
 
