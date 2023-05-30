@@ -3662,7 +3662,8 @@ def update_flex_functionapp_configuration(cmd, resource_group_name, name, config
     config_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}/config/web?api-version={}'
     config_url = config_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + config_url
-    body = json.dumps(configs)
+    configs_json = configs.serialize()
+    body = json.dumps(configs_json)
     response = send_raw_request(cmd.cli_ctx, "PATCH", request_url, body=body)
     return response.json()
 
