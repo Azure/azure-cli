@@ -61,7 +61,7 @@ def validate_resync_quotarule(cmd, namespace):
                 logger.warning("ANF validate_resync_quotarule: The remote_volume_resource_id %s is not a valid\
                                resourceId:", remoteVolumeResourceId)
             if rules_list is not None and not rules_list:
-                logger.debug("ANF validate_resync_quotarule: There are no quota rules for volume:")                             
+                logger.debug("ANF validate_resync_quotarule: There are no quota rules for volume:")
             else:
                 logger.debug("ANF validate_resync_quotarule: There are %s quota rules for this volume, show warning",
                              len(rules_list))
