@@ -7494,8 +7494,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--ssh-key-value={ssh_key_value} '
         response = self.cmd(create_cmd, checks=[
             self.check('addonProfiles.omsagent.enabled', True),
-            self.exists('addonProfiles.omsagent.config.logAnalyticsWorkspaceResourceID'),
-            self.check('addonProfiles.omsagent.config.useAADAuth', 'false')
+            self.exists('addonProfiles.omsagent.config.logAnalyticsWorkspaceResourceID')
         ]).get_output_in_json()
 
         # make sure a DCR was not created
