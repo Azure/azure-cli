@@ -319,8 +319,9 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
                     "key:{0} value:{1}\nFull exception: \n{2}".format(keyvalue.key, keyvalue.value, str(exception))
         raise ValueError(error_msg)
 
-    except:
-        logger.error("Exception while parsing feature flag. key:%s value:%s.", keyvalue.key, keyvalue.value)
-        raise
+    except Exception as exception:
+        error_msg = "Exception while parsing feature flag. key:{0} value:{1}.\nFull exception: \n{2}".format(
+            keyvalue.key, keyvalue.value, str(exception))
+        raise ValueError(error_msg)
 
     return feature_flag_value
