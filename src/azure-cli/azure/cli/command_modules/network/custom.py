@@ -5693,8 +5693,7 @@ def sync_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_ne
         err_msg = f"Virtual network peering {virtual_network_name} doesn't exist."
         raise ResourceNotFoundError(err_msg)
 
-    from .aaz.latest.network.vnet.peering import Create
-    return Create(cli_ctx=cmd.cli_ctx)(command_args={
+    return VNetPeeringCreate(cli_ctx=cmd.cli_ctx)(command_args={
         "name": virtual_network_peering_name,
         "resource_group": resource_group_name,
         "vnet_name": virtual_network_name,
