@@ -153,6 +153,7 @@ def validate_assessment(namespace):
             assessment_day_of_week is not None or assessment_start_time_local is not None):
         is_assessment_schedule_provided = True
 
+    # Should we add new validations for workspace rg, name, agent rg here?
     # Validate conflicting settings
     if (enable_assessment_schedule is False and is_assessment_schedule_provided):
         raise InvalidArgumentValueError("Assessment schedule settings cannot be provided while enable-assessment-schedule is False")

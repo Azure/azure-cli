@@ -8,14 +8,14 @@ from knack.prompting import prompt_pass
 from azure.cli.core.azclierror import (
     InvalidArgumentValueError,
     RequiredArgumentMissingError,
-    ResourceNotFoundError,
-    AzureInternalError
+    AzureResponseError
 )
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import (
     sdk_no_wait
 )
 from azure.core.exceptions import HttpResponseError
+from azure.cli.core.commands.arm import ArmTemplateBuilder
 
 from azure.mgmt.sqlvirtualmachine.models import (
     WsfcDomainProfile,
@@ -37,11 +37,15 @@ from azure.mgmt.sqlvirtualmachine.models import (
 )
 
 from ._util import (
-    get_workspace_id_from_log_analytics_extension,
-    get_workspace_in_sub,
-    set_log_analytics_extension,
     validate_and_set_assessment_custom_log
 )
+
+from azure.cli.command_modules.sqlvm._template_builder import *
+import re
+
+# from azure.mgmt.resource import ResourceManagementClient
+
+from azure.cli.command_modules.vm.custom import get_vm
 
 
 def sqlvm_list(
@@ -297,7 +301,7 @@ def sqlvm_update(cmd, instance, sql_virtual_machine_name, resource_group_name, s
                  service_principal_secret=None, connectivity_type=None, port=None, sql_workload_type=None, enable_r_services=None, tags=None,
                  enable_assessment=None, enable_assessment_schedule=None, assessment_weekly_interval=None,
                  assessment_monthly_occurrence=None, assessment_day_of_week=None, assessment_start_time_local=None,
-                 workspace_name=None, workspace_rg=None):
+                 workspace_name=None, workspace_rg=None, workspace_sub=None, agent_rg=None):
     '''
     Updates a SQL virtual machine.
     '''
@@ -387,7 +391,9 @@ def sqlvm_update(cmd, instance, sql_virtual_machine_name, resource_group_name, s
                               resource_group_name,
                               sql_virtual_machine_name,
                               workspace_rg,
-                              workspace_name)
+                              workspace_name,
+                              workspace_sub,
+                              agent_rg)
 
     return instance
 
@@ -437,15 +443,21 @@ def sqlvm_remove_from_group(client, cmd, sql_virtual_machine_name, resource_grou
     return client.get(resource_group_name, sql_virtual_machine_name)
 
 
-# region Helpers for custom commands
+#region Helpers for custom commands
 def set_assessment_properties(cmd, instance, enable_assessment, enable_assessment_schedule,
                               assessment_weekly_interval, assessment_monthly_occurrence,
                               assessment_day_of_week, assessment_start_time_local,
                               resource_group_name, sql_virtual_machine_name,
-                              workspace_rg, workspace_name):
+                              workspace_rg, workspace_name, workspace_sub, agent_rg):
     '''
     Set assessment properties to be sent in sql vm update
     '''
+
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from azure.cli.core.util import random_string, hash_string, send_raw_request
+    from azure.cli.command_modules.vm._vm_utils import ArmTemplateBuilder20190401
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     # If assessment.schedule settings are provided but enable schedule is skipped, then ensure schedule is enabled
     if (enable_assessment_schedule is None and
@@ -475,57 +487,325 @@ def set_assessment_properties(cmd, instance, enable_assessment, enable_assessmen
     # 2. Custom log definition on workspace
     if enable_assessment:
         workspace_id = None
+        print("processing arguments")
+        curr_subscription = get_subscription_id(cmd.cli_ctx)
+        # Raise error if workspace arguments not provided by user
+        if workspace_name is None or workspace_rg is None:
+            raise RequiredArgumentMissingError('Assessment requires a Log Analytics workspace and Log Analytics extension on VM - '
+                                               'workspace name and workspace resource group must be specified to deploy pre-requisites.')
+        if agent_rg is None:
+            raise RequiredArgumentMissingError('Assessment requires a Resource Group to deploy the AMA Agent resources- '
+                                               'Use the --agent-rg paramater to specify a resource group in this subscription. '
+                                               'It is recommended to reuse this resource group for other Assessment deployments using this Log Analytics workspace')
 
-        # Check if Log Analytics extension is provisioned on VM and get workspace id (also called customer id)
+        if workspace_sub is None:
+            # raise warning => --workspace-sub not provided. Using current subscription to find LA WS
+            workspace_sub = curr_subscription
+        api_version = "2021-12-01-preview"
+        la_url = f"https://management.azure.com/subscriptions/{workspace_sub}/resourcegroups/{workspace_rg}/providers/Microsoft.OperationalInsights/workspaces/{workspace_name}?api-version={api_version}"
+
         try:
-            workspace_id = get_workspace_id_from_log_analytics_extension(cmd, resource_group_name, sql_virtual_machine_name)
-        except HttpResponseError as err:
-            raise AzureInternalError(f"Failed to validate and deploy assessment pre-requisities. Error: {err}")
+            la_response = send_raw_request(cmd.cli_ctx, method="GET", url=la_url)
+        except:
+            raise AzureResponseError('Could not connect to the LA workspace. If the workspace is not in the same VM subscription'
+                                    'use the --workspace-subscription parameter')
 
-        # Log Analytics extension was not found, lets deploy it
-        if workspace_id is None:
-            # Raise error if workspace arguments not provided by user
-            if workspace_name is None or workspace_rg is None:
-                raise RequiredArgumentMissingError('Assessment requires a Log Analytics workspace and Log Analytics extension on VM - '
-                                                   'workspace name and workspace resource group must be specified to deploy pre-requisites.')
+        la_response = la_response.json()
+        workspace_id = la_response['properties']['customerId']
 
-            # Install extension using workspace arguments provided by user
-            _, workspace_id = set_log_analytics_extension(cmd,
-                                                          resource_group_name,
-                                                          sql_virtual_machine_name,
-                                                          workspace_rg,
-                                                          workspace_name)
+        workspace_loc = la_response['location']
 
-        # Get workspace details using workspace id fetched from extension
+        workspace_res_id = la_response['id']
+
+        # Validate the agent_rg -> Check if DCR + DCE exist already
+        ama_sub = curr_subscription
+        url = f"https://management.azure.com/subscriptions/{ama_sub}/resourceGroups/{agent_rg}/providers/Microsoft.Insights/dataCollectionRules?api-version=2022-06-01"
+
         try:
-            workspace = get_workspace_in_sub(cmd, workspace_id)
-        except HttpResponseError as err:
-            raise AzureInternalError(f"Failed to validate and deploy assessment pre-requisities. Error: {err}")
+            dcr_response = send_raw_request(cmd.cli_ctx, method="GET", url=url)
+        except:
+            raise AzureResponseError('could not connect to the provided agent resource group {agent_rg}. Ensure the resource in the same subscription as {ama_sub}')
 
-        if not workspace:
-            raise ResourceNotFoundError("Log Analytics workspace associated with VM does not exist in current subscription.")
+        # response contains list of dcr's
+        dcr_response = dcr_response.json()
+        dcr_list = dcr_response['value']
+        dcr_found = False
 
-        workspace_resource_id_parts = parse_resource_id(workspace.id)
-        workspace_rg_found = workspace_resource_id_parts['resource_group']
-        workspace_name_found = workspace_resource_id_parts['name']
+        # get list of all dcr names found
+        dcr_name_list = []
 
-        # In case workspace arguments provided by customer, verify they match with workspace associated with VM
-        if workspace_name is None:
-            workspace_name = workspace_name_found
-        elif workspace_name.lower() != workspace_name_found.lower():
-            raise InvalidArgumentValueError(f"VM is already associated with workspace '{workspace.id}'. "
-                                            "Skip workspace arguments to continue with associated workspace or dissociate workspace using Azure Portal first.")
+        for dcr in dcr_list:
+            # Now validate each dcr to check if it passes validation. if yes use. if none then create
+            # Fully qualifieds resource url that can be used
+            dcr_id = dcr['id']
 
-        if workspace_rg is None:
-            workspace_rg = workspace_rg_found
-        elif workspace_rg.lower() != workspace_rg_found.lower():
-            raise InvalidArgumentValueError(f"VM is already associated with workspace {workspace.id}. "
-                                            "Skip workspace arguments to continue with associated workspace or dissociate workspace from Azure Portal.")
+            # Define the regex pattern for extracting the required fields
+            dcr_pattern = r'/subscriptions/([^/]+)/resourceGroups/([^/]+)/.*?/dataCollectionRules/([^/]+)'
 
-        # Validate custom log definition on workspace
+            # Search the id in dcr_List for the fields
+            dcr_match = re.search(dcr_pattern, dcr_id)
+
+            if dcr_match:
+                dcr_subId = dcr_match.group(1)
+                dcr_rg = dcr_match.group(2)
+                dcr_name = dcr_match.group(3)
+
+            dcr_name_list.append(dcr_name)
+            #Validate DCR Name with regex before continuing
+
+            dcr_name_pattern = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_[a-z0-9]+_DCR_\d+$",
+                re.IGNORECASE)
+
+            if dcr_name_pattern.match(dcr_name):
+                url = f"https://management.azure.com/subscriptions/{dcr_subId}/resourceGroups/{dcr_rg}/providers/Microsoft.Insights/dataCollectionRules/{dcr_name}?api-version=2022-06-01"
+
+                try:
+                    dcr_response = send_raw_request(cmd.cli_ctx, method="GET", url=url)
+                except:
+                    # continue as we couldn't connect to DCR. If all connections fail we create new anyway
+                    continue
+            else:
+                # If DCR Name doesn't match then skip to check next DCR
+                continue
+            # Validate dcr response
+            dcr_response = dcr_response.json()
+
+            dcr_location = dcr_response['location']
+            dce_endpoint_id = dcr_response['properties']['dataCollectionEndpointId']
+            dcr_source_filePattern = dcr_response['properties']['dataSources']['logFiles'][0]['filePatterns'][0]
+            dcr_custom_log = dcr_response['properties']['dataFlows'][0]['outputStream']
+            # Custom-SqlAssessment_CL
+            dcr_la_id = dcr_response['properties']['destinations']['logAnalytics'][0]['workspaceId']
+            # CustomerId is the workspace Id. ResourceId is full qualified resource path
+            # dcr_la_name = dcr_response['properties']['destinations']['logAnalytics'][0]['name']
+            # workspace name is arbitrary name given by DCR resource metadata
+
+            def Validate_DCR(dcr_location, workspace_loc, dcr_source_filePattern, dcr_custom_log, dcr_la_id, workspace_id, dce_endpoint_id):
+                if dcr_location != workspace_loc:
+                    return False
+                if dcr_source_filePattern != "C:\\Windows\\System32\\config\\systemprofile\\AppData\\Local\\Microsoft SQL Server IaaS Agent\\Assessment\\*.csv":
+                    return False
+                if dcr_custom_log != "Custom-SqlAssessment_CL":
+                    return False
+                if dcr_la_id != workspace_id:
+                    return False
+
+                dce_pattern = r'/subscriptions/([^/]+)/resourceGroups/([^/]+)/.*?/dataCollectionEndpoints/([^/]+)'
+
+                # Search for the pattern in the string
+                dce_match = re.search(dce_pattern, dce_endpoint_id)
+
+                if dce_match:
+                    dce_sub = dce_match.group(1)
+                    dce_rg = dce_match.group(2)
+                    dce_name = dce_match.group(3)
+
+                dce_url = f"https://management.azure.com/subscriptions/{dce_sub}/resourceGroups/{dce_rg}/providers/Microsoft.Insights/dataCollectionEndpoints/{dce_name}?api-version=2022-06-01"
+                try:
+                    # Does a GET on the dce to ensure no http errors - suffices
+                    send_raw_request(cmd.cli_ctx, method="GET", url=dce_url)
+                except:
+                    # Validation on DCE Endpoint failed return False
+                    # We can consider not returning false - creating a DCE and patching the DCR here
+                    return False
+                return True
+
+            dcr_found = Validate_DCR(dcr_location, workspace_loc, dcr_source_filePattern, dcr_custom_log, dcr_la_id, workspace_id, dce_endpoint_id)
+
+            # Match all the stuff
+            # collect a list of all dcr names found in this rg and ensure no collision in new create name
+
+            # Validate_DCR():
+            # dcr follows naming convention
+            # Sample DCR NAME => 0009fc4d-e310-4e40-8e63-c48a23e9cdc1_eastus_DCR_1
+            # dcr location = la workspace location as they must be in same region
+        # Change to new custom table?
+        # New Custom table deployment workflow:
+        # Check if old table exists - if yes - run POST command.
+        # If does not exist add to the deployment template
+        print("Validating Custom Log")
+        log_exists = validate_and_set_assessment_custom_log(cmd, workspace_name, workspace_rg)
+        table_name = "SQLAssessment_CL"
+
+        if log_exists:
+            # Run a POST on the existing table for migration
+            # POST https://management.azure.com/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/tables/{tableName}/migrate?api-version=2021-12-01-preview
+            try:
+                # Does a GET on the dce to ensure no http errors - suffices
+                table_migration_url = f"https://management.azure.com/subscriptions/{curr_subscription}/resourceGroups/{workspace_rg}/providers/Microsoft.OperationalInsights/workspaces/{workspace_name}/tables/{table_name}/migrate?api-version=2021-12-01-preview"
+
+                send_raw_request(cmd.cli_ctx, method="POST", url=table_migration_url)
+            except:
+                raise AzureResponseError("Old Custom Log detected. Migrating to Custom Table failed.")
+
+        if not dcr_found:
+            # Create DCE
+            # CREATE DCR - Put request vs ARM template?
+
+            # Now we could probably send a full template
+            # Migrating from MMA to AMA Agent, deploy AMA pre requisites
+            # Required Resources: Data Collection Endpoint (DCE), Data Collection Rule (DCR), Link VM to DCR, Install AMA Agent
+            # These resources must be deployed to a Resource Group in the same region as the LA workspace
+            # Use a custom ARM template to deploy the resources
+            x = 1
+            dce_name = workspace_loc + "-" + "DCE-" + x
+            # we must do get req and loop on dce till we get an http error so we know it does not exist
+            # else increase x and try again
+
+            dce_res = f"/subscriptions/{curr_subscription}/resourceGroups/{agent_rg}/providers/Microsoft.Insights/dataCollectionEndpoints/{dce_name}"
+            # Validate dce_res and update name
+            # Make a GET request on dce_res and if error then proceed else bump x and retry till name satisfies
+
+            dce_exists = True
+            while(dce_exists):
+                try:
+                    # Does a GET on the dce to ensure no http errors - suffices
+                    dce_url = f"https://management.azure.com/subscriptions/{curr_subscription}/resourceGroups/{agent_rg}/providers/Microsoft.Insights/dataCollectionEndpoints/{dce_name}?api-version=2022-06-01"
+
+                    send_raw_request(cmd.cli_ctx, method="GET", url=dce_url)
+                except:
+                    # dce does not exist. so we do not need to bump name
+                    dce_exists = False
+                    break
+                x = x + 1
+                dce_name = workspace_loc + "-" + "DCE-" + x
+
+            x = 1
+            dcr_name = workspace_res_id + "_" + workspace_loc + "_" + "DCR_" + x
+
+            dcr_res = f"/subscriptions/{curr_subscription}/resourceGroups/{agent_rg}/providers/Microsoft.Insights/dataCollectionRules/{dcr_name}"
+            #Validate dcr res else update dcr name till validation passes
+
+            dcr_exists = True
+            while(dcr_exists):
+                try:
+                    # Does a GET on the dce to ensure no http errors - suffices
+                    dcr_url = f"https://management.azure.com/subscriptions/{curr_subscription}/resourceGroups/{agent_rg}/providers/Microsoft.Insights/dataCollectionRules/{dcr_name}?api-version=2022-06-01"
+
+                    send_raw_request(cmd.cli_ctx, method="GET", url=dcr_url)
+                except:
+                    # dce does not exist. so we do not need to bump name
+                    dcr_exists = False
+                    break
+                x = x + 1
+                dcr_name = workspace_res_id + "_" + workspace_loc + "_" + "DCR_" + x
+
+            master_template = ArmTemplateBuilder20190401()
+            dce = build_dce_resource(dce_name, workspace_loc)
+            master_template.add_resource(dce)
+            dcr = build_dcr_resource(dcr_name, workspace_loc, workspace_name, workspace_res_id, dce_res, dce_name)
+            master_template.add_resource(dcr)
+
+            vm = get_vm(cmd, resource_group_name, sql_virtual_machine_name, 'instanceView')
+
+            amainstall = build_ama_install_resource(sql_virtual_machine_name, vm.location)
+            master_template.add_resource(amainstall)
+
+            # /subscriptions/0009fc4d-e310-4e40-8e63-c48a23e9cdc1/resourceGroups/abhaga-iaasrg/providers/Microsoft.Insights/dataCollectionRules/0009fc4d-e310-4e40-8e63-c48a23e9cdc1_eastus_DCR_1
+            dcr_resource_id = f"/subscriptions/{curr_subscription}/resourceGroups/{agent_rg}/providers/Microsoft.Insights/dataCollectionRules/{dcr_name}"
+
+            dcra_name = workspace_res_id + "_" + workspace_loc + "_" + "DCRA_" + x
+            dcrlinkage = build_dcr_vm_linkage_resource(sql_virtual_machine_name, dcra_name, dcr_resource_id, dcr_name)
+            master_template.add_resource(dcrlinkage)
+
+            if not log_exists:
+                custom_table = build_custom_table_resource()
+                master_template.add_resource(custom_table)
+
+            template = master_template.build()
+
+            # deploy ARM template
+            deployment_name = 'vm_deploy_' + random_string(32)
+            client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+            DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+
+            properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
+
+            Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+            deployment = Deployment(properties=properties)
+
+            # creates the AMA DEPLOYMENT
+            LongRunningOperation(cmd.cli_ctx)(client.begin_create_or_update(agent_rg, deployment_name, deployment))
+
+        else:
+
+            # DCR and DCE were validated
+            # build ARM template for linkage resource and AMA installation
+            master_template = ArmTemplateBuilder20190401()
+
+            vm = get_vm(cmd, resource_group_name, sql_virtual_machine_name, 'instanceView')
+            amainstall = build_ama_install_resource(sql_virtual_machine_name, vm.location)
+
+            master_template.add_resource(amainstall)
+
+            dcra_name = "testDCRA"
+            dcrlinkage = build_dcr_vm_linkage_resource(sql_virtual_machine_name, dcra_name, dcr_resource_id, dcr_name)
+            master_template.add_resource(dcrlinkage)
+
+            template = master_template.build()
+
+            # deploy ARM template
+            deployment_name = 'vm_deploy_' + random_string(32)
+            client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+            DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+
+            properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
+
+            Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+            deployment = Deployment(properties=properties)
+
+            # creates the AMA DEPLOYMENT
+            LongRunningOperation(cmd.cli_ctx)(client.begin_create_or_update(agent_rg, deployment_name, deployment))
+    elif enable_assessment is False:
+
+        print("assessment false. deleting stuff")
+        # Delete DCRA
+        # Otherwise AssessmentSetting payload is set above
+        # GET DCRA ATTACHED TO VM: Validate for Assessment and delete
+        # Unless we can track assessment dcra resource id.
+
+        # GET https://management.azure.com/subscriptions/703362b3-f278-4e4b-9179-c76eaf41ffc2/resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/myVm/providers/Microsoft.Insights/dataCollectionRuleAssociations?api-version=2022-06-01
+
+        vm_sub = get_subscription_id(cmd.cli_ctx)
+        vm_rg = resource_group_name
+        vm_name = sql_virtual_machine_name
+
+        dcra_get_url = f"https://management.azure.com/subscriptions/{vm_sub}/resourceGroups/{vm_rg}/providers/Microsoft.Compute/virtualMachines/{vm_name}/providers/Microsoft.Insights/dataCollectionRuleAssociations?api-version=2022-06-01"
         try:
-            validate_and_set_assessment_custom_log(cmd, workspace_name, workspace_rg)
-        except BaseException as err:
-            raise AzureInternalError(f"Failed to validate and deploy assessment pre-requisities. Error: {err}")
+            # Does a GET on the dce to ensure no http errors - suffices
+            dcra_list = send_raw_request(cmd.cli_ctx, method="GET", url=dcra_get_url)
+        except:
+            # No dcra found? assessment was not setup with DCRA before
+            print("No DCRA found")
 
-# endRegion
+        for dcra in dcra_list:
+            dcra_name = dcra['name']
+            dcra_id = dcra['id']
+
+            pattern = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_[a-z0-9]+_DCR_\d+$",
+                re.IGNORECASE
+            )
+            if pattern.match(dcra_name):
+
+                # Match from response the values and add to url then delete
+                dcra_pattern = r'/subscriptions/([^/]+)/resourceGroups/([^/]+)/.*?/dataCollectionRuleAssociations/([^/]+)'
+
+                # Search for the pattern in the string
+                dcra_match = re.search(dcra_pattern, dcra_id)
+
+                if dcra_match:
+                    dcra_sub = dcra_match.group(1)
+                    dcra_rg = dcra_match.group(2)
+                    dcra_name = dcra_match.group(3)
+                dcra_url = f"/subscriptions/{dcra_sub}/resourceGroups/{dcra_rg}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{dcra_name}"
+                send_raw_request(cmd.cli_ctx, method="DELETE", url=dcra_url)
+
+            # Can also delete based on this simply as customer should not be creating this dcra..
+            # Find DCRA matching naming convention
+            # If 1 found - delete and check deleted
+            # If multiple found - validate each and delete all that pass validation?
+            # Check DCR resource ID
+            # Run through validation of DCR
+            # Basic validation: Custom Log, file pattern and dcr name
+            # advanced - dce endpoint valid, la workspace valid and location same
+#endregion Helpers for custom commands

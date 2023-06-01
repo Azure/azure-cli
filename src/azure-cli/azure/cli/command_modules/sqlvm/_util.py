@@ -109,6 +109,8 @@ def validate_and_set_assessment_custom_log(cmd, workspace_name, workspace_rg):
     except HttpResponseError as err:
         # Required custom log definition does not exist so deploy it
         if err.status_code == 404:
+            print("Custom Log not found - Create new")
+            return False
             data_source = DataSource(kind=data_source_kind,
                                      properties=data_source_properties)
             data_sources_client.create_or_update(workspace_rg,
@@ -117,3 +119,4 @@ def validate_and_set_assessment_custom_log(cmd, workspace_name, workspace_rg):
                                                  data_source)
         else:
             raise err
+    return True

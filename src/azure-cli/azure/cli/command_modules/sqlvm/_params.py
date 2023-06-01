@@ -363,3 +363,7 @@ def load_arguments(self, _):
                    help='Name of the Log Analytics workspace to associate with VM.')
         c.argument('workspace_rg',
                    help='Resource group containing the Log Analytics workspace.')
+        c.argument('workspace_sub',
+                   help='Subscription containing the Log Analytics workspace.')
+        c.argument('agent_rg',
+                   help='Resource group where we provision the AMA Agent resources.')
