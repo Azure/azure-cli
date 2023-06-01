@@ -68,7 +68,7 @@ from .utils import (_normalize_sku,
                     _normalize_location,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
                     get_resource_if_exists, repo_url_to_name, get_token,
-                    app_service_plan_exists, is_centauri_functionapp, is_flex_functionapp, is_flex_functionapp_tmp)
+                    app_service_plan_exists, is_centauri_functionapp, is_flex_functionapp, is_flex_functionapp_from_plan)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -560,8 +560,11 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
     # it can take a couple of tries before it gets the plan
     for _ in range(5):
         try:
-            plan_info = client.app_service_plans.get(parse_plan_id['resource_group'],
-                                                     parse_plan_id['name'])
+            params = {}
+            params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
+            plan_info = client.app_service_plans.get(parse_plan_id['resource_group'], parse_plan_id['name'], api_version='2022-03-01-privatepreview', params = params)
+            # plan_info = client.app_service_plans.get(parse_plan_id['resource_group'],
+            #                                          parse_plan_id['name'])
         except:  # pylint: disable=bare-except
             pass
         if plan_info is not None:
@@ -574,7 +577,7 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
     if is_consumption and app.reserved:
         validate_zip_deploy_app_setting_exists(cmd, resource_group_name, name, slot)
 
-    if is_flex_functionapp_tmp(cmd, resource_group_name, name):
+    if is_flex_functionapp_from_plan(cmd, plan_info):
         return enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout, slot, build_remote, app)
 
     if (not build_remote) and is_consumption and app.reserved:
@@ -595,7 +598,7 @@ def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, sl
     logger.warning("Getting scm site credentials for zip deployment")
 
     try:
-        scm_url = _get_scm_url_flex(app)
+        scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     except ValueError:
         raise ResourceNotFoundError('Failed to fetch scm url for function app')
 
@@ -1363,7 +1366,7 @@ def get_app_settings(cmd, resource_group_name, name, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     result = client.web_apps.list_application_settings(resource_group_name, name, api_version='2022-03-01-privatepreview', params=params)
     is_centauri = is_centauri_functionapp(cmd, resource_group_name, name)
-    is_cv2 = is_flex_functionapp_tmp(cmd, resource_group_name, name)
+    is_cv2 = is_flex_functionapp(cmd, resource_group_name, name)
     slot_app_setting_names = [] if (is_centauri or is_cv2) \
         else client.web_apps.list_slot_configuration_names(resource_group_name, name) \
         .app_setting_names
@@ -1636,7 +1639,7 @@ def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None
     client = web_client_factory(cmd.cli_ctx)
     app_settings = client.web_apps.list_application_settings(resource_group_name, name, api_version='2022-03-01-privatepreview', params=params)
     is_centauri = is_centauri_functionapp(cmd, resource_group_name, name)
-    is_cv2 = is_flex_functionapp_tmp(cmd, resource_group_name, name)
+    is_cv2 = is_flex_functionapp(cmd, resource_group_name, name)
     slot_cfg_names = {} if (is_centauri or is_cv2) \
         else client.web_apps.list_slot_configuration_names(resource_group_name, name)
     is_slot_settings = False
@@ -2500,16 +2503,6 @@ def _get_scm_url(cmd, resource_group_name, name, slot=None):
     # this should not happen, but throw anyway
     raise ResourceNotFoundError('Failed to retrieve Scm Uri')
 
-# temporary workaround for flex
-def _get_scm_url_flex(app):
-    from azure.mgmt.web.models import HostType
-    for host in app.host_name_ssl_states or []:
-        if host.host_type == '1':
-            return "https://{}".format(host.name)
-
-    # this should not happen, but throw anyway
-    raise ResourceNotFoundError('Failed to retrieve Scm Uri')
-
 
 def get_publishing_user(cmd):
     client = web_client_factory(cmd.cli_ctx)
@@ -2909,7 +2902,6 @@ def get_scm_site_headers_flex(cli_ctx, name, resource_group_name, slot=None, add
     logger.info("[AUTH]: AAD")
     headers = urllib3.util.make_headers()
     headers["Authorization"] = f"Bearer {get_bearer_token(cli_ctx)}"
-    print(headers["Authorization"])
     headers['User-Agent'] = get_az_user_agent()
     headers['x-ms-client-request-id'] = cli_ctx.data['headers']['x-ms-client-request-id']
     # allow setting Content-Type, Cache-Control, etc. headers
@@ -4396,7 +4388,7 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, head
             num_trials = num_trials + 1
 
         if res_dict.get('status', 0) == 3:
-            if not is_flex_functionapp_tmp(cmd, rg_name, name):
+            if not is_flex_functionapp(cmd, rg_name, name):
                 _configure_default_logging(cmd, rg_name, name)
             raise CLIError("Zip deployment failed. {}. Please run the command az webapp log deployment show "
                            "-n {} -g {}".format(res_dict, name, rg_name))

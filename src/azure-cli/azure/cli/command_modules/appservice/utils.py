@@ -187,6 +187,14 @@ def is_flex_functionapp(cmd, resource_group, name):
             return plan_info.sku.tier.lower() == 'flexconsumption'
     return False
 
+
+def is_flex_functionapp_from_plan(cmd, plan_info):
+    SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
+    if isinstance(plan_info, AppServicePlan):
+        if isinstance(plan_info.sku, SkuDescription):
+            return plan_info.sku.tier.lower() == 'flexconsumption'
+    return False
+
 #temporary function to check if the function app is flex
 def is_flex_functionapp_tmp(cmd, resource_group, name):
     client = web_client_factory(cmd.cli_ctx)
