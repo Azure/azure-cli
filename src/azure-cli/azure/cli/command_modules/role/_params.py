@@ -181,8 +181,9 @@ def load_arguments(self, _):
                    deprecate_info=c.deprecate(target='--skip-assignment', hide=True), help='No-op.')
         c.argument('show_auth_in_json', options_list=['--sdk-auth', '--json-auth'],
                    deprecate_info=c.deprecate(target='--sdk-auth'),
-                   help='Output result in the format compatible with some authentication scenarios requiring reading '
-                        'from a JSON dictionary.', arg_type=get_three_state_flag())
+                   help='Output service principal credential along with cloud endpoints in JSON format. '
+                        'See https://learn.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli.',
+                   arg_type=get_three_state_flag())
 
     with self.argument_context('ad sp owner list') as c:
         c.argument('identifier', options_list=['--id'], help='service principal name, or object id or the service principal')
