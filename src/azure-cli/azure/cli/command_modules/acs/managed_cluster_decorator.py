@@ -2246,8 +2246,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         Note: SDK provides default value "10.0.0.10" and performs the following validation
         {'pattern': r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'}
         for dns_service_ip.
-        Note: SDK provides default value "172.17.0.1/16" and performs the following validation
-        {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'} for docker_bridge_address.
 
         This function supports the option of enable_validation. When enabled, if pod_cidr is assigned and the value of
         network_plugin is azure, an InvalidArgumentValueError will be raised; otherwise, if any of pod_cidr,
@@ -2286,13 +2284,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         if network_profile and network_profile.dns_service_ip is not None:
             dns_service_ip = network_profile.dns_service_ip
 
-        # docker_bridge_address
-        # read the original value passed by the command
-        docker_bridge_address = self.raw_param.get("docker_bridge_address")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if network_profile and network_profile.docker_bridge_cidr is not None:
-            docker_bridge_address = network_profile.docker_bridge_cidr
-
         # network_policy
         # read the original value passed by the command
         network_policy = self.raw_param.get("network_policy")
@@ -2310,13 +2301,12 @@ class AKSManagedClusterContext(BaseAKSContext):
                     pod_cidr or
                     service_cidr or
                     dns_service_ip or
-                    docker_bridge_address or
                     network_policy
                 ):
                     raise RequiredArgumentMissingError(
                         "Please explicitly specify the network plugin type"
                     )
-        return pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy
+        return pod_cidr, service_cidr, dns_service_ip, None, network_policy
 
     def get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
         self,
@@ -2618,6 +2608,12 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         # read the original value passed by the command
         enable_msi_auth_for_monitoring = self.raw_param.get("enable_msi_auth_for_monitoring")
+        if (
+            self.mc and
+            self.mc.service_principal_profile and
+            self.mc.service_principal_profile.client_id is not None
+        ):
+            return False
         # try to read the property value corresponding to the parameter from the `mc` object
         if (
             self.mc and
@@ -5383,9 +5379,9 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             enabled=True,
             config={
                 CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: self.context.get_workspace_resource_id(),
-                CONST_MONITORING_USING_AAD_MSI_AUTH: "True"
+                CONST_MONITORING_USING_AAD_MSI_AUTH: "true"
                 if self.context.get_enable_msi_auth_for_monitoring()
-                else "False",
+                else "false",
             },
         )
         # post-process, create a deployment

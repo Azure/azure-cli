@@ -27,7 +27,8 @@ from ._models import (KeyValue,
                       convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting)
 from ._utils import (get_appconfig_data_client,
-                     prep_label_filter_for_url_encoding)
+                     prep_label_filter_for_url_encoding,
+                     validate_feature_flag_name)
 from ._featuremodels import (map_keyvalue_to_featureflag,
                              map_keyvalue_to_featureflagvalue,
                              FeatureFilter)
@@ -52,7 +53,15 @@ def set_feature(cmd,
         raise CLIErrors.RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
 
     key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
-    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):] if feature is None else feature
+
+    # If only key is indicated, ensure that the feature name derived from the key is valid.
+    if feature is None:
+        feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+        try:
+            validate_feature_flag_name(feature)
+        except CLIErrors.InvalidArgumentValueError as exception:
+            exception.error_msg = "The feature name derived from the specified key is invalid. " + exception.error_msg
+            raise exception
 
     # when creating a new Feature flag, these defaults will be used
     tags = {}

@@ -357,17 +357,7 @@ def add_nic_ip_config_address_pool(cmd, resource_group_name, network_interface_n
 
 def remove_nic_ip_config_address_pool(cmd, resource_group_name, network_interface_name, ip_config_name,
                                       backend_address_pool, load_balancer_name):
-
-    class LBPoolRemove(_LBPool.Remove):
-        def _handler(self, command_args):
-            lro_poller = super()._handler(command_args)
-            lro_poller._result_callback = self._output
-            return lro_poller
-
-        def _output(self, *args, **kwargs):
-            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-            return result["ipConfigurations"][0]
-
+    LBPoolRemove = _LBPool.Remove
     arguments = {
         "ip_config_name": ip_config_name,
         "nic_name": network_interface_name,
@@ -402,11 +392,6 @@ class NICIPConfigNATAdd(_NICIPConfigNAT.Add):
 
 class NICIPConfigNATRemove(_NICIPConfigNAT.Remove):
 
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
-
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -419,7 +404,3 @@ class NICIPConfigNATRemove(_NICIPConfigNAT.Remove):
                      "/loadBalancers/{lb_name}/inboundNatRules/{}",
         )
         return args_schema
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result["ipConfigurations"][0]
