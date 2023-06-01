@@ -66,7 +66,7 @@ def validate_resync_quotarule(cmd, namespace):
                 logger.debug("ANF validate_resync_quotarule: There are %s quota rules for this volume, show warning",
                              len(rules_list))
                 logger.warning("\nIf any quota rules exists on destination volume they will be overwritten\
-                                with source volume's quota rules.")
+with source volume's quota rules.")
     else:
         logger.debug("ANF validate_resync_quotarule: Volume %s is not in a CRR relationship:", namespace.volume_name)
         raise ValueError("\nThis volume is not configured for CRR replication.")
