@@ -547,7 +547,7 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
 def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_remote=False, timeout=None, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     params = {}
-    params['stamp'] = 'kc12geo.eastus.cloudapp.azure.com'
+    params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
     app = client.web_apps.get(resource_group_name, name, api_version='2022-03-01-privatepreview', params = params)
     # app = client.web_apps.get(resource_group_name, name)
     if app is None:
@@ -561,7 +561,7 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
     for _ in range(5):
         try:
             params = {}
-            params['stamp'] = 'kc12geo.eastus.cloudapp.azure.com'
+            params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
             plan_info = client.app_service_plans.get(parse_plan_id['resource_group'], parse_plan_id['name'], api_version='2022-03-01-privatepreview', params = params)
             # plan_info = client.app_service_plans.get(parse_plan_id['resource_group'],
             #                                          parse_plan_id['name'])
@@ -2902,7 +2902,6 @@ def get_scm_site_headers_flex(cli_ctx, name, resource_group_name, slot=None, add
     logger.info("[AUTH]: AAD")
     headers = urllib3.util.make_headers()
     headers["Authorization"] = f"Bearer {get_bearer_token(cli_ctx)}"
-    print(headers["Authorization"])
     headers['User-Agent'] = get_az_user_agent()
     headers['x-ms-client-request-id'] = cli_ctx.data['headers']['x-ms-client-request-id']
     # allow setting Content-Type, Cache-Control, etc. headers
