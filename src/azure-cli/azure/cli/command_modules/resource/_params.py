@@ -801,6 +801,7 @@ def load_arguments(self, _):
         c.argument('deny_settings_excluded_actions', arg_type=stacks_excluded_actions)
         c.argument('deny_settings_apply_to_child_scopes', arg_type=stacks_apply_to_child_scopes)
         c.argument('tags', tags_type)
+        c.argument('yes', help='Do not prompt for confirmation')
 
     for scope in ['stack mg show', 'stack mg export']:
         with self.argument_context(scope) as c:
@@ -815,6 +816,7 @@ def load_arguments(self, _):
         c.argument('delete_resources', arg_type=stacks_delete_resources_type)
         c.argument('delete_resource_groups', arg_type=stacks_delete_resource_groups_type)
         c.argument('delete_all', arg_type=stacks_delete_all_type)
+        c.argument('yes', help='Do not prompt for confirmation')
 
     with self.argument_context('stack mg list') as c:
         c.argument('subscription', arg_type=subscription_type)
@@ -838,6 +840,7 @@ def load_arguments(self, _):
         c.argument('deny_settings_excluded_actions', arg_type=stacks_excluded_actions)
         c.argument('deny_settings_apply_to_child_scopes', arg_type=stacks_apply_to_child_scopes)
         c.argument('tags', tags_type)
+        c.argument('yes', help='Do not prompt for confirmation')
 
     for scope in ['stack sub show', 'stack sub export']:
         with self.argument_context(scope) as c:
@@ -852,6 +855,7 @@ def load_arguments(self, _):
         c.argument('delete_resources', arg_type=stacks_delete_resources_type)
         c.argument('delete_resource_groups', arg_type=stacks_delete_resource_groups_type)
         c.argument('delete_all', arg_type=stacks_delete_all_type)
+        c.argument('yes', help='Do not prompt for confirmation')
 
     with self.argument_context('stack group create') as c:
         c.argument('name', options_list=['--name', '-n'], arg_type=stacks_name_type)
@@ -872,6 +876,7 @@ def load_arguments(self, _):
         c.argument('deny_settings_excluded_actions', arg_type=stacks_excluded_actions)
         c.argument('deny_settings_apply_to_child_scopes', arg_type=stacks_apply_to_child_scopes)
         c.argument('tags', tags_type)
+        c.argument('yes', help='Do not prompt for confirmation')
 
     for scope in ['stack group show', 'stack group export']:
         with self.argument_context(scope) as c:
@@ -895,6 +900,7 @@ def load_arguments(self, _):
         c.argument('delete_resources', arg_type=stacks_delete_resources_type)
         c.argument('delete_resource_groups', arg_type=stacks_delete_resource_groups_type)
         c.argument('delete_all', arg_type=stacks_delete_all_type)
+        c.argument('yes', help='Do not prompt for confirmation')
 
     with self.argument_context('bicep build') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep file to build in the file system.")

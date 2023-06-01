@@ -2148,7 +2148,7 @@ def list_template_specs(cmd, resource_group_name=None, name=None):
     return rcf.template_specs.list_by_subscription()
 
 
-def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_mode, delete_resources=False, delete_resource_groups=False, delete_all=False, deployment_resource_group=None, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_apply_to_child_scopes=False, tags=None, yes=False):
+def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_mode, delete_resources=False, delete_resource_groups=False, delete_all=False, deployment_resource_group=None, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, tags=None, yes=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
     delete_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
@@ -2182,7 +2182,17 @@ def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_m
     else:
         excluded_principals_array = None
 
+    excluded_actions_array = []
+    if deny_settings_excluded_actions:
+        for action in deny_settings_excluded_actions.split(" "):
+            excluded_actions_array.append(str(action))
+    else:
+        excluded_actions_array = None
+
     tags = tags or {}
+
+    if query_string and not template_uri:
+        raise IncorrectUsageError('please provide --template-uri if --query-string is specified')
 
     if [template_file, template_spec, template_uri].count(None) != 2:
         raise InvalidArgumentValueError(
@@ -2240,7 +2250,7 @@ def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_m
         resources=delete_resources_enum, resource_groups=delete_resource_groups_enum)
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = rcf.deployment_stacks.models.DenySettings(
-        mode=deny_settings_enum, excluded_principals=excluded_principals_array, apply_to_child_scopes=apply_to_child_scopes)
+        mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
         description=description, location=location, action_on_unmanage=action_on_unmanage_model, deployment_scope=deployment_scope, deny_settings=deny_settings_model, tags=tags)
     deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink()
@@ -2252,9 +2262,15 @@ def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_m
         template_obj = show_resource(cmd=cmd, resource_ids=[template_spec],
                                      api_version=api_version).properties['mainTemplate']
     elif t_uri:
-        deployment_stacks_template_link.uri = t_uri
+        if query_string:
+            deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink(
+                uri=t_uri, query_string=query_string)
+            t_uri = _prepare_template_uri_with_query_string(
+                template_uri=t_uri, input_query_string=query_string)
+        else:
+            deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink(uri=t_uri)
         deployment_stack_model.template_link = deployment_stacks_template_link
-        template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
+        template_obj = _remove_comments_from_json(_urlretrieve(t_uri).decode('utf-8'), file_path=t_uri)
     else:
         if _is_bicepparam_file_provided(parameters):
             ensure_bicep_installation(cmd.cli_ctx)
@@ -2379,7 +2395,7 @@ def export_template_deployment_stack_at_subscription(cmd, name=None, id=None):
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id.")
 
 
-def create_deployment_stack_at_resource_group(cmd, name, resource_group, deny_settings_mode, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_apply_to_child_scopes=False, yes=False, tags=None):
+def create_deployment_stack_at_resource_group(cmd, name, resource_group, deny_settings_mode, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, yes=False, tags=None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
@@ -2412,6 +2428,18 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, deny_se
             excluded_principals_array.append(str(principal))
     else:
         excluded_principals_array = None
+
+    excluded_actions_array = []
+    if deny_settings_excluded_actions:
+        for action in deny_settings_excluded_actions.split(" "):
+            excluded_actions_array.append(str(action))
+    else:
+        excluded_actions_array = None
+
+    tags = tags or {}
+
+    if query_string and not template_uri:
+        raise IncorrectUsageError('please provide --template-uri if --query-string is specified')
 
     if [template_file, template_spec, template_uri].count(None) != 2:
         raise InvalidArgumentValueError(
@@ -2460,7 +2488,7 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, deny_se
     # removed the following code because it is not in service yet, need to add this back eventually
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = rcf.deployment_stacks.models.DenySettings(
-        mode=deny_settings_enum, excluded_principals=excluded_principals_array, apply_to_child_scopes=apply_to_child_scopes)
+        mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
         description=description, action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model, tags=tags)
     deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink()
@@ -2472,9 +2500,15 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, deny_se
         template_obj = show_resource(cmd=cmd, resource_ids=[template_spec],
                                      api_version=api_version).properties['mainTemplate']
     elif t_uri:
-        deployment_stacks_template_link.uri = t_uri
+        if query_string:
+            deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink(
+                uri=t_uri, query_string=query_string)
+            t_uri = _prepare_template_uri_with_query_string(
+                template_uri=t_uri, input_query_string=query_string)
+        else:
+            deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink(uri=t_uri)
         deployment_stack_model.template_link = deployment_stacks_template_link
-        template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
+        template_obj = _remove_comments_from_json(_urlretrieve(t_uri).decode('utf-8'), file_path=t_uri)
     else:
         if _is_bicepparam_file_provided(parameters):
             ensure_bicep_installation(cmd.cli_ctx)
@@ -2608,7 +2642,7 @@ def export_template_deployment_stack_at_resource_group(cmd, name=None, resource_
     raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
 
 
-def create_deployment_stack_at_management_group(cmd, management_group_id, name, location, deny_settings_mode, deployment_subscription=None, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_apply_to_child_scopes=False, yes=False, tags=None):
+def create_deployment_stack_at_management_group(cmd, management_group_id, name, location, deny_settings_mode, deployment_subscription=None, delete_resources=False, delete_resource_groups=False, delete_all=False, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, yes=False, tags=None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
@@ -2641,6 +2675,18 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
             excluded_principals_array.append(str(principal))
     else:
         excluded_principals_array = None
+
+    excluded_actions_array = []
+    if deny_settings_excluded_actions:
+        for action in deny_settings_excluded_actions.split(" "):
+            excluded_actions_array.append(str(action))
+    else:
+        excluded_actions_array = None
+
+    tags = tags or {}
+
+    if query_string and not template_uri:
+        raise IncorrectUsageError('please provide --template-uri if --query-string is specified')
 
     if [template_file, template_spec, template_uri].count(None) != 2:
         raise InvalidArgumentValueError(
@@ -2695,7 +2741,7 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
         resources=delete_resources_enum, resource_groups=delete_resource_groups_enum)
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = rcf.deployment_stacks.models.DenySettings(
-        mode=deny_settings_enum, excluded_principals=excluded_principals_array, apply_to_child_scopes=apply_to_child_scopes)
+        mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
         description=description, location=location, action_on_unmanage=action_on_unmanage_model, deployment_scope=deployment_scope, deny_settings=deny_settings_model, tags=tags)
     deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink()
@@ -2707,9 +2753,15 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
         template_obj = show_resource(cmd=cmd, resource_ids=[template_spec],
                                      api_version=api_version).properties['mainTemplate']
     elif t_uri:
-        deployment_stacks_template_link.uri = t_uri
+        if query_string:
+            deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink(
+                uri=t_uri, query_string=query_string)
+            t_uri = _prepare_template_uri_with_query_string(
+                template_uri=t_uri, input_query_string=query_string)
+        else:
+            deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink(uri=t_uri)
         deployment_stack_model.template_link = deployment_stacks_template_link
-        template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
+        template_obj = _remove_comments_from_json(_urlretrieve(t_uri).decode('utf-8'), file_path=t_uri)
     else:
         if _is_bicepparam_file_provided(parameters):
             ensure_bicep_installation(cmd.cli_ctx)
@@ -4518,13 +4570,15 @@ def publish_bicep_file(cmd, file, target, documentationUri=None, force=None):
             if bicep_version_greater_than_or_equal_to(minimum_supported_version_for_documentationUri_parameter):
                 args += ["--documentationUri", documentationUri]
             else:
-                logger.error("az bicep publish with --documentationUri/-d parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_documentationUri_parameter)
+                logger.error("az bicep publish with --documentationUri/-d parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.",
+                             minimum_supported_version_for_documentationUri_parameter)
         if force:
             minimum_supported_version_for_publish_force = "0.17.1"
             if bicep_version_greater_than_or_equal_to(minimum_supported_version_for_publish_force):
                 args += ["--force"]
             else:
-                logger.error("az bicep publish with --force parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_publish_force)
+                logger.error("az bicep publish with --force parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.",
+                             minimum_supported_version_for_publish_force)
         run_bicep_command(cmd.cli_ctx, args)
     else:
         logger.error("az bicep publish could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
