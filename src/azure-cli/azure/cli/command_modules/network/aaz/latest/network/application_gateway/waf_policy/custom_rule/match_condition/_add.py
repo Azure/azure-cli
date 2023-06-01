@@ -25,9 +25,9 @@ class Add(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-05-01",
+        "version": "2022-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies/{}", "2022-05-01", "properties.customRules[].matchConditions[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies/{}", "2022-11-01", "properties.customRules[].matchConditions[]"],
         ]
     }
 
@@ -66,6 +66,7 @@ class Add(AAZCommand):
         _args_schema.values = AAZListArg(
             options=["--values"],
             help="Space-separated list of values to match.",
+            required=True,
         )
         _args_schema.variables = AAZListArg(
             options=["--variables"],
@@ -238,7 +239,7 @@ class Add(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-05-01",
+                    "api-version", "2022-11-01",
                     required=True,
                 ),
             }
@@ -321,7 +322,7 @@ class Add(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-05-01",
+                    "api-version", "2022-11-01",
                     required=True,
                 ),
             }
@@ -378,7 +379,7 @@ class Add(AAZCommand):
                 self.ctx.args,
                 typ=AAZObjectType
             )
-            _builder.set_prop("matchValues", AAZListType, ".values")
+            _builder.set_prop("matchValues", AAZListType, ".values", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("matchVariables", AAZListType, ".variables", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("negationConditon", AAZBoolType, ".negate")
             _builder.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
@@ -940,6 +941,10 @@ class _AddHelper:
         properties.tunnel_interfaces = AAZListType(
             serialized_name="tunnelInterfaces",
         )
+        properties.virtual_network = AAZObjectType(
+            serialized_name="virtualNetwork",
+        )
+        cls._build_schema_sub_resource_read(properties.virtual_network)
 
         backend_ip_configurations = _schema_network_interface_ip_configuration_read.properties.load_balancer_backend_address_pools.Element.properties.backend_ip_configurations
         backend_ip_configurations.Element = AAZObjectType()
@@ -1182,6 +1187,9 @@ class _AddHelper:
         properties.auxiliary_mode = AAZStrType(
             serialized_name="auxiliaryMode",
         )
+        properties.auxiliary_sku = AAZStrType(
+            serialized_name="auxiliarySku",
+        )
         properties.disable_tcp_state_tracking = AAZBoolType(
             serialized_name="disableTcpStateTracking",
         )
@@ -1414,6 +1422,10 @@ class _AddHelper:
             serialized_name="privateEndpoint",
         )
         cls._build_schema_private_endpoint_read(properties.private_endpoint)
+        properties.private_endpoint_location = AAZStrType(
+            serialized_name="privateEndpointLocation",
+            flags={"read_only": True},
+        )
         properties.private_link_service_connection_state = AAZObjectType(
             serialized_name="privateLinkServiceConnectionState",
         )
@@ -1939,6 +1951,9 @@ class _AddHelper:
         dns_settings.domain_name_label = AAZStrType(
             serialized_name="domainNameLabel",
         )
+        dns_settings.domain_name_label_scope = AAZStrType(
+            serialized_name="domainNameLabelScope",
+        )
         dns_settings.fqdn = AAZStrType()
         dns_settings.reverse_fqdn = AAZStrType(
             serialized_name="reverseFqdn",
@@ -2084,7 +2099,9 @@ class _AddHelper:
         properties.direction = AAZStrType(
             flags={"required": True},
         )
-        properties.priority = AAZIntType()
+        properties.priority = AAZIntType(
+            flags={"required": True},
+        )
         properties.protocol = AAZStrType(
             flags={"required": True},
         )
@@ -2182,7 +2199,7 @@ class _AddHelper:
             serialized_name="addressPrefixes",
         )
         properties.application_gateway_ip_configurations = AAZListType(
-            serialized_name="applicationGatewayIpConfigurations",
+            serialized_name="applicationGatewayIPConfigurations",
         )
         properties.delegations = AAZListType()
         properties.ip_allocations = AAZListType(
@@ -3892,6 +3909,9 @@ class _AddHelper:
         _element.etag = AAZStrType(
             flags={"read_only": True},
         )
+        _element.group_by_user_session = AAZListType(
+            serialized_name="groupByUserSession",
+        )
         _element.match_conditions = AAZListType(
             serialized_name="matchConditions",
             flags={"required": True},
@@ -3900,8 +3920,33 @@ class _AddHelper:
         _element.priority = AAZIntType(
             flags={"required": True},
         )
+        _element.rate_limit_duration = AAZStrType(
+            serialized_name="rateLimitDuration",
+        )
+        _element.rate_limit_threshold = AAZIntType(
+            serialized_name="rateLimitThreshold",
+        )
         _element.rule_type = AAZStrType(
             serialized_name="ruleType",
+            flags={"required": True},
+        )
+        _element.state = AAZStrType()
+
+        group_by_user_session = _schema_web_application_firewall_policy_read.properties.custom_rules.Element.group_by_user_session
+        group_by_user_session.Element = AAZObjectType()
+
+        _element = _schema_web_application_firewall_policy_read.properties.custom_rules.Element.group_by_user_session.Element
+        _element.group_by_variables = AAZListType(
+            serialized_name="groupByVariables",
+            flags={"required": True},
+        )
+
+        group_by_variables = _schema_web_application_firewall_policy_read.properties.custom_rules.Element.group_by_user_session.Element.group_by_variables
+        group_by_variables.Element = AAZObjectType()
+
+        _element = _schema_web_application_firewall_policy_read.properties.custom_rules.Element.group_by_user_session.Element.group_by_variables.Element
+        _element.variable_name = AAZStrType(
+            serialized_name="variableName",
             flags={"required": True},
         )
 
@@ -3911,6 +3956,7 @@ class _AddHelper:
         _element = _schema_web_application_firewall_policy_read.properties.custom_rules.Element.match_conditions.Element
         _element.match_values = AAZListType(
             serialized_name="matchValues",
+            flags={"required": True},
         )
         _element.match_variables = AAZListType(
             serialized_name="matchVariables",
@@ -4047,8 +4093,20 @@ class _AddHelper:
         cls._build_schema_sub_resource_read(path_based_rules.Element)
 
         policy_settings = _schema_web_application_firewall_policy_read.properties.policy_settings
+        policy_settings.custom_block_response_body = AAZStrType(
+            serialized_name="customBlockResponseBody",
+        )
+        policy_settings.custom_block_response_status_code = AAZIntType(
+            serialized_name="customBlockResponseStatusCode",
+        )
+        policy_settings.file_upload_enforcement = AAZBoolType(
+            serialized_name="fileUploadEnforcement",
+        )
         policy_settings.file_upload_limit_in_mb = AAZIntType(
             serialized_name="fileUploadLimitInMb",
+        )
+        policy_settings.log_scrubbing = AAZObjectType(
+            serialized_name="logScrubbing",
         )
         policy_settings.max_request_body_size_in_kb = AAZIntType(
             serialized_name="maxRequestBodySizeInKb",
@@ -4057,7 +4115,34 @@ class _AddHelper:
         policy_settings.request_body_check = AAZBoolType(
             serialized_name="requestBodyCheck",
         )
+        policy_settings.request_body_enforcement = AAZBoolType(
+            serialized_name="requestBodyEnforcement",
+        )
+        policy_settings.request_body_inspect_limit_in_kb = AAZIntType(
+            serialized_name="requestBodyInspectLimitInKB",
+        )
         policy_settings.state = AAZStrType()
+
+        log_scrubbing = _schema_web_application_firewall_policy_read.properties.policy_settings.log_scrubbing
+        log_scrubbing.scrubbing_rules = AAZListType(
+            serialized_name="scrubbingRules",
+        )
+        log_scrubbing.state = AAZStrType()
+
+        scrubbing_rules = _schema_web_application_firewall_policy_read.properties.policy_settings.log_scrubbing.scrubbing_rules
+        scrubbing_rules.Element = AAZObjectType()
+
+        _element = _schema_web_application_firewall_policy_read.properties.policy_settings.log_scrubbing.scrubbing_rules.Element
+        _element.match_variable = AAZStrType(
+            serialized_name="matchVariable",
+            flags={"required": True},
+        )
+        _element.selector = AAZStrType()
+        _element.selector_match_operator = AAZStrType(
+            serialized_name="selectorMatchOperator",
+            flags={"required": True},
+        )
+        _element.state = AAZStrType()
 
         tags = _schema_web_application_firewall_policy_read.tags
         tags.Element = AAZStrType()
