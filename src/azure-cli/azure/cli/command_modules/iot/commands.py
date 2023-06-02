@@ -130,7 +130,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('create', 'iot_hub_create', supports_no_wait=True)
         g.custom_command('list', 'iot_hub_list')
         g.custom_command('show-connection-string', 'iot_hub_show_connection_string',
-                         deprecate_info=self.deprecate(redirect=CS_DEPRECATION_INFO), hide=True)
+                         deprecate_info=self.deprecate(redirect=CS_DEPRECATION_INFO, hide=True))
         g.custom_show_command('show', 'iot_hub_get')
         g.generic_update_command('update', getter_name='iot_hub_get', setter_name='iot_hub_update',
                                  command_type=update_custom_util, custom_func_name='update_iot_hub_custom')
