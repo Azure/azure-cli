@@ -789,6 +789,7 @@ def load_arguments(self, _):
         c.argument('template_file', arg_type=deployment_template_file_type)
         c.argument('template_spec', arg_type=deployment_template_spec_type)
         c.argument('template_uri', arg_type=deployment_template_uri_type)
+        c.argument('query_string', arg_type=deployment_query_string_type)
         c.argument('parameters', arg_type=deployment_parameters_type,
                    help='Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.')
         c.argument('description', arg_type=stacks_description_type)
@@ -828,6 +829,7 @@ def load_arguments(self, _):
         c.argument('template_file', arg_type=deployment_template_file_type)
         c.argument('template_spec', arg_type=deployment_template_spec_type)
         c.argument('template_uri', arg_type=deployment_template_uri_type)
+        c.argument('query_string', arg_type=deployment_query_string_type)
         c.argument('parameters', arg_type=deployment_parameters_type,
                    help='Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.')
         c.argument('description', arg_type=stacks_description_type)
@@ -864,6 +866,7 @@ def load_arguments(self, _):
         c.argument('template_file', arg_type=deployment_template_file_type)
         c.argument('template_spec', arg_type=deployment_template_spec_type)
         c.argument('template_uri', arg_type=deployment_template_uri_type)
+        c.argument('query_string', arg_type=deployment_query_string_type)
         c.argument('parameters', arg_type=deployment_parameters_type,
                    help='Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.')
         c.argument('description', arg_type=stacks_description_type)
