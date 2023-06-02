@@ -9042,6 +9042,105 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_trusted_launch_on_v2_', location='westus')
+    @AllowLargeResponse()
+    def test_enable_trusted_launch_on_v2(self, resource_group):
+        self.kwargs.update({
+            'vm1': self.create_random_name('vm', 10),
+            'vm2': self.create_random_name('vm', 10),
+            'vm3': self.create_random_name('vm', 10),
+            'vm4': self.create_random_name('vm', 10),
+            'disk1': 'disk1',
+
+        })
+        self.cmd(
+            'disk create -g {rg} -n {disk1} --image-reference MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --hyper-v-generation V2',
+            checks=[
+                self.check('hyperVGeneration', 'V2')
+            ])
+        self.cmd('vm create -g {rg} -n {vm1} --attach-os-disk {disk1} --nsg-rule NONE --os-type windows')
+
+        self.cmd(('vm update -g {rg} -n {vm1} --security-type TrustedLaunch'), checks=[
+            self.check('')
+        ])
+
+        self.cmd(
+            'disk create -g {rg} -n {disk1} --image-reference MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --hyper-v-generation V1',
+            checks=[
+                self.check('hyperVGeneration', 'V1')
+            ])
+        self.cmd('vm create -g {rg} -n {vm1} --attach-os-disk {disk1} --nsg-rule NONE --os-type windows')
+
+        #
+        message = 'Trusted Launch security configuration can be enabled only with Azure Gen2 VMs. Please visit https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch for more details.'
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2} --treat-deployment-as-failure false')
+
+        self.cmd(('vm update -g {rg} -n {vm1} --security-type TrustedLaunch'), checks=[
+            self.check('')
+        ])
+
+
+        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --assign-identity {id1} [system] --admin-username azureuser -g {rg} -n {vm1} --enable-secure-boot --enable-vtpm')
+        self.cmd('vm show -g {rg} -n {vm1}', checks=[
+            self.check('identity.type', 'SystemAssigned, UserAssigned'),
+            self.check('resources[0].name', 'GuestAttestation'),
+            self.check('resources[0].publisher', 'Microsoft.Azure.Security.LinuxAttestation'),
+            self.check('securityProfile.securityType', 'TrustedLaunch'),
+            self.check('securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('securityProfile.uefiSettings.vTpmEnabled', True)
+
+        ])
+        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser -g {rg} -n {vm2} --enable-secure-boot --enable-vtpm --disable-integrity-monitoring')
+        self.cmd('vm show -g {rg} -n {vm2}', checks=[
+            self.check('resources', None),
+            self.check('identity', None),
+            self.check('securityProfile.securityType', 'TrustedLaunch'),
+            self.check('securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('securityProfile.uefiSettings.vTpmEnabled', True)
+        ])
+        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --assign-identity {id1} --admin-username azureuser -g {rg} -n {vm3} --enable-secure-boot --enable-vtpm')
+        self.cmd('vm show -g {rg} -n {vm3}', checks=[
+            self.check('identity.type', 'SystemAssigned, UserAssigned'),
+            self.check('resources[0].name', 'GuestAttestation'),
+            self.check('resources[0].publisher', 'Microsoft.Azure.Security.LinuxAttestation'),
+            self.check('securityProfile.securityType', 'TrustedLaunch'),
+            self.check('securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('securityProfile.uefiSettings.vTpmEnabled', True)
+
+        ])
+        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser -g {rg} -n {vm4}')
+        self.cmd('vm show -g {rg} -n {vm4}', checks=[
+            self.check('securityProfile.uefiSettings.vTpmEnabled', True),
+            self.check('securityProfile.uefiSettings.secureBootEnabled', True)
+        ])
+        self.cmd('vmss create -g {rg} -n {vmss1} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm')
+        self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
+            self.check('identity.type', 'SystemAssigned'),
+            self.check('virtualMachineProfile.extensionProfile.extensions[0].name', 'GuestAttestation'),
+            self.check('virtualMachineProfile.extensionProfile.extensions[0].publisher', 'Microsoft.Azure.Security.LinuxAttestation'),
+            self.check('virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True)
+        ])
+        self.cmd('vmss list-instances -n {vmss1} -g {rg}', checks=[
+            self.check('[0].resources[0].name', 'GuestAttestation'),
+            self.check('[0].resources[0].publisher', 'Microsoft.Azure.Security.LinuxAttestation')
+        ])
+        self.cmd('vmss create -g {rg} -n {vmss2} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm --disable-integrity-monitoring')
+        self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
+            self.check('identity', None),
+            self.check('virtualMachineProfile.extensionProfile', 'None'),
+            self.check('virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True)
+        ])
+        self.cmd('vmss create -g {rg} -n {vmss3} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch')
+        self.cmd('vmss show -g {rg} -n {vmss3}', checks=[
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True)
+        ])
+
 
 class DiskHibernationScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_disk_hibernation_')

@@ -1624,7 +1624,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, disk_controller_type=None,
               security_type=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
-    from ._vm_utils import update_write_accelerator_settings, update_disk_caching, is_update_vm_trusted_launch_supported
+    from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
 
     disk_resource_group, disk_name = None, None
@@ -1634,29 +1634,31 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             os_disk_id_parsed = parse_resource_id(os_disk)
             disk_resource_group, disk_name = os_disk_id_parsed['resource_group'], os_disk_id_parsed['name']
         else:
-            vm_is_parsed = parse_resource_id(vm.id)
-            disk_id = resource_id(subscription=vm_is_parsed['subscription'],
-                                  resource_group=vm_is_parsed['resource_group'],
+            vm_id_parsed = parse_resource_id(vm.id)
+            disk_id = resource_id(subscription=vm_id_parsed['subscription'],
+                                  resource_group=vm_id_parsed['resource_group'],
                                   namespace='Microsoft.Compute', type='disks', name=os_disk)
-            disk_resource_group, disk_name = vm_is_parsed['resource_group'], os_disk
+            disk_resource_group, disk_name = vm_id_parsed['resource_group'], os_disk
         vm.storage_profile.os_disk.managed_disk.id = disk_id
         vm.storage_profile.os_disk.name = disk_name
 
     if security_type is not None and security_type == "TrustedLaunch":
-        if disk_name is None:
-            if vm.storage_profile.os_disk.managed_disk is not None:
-                os_disk_id_parsed = parse_resource_id(vm.storage_profile.os_disk.managed_disk.id)
-                disk_resource_group, disk_name = os_disk_id_parsed['resource_group'], os_disk_id_parsed['name']
+        if disk_name is None and vm.storage_profile.os_disk.managed_disk is not None:
+            os_disk_id_parsed = parse_resource_id(vm.storage_profile.os_disk.managed_disk.id)
+            disk_resource_group, disk_name = os_disk_id_parsed['resource_group'], os_disk_id_parsed['name']
 
         if disk_name is not None:
-            if is_update_vm_trusted_launch_supported(cmd=cmd, vm=vm, os_disk_resource_group=disk_resource_group,
-                                                     os_disk_name=disk_name):
-                enable_secure_boot = enable_secure_boot if enable_secure_boot is not None else False
-                enable_vtpm = enable_vtpm if enable_vtpm is not None else True
+            from ._vm_utils import validate_update_vm_trusted_launch_supported
 
-                if vm.security_profile is None:
-                    vm.security_profile = {}
-                vm.security_profile['security_type'] = security_type
+            validate_update_vm_trusted_launch_supported(cmd=cmd, vm=vm, os_disk_resource_group=disk_resource_group,
+                                                        os_disk_name=disk_name)
+            # Set --enable-secure-boot False and --enable-vtpm True if not specified by end user.
+            enable_secure_boot = enable_secure_boot if enable_secure_boot is not None else False
+            enable_vtpm = enable_vtpm if enable_vtpm is not None else True
+
+            if vm.security_profile is None:
+                vm.security_profile = {}
+            vm.security_profile['security_type'] = security_type
 
     if write_accelerator is not None:
         update_write_accelerator_settings(vm.storage_profile, write_accelerator)
