@@ -356,9 +356,16 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         identity_2_name = self.create_random_name('identity', 32)
         server_2_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         tier = 'GeneralPurpose'
-        sku_name = 'Standard_D2s_v3'
-        location = self.postgres_location
-        replication_role = 'AsyncReplica'
+        if database_engine == 'mysql':
+            sku_name = 'Standard_D2s_v3'
+            location = 'centraluseuap'
+            backup_location = 'eastus2euap'
+            replication_role = 'Replica'
+        elif database_engine == 'postgres':
+            sku_name = 'Standard_D2s_v3'
+            location = self.postgres_location
+            backup_location = 'westus'
+            replication_role = 'AsyncReplica'
 
         key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                        .format(key_name, vault_name)).get_output_in_json()
@@ -368,13 +375,22 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
                  .format(resource_group, vault_name, identity['principalId']))
 
-        key_2 = self.cmd('keyvault key create --name {} -p software --vault-name {}'
-                            .format(key_2_name, vault_name)).get_output_in_json()
+        if database_engine == 'mysql':
+            backup_key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
+                                  .format(backup_key_name, backup_vault_name)).get_output_in_json()
 
-        identity_2 = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, identity_2_name, location)).get_output_in_json()
+            backup_identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, backup_identity_name, backup_location)).get_output_in_json()
 
-        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                    .format(resource_group, vault_name, identity_2['principalId']))
+            self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
+                     .format(resource_group, backup_vault_name, backup_identity['principalId']))
+        elif database_engine == 'postgres':
+            key_2 = self.cmd('keyvault key create --name {} -p software --vault-name {}'
+                             .format(key_2_name, vault_name)).get_output_in_json()
+
+            identity_2 = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, identity_2_name, location)).get_output_in_json()
+
+            self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
+                     .format(resource_group, vault_name, identity_2['principalId']))
 
         def invalid_input_tests():
             # key or identity only
@@ -407,12 +423,13 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                 identity['id'],
             ), expect_failure=True)
 
-        def main_tests():
-            geo_redundant_backup_enabled = 'Disabled'
-            restore_type = 'restore'
+        def main_tests(geo_redundant_backup):
+            geo_redundant_backup_enabled = 'Enabled' if geo_redundant_backup else 'Disabled'
+            backup_key_id_flags = '--backup-key {} --backup-identity {}'.format(backup_key['key']['kid'], backup_identity['id']) if geo_redundant_backup else ''
+            restore_type = 'geo-restore --location {}'.format(backup_location) if geo_redundant_backup else 'restore'
 
             # create primary flexible server with data encryption
-            self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --location {} --geo-redundant-backup {}'.format(
+            self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} {} --location {} --geo-redundant-backup {}'.format(
                         database_engine,
                         resource_group,
                         server_name,
@@ -420,6 +437,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                         sku_name,
                         key['key']['kid'],
                         identity['id'],
+                        backup_key_id_flags,
                         location,
                         geo_redundant_backup_enabled
                     ))
@@ -434,6 +452,13 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                 JMESPathCheck('dataEncryption.primaryKeyUri', key['key']['kid']),
                 JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', identity['id'])
             ]
+
+            if geo_redundant_backup:
+                main_checks += [
+                    JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(backup_identity['id'])),
+                    JMESPathCheck('dataEncryption.geoBackupKeyUri', backup_key['key']['kid']),
+                    JMESPathCheck('dataEncryption.geoBackupUserAssignedIdentityId', backup_identity['id'])
+                ]
 
             result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
                     checks=main_checks).get_output_in_json()
@@ -496,6 +521,9 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                      F"--key {key['key']['kid']} --identity {identity['id']}" if database_engine == 'postgres' else ''
             ), checks=main_checks).get_output_in_json()
 
+            if geo_redundant_backup:
+                self.assertEqual(str(restore_result['location']).replace(' ', '').lower(), backup_location)
+
             # delete all servers
             self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, replica_1_name))
             self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, replica_2_name))
@@ -503,7 +531,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
 
         invalid_input_tests()
-        main_tests()
+        main_tests(False)
 
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
