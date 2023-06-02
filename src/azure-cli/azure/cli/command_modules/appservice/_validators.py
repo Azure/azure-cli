@@ -170,7 +170,7 @@ def validate_functionapp_on_flex_plan(cmd, namespace):
         raise ResourceNotFoundError('Could not determine the current plan of the functionapp')
     if plan_info.sku.tier == 'FlexConsumption':
         raise ValidationError('Invalid command. This is not currently supported for Azure Functions '
-                              'on Flex App Service plans.')
+                              'on the Flex Consumption plan.')
 
 
 def validate_app_exists(cmd, namespace):
