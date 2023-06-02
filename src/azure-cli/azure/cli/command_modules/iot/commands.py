@@ -183,7 +183,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     # iot hub route commands
     with self.command_group('iot hub route', client_factory=iot_hub_service_factory,
-                            deprecate_info=self.deprecate(redirect=ROUTE_DEPRECATION_INFO), hide=True) as g:
+                            deprecate_info=self.deprecate(redirect=ROUTE_DEPRECATION_INFO, hide=True)) as g:
         g.custom_command('create', 'iot_hub_route_create', transform=RouteUpdateResultTransform(self.cli_ctx))
         g.custom_show_command('show', 'iot_hub_route_show')
         g.custom_command('list', 'iot_hub_route_list')
