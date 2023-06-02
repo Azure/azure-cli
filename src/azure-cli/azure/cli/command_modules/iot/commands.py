@@ -165,7 +165,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     # iot hub routing endpoint commands
     with self.command_group('iot hub routing-endpoint', client_factory=iot_hub_service_factory,
-                            deprecate_info=self.deprecate(redirect=ENDPOINT_DEPRECATION_INFO), hide=True) as g:
+                            deprecate_info=self.deprecate(redirect=ENDPOINT_DEPRECATION_INFO, hide=True)) as g:
         g.custom_command('create', 'iot_hub_routing_endpoint_create',
                          transform=EndpointUpdateResultTransform(self.cli_ctx))
         g.custom_show_command('show', 'iot_hub_routing_endpoint_show')
