@@ -863,7 +863,7 @@ short-summary: List available locations for running function apps.
 
 helps['functionapp list-flexconsumption-locations'] = """
 type: command
-short-summary: List available locations for running function apps on Flex App Service plans.
+short-summary: List available locations for running function apps on the Flex Consumption plan.
 """
 
 helps['functionapp plan'] = """

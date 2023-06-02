@@ -3747,27 +3747,27 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if flexconsumption_location is not None:
         if image is not None:
             raise ArgumentUsageError(
-                '--image is not a valid input for Azure Functions on Flex App Service plans. '
+                '--image is not a valid input for Azure Functions on the Flex Consumption plan. '
                 'Please try again without the --image parameter.')
 
         if deployment_local_git is not None:
             raise ArgumentUsageError(
-                '--deployment-local-git is not a valid input for Azure Functions on Flex App Service plans. '
+                '--deployment-local-git is not a valid input for Azure Functions on the Flex Consumption plan. '
                 'Please try again without the --deployment-local-git parameter.')
 
         if deployment_source_url is not None:
             raise ArgumentUsageError(
-                '--deployment-source-url is not a valid input for Azure Functions on Flex App Service plans. '
+                '--deployment-source-url is not a valid input for Azure Functions on the Flex Consumption plan. '
                 'Please try again without the --deployment-source-url parameter.')
 
         if deployment_source_branch is not None:
             raise ArgumentUsageError(
-                '--deployment-source-branch is not a valid input for Azure Functions on Flex App Service plans. '
+                '--deployment-source-branch is not a valid input for Azure Functions on the Flex Consumption plan. '
                 'Please try again without the --deployment-source-branch parameter.')
 
         if os_type and os_type.lower() != LINUX_OS_NAME:
             raise ArgumentUsageError(
-                '--os-type windows is not a valid input for Azure Functions on Flex App Service plans. '
+                '--os-type windows is not a valid input for Azure Functions on the Flex Consumption plan. '
                 'Please try again without the --os-type parameter or set --os-type to be linux.'
             )
 
@@ -3909,7 +3909,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         if runtime_version is None:
             runtime_version = lang['version']
         elif runtime_version != lang['version']:
-            raise ValidationError("Invalid version {0} for runtime {1} for function apps on Flex App Service plans. "
+            raise ValidationError("Invalid version {0} for runtime {1} for function apps on the Flex Consumption plan. "
                                   "Supported version for runtime {1} is {2}."
                                   .format(runtime_version, runtime, lang['version']))
 
