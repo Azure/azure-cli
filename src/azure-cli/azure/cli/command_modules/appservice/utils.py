@@ -19,7 +19,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from ._client_factory import web_client_factory
-from ._constants import LOGICAPP_KIND, FUNCTIONAPP_KIND
+from ._constants import LOGICAPP_KIND, FUNCTIONAPP_KIND, STAMP_NAME
 
 logger = get_logger(__name__)
 
@@ -165,7 +165,7 @@ def show_raw_functionapp(cmd, resource_group_name, name):
     client = web_client_factory(cmd.cli_ctx)
     site_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?stamp={}&api-version={}'
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    site_url = site_url_base.format(subscription_id, resource_group_name, name, 'kc11geo.eastus.cloudapp.azure.com', '2022-03-01-privatepreview')
+    site_url = site_url_base.format(subscription_id, resource_group_name, name, STAMP_NAME, '2022-03-01-privatepreview')
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + site_url
     response = send_raw_request(cmd.cli_ctx, "GET", request_url)
     return response.json()
@@ -178,7 +178,7 @@ def is_centauri_functionapp(cmd, resource_group, name):
 
 def is_flex_functionapp(cmd, resource_group, name):
     params = {}
-    params['stamp'] = 'eliasl-linux01geo.eastus.cloudapp.azure.com'
+    params['stamp'] = STAMP_NAME
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group, name, api_version='2022-03-01-privatepreview', params=params)
     parse_plan_id = parse_resource_id(app.server_farm_id)
@@ -201,7 +201,7 @@ def is_flex_functionapp_from_plan(cmd, plan_info):
 def is_flex_functionapp_tmp(cmd, resource_group, name):
     client = web_client_factory(cmd.cli_ctx)
     params = {}
-    params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
+    params['stamp'] = STAMP_NAME
     name = name+'FlexPlan'
     plan_info = client.app_service_plans.get(resource_group, name, api_version='2022-03-01-privatepreview', params = params)
     if plan_info:

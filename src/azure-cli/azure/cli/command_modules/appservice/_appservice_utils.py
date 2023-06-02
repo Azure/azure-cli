@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from ._client_factory import web_client_factory
+from ._constants import STAMP_NAME
 
 
 MSI_LOCAL_ID = '[system]'
@@ -18,7 +19,7 @@ def _generic_site_operation(cli_ctx, resource_group_name, name, operation_name, 
                         operation_name if slot is None else operation_name + '_slot')
     if slot is None:
         params = {}
-        params['stamp'] = 'kc11geo.eastus.cloudapp.azure.com'
+        params['stamp'] = STAMP_NAME
         return (operation(resource_group_name, name, api_version='2022-03-01-privatepreview', params = params)
                 if extra_parameter is None else operation(resource_group_name,
                                                           name, extra_parameter))
