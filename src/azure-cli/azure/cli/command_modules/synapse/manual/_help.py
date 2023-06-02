@@ -38,7 +38,7 @@ examples:
           --storage-account testadlsgen2 --file-system testfilesystem \\
           --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US" \\
           --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname} --key-name testcmk \\
-          --uami-id-in-encrypt {your-uami-resourceid} --use-sami-in-encrypt False
+          --use-sami-in-encrypt True
   - name: Create a Synapse workspace connecting to azure devops
     text: |-
         az synapse workspace create --name testworkspace --resource-group rg \\
@@ -101,6 +101,10 @@ examples:
     text: |-
         az synapse workspace update --name fromcli4 --resource-group rg \\
         --uami-action Set --uami-id "{your-first-uami-resourceid}" "{your-second-uami-resourceid}"
+  - name: Update a Synapse workspace, set workspace encryption uami
+    text: |-
+        az synapse workspace update --name fromcli4 --resource-group rg \\
+        --uami-id-in-encrypt "{your-encrytion-uami-resourceid}" --use-sami-in-encrypt False
 """
 
 helps['synapse workspace delete'] = """

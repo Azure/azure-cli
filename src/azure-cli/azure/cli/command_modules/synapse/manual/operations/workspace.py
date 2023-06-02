@@ -101,9 +101,10 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
 def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin_login_password=None,
                      allowed_aad_tenant_ids=None, tags=None, key_name=None, repository_type=None, host_name=None, account_name=None,
                      collaboration_branch=None, repository_name=None, root_folder=None, project_name=None, last_commit_id=None, tenant_id=None,
-                     user_assigned_identity_id=None, user_assigned_identity_in_encryption=None, user_assigned_identity_action=None,
+                     user_assigned_identity_id=None, user_assigned_identity_action=None, user_assigned_identity_in_encryption=None,
                      use_system_assigned_identity_in_encryption=None, no_wait=False):
     encryption = None
+    identity = None
     tenant_ids_list = None
     workspace_repository_configuration = None
     existing_ws = client.get(resource_group_name, workspace_name)
@@ -111,42 +112,40 @@ def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin
     if existing_ws.encryption.double_encryption_enabled is False:
         encryption = existing_ws.encryption
     else:
-        if key_name:
-            workspace_key_detail = WorkspaceKeyDetails(name=key_name, key_vault_url=existing_ws.encryption.cmk.key.keyVaultUrl)
+        if key_name is not None:
+            workspace_key_detail = WorkspaceKeyDetails(name=key_name)
         else:
             workspace_key_detail = existing_ws.encryption.cmk.key
-
-        if user_assigned_identity_in_encryption or use_system_assigned_identity_in_encryption:
+        if user_assigned_identity_in_encryption is not None or use_system_assigned_identity_in_encryption is not None:
             kek_identity = KekIdentityProperties(user_assigned_identity=user_assigned_identity_in_encryption,
-                                                 use_system_assigned_identity =use_system_assigned_identity_in_encryption)
+                                                 use_system_assigned_identity=use_system_assigned_identity_in_encryption)
         else:
             kek_identity = existing_ws.encryption.cmk.kek_identity
-
         encryption = EncryptionDetails(cmk=CustomerManagedKeyDetails(key=workspace_key_detail, kek_identity=kek_identity))
+    if user_assigned_identity_id:
+        if user_assigned_identity_action == 'Add':
+            existing_identity = existing_ws.identity
+            keysList = list(existing_identity.user_assigned_identities.keys())
+            for uami_id in user_assigned_identity_id:
+                keysList.append(uami_id)
+        if user_assigned_identity_action == 'Remove':
+            existing_identity = existing_ws.identity
+            keysList = list(existing_identity.user_assigned_identities.keys())
+            for uami_id in user_assigned_identity_id:
+                keysList.remove(uami_id)
+        if user_assigned_identity_action == 'Set':
+            keysList = []
+            for uami_id in user_assigned_identity_id:
+                keysList.append(uami_id)
+        if len(keysList) == 0:
+            identity_type = "SystemAssigned"
+            identity = ManagedIdentity(type=identity_type)
+        if len(keysList) > 0:
+            identity_type = "SystemAssigned,UserAssigned"
+            userAssignedIdentities = UserAssignedManagedIdentity()
+            userAssignedIdentitiesdict = dict.fromkeys(user_assigned_identity_id, userAssignedIdentities)
+            identity = ManagedIdentity(type=identity_type, user_assigned_identities=userAssignedIdentitiesdict)
 
-    existing_identity = existing_ws.identity
-    keysList = list(existing_identity.user_assigned_identities.keys())
-    if user_assigned_identity_action == 'Add':
-        for uami_id in user_assigned_identity_id:
-            keysList.append(uami_id)
-    if user_assigned_identity_action == 'Remove':
-        for uami_id in user_assigned_identity_id:
-            keysList.remove(uami_id)
-    if user_assigned_identity_action == 'Set':
-        keysList.clear()
-        for uami_id in user_assigned_identity_id:
-            keysList.append(uami_id)
-    if len(keysList) == 0:
-        identity_type = "SystemAssigned"
-        identity = ManagedIdentity(type=identity_type)
-    if len(keysList) > 0:
-        identity_type = "SystemAssigned,UserAssigned"
-        userAssignedIdentities = UserAssignedManagedIdentity()
-        userAssignedIdentitiesdict = dict.fromkeys(user_assigned_identity_id, userAssignedIdentities)
-        identity = ManagedIdentity(type=identity_type, user_assigned_identities=userAssignedIdentitiesdict)
-
-    if user_assigned_identity_id is None:
-        identity = existing_identity
     if allowed_aad_tenant_ids and '' in allowed_aad_tenant_ids:
         tenant_ids_list = []
     else:
