@@ -302,7 +302,7 @@ def list_feature(cmd,
                 retrieved_featureflags.append(
                     map_keyvalue_to_featureflag(
                         keyvalue=kv, show_conditions=True))
-            except Exception as exception:
+            except (CLIErrors.InvalidArgumentValueError, ValueError, TypeError) as exception:
                 logger.warning("%s\n", exception)
                 invalid_ffs += 1
                 continue

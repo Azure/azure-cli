@@ -7,6 +7,7 @@ from enum import Enum
 import json
 from knack.log import get_logger
 from azure.cli.core.util import shell_safe_json_parse
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from ._models import KeyValue
 from ._constants import FeatureFlagConstants
 
@@ -319,9 +320,13 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
                     "key:{0} value:{1}\nFull exception: \n{2}".format(keyvalue.key, keyvalue.value, str(exception))
         raise ValueError(error_msg)
 
-    except Exception as exception:
-        error_msg = "Exception while parsing feature flag. key:{0} value:{1}.\nFull exception: \n{2}".format(
-            keyvalue.key, keyvalue.value, str(exception))
-        raise ValueError(error_msg)
+    except (InvalidArgumentValueError, TypeError) as exception:
+        error_msg = "Error occured when parsing the JSON value. \n" +\
+             "key: {0} value: {1}\nFull exception: \n{2}".format(keyvalue.key, keyvalue.value, str(exception))
+        raise InvalidArgumentValueError(error_msg)
+    
+    except:
+        logger.error("Exception while parsing feature flag. key:%s value:%s.", keyvalue.key, keyvalue.value)
+        raise
 
     return feature_flag_value
