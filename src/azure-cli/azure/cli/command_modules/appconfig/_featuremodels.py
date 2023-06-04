@@ -315,16 +315,11 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
                                               enabled=feature_flag_dict.get('enabled', False),
                                               conditions=conditions)
 
-    except ValueError as exception:
+    except (InvalidArgumentValueError, TypeError, ValueError) as exception:
         error_msg = "Invalid value. Unable to decode the following JSON value: \n" +\
                     "key:{0} value:{1}\nFull exception: \n{2}".format(keyvalue.key, keyvalue.value, str(exception))
         raise ValueError(error_msg)
 
-    except (InvalidArgumentValueError, TypeError) as exception:
-        error_msg = "Error occured when parsing the JSON value. \n" +\
-             "key: {0} value: {1}\nFull exception: \n{2}".format(keyvalue.key, keyvalue.value, str(exception))
-        raise InvalidArgumentValueError(error_msg)
-    
     except:
         logger.error("Exception while parsing feature flag. key:%s value:%s.", keyvalue.key, keyvalue.value)
         raise

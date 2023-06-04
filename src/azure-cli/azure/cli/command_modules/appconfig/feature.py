@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long, too-many-statements, too-many-locals, too-many-branches, broad-except
+# pylint: disable=line-too-long, too-many-statements, too-many-locals, too-many-branches
 
 import json
 import time
@@ -302,7 +302,7 @@ def list_feature(cmd,
                 retrieved_featureflags.append(
                     map_keyvalue_to_featureflag(
                         keyvalue=kv, show_conditions=True))
-            except (CLIErrors.InvalidArgumentValueError, ValueError, TypeError) as exception:
+            except (ValueError) as exception:
                 logger.warning("%s\n", exception)
                 invalid_ffs += 1
                 continue
