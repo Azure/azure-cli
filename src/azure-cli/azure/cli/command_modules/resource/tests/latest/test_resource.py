@@ -3588,10 +3588,9 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         self.cmd('role assignment delete --assignee {upn} --role contributor ')
         self.cmd('ad user delete --id {upn}')
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     def test_managed_app_def_deployment_mode(self):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-
         self.kwargs.update({
             'upn': self.create_random_name('testuser', 15) + '@azuresdkteam.onmicrosoft.com',
             'sub': self.get_subscription_id()
@@ -3616,6 +3615,8 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         self.cmd('managedapp definition update -n {app_def} -g {rg} --display-name {addn} --description test -a {auth} --package-file-uri {uri} --lock-level None --deployment-mode Complete', checks=[
             self.check('deploymentPolicy.deploymentMode', 'Complete')
         ])
+        self.cmd('role assignment delete --assignee {upn} --role contributor ')
+        self.cmd('ad user delete --id {upn}')
 
 class ManagedAppScenarioTest(ScenarioTest):
 
