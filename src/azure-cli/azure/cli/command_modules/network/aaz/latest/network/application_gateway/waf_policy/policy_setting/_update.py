@@ -114,7 +114,7 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.request_body_inspect_limit_in_kb = AAZIntArg(
-            options=["--rbi-limit-in-kb", "--request-body-inspect-limit-in-kb"],
+            options=["--req-inspect-limit-in-kb", "--request-body-inspect-limit-in-kb"],
             help="Max inspection limit in KB for request body inspection for WAF.",
             nullable=True,
         )
@@ -166,7 +166,7 @@ class Update(AAZCommand):
         )
         _element.state = AAZStrArg(
             options=["state"],
-            help="Defines the state of log scrubbing rule. Default value is Enabled.",
+            help="Define the state of log scrubbing rule. Default value is Enabled.",
             nullable=True,
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
