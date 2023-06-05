@@ -533,5 +533,7 @@ def get_certificate(cert):
             certificate = read_file_content(cert)
         else:
             raise InvalidArgumentValueError("""File does not exist in the path provided.""")
+    else:
+        raise InvalidArgumentValueError("""One of the value provided for the certificates is empty. Please verify there aren't any spaces.""")
 
     return certificate
