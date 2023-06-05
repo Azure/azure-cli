@@ -352,7 +352,7 @@ class ImageTemplateTest(ScenarioTest):
                      self.check('properties.optimize.vmBoot.state', 'Disabled')
                  ])
 
-        # remove optimizer from template
+        # update optimizer with enabling VM boot
         self.cmd('image builder optimizer update -n {tmpl} -g {rg} --enable-vm-boot true --defer',
                  checks=[
                      self.check('properties.optimize.vmBoot.state', 'Enabled')
@@ -364,7 +364,7 @@ class ImageTemplateTest(ScenarioTest):
                      self.check('properties.optimize', 'None')
                  ])
 
-        # add optimizer to template
+        # add optimizer with enabling VM boot to template
         self.cmd('image builder optimizer add -n {tmpl} -g {rg} --enable-vm-boot --defer',
                  checks=[
                      self.check('properties.optimize.vmBoot.state', 'Enabled')
