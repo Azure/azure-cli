@@ -316,6 +316,12 @@ def load_command_table(self, _):
         g.custom_command('remove', 'remove_template_validator', supports_local_cache=True)
         g.custom_show_command('show', 'show_template_validator', supports_local_cache=True)
 
+    with self.command_group('image builder optimizer', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
+        g.custom_command('add', 'add_or_update_template_optimizer', supports_local_cache=True)
+        g.custom_command('update', 'add_or_update_template_optimizer', supports_local_cache=True)
+        g.custom_command('remove', 'remove_template_optimizer', supports_local_cache=True)
+        g.custom_show_command('show', 'show_template_optimizer', supports_local_cache=True)
+
     with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots', min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_snapshot', validator=process_snapshot_create_namespace, supports_no_wait=True)
         g.command('delete', 'begin_delete')
