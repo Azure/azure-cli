@@ -1102,7 +1102,6 @@ class SynapseScenarioTests(ScenarioTest):
         time.sleep(20)
         self.cmd('az synapse kql-script show --workspace-name {workspace} --name {scriptName}', expect_failure=True)
 
-    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_workspaces(self, resource_group, storage_account):
