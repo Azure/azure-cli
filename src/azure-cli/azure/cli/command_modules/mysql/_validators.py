@@ -106,7 +106,8 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
                               zone=None, standby_availability_zone=None, high_availability=None, backup_byok_key=None,
                               public_access=None, version=None, auto_grow=None, replication_role=None, subnet=None,
                               byok_identity=None, backup_byok_identity=None, byok_key=None, geo_redundant_backup=None,
-                              disable_data_encryption=None, iops=None, auto_io_scaling=None, instance=None, data_source_type=None, mode=None):
+                              disable_data_encryption=None, iops=None, auto_io_scaling=None, instance=None,
+                              data_source_type=None, mode=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
 
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location, server_name=instance.name if instance else None)
