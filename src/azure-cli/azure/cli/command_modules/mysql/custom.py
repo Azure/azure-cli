@@ -4,40 +4,307 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
+
+import re
+from datetime import datetime, timedelta
+from dateutil.tz import tzutc
+from knack.log import get_logger
+from urllib.request import urlretrieve
 from importlib import import_module
 from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
-from knack.log import get_logger
+from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
 from azure.core.exceptions import ResourceNotFoundError
-from azure.cli.core.azclierror import RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.cli.core.local_context import ALL
 from azure.mgmt.rdbms import mysql_flexibleservers
-from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, \
-    cf_mysql_flexible_db, cf_mysql_check_resource_availability, \
-    cf_mysql_check_resource_availability_without_location, cf_mysql_flexible_private_dns_zone_suffix_operations, \
-    cf_mysql_flexible_servers, cf_mysql_flexible_replica, cf_mysql_flexible_adadmin, cf_mysql_flexible_config
-from ._flexible_server_util import resolve_poller, generate_missing_parameters, get_mysql_list_skus_info, \
-    generate_password, parse_maintenance_window, replace_memory_optimized_tier, build_identity_and_data_encryption, \
-    get_identity_and_data_encryption, get_tenant_id
-from .flexible_server_custom_common import create_firewall_rule
-from .flexible_server_virtual_network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, \
-    prepare_private_network, prepare_private_dns_zone, prepare_public_network
-from .validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, \
-    mysql_restore_tier_validator, mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, \
-    validate_mysql_replica, validate_server_name, validate_georestore_location, \
-    validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_replica_location
+from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError
+from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, cf_mysql_flexible_db, \
+    cf_mysql_check_resource_availability, cf_mysql_check_resource_availability_without_location, cf_mysql_flexible_config, \
+    cf_mysql_flexible_servers, cf_mysql_flexible_replica, cf_mysql_flexible_adadmin, cf_mysql_flexible_private_dns_zone_suffix_operations
+from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_skus_info, generate_password, parse_maintenance_window, \
+    replace_memory_optimized_tier, build_identity_and_data_encryption, get_identity_and_data_encryption, get_tenant_id, run_subprocess, \
+    run_subprocess_get_output, fill_action_template, get_git_root_dir, GITHUB_ACTION_PATH
+from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, prepare_private_network, prepare_private_dns_zone, prepare_public_network
+from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, \
+    mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, validate_georestore_location, \
+    validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_replica_location, validate_public_access_server
 
 logger = get_logger(__name__)
-DEFAULT_DB_NAME = 'flexibleserverdb'
 DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
-MINIMUM_IOPS = 300
 RESOURCE_PROVIDER = 'Microsoft.DBforMySQL'
+DEFAULT_DB_NAME = 'flexibleserverdb'
+MINIMUM_IOPS = 300
 
 
-# region create without args
+def flexible_server_update_get(client, resource_group_name, server_name):
+    return client.get(resource_group_name, server_name)
+
+
+def flexible_server_stop(client, resource_group_name=None, server_name=None, no_wait=False):
+    days = 30
+    logger.warning("Server will be automatically started after %d days "
+                   "if you do not perform a manual start operation", days)
+    return sdk_no_wait(no_wait, client.begin_stop, resource_group_name, server_name)
+
+
+def flexible_server_update_set(client, resource_group_name, server_name, parameters):
+    return client.begin_update(resource_group_name, server_name, parameters)
+
+
+def server_list_custom_func(client, resource_group_name=None):
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list()
+
+
+def firewall_rule_delete_func(cmd, client, resource_group_name, server_name, firewall_rule_name, yes=None):
+    validate_public_access_server(cmd, resource_group_name, server_name)
+
+    result = None
+    if not yes:
+        user_confirmation(
+            "Are you sure you want to delete the firewall-rule '{0}' in server '{1}', resource group '{2}'".format(
+                firewall_rule_name, server_name, resource_group_name))
+    try:
+        result = client.begin_delete(resource_group_name, server_name, firewall_rule_name)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.error(ex)
+    return result
+
+
+def firewall_rule_create_func(cmd, client, resource_group_name, server_name, firewall_rule_name=None, start_ip_address=None, end_ip_address=None):
+
+    validate_public_access_server(cmd, resource_group_name, server_name)
+
+    if end_ip_address is None and start_ip_address is not None:
+        end_ip_address = start_ip_address
+    elif start_ip_address is None and end_ip_address is not None:
+        start_ip_address = end_ip_address
+
+    if firewall_rule_name is None:
+        now = datetime.now()
+        firewall_rule_name = 'FirewallIPAddress_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute,
+                                                                          now.second)
+        if start_ip_address == '0.0.0.0' and end_ip_address == '0.0.0.0':
+            logger.warning('Configuring server firewall rule, \'azure-access\', to accept connections from all '
+                           'Azure resources...')
+            firewall_rule_name = 'AllowAllAzureServicesAndResourcesWithinAzureIps_{}-{}-{}_{}-{}-{}'.format(now.year, now.month,
+                                                                                                            now.day, now.hour,
+                                                                                                            now.minute, now.second)
+        elif start_ip_address == end_ip_address:
+            logger.warning('Configuring server firewall rule to accept connections from \'%s\'...', start_ip_address)
+        else:
+            if start_ip_address == '0.0.0.0' and end_ip_address == '255.255.255.255':
+                firewall_rule_name = 'AllowAll_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day,
+                                                                         now.hour, now.minute, now.second)
+            logger.warning('Configuring server firewall rule to accept connections from \'%s\' to \'%s\'...', start_ip_address,
+                           end_ip_address)
+
+    parameters = {
+        'name': firewall_rule_name,
+        'start_ip_address': start_ip_address,
+        'end_ip_address': end_ip_address
+    }
+
+    return client.begin_create_or_update(
+        resource_group_name,
+        server_name,
+        firewall_rule_name,
+        parameters)
+
+
+def flexible_firewall_rule_custom_getter(cmd, client, resource_group_name, server_name, firewall_rule_name):
+    validate_public_access_server(cmd, resource_group_name, server_name)
+    return client.get(resource_group_name, server_name, firewall_rule_name)
+
+
+def flexible_firewall_rule_custom_setter(client, resource_group_name, server_name, firewall_rule_name, parameters):
+    return client.begin_create_or_update(
+        resource_group_name,
+        server_name,
+        firewall_rule_name,
+        parameters)
+
+
+def flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_address=None):
+    if start_ip_address is not None:
+        instance.start_ip_address = start_ip_address
+    if end_ip_address is not None:
+        instance.end_ip_address = end_ip_address
+    return instance
+
+
+def firewall_rule_get_func(cmd, client, resource_group_name, server_name, firewall_rule_name):
+    validate_public_access_server(cmd, resource_group_name, server_name)
+    return client.get(resource_group_name, server_name, firewall_rule_name)
+
+
+def firewall_rule_list_func(cmd, client, resource_group_name, server_name):
+    validate_public_access_server(cmd, resource_group_name, server_name)
+    return client.list_by_server(resource_group_name, server_name)
+
+
+def database_delete_func(client, resource_group_name=None, server_name=None, database_name=None, yes=None):
+    result = None
+    if resource_group_name is None or server_name is None or database_name is None:
+        raise CLIError("Incorrect Usage : Deleting a database needs resource-group, server-name and database-name. "
+                       "If your parameter persistence is turned ON, make sure these three parameters exist in "
+                       "persistent parameters using \'az config param-persist show\'. "
+                       "If your parameter persistence is turned OFF, consider passing them explicitly.")
+    if not yes:
+        user_confirmation(
+            "Are you sure you want to delete the database '{0}' of server '{1}'".format(database_name,
+                                                                                        server_name), yes=yes)
+
+    try:
+        result = client.begin_delete(resource_group_name, server_name, database_name)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.error(ex)
+    return result
+
+
+def create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip):
+    # allow access to azure ip addresses
+    cf_firewall = db_context.cf_firewall  # NOQA pylint: disable=unused-variable
+    firewall_client = cf_firewall(cmd.cli_ctx, None)
+    firewall = firewall_rule_create_func(cmd=cmd,
+                                         client=firewall_client,
+                                         resource_group_name=resource_group_name,
+                                         server_name=server_name,
+                                         start_ip_address=start_ip, end_ip_address=end_ip)
+    return firewall.result().name
+
+
+def github_actions_setup(cmd, client, resource_group_name, server_name, database_name, administrator_login,
+                         administrator_login_password, sql_file_path, repository, action_name=None, branch=None, allow_push=None):
+
+    server = client.get(resource_group_name, server_name)
+    if server.network.public_network_access == 'Disabled':
+        raise ClientRequestError("This command only works with public access enabled server.")
+    if allow_push and not branch:
+        raise RequiredArgumentMissingError("Provide remote branch name to allow pushing the action file to your remote branch.")
+    if action_name is None:
+        action_name = server.name + '_' + database_name + "_deploy"
+    gitcli_check_and_login()
+
+    fill_action_template(cmd,
+                         database_engine='mysql',
+                         server=server,
+                         database_name=database_name,
+                         administrator_login=administrator_login,
+                         administrator_login_password=administrator_login_password,
+                         file_name=sql_file_path,
+                         repository=repository,
+                         action_name=action_name)
+
+    action_path = get_git_root_dir() + GITHUB_ACTION_PATH + action_name + '.yml'
+    logger.warning("Making git commit for file %s", action_path)
+    run_subprocess("git add {}".format(action_path))
+    run_subprocess("git commit -m \"Add github action file\"")
+
+    if allow_push:
+        logger.warning("Pushing the created action file to origin %s branch", branch)
+        run_subprocess("git push origin {}".format(branch))
+    else:
+        logger.warning('You did not set --allow-push parameter. Please push the prepared file %s to your remote repo and run "deploy run" command to activate the workflow.', action_path)
+
+
+def github_actions_run(action_name, branch):
+
+    gitcli_check_and_login()
+    logger.warning("Created an event for %s.yml in branch %s", action_name, branch)
+    run_subprocess("gh workflow run {}.yml --ref {}".format(action_name, branch))
+
+
+def gitcli_check_and_login():
+    output = run_subprocess_get_output("gh")
+    if output.returncode:
+        raise ClientRequestError('Please install "Github CLI" to run this command.')
+
+    output = run_subprocess_get_output("gh auth status")
+    if output.returncode:
+        run_subprocess("gh auth login", stdout_show=True)
+
+
+# Custom functions for server logs
+def flexible_server_log_download(client, resource_group_name, server_name, file_name):
+
+    files = client.list_by_server(resource_group_name, server_name)
+
+    for f in files:
+        if f.name in file_name:
+            urlretrieve(f.url, f.name)
+
+
+def flexible_server_log_list(client, resource_group_name, server_name, filename_contains=None,
+                             file_last_written=None, max_file_size=None):
+
+    all_files = client.list_by_server(resource_group_name, server_name)
+    files = []
+
+    if file_last_written is None:
+        file_last_written = 72
+    time_line = datetime.utcnow().replace(tzinfo=tzutc()) - timedelta(hours=file_last_written)
+
+    for f in all_files:
+        if f.last_modified_time < time_line:
+            continue
+        if filename_contains is not None and re.search(filename_contains, f.name) is None:
+            continue
+        if max_file_size is not None and f.size_in_kb > max_file_size:
+            continue
+
+        del f.created_time
+        files.append(f)
+
+    return files
+
+
+def flexible_server_version_upgrade(cmd, client, resource_group_name, server_name, version, yes=None):
+    if not yes:
+        user_confirmation(
+            "Updating major version in server {} is irreversible. The action you're about to take can't be undone. "
+            "Going further will initiate major version upgrade to the selected version on this server."
+            .format(server_name), yes=yes)
+
+    instance = client.get(resource_group_name, server_name)
+    if instance.sku.tier == 'Burstable':
+        raise CLIError("Major version update is not supported for the Burstable pricing tier.")
+
+    current_version = int(instance.version.split('.')[0])
+    if current_version >= int(version):
+        raise CLIError("The version to upgrade to must be greater than the current version.")
+
+    replica_operations_client = cf_mysql_flexible_replica(cmd.cli_ctx, '_')
+    mysql_version_map = {
+        '8': '8.0.21',
+    }
+    version_mapped = mysql_version_map[version]
+
+    replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
+
+    for replica in replicas:
+        current_replica_version = int(replica.version.split('.')[0])
+        if current_replica_version < int(version):
+            raise CLIError("Primary server version must not be greater than replica server version. "
+                           "First upgrade {} server version to {} and try again.".format(replica.name, version))
+
+    parameters = {
+        'version': version_mapped
+    }
+
+    return resolve_poller(
+        client.begin_update(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            parameters=parameters),
+        cmd.cli_ctx, 'Updating server {} to major version {}'.format(server_name, version)
+    )
+
+
 # pylint: disable=too-many-locals, too-many-statements, raise-missing-from
+# Region create without args
 def flexible_server_create(cmd, client,
                            resource_group_name=None, server_name=None,
                            location=None, backup_retention=None,
@@ -52,8 +319,7 @@ def flexible_server_create(cmd, client,
                            byok_identity=None, backup_byok_identity=None, byok_key=None, backup_byok_key=None,
                            yes=False):
     # Generate missing parameters
-    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
-                                                                             server_name, 'mysql')
+    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
     db_context = DbContext(
         cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
         cf_availability=cf_mysql_check_resource_availability,
@@ -181,10 +447,9 @@ def flexible_server_create(cmd, client,
                           database_name, firewall_name, subnet_id)
 
 
-def flexible_server_restore(cmd, client,
-                            resource_group_name, server_name,
-                            source_server, restore_point_in_time=None, zone=None, no_wait=False,
-                            subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
+# pylint: disable=too-many-locals, too-many-statements, raise-missing-from
+def flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time=None, zone=None,
+                            no_wait=False, subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                             private_dns_zone_arguments=None, public_access=None, yes=False, sku_name=None, tier=None,
                             storage_gb=None, auto_grow=None, backup_retention=None, geo_redundant_backup=None):
     provider = 'Microsoft.DBforMySQL'
@@ -314,6 +579,7 @@ def flexible_server_restore(cmd, client,
     return sdk_no_wait(no_wait, client.begin_update, resource_group_name, server_name, update_parameter)
 
 
+# pylint: disable=too-many-locals, too-many-statements, raise-missing-from
 def flexible_server_georestore(cmd, client,
                                resource_group_name, server_name,
                                source_server, location, zone=None, no_wait=False,
@@ -441,7 +707,7 @@ def flexible_server_georestore(cmd, client,
     return sdk_no_wait(no_wait, client.begin_update, resource_group_name, server_name, update_parameter)
 
 
-# pylint: disable=too-many-branches
+# pylint: disable=too-many-branches, disable=too-many-locals, too-many-statements, raise-missing-from
 def flexible_server_update_custom_func(cmd, client, instance,
                                        sku_name=None,
                                        tier=None,

@@ -198,6 +198,10 @@ setup(
             'randomname/nouns.txt',
             'templates/mysql_githubaction_template.yaml',
             'templates/postgresql_githubaction_template.yaml'
+        ],
+        'azure.cli.command_modules.mysql': [
+            'random/adjectives.txt',
+            'random/nouns.txt'
         ]
     },
     cmdclass=cmdclass
