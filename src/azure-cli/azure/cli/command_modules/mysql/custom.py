@@ -578,7 +578,7 @@ def flexible_server_import_create(cmd, client,
                                           high_availability=high_availability,
                                           availability_zone=zone,
                                           data_encryption=data_encryption,
-                                          data_source=source_server_id)
+                                          source_server_id=source_server_id)
 
     # Adding firewall rule
     if start_ip != -1 and end_ip != -1:
@@ -1269,7 +1269,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, tags, loca
         '{} Server Create'.format(logging_name))
 
 
-def _import_create_server(db_context, cmd, resource_group_name, server_name, data_source, tags, location, sku, administrator_login, administrator_login_password,
+def _import_create_server(db_context, cmd, resource_group_name, server_name, source_server_id, tags, location, sku, administrator_login, administrator_login_password,
                           storage, backup, network, version, high_availability, availability_zone, identity, data_encryption):
     logging_name, server_client = db_context.logging_name, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
@@ -1292,7 +1292,7 @@ def _import_create_server(db_context, cmd, resource_group_name, server_name, dat
         high_availability=high_availability,
         availability_zone=availability_zone,
         data_encryption=data_encryption,
-        source_server_resource_id=data_source,
+        source_server_resource_id=source_server_id,
         create_mode="Migrate")
 
     return resolve_poller(
