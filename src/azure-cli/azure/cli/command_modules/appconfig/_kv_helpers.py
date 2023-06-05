@@ -596,10 +596,12 @@ def __serialize_features_from_kv_list_to_comparable_json_object(keyvalues, is_de
 
     if invalid_ffs > 0:
         if is_dest:
-            logger.warning("\n%i invalid feature flags from the source configuration could not be previewed but will be imported.", invalid_ffs)
+            logger.warning(
+                "%i invalid feature flags from the destination configuration could not be previewed.", invalid_ffs)
 
         else:
-            logger.warning("%i invalid feature flags from the destination configuration could not be previewed.", invalid_ffs)
+            logger.warning(
+                "\n%i invalid feature flags from the source configuration could not be previewed but will be imported.", invalid_ffs)
 
     return __serialize_feature_list_to_comparable_json_object(features)
 
