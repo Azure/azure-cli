@@ -76,7 +76,7 @@ class Update(AAZCommand):
             ),
         )
         _args_schema.file_upload_enforcement = AAZBoolArg(
-            options=["--file-upload-enforcement"],
+            options=["--file-upload-enforce", "--file-upload-enforcement"],
             help="Whether allow WAF to enforce file upload limits.",
             nullable=True,
         )
@@ -109,7 +109,7 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.request_body_enforcement = AAZBoolArg(
-            options=["--request-body-enforcement"],
+            options=["--request-body-enforce", "--request-body-enforcement"],
             help="Whether allow WAF to enforce request body limits.",
             nullable=True,
         )
