@@ -106,7 +106,7 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
                               zone=None, standby_availability_zone=None, high_availability=None, backup_byok_key=None,
                               public_access=None, version=None, auto_grow=None, replication_role=None, subnet=None,
                               byok_identity=None, backup_byok_identity=None, byok_key=None, geo_redundant_backup=None,
-                              disable_data_encryption=None, iops=None, auto_io_scaling=None, instance=None):
+                              disable_data_encryption=None, iops=None, auto_io_scaling=None, instance=None, data_source_type=None, mode=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
 
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location, server_name=instance.name if instance else None)
@@ -131,6 +131,20 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
     _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_byok_key,
                           disable_data_encryption, geo_redundant_backup, instance)
     _mysql_iops_validator(iops, auto_io_scaling, instance)
+    _mysql_import_data_source_type_validator(data_source_type)
+    _mysql_import_mode_validator(mode)
+
+
+def _mysql_import_data_source_type_validator(data_source_type):
+    allowed_values = ['mysql_single']
+    if data_source_type is not None and data_source_type.lower() not in allowed_values:
+        raise ArgumentUsageError('Incorrect value for --data-source-type. Allowed values : {}'.format(allowed_values))
+
+
+def _mysql_import_mode_validator(mode):
+    allowed_values = ['offline']
+    if mode is not None and mode.lower() not in allowed_values:
+        raise ArgumentUsageError('Incorrect value for --mode. Allowed values : {}'.format(allowed_values))
 
 
 def mysql_retention_validator(backup_retention, sku_info, tier):
