@@ -2422,7 +2422,6 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('matchConditions | length(@)', 1)
                  ])
 
-
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_setting_')
     def test_network_app_gateway_waf_policy_setting(self, resource_group):
         self.kwargs.update({
@@ -2449,6 +2448,36 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('policySettings.mode', 'Prevention'),
                      self.check('policySettings.requestBodyCheck', False),
                      self.check('policySettings.state', 'Enabled')
+                 ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_setting_v2_')
+    def test_network_app_gateway_waf_policy_setting_v2(self, resource_group):
+        self.kwargs.update({
+            'waf': 'agp1',
+            'ag': 'ag1',
+            'rg': resource_group,
+        })
+
+        # check default policy setting values
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}', checks=[
+            self.check('policySettings.fileUploadLimitInMb', 100),
+            self.check('policySettings.maxRequestBodySizeInKb', 128),
+            self.check('policySettings.mode', 'Detection'),
+            self.check('policySettings.requestBodyCheck', True),
+            self.check('policySettings.state', 'Disabled')
+        ])
+        self.cmd(
+            'network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} --type OWASP --version 3.2 --group-name "REQUEST-931-APPLICATION-ATTACK-RFI" --rule rule-id=931120 state=Enabled action=Log --rule rule-id=931130 state=Disabled action=AnomalyScoring')
+        # randomly update some properties
+        self.cmd('network application-gateway waf-policy policy-setting update -g {rg} --policy-name {waf} '
+                 '--request-body-inspect-limit-in-kb 64 --file-upload-enforcement True --request-body-enforcement False '
+                 '--log-scrubbing-state Enabled --scrubbing-rules [{{"state":"Enabled","match-variable":"RequestArgNames","selector-match-operator":"Equals","selector":"test"}},{{"state":"Enabled","match-variable":"RequestIPAddress","selector-match-operator":"EqualsAny","selector":null}}]',
+                 checks=[
+                     self.check('policySettings.requestBodyInspectLimitInKB', 64),
+                     self.check('policySettings.requestBodyEnforcement', False),
+                     self.check('policySettings.fileUploadEnforcement', True),
+                     self.check('policySettings.logScrubbing.scrubbingRules | length(@)', 2),
+                     self.check('policySettings.logScrubbing.state', 'Enabled')
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_managed_rules_')
