@@ -90,7 +90,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     def test_mysql_flexible_server_import_create(self, resource_group):
-        self._test_mysql_flexible_server_import_create('mysql', resource_group)
+        self._test_mysql_flexible_server_import_create_mgmt('mysql', resource_group)
 
     # To run this test live, make sure that your role excludes the permission 'Microsoft.DBforMySQL/locations/checkNameAvailability/action'
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
@@ -214,7 +214,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, restore_server_name), checks=NoneCheck())
 
-    def _test_mysql_flexible_server_import_create(self, database_engine, resource_group):
+    def _test_mysql_flexible_server_import_create_mgmt(self, database_engine, resource_group):
         storage_size = 32
         version = '5.7'
         location = 'eastus'
