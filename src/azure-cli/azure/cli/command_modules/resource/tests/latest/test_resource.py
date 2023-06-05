@@ -3588,6 +3588,34 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         self.cmd('role assignment delete --assignee {upn} --role contributor ')
         self.cmd('ad user delete --id {upn}')
 
+    @ResourceGroupPreparer()
+    def test_managed_app_def_deployment_mode(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+
+        self.kwargs.update({
+            'upn': self.create_random_name('testuser', 15) + '@azuresdkteam.onmicrosoft.com',
+            'sub': self.get_subscription_id()
+        })
+        user_principal = self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}').get_output_in_json()
+        time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+        principal_id = user_principal['id']
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            role_assignment = self.cmd(
+                'role assignment create --assignee {upn} --role contributor --scope "/subscriptions/{sub}" ').get_output_in_json()
+        from msrestazure.tools import parse_resource_id
+        role_definition_id = parse_resource_id(role_assignment['roleDefinitionId'])['name']
+        self.kwargs.update({
+            'app_def': self.create_random_name('def', 10),
+            'auth': principal_id + ':' + role_definition_id,
+            'addn': self.create_random_name('test_appdef', 20),
+            'uri': 'https://raw.githubusercontent.com/Azure/azure-managedapp-samples/master/Managed%20Application%20Sample%20Packages/201-managed-storage-account/managedstorage.zip',
+        })
+        self.cmd('managedapp definition create -n {app_def} -g {rg} --display-name {addn} --description test -a {auth} --package-file-uri {uri} --lock-level None --deployment-mode Incremental', checks=[
+            self.check('deploymentPolicy.deploymentMode', 'Incremental')
+        ])
+        self.cmd('managedapp definition update -n {app_def} -g {rg} --display-name {addn} --description test -a {auth} --package-file-uri {uri} --lock-level None --deployment-mode Complete', checks=[
+            self.check('deploymentPolicy.deploymentMode', 'Complete')
+        ])
 
 class ManagedAppScenarioTest(ScenarioTest):
 
