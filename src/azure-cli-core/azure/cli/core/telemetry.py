@@ -408,8 +408,9 @@ def set_feedback(feedback):
 def set_cli_recommendation(api_version, feedback):
     # This function returns the user's selection and feedback on the cli-recommendation results
     # Please refer to feedback_design.md of cli-recommendation for detailed information
-    _session.cli_recommendation = {"api_version": api_version,
-                                   "feedback": feedback}
+    # json.dumps converts the JSON-formatted feedback into a string format before storing it in the telemetry database.
+    # Telemetry property only accepts string inputs, and it cannot directly upload JSON content.
+    _session.cli_recommendation = json.dumps({"api_version": api_version, "feedback": feedback})
 
 
 @decorators.suppress_all_exceptions()

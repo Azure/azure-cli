@@ -777,6 +777,7 @@ def load_arguments(self, _):
                    help='Only applicable when used with `--vm-sku`. Allows you to choose the Ephemeral OS disk provisioning location.')
         c.argument('enable_secure_boot', enable_secure_boot_type)
         c.argument('enable_vtpm', enable_vtpm_type)
+        c.argument('custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
 
     with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
 
