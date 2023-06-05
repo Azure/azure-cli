@@ -583,7 +583,7 @@ def __serialize_kv_list_to_comparable_json_object(keyvalues, level):
     return res
 
 
-def __serialize_features_from_kv_list_to_comparable_json_object(keyvalues, is_dest = False):
+def __serialize_features_from_kv_list_to_comparable_json_object(keyvalues, is_dest=False):
     features = []
     invalid_ffs = 0
     for kv in keyvalues:
