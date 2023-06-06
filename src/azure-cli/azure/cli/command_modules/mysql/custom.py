@@ -28,7 +28,8 @@ from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_s
 from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, \
     mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, validate_georestore_location, \
-    validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_replica_location, validate_public_access_server
+    validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_replica_location, validate_public_access_server, \
+    mysql_import_data_source_validator
 
 logger = get_logger(__name__)
 DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
@@ -448,8 +449,8 @@ def flexible_server_create(cmd, client,
 
 
 def flexible_server_import_create(cmd, client,
-                                  resource_group_name=None, server_name=None,
-                                  data_source_type=None, data_source=None, mode=None,
+                                  resource_group_name, server_name,
+                                  data_source_type, data_source, mode=None,
                                   location=None, backup_retention=None,
                                   sku_name=None, tier=None,
                                   storage_gb=None, administrator_login=None,
@@ -486,6 +487,8 @@ def flexible_server_import_create(cmd, client,
         cf_availability_without_location=cf_mysql_check_resource_availability_without_location,
         cf_private_dns_zone_suffix=cf_mysql_flexible_private_dns_zone_suffix_operations,
         logging_name='MySQL', command_group='mysql', server_client=client, location=location)
+
+    mysql_import_data_source_validator(cmd.cli_ctx, source_server_id, resource_group_name)
 
     # Process parameters
     server_name = server_name.lower()

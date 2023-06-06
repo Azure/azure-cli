@@ -328,8 +328,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('tags', tags_type)
         c.argument('standby_availability_zone', arg_type=standby_availability_zone_arg_type)
         c.argument('yes', arg_type=yes_arg_type)
-        c.argument('data_source_type', arg_type=data_source_type_arg_type, required=True)
-        c.argument('data_source', arg_type=data_source_arg_type, required=True)
+        c.argument('data_source_type', arg_type=data_source_type_arg_type)
+        c.argument('data_source', arg_type=data_source_arg_type)
         c.argument('mode', arg_type=mode_arg_type)
 
     with self.argument_context('mysql flexible-server delete') as c:
