@@ -114,7 +114,7 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.request_body_inspect_limit_in_kb = AAZIntArg(
-            options=["--req-inspect-limit-in-kb", "--request-body-inspect-limit-in-kb"],
+            options=["--request-limit-in-kb", "--request-body-inspect-limit-in-kb"],
             help="Max inspection limit in KB for request body inspection for WAF.",
             nullable=True,
         )
