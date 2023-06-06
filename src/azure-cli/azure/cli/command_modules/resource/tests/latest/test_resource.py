@@ -2140,8 +2140,8 @@ class DeploymentScriptsTest(ScenarioTest):
 class DeploymentStacksTest(ScenarioTest):
     global location
     location = "westus2"
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
-    @AllowLargeResponse
     def test_create_deployment_stack_subscription(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         deployment_stack_name = self.create_random_name('cli-test-create-deployment-stack-subscription', 60)
@@ -2826,6 +2826,7 @@ class DeploymentStacksTest(ScenarioTest):
         # cleanup
         self.cmd('stack group delete --name {name} --resource-group {resource-group} --yes')
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
     def test_create_deployment_stack_management_group(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
