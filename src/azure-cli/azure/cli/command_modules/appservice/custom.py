@@ -3066,14 +3066,20 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
     webapp_certs = client.certificates.list_by_resource_group(cert_resource_group_name)
 
     found_cert = None
+    # search for a cert that matches in the app service plan's RG
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
             found_cert = webapp_cert
+    # search for a cert that matches in the webapp's RG
     if not found_cert:
         webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
         for webapp_cert in webapp_certs:
             if webapp_cert.thumbprint == certificate_thumbprint:
                 found_cert = webapp_cert
+    # search for a cert that matches in the subscription
+    if not found_cert:
+        sub_certs = client.certificates.list()
+        found_cert = next([c for c in sub_certs if c.thumbprint == certificate_thumbprint], None)
     if found_cert:
         if not hostname:
             if len(found_cert.host_names) == 1 and not found_cert.host_names[0].startswith('*'):
