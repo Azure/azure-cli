@@ -368,6 +368,10 @@ def load_arguments(self, _):
     with self.argument_context('image builder validator add', min_api='2022-02-14') as c:
         c.argument('dis_on_failure', options_list=['--continue-distribute-on-failure', '--dis-on-failure'], arg_type=get_three_state_flag(), help="If validation fails and this parameter is set to false, output image(s) will not be distributed.")
         c.argument('source_validation_only', arg_type=get_three_state_flag(), help="If this parameter is set to true, the image specified in the 'source' section will directly be validated. No separate build will be run to generate and then validate a customized image.")
+
+    for scope in ['image builder optimizer add', 'image builder optimizer update']:
+        with self.argument_context(scope, min_api='2022-07-01') as c:
+            c.argument('enable_vm_boot', arg_type=get_three_state_flag(), help='If this parameter is set to true, VM boot time will be improved by optimizing the final customized image output.')
     # endregion
 
     # region AvailabilitySets
@@ -774,6 +778,7 @@ def load_arguments(self, _):
                    help='Only applicable when used with `--vm-sku`. Allows you to choose the Ephemeral OS disk provisioning location.')
         c.argument('enable_secure_boot', enable_secure_boot_type)
         c.argument('enable_vtpm', enable_vtpm_type)
+        c.argument('custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
 
     with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
 

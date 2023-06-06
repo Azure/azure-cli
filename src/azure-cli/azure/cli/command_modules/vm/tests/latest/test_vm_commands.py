@@ -4437,6 +4437,20 @@ class VMSSCustomDataScenarioTest(ScenarioTest):
         self.cmd('vmss show -n {vmss} -g {rg}',
                  checks=self.check('provisioningState', 'Succeeded'))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_custom_data')
+    def test_vmss_update_custom_data(self):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss', 10),
+            'ssh_key': TEST_SSH_KEY_PUB
+        })
+
+        self.cmd('vmss create -n {vmss} -g {rg} --image Debian --admin-username deploy --ssh-key-value "{ssh_key}"')
+        self.cmd('vmss update -n {vmss} -g {rg} --custom-data "#cloud-config\nhostname: myVMSShostname"')
+        # custom data is write only, hence we have no automatic way to cross check. Here we just verify VM was provisioned
+        self.cmd('vmss show -n {vmss} -g {rg}', checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_user_data')
     def test_vmss_create_user_data(self):
 
