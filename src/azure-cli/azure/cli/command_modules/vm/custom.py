@@ -1652,10 +1652,6 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
             validate_update_vm_trusted_launch_supported(cmd=cmd, vm=vm, os_disk_resource_group=disk_resource_group,
                                                         os_disk_name=disk_name)
-            # Set --enable-secure-boot False and --enable-vtpm True if not specified by end user.
-            enable_secure_boot = enable_secure_boot if enable_secure_boot is not None else False
-            enable_vtpm = enable_vtpm if enable_vtpm is not None else True
-
             if vm.security_profile is None:
                 vm.security_profile = {}
             vm.security_profile['security_type'] = security_type
@@ -1728,10 +1724,13 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         vm.proximity_placement_group = {'id': proximity_placement_group}
 
     if enable_secure_boot is not None or enable_vtpm is not None:
-        vm.security_profile = {'uefiSettings': {
+        if vm.security_profile is None:
+            vm.security_profile = {}
+
+        vm.security_profile.uefiSettings = {
             'secureBootEnabled': enable_secure_boot,
             'vTpmEnabled': enable_vtpm
-        }}
+        }
 
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
