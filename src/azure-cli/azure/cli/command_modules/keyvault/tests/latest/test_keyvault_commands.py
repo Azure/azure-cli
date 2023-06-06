@@ -500,14 +500,13 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                          self.check('properties.enablePurgeProtection', True)])
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_list_deleted')
-    def test_keyvault_list_deleted(self, resource_group):
+    @KeyVaultPreparer(name_prefix='cli-test-kv-mgmt-', name_len=24, skip_delete=True)
+    @ManagedHSMPreparer(name_prefix='cli-test-hsm-mgmt-', name_len=24, skip_delete=True, certs_path=CERTS_DIR)
+    def test_keyvault_list_deleted(self, resource_group, key_vault, managed_hsm):
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-mgmt-', 24),
-            'hsm': self.create_random_name('cli-test-hsm-mgmt-', 24),
-            'loc': 'eastus'
+            'kv': key_vault,
+            'hsm': managed_hsm,
         })
-        _create_keyvault(self, self.kwargs)
-        _create_hsm(self)
 
         # delete resources
         self.cmd('keyvault delete --name {kv}')
@@ -528,10 +527,6 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
             self.exists("[?name=='{hsm}']"),
             self.exists("[?name=='{kv}']")
         ])
-
-        # clean resources
-        self.cmd('keyvault purge --name {kv} -l {loc}')
-        self.cmd('keyvault purge --hsm-name {hsm} -l {loc}')
 
 
 class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
@@ -2686,7 +2681,7 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
         })
 
         self.cmd('keyvault create -n {kv4} -l {loc} -g {rg} --network-acls-ips {ip3} {ip4} '
-                 '--network-acls-vnets {subnetId2} {vnet3}/{subnet3}', checks=[
+                 '--network-acls-vnets {subnetId2} "{vnet3}/{subnet3}"', checks=[
                      self.check('length(properties.networkAcls.ipRules)', 2),
                      self.check('properties.networkAcls.ipRules[0].value', '{ip3}'),
                      self.check('properties.networkAcls.ipRules[1].value', '{ip4}'),
@@ -2803,7 +2798,7 @@ class KeyVaultPublicNetworkAccessScenarioTest(ScenarioTest):
             'kv': self.create_random_name('cli-test-kv-pna-', 24),
             'kv2': self.create_random_name('cli-test-kv2-pna-', 24),
             'kv3': self.create_random_name('cli-test-kv3-pna-', 24),
-            'loc': 'eastus2euap'
+            'loc': 'eastus'
         })
         self.cmd('keyvault create -g {rg} -n {kv} -l {loc}',
                  checks=[self.check('properties.publicNetworkAccess', 'Enabled')])

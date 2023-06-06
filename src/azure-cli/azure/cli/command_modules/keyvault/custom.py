@@ -454,7 +454,7 @@ def recover_vault(cmd, client, vault_name, resource_group_name, location, no_wai
 
 
 def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acls_ips, network_acls_vnets,
-                        bypass, default_action):
+                        bypass, default_action, json_format=False):
     if network_acls_json is None:
         network_acls_json = {}
 
@@ -472,6 +472,24 @@ def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acl
         for vnet_rule in network_acls_vnets:
             if vnet_rule not in network_acls_json['vnet']:
                 network_acls_json['vnet'].append(vnet_rule)
+
+    if json_format:
+        ret_json = {}
+        ret_json['bypass'] = bypass
+        ret_json['default_action'] = default_action
+        ret_json['ip'] = network_acls_json.get('ip', [])
+        ret_json['vnet'] = []
+        for vnet_rule in network_acls_json.get('vnet', []):
+            items = vnet_rule.split('/')
+            if len(items) == 2:
+                vnet_name = items[0].lower()
+                subnet_name = items[1].lower()
+                vnet = _construct_vnet(cmd, resource_group_name, vnet_name, subnet_name)
+                ret_json['vnet'].append(vnet)
+            else:
+                subnet_id = vnet_rule.lower()
+                ret_json['vnet'].append(subnet_id)
+        return ret_json
 
     VirtualNetworkRule = cmd.get_models('VirtualNetworkRule', resource_type=ResourceType.MGMT_KEYVAULT)
     IPRule = cmd.get_models('IPRule', resource_type=ResourceType.MGMT_KEYVAULT)
@@ -705,9 +723,10 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
     # if neither were specified we will parse it from parameter `--network-acls`
     if network_acls or network_acls_ips or network_acls_vnets:
         network_acls = _parse_network_acls(
-            cmd, resource_group_name, network_acls, network_acls_ips, network_acls_vnets, bypass, default_action)
+            cmd, resource_group_name, network_acls, network_acls_ips, network_acls_vnets,
+            bypass, default_action, json_format=True)
     else:
-        network_acls = _create_network_rule_set(cmd, bypass, default_action)
+        network_acls = {'bypass': bypass, 'default_action': default_action}
 
     if no_self_perms or enable_rbac_authorization:
         access_policies = []
@@ -745,9 +764,9 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
         "tenantId": {"value": tenant_id},
         "networkRuleBypassOptions": {"value": bypass},
         "NetworkRuleAction": {"value": default_action},
-        "ipRules": {"value": network_acls.ip_rules},
+        "ipRules": {"value": network_acls.get('ip', [])},
         "accessPolicies": {"value": access_policies},
-        "virtualNetworkRules": {"value": network_acls.virtual_network_rules},
+        "virtualNetworkRules": {"value": network_acls.get('vnet', [])},
         "publicNetworkAccess": {"value": public_network_access},
         "skuName": {"value": sku},
         "tags": {"value": tags},

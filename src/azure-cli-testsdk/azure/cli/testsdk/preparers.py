@@ -206,12 +206,18 @@ class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         return {self.parameter_name: self.dev_setting_name}
 
     def remove_resource(self, name, **kwargs):
+        from azure.core.exceptions import HttpResponseError
         if not self.skip_delete and not self.dev_setting_name:
             group = self._get_resource_group(**kwargs)
             self.live_only_execute(self.cli_ctx, 'az keyvault delete -n {} -g {}'.format(name, group))
-            from azure.core.exceptions import HttpResponseError
             if self.skip_purge:
                 return
+            try:
+                self.live_only_execute(self.cli_ctx, 'az keyvault purge -n {} -l {}'.format(name, self.location))
+            except HttpResponseError:
+                # purge operation will fail with HttpResponseError when --enable-purge-protection
+                pass
+        elif not self.skip_purge:
             try:
                 self.live_only_execute(self.cli_ctx, 'az keyvault purge -n {} -l {}'.format(name, self.location))
             except HttpResponseError:
@@ -232,7 +238,7 @@ class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 # pylint: disable=too-many-instance-attributes
 class ManagedHSMPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def __init__(self, certs_path, name_prefix='clitest', location='uksouth', key='hsm', name_len=24,
-                 parameter_name='managed_hsm', resource_group_parameter_name='resource_group',
+                 parameter_name='managed_hsm', resource_group_parameter_name='resource_group', skip_delete=False,
                  administrators=None, roles=[], additional_params=None):
         super(ManagedHSMPreparer, self).__init__(name_prefix, name_len)
         self.cli_ctx = get_dummy_cli()
@@ -241,6 +247,7 @@ class ManagedHSMPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         self.parameter_name = parameter_name
         self.key = key
         self.certs_path = certs_path
+        self.skip_delete = skip_delete
         self.administrators = administrators
         self.roles = roles
         self.additional_params = additional_params
@@ -274,7 +281,8 @@ class ManagedHSMPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         if os.path.exists(security_domain):
             os.remove(security_domain)
         group = self._get_resource_group(**kwargs)
-        self.live_only_execute(self.cli_ctx, 'az keyvault delete --hsm-name {} -g {}'.format(name, group))
+        if not self.skip_delete:
+            self.live_only_execute(self.cli_ctx, 'az keyvault delete --hsm-name {} -g {}'.format(name, group))
         from azure.core.exceptions import HttpResponseError
         try:
             self.live_only_execute(self.cli_ctx, 'az keyvault purge --hsm-name {} -l {}'.format(name, self.location))
