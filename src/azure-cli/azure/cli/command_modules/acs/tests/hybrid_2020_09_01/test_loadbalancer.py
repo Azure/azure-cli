@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 import importlib
 import unittest
-from unittest import mock
 
 from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.acs import _loadbalancer as loadbalancer
@@ -64,6 +63,7 @@ class TestLoadBalancer(unittest.TestCase):
 
         p = loadbalancer.configure_load_balancer_profile(
             managed_outbound_ip_count,
+            None,
             outbound_ips,
             outbound_ip_prefixes,
             outbound_ports,

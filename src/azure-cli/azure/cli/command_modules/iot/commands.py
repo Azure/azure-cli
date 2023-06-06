@@ -4,12 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import LongRunningOperation, CliCommandType
-from ._client_factory import iot_hub_service_factory
-from ._client_factory import iot_service_provisioning_factory
-from ._client_factory import iot_central_service_factory
-from ._utils import _dps_certificate_response_transform
+from azure.cli.command_modules.iot._client_factory import (iot_hub_service_factory,
+                                                           iot_central_service_factory,
+                                                           iot_service_provisioning_factory)
+from azure.cli.command_modules.iot._utils import _dps_certificate_response_transform
 
 CS_DEPRECATION_INFO = 'IoT Extension (azure-iot) connection-string command (az iot hub connection-string show)'
+ROUTE_DEPRECATION_INFO = 'IoT Extension (azure-iot) message-route command group (az iot hub message-route)'
+ENDPOINT_DEPRECATION_INFO = 'IoT Extension (azure-iot) message-endpoint command group (az iot hub message-endpoint)'
 
 
 class PolicyUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
@@ -36,6 +38,9 @@ class RouteUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-f
 class HubDeleteResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
     def __call__(self, poller):
         from azure.cli.core.util import CLIError
+        # if no wait, return right away
+        if not poller:
+            return poller
         try:
             super(HubDeleteResultTransform, self).__call__(poller)
         except CLIError as e:
@@ -48,7 +53,17 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     update_custom_util = CliCommandType(operations_tmpl='azure.cli.command_modules.iot.custom#{}')
 
     iot_central_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.iotcentral.operations#IoTCentaralOperations.{}'
+        operations_tmpl='azure.mgmt.iotcentral.operations#IoTCentralOperations.{}'
+    )
+
+    private_endpoint_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.iotcentral.operations#PrivateEndpointConnectionsOperations.{}',
+        # client_factory=cf_private_endpoint,
+    )
+
+    private_link_resource_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.iotcentral.operations#PrivateLinksOperations.{}',
+        # client_factory=cf_private_link,
     )
 
     # iot dps commands
@@ -59,18 +74,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('delete', 'iot_dps_delete')
         g.generic_update_command('update', getter_name='iot_dps_get', setter_name='iot_dps_update',
                                  command_type=update_custom_util)
-
-    # iot dps access-policy commands (Deprecated)
-    with self.command_group('iot dps access-policy',
-                            client_factory=iot_service_provisioning_factory,
-                            deprecate_info=self.deprecate(redirect='iot dps policy',
-                                                          expiration='2.35.0')
-                            ) as g:
-        g.custom_command('list', 'iot_dps_policy_list')
-        g.custom_show_command('show', 'iot_dps_policy_get')
-        g.custom_command('create', 'iot_dps_policy_create', supports_no_wait=True)
-        g.custom_command('update', 'iot_dps_policy_update', supports_no_wait=True)
-        g.custom_command('delete', 'iot_dps_policy_delete', supports_no_wait=True)
 
     # iot dps linked-hub commands
     with self.command_group('iot dps linked-hub', client_factory=iot_service_provisioning_factory) as g:
@@ -84,7 +87,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     with self.command_group('iot dps certificate',
                             client_factory=iot_service_provisioning_factory,
                             transform=_dps_certificate_response_transform) as g:
-        g.custom_command('list', 'iot_dps_certificate_list')
+        g.custom_command(
+            'list', 'iot_dps_certificate_list',
+            table_transformer=(
+                "value[*].{Name:name,ResourceGroup:resourceGroup,Created:properties.created,Expiry:properties.expiry,"
+                "Subject:properties.subject,Thumbprint:properties.thumbprint,IsVerified:properties.isVerified}"
+            )
+        )
         g.custom_show_command('show', 'iot_dps_certificate_get')
         g.custom_command('create', 'iot_dps_certificate_create')
         g.custom_command('delete', 'iot_dps_certificate_delete')
@@ -102,7 +111,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     # iot hub certificate commands
     with self.command_group('iot hub certificate', client_factory=iot_hub_service_factory) as g:
-        g.custom_command('list', 'iot_hub_certificate_list')
+        g.custom_command(
+            'list', 'iot_hub_certificate_list',
+            table_transformer=(
+                "value[*].{Name:name,ResourceGroup:resourceGroup,Created:properties.created,Expiry:properties.expiry,"
+                "Subject:properties.subject,Thumbprint:properties.thumbprint,IsVerified:properties.isVerified}"
+            )
+        )
         g.custom_show_command('show', 'iot_hub_certificate_get')
         g.custom_command('create', 'iot_hub_certificate_create')
         g.custom_command('delete', 'iot_hub_certificate_delete')
@@ -112,14 +127,16 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     # iot hub commands
     with self.command_group('iot hub', client_factory=iot_hub_service_factory) as g:
-        g.custom_command('create', 'iot_hub_create')
+        g.custom_command('create', 'iot_hub_create', supports_no_wait=True)
         g.custom_command('list', 'iot_hub_list')
         g.custom_command('show-connection-string', 'iot_hub_show_connection_string',
-                         deprecate_info=self.deprecate(redirect=CS_DEPRECATION_INFO))
+                         deprecate_info=self.deprecate(redirect=CS_DEPRECATION_INFO, hide=True))
         g.custom_show_command('show', 'iot_hub_get')
         g.generic_update_command('update', getter_name='iot_hub_get', setter_name='iot_hub_update',
                                  command_type=update_custom_util, custom_func_name='update_iot_hub_custom')
-        g.custom_command('delete', 'iot_hub_delete', transform=HubDeleteResultTransform(self.cli_ctx))
+        g.custom_command('delete', 'iot_hub_delete', transform=HubDeleteResultTransform(self.cli_ctx),
+                         supports_no_wait=True)
+        g.custom_wait_command('wait', 'iot_hub_get')
         g.custom_command('list-skus', 'iot_hub_sku_list')
         g.custom_command('show-quota-metrics', 'iot_hub_get_quota_metrics')
         g.custom_command('show-stats', 'iot_hub_get_stats')
@@ -147,7 +164,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('renew-key', 'iot_hub_policy_key_renew', supports_no_wait=True)
 
     # iot hub routing endpoint commands
-    with self.command_group('iot hub routing-endpoint', client_factory=iot_hub_service_factory) as g:
+    with self.command_group('iot hub routing-endpoint', client_factory=iot_hub_service_factory,
+                            deprecate_info=self.deprecate(redirect=ENDPOINT_DEPRECATION_INFO, hide=True)) as g:
         g.custom_command('create', 'iot_hub_routing_endpoint_create',
                          transform=EndpointUpdateResultTransform(self.cli_ctx))
         g.custom_show_command('show', 'iot_hub_routing_endpoint_show')
@@ -164,7 +182,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('update', 'iot_message_enrichment_update')
 
     # iot hub route commands
-    with self.command_group('iot hub route', client_factory=iot_hub_service_factory) as g:
+    with self.command_group('iot hub route', client_factory=iot_hub_service_factory,
+                            deprecate_info=self.deprecate(redirect=ROUTE_DEPRECATION_INFO, hide=True)) as g:
         g.custom_command('create', 'iot_hub_route_create', transform=RouteUpdateResultTransform(self.cli_ctx))
         g.custom_show_command('show', 'iot_hub_route_show')
         g.custom_command('list', 'iot_hub_route_list')
@@ -174,9 +193,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     # iot hub device stream commands
     with self.command_group('iot hub devicestream', client_factory=iot_hub_service_factory,
-                            min_api="2019-07-01-preview") as g:
+                            min_api="2019-07-01-preview", is_preview=True) as g:
         g.custom_show_command('show', 'iot_hub_devicestream_show')
 
+    # iot central commands
     with self.command_group('iot central app', iot_central_sdk, client_factory=iot_central_service_factory) as g:
         g.custom_command('create', 'iot_central_app_create', supports_no_wait=True)
         g.custom_command('list', 'iot_central_app_list')
@@ -187,3 +207,24 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('identity assign', 'iot_central_app_assign_identity')
         g.custom_command('identity remove', 'iot_central_app_remove_identity')
         g.custom_show_command('identity show', 'iot_central_app_show_identity')
+
+    with self.command_group('iot central app private-endpoint-connection',
+                            private_endpoint_sdk,
+                            client_factory=iot_central_service_factory) as g:
+        from azure.cli.command_modules.iot._validators import validate_private_endpoint_connection_id
+        g.custom_command('delete', 'delete_private_endpoint_connection', confirmation=True,
+                         validator=validate_private_endpoint_connection_id)
+        g.custom_show_command('show', 'show_private_endpoint_connection',
+                              validator=validate_private_endpoint_connection_id)
+        g.custom_command('approve', 'approve_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id)
+        g.custom_command('reject', 'reject_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id)
+        g.custom_command('list', 'list_private_endpoint_connection')
+
+    with self.command_group('iot central app private-link-resource', private_link_resource_sdk,
+                            client_factory=iot_central_service_factory) as g:
+        from azure.cli.core.commands.transform import gen_dict_to_list_transform
+        g.custom_command('list', 'list_private_link_resource',
+                         transform=gen_dict_to_list_transform(key="value"))
+        g.custom_show_command('show', 'get_private_link_resource')

@@ -422,6 +422,7 @@ examples:
 helps['deployment validate'] = """
 type: command
 short-summary: Validate whether a template is valid at subscription scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -447,6 +448,7 @@ examples:
 helps['deployment create'] = """
 type: command
 short-summary: Start a deployment at subscription scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -561,6 +563,7 @@ examples:
 helps['deployment sub validate'] = """
 type: command
 short-summary: Validate whether a template is valid at subscription scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -589,6 +592,7 @@ examples:
 helps['deployment sub create'] = """
 type: command
 short-summary: Start a deployment at subscription scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -625,6 +629,7 @@ examples:
 helps['deployment sub what-if'] = """
 type: command
 short-summary: Execute a deployment What-If operation at subscription scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -733,6 +738,7 @@ examples:
 helps['deployment group validate'] = """
 type: command
 short-summary: Validate whether a template is valid at resource group.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -763,12 +769,14 @@ examples:
 helps['deployment group create'] = """
 type: command
 short-summary: Start a deployment at resource group.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Also note if you are providing a bicepparam file with a bicep template then you can use this
+        argument only once.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -804,11 +812,19 @@ examples:
   - name: Create a deployment at resource group scope from a template-spec
     text: >
         az deployment group create --resource-group testrg --template-spec "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Resources/templateSpecs/myTemplateSpec/versions/1.0"
+  - name: Create a deployment at resource group scope from a bicep template and a bicepparam parameter file
+    text: >
+        az deployment group create --resource-group testrg --template-file azuredeploy.bicep --parameters parameters.bicepparam
+  - name: Create a deployment at resource group across tenants
+    text: >
+        az deployment group create --resource-group testrg --name rollout01 \\
+            --template-file azuredeploy.json --parameters @myparameters.json --aux-tenants auxiliary_tenant01 auxiliary_tenant02
 """
 
 helps['deployment group what-if'] = """
 type: command
 short-summary: Execute a deployment What-If operation at resource group scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -816,7 +832,7 @@ parameters:
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
         It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
   - name: --template-file -f
-    short-summary: The path to the template file or Bicpe file.
+    short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
   - name: --template-spec -s
@@ -919,6 +935,7 @@ examples:
 helps['deployment mg validate'] = """
 type: command
 short-summary: Validate whether a template is valid at management group.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -949,6 +966,7 @@ examples:
 helps['deployment mg what-if'] = """
 type: command
 short-summary: Execute a deployment What-If operation at management group scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -984,6 +1002,7 @@ examples:
 helps['deployment mg create'] = """
 type: command
 short-summary: Start a deployment at management group.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -1089,6 +1108,7 @@ examples:
 helps['deployment tenant validate'] = """
 type: command
 short-summary: Validate whether a template is valid at tenant scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -1117,6 +1137,7 @@ examples:
 helps['deployment tenant what-if'] = """
 type: command
 short-summary: Execute a deployment What-If operation at tenant scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -1150,6 +1171,7 @@ examples:
 helps['deployment tenant create'] = """
 type: command
 short-summary: Start a deployment at tenant scope.
+long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
     short-summary: Supply deployment parameter values.
@@ -1350,6 +1372,9 @@ examples:
   - name: Delete a resource group.
     text: >
         az group delete -n MyResourceGroup
+  - name: Force delete all the Virtual Machines in a resource group.
+    text: >
+        az group delete -n MyResourceGroup --force-deletion-types Microsoft.Compute/virtualMachines
 """
 
 helps['group deployment'] = """
@@ -1955,15 +1980,15 @@ examples:
   - name: Create a policy set definition.
     text: |
         az policy set-definition create -n readOnlyStorage \\
+            --definitions '[ { \\"policyDefinitionId\\": \\"/subscriptions/mySubId/providers/ \\
+                Microsoft.Authorization/policyDefinitions/storagePolicy\\" } ]'
+  - name: Create a policy set definition with parameters.
+    text: |
+        az policy set-definition create -n readOnlyStorage \\
             --definitions "[ { \\"policyDefinitionId\\": \\"/subscriptions/mySubId/providers/ \\
                 Microsoft.Authorization/policyDefinitions/storagePolicy\\", \\"parameters\\": \\
                     { \\"storageSku\\": { \\"value\\": \\"[parameters(\\\\"requiredSku\\\\")]\\" } } }]" \\
             --params "{ \\"requiredSku\\": { \\"type\\": \\"String\\" } }"
-  - name: Create a policy set definition with parameters.
-    text: |
-        az policy set-definition create -n readOnlyStorage \\
-            --definitions '[ { \\"policyDefinitionId\\": \\"/subscriptions/mySubId/providers/ \\
-                Microsoft.Authorization/policyDefinitions/storagePolicy\\" } ]'
   - name: Create a policy set definition in a subscription.
     text: |
         az policy set-definition create -n readOnlyStorage \\
@@ -2002,9 +2027,9 @@ helps['policy set-definition show'] = """
 type: command
 short-summary: Show a policy set definition.
 examples:
-  - name: Show a policy set definition. (autogenerated)
+  - name: Show a policy set definition. If the policy set is scoped to a management group, then you must include the `--management-group` parameter and value.
     text: |
-        az policy set-definition show --name MyPolicySetDefinition
+        az policy set-definition show --name MyPolicySetDefinition --management-group MyManagementGroup
     crafted: true
 """
 
@@ -2113,7 +2138,7 @@ type: command
 examples:
   - name: Display all resource types for the network resource provider.
     text: >
-        az provider list --query [?namespace=='Microsoft.Network'].resourceTypes[].resourceType
+        az provider list --query "[?namespace=='Microsoft.Network'].resourceTypes[].resourceType"
 """
 
 helps['provider permission'] = """
@@ -2439,7 +2464,9 @@ examples:
 
 helps['resource update'] = """
 type: command
-short-summary: Update a resource.
+short-summary: Update a resource by PUT request.
+long-summary: It supports the generic update (using property path) to update resources.
+              If the update operation fails, please try run 'az resource patch' instead.
 examples:
   - name: Update a webapp by using the latest api-version whether this version is a preview version.
     text: >
@@ -2450,8 +2477,30 @@ examples:
     crafted: true
   - name: Update a resource. (autogenerated)
     text: |
-        az resource update --name myresource --resource-group myresourcegroup --resource-type subnets --set tags.key=value
+        az resource update --name MyResource --resource-group MyResourceGroup --resource-type subnets --set tags.key=value
     crafted: true
+"""
+
+helps['resource patch'] = """
+type: command
+short-summary: Update a resource by PATCH request.
+long-summary: It supports updating resources with JSON-formatted string.
+              If the patch operation fails, please try run 'az resource update' instead.
+examples:
+  - name: Update a webapp by using the latest api-version whether this version is a preview version.
+    text: >
+        az resource patch --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp} \\
+          --latest-include-preview --is-full-object --properties "{ \\"tags\\": { \\"key\\": \\"value\\" } }"
+  - name: Update a resource by using JSON configuration from a file.
+    text: >
+        az resource patch --name MyResource --resource-group MyResourceGroup --resource-type Microsoft.web/sites \\
+          --is-full-object --properties @jsonConfigFile
+  - name: Update an API app by providing a JSON configuration.
+    text: |
+        az resource patch --name MyApiApp --resource-group MyResourceGroup --resource-type Microsoft.web/sites \\
+            --is-full-object --properties "{ \\"kind\\": \\"api\\", \\"properties\\": { \\"serverFarmId\\": \\
+                    \\"/subscriptions/{SubID}/resourcegroups/{ResourceGroup} \\
+                        /providers/Microsoft.Web/serverfarms/{ServicePlan}\\" } }"
 """
 
 helps['resource wait'] = """
@@ -2529,7 +2578,7 @@ parameters:
   - name: --resource-id
     short-summary: The resource identifier for the entity being tagged. A resource, a resource group or a subscription may be tagged.
 examples:
-  - name: Delete a tag from the subscription.
+  - name: Delete a predefined tag from the subscription not associated with a resource or having no tag values.
     text: >
         az tag delete --name MyTag
   - name: Delete the entire set of tags on a subscription.
@@ -2538,7 +2587,7 @@ examples:
   - name: Delete the entire set of tags on a resource group.
     text: >
         az tag delete --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}
-  - name: Delete the entire set of tags on a resource.
+  - name: Delete the entire set of tags on a resource. (Even using --name along with --resource-id to specify a single tag)
     text: >
         az tag delete --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vmName}
 """
@@ -2676,6 +2725,14 @@ examples:
 helps['bicep'] = """
 type: group
 short-summary: Bicep CLI command group.
+long-summary: |
+  Bicep CLI command group. There are two configurations that can be set for the command group, including bicep.check_version and bicep.use_binary_from_path:
+
+  [1] az config set bicep.version_check=True/False
+      Turn on/off Bicep CLI version check when executing az bicep commands.
+
+  [2] az config set bicep.use_binary_from_path=True/False/if_found_in_ci
+      Specify whether to use Bicep CLI from PATH or not. The default value is if_found_in_ci.
 """
 
 helps['bicep install'] = """
@@ -2717,6 +2774,28 @@ examples:
     text: az bicep build --file {bicep_file} --outdir {out_dir}
   - name: Build a Bicep file and save the result to the specified file.
     text: az bicep build --file {bicep_file} --outfile {out_file}
+  - name: Build a Bicep file without restoring external modules.
+    text: az bicep build --file {bicep_file} --no-restore
+"""
+
+helps['bicep format'] = """
+type: command
+short-summary: Format a Bicep file.
+examples:
+  - name: Format a Bicep file.
+    text: az bicep format --file {bicep_file}
+  - name: Format a Bicep file and print all output to stdout.
+    text: az bicep format --file {bicep_file} --stdout
+  - name: Format a Bicep file and save the result to the specified directory.
+    text: az bicep format --file {bicep_file} --outdir {out_dir}
+  - name: Format a Bicep file and save the result to the specified file.
+    text: az bicep format --file {bicep_file} --outfile {out_file}
+  - name: Format a Bicep file insert a final newline.
+    text: az bicep format --file {bicep_file} --insert-final-newline
+  - name: Format a Bicep file set indentation kind. Valid values are ( Space | Tab ).
+    text: az bicep format --file {bicep_file} --indent-kind {indent_kind}
+  - name: Format a Bicep file set number of spaces to indent with (Only valid with --indent-kind set to Space).
+    text: az bicep format --file {bicep_file} --indent-size {indent_size}
 """
 
 helps['bicep decompile'] = """
@@ -2725,6 +2804,8 @@ short-summary: Attempt to decompile an ARM template file to a Bicep file.
 examples:
   - name: Decompile an ARM template file.
     text: az bicep decompile --file {json_template_file}
+  - name: Decompile an ARM template file and overwrite existing Bicep file.
+    text: az bicep decompile --file {json_template_file} --force
 """
 
 helps['bicep publish'] = """
@@ -2733,6 +2814,20 @@ short-summary: Publish a bicep file to a remote module registry.
 examples:
   - name: Publish a bicep file.
     text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}"
+  - name: Publish a bicep file overwriting an existing tag.
+    text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag} --force"
+  - name: Publish a bicep file with documentation uri.
+    text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}" --documentationUri {documentationUri}
+"""
+
+helps['bicep restore'] = """
+type: command
+short-summary: Restore external modules for a bicep file.
+examples:
+  - name: Retore external modules.
+    text: az bicep restore --file {bicep_file}
+  - name: Retore external modules and overwrite cached external modules.
+    text: az bicep restore --file {bicep_file} --force
 """
 
 helps['bicep version'] = """
@@ -2743,4 +2838,96 @@ short-summary: Show the installed version of Bicep CLI.
 helps['bicep list-versions'] = """
 type: command
 short-summary: List out all available versions of Bicep CLI.
+"""
+
+helps['bicep generate-params'] = """
+type: command
+short-summary: Generate parameters file for a Bicep file.
+examples:
+  - name: Generate parameters file for a Bicep file.
+    text: az bicep generate-params --file {bicep_file}
+  - name: Generate parameters file for a Bicep file and print all output to stdout.
+    text: az bicep generate-params --file {bicep_file} --stdout
+  - name: Generate parameters file for a Bicep file and save the result to the specified directory.
+    text: az bicep generate-params --file {bicep_file} --outdir {out_dir}
+  - name: Generate parameters file for a Bicep file and save the result to the specified file.
+    text: az bicep generate-params --file {bicep_file} --outfile {out_file}
+  - name: Generate parameters file for a Bicep file without restoring external modules.
+    text: az bicep generate-params --file {bicep_file} --no-restore
+"""
+
+helps['resourcemanagement'] = """
+type: group
+short-summary: resourcemanagement CLI command group.
+"""
+helps['resourcemanagement private-link'] = """
+type: group
+short-summary: resourcemanagement private-link management on a resource.
+"""
+helps['private-link'] = """
+type: group
+short-summary: private-link association CLI command group.
+"""
+helps['private-link association'] = """
+type: group
+short-summary: private-link association management on a resource.
+"""
+
+helps['resourcemanagement private-link create'] = """
+type: command
+short-summary: Create a resource management group private link.
+examples:
+  - name: Create a resource management group private link.
+    text: az resourcemanagement private-link create --resource-group testRG --name TestRMPL --location WestUS
+"""
+helps['resourcemanagement private-link show'] = """
+type: command
+short-summary: Get resource management private.
+examples:
+  - name: Get single resource management private link.
+    text: az resourcemanagement private-link show --resource-group testRG --name TestRMPL
+"""
+helps['resourcemanagement private-link list'] = """
+type: command
+short-summary: Get all the resource management private links at scope.
+examples:
+  - name: List all resource management private links in a subscription.
+    text: az resourcemanagement private-link list
+  - name: List all resource management private links in a resource group.
+    text: az resourcemanagement private-link list --resource-group testRG
+"""
+helps['resourcemanagement private-link delete'] = """
+type: command
+short-summary: Delete a resource management private link.
+examples:
+  - name: Delete a resource management private link.
+    text: az resourcemanagement private-link delete --resource-group TestRG --name testRMPL
+"""
+helps['private-link association create'] = """
+type: command
+short-summary: Create a PrivateLinkAssociation.
+examples:
+  - name: Create a PrivateLinkAssociation.
+    text: az private-link association create --management-group-id TestMG --name testPLA --privatelink testPL --public-network-access enabled
+"""
+helps['private-link association show'] = """
+type: command
+short-summary: Get a private link association.
+examples:
+  - name: Get a single private link association.
+    text: az private-link association show --management-group-id TestMG --name testPLA
+"""
+helps['private-link association list'] = """
+type: command
+short-summary: Get a private link association for a management group scope.
+examples:
+  - name: Get a private link association for a management group scope.
+    text: az private-link association list --management-group-id TestMG
+"""
+helps['private-link association delete'] = """
+type: command
+short-summary: Delete a PrivateLinkAssociation.
+examples:
+  - name: Delete a PrivateLinkAssociation.
+    text: az private-link association delete --management-group-id TestMG --name testPLA
 """

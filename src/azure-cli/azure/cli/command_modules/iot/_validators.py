@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from argparse import ArgumentError
-from azure.cli.core.azclierror import InvalidArgumentValueError
-from .custom import SimpleAccessRights
+from azure.cli.core.azclierror import InvalidArgumentValueError, ArgumentUsageError
+from azure.cli.command_modules.iot.custom import SimpleAccessRights, iot_central_app_get
 
 
 def validate_policy_permissions(ns):
@@ -82,3 +82,18 @@ def validate_c2d_ttl(ns):
             ns.c2d_ttl not in range(1, 49, 1)):
         raise ArgumentError(None, 'Please specify the default time from 1 to 48 hours to live for cloud-to-device'
                                   ' messages in the device queue.')
+
+
+def validate_private_endpoint_connection_id(cmd, namespace):
+    ns = namespace
+    if ns.connection_id:
+        id_parts = ns.connection_id.split('/')
+        ns.private_endpoint_connection_name = id_parts[-1]
+        ns.account_name = id_parts[-3]
+        ns.resource_group_name = id_parts[-7]
+        del ns.connection_id
+    if ns.account_name and not ns.resource_group_name:
+        ns.resource_group_name = iot_central_app_get(cmd.cli_ctx, ns.account_name).resourceGroup
+
+    if not all([ns.account_name, ns.resource_group_name, ns.private_endpoint_connection_name]):
+        raise ArgumentUsageError('incorrect usage: [--id ID | --name NAME --account-name NAME]')

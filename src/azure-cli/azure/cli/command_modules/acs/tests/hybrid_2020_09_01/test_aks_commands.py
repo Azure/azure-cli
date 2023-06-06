@@ -15,7 +15,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.checkers import (
     StringContainCheck, StringContainCheckIgnoreCase)
 from azure.cli.command_modules.acs._format import version_to_tuple
-from .recording_processors import KeyReplacer
+from azure.cli.command_modules.acs.tests.hybrid_2020_09_01.recording_processors import KeyReplacer
 
 # flake8: noqa
 
@@ -25,8 +25,7 @@ from .recording_processors import KeyReplacer
 # is set with the environment varibale for sp_name. This method is compatible with
 # both cases.
 def _process_sp_name(sp_name):
-    from azure.cli.core.util import is_guid
-    return sp_name if is_guid(sp_name) else 'http://{}'.format(sp_name)
+    return sp_name
 
 
 class AzureKubernetesServiceScenarioTest(ScenarioTest):
@@ -493,7 +492,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             resource_group, identity_name)).get_output_in_json()
         return identity.get("id")
 
-    
+
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
         # kwargs for string formatting

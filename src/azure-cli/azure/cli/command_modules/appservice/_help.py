@@ -55,6 +55,12 @@ examples:
   - name: Create an app service plan for app service environment.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan --app-service-environment MyAppServiceEnvironment --sku I1
+  - name: Create an app service plan for app service environment in different subscription.
+    text: >
+        az appservice plan create -g MyResourceGroup -n MyPlan --app-service-environment '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.Web/hostingEnvironments/test-ase' --sku I1V2
+  - name: Create an app service plan for app service environment in different subscription and the resource group in different region than app service environment.
+    text: >
+        az appservice plan create -g MyResourceGroup -n MyPlan --app-service-environment '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.Web/hostingEnvironments/test-ase' --sku I1V2 --location ase-region
 """
 
 helps['appservice plan delete'] = """
@@ -145,6 +151,8 @@ examples:
     text: az functionapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureCloud
   - name: Add Access Restriction opening (Allow) with no rule name for service tag AzureFrontDoor.Backend and http-header X-Azure-FDID with value '12345678-abcd-1234-abcd-12345678910a'
     text: az functionapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureFrontDoor.Backend --http-header x-azure-fdid=12345678-abcd-1234-abcd-12345678910a
+  - name: Add Access Restriction opening (Allow) with multiple http-header values for the same header 'X-Azure-FDID'
+    text: az functionapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureFrontDoor.Backend --http-header x-azure-fdid=12345678-abcd-1234-abcd-12345678910a x-azure-fdid=11111111-abcd-1234-abcd-222222222222
 """
 
 helps['functionapp config access-restriction remove'] = """
@@ -201,10 +209,18 @@ examples:
 helps['functionapp config appsettings set'] = """
 type: command
 short-summary: Update a function app's settings.
+parameters:
+  - name: --settings
+    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file.
+  - name: --slot-settings
+    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file. Given setting are added to the configuration and marked as Deployment slot setting by default.
 examples:
   - name: Update a function app's settings.
     text: |
         az functionapp config appsettings set --name MyFunctionApp --resource-group MyResourceGroup --settings "AzureWebJobsStorage=$storageConnectionString"
+  - name: Set using both key-value pair and a json file with more settings.
+    text: >
+        az functionapp config appsettings set -g MyResourceGroup -n MyUniqueApp --settings mySetting=value @moreSettings.json
 """
 
 helps['functionapp config container'] = """
@@ -397,6 +413,18 @@ examples:
     crafted: true
 """
 
+helps['functionapp cors credentials'] = """
+type: command
+short-summary: Enable or disable access-control-allow-credentials.
+examples:
+  - name: Enable CORS access-control-allow-credentials.
+    text: az functionapp cors credentials --name MyFunctionApp --resource-group MyResourceGroup --enable true
+    crafted: true
+  - name: Disable CORS access-control-allow-credentials.
+    text: az functionapp cors credentials --name MyFunctionApp --resource-group MyResourceGroup --enable false
+    crafted: false
+"""
+
 helps['functionapp create'] = """
 type: command
 short-summary: Create a function app.
@@ -425,6 +453,11 @@ examples:
 helps['functionapp deployment'] = """
 type: group
 short-summary: Manage function app deployments.
+"""
+
+helps['functionapp deployment user show'] = """
+type: command
+short-summary: Gets publishing user.
 """
 
 helps['functionapp deployment container'] = """
@@ -605,6 +638,35 @@ examples:
         az functionapp deployment user set --user-name MyUserName
 """
 
+helps['functionapp deployment github-actions'] = """
+type: group
+short-summary: Configure GitHub Actions for a functionapp
+"""
+
+helps['functionapp deployment github-actions add'] = """
+type: command
+short-summary: Add a GitHub Actions workflow file to the specified repository. The workflow will build and deploy your app to the specified functionapp.
+examples:
+  - name: Add GitHub Actions to a specified repository, providing personal access token
+    text: >
+        az functionapp deployment github-actions add --repo "githubUser/githubRepo" -g MyResourceGroup -n MyFunctionapp --token MyPersonalAccessToken
+  - name: Add GitHub Actions to a specified repository, using interactive method of retrieving personal access token
+    text: >
+        az functionapp deployment github-actions add --repo "githubUser/githubRepo" -g MyResourceGroup -n MyFunctionapp --login-with-github
+"""
+
+helps['functionapp deployment github-actions remove'] = """
+type: command
+short-summary: Remove and disconnect the GitHub Actions workflow file from the specified repository.
+examples:
+  - name: Remove GitHub Actions from a specified repository, providing personal access token
+    text: >
+        az functionapp deployment github-actions remove --repo "githubUser/githubRepo" -g MyResourceGroup -n MyFunctionapp --token MyPersonalAccessToken
+  - name: Remove GitHub Actions from a specified repository, using interactive method of retrieving personal access token
+    text: >
+        az functionapp deployment github-actions remove --repo "githubUser/githubRepo" -g MyResourceGroup -n MyFunctionapp --login-with-github
+"""
+
 helps['functionapp function'] = """
 type: group
 short-summary: Manage function app functions.
@@ -628,6 +690,15 @@ examples:
     text: >
         az functionapp function delete -g MyResourceGroup -n MyFunctionAppName --function-name MyFunctionName
     crafted: true
+"""
+
+helps['functionapp function list'] = """
+type: command
+short-summary: List functions in a function app.
+examples:
+  - name: List functions.
+    text: >
+        az functionapp function list -g MyResourceGroup -n MyFunctionAppName
 """
 
 helps['functionapp function keys'] = """
@@ -927,9 +998,9 @@ helps['functionapp deploy'] = """
     short-summary: Deploys a provided artifact to Azure functionapp.
     examples:
     - name: Deploy a war file asynchronously.
-      text: az functionapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type war --async true
+      text: az functionapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type war --async true
     - name: Deploy a static text file to wwwroot/staticfiles/test.txt
-      text: az functionapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
+      text: az functionapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
 """
 
 helps['webapp'] = """
@@ -971,7 +1042,7 @@ examples:
 
 helps['webapp browse'] = """
 type: command
-short-summary: Open a web app in a browser.
+short-summary: Open a web app in a browser. This is not supported in Azure Cloud Shell.
 examples:
   - name: Open a web app in a browser. (autogenerated)
     text: az webapp browse --name MyWebapp --resource-group MyResourceGroup
@@ -1008,6 +1079,8 @@ examples:
     text: az webapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureCloud
   - name: Add Access Restriction opening (Allow) with no rule name for service tag AzureFrontDoor.Backend and http-header X-Azure-FDID with value '12345678-abcd-1234-abcd-12345678910a'
     text: az webapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureFrontDoor.Backend --http-header x-azure-fdid=12345678-abcd-1234-abcd-12345678910a
+  - name: Add Access Restriction opening (Allow) with multiple http-header values for the same header 'X-Azure-FDID'
+    text: az webapp config access-restriction add -g ResourceGroup -n AppName --priority 400 --service-tag AzureFrontDoor.Backend --http-header x-azure-fdid=12345678-abcd-1234-abcd-12345678910a x-azure-fdid=11111111-abcd-1234-abcd-222222222222
 """
 
 helps['webapp config access-restriction remove'] = """
@@ -1064,6 +1137,11 @@ examples:
 helps['webapp config appsettings set'] = """
 type: command
 short-summary: Set a web app's settings.
+parameters:
+  - name: --settings
+    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file. See https://go.microsoft.com/fwlink/?linkid=2219923 for more information on file format and editing app settings in bulk.
+  - name: --slot-settings
+    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file. Given setting are added to the configuration and marked as Deployment slot setting by default.
 examples:
   - name: Set the default NodeJS version to 6.9.1 for a web app.
     text: >
@@ -1071,11 +1149,6 @@ examples:
   - name: Set using both key-value pair and a json file with more settings.
     text: >
         az webapp config appsettings set -g MyResourceGroup -n MyUniqueApp --settings mySetting=value @moreSettings.json
-parameters:
-  - name: --settings
-    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file.
-  - name: --slot-settings
-    short-summary: Space-separated appsettings in KEY=VALUE format. Use @{file} to load from a file. Given setting are added to the configuration and marked as Deployment slot setting by default.
 """
 
 helps['webapp config backup'] = """
@@ -1104,6 +1177,11 @@ examples:
 helps['webapp config backup restore'] = """
 type: command
 short-summary: Restore a web app from a backup.
+"""
+
+helps['webapp config backup delete'] = """
+type: command
+short-summary: Delete a web app backup.
 """
 
 helps['webapp config backup show'] = """
@@ -1441,15 +1519,12 @@ examples:
   - name: Create a web app with the default configuration.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName
-  - name: Create a web app with a Java 11 runtime using '|' delimiter. (not recommended for powershell; use the ":" delimiter instead)
-    text: >
-        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java|11|Java SE|11"
-  - name: Create a web app with a Java 11 runtime using ':' delimiter.
+  - name: Create a web app with a Java 11 runtime.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java:11:Java SE:11"
   - name: Create a web app with a NodeJS 10.14 runtime and deployed from a local git repository.
     text: >
-        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|12LTS" --deployment-local-git
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node:12LTS" --deployment-local-git
   - name: Create a web app with an image from DockerHub.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i nginx
@@ -2015,10 +2090,7 @@ examples:
   - name: Create a web app with a specified name
     text: >
         az webapp up -n MyUniqueAppName
-  - name: Create a web app with a specified name and a Java 11 runtime using '|' delimiter (not recommended for powershell; use the ":" delimiter instead)
-    text: >
-        az webapp up -n MyUniqueAppName --runtime "java|11|Java SE|11"
-  - name: Create a web app with a specified name and a Java 11 runtime using ':' delimiter
+  - name: Create a web app with a specified name and a Java 11 runtime
     text: >
         az webapp up -n MyUniqueAppName --runtime "java:11:Java SE:11"
   - name: Create a web app in a specific region, by running the command from the folder where the code to be deployed exists.
@@ -2059,9 +2131,9 @@ examples:
   - name: Add a regional virtual network integration to a webapp
     text: az webapp vnet-integration add -g MyResourceGroup -n MyWebapp --vnet MyVnetName --subnet MySubnetName -s [slot]
   - name: Add a regional virtual network integration to a webapp using vnet resource id
-    text: az webapp vnet-integration add -g MyResourceGroup -n MyWebapp --vnet '/subscriptions/[sub id]/resourceGroups/[MyResourceGroup]/providers/Microsoft.Network/virtualNetworks/[MyVnetName]' --subnet MySubnetName -s [slot]
+    text: az webapp vnet-integration add -g MyResourceGroup -n MyWebapp --vnet /subscriptions/[SubscriptionId]/resourceGroups/[MyResourceGroup]/providers/Microsoft.Network/virtualNetworks/[MyVnetName] --subnet MySubnetName -s [slot]
   - name: Add a regional virtual network integration to a webapp using subnet resource id
-    text: az webapp vnet-integration add -g MyResourceGroup -n MyWebapp --vnet MyVnetName --subnet '/subscriptions/[sub id]/resourceGroups/[MyResourceGroup]/providers/Microsoft.Network/virtualNetworks/[MyVnetName]/subnets/MySubnetName' -s [slot]
+    text: az webapp vnet-integration add -g MyResourceGroup -n MyWebapp --vnet MyVnetName --subnet /subscriptions/[SubscriptionId]/resourceGroups/[MyResourceGroup]/providers/Microsoft.Network/virtualNetworks/[MyVnetName]/subnets/MySubnetName -s [slot]
 """
 
 helps['webapp vnet-integration list'] = """
@@ -2255,7 +2327,7 @@ helps['appservice ase create'] = """
 
 helps['appservice ase create-inbound-services'] = """
     type: command
-    short-summary: Private DNS Zone for Internal ASEv2.
+    short-summary: Private DNS Zone for Internal (ILB) App Service Environments.
     examples:
     - name: Create Private DNS Zone and A records.
       text: |
@@ -2263,6 +2335,23 @@ helps['appservice ase create-inbound-services'] = """
             --vnet-name MyASEVirtualNetwork --subnet MyAseSubnet
 """
 
+helps['appservice ase upgrade'] = """
+    type: command
+    short-summary: Upgrade app service environment v3.
+    examples:
+    - name: Upgrade app service environment v3.
+      text: |
+          az appservice ase upgrade -n MyAseV3Name -g MyResourceGroup
+"""
+
+helps['appservice ase send-test-notification'] = """
+    type: command
+    short-summary: Send a test upgrade notification in app service environment v3.
+    examples:
+    - name: Send a test upgrade notification in app service environment v3.
+      text: |
+          az appservice ase send-test-notification -n MyAseV3Name -g MyResourceGroup
+"""
 
 helps['appservice ase update'] = """
     type: command
@@ -2275,6 +2364,12 @@ helps['appservice ase update'] = """
     - name: Update app service environment v3 to allow new private endpoint connections.
       text: |
           az appservice ase update -n MyAseV3Name -g MyResourceGroup --allow-new-private-endpoint-connections
+    - name: Update app service environment v3 to allow incoming ftp connections.
+      text: |
+          az appservice ase update -n MyAseV3Name -g MyResourceGroup --allow-incoming-ftp-connections
+    - name: Update app service environment v3 to allow remote debugging.
+      text: |
+          az appservice ase update -n MyAseV3Name -g MyResourceGroup --allow-remote-debugging
 """
 
 helps['appservice ase delete'] = """
@@ -2331,7 +2426,7 @@ helps['staticwebapp show'] = """
 
 helps['staticwebapp create'] = """
     type: command
-    short-summary: Create a static app with content from a GitHub repository URL and on the provided branch. If the repo is under a Github organization, please ensure that the Azure CLI Github App has access to the organization. Access can be requested in the browser when using the "--login-with-github" argument. Access must be granted by the organization's admin.
+    short-summary: Create a static app. To provide content to the static web app and integrate with a Github repo, provide the Github repository URL (--source) and a branch (--branch). If the repo is under a Github organization, please ensure that the Azure CLI Github App has access to the organization. Access can be requested in the browser when using the "--login-with-github" argument. Access must be granted by the organization's admin.
     examples:
     - name: Create static app in a subscription.
       text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
@@ -2339,6 +2434,8 @@ helps['staticwebapp create'] = """
     - name: Create static app in a subscription, retrieving token interactively
       text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
        -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master --login-with-github
+    - name: Create a static web app without any content and without a github integration
+      text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
 """
 
 helps['staticwebapp update'] = """
@@ -2464,6 +2561,8 @@ helps['staticwebapp appsettings list'] = """
     examples:
     - name: List app settings of the static app.
       text: az staticwebapp appsettings list -n MyStaticAppName
+    - name: List app settings of the static app environment.
+      text: az staticwebapp appsettings list -n MyStaticAppName --environment-name MyEnvironmentName
 """
 
 helps['staticwebapp appsettings set'] = """
@@ -2472,6 +2571,8 @@ helps['staticwebapp appsettings set'] = """
     examples:
     - name: Add to or change the app settings of the static app.
       text: az staticwebapp appsettings set -n MyStaticAppName --setting-names key1=val1 key2=val2
+    - name: Add to or change the app settings of the static app environment.
+      text: az staticwebapp appsettings set -n MyStaticAppName --setting-names key1=val1 key2=val2 --environment-name MyEnvironmentName
 """
 
 helps['staticwebapp appsettings delete'] = """
@@ -2480,6 +2581,8 @@ helps['staticwebapp appsettings delete'] = """
     examples:
     - name: Delete given app settings of the static app.
       text: az staticwebapp appsettings delete -n MyStaticAppName --setting-names key1 key2
+    - name: Delete given app settings of the static app.
+      text: az staticwebapp appsettings delete -n MyStaticAppName --setting-names key1 key2 --environment-name MyEnvironmentName
 """
 
 helps['staticwebapp identity'] = """
@@ -2584,7 +2687,7 @@ helps['staticwebapp functions link'] = """
     short-summary: Link an Azure Function to a static webapp. Also known as "Bring your own Functions." Only one Azure Functions app is available to a single static web app. Static webapp SKU must be "Standard"
     examples:
     - name: Link a function to a static webapp
-      text: az staticwebapp functions link -n MyStaticAppName -g MyResourceGroup --function-resource-id "/subscriptions/<<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Web/sites/<function-name>"
+      text: az staticwebapp functions link -n MyStaticAppName -g MyResourceGroup --function-resource-id "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Web/sites/<function-name>"
 """
 
 helps['staticwebapp functions unlink'] = """
@@ -2603,12 +2706,91 @@ helps['staticwebapp functions show'] = """
       text: az staticwebapp functions show -n MyStaticAppName -g MyResourceGroup
 """
 
+helps['staticwebapp backends'] = """
+type: group
+short-summary: Link or unlink a prexisting backend with a static web app. Also known as "Bring your own API."
+"""
+
+helps['staticwebapp backends validate'] = """
+    type: command
+    short-summary: Validate a backend for a static web app
+    long-summary: >
+      Only one backend is available to a single static web app.
+      If a backend was previously linked to another static Web App, the auth configuration must first be removed from the backend before linking to a different Static Web App.
+      Static web app SKU must be "Standard".
+      Supported backend types are Azure Functions, Azure API Management, Azure App Service, Azure Container Apps.
+      Backend region must be provided for backends of type Azure Functions and Azure App Service.
+      See https://learn.microsoft.com/azure/static-web-apps/apis-overview to learn more.
+    examples:
+    - name: Validate a backend for a static web app
+      text: az staticwebapp backends validate -n MyStaticAppName -g MyResourceGroup --backend-resource-id "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/<resource-provider>/<resource-type>/<backend-name>" --backend-region MyBackendRegion
+    - name: Validate a backend for a static web app environment
+      text: az staticwebapp backends validate -n MyStaticAppName -g MyResourceGroup --environment-name MyEnvironmentName --backend-resource-id "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/<resource-provider>/<resource-type>/<backend-name>" --backend-region MyBackendRegion
+"""
+
+helps['staticwebapp backends link'] = """
+    type: command
+    short-summary: Link a backend to a static web app. Also known as "Bring your own API."
+    long-summary: >
+      Only one backend is available to a single static web app.
+      If a backend was previously linked to another static Web App, the auth configuration must first be removed from the backend before linking to a different Static Web App.
+      Static web app SKU must be "Standard".
+      Supported backend types are Azure Functions, Azure API Management, Azure App Service, Azure Container Apps.
+      Backend region must be provided for backends of type Azure Functions and Azure App Service.
+      See https://learn.microsoft.com/azure/static-web-apps/apis-overview to learn more.
+    examples:
+    - name: Link a backend to a static web app
+      text: az staticwebapp backends link -n MyStaticAppName -g MyResourceGroup --backend-resource-id "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/<resource-provider>/<resource-type>/<backend-name>" --backend-region MyBackendRegion
+    - name: Link a backend to a static web app environment
+      text: az staticwebapp backends link -n MyStaticAppName -g MyResourceGroup --environment-name MyEnvironmentName --backend-resource-id "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/<resource-provider>/<resource-type>/<backend-name>" --backend-region MyBackendRegion
+"""
+
+helps['staticwebapp backends unlink'] = """
+    type: command
+    short-summary: Unlink backend from a static web app
+    examples:
+    - name: Unlink static app backends.
+      text: az staticwebapp backends unlink -n MyStaticAppName -g MyResourceGroup
+    - name: Unlink backend from static web app environment and remove auth config from backend.
+      text: az staticwebapp backends unlink -n MyStaticAppName -g MyResourceGroup --environment-name MyEnvironmentName --remove-backend-auth
+"""
+
+helps['staticwebapp backends show'] = """
+    type: command
+    short-summary: Show details on the backend linked to a static web app
+    examples:
+    - name: Show static web app backends.
+      text: az staticwebapp backends show -n MyStaticAppName -g MyResourceGroup
+    - name: Show static web app backends for environment.
+      text: az staticwebapp backends show -n MyStaticAppName -g MyResourceGroup --environment-name MyEnvironmentName
+"""
+
+helps['staticwebapp enterprise-edge'] = """
+    type: group
+    short-summary: Manage the Azure Front Door CDN for static webapps. For optimal experience and availability please check our documentation https://aka.ms/swaedge
+"""
+
+helps['staticwebapp enterprise-edge enable'] = """
+    type: command
+    short-summary: Enable the Azure Front Door CDN for a static webapp. Enabling enterprise-grade edge requires re-registration for the Azure Front Door Microsoft.CDN resource provider. For optimal experience and availability please check our documentation https://aka.ms/swaedge
+"""
+
+helps['staticwebapp enterprise-edge disable'] = """
+    type: command
+    short-summary: Disable the Azure Front Door CDN for a static webapp. For optimal experience and availability please check our documentation https://aka.ms/swaedge
+"""
+
+helps['staticwebapp enterprise-edge show'] = """
+    type: command
+    short-summary: Show the status (Enabled, Disabled, Enabling, Disabling) of the Azure Front Door CDN for a webapp. For optimal experience and availability please check our documentation https://aka.ms/swaedge
+"""
+
 helps['webapp deploy'] = """
     type: command
     short-summary: Deploys a provided artifact to Azure Web Apps.
     examples:
     - name: Deploy a war file asynchronously.
-      text: az webapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type war --async true
+      text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type war --async true
     - name: Deploy a static text file to wwwroot/staticfiles/test.txt
-      text: az webapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
+      text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
 """

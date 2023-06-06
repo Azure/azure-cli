@@ -213,3 +213,7 @@ def get_streaming_endpoint(client, resource_group_name, account_name,
             streaming_endpoint_name)
 
     return streaming_endpoint
+
+
+def get_skus(client, resource_group_name, account_name, streaming_endpoint_name):
+    return client.skus(resource_group_name, account_name, streaming_endpoint_name)

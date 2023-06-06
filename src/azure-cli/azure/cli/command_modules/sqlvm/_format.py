@@ -55,6 +55,7 @@ def transform_sqlvm_output(result):
                               ('sqlImageOffer', result.sql_image_offer),
                               ('sqlImageSku', result.sql_image_sku),
                               ('sqlManagement', result.sql_management),
+                              ('leastPrivilegeMode', result.least_privilege_mode),
                               ('resourceGroup', resource_group),
                               ('sqlServerLicenseType', result.sql_server_license_type),
                               ('virtualMachineResourceId', result.virtual_machine_resource_id),
@@ -71,6 +72,8 @@ def transform_sqlvm_output(result):
             output['serverConfigurationsManagementSettings'] = format_server_configuration_management_settings(result.server_configurations_management_settings)
         if result.key_vault_credential_settings is not None:
             output['keyVaultCredentialSettings'] = format_key_vault_credential_settings(result.key_vault_credential_settings)
+        if result.assessment_settings is not None:
+            output['assessmentSettings'] = format_assessment_settings(result.assessment_settings)
 
         return output
     except AttributeError:
@@ -290,6 +293,10 @@ def format_server_configuration_management_settings(result):
     if settings:
         order_dict['additionalFeaturesServerConfigurations'] = settings
 
+    settings = format_azure_ad_authentication_settings(result.azure_ad_authentication_settings)
+    if settings:
+        order_dict['azureAdAuthenticationSettings'] = settings
+
     return order_dict
 
 
@@ -337,5 +344,59 @@ def format_sql_workload_type_update_settings(result):
     order_dict = OrderedDict()
     if result.sql_workload_type is not None:
         order_dict['sqlWorkloadType'] = result.sql_workload_type
+
+    return order_dict
+
+
+def format_assessment_settings(result):
+    '''
+    Formats the AssessmentSettings object removing arguments that are empty
+    '''
+    from collections import OrderedDict
+    # Only display parameters that have content
+    order_dict = OrderedDict()
+
+    if result.enable is not None:
+        order_dict['enable'] = result.enable
+
+    schedule = format_assessment_schedule(result.schedule)
+    if schedule:
+        order_dict['schedule'] = schedule
+
+    return order_dict
+
+
+def format_assessment_schedule(result):
+    '''
+    Formats the AssessmentSchedule object removing arguments that are empty
+    '''
+
+    from collections import OrderedDict
+    # Only display parameters that have content
+    order_dict = OrderedDict()
+    if result.enable is not None:
+        order_dict['enable'] = result.enable
+    if result.weekly_interval is not None:
+        order_dict['weeklyInterval'] = result.weekly_interval
+    if result.monthly_occurrence is not None:
+        order_dict['monthlyOccurrence'] = result.monthly_occurrence
+    if result.day_of_week is not None:
+        order_dict['dayOfWeek'] = result.day_of_week
+    if result.start_time is not None:
+        order_dict['startTimeLocal'] = result.start_time
+
+    return order_dict
+
+
+def format_azure_ad_authentication_settings(result):
+    '''
+    Formats the AzureAD authentication object removing arguments that are empty
+    '''
+
+    from collections import OrderedDict
+    # Only display parameters that have content
+    order_dict = OrderedDict()
+    if result is not None and result.client_id is not None:
+        order_dict['clientId'] = result.client_id
 
     return order_dict

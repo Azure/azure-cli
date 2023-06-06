@@ -6,17 +6,17 @@
 import time
 import json
 import tempfile
-from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer)
+from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, LogAnalyticsWorkspacePreparer)
 from azure.cli.testsdk.base import execute
 from azure.cli.core.mock import DummyCli
 from azure.cli.testsdk.exceptions import CliTestError
-from .preparers import (SqlVirtualMachinePreparer, LogAnalyticsWorkspacePreparer)
+from .preparers import (SqlVirtualMachinePreparer)
 
 
 class VulnerabilityAssessmentForSqlTests(LiveScenarioTest):
-    @ResourceGroupPreparer()
-    @SqlVirtualMachinePreparer()
-    @LogAnalyticsWorkspacePreparer()
+    @ResourceGroupPreparer(location='eastus')
+    @SqlVirtualMachinePreparer(location='eastus')
+    @LogAnalyticsWorkspacePreparer(location='eastus')
     def test_va_sql_scenario(self, resource_group, resource_group_location, sqlvm, laworkspace):
 
         # Use prepared sql virtual machine and log analytics workspace to setup OMS agent with VA management pack

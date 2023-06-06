@@ -8,7 +8,6 @@ from azure.cli.core.commands import CliCommandType
 from ._format import (
     registry_output_format,
     usage_output_format,
-    policy_output_format,
     credential_output_format,
     webhook_output_format,
     webhook_get_config_output_format,
@@ -44,7 +43,10 @@ from ._client_factory import (
     cf_acr_token_credentials,
     cf_acr_private_endpoint_connections,
     cf_acr_agentpool,
-    cf_acr_connected_registries
+    cf_acr_connected_registries,
+    cf_acr_network_rules,
+    cf_acr_cache,
+    cf_acr_cred_sets
 )
 
 
@@ -69,7 +71,6 @@ def load_command_table(self, _):
 
     acr_policy_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.policy#{}',
-        table_transformer=policy_output_format,
         client_factory=cf_acr_registries
     )
 
@@ -135,7 +136,7 @@ def load_command_table(self, _):
 
     acr_network_rule_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.network_rule#{}',
-        client_factory=cf_acr_registries
+        client_factory=cf_acr_network_rules
     )
 
     acr_check_health_util = CliCommandType(
@@ -177,6 +178,16 @@ def load_command_table(self, _):
         client_factory=cf_acr_private_endpoint_connections
     )
 
+    acr_cache_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.cache#{}',
+        client_factory=cf_acr_cache
+    )
+
+    acr_cred_set_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.credential_set#{}',
+        client_factory=cf_acr_cred_sets
+    )
+
     with self.command_group('acr', acr_custom_util) as g:
         g.command('check-name', 'acr_check_name', table_transformer=None)
         g.command('list', 'acr_list')
@@ -211,6 +222,7 @@ def load_command_table(self, _):
         g.command('update', 'acr_repository_update')
         g.command('delete', 'acr_repository_delete')
         g.command('untag', 'acr_repository_untag')
+        g.command('list-deleted', 'acr_repository_deleted_list', is_preview=True)
 
     with self.command_group('acr manifest', acr_manifest_util, is_preview=True) as g:
         g.show_command('show', 'acr_manifest_show')
@@ -220,19 +232,33 @@ def load_command_table(self, _):
         g.show_command('show-metadata', 'acr_manifest_metadata_show')
         g.command('list-metadata', 'acr_manifest_metadata_list')
         g.command('update-metadata', 'acr_manifest_metadata_update')
+        g.command('list-deleted', 'acr_manifest_deleted_list')
+        g.command('list-deleted-tags', 'acr_manifest_deleted_tags_list')
+        g.command('restore', 'acr_manifest_deleted_restore')
 
-    def _metadata_deprecate_message(self):
-        msg = "This {} has been deprecated and will be removed in future release.".format(self.object_type)
-        msg += " Use '{}' instead.".format(self.redirect)
-        return msg
+    with self.command_group('acr cache', acr_cache_util) as g:
+        g.show_command('show', 'acr_cache_show')
+        g.command('create', 'acr_cache_create')
+        g.command('list', 'acr_cache_list')
+        g.command('delete', 'acr_cache_delete', confirmation=True)
+        g.generic_update_command('update',
+                                 getter_name='acr_cache_update_get',
+                                 setter_name='acr_cache_update_set',
+                                 custom_func_name='acr_cache_update_custom',
+                                 custom_func_type=acr_cache_util,
+                                 client_factory=cf_acr_cache)
 
-    with self.command_group('acr manifest metadata', acr_manifest_util, is_preview=True,
-                            deprecate_info=self.deprecate(redirect="az acr manifest",
-                                                          message_func=_metadata_deprecate_message,
-                                                          hide=True)) as g:
-        g.show_command('show', 'acr_manifest_metadata_show')
-        g.command('list', 'acr_manifest_metadata_list')
-        g.command('update', 'acr_manifest_metadata_update')
+    with self.command_group('acr credential-set', acr_cred_set_util) as g:
+        g.show_command('show', 'acr_cred_set_show')
+        g.command('create', 'acr_cred_set_create')
+        g.command('list', 'acr_cred_set_list')
+        g.command('delete', 'acr_cred_set_delete', confirmation=True)
+        g.generic_update_command('update',
+                                 getter_name='acr_cred_set_update_get',
+                                 setter_name='acr_cred_set_update_set',
+                                 custom_func_name='acr_cred_set_update_custom',
+                                 custom_func_type=acr_cred_set_util,
+                                 client_factory=cf_acr_cred_sets)
 
     with self.command_group('acr webhook', acr_webhook_util) as g:
         g.command('list', 'acr_webhook_list')
@@ -315,6 +341,14 @@ def load_command_table(self, _):
         g.show_command('show', 'acr_config_retention_show')
         g.command('update', 'acr_config_retention_update')
 
+    with self.command_group('acr config soft-delete', acr_policy_util, is_preview=True) as g:
+        g.show_command('show', 'acr_config_soft_delete_show')
+        g.command('update', 'acr_config_soft_delete_update')
+
+    with self.command_group('acr config authentication-as-arm', acr_policy_util, is_preview=True) as g:
+        g.show_command('show', 'acr_config_authentication_as_arm_show')
+        g.command('update', 'acr_config_authentication_as_arm_update')
+
     def _helm_deprecate_message(self):
         msg = "This {} has been deprecated and will be removed in future release.".format(self.object_type)
         msg += " Use '{}' instead.".format(self.redirect)
@@ -340,14 +374,14 @@ def load_command_table(self, _):
     with self.command_group('acr', acr_check_health_util) as g:
         g.command('check-health', 'acr_check_health')
 
-    with self.command_group('acr scope-map', acr_scope_map_util, is_preview=True) as g:
+    with self.command_group('acr scope-map', acr_scope_map_util) as g:
         g.command('create', 'acr_scope_map_create')
         g.command('delete', 'acr_scope_map_delete')
         g.command('update', 'acr_scope_map_update')
         g.show_command('show', 'acr_scope_map_show')
         g.command('list', 'acr_scope_map_list')
 
-    with self.command_group('acr token', acr_token_util, is_preview=True) as g:
+    with self.command_group('acr token', acr_token_util) as g:
         g.command('create', 'acr_token_create')
         g.command('delete', 'acr_token_delete')
         g.command('update', 'acr_token_update')
@@ -406,3 +440,16 @@ def load_command_table(self, _):
                                                           hide=True)) as g:
         g.command('info', 'acr_connected_registry_install_info')
         g.command('renew-credentials', 'acr_connected_registry_install_renew_credentials')
+
+    def _metadata_deprecate_message(self):
+        msg = "This {} has been deprecated and will be removed in future release.".format(self.object_type)
+        msg += " Use '{}' instead.".format(self.redirect)
+        return msg
+
+    with self.command_group('acr manifest metadata', acr_manifest_util, is_preview=True,
+                            deprecate_info=self.deprecate(redirect="az acr manifest",
+                                                          message_func=_metadata_deprecate_message,
+                                                          hide=True)) as g:
+        g.show_command('show', 'acr_manifest_metadata_show')
+        g.command('list', 'acr_manifest_metadata_list')
+        g.command('update', 'acr_manifest_metadata_update')

@@ -51,15 +51,6 @@ def get_auth_management_client(cli_ctx, scope=None, **_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION, subscription_id=subscription_id)
 
 
-def cf_network(cli_ctx):
-    from azure.mgmt.network import NetworkManagementClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.core.profiles import AD_HOC_API_VERSIONS, ResourceType
-    return get_mgmt_service_client(cli_ctx, NetworkManagementClient,
-                                   api_version=AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]
-                                   ['container_network'])
-
-
 def cf_msi(cli_ctx):
     from azure.mgmt.msi import ManagedServiceIdentityClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client

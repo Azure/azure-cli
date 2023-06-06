@@ -19,7 +19,3 @@ docker run --rm \
            -e DEBIAN_FRONTEND=noninteractive \
            $DISTRO_BASE_IMAGE \
            /mnt/repo/scripts/release/debian/build.sh
-
-if [ -d $BUILD_STAGINGDIRECTORY/pypi ]; then
-    rm -rf $BUILD_STAGINGDIRECTORY/pypi
-fi

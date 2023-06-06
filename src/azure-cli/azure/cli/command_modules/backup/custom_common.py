@@ -6,10 +6,13 @@
 
 from azure.cli.command_modules.backup import custom_help
 from azure.cli.command_modules.backup._client_factory import backup_protected_items_cf, \
-    protected_items_cf, backup_protected_items_crr_cf, recovery_points_crr_cf
+    protected_items_cf, backup_protected_items_crr_cf, recovery_points_crr_cf, resource_guard_proxy_cf
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
-from azure.mgmt.recoveryservicesbackup.activestamp.models import RecoveryPointTierStatus, RecoveryPointTierType
+from azure.mgmt.recoveryservicesbackup.activestamp.models import RecoveryPointTierStatus, RecoveryPointTierType, \
+    UnlockDeleteRequest, TieringMode
+from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
 # pylint: disable=import-error
 
 fabric_name = "Azure"
@@ -23,11 +26,18 @@ workload_type_map = {'MSSQL': 'SQLDataBase',
                      'VM': 'VM',
                      'AzureFileShare': 'AzureFileShare'}
 
+workload_bmt_map = {'SQLDataBase': 'AzureWorkload',
+                    'SAPHanaDatabase': 'AzureWorkload',
+                    'VM': 'AzureIaasVM',
+                    'AzureFileShare': 'AzureStorage'}
+
 tier_type_map = {'VaultStandard': 'HardenedRP',
                  'VaultArchive': 'ArchivedRP',
                  'Snapshot': 'InstantRP'}
 
 crr_not_supported_bmt = ["azurestorage", "mab"]
+
+default_resource_guard = "VaultProxy"
 
 
 def show_container(cmd, client, name, resource_group_name, vault_name, backup_management_type=None,
@@ -57,8 +67,10 @@ def show_policy(client, resource_group_name, vault_name, name):
 
 
 def list_policies(client, resource_group_name, vault_name, workload_type=None, backup_management_type=None,
-                  policy_sub_type=None):
+                  policy_sub_type=None, move_to_archive_tier='All'):
     workload_type = _check_map(workload_type, workload_type_map)
+    if workload_type:
+        backup_management_type = workload_bmt_map[workload_type]
     filter_string = custom_help.get_filter_string({
         'backupManagementType': backup_management_type,
         'workloadType': workload_type})
@@ -74,7 +86,24 @@ def list_policies(client, resource_group_name, vault_name, workload_type=None, b
             paged_policies = [policy for policy in paged_policies if (not hasattr(policy.properties, 'policy_type') or
                                                                       policy.properties.policy_type is None or
                                                                       policy.properties.policy_type == 'V1')]
-    return paged_policies
+
+    filtered_paged_policies = []
+    for policy in paged_policies:
+        tiering_policy = None
+        if policy.properties.backup_management_type == "AzureIaasVM":
+            tiering_policy = policy.properties.tiering_policy
+        if policy.properties.backup_management_type == "AzureWorkload":
+            tiering_policy = policy.properties.sub_protection_policy[0].tiering_policy
+        if (move_to_archive_tier in ['Disabled', 'All'] and
+            (tiering_policy is None or
+             tiering_policy['ArchivedRP'].tiering_mode in [TieringMode.INVALID, TieringMode.DO_NOT_TIER])):
+            filtered_paged_policies.append(policy)
+        if (move_to_archive_tier in ['Enabled', 'All'] and
+            (tiering_policy is not None and
+             tiering_policy['ArchivedRP'].tiering_mode in [TieringMode.TIER_RECOMMENDED, TieringMode.TIER_AFTER])):
+            filtered_paged_policies.append(policy)
+
+    return filtered_paged_policies
 
 
 def show_item(cmd, client, resource_group_name, vault_name, container_name, name, backup_management_type=None,
@@ -134,6 +163,32 @@ def list_items(cmd, client, resource_group_name, vault_name, workload_type=None,
                 item.properties.container_name.lower().split(';')[-1] == container_name.lower()]
 
     return paged_items
+
+
+def delete_protected_item(cmd, client, resource_group_name, vault_name, item, tenant_id=None):
+    container_uri = custom_help.get_protection_container_uri_from_id(item.id)
+    item_uri = custom_help.get_protected_item_uri_from_id(item.id)
+    if custom_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name, vault_name, "deleteProtection"):
+        resource_guard_proxy_client = resource_guard_proxy_cf(cmd.cli_ctx)
+        # For Cross Tenant Scenario
+        if tenant_id is not None:
+            resource_guard_proxy_client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                                                  aux_tenants=[tenant_id]).resource_guard_proxy
+            client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                             aux_tenants=[tenant_id]).protected_items
+        # unlock delete
+        resource_guard_operation_request = custom_help.get_resource_guard_operation_request(cmd.cli_ctx,
+                                                                                            resource_group_name,
+                                                                                            vault_name,
+                                                                                            "deleteProtection")
+        resource_guard_proxy_client.unlock_delete(vault_name, resource_group_name, default_resource_guard,
+                                                  UnlockDeleteRequest(resource_guard_operation_requests=[
+                                                      resource_guard_operation_request],
+                                                      resource_to_be_deleted=item.id))
+
+    result = client.delete(vault_name, resource_group_name, fabric_name, container_uri, item_uri,
+                           cls=custom_help.get_pipeline_response)
+    return custom_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
 def list_associated_items_for_policy(client, resource_group_name, vault_name, name, backup_management_type):

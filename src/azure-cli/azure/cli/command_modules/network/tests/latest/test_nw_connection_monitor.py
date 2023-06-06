@@ -15,10 +15,8 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
     def _prepare_vm(self, resource_group, vm):
         vm_create_cmd_tpl = 'vm create -g {rg} --name {vm} ' \
                             '--image UbuntuLTS ' \
-                            '--authentication-type password ' \
-                            '--admin-username deploy ' \
-                            '--admin-password PassPass10!) ' \
                             '--nsg {vm} ' \
+                            '--generate-ssh-keys '\
                             '--nsg-rule None '
         vm_info = self.cmd(vm_create_cmd_tpl.format(rg=resource_group, vm=vm)).get_output_in_json()
 
@@ -58,63 +56,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                  '--protocol Tcp '
                  '--tcp-port 2048 ')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_nw_connection_monitor', location='eastus')
-    @AllowLargeResponse()
-    def test_nw_connection_monitor_v1(self, resource_group, resource_group_location):
-        """
-        This is copied from Azure/azure-cli,
-        src/azure-cli/azure/cli/command_modules/network/tests/latest/test_network_commands.py,
-        test_network_watcher_connection_monitor()
-        """
-        import time
-        self.kwargs.update({
-            'loc': resource_group_location,
-            'vm2': 'vm2',
-            'vm3': 'vm3',
-            'cm': 'cm1'
-        })
-
-        self.cmd('vm create -g {rg} -n {vm2} '
-                 '--image UbuntuLTS '
-                 '--authentication-type password '
-                 '--admin-username deploy '
-                 '--admin-password PassPass10!) '
-                 '--nsg {vm2} '
-                 '--nsg-rule None')
-        self.cmd('vm extension set -g {rg} '
-                 '--vm-name {vm2} '
-                 '-n NetworkWatcherAgentLinux '
-                 '--publisher Microsoft.Azure.NetworkWatcher')
-        self.cmd('vm create -g {rg} -n {vm3} '
-                 '--image UbuntuLTS '
-                 '--authentication-type password '
-                 '--admin-username deploy '
-                 '--admin-password PassPass10!) '
-                 '--nsg {vm3} '
-                 '--nsg-rule None')
-        self.cmd('vm extension set -g {rg} '
-                 '--vm-name {vm3} '
-                 '-n NetworkWatcherAgentLinux '
-                 '--publisher Microsoft.Azure.NetworkWatcher')
-        time.sleep(20)
-        self.cmd('network watcher connection-monitor create '
-                 '-n {cm} '
-                 '--source-resource {vm2} '
-                 '-g {rg} '
-                 '--dest-resource {vm3} '
-                 '--dest-port 80 '
-                 '--tags foo=doo')
-        self.cmd('network watcher connection-monitor list -l {loc}')
-        self.cmd('network watcher connection-monitor show -l {loc} -n {cm}')
-        try:
-            self.cmd('network watcher connection-monitor stop -l {loc} -n {cm}')
-            self.cmd('network watcher connection-monitor start -l {loc} -n {cm}')
-        except CLIError:
-            pass
-        self.cmd('network watcher connection-monitor query -l {loc} -n {cm}')
-        self.cmd('network watcher connection-monitor delete -l {loc} -n {cm}')
-
-    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
+    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='westus')
     @AllowLargeResponse()
     def test_nw_connection_monitor_v2_creation(self, resource_group, resource_group_location):
         # create a V2 connection monitor with --location and TCP configuration
@@ -128,13 +70,16 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                  '--endpoint-dest-name bing '
                  '--endpoint-dest-address bing.com '
                  '--test-config-name DefaultIcmp '
-                 '--protocol Icmp ')
+                 '--protocol Icmp --tags tag=test',
+                 checks=[
+                     self.check('tags', {'tag': 'test'})
+                 ])
 
         self.cmd('network watcher connection-monitor list -l {location}')
         self.cmd('network watcher connection-monitor show -l {location} -n {cmv2}')
         self.cmd('network watcher connection-monitor show -l {location} -n cmv2-01')
 
-    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
+    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='westus')
     @AllowLargeResponse()
     def test_nw_connection_monitor_v2_endpoint(self, resource_group, resource_group_location):
         self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
@@ -352,3 +297,42 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         self.cmd('network watcher connection-monitor output list '
                  '--location {location} '
                  '--connection-monitor {cmv2} ')
+
+    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
+    @AllowLargeResponse()
+    def test_nw_connection_monitor_output_type_as_workspace(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': resource_group_location,
+            'cmv2': 'CMv2-01',
+            'test_group': 'DefaultTestGroup',
+            'workspace_name': self.create_random_name('clitest', 20)
+        })
+
+        vm1_info = self._prepare_vm(resource_group, 'vm1')
+
+        workspace = self.cmd('monitor log-analytics workspace create '
+                             '-g {rg} '
+                             '--location {location} '
+                             '--workspace-name {workspace_name} ').get_output_in_json()
+
+        self.kwargs.update({
+            'vm1_id': vm1_info['id'],
+            'workspace_id': workspace['id']
+        })
+
+        # create a connection monitor v2 with TCP monitoring
+        self.cmd('network watcher connection-monitor create '
+                    '--location {location} '
+                    '--name {cmv2} '
+                    '--endpoint-source-name vm1 '
+                    '--endpoint-source-resource-id {vm1_id} '
+                    '--endpoint-dest-name bing '
+                    '--endpoint-dest-address bing.com '
+                    '--test-config-name DefaultTestConfig '
+                    '--protocol Tcp '
+                    '--tcp-port 2048 '
+                    '--workspace-ids {workspace_id} ', checks=[
+                        self.check('name', '{cmv2}'),
+                        self.check('outputs[0].workspaceSettings.workspaceResourceId', '{workspace_id}')
+                    ])

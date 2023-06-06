@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=no-self-use,no-member,line-too-long,too-few-public-methods,too-many-lines,too-many-arguments,too-many-locals
 
+import json
 import re
 from enum import Enum
 from knack.log import get_logger
@@ -19,6 +20,7 @@ from azure.cli.core.azclierror import (
 )
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType
 
 from azure.mgmt.iothub.models import (IotHubSku,
                                       AccessRights,
@@ -66,9 +68,9 @@ from azure.mgmt.iotcentral.models import (AppSkuInfo,
                                           App)
 from azure.cli.command_modules.iot._constants import SYSTEM_ASSIGNED_IDENTITY
 from azure.cli.command_modules.iot.shared import EndpointType, EncodingFormat, RenewKeyType, AuthenticationType, IdentityType
-from ._client_factory import resource_service_factory
-from ._client_factory import iot_hub_service_factory
-from ._utils import open_certificate, generate_key
+from azure.cli.command_modules.iot._client_factory import resource_service_factory
+from azure.cli.command_modules.iot._client_factory import iot_hub_service_factory
+from azure.cli.command_modules.iot._utils import open_certificate, generate_key
 
 
 logger = get_logger(__name__)
@@ -166,14 +168,11 @@ def iot_dps_policy_create(
     access_policy_rights = _convert_rights_to_access_rights(rights)
     dps_access_policies.append(SharedAccessSignatureAuthorizationRuleAccessRightsDescription(
         key_name=access_policy_name, rights=access_policy_rights, primary_key=primary_key, secondary_key=secondary_key))
-    dps_property = IotDpsPropertiesDescription(iot_hubs=dps.properties.iot_hubs,
-                                               allocation_policy=dps.properties.allocation_policy,
-                                               authorization_policies=dps_access_policies)
-    dps_description = ProvisioningServiceDescription(location=dps.location, properties=dps_property, sku=dps.sku)
+    dps.properties.authorization_policies = dps_access_policies
 
     if no_wait:
-        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description)
-    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description))
+        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps)
+    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps))
     return iot_dps_policy_get(client, dps_name, access_policy_name, resource_group_name)
 
 
@@ -205,14 +204,11 @@ def iot_dps_policy_update(
                 policy.rights = _convert_rights_to_access_rights(rights)
 
     dps = iot_dps_get(client, dps_name, resource_group_name)
-    dps_property = IotDpsPropertiesDescription(iot_hubs=dps.properties.iot_hubs,
-                                               allocation_policy=dps.properties.allocation_policy,
-                                               authorization_policies=dps_access_policies)
-    dps_description = ProvisioningServiceDescription(location=dps.location, properties=dps_property, sku=dps.sku)
+    dps.properties.authorization_policies = dps_access_policies
 
     if no_wait:
-        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description)
-    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description))
+        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps)
+    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps))
     return iot_dps_policy_get(client, dps_name, access_policy_name, resource_group_name)
 
 
@@ -226,14 +222,11 @@ def iot_dps_policy_delete(cmd, client, dps_name, access_policy_name, resource_gr
     updated_policies = [p for p in dps_access_policies if p.key_name.lower() != access_policy_name.lower()]
 
     dps = iot_dps_get(client, dps_name, resource_group_name)
-    dps_property = IotDpsPropertiesDescription(iot_hubs=dps.properties.iot_hubs,
-                                               allocation_policy=dps.properties.allocation_policy,
-                                               authorization_policies=updated_policies)
-    dps_description = ProvisioningServiceDescription(location=dps.location, properties=dps_property, sku=dps.sku)
+    dps.properties.authorization_policies = updated_policies
 
     if no_wait:
-        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description)
-    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description))
+        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps)
+    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps))
     return iot_dps_policy_list(client, dps_name, resource_group_name)
 
 
@@ -286,26 +279,22 @@ def iot_dps_linked_hub_create(
                 raise InvalidArgumentValueError("Please provide a valid IoT Hub connection string.")
 
         hub_client = iot_hub_service_factory(cmd.cli_ctx)
-        location = iot_hub_get(cmd, hub_client, hub_name=hub_name, resource_group_name=hub_resource_group).location
+        try:
+            location = iot_hub_get(cmd, hub_client, hub_name=hub_name, resource_group_name=hub_resource_group).location
+        except CLIError:
+            raise RequiredArgumentMissingError("Please provide the IoT Hub location.")
 
     resource_group_name = _ensure_dps_resource_group_name(client, resource_group_name, dps_name)
-    dps_linked_hubs = []
-    dps_linked_hubs.extend(iot_dps_linked_hub_list(client, dps_name, resource_group_name))
-
-    dps_linked_hubs.append(IotHubDefinitionDescription(connection_string=connection_string,
-                                                       location=location,
-                                                       apply_allocation_policy=apply_allocation_policy,
-                                                       allocation_weight=allocation_weight))
 
     dps = iot_dps_get(client, dps_name, resource_group_name)
-    dps_property = IotDpsPropertiesDescription(iot_hubs=dps_linked_hubs,
-                                               allocation_policy=dps.properties.allocation_policy,
-                                               authorization_policies=dps.properties.authorization_policies)
-    dps_description = ProvisioningServiceDescription(location=dps.location, properties=dps_property, sku=dps.sku)
+    dps.properties.iot_hubs.append(IotHubDefinitionDescription(connection_string=connection_string,
+                                                               location=location,
+                                                               apply_allocation_policy=apply_allocation_policy,
+                                                               allocation_weight=allocation_weight))
 
     if no_wait:
-        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description)
-    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description))
+        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps)
+    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps))
     return iot_dps_linked_hub_list(client, dps_name, resource_group_name)
 
 
@@ -329,14 +318,11 @@ def iot_dps_linked_hub_update(cmd, client, dps_name, linked_hub, resource_group_
                 hub.allocation_weight = allocation_weight
 
     dps = iot_dps_get(client, dps_name, resource_group_name)
-    dps_property = IotDpsPropertiesDescription(iot_hubs=dps_linked_hubs,
-                                               allocation_policy=dps.properties.allocation_policy,
-                                               authorization_policies=dps.properties.authorization_policies)
-    dps_description = ProvisioningServiceDescription(location=dps.location, properties=dps_property, sku=dps.sku)
+    dps.properties.iot_hubs = dps_linked_hubs
 
     if no_wait:
-        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description)
-    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description))
+        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps)
+    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps))
     return iot_dps_linked_hub_get(cmd, client, dps_name, linked_hub, resource_group_name)
 
 
@@ -350,17 +336,14 @@ def iot_dps_linked_hub_delete(cmd, client, dps_name, linked_hub, resource_group_
     dps_linked_hubs.extend(iot_dps_linked_hub_list(client, dps_name, resource_group_name))
     if not _is_linked_hub_existed(dps_linked_hubs, linked_hub):
         raise ResourceNotFoundError("Linked hub {0} doesn't exist.".format(linked_hub))
-    updated_hub = [p for p in dps_linked_hubs if p.name.lower() != linked_hub.lower()]
+    updated_hubs = [p for p in dps_linked_hubs if p.name.lower() != linked_hub.lower()]
 
     dps = iot_dps_get(client, dps_name, resource_group_name)
-    dps_property = IotDpsPropertiesDescription(iot_hubs=updated_hub,
-                                               allocation_policy=dps.properties.allocation_policy,
-                                               authorization_policies=dps.properties.authorization_policies)
-    dps_description = ProvisioningServiceDescription(location=dps.location, properties=dps_property, sku=dps.sku)
+    dps.properties.iot_hubs = updated_hubs
 
     if no_wait:
-        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description)
-    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps_description))
+        return client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps)
+    LongRunningOperation(cmd.cli_ctx)(client.iot_dps_resource.begin_create_or_update(resource_group_name, dps_name, dps))
     return iot_dps_linked_hub_list(client, dps_name, resource_group_name)
 
 
@@ -445,8 +428,11 @@ def iot_hub_certificate_create(client, hub_name, certificate_name, certificate_p
     if not certificate:
         raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
     cert_properties = CertificateProperties(certificate=certificate, is_verified=is_verified)
-    cert_description = CertificateDescription(properties=cert_properties)
-    return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description)
+
+    if AZURE_API_PROFILES["latest"][ResourceType.MGMT_IOTHUB] in client.profile.label:
+        cert_description = CertificateDescription(properties=cert_properties)
+        return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description)
+    return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_properties)
 
 
 def iot_hub_certificate_update(client, hub_name, certificate_name, certificate_path, etag, resource_group_name=None, is_verified=None):
@@ -458,8 +444,11 @@ def iot_hub_certificate_update(client, hub_name, certificate_name, certificate_p
             if not certificate:
                 raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
             cert_properties = CertificateProperties(certificate=certificate, is_verified=is_verified)
-            cert_description = CertificateDescription(properties=cert_properties)
-            return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description, etag)
+
+            if AZURE_API_PROFILES["latest"][ResourceType.MGMT_IOTHUB] in client.profile.label:
+                cert_description = CertificateDescription(properties=cert_properties)
+                return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description, etag)
+            return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_properties, etag)
     raise CLIError("Certificate '{0}' does not exist. Use 'iot hub certificate create' to create a new certificate."
                    .format(certificate_name))
 
@@ -483,6 +472,7 @@ def iot_hub_certificate_verify(client, hub_name, certificate_name, certificate_p
     return client.certificates.verify(resource_group_name, hub_name, certificate_name, etag, certificate_verify_body)
 
 
+# pylint: disable=too-many-statements
 def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                    sku=IotHubSku.s1.value,
                    unit=1,
@@ -505,7 +495,6 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                    fileupload_storage_container_name=None,
                    fileupload_sas_ttl=1,
                    fileupload_storage_authentication_type=None,
-                   fileupload_storage_container_uri=None,
                    fileupload_storage_identity=None,
                    min_tls_version=None,
                    tags=None,
@@ -532,6 +521,13 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
         if fileupload_storage_identity and fileupload_storage_identity != SYSTEM_ASSIGNED_IDENTITY and not user_identities:
             raise ArgumentUsageError('User identity [--mi-user-assigned] must be added in order to use it for file upload')
     location = _ensure_location(cli_ctx, resource_group_name, location)
+
+    if location.lower() == 'qatarcentral' and not enable_data_residency:
+        raise InvalidArgumentValueError(
+            "Data Residency enforcement must be enabled for IoT Hubs created in this region. Please use the '--enforce-data-residency' (--edr) argument "
+            "to enable it. Check command help (-h) for more information on this property's usage and implications."
+        )
+
     sku = IotHubSkuInfo(name=sku, capacity=unit)
 
     event_hub_dic = {}
@@ -553,7 +549,6 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
         connection_string=fileupload_storage_connectionstring if fileupload_storage_connectionstring else '',
         container_name=fileupload_storage_container_name if fileupload_storage_container_name else '',
         authentication_type=fileupload_storage_authentication_type if fileupload_storage_authentication_type else None,
-        container_uri=fileupload_storage_container_uri if fileupload_storage_container_uri else '',
         identity=ManagedIdentity(user_assigned_identity=fileupload_storage_identity) if fileupload_storage_identity else None)
 
     properties = IotHubProperties(event_hub_endpoints=event_hub_dic,
@@ -590,7 +585,7 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
         except CloudError as e:
             raise e
 
-    create = client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub_description, polling=True)
+    create = client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub_description)
     if identity_role and identity_scopes:
         create.add_done_callback(identity_assignment)
     return create
@@ -709,12 +704,12 @@ def update_iot_hub_custom(instance,
 
 def iot_hub_update(client, hub_name, parameters, resource_group_name=None):
     resource_group_name = _ensure_hub_resource_group_name(client, resource_group_name, hub_name)
-    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, parameters, {'IF-MATCH': parameters.etag}, polling=True)
+    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, parameters, {'IF-MATCH': parameters.etag})
 
 
 def iot_hub_delete(client, hub_name, resource_group_name=None):
     resource_group_name = _ensure_hub_resource_group_name(client, resource_group_name, hub_name)
-    return client.iot_hub_resource.begin_delete(resource_group_name, hub_name, polling=True)
+    return client.iot_hub_resource.begin_delete(resource_group_name, hub_name)
 
 
 # pylint: disable=inconsistent-return-statements
@@ -1136,6 +1131,10 @@ def iot_hub_route_update(cmd, client, hub_name, route_name, source_type=None, en
 
 def iot_hub_route_test(cmd, client, hub_name, route_name=None, source_type=None, body=None, app_properties=None,
                        system_properties=None, resource_group_name=None):
+    if app_properties:
+        app_properties = json.loads(app_properties)
+    if system_properties:
+        system_properties = json.loads(system_properties)
     resource_group_name = _ensure_hub_resource_group_name(client, resource_group_name, hub_name)
     route_message = RoutingMessage(
         body=body,
@@ -1197,7 +1196,7 @@ def iot_message_enrichment_list(cmd, client, hub_name, resource_group_name=None)
 
 
 def iot_hub_devicestream_show(cmd, client, hub_name, resource_group_name=None):
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client, ResourceType
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
     resource_group_name = _ensure_hub_resource_group_name(client, resource_group_name, hub_name)
     # DeviceStreams property is still in preview, so until GA we need to use a preview API-version
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_IOTHUB, api_version='2019-07-01-preview')
@@ -1373,7 +1372,7 @@ def iot_central_app_list(client, resource_group_name=None):
 
 
 def iot_central_app_update(client, app_name, parameters, resource_group_name):
-    return client.apps.begin_update(resource_group_name, app_name, parameters)
+    return client.apps.begin_create_or_update(resource_group_name, app_name, parameters)
 
 
 def iot_central_app_assign_identity(client, app_name, system_assigned=False, resource_group_name=None):
@@ -1436,6 +1435,161 @@ def _get_iot_central_app_by_name(client, app_name):
         raise CLIError(
             "No IoT Central application found with name {} in current subscription.".format(app_name))
     return target_app
+
+
+def get_private_link_resource(client, name=None, connection_id=None, resource_group_name=None, group_id=None):
+
+    if resource_group_name and name and group_id:
+        return client.private_links.get(resource_group_name=resource_group_name,
+                                        resource_name=name,
+                                        group_id=group_id)
+    if connection_id:
+        id_list = connection_id.split('/')
+        resource_group_name = id_list[id_list.index('resourceGroups') + 1]
+        name = id_list[id_list.index('iotApps') + 1]
+        group_id = id_list[id_list.index('privateLinkResources') + 1]
+        return client.private_links.get(resource_group_name=resource_group_name,
+                                        resource_name=name,
+                                        group_id=group_id)
+
+    raise RequiredArgumentMissingError(
+        "Must provide private link resource ID or resource name, resource group, and group id.")
+
+
+def list_private_link_resource(client, app_name=None, connection_id=None, resource_group_name=None, source_type=None):
+    if app_name and resource_group_name and source_type:
+        if source_type.lower() != 'microsoft.iotcentral/iotapps':
+            raise InvalidArgumentValueError(
+                "Resource type must be Microsoft.IoTCentral/iotApps")
+    elif connection_id:
+        id_list = connection_id.split('/')
+        if id_list[id_list.index('providers') + 1].lower() != 'microsoft.iotcentral':
+            raise InvalidArgumentValueError(
+                "Type must be Microsoft.IoTCentral/iotApps")
+        resource_group_name = id_list[id_list.index('resourceGroups') + 1]
+        app_name = id_list[id_list.index('iotApps') + 1]
+    else:
+        raise RequiredArgumentMissingError(
+            "Must provide private endpoint connection resource ID or resource name, resource group, and resource type.")
+    return client.private_links.list(resource_group_name, app_name)
+
+
+def show_private_endpoint_connection(client, resource_group_name=None, connection_id=None, account_name=None, private_endpoint_connection_name=None):
+
+    return get_private_endpoint_connection(client=client,
+                                           resource_group_name=resource_group_name,
+                                           connection_id=connection_id,
+                                           account_name=account_name,
+                                           private_endpoint_connection_name=private_endpoint_connection_name,
+                                           return_args=False)
+
+
+def list_private_endpoint_connection(client, resource_group_name=None, connection_id=None, account_name=None):
+    if connection_id:
+        id_list = connection_id.split('/')
+        if id_list[id_list.index('providers') + 1].lower() != 'microsoft.iotcentral':
+            raise InvalidArgumentValueError(
+                "Type must be Microsoft.IoTCentral/iotApps")
+        resource_group_name = id_list[id_list.index('resourceGroups') + 1]
+        account_name = id_list[id_list.index('iotApps') + 1]
+
+    if resource_group_name is None or account_name is None:
+        raise RequiredArgumentMissingError(
+            "Must provide private endpoint connection resource ID or resource name, resource group, and resource type.")
+
+    return client.private_endpoint_connections.list(resource_group_name, account_name)
+
+
+def get_private_endpoint_connection(client, resource_group_name=None, connection_id=None, account_name=None, private_endpoint_connection_name=None, return_args=False):
+
+    if resource_group_name and account_name and private_endpoint_connection_name:
+        output = client.private_endpoint_connections.get(resource_group_name=resource_group_name,
+                                                         resource_name=account_name,
+                                                         private_endpoint_connection_name=private_endpoint_connection_name)
+        if return_args is False:
+            return output
+        return [output, resource_group_name, account_name, private_endpoint_connection_name]
+    if connection_id:
+        id_list = connection_id.split('/')
+        resource_group_name = id_list[id_list.index('resourceGroups') + 1]
+        account_name = id_list[id_list.index('iotApps') + 1]
+        private_endpoint_connection_name = id_list[id_list.index('privateEndpointConnections') + 1]
+        output = client.private_endpoint_connections.get(resource_group_name=resource_group_name,
+                                                         resource_name=account_name,
+                                                         private_endpoint_connection_name=private_endpoint_connection_name)
+        if return_args is False:
+            return output
+        return [output, resource_group_name, account_name, private_endpoint_connection_name]
+    raise RequiredArgumentMissingError(
+        "Account name, resource group, and private endpoint connection name are required unless id is specified.")
+
+
+def _update_private_endpoint_connection_status(client, resource_group_name, account_name, connection_id, private_endpoint_connection_name, is_approved=True, description=None):  # pylint: disable=unused-argument
+    from azure.core.exceptions import HttpResponseError
+    getInfoArr = get_private_endpoint_connection(client,
+                                                 resource_group_name=resource_group_name,
+                                                 connection_id=connection_id,
+                                                 account_name=account_name,
+                                                 private_endpoint_connection_name=private_endpoint_connection_name,
+                                                 return_args=True)
+    private_endpoint_connection = getInfoArr[0]
+    rg = getInfoArr[1]
+    acc_name = getInfoArr[2]
+    pec_name = getInfoArr[3]
+    old_status = private_endpoint_connection.private_link_service_connection_state.status
+    new_status = "Approved" if is_approved else "Rejected"
+    private_endpoint_connection.private_link_service_connection_state.status = new_status
+    private_endpoint_connection.private_link_service_connection_state.description = description
+    try:
+        return client.private_endpoint_connections.begin_create(resource_group_name=rg,
+                                                                resource_name=acc_name,
+                                                                private_endpoint_connection=private_endpoint_connection,
+                                                                private_endpoint_connection_name=pec_name)
+    except HttpResponseError as ex:
+        if ex.response.status_code == 400:
+            if new_status == "Approved" and old_status == "Rejected":
+                raise CLIError(ex.response, "You cannot approve the connection request after rejection. Please create "
+                                            "a new connection for approval.")
+            if new_status == "Approved" and old_status == "Approved":
+                raise CLIError(ex.response, "Your connection is already approved. No need to approve again.")
+        raise ex
+
+
+def approve_private_endpoint_connection(client, resource_group_name=None, account_name=None, private_endpoint_connection_name=None, connection_id=None, description=None):
+    return _update_private_endpoint_connection_status(client,
+                                                      resource_group_name=resource_group_name,
+                                                      account_name=account_name,
+                                                      connection_id=connection_id,
+                                                      private_endpoint_connection_name=private_endpoint_connection_name,
+                                                      description=description)
+
+
+def reject_private_endpoint_connection(client, resource_group_name=None, account_name=None, private_endpoint_connection_name=None, connection_id=None, description=None):
+    return _update_private_endpoint_connection_status(client,
+                                                      resource_group_name=resource_group_name,
+                                                      account_name=account_name,
+                                                      connection_id=connection_id,
+                                                      is_approved=False,
+                                                      private_endpoint_connection_name=private_endpoint_connection_name,
+                                                      description=description)
+
+
+def delete_private_endpoint_connection(client, resource_group_name=None, account_name=None, private_endpoint_connection_name=None, connection_id=None):
+
+    getInfoArr = get_private_endpoint_connection(client,
+                                                 resource_group_name=resource_group_name,
+                                                 connection_id=connection_id,
+                                                 account_name=account_name,
+                                                 private_endpoint_connection_name=private_endpoint_connection_name,
+                                                 return_args=True)
+    rg = getInfoArr[1]
+    acc_name = getInfoArr[2]
+    pec_name = getInfoArr[3]
+    # private_endpoint_connection.private_link_service_connection_state.status = new_status
+    # private_endpoint_connection.private_link_service_connection_state.description = description
+    return client.private_endpoint_connections.begin_delete(resource_group_name=rg,
+                                                            resource_name=acc_name,
+                                                            private_endpoint_connection_name=pec_name)
 
 
 def _process_fileupload_args(

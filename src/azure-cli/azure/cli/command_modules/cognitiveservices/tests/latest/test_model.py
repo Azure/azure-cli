@@ -20,7 +20,7 @@ class CognitiveServicesModelTests(ScenarioTest):
             'sname': sname,
             'kind': 'OpenAI',
             'sku': 'S0',
-            'location': 'westus2'
+            'location': 'SOUTHCENTRALUS'
         })
 
         # test to create cognitive services account

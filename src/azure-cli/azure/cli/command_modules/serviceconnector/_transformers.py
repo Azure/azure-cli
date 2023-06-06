@@ -39,3 +39,37 @@ def transform_linker_properties(result):
     except CLIInternalError:
         pass
     return result
+
+
+def transform_local_linker_properties(result):
+    from azure.core.polling import LROPoller
+    from ._utils import (
+        run_cli_cmd
+    )
+
+    # manually polling if result is a poller
+    if isinstance(result, LROPoller):
+        result = result.result()
+
+    result = todict(result)
+    resource_id = result.get('id')
+    try:
+        output = run_cli_cmd('az connection generate-configuration --id {} -o json'.format(resource_id))
+        result['configurations'] = output.get('configurations')
+    except CLIInternalError:
+        pass
+    return result
+
+
+def transform_validation_result(result):
+    from azure.core.polling import LROPoller
+
+    # manually polling if result is a poller
+    if isinstance(result, LROPoller):
+        result = result.result()
+
+    result = todict(result)
+    try:
+        return result['validationDetail'] or result['additionalProperties']['properties']['validationDetail']
+    except Exception:  # pylint: disable=broad-except
+        return result

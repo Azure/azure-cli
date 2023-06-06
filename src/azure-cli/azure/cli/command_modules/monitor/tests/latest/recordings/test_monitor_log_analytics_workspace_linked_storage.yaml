@@ -13,12 +13,12 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001","name":"cli_test_monitor_workspace_linked_storage000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-12-13T07:14:37Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001","name":"cli_test_monitor_workspace_linked_storage000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-16T10:00:44Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Dec 2021 07:16:34 GMT
+      - Thu, 16 Feb 2023 10:02:37 GMT
       expires:
       - '-1'
       pragma:
@@ -42,8 +42,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"tags": {"clitest": "myron"}, "location": "eastus", "properties": {"sku":
-      {"name": "PerGB2018"}, "retentionInDays": 30, "workspaceCapping": {}}}'
+    body: '{"location": "eastus", "properties": {"retentionInDays": 30, "sku": {"name":
+      "PerGB2018"}}, "tags": {"clitest": "myron"}}'
     headers:
       Accept:
       - application/json
@@ -54,33 +54,35 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '145'
+      - '121'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006?api-version=2021-12-01-preview
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
-        \"9817c2ea-0047-43e6-a989-1fb2364d4dff\",\r\n    \"provisioningState\": \"Creating\",\r\n
-        \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"lastSkuUpdate\":
-        \"Mon, 13 Dec 2021 07:16:40 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
-        \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
-        \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
-        \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
-        \"Tue, 14 Dec 2021 07:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
-        \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
-        \"Enabled\",\r\n    \"createdDate\": \"Mon, 13 Dec 2021 07:16:40 GMT\",\r\n
-        \   \"modifiedDate\": \"Mon, 13 Dec 2021 07:16:40 GMT\"\r\n  },\r\n  \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/microsoft.operationalinsights/workspaces/clitest000006\",\r\n
-        \ \"name\": \"clitest000006\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
-        \ \"location\": \"eastus\",\r\n  \"tags\": {\r\n    \"clitest\": \"myron\"\r\n
-        \ }\r\n}"
+      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\"\
+        : \"d0e6ba4e-09fa-4165-9442-c295795fd9e1\",\r\n    \"provisioningState\":\
+        \ \"Creating\",\r\n    \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n  \
+        \    \"lastSkuUpdate\": \"Thu, 16 Feb 2023 10:02:42 GMT\"\r\n    },\r\n  \
+        \  \"retentionInDays\": 30,\r\n    \"features\": {\r\n      \"legacy\": 0,\r\
+        \n      \"searchVersion\": 1,\r\n      \"enableLogAccessUsingOnlyResourcePermissions\"\
+        : true\r\n    },\r\n    \"workspaceCapping\": {\r\n      \"dailyQuotaGb\"\
+        : -1.0,\r\n      \"quotaNextResetTime\": \"Fri, 17 Feb 2023 06:00:00 GMT\"\
+        ,\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n    },\r\n    \"publicNetworkAccessForIngestion\"\
+        : \"Enabled\",\r\n    \"publicNetworkAccessForQuery\": \"Enabled\",\r\n  \
+        \  \"createdDate\": \"Thu, 16 Feb 2023 10:02:42 GMT\",\r\n    \"modifiedDate\"\
+        : \"Thu, 16 Feb 2023 10:02:42 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/microsoft.operationalinsights/workspaces/clitest000006\"\
+        ,\r\n  \"name\": \"clitest000006\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\"\
+        ,\r\n  \"location\": \"eastus\",\r\n  \"tags\": {\r\n    \"clitest\": \"myron\"\
+        \r\n  }\r\n}"
     headers:
+      access-control-allow-origin:
+      - '*'
       cache-control:
       - no-cache
       content-length:
@@ -88,18 +90,19 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 13 Dec 2021 07:16:41 GMT
+      - Thu, 16 Feb 2023 10:02:44 GMT
       pragma:
       - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       server:
-      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1193'
       x-powered-by:
       - ASP.NET
       - ASP.NET
@@ -120,27 +123,29 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006?api-version=2021-12-01-preview
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
-        \"9817c2ea-0047-43e6-a989-1fb2364d4dff\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"lastSkuUpdate\":
-        \"Mon, 13 Dec 2021 07:16:40 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
-        \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
-        \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
-        \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
-        \"Tue, 14 Dec 2021 07:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
-        \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
-        \"Enabled\",\r\n    \"createdDate\": \"Mon, 13 Dec 2021 07:16:40 GMT\",\r\n
-        \   \"modifiedDate\": \"Mon, 13 Dec 2021 07:16:45 GMT\"\r\n  },\r\n  \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/microsoft.operationalinsights/workspaces/clitest000006\",\r\n
-        \ \"name\": \"clitest000006\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
-        \ \"location\": \"eastus\",\r\n  \"tags\": {\r\n    \"clitest\": \"myron\"\r\n
-        \ }\r\n}"
+      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\"\
+        : \"d0e6ba4e-09fa-4165-9442-c295795fd9e1\",\r\n    \"provisioningState\":\
+        \ \"Succeeded\",\r\n    \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n \
+        \     \"lastSkuUpdate\": \"Thu, 16 Feb 2023 10:02:42 GMT\"\r\n    },\r\n \
+        \   \"retentionInDays\": 30,\r\n    \"features\": {\r\n      \"legacy\": 0,\r\
+        \n      \"searchVersion\": 1,\r\n      \"enableLogAccessUsingOnlyResourcePermissions\"\
+        : true\r\n    },\r\n    \"workspaceCapping\": {\r\n      \"dailyQuotaGb\"\
+        : -1.0,\r\n      \"quotaNextResetTime\": \"Fri, 17 Feb 2023 06:00:00 GMT\"\
+        ,\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n    },\r\n    \"publicNetworkAccessForIngestion\"\
+        : \"Enabled\",\r\n    \"publicNetworkAccessForQuery\": \"Enabled\",\r\n  \
+        \  \"createdDate\": \"Thu, 16 Feb 2023 10:02:42 GMT\",\r\n    \"modifiedDate\"\
+        : \"Thu, 16 Feb 2023 10:02:44 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/microsoft.operationalinsights/workspaces/clitest000006\"\
+        ,\r\n  \"name\": \"clitest000006\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\"\
+        ,\r\n  \"location\": \"eastus\",\r\n  \"tags\": {\r\n    \"clitest\": \"myron\"\
+        \r\n  }\r\n}"
     headers:
+      access-control-allow-origin:
+      - '*'
       cache-control:
       - no-cache
       content-length:
@@ -148,11 +153,12 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 13 Dec 2021 07:17:13 GMT
+      - Thu, 16 Feb 2023 10:03:14 GMT
       pragma:
       - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       server:
-      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -186,16 +192,19 @@ interactions:
       ParameterSetName:
       - --type -g -n --storage-accounts
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/CustomLogs?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"dataSourceType\": \"customlogs\",\r\n
-        \   \"storageAccountIds\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws1000002\"\r\n
-        \   ]\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/CustomLogs\",\r\n
-        \ \"name\": \"customlogs\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/linkedStorageAccounts\"\r\n}"
+      string: "{\r\n  \"properties\": {\r\n    \"dataSourceType\": \"customlogs\"\
+        ,\r\n    \"storageAccountIds\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws1000002\"\
+        \r\n    ]\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/CustomLogs\"\
+        ,\r\n  \"name\": \"customlogs\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/linkedStorageAccounts\"\
+        \r\n}"
     headers:
+      access-control-allow-origin:
+      - '*'
       cache-control:
       - no-cache
       cachecontrol:
@@ -205,13 +214,14 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Dec 2021 07:17:16 GMT
+      - Thu, 16 Feb 2023 10:03:18 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       server:
-      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -224,7 +234,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1192'
+      - '1195'
       x-powered-by:
       - ASP.NET
       - ASP.NET
@@ -245,16 +255,19 @@ interactions:
       ParameterSetName:
       - --type -g -n --storage-accounts
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/CustomLogs?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"dataSourceType\": \"customlogs\",\r\n
-        \   \"storageAccountIds\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws1000002\"\r\n
-        \   ]\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/CustomLogs\",\r\n
-        \ \"name\": \"customlogs\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/linkedStorageAccounts\"\r\n}"
+      string: "{\r\n  \"properties\": {\r\n    \"dataSourceType\": \"customlogs\"\
+        ,\r\n    \"storageAccountIds\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws1000002\"\
+        \r\n    ]\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/CustomLogs\"\
+        ,\r\n  \"name\": \"customlogs\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/linkedStorageAccounts\"\
+        \r\n}"
     headers:
+      access-control-allow-origin:
+      - '*'
       cache-control:
       - no-cache
       cachecontrol:
@@ -264,13 +277,14 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Dec 2021 07:17:16 GMT
+      - Thu, 16 Feb 2023 10:03:20 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       server:
-      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -308,18 +322,21 @@ interactions:
       ParameterSetName:
       - --type -g -n --storage-accounts
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/CustomLogs?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"dataSourceType\": \"customlogs\",\r\n
-        \   \"storageAccountIds\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws1000002\",\r\n
-        \     \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws2000003\",\r\n
-        \     \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws3000004\"\r\n
-        \   ]\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/CustomLogs\",\r\n
-        \ \"name\": \"customlogs\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/linkedStorageAccounts\"\r\n}"
+      string: "{\r\n  \"properties\": {\r\n    \"dataSourceType\": \"customlogs\"\
+        ,\r\n    \"storageAccountIds\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws1000002\"\
+        ,\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws2000003\"\
+        ,\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws3000004\"\
+        \r\n    ]\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/CustomLogs\"\
+        ,\r\n  \"name\": \"customlogs\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/linkedStorageAccounts\"\
+        \r\n}"
     headers:
+      access-control-allow-origin:
+      - '*'
       cache-control:
       - no-cache
       cachecontrol:
@@ -329,13 +346,14 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Dec 2021 07:17:18 GMT
+      - Thu, 16 Feb 2023 10:03:22 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       server:
-      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -348,7 +366,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1197'
       x-powered-by:
       - ASP.NET
       - ASP.NET
@@ -369,18 +387,21 @@ interactions:
       ParameterSetName:
       - --type -g -n --storage-accounts
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/CustomLogs?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"dataSourceType\": \"customlogs\",\r\n
-        \   \"storageAccountIds\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws1000002\",\r\n
-        \     \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws2000003\",\r\n
-        \     \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws3000004\"\r\n
-        \   ]\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/CustomLogs\",\r\n
-        \ \"name\": \"customlogs\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/linkedStorageAccounts\"\r\n}"
+      string: "{\r\n  \"properties\": {\r\n    \"dataSourceType\": \"customlogs\"\
+        ,\r\n    \"storageAccountIds\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws1000002\"\
+        ,\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws2000003\"\
+        ,\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws3000004\"\
+        \r\n    ]\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/CustomLogs\"\
+        ,\r\n  \"name\": \"customlogs\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/linkedStorageAccounts\"\
+        \r\n}"
     headers:
+      access-control-allow-origin:
+      - '*'
       cache-control:
       - no-cache
       cachecontrol:
@@ -390,13 +411,14 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Dec 2021 07:17:19 GMT
+      - Thu, 16 Feb 2023 10:03:23 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       server:
-      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -433,17 +455,20 @@ interactions:
       ParameterSetName:
       - --type -g -n --storage-accounts
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/CustomLogs?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"dataSourceType\": \"customlogs\",\r\n
-        \   \"storageAccountIds\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws2000003\",\r\n
-        \     \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws3000004\"\r\n
-        \   ]\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/CustomLogs\",\r\n
-        \ \"name\": \"customlogs\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/linkedStorageAccounts\"\r\n}"
+      string: "{\r\n  \"properties\": {\r\n    \"dataSourceType\": \"customlogs\"\
+        ,\r\n    \"storageAccountIds\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws2000003\"\
+        ,\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws3000004\"\
+        \r\n    ]\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/CustomLogs\"\
+        ,\r\n  \"name\": \"customlogs\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/linkedStorageAccounts\"\
+        \r\n}"
     headers:
+      access-control-allow-origin:
+      - '*'
       cache-control:
       - no-cache
       cachecontrol:
@@ -453,13 +478,14 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Dec 2021 07:17:20 GMT
+      - Thu, 16 Feb 2023 10:03:25 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       server:
-      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -493,17 +519,20 @@ interactions:
       ParameterSetName:
       - --type -g -n
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/CustomLogs?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"dataSourceType\": \"customlogs\",\r\n
-        \   \"storageAccountIds\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws2000003\",\r\n
-        \     \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws3000004\"\r\n
-        \   ]\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/CustomLogs\",\r\n
-        \ \"name\": \"customlogs\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/linkedStorageAccounts\"\r\n}"
+      string: "{\r\n  \"properties\": {\r\n    \"dataSourceType\": \"customlogs\"\
+        ,\r\n    \"storageAccountIds\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws2000003\"\
+        ,\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws3000004\"\
+        \r\n    ]\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/CustomLogs\"\
+        ,\r\n  \"name\": \"customlogs\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/linkedStorageAccounts\"\
+        \r\n}"
     headers:
+      access-control-allow-origin:
+      - '*'
       cache-control:
       - no-cache
       cachecontrol:
@@ -513,13 +542,14 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Dec 2021 07:17:22 GMT
+      - Thu, 16 Feb 2023 10:03:28 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       server:
-      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -551,12 +581,12 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.45.0 azsdk-python-azure-mgmt-resource/22.0.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001","name":"cli_test_monitor_workspace_linked_storage000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-12-13T07:14:37Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001","name":"cli_test_monitor_workspace_linked_storage000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2023-02-16T10:00:44Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -565,7 +595,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Dec 2021 07:17:23 GMT
+      - Thu, 16 Feb 2023 10:03:28 GMT
       expires:
       - '-1'
       pragma:
@@ -580,8 +610,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"tags": {"clitest": "myron"}, "location": "eastus", "properties": {"sku":
-      {"name": "PerGB2018"}, "retentionInDays": 30, "workspaceCapping": {}}}'
+    body: '{"location": "eastus", "properties": {"retentionInDays": 30, "sku": {"name":
+      "PerGB2018"}}, "tags": {"clitest": "myron"}}'
     headers:
       Accept:
       - application/json
@@ -592,33 +622,35 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '145'
+      - '121'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000007?api-version=2021-12-01-preview
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
-        \"e13d17ab-1a8f-4865-8d33-54b984782a4d\",\r\n    \"provisioningState\": \"Creating\",\r\n
-        \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"lastSkuUpdate\":
-        \"Mon, 13 Dec 2021 07:17:32 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
-        \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
-        \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
-        \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
-        \"Mon, 13 Dec 2021 13:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
-        \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
-        \"Enabled\",\r\n    \"createdDate\": \"Mon, 13 Dec 2021 07:17:32 GMT\",\r\n
-        \   \"modifiedDate\": \"Mon, 13 Dec 2021 07:17:32 GMT\"\r\n  },\r\n  \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/microsoft.operationalinsights/workspaces/clitest000007\",\r\n
-        \ \"name\": \"clitest000007\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
-        \ \"location\": \"eastus\",\r\n  \"tags\": {\r\n    \"clitest\": \"myron\"\r\n
-        \ }\r\n}"
+      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\"\
+        : \"cc98f35e-30fd-417d-a2a8-298e5650449d\",\r\n    \"provisioningState\":\
+        \ \"Creating\",\r\n    \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n  \
+        \    \"lastSkuUpdate\": \"Thu, 16 Feb 2023 10:03:36 GMT\"\r\n    },\r\n  \
+        \  \"retentionInDays\": 30,\r\n    \"features\": {\r\n      \"legacy\": 0,\r\
+        \n      \"searchVersion\": 1,\r\n      \"enableLogAccessUsingOnlyResourcePermissions\"\
+        : true\r\n    },\r\n    \"workspaceCapping\": {\r\n      \"dailyQuotaGb\"\
+        : -1.0,\r\n      \"quotaNextResetTime\": \"Fri, 17 Feb 2023 08:00:00 GMT\"\
+        ,\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n    },\r\n    \"publicNetworkAccessForIngestion\"\
+        : \"Enabled\",\r\n    \"publicNetworkAccessForQuery\": \"Enabled\",\r\n  \
+        \  \"createdDate\": \"Thu, 16 Feb 2023 10:03:36 GMT\",\r\n    \"modifiedDate\"\
+        : \"Thu, 16 Feb 2023 10:03:36 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/microsoft.operationalinsights/workspaces/clitest000007\"\
+        ,\r\n  \"name\": \"clitest000007\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\"\
+        ,\r\n  \"location\": \"eastus\",\r\n  \"tags\": {\r\n    \"clitest\": \"myron\"\
+        \r\n  }\r\n}"
     headers:
+      access-control-allow-origin:
+      - '*'
       cache-control:
       - no-cache
       content-length:
@@ -626,18 +658,19 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 13 Dec 2021 07:17:34 GMT
+      - Thu, 16 Feb 2023 10:03:37 GMT
       pragma:
       - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       server:
-      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1195'
       x-powered-by:
       - ASP.NET
       - ASP.NET
@@ -658,27 +691,29 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000007?api-version=2021-12-01-preview
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
-        \"e13d17ab-1a8f-4865-8d33-54b984782a4d\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"lastSkuUpdate\":
-        \"Mon, 13 Dec 2021 07:17:32 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
-        \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
-        \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
-        \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
-        \"Mon, 13 Dec 2021 13:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
-        \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
-        \"Enabled\",\r\n    \"createdDate\": \"Mon, 13 Dec 2021 07:17:32 GMT\",\r\n
-        \   \"modifiedDate\": \"Mon, 13 Dec 2021 07:17:34 GMT\"\r\n  },\r\n  \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/microsoft.operationalinsights/workspaces/clitest000007\",\r\n
-        \ \"name\": \"clitest000007\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
-        \ \"location\": \"eastus\",\r\n  \"tags\": {\r\n    \"clitest\": \"myron\"\r\n
-        \ }\r\n}"
+      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\"\
+        : \"cc98f35e-30fd-417d-a2a8-298e5650449d\",\r\n    \"provisioningState\":\
+        \ \"Succeeded\",\r\n    \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n \
+        \     \"lastSkuUpdate\": \"Thu, 16 Feb 2023 10:03:36 GMT\"\r\n    },\r\n \
+        \   \"retentionInDays\": 30,\r\n    \"features\": {\r\n      \"legacy\": 0,\r\
+        \n      \"searchVersion\": 1,\r\n      \"enableLogAccessUsingOnlyResourcePermissions\"\
+        : true\r\n    },\r\n    \"workspaceCapping\": {\r\n      \"dailyQuotaGb\"\
+        : -1.0,\r\n      \"quotaNextResetTime\": \"Fri, 17 Feb 2023 08:00:00 GMT\"\
+        ,\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n    },\r\n    \"publicNetworkAccessForIngestion\"\
+        : \"Enabled\",\r\n    \"publicNetworkAccessForQuery\": \"Enabled\",\r\n  \
+        \  \"createdDate\": \"Thu, 16 Feb 2023 10:03:36 GMT\",\r\n    \"modifiedDate\"\
+        : \"Thu, 16 Feb 2023 10:03:37 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/microsoft.operationalinsights/workspaces/clitest000007\"\
+        ,\r\n  \"name\": \"clitest000007\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\"\
+        ,\r\n  \"location\": \"eastus\",\r\n  \"tags\": {\r\n    \"clitest\": \"myron\"\
+        \r\n  }\r\n}"
     headers:
+      access-control-allow-origin:
+      - '*'
       cache-control:
       - no-cache
       content-length:
@@ -686,11 +721,12 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 13 Dec 2021 07:18:04 GMT
+      - Thu, 16 Feb 2023 10:04:09 GMT
       pragma:
       - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       server:
-      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -724,16 +760,19 @@ interactions:
       ParameterSetName:
       - --type -g -n --storage-accounts
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/AzureWatson?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"dataSourceType\": \"azurewatson\",\r\n
-        \   \"storageAccountIds\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws1000002\"\r\n
-        \   ]\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/AzureWatson\",\r\n
-        \ \"name\": \"azurewatson\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/linkedStorageAccounts\"\r\n}"
+      string: "{\r\n  \"properties\": {\r\n    \"dataSourceType\": \"azurewatson\"\
+        ,\r\n    \"storageAccountIds\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws1000002\"\
+        \r\n    ]\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/AzureWatson\"\
+        ,\r\n  \"name\": \"azurewatson\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces/linkedStorageAccounts\"\
+        \r\n}"
     headers:
+      access-control-allow-origin:
+      - '*'
       cache-control:
       - no-cache
       cachecontrol:
@@ -743,13 +782,14 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Dec 2021 07:18:06 GMT
+      - Thu, 16 Feb 2023 10:04:12 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       server:
-      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -762,7 +802,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
       x-powered-by:
       - ASP.NET
       - ASP.NET
@@ -783,22 +823,25 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"value\": [\r\n    {\r\n      \"properties\": {\r\n        \"dataSourceType\":
-        \"azurewatson\",\r\n        \"storageAccountIds\": [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws1000002\"\r\n
-        \       ]\r\n      },\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/azurewatson\",\r\n
-        \     \"name\": \"azurewatson\",\r\n      \"type\": \"Microsoft.OperationalInsights/workspaces/linkedStorageAccounts\"\r\n
-        \   },\r\n    {\r\n      \"properties\": {\r\n        \"dataSourceType\":
-        \"customlogs\",\r\n        \"storageAccountIds\": [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws2000003\",\r\n
-        \         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws3000004\"\r\n
-        \       ]\r\n      },\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/customlogs\",\r\n
-        \     \"name\": \"customlogs\",\r\n      \"type\": \"Microsoft.OperationalInsights/workspaces/linkedStorageAccounts\"\r\n
-        \   }\r\n  ]\r\n}"
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"properties\": {\r\n       \
+        \ \"dataSourceType\": \"azurewatson\",\r\n        \"storageAccountIds\": [\r\
+        \n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws1000002\"\
+        \r\n        ]\r\n      },\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/azurewatson\"\
+        ,\r\n      \"name\": \"azurewatson\",\r\n      \"type\": \"Microsoft.OperationalInsights/workspaces/linkedStorageAccounts\"\
+        \r\n    },\r\n    {\r\n      \"properties\": {\r\n        \"dataSourceType\"\
+        : \"customlogs\",\r\n        \"storageAccountIds\": [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws2000003\"\
+        ,\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws3000004\"\
+        \r\n        ]\r\n      },\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/customlogs\"\
+        ,\r\n      \"name\": \"customlogs\",\r\n      \"type\": \"Microsoft.OperationalInsights/workspaces/linkedStorageAccounts\"\
+        \r\n    }\r\n  ]\r\n}"
     headers:
+      access-control-allow-origin:
+      - '*'
       cache-control:
       - no-cache
       cachecontrol:
@@ -808,13 +851,14 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Dec 2021 07:18:07 GMT
+      - Thu, 16 Feb 2023 10:04:14 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       server:
-      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -848,13 +892,15 @@ interactions:
       ParameterSetName:
       - --type -g -n -y
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/AzureWatson?api-version=2020-08-01
   response:
     body:
       string: ''
     headers:
+      access-control-allow-origin:
+      - '*'
       cache-control:
       - no-cache
       cachecontrol:
@@ -862,13 +908,14 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 13 Dec 2021 07:18:08 GMT
+      - Thu, 16 Feb 2023 10:04:17 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       server:
-      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -877,7 +924,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14998'
       x-powered-by:
       - ASP.NET
       - ASP.NET
@@ -898,18 +945,21 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.45.0 (AAZ) azsdk-python-core/1.24.0 Python/3.10.9 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"value\": [\r\n    {\r\n      \"properties\": {\r\n        \"dataSourceType\":
-        \"customlogs\",\r\n        \"storageAccountIds\": [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws2000003\",\r\n
-        \         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws3000004\"\r\n
-        \       ]\r\n      },\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/customlogs\",\r\n
-        \     \"name\": \"customlogs\",\r\n      \"type\": \"Microsoft.OperationalInsights/workspaces/linkedStorageAccounts\"\r\n
-        \   }\r\n  ]\r\n}"
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"properties\": {\r\n       \
+        \ \"dataSourceType\": \"customlogs\",\r\n        \"storageAccountIds\": [\r\
+        \n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws2000003\"\
+        ,\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.Storage/storageAccounts/saws3000004\"\
+        \r\n        ]\r\n      },\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_linked_storage000001/providers/Microsoft.OperationalInsights/workspaces/clitest000006/linkedStorageAccounts/customlogs\"\
+        ,\r\n      \"name\": \"customlogs\",\r\n      \"type\": \"Microsoft.OperationalInsights/workspaces/linkedStorageAccounts\"\
+        \r\n    }\r\n  ]\r\n}"
     headers:
+      access-control-allow-origin:
+      - '*'
       cache-control:
       - no-cache
       cachecontrol:
@@ -919,13 +969,14 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 13 Dec 2021 07:18:09 GMT
+      - Thu, 16 Feb 2023 10:04:18 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      request-context:
+      - appId=cid-v1:e6336c63-aab2-45f0-996a-e5dbab2a1508
       server:
-      - Microsoft-IIS/10.0
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains

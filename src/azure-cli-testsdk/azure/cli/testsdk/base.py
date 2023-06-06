@@ -24,7 +24,7 @@ from .patches import (patch_load_cached_subscriptions, patch_main_exception_hand
                       patch_progress_controller, patch_get_current_system_username)
 from .exceptions import CliExecutionError
 from .utilities import (find_recording_dir, StorageAccountKeyReplacer, GraphClientPasswordReplacer,
-                        AADAuthRequestFilter)
+                        MSGraphClientPasswordReplacer, AADAuthRequestFilter)
 from .reverse_dependency import get_dummy_cli
 
 logger = logging.getLogger('azure.cli.testsdk')
@@ -81,12 +81,15 @@ class CheckerMixin(object):
 
 class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
     def __init__(self, method_name, config_file=None, recording_name=None,
-                 recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None):
-        self.cli_ctx = get_dummy_cli()
+                 recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None,
+                 random_config_dir=False):
+        self.cli_ctx = get_dummy_cli(random_config_dir=random_config_dir)
+        self.random_config_dir = random_config_dir
         self.name_replacer = GeneralNameReplacer()
         self.kwargs = {}
         self.test_guid_count = 0
-        self._processors_to_reset = [StorageAccountKeyReplacer(), GraphClientPasswordReplacer()]
+        self._processors_to_reset = [StorageAccountKeyReplacer(), GraphClientPasswordReplacer(),
+                                     MSGraphClientPasswordReplacer()]
         default_recording_processors = [
             SubscriptionRecordingProcessor(MOCKED_SUBSCRIPTION_ID),
             AADAuthRequestFilter(),
@@ -136,6 +139,9 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
     def tearDown(self):
         for processor in self._processors_to_reset:
             processor.reset()
+        if self.random_config_dir:
+            from azure.cli.core.util import rmtree_with_retry
+            rmtree_with_retry(self.cli_ctx.config.config_dir)
         super(ScenarioTest, self).tearDown()
 
     def create_random_name(self, prefix, length):
@@ -180,7 +186,8 @@ class LocalContextScenarioTest(ScenarioTest):
     def __init__(self, method_name, config_file=None, recording_name=None, recording_processors=None,
                  replay_processors=None, recording_patches=None, replay_patches=None, working_dir=None):
         super(LocalContextScenarioTest, self).__init__(method_name, config_file, recording_name, recording_processors,
-                                                       replay_processors, recording_patches, replay_patches)
+                                                       replay_processors, recording_patches, replay_patches,
+                                                       random_config_dir=True)
         if self.in_recording:
             self.recording_patches.append(patch_get_current_system_username)
         else:
@@ -195,12 +202,12 @@ class LocalContextScenarioTest(ScenarioTest):
         super(LocalContextScenarioTest, self).setUp()
         self.cli_ctx.local_context.initialize()
         os.chdir(self.working_dir)
-        self.cmd('local-context on')
+        self.cmd('config param-persist on')
 
     def tearDown(self):
         super(LocalContextScenarioTest, self).tearDown()
-        self.cmd('local-context off')
-        self.cmd('local-context delete --all --purge -y')
+        self.cmd('config param-persist off')
+        self.cmd('config param-persist delete --all --purge -y')
         os.chdir(self.original_working_dir)
         if os.path.exists(self.working_dir):
             import shutil

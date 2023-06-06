@@ -298,6 +298,43 @@ examples:
     text: az appconfig revision list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --fields key value last_modified
 """
 
+helps['appconfig replica'] = """
+type: group
+short-summary: Manage replicas of an App Configuration.
+"""
+
+helps['appconfig replica list'] = """
+type: command
+short-summary: List replicas of an App Configuration.
+examples:
+  - name: List replicas of an App Configuration.
+    text: az appconfig replica list --store-name MyAppConfiguration
+"""
+
+helps['appconfig replica show'] = """
+type: command
+short-summary: Show details of a replica of an App Configuration.
+examples:
+  - name: Show details of a replica of an App Configuration.
+    text: az appconfig replica show --store-name MyAppConfiguration --name MyReplicaName
+"""
+
+helps['appconfig replica create'] = """
+type: command
+short-summary: Create a new replica of an App Configuration.
+examples:
+  - name: Create a new replica of an App Configuration at a location.
+    text: az appconfig replica create --store-name MyAppConfiguration --name MyReplicaName --location westus
+"""
+
+helps['appconfig replica delete'] = """
+type: command
+short-summary: Delete a replica of an App Configuration.
+examples:
+  - name: Delete a replica of an App Configuration.
+    text: az appconfig replica delete --store-name MyAppConfiguration --name MyReplicaName
+"""
+
 helps['appconfig show'] = """
 type: command
 short-summary: Show properties of an App Configuration.
@@ -493,6 +530,24 @@ helps['appconfig feature filter add'] = """
           text:
             az appconfig feature filter add -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters ArrayParam=[1,2,3]
     """
+
+helps['appconfig feature filter update'] = """
+  type: command
+  short-summary: Update a filter in a feature flag.
+  examples:
+      - name: Update the filter for feature 'color' with label MyLabel with name 'MyFilter' and 2 parameters.
+        text:
+          az appconfig feature filter update -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters Name=\\"Value\\" Name2=\\"Value2\\"
+      - name: Update the filter at index 2 (zero-based index) for feature 'color' with label MyLabel with name 'MyFilter' and 2 parameters.
+        text:
+          az appconfig feature filter update -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters Name=\\"Value\\" Name2=\\"Value2\\" --index 2
+      - name: Update a filter for feature 'color' with label MyLabel and filter name 'MyFilter' with no parameters
+        text:
+          az appconfig feature filter update -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter
+      - name: Update the filter for feature 'color' with label MyLabel with name 'MyFilter' and array parameters.
+        text:
+          az appconfig feature filter update -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters ArrayParam=[1,2,3]
+  """
 
 helps['appconfig feature filter delete'] = """
     type: command

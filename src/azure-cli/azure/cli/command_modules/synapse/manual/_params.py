@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=too-many-statements, line-too-long, too-many-branches
+# pylint: disable=too-many-statements, line-too-long, too-many-branches, option-length-too-long
 from knack.arguments import CLIArgumentType
 from argcomplete import FilesCompleter
 from azure.mgmt.synapse.models import TransparentDataEncryptionStatus, SecurityAlertPolicyState, BlobAuditingPolicyState
@@ -101,6 +101,7 @@ def load_arguments(self, _):
             c.argument('root_folder', arg_group=repository_arg_group, help='The name of the folder to the location of your Azure synapse JSON resources are imported. Default is /')
             c.argument('project_name', arg_group=repository_arg_group, help='The project name to which you are connecting.')
             c.argument('tenant_id', arg_group=repository_arg_group, help='The tenant id used to connect Azure devops')
+            c.argument('last_commit_id', arg_group=repository_arg_group, help='The last commit ID.')
 
     with self.argument_context('synapse workspace create') as c:
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
@@ -116,6 +117,8 @@ def load_arguments(self, _):
         c.argument('prevent_data_exfiltration', arg_type=get_three_state_flag(),
                    help='The flag indicates whether enable data exfiltration.', options_list=['--prevent-exfiltration', '--prevent-data-exfiltration'])
         c.argument('key_identifier', help='The customer-managed key used to encrypt all data at rest in the workspace. Key identifier should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.', options_list=['--key-identifier', '--cmk'])
+        c.argument('managed_resource_group_name', options_list=['--managed-rg-name'],
+                   help=' Workspace managed resource group. The resource group name uniquely identifies the resource group within the user subscriptionId.')
 
     with self.argument_context('synapse workspace check-name') as c:
         c.argument('name', arg_type=name_type, help='The name you wanted to check.')
@@ -139,9 +142,10 @@ def load_arguments(self, _):
     with self.argument_context('synapse spark pool create') as c:
         # Node
         c.argument('node_count', type=int, arg_group='Node', help='The number of node.')
-        c.argument('node_size_family', arg_group='Node', help='The node size family.')
-        c.argument('node_size', arg_group='Node', arg_type=get_enum_type(['Small', 'Medium', 'Large']),
-                   help='The node size.')
+        c.argument('node_size_family', arg_group='Node', arg_type=get_enum_type(['None', 'MemoryOptimized', 'HardwareAcceleratedFPGA', 'HardwareAcceleratedGPU']),
+                   help='The kind of nodes that the Big Data pool provides')
+        c.argument('node_size', arg_group='Node', arg_type=get_enum_type(['None', 'Small', 'Medium', 'Large', 'XLarge', 'XXLarge', 'XXXLarge']),
+                   help='The level of compute power that each node in the Big Data pool has..')
 
         # AutoScale
         c.argument('enable_auto_scale', arg_type=get_three_state_flag(), arg_group='AutoScale',
@@ -168,16 +172,23 @@ def load_arguments(self, _):
         # Spark config file
         c.argument('spark_config_file_path', arg_group='Environment Configuration', help='Absolute path of Spark pool properties configuration file.')
 
+        # Dynamic executor allocation
+        c.argument('enable_dynamic_executor_allocation', arg_type=get_three_state_flag(), arg_group='DynamicExecutor',
+                   options_list=['--enable-dynamic-exec'], help='Indicates whether Dynamic Executor Allocation is enabled or not.')
+        c.argument('max_executors', type=int, arg_group='DynamicExecutor', help='The maximum number of executors alloted.')
+        c.argument('min_executors', type=int, arg_group='DynamicExecutor', help='The minimum number of executors alloted.')
+
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('synapse spark pool update') as c:
         c.argument('tags', arg_type=tags_type)
         # Node
         c.argument('node_count', type=int, arg_group='Node', help='The number of node.')
-        c.argument('node_size_family', arg_group='Node', help='The node size family.')
+        c.argument('node_size_family', arg_group='Node', arg_type=get_enum_type(['None', 'MemoryOptimized', 'HardwareAcceleratedFPGA', 'HardwareAcceleratedGPU']),
+                   help='The kind of nodes that the Big Data pool provides')
 
-        c.argument('node_size', arg_group='Node', arg_type=get_enum_type(['Small', 'Medium', 'Large']),
-                   help='The node size.')
+        c.argument('node_size', arg_group='Node', arg_type=get_enum_type(['None', 'Small', 'Medium', 'Large', 'XLarge', 'XXLarge', 'XXXLarge']),
+                   help='The level of compute power that each node in the Big Data pool has..')
         # AutoScale
         c.argument('enable_auto_scale', arg_type=get_three_state_flag(), arg_group='AutoScale',
                    help='The flag of enabling auto scale.')
@@ -201,6 +212,12 @@ def load_arguments(self, _):
 
         # Spark config file
         c.argument('spark_config_file_path', arg_group='Environment Configuration', help='Absolute path of Spark pool properties configuration file.')
+
+        # Dynamic executor allocation
+        c.argument('enable_dynamic_executor_allocation', arg_type=get_three_state_flag(), arg_group='DynamicExecutor',
+                   options_list=['--enable-dynamic-exec'], help='Indicates whether Dynamic Executor Allocation is enabled or not.')
+        c.argument('max_executors', type=int, arg_group='DynamicExecutor', help='The maximum number of executors alloted.')
+        c.argument('min_executors', type=int, arg_group='DynamicExecutor', help='The minimum number of executors alloted.')
 
     # synapse sql pool
     with self.argument_context('synapse sql pool') as c:
@@ -226,6 +243,8 @@ def load_arguments(self, _):
                    arg_group=storage_arg_group,
                    help='The Storage Account Type.',
                    arg_type=get_enum_type(['GRS', 'LRS']))
+        c.argument('collation',
+                   help='Collation defines the rules that sort and compare data, and cannot be changed after SQL pool creation. The default collation is "SQL_Latin1_General_CP1_CI_AS".')
 
     with self.argument_context('synapse sql pool update') as c:
         c.argument('sku_name', options_list=['--performance-level'], help='The performance level.')
@@ -1098,3 +1117,43 @@ def load_arguments(self, _):
         c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
         c.argument('output_folder', type=str, help='The name of the output folder')
         c.argument('script_name', arg_type=name_type, help='The name of the KQL script.')
+
+    for scope in ['enable', 'disable']:
+        with self.argument_context('synapse ad-only-auth ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
+            c.argument('resource_group_name', resource_group_name_type)
+
+    # synapse link connections
+    with self.argument_context('synapse link-connection list') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+
+    for scope in ['create', 'update']:
+        with self.argument_context('synapse link-connection ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type)
+            c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+            c.argument('definition_file', arg_type=definition_file_arg_type)
+
+    for scope in ['show', 'delete', 'get-status', 'start', 'stop']:
+        with self.argument_context('synapse link-connection ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type)
+            c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+
+    with self.argument_context('synapse link-connection list-link-tables') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+
+    with self.argument_context('synapse link-connection edit-link-tables') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+        c.argument('definition_file', arg_type=definition_file_arg_type, options_list=['--file', '-f'], type=shell_safe_json_parse,
+                   help='The Edit link-tables file path, The file format can be viewed using --help.')
+
+    with self.argument_context('synapse link-connection get-link-tables-status') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+        c.argument('max_segment_count', help='Max segment count to query table status.')
+        c.argument('continuation_token', help='Continuation token to query table status.')
+    with self.argument_context('synapse link-connection update-landing-zone-credential') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('link_connection_name', arg_type=name_type, help='The link connection name.')
+        c.argument('sas_token', help='Value of secure string.')

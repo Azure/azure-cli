@@ -38,6 +38,8 @@ for ext in $output; do
     fi
 done
 
+pip list -v
+
 az self-test --debug
 if [ $? != 0 ]
 then

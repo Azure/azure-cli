@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-ARG PYTHON_VERSION="3.10.3"
+ARG PYTHON_VERSION="3.10"
 
-FROM python:${PYTHON_VERSION}-alpine3.15
+FROM python:${PYTHON_VERSION}-alpine
 
 ARG CLI_VERSION
 
@@ -34,6 +34,8 @@ LABEL maintainer="Microsoft" \
 # pip wheel - required for CLI packaging
 # jmespath-terminal - we include jpterm as a useful tool
 # libintl and icu-libs - required by azure devops artifact (az extension add --name azure-devops)
+
+# We don't use openssl (3.0) for now. We only install it so that users can use it.
 RUN apk add --no-cache bash openssh ca-certificates jq curl openssl perl git zip \
  && apk add --no-cache --virtual .build-deps gcc make openssl-dev libffi-dev musl-dev linux-headers \
  && apk add --no-cache libintl icu-libs libc6-compat \
@@ -50,7 +52,7 @@ COPY . /azure-cli
 
 # 1. Build packages and store in tmp dir
 # 2. Install the cli and the other command modules that weren't included
-RUN ./scripts/install_full.sh \
+RUN ./scripts/install_full.sh && python ./scripts/trim_sdk.py \
  && cat /azure-cli/az.completion > ~/.bashrc \
  && runDeps="$( \
     scanelf --needed --nobanner --recursive /usr/local \

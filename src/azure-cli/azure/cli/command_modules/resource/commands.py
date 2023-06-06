@@ -16,7 +16,7 @@ from azure.cli.core.commands.arm import handle_template_based_exception
 from azure.cli.command_modules.resource._client_factory import (
     cf_resource_groups, cf_providers, cf_features, cf_feature_registrations, cf_tags, cf_deployments,
     cf_deployment_operations, cf_policy_definitions, cf_policy_set_definitions, cf_policy_exemptions, cf_resource_links,
-    cf_resource_deploymentscripts, cf_resource_managedapplications, cf_resource_managedappdefinitions, cf_management_groups, cf_management_groups_mixin, cf_management_group_subscriptions, cf_management_group_entities, cf_hierarchy_settings, cf_resource_templatespecs)
+    cf_resource_deploymentscripts, cf_resource_managedapplications, cf_resource_managedappdefinitions, cf_management_groups, cf_management_groups_mixin, cf_management_group_subscriptions, cf_management_group_entities, cf_hierarchy_settings, cf_resource_templatespecs, cf_resource_resourcemanagementprivatelinks, cf_resource_privatelinkassociations)
 from azure.cli.command_modules.resource._validators import (
     process_deployment_create_namespace, process_ts_create_or_update_namespace, _validate_template_spec, _validate_template_spec_out,
     process_assign_identity_namespace, process_assignment_create_namespace)
@@ -42,6 +42,18 @@ resource_managementgroups_entities_sdk = CliCommandType(
     operations_tmpl='azure.mgmt.managementgroups.operations#EntitiesOperations.{}',
     client_factory=cf_management_group_entities,
     exception_handler=managementgroups_exception_handler
+)
+
+resource_resourcemanagementprivatelink_sdk = CliCommandType(
+    operations_tmpl='azure.mgmt.resource.privatelinks.operations#ResourceManagementPrivateLinkOperations.{}',
+    client_factory=cf_resource_resourcemanagementprivatelinks,
+    resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS
+)
+
+resource_privatelinksassociation_sdk = CliCommandType(
+    operations_tmpl='azure.mgmt.resource.privatelinks.operations#PrivateLinkAssociationOperations.{}',
+    client_factory=cf_resource_privatelinkassociations,
+    resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS
 )
 
 
@@ -168,13 +180,13 @@ def load_command_table(self, _):
     resource_managedapp_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.resource.managedapplications.operations#ApplicationsOperations.{}',
         client_factory=cf_resource_managedapplications,
-        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
+        resource_type=ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS
     )
 
     resource_managedapp_def_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.resource.managedapplications.operations#ApplicationDefinitionsOperations.{}',
         client_factory=cf_resource_managedappdefinitions,
-        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
+        resource_type=ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS
     )
 
     resource_managementgroups_mixin_sdk = CliCommandType(
@@ -233,7 +245,7 @@ def load_command_table(self, _):
 
     with self.command_group('resource', resource_custom, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.custom_command('create', 'create_resource')
-        g.custom_command('delete', 'delete_resource')
+        g.custom_command('delete', 'delete_resource', supports_no_wait=True)
         g.custom_show_command('show', 'show_resource')
         g.custom_command('list', 'list_resources', table_transformer=transform_resource_list)
         g.custom_command('tag', 'tag_resource')
@@ -241,6 +253,7 @@ def load_command_table(self, _):
         g.custom_command('invoke-action', 'invoke_resource_action', transform=DeploymentOutputLongRunningOperation(self.cli_ctx))
         g.generic_update_command('update', getter_name='show_resource', setter_name='update_resource',
                                  client_factory=None)
+        g.custom_command('patch', 'patch_resource')
         g.wait_command('wait', getter_name='show_resource')
 
     with self.command_group('resource lock', resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
@@ -465,13 +478,13 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_resource_links')
         g.custom_command('update', 'update_resource_link')
 
-    with self.command_group('managedapp', resource_managedapp_sdk, min_api='2017-05-10', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+    with self.command_group('managedapp', resource_managedapp_sdk, min_api='2017-05-10', resource_type=ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS) as g:
         g.custom_command('create', 'create_application')
         g.command('delete', 'begin_delete')
         g.custom_show_command('show', 'show_application')
         g.custom_command('list', 'list_applications')
 
-    with self.command_group('managedapp definition', resource_managedapp_def_sdk, min_api='2017-05-10', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+    with self.command_group('managedapp definition', resource_managedapp_def_sdk, min_api='2017-05-10', resource_type=ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS) as g:
         g.custom_command('create', 'create_or_update_applicationdefinition')
         g.custom_command('update', 'create_or_update_applicationdefinition')
         g.command('delete', 'begin_delete')
@@ -528,7 +541,22 @@ def load_command_table(self, _):
         g.custom_command('uninstall', 'uninstall_bicep_cli')
         g.custom_command('upgrade', 'upgrade_bicep_cli')
         g.custom_command('build', 'build_bicep_file')
+        g.custom_command('format', 'format_bicep_file')
         g.custom_command('decompile', 'decompile_bicep_file')
+        g.custom_command('restore', 'restore_bicep_file')
         g.custom_command('publish', 'publish_bicep_file')
         g.custom_command('version', 'show_bicep_cli_version')
         g.custom_command('list-versions', 'list_bicep_cli_versions')
+        g.custom_command('generate-params', 'generate_params_file')
+
+    with self.command_group('resourcemanagement private-link', resource_resourcemanagementprivatelink_sdk, resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS) as g:
+        g.custom_command('create', 'create_resourcemanager_privatelink')
+        g.custom_show_command('show', 'get_resourcemanager_privatelink')
+        g.custom_command('list', 'list_resourcemanager_privatelink')
+        g.custom_command('delete', 'delete_resourcemanager_privatelink', confirmation=True)
+
+    with self.command_group('private-link association', resource_privatelinksassociation_sdk, resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS) as g:
+        g.custom_command('create', 'create_private_link_association')
+        g.custom_show_command('show', 'get_private_link_association')
+        g.custom_command('list', 'list_private_link_association')
+        g.custom_command('delete', 'delete_private_link_association', confirmation=True)

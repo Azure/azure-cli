@@ -245,7 +245,8 @@ def load_command_table(self, _):
     with self.command_group('cdn edge-node', cdn_edge_sdk) as g:
         g.command('list', 'list')
 
-    with self.command_group('cdn waf policy', cdn_waf_policy_sdk, is_preview=True) as g:
+    with self.command_group('cdn waf policy', cdn_waf_policy_sdk, is_preview=True,
+                            deprecate_info=self.deprecate(hide=False)) as g:
         g.show_command('show', 'get')
         g.command('list', 'list')
         g.custom_command('set', 'set_waf_policy', client_factory=cf_waf_policy)

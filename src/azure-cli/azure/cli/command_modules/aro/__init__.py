@@ -9,7 +9,6 @@ from azure.cli.core import AzCommandsLoader, ModExtensionSuppress
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.aro._client_factory import cf_aro  # pylint: disable=unused-import
-
 from azure.cli.command_modules.aro._help import helps  # pylint: disable=unused-import
 
 
@@ -29,6 +28,17 @@ class AroCommandsLoader(AzCommandsLoader):
                          resource_type=ResourceType.MGMT_ARO)
 
     def load_command_table(self, args):
+        from azure.cli.core.aaz import load_aaz_command_table
+        try:
+            from . import aaz
+        except ImportError:
+            aaz = None
+        if aaz:
+            load_aaz_command_table(
+                loader=self,
+                aaz_pkg_name=aaz.__name__,
+                args=args
+            )
         load_command_table(self, args)
         return self.command_table
 

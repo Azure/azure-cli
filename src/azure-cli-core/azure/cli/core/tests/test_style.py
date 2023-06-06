@@ -31,6 +31,7 @@ class TestStyle(unittest.TestCase):
             (Style.ERROR, "Bright Red: Error message indicator\n"),
             (Style.SUCCESS, "Bright Green: Success message indicator\n"),
             (Style.WARNING, "Bright Yellow: Warning message indicator\n"),
+            ('\x1b[4m', "Underline text\n"),
         ]
         formatted = format_styled_text(styled_text)
         excepted = """\x1b[0mWhite: Primary text color
@@ -41,6 +42,7 @@ class TestStyle(unittest.TestCase):
 \x1b[91mBright Red: Error message indicator
 \x1b[92mBright Green: Success message indicator
 \x1b[93mBright Yellow: Warning message indicator
+\x1b[4mUnderline text
 \x1b[0m"""
         self.assertEqual(formatted, excepted)
 

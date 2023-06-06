@@ -14,7 +14,7 @@ from azure.mgmt.web.models import SkuDescription
 
 from ._constants import (NETCORE_RUNTIME_NAME, NODE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, STATIC_RUNTIME_NAME,
                          PYTHON_RUNTIME_NAME, LINUX_SKU_DEFAULT, OS_DEFAULT, DOTNET_RUNTIME_NAME,
-                         DOTNET_TARGET_FRAMEWORK_REGEX, GENERATE_RANDOM_APP_NAMES)
+                         DOTNET_TARGET_FRAMEWORK_REGEX, GENERATE_RANDOM_APP_NAMES, DOTNET_REFERENCES_DIR_IN_ZIP)
 from .utils import get_resource_if_exists
 
 logger = get_logger(__name__)
@@ -63,6 +63,14 @@ def zip_contents_from_dir(dirPath, lang):
                     absname = os.path.abspath(os.path.join(dirname, filename))
                     arcname = absname[len(abs_src) + 1:]
                     zf.write(absname, arcname)
+
+        if lang.lower() == NETCORE_RUNTIME_NAME:
+            from xml.etree.ElementTree import ParseError
+            from zipfile import BadZipFile, LargeZipFile
+            try:
+                zip_dotnet_project_references(abs_src, "{}".format(zip_file_path))
+            except (OSError, ValueError, TypeError, ParseError, BadZipFile, LargeZipFile):
+                logger.warning("Analysing and bundling dotnet project references have failed.")
     except IOError as e:
         if e.errno == 13:
             raise CLIError('Insufficient permissions to create a zip in current directory. '
@@ -364,9 +372,12 @@ def set_language(src_dir, html=False):
     return lang_details.get('language')
 
 
-def detect_os_form_src(src_dir, html=False):
-    lang_details = get_lang_from_content(src_dir, html)
-    language = lang_details.get('language')
+def detect_os_from_src(src_dir, html=False, runtime=None):
+    from .custom import _StackRuntimeHelper
+    if runtime:
+        language = runtime.split(_StackRuntimeHelper.DEFAULT_DELIMETER)[0]
+    else:
+        language = get_lang_from_content(src_dir, html).get('language')
     return "Linux" if language is not None and language.lower() == NODE_RUNTIME_NAME \
         or language.lower() == PYTHON_RUNTIME_NAME else OS_DEFAULT
 
@@ -463,3 +474,136 @@ def generate_default_app_name(cmd):
     if not generated_name:
         raise CLIError("Unable to generate a default name for webapp. Please specify webapp name using --name flag")
     return generated_name
+
+
+# region Add the project references for dotnet webapp in zip archive
+# Get the .csproj path for the main project
+def _get_dotnet_main_project_csproj(dirPath):
+    file_list = os.listdir(dirPath)
+    ll = [x for x in file_list if x.endswith('.csproj')]
+    if len(ll) == 1:
+        csproj_path = os.path.join(dirPath, ll[0])
+    else:
+        raise Exception('{} should contain only one .csproj file'.format(dirPath))
+
+    return csproj_path
+
+
+# List the project references path in a .csproj file
+def _get_dotnet_project_references(csproj_path):
+    import xml.etree.ElementTree as ET
+
+    abs_references = []
+
+    # find ProjectReference in csproj
+    tree = ET.parse(csproj_path)
+    item_groups = [item for item in tree.findall(
+        "ItemGroup") if item.find('ProjectReference') is not None]
+    project_references = []
+    for i in item_groups:
+        project_references += [project for project in i if project.tag ==
+                               'ProjectReference']
+
+    # List the absolute path for each references
+    for project in project_references:
+        include = project.attrib['Include']
+        if (include is not None and include.endswith('.csproj')):
+            abs_references.append(include)
+
+    return abs_references
+
+
+# List the missing project references because of transitive dependencies
+def _get_dotnet_transitive_missing_references(current_references):
+    result_references = list(current_references)
+    newReference = set(current_references)
+
+    while any(newReference):
+        reference = newReference.pop()
+        abs_references = _get_dotnet_project_references(reference)
+        for suggested_reference in abs_references:
+            if suggested_reference not in result_references:
+                result_references.append(suggested_reference)
+                newReference.add(suggested_reference)
+
+    return list(set(result_references) - set(current_references))
+
+
+# Append dotnet references in a zip file according to a list of absolute references
+def _append_dotnet_references(dirPath, abs_references, zip_file_path):
+    # dictionary with key[str]=project reference path, value[str]=new project reference
+    replace_dict = {}
+
+    with zipfile.ZipFile(zip_file_path, "a", zipfile.ZIP_DEFLATED) as tmp_zf:
+        for include in abs_references:
+            abs_include = os.path.abspath(os.path.join(dirPath, include))
+            dirname_include = os.path.dirname(abs_include)
+            basename_dir_include = os.path.basename(dirname_include)
+            csproj_include = os.path.join(
+                DOTNET_REFERENCES_DIR_IN_ZIP, basename_dir_include, abs_include[len(dirname_include) + 1:])
+
+            # Copy project references (excluding obj, bin folders)
+            for dirname, subdirs, files in os.walk(dirname_include):
+                subdirs[:] = [d for d in subdirs if d not in ['obj', 'bin']]
+                for filename in files:
+                    absname = os.path.abspath(os.path.join(dirname, filename))
+                    arcname = os.path.join(
+                        DOTNET_REFERENCES_DIR_IN_ZIP, basename_dir_include, absname[len(dirname_include) + 1:])
+                    tmp_zf.write(absname, arcname)
+
+            # backup project reference .csproj and prepare for replacing
+            tmp_zf.write(abs_include, csproj_include + ".bak")
+            replace_dict[include] = csproj_include
+
+    return replace_dict
+
+
+# Zip all local project references needed to compile the dotnet webapp
+def zip_dotnet_project_references(dirPath, zip_file_path):
+    # Get csproj path
+    csproj_path = _get_dotnet_main_project_csproj(dirPath)
+
+    # Absolute .csproj references
+    abs_references = _get_dotnet_project_references(csproj_path)
+
+    if any(abs_references):
+        tmp_zip_file_path = "{}.tmp".format(zip_file_path)
+
+        # Step 1: init .zip.tmp
+        with zipfile.ZipFile(tmp_zip_file_path, "w", zipfile.ZIP_DEFLATED) as tmp_zf:
+            tmp_zf.mkdir(DOTNET_REFERENCES_DIR_IN_ZIP)
+
+        # Step 2: append webapp project references to .zip.tmp + compute new webapp .csproj
+        replace_dict = _append_dotnet_references(dirPath, abs_references, tmp_zip_file_path)
+
+        with open(csproj_path, "r", encoding="utf-8-sig") as csproj_file:
+            csproj_content = csproj_file.read()
+            new_csproj_content = str(csproj_content)
+
+            for include in replace_dict:
+                new_csproj_content = str(new_csproj_content).replace(include, replace_dict[include])
+
+        # Step 3: append transitive project references to .zip.tmp
+        transitives_references = _get_dotnet_transitive_missing_references(abs_references)
+        if any(transitives_references):
+            _append_dotnet_references(dirPath, transitives_references, tmp_zip_file_path)
+
+        # Step 4: copy the content from the original .zip archive to the .zip.tmp archive
+        with zipfile.ZipFile(tmp_zip_file_path, "a", zipfile.ZIP_DEFLATED) as tmp_zf:
+            # Backup main project .csproj
+            tmp_zf.write(
+                csproj_path, csproj_path[len(dirPath) + 1:] + ".bak")
+            # New main project .csproj
+            tmp_zf.writestr(csproj_path[len(dirPath) + 1:], new_csproj_content)
+            # Copy each original .zip file excluding the .csproj
+            with zipfile.ZipFile('{}'.format(zip_file_path), "r", zipfile.ZIP_DEFLATED) as original_zf:
+                for original_info in original_zf.infolist():
+                    if not original_info.filename.endswith('.csproj'):
+                        with original_zf.open(original_info.filename) as original_file:
+                            content = original_file.read()
+                            tmp_zf.writestr(original_info.filename, content)
+
+        # Step 5: remove original .zip and rename de .zip.tmp
+        os.remove(zip_file_path)
+        os.rename(tmp_zip_file_path, zip_file_path)
+# endregion

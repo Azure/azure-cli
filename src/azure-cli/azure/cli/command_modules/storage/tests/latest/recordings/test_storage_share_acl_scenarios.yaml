@@ -15,12 +15,13 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - AZURECLI/2.33.1 azsdk-python-azure-mgmt-storage/19.1.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.42.0 azsdk-python-azure-mgmt-storage/21.0.0 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2021-08-01&$expand=kerb
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2022-09-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2022-02-23T03:37:57.0552662Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-02-23T03:37:57.0552662Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2022-11-18T06:27:34.1620733Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2022-11-18T06:27:34.1620733Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
@@ -29,7 +30,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 23 Feb 2022 03:38:19 GMT
+      - Fri, 18 Nov 2022 06:27:54 GMT
       expires:
       - '-1'
       pragma:
@@ -45,23 +46,32 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11996'
+      - '11999'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share create
       Connection:
       - keep-alive
       Content-Length:
       - '0'
+      ParameterSetName:
+      - -n --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
+      - AZURECLI/2.42.0 azsdk-python-storage-file-share/12.10.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Wed, 23 Feb 2022 03:38:20 GMT
+      - Fri, 18 Nov 2022 06:27:55 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: PUT
     uri: https://clitest000002.file.core.windows.net/share000003?restype=share
   response:
@@ -71,29 +81,38 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 23 Feb 2022 03:38:21 GMT
+      - Fri, 18 Nov 2022 06:27:54 GMT
       etag:
-      - '"0x8D9F67DF08C90B8"'
+      - '"0x8DAC92E0766076F"'
       last-modified:
-      - Wed, 23 Feb 2022 03:38:21 GMT
+      - Fri, 18 Nov 2022 06:27:55 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 201
       message: Created
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy list
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --share-name --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
+      - AZURECLI/2.42.0 azsdk-python-storage-file-share/12.10.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Wed, 23 Feb 2022 03:38:21 GMT
+      - Fri, 18 Nov 2022 06:27:55 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.file.core.windows.net/share000003?restype=share&comp=acl
   response:
@@ -104,31 +123,40 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Wed, 23 Feb 2022 03:38:22 GMT
+      - Fri, 18 Nov 2022 06:27:55 GMT
       etag:
-      - '"0x8D9F67DF08C90B8"'
+      - '"0x8DAC92E0766076F"'
       last-modified:
-      - Wed, 23 Feb 2022 03:38:21 GMT
+      - Fri, 18 Nov 2022 06:27:55 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy create
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --share-name -n --permission --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
+      - AZURECLI/2.42.0 azsdk-python-storage-file-share/12.10.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Wed, 23 Feb 2022 03:38:22 GMT
+      - Fri, 18 Nov 2022 06:27:56 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.file.core.windows.net/share000003?restype=share&comp=acl
   response:
@@ -139,17 +167,17 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Wed, 23 Feb 2022 03:38:23 GMT
+      - Fri, 18 Nov 2022 06:27:55 GMT
       etag:
-      - '"0x8D9F67DF08C90B8"'
+      - '"0x8DAC92E0766076F"'
       last-modified:
-      - Wed, 23 Feb 2022 03:38:21 GMT
+      - Fri, 18 Nov 2022 06:27:55 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
@@ -158,16 +186,27 @@ interactions:
 
       <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy create
       Connection:
       - keep-alive
       Content-Length:
       - '184'
+      Content-Type:
+      - application/xml
+      ParameterSetName:
+      - --share-name -n --permission --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
+      - AZURECLI/2.42.0 azsdk-python-storage-file-share/12.10.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Wed, 23 Feb 2022 03:38:23 GMT
+      - Fri, 18 Nov 2022 06:27:56 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: PUT
     uri: https://clitest000002.file.core.windows.net/share000003?restype=share&comp=acl
   response:
@@ -177,29 +216,38 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 23 Feb 2022 03:38:23 GMT
+      - Fri, 18 Nov 2022 06:27:56 GMT
       etag:
-      - '"0x8D9F67DF234B126"'
+      - '"0x8DAC92E07E9EAF8"'
       last-modified:
-      - Wed, 23 Feb 2022 03:38:24 GMT
+      - Fri, 18 Nov 2022 06:27:56 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy create
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --share-name -n --start --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
+      - AZURECLI/2.42.0 azsdk-python-storage-file-share/12.10.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Wed, 23 Feb 2022 03:38:24 GMT
+      - Fri, 18 Nov 2022 06:27:56 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.file.core.windows.net/share000003?restype=share&comp=acl
   response:
@@ -209,35 +257,46 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Wed, 23 Feb 2022 03:38:25 GMT
+      - Fri, 18 Nov 2022 06:27:56 GMT
       etag:
-      - '"0x8D9F67DF234B126"'
+      - '"0x8DAC92E07E9EAF8"'
       last-modified:
-      - Wed, 23 Feb 2022 03:38:24 GMT
+      - Fri, 18 Nov 2022 06:27:56 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy create
       Connection:
       - keep-alive
       Content-Length:
-      - '296'
+      - '299'
+      Content-Type:
+      - application/xml
+      ParameterSetName:
+      - --share-name -n --start --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
+      - AZURECLI/2.42.0 azsdk-python-storage-file-share/12.10.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Wed, 23 Feb 2022 03:38:25 GMT
+      - Fri, 18 Nov 2022 06:27:56 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: PUT
     uri: https://clitest000002.file.core.windows.net/share000003?restype=share&comp=acl
   response:
@@ -247,29 +306,38 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 23 Feb 2022 03:38:25 GMT
+      - Fri, 18 Nov 2022 06:27:56 GMT
       etag:
-      - '"0x8D9F67DF336B8CE"'
+      - '"0x8DAC92E083910DE"'
       last-modified:
-      - Wed, 23 Feb 2022 03:38:26 GMT
+      - Fri, 18 Nov 2022 06:27:56 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy create
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --share-name -n --expiry --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
+      - AZURECLI/2.42.0 azsdk-python-storage-file-share/12.10.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Wed, 23 Feb 2022 03:38:26 GMT
+      - Fri, 18 Nov 2022 06:27:57 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.file.core.windows.net/share000003?restype=share&comp=acl
   response:
@@ -279,35 +347,47 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Wed, 23 Feb 2022 03:38:26 GMT
+      - Fri, 18 Nov 2022 06:27:57 GMT
       etag:
-      - '"0x8D9F67DF336B8CE"'
+      - '"0x8DAC92E083910DE"'
       last-modified:
-      - Wed, 23 Feb 2022 03:38:26 GMT
+      - Fri, 18 Nov 2022 06:27:56 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Permission
+      /></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00Z</Expiry></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy create
       Connection:
       - keep-alive
       Content-Length:
-      - '413'
+      - '430'
+      Content-Type:
+      - application/xml
+      ParameterSetName:
+      - --share-name -n --expiry --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
+      - AZURECLI/2.42.0 azsdk-python-storage-file-share/12.10.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Wed, 23 Feb 2022 03:38:27 GMT
+      - Fri, 18 Nov 2022 06:27:57 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: PUT
     uri: https://clitest000002.file.core.windows.net/share000003?restype=share&comp=acl
   response:
@@ -317,29 +397,38 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 23 Feb 2022 03:38:27 GMT
+      - Fri, 18 Nov 2022 06:27:57 GMT
       etag:
-      - '"0x8D9F67DF42C6641"'
+      - '"0x8DAC92E08918428"'
       last-modified:
-      - Wed, 23 Feb 2022 03:38:27 GMT
+      - Fri, 18 Nov 2022 06:27:57 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy create
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --share-name -n --permission --start --expiry --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
+      - AZURECLI/2.42.0 azsdk-python-storage-file-share/12.10.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Wed, 23 Feb 2022 03:38:27 GMT
+      - Fri, 18 Nov 2022 06:27:57 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.file.core.windows.net/share000003?restype=share&comp=acl
   response:
@@ -349,35 +438,48 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Wed, 23 Feb 2022 03:38:28 GMT
+      - Fri, 18 Nov 2022 06:27:57 GMT
       etag:
-      - '"0x8D9F67DF42C6641"'
+      - '"0x8DAC92E08918428"'
       last-modified:
-      - Wed, 23 Feb 2022 03:38:27 GMT
+      - Fri, 18 Nov 2022 06:27:57 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00Z</Start><Expiry>2016-05-01T00:00Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>l</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Permission
+      /></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00Z</Expiry><Permission
+      /></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>2016-05-01T00:00:00Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy create
       Connection:
       - keep-alive
       Content-Length:
-      - '591'
+      - '625'
+      Content-Type:
+      - application/xml
+      ParameterSetName:
+      - --share-name -n --permission --start --expiry --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
+      - AZURECLI/2.42.0 azsdk-python-storage-file-share/12.10.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Wed, 23 Feb 2022 03:38:28 GMT
+      - Fri, 18 Nov 2022 06:27:57 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: PUT
     uri: https://clitest000002.file.core.windows.net/share000003?restype=share&comp=acl
   response:
@@ -387,29 +489,38 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 23 Feb 2022 03:38:29 GMT
+      - Fri, 18 Nov 2022 06:27:58 GMT
       etag:
-      - '"0x8D9F67DF51D3260"'
+      - '"0x8DAC92E08D9CD31"'
       last-modified:
-      - Wed, 23 Feb 2022 03:38:29 GMT
+      - Fri, 18 Nov 2022 06:27:58 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy list
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --share-name --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
+      - AZURECLI/2.42.0 azsdk-python-storage-file-share/12.10.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Wed, 23 Feb 2022 03:38:29 GMT
+      - Fri, 18 Nov 2022 06:27:58 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.file.core.windows.net/share000003?restype=share&comp=acl
   response:
@@ -419,31 +530,40 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Wed, 23 Feb 2022 03:38:30 GMT
+      - Fri, 18 Nov 2022 06:27:57 GMT
       etag:
-      - '"0x8D9F67DF51D3260"'
+      - '"0x8DAC92E08D9CD31"'
       last-modified:
-      - Wed, 23 Feb 2022 03:38:29 GMT
+      - Fri, 18 Nov 2022 06:27:58 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy show
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --share-name -n --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
+      - AZURECLI/2.42.0 azsdk-python-storage-file-share/12.10.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Wed, 23 Feb 2022 03:38:30 GMT
+      - Fri, 18 Nov 2022 06:27:58 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.file.core.windows.net/share000003?restype=share&comp=acl
   response:
@@ -453,31 +573,40 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Wed, 23 Feb 2022 03:38:31 GMT
+      - Fri, 18 Nov 2022 06:27:58 GMT
       etag:
-      - '"0x8D9F67DF51D3260"'
+      - '"0x8DAC92E08D9CD31"'
       last-modified:
-      - Wed, 23 Feb 2022 03:38:29 GMT
+      - Fri, 18 Nov 2022 06:27:58 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy show
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --share-name -n --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
+      - AZURECLI/2.42.0 azsdk-python-storage-file-share/12.10.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Wed, 23 Feb 2022 03:38:31 GMT
+      - Fri, 18 Nov 2022 06:27:58 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.file.core.windows.net/share000003?restype=share&comp=acl
   response:
@@ -487,31 +616,40 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Wed, 23 Feb 2022 03:38:32 GMT
+      - Fri, 18 Nov 2022 06:27:58 GMT
       etag:
-      - '"0x8D9F67DF51D3260"'
+      - '"0x8DAC92E08D9CD31"'
       last-modified:
-      - Wed, 23 Feb 2022 03:38:29 GMT
+      - Fri, 18 Nov 2022 06:27:58 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy show
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --share-name -n --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
+      - AZURECLI/2.42.0 azsdk-python-storage-file-share/12.10.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Wed, 23 Feb 2022 03:38:32 GMT
+      - Fri, 18 Nov 2022 06:27:59 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.file.core.windows.net/share000003?restype=share&comp=acl
   response:
@@ -521,31 +659,40 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Wed, 23 Feb 2022 03:38:33 GMT
+      - Fri, 18 Nov 2022 06:27:59 GMT
       etag:
-      - '"0x8D9F67DF51D3260"'
+      - '"0x8DAC92E08D9CD31"'
       last-modified:
-      - Wed, 23 Feb 2022 03:38:29 GMT
+      - Fri, 18 Nov 2022 06:27:58 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy show
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --share-name -n --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
+      - AZURECLI/2.42.0 azsdk-python-storage-file-share/12.10.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Wed, 23 Feb 2022 03:38:34 GMT
+      - Fri, 18 Nov 2022 06:27:59 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.file.core.windows.net/share000003?restype=share&comp=acl
   response:
@@ -555,31 +702,40 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Wed, 23 Feb 2022 03:38:35 GMT
+      - Fri, 18 Nov 2022 06:27:59 GMT
       etag:
-      - '"0x8D9F67DF51D3260"'
+      - '"0x8DAC92E08D9CD31"'
       last-modified:
-      - Wed, 23 Feb 2022 03:38:29 GMT
+      - Fri, 18 Nov 2022 06:27:58 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy update
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --share-name -n --permission --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
+      - AZURECLI/2.42.0 azsdk-python-storage-file-share/12.10.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Wed, 23 Feb 2022 03:38:35 GMT
+      - Fri, 18 Nov 2022 06:28:00 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.file.core.windows.net/share000003?restype=share&comp=acl
   response:
@@ -589,35 +745,48 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Wed, 23 Feb 2022 03:38:36 GMT
+      - Fri, 18 Nov 2022 06:28:00 GMT
       etag:
-      - '"0x8D9F67DF51D3260"'
+      - '"0x8DAC92E08D9CD31"'
       last-modified:
-      - Wed, 23 Feb 2022 03:38:29 GMT
+      - Fri, 18 Nov 2022 06:27:58 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>2016-05-01T00:00:00Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+      <SignedIdentifiers><SignedIdentifier><Id>test1</Id><AccessPolicy><Permission>r</Permission></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Permission
+      /></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00Z</Expiry><Permission
+      /></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>2016-05-01T00:00:00Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy update
       Connection:
       - keep-alive
       Content-Length:
-      - '597'
+      - '625'
+      Content-Type:
+      - application/xml
+      ParameterSetName:
+      - --share-name -n --permission --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
+      - AZURECLI/2.42.0 azsdk-python-storage-file-share/12.10.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Wed, 23 Feb 2022 03:38:36 GMT
+      - Fri, 18 Nov 2022 06:28:00 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: PUT
     uri: https://clitest000002.file.core.windows.net/share000003?restype=share&comp=acl
   response:
@@ -627,29 +796,38 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 23 Feb 2022 03:38:36 GMT
+      - Fri, 18 Nov 2022 06:28:00 GMT
       etag:
-      - '"0x8D9F67DF9CB637A"'
+      - '"0x8DAC92E0A603421"'
       last-modified:
-      - Wed, 23 Feb 2022 03:38:37 GMT
+      - Fri, 18 Nov 2022 06:28:00 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy show
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --share-name -n --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
+      - AZURECLI/2.42.0 azsdk-python-storage-file-share/12.10.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Wed, 23 Feb 2022 03:38:37 GMT
+      - Fri, 18 Nov 2022 06:28:00 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.file.core.windows.net/share000003?restype=share&comp=acl
   response:
@@ -659,31 +837,40 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Wed, 23 Feb 2022 03:38:38 GMT
+      - Fri, 18 Nov 2022 06:28:00 GMT
       etag:
-      - '"0x8D9F67DF9CB637A"'
+      - '"0x8DAC92E0A603421"'
       last-modified:
-      - Wed, 23 Feb 2022 03:38:37 GMT
+      - Fri, 18 Nov 2022 06:28:00 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy delete
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --share-name -n --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
+      - AZURECLI/2.42.0 azsdk-python-storage-file-share/12.10.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Wed, 23 Feb 2022 03:38:38 GMT
+      - Fri, 18 Nov 2022 06:28:01 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.file.core.windows.net/share000003?restype=share&comp=acl
   response:
@@ -693,35 +880,48 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Wed, 23 Feb 2022 03:38:39 GMT
+      - Fri, 18 Nov 2022 06:28:00 GMT
       etag:
-      - '"0x8D9F67DF9CB637A"'
+      - '"0x8DAC92E0A603421"'
       last-modified:
-      - Wed, 23 Feb 2022 03:38:37 GMT
+      - Fri, 18 Nov 2022 06:28:00 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <SignedIdentifiers><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00Z</Expiry></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>2016-05-01T00:00:00Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+      <SignedIdentifiers><SignedIdentifier><Id>test2</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Permission
+      /></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test3</Id><AccessPolicy><Expiry>2018-01-01T00:00:00Z</Expiry><Permission
+      /></AccessPolicy></SignedIdentifier><SignedIdentifier><Id>test4</Id><AccessPolicy><Start>2016-01-01T00:00:00Z</Start><Expiry>2016-05-01T00:00:00Z</Expiry><Permission>rwdl</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy delete
       Connection:
       - keep-alive
       Content-Length:
-      - '491'
+      - '519'
+      Content-Type:
+      - application/xml
+      ParameterSetName:
+      - --share-name -n --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
+      - AZURECLI/2.42.0 azsdk-python-storage-file-share/12.10.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Wed, 23 Feb 2022 03:38:39 GMT
+      - Fri, 18 Nov 2022 06:28:01 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: PUT
     uri: https://clitest000002.file.core.windows.net/share000003?restype=share&comp=acl
   response:
@@ -731,29 +931,38 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 23 Feb 2022 03:38:39 GMT
+      - Fri, 18 Nov 2022 06:28:00 GMT
       etag:
-      - '"0x8D9F67DFB7B1DAA"'
+      - '"0x8DAC92E0AE6B58C"'
       last-modified:
-      - Wed, 23 Feb 2022 03:38:40 GMT
+      - Fri, 18 Nov 2022 06:28:01 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK
 - request:
     body: null
     headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share policy list
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --share-name --account-name --account-key
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.33.1
+      - AZURECLI/2.42.0 azsdk-python-storage-file-share/12.10.0b1 Python/3.10.8 (Linux-5.15.0-1022-azure-x86_64-with-glibc2.31)
+        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
       x-ms-date:
-      - Wed, 23 Feb 2022 03:38:39 GMT
+      - Fri, 18 Nov 2022 06:28:01 GMT
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     method: GET
     uri: https://clitest000002.file.core.windows.net/share000003?restype=share&comp=acl
   response:
@@ -763,17 +972,17 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Wed, 23 Feb 2022 03:38:41 GMT
+      - Fri, 18 Nov 2022 06:28:00 GMT
       etag:
-      - '"0x8D9F67DFB7B1DAA"'
+      - '"0x8DAC92E0AE6B58C"'
       last-modified:
-      - Wed, 23 Feb 2022 03:38:40 GMT
+      - Fri, 18 Nov 2022 06:28:01 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2018-11-09'
+      - '2021-06-08'
     status:
       code: 200
       message: OK

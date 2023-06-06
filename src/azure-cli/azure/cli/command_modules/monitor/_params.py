@@ -16,15 +16,14 @@ from azure.cli.command_modules.monitor.actions import (
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
 from azure.cli.command_modules.monitor.validators import (
     process_webhook_prop, validate_autoscale_recurrence, validate_autoscale_timegrain, get_action_group_validator,
-    get_action_group_id_validator, validate_metric_dimension, validate_storage_accounts_name_or_id,
-    process_subscription_id, process_workspace_data_export_destination)
+    get_action_group_id_validator, validate_metric_dimension, validate_storage_accounts_name_or_id)
 
 from knack.arguments import CLIArgumentType
 
 
 # pylint: disable=line-too-long, too-many-statements
 def load_arguments(self, _):
-    from azure.mgmt.monitor.models import ConditionOperator, TimeAggregationOperator, EventData
+    from azure.mgmt.monitor.models import ConditionOperator, TimeAggregationOperator, EventData, PredictiveAutoscalePolicyScaleMode
     from .grammar.metric_alert.MetricAlertConditionValidator import dim_op_conversion, agg_conversion, op_conversion, sens_conversion
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     webhook_prop_type = CLIArgumentType(validator=process_webhook_prop, nargs='*')
@@ -213,6 +212,12 @@ def load_arguments(self, _):
         c.argument('min_count', type=int, help='The minimum number of instances.')
         c.argument('max_count', type=int, help='The maximum number of instances.')
 
+    with self.argument_context('monitor autoscale', arg_group='Predictive Policy') as c:
+        c.argument('scale_look_ahead_time', help='The amount of time to specify by which instances are launched in advance. '
+                                                 'It must be between 1 minute and 60 minutes in ISO 8601 format '
+                                                 '(for example, 100 days would be P100D).')
+        c.argument('scale_mode', arg_type=get_enum_type(PredictiveAutoscalePolicyScaleMode), help='The predictive autoscale mode')
+
     with self.argument_context('monitor autoscale profile') as c:
         c.argument('autoscale_name', arg_type=autoscale_name_type, id_part=None)
         c.argument('profile_name', arg_type=autoscale_profile_name_type, options_list=['--name', '-n'])
@@ -265,62 +270,6 @@ def load_arguments(self, _):
         c.ignore('filter')
     # endregion
 
-    # region Diagnostic
-    with self.argument_context('monitor diagnostic-settings') as c:
-        c.argument('name', options_list=('--name', '-n'))
-
-    with self.argument_context('monitor diagnostic-settings show') as c:
-        c.resource_parameter('resource_uri', required=True, arg_group='Target Resource')
-
-    with self.argument_context('monitor diagnostic-settings list') as c:
-        c.resource_parameter('resource_uri', required=True)
-
-    with self.argument_context('monitor diagnostic-settings delete') as c:
-        c.resource_parameter('resource_uri', required=True, arg_group='Target Resource')
-
-    with self.argument_context('monitor diagnostic-settings update') as c:
-        c.resource_parameter('resource_uri', required=True, arg_group='Target Resource')
-
-    with self.argument_context('monitor diagnostic-settings create') as c:
-        c.resource_parameter('resource_uri', required=True, arg_group='Target Resource', skip_validator=True)
-        c.argument('logs', type=get_json_object)
-        c.argument('metrics', type=get_json_object)
-        c.argument('export_to_resource_specific', arg_type=get_three_state_flag(),
-                   help='Indicate that the export to LA must be done to a resource specific table, '
-                        'a.k.a. dedicated or fixed schema table, '
-                        'as opposed to the default dynamic schema table called AzureDiagnostics. '
-                        'This argument is effective only when the argument --workspace is also given.')
-
-    with self.argument_context('monitor diagnostic-settings categories list') as c:
-        c.resource_parameter('resource_uri', required=True)
-
-    with self.argument_context('monitor diagnostic-settings categories show') as c:
-        c.resource_parameter('resource_uri', required=True)
-
-    with self.argument_context('monitor diagnostic-settings subscription') as c:
-        import argparse
-        c.argument('subscription_id', validator=process_subscription_id, help=argparse.SUPPRESS, required=False)
-        c.argument('logs', type=get_json_object, help="JSON encoded list of logs settings. Use '@{file}' to load from a file.")
-        c.argument('name', help='The name of the diagnostic setting.', options_list=['--name', '-n'])
-        c.argument('event_hub_name', help='The name of the event hub. If none is specified, the default event hub will be selected.')
-        c.argument('event_hub_auth_rule', help='The resource Id for the event hub authorization rule.')
-        c.argument('workspace', help='The resource id of the log analytics workspace.')
-        c.argument('storage_account', help='The resource id of the storage account to which you would like to send the Activity Log.')
-        c.argument('service_bus_rule', help="The service bus rule ID of the service bus namespace in which you would like to have Event Hubs created for streaming the Activity Log. The rule ID is of the format '{service bus resource ID}/authorizationrules/{key name}'.")
-    # endregion
-
-    # region LogProfiles
-    with self.argument_context('monitor log-profiles') as c:
-        c.argument('log_profile_name', options_list=['--name', '-n'])
-
-    with self.argument_context('monitor log-profiles create') as c:
-        c.argument('name', options_list=['--name', '-n'])
-        c.argument('categories', nargs='+')
-        c.argument('locations', nargs='+')
-        c.argument('days', type=int, arg_group='Retention Policy')
-        c.argument('enabled', arg_type=get_three_state_flag(), arg_group='Retention Policy')
-    # endregion
-
     # region ActivityLog
     with self.argument_context('monitor activity-log list') as c:
         activity_log_props = [x['key'] for x in EventData()._attribute_map.values()]  # pylint: disable=protected-access
@@ -333,11 +282,10 @@ def load_arguments(self, _):
         c.argument('offset', type=get_period_type(as_timedelta=True))
 
     with self.argument_context('monitor activity-log list', arg_group='Filter') as c:
-        c.argument('filters', deprecate_info=c.deprecate(target='--filters', hide=True, expiration='3.0.0'), help='OData filters. Will ignore other filter arguments.')
         c.argument('correlation_id')
         c.argument('resource_group', resource_group_name_type)
         c.argument('resource_id')
-        c.argument('resource_provider', options_list=['--namespace', c.deprecate(target='--resource-provider', redirect='--namespace', hide=True, expiration='3.0.0')])
+        c.argument('resource_provider', options_list=['--namespace'])
         c.argument('caller')
         c.argument('status')
     # endregion
@@ -345,12 +293,14 @@ def load_arguments(self, _):
     # region ActionGroup
     with self.argument_context('monitor action-group') as c:
         c.argument('action_group_name', options_list=['--name', '-n'], id_part='name')
+        c.argument('location', get_location_type(self.cli_ctx), validator=None)
 
     with self.argument_context('monitor action-group create') as c:
         from .actions import ActionGroupReceiverParameterAction
         c.extra('receivers', options_list=['--action', '-a'], nargs='+', arg_group='Actions', action=ActionGroupReceiverParameterAction)
         c.extra('short_name')
         c.extra('tags')
+        c.extra('location', get_location_type(self.cli_ctx))
         c.ignore('action_group')
 
     with self.argument_context('monitor action-group update', arg_group='Actions') as c:
@@ -360,6 +310,11 @@ def load_arguments(self, _):
 
     with self.argument_context('monitor action-group enable-receiver') as c:
         c.argument('receiver_name', options_list=['--name', '-n'], help='The name of the receiver to resubscribe.')
+        c.argument('action_group_name', options_list=['--action-group'], help='The name of the action group.')
+
+    with self.argument_context('monitor action-group test-notifications create') as c:
+        c.argument('add_receivers', options_list=['--add-action', '-a'], nargs='+', action=ActionGroupReceiverParameterAction)
+        c.argument('alert_type', type=str, help='The name of the supported alert type.')
         c.argument('action_group_name', options_list=['--action-group'], help='The name of the action group.')
     # endregion
 
@@ -409,19 +364,7 @@ def load_arguments(self, _):
         c.argument('capacity_reservation_level', options_list=['--capacity-reservation-level', '--level'], help='The capacity reservation level for this workspace, when CapacityReservation sku is selected. The maximum value is 1000 and must be in multiples of 100. If you want to increase the limit, please contact LAIngestionRate@microsoft.com.')
         c.argument('daily_quota_gb', options_list=['--quota'], help='The workspace daily quota for ingestion in gigabytes. The minimum value is 0.023 and default is -1 which means unlimited.')
         c.argument('retention_time', help="The workspace data retention in days.", type=int, default=30)
-        from azure.mgmt.loganalytics.models import PublicNetworkAccessType
-        c.argument('public_network_access_for_ingestion', options_list=['--ingestion-access'], help='The public network access type to access workspace ingestion.',
-                   arg_type=get_enum_type(PublicNetworkAccessType))
-        c.argument('public_network_access_for_query', options_list=['--query-access'], help='The public network access type to access workspace query.',
-                   arg_type=get_enum_type(PublicNetworkAccessType))
         c.argument('force', options_list=['--force', '-f'], arg_type=get_three_state_flag())
-
-    with self.argument_context('monitor log-analytics workspace update') as c:
-        c.argument('default_data_collection_rule_resource_id', options_list='--data-collection-rule', help='The resource ID of the default Data Collection Rule to use for this workspace. Expected format is /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/dataCollectionRules/{dcrName}.')
-
-    with self.argument_context('monitor log-analytics workspace pack') as c:
-        c.argument('intelligence_pack_name', options_list=['--name', '-n'])
-        c.argument('workspace_name', options_list='--workspace-name')
 
     with self.argument_context('monitor log-analytics workspace saved-search') as c:
         c.argument('saved_search_id', options_list=['--name', '-n'], help="Name of the saved search and it's unique in a given workspace.")
@@ -443,13 +386,12 @@ def load_arguments(self, _):
     with self.argument_context('monitor log-analytics workspace table') as c:
         c.argument('table_name', name_arg_type, help='Name of the table.')
         c.argument('workspace_name', options_list='--workspace-name')
-        c.argument('retention_in_days', type=int, options_list='--retention-time', help='The data table data retention in days, between 30 and 730. Setting this property to null will default to the workspace')
+        c.argument('retention_in_days', type=int, options_list='--retention-time', help='The data table data retention in days, between 4 and 730. Setting this property to null will default to the workspace')
         c.argument('total_retention_in_days', type=int, options_list='--total-retention-time', help='The table data total retention in days, between 4 and 2555. Setting this property to null will default to table retention.')
 
     with self.argument_context('monitor log-analytics workspace table create') as c:
-        from azure.mgmt.loganalytics.models import TablePlanEnum
-        c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated colunms in colunm_name=colunm_type format')
-        c.argument('plan', arg_type=get_enum_type(TablePlanEnum), help='The table plan. Possible values include: "Basic", "Analytics".')
+        c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated columns in column_name=column_type format')
+        c.argument('plan', arg_type=get_enum_type(["Basic", "Analytics"]), help='The table plan. Possible values include: "Basic", "Analytics".')
         c.argument('description', help='Schema description.')
 
     with self.argument_context('monitor log-analytics workspace table search-job create') as c:
@@ -464,24 +406,9 @@ def load_arguments(self, _):
         c.argument('restore_source_table', help='The table to restore data from.')
 
     with self.argument_context('monitor log-analytics workspace table update') as c:
-        from azure.mgmt.loganalytics.models import TablePlanEnum
-        c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated colunms in colunm_name=colunm_type format')
-        c.argument('plan', arg_type=get_enum_type(TablePlanEnum), help='The table plan. Possible values include: "Basic", "Analytics".')
+        c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated columns in column_name=column_type format')
+        c.argument('plan', arg_type=get_enum_type(["Basic", "Analytics"]), help='The table plan. Possible values include: "Basic", "Analytics".')
         c.argument('description', help='Table description.')
-    # endregion
-
-    # region Log Analytics Workspace Data Export
-    with self.argument_context('monitor log-analytics workspace data-export') as c:
-        c.argument('data_export_name', options_list=['--name', '-n'], help="Name of the data export rule")
-        c.argument('workspace_name', options_list='--workspace-name')
-        c.argument('table_names', nargs='+', options_list=['--tables', '-t'],
-                   help='An array of tables to export.')
-        c.argument('destination', validator=process_workspace_data_export_destination,
-                   help='The destination resource ID. It should be a storage account, an event hub namespace or an event hub. '
-                        'If event hub namespace is provided, event hub would be created for each table automatically.')
-        c.ignore('data_export_type')
-        c.ignore('event_hub_name')
-        c.argument('enable', arg_type=get_three_state_flag(), help='Enable this data export rule.')
     # endregion
 
     # region Log Analytics Workspace Linked Service
@@ -495,26 +422,10 @@ def load_arguments(self, _):
                                                     'require write access.')
     # endregion
 
-    # region Log Analytics Cluster
-    with self.argument_context('monitor log-analytics cluster') as c:
-        c.argument('cluster_name', name_arg_type, help='The name of the Log Analytics cluster.')
-        c.argument('sku_name', help="The name of the SKU. Currently only support 'CapacityReservation'")
-        c.argument('sku_capacity', help='The capacity of the SKU. It must be in the range of 1000-2000 per day and must'
-                                        ' be in multiples of 100. If you want to increase the limit, please contact'
-                                        ' LAIngestionRate@microsoft.com. It can be decreased only after 31 days.')
-        c.argument('identity_type', help='The identity type. Supported values: SystemAssigned')
-
-    with self.argument_context('monitor log-analytics cluster update') as c:
-        c.argument('key_vault_uri', help='The Key Vault uri which holds the key associated with the Log Analytics cluster.')
-        c.argument('key_name', help='The name of the key associated with the Log Analytics cluster.')
-        c.argument('key_version', help='The version of the key associated with the Log Analytics cluster.')
-    # endregion
-
     # region Log Analytics Linked Storage Account
     with self.argument_context('monitor log-analytics workspace linked-storage') as c:
-        from azure.mgmt.loganalytics.models import DataSourceType
         c.argument('data_source_type', help='Data source type for the linked storage account.',
-                   options_list=['--type'], arg_type=get_enum_type(DataSourceType))
+                   options_list=['--type'], arg_type=get_enum_type(["Alerts", "AzureWatson", "CustomLogs", "Ingestion", "Query"]))
         c.argument('storage_account_ids', nargs='+', options_list=['--storage-accounts'],
                    help='List of Name or ID of Azure Storage Account.',
                    validator=validate_storage_accounts_name_or_id)

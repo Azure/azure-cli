@@ -62,8 +62,5 @@ class EHConsumerGroupCURDScenarioTest(ScenarioTest):
         # Delete ConsumerGroup
         self.cmd('eventhubs eventhub consumer-group delete --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {consumergroupname}')
 
-        # Delete Eventhub
-        self.cmd('eventhubs eventhub delete --resource-group {rg} --namespace-name {namespacename} --name {eventhubname}')
-
         # Delete Namespace
         self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename}')

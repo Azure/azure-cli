@@ -6,17 +6,29 @@
 from __future__ import unicode_literals
 
 import os
-import os.path
 import re
 from ipaddress import ip_network
 from math import isclose, isnan
 
+from azure.cli.command_modules.acs._consts import (
+    CONST_MANAGED_CLUSTER_SKU_TIER_FREE,
+    CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD,
+    CONST_OS_SKU_AZURELINUX,
+    CONST_OS_SKU_CBLMARINER,
+    CONST_OS_SKU_MARINER,
+)
 from azure.cli.core import keys
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import (
+    ArgumentUsageError,
+    InvalidArgumentValueError,
+    MutuallyExclusiveArgumentError,
+    RequiredArgumentMissingError,
+)
+
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
-# pylint: disable=no-name-in-module,import-error
 from knack.log import get_logger
+
 
 logger = get_logger(__name__)
 
@@ -50,11 +62,6 @@ def validate_ssh_key(namespace):
             raise CLIError('An RSA key file or key value must be supplied to SSH Key Value. '
                            'You can use --generate-ssh-keys to let CLI generate one for you')
     namespace.ssh_key_value = content
-
-
-def validate_list_of_integers(string):
-    # extract comma-separated list of integers
-    return list(map(int, string.split(',')))
 
 
 def validate_create_parameters(namespace):
@@ -96,22 +103,32 @@ def validate_k8s_version(namespace):
     """Validates a string as a possible Kubernetes version. An empty string is also valid, which tells the server
     to use its default version."""
     if namespace.kubernetes_version:
-        k8s_release_regex = re.compile(r'^[v|V]?(\d+\.\d+\.\d+.*)$')
+        k8s_release_regex = re.compile(r'^[v|V]?(\d+\.\d+(?:\.\d+)?)$')
         found = k8s_release_regex.findall(namespace.kubernetes_version)
         if found:
             namespace.kubernetes_version = found[0]
         else:
-            raise CLIError('--kubernetes-version should be the full version number, '
-                           'such as "1.11.8" or "1.12.6"')
+            raise CLIError('--kubernetes-version should be the full version number or major.minor version number, '
+                           'such as "1.7.12" or "1.7"')
+
+
+def _validate_nodepool_name(nodepool_name):
+    """Validates a nodepool name to be at most 12 characters, alphanumeric only."""
+    if nodepool_name != "":
+        if len(nodepool_name) > 12:
+            raise InvalidArgumentValueError('--nodepool-name can contain at most 12 characters')
+        if not nodepool_name.isalnum():
+            raise InvalidArgumentValueError('--nodepool-name should contain only alphanumeric characters')
 
 
 def validate_nodepool_name(namespace):
     """Validates a nodepool name to be at most 12 characters, alphanumeric only."""
-    if namespace.nodepool_name != "":
-        if len(namespace.nodepool_name) > 12:
-            raise CLIError('--nodepool-name can contain at most 12 characters')
-        if not namespace.nodepool_name.isalnum():
-            raise CLIError('--nodepool-name should contain only alphanumeric characters')
+    _validate_nodepool_name(namespace.nodepool_name)
+
+
+def validate_agent_pool_name(namespace):
+    """Validates a nodepool name to be at most 12 characters, alphanumeric only."""
+    _validate_nodepool_name(namespace.agent_pool_name)
 
 
 def validate_kubectl_version(namespace):
@@ -144,11 +161,11 @@ def validate_linux_host_name(namespace):
     in the CLI pre-flight.
     """
     # https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
-    rfc1123_regex = re.compile(r'^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$')  # pylint:disable=line-too-long
+    rfc1123_regex = re.compile(r'^[a-zA-Z0-9]$|^[a-zA-Z0-9][-_a-zA-Z0-9]{0,61}[a-zA-Z0-9]$')  # pylint:disable=line-too-long
     found = rfc1123_regex.findall(namespace.name)
     if not found:
-        raise CLIError('--name cannot exceed 63 characters and can only contain '
-                       'letters, numbers, or dashes (-).')
+        raise InvalidArgumentValueError('--name cannot exceed 63 characters and can only contain '
+                                        'letters, numbers, underscores (_) or dashes (-).')
 
 
 def validate_snapshot_name(namespace):
@@ -177,6 +194,15 @@ def validate_load_balancer_sku(namespace):
             return
         if namespace.load_balancer_sku.lower() != "basic" and namespace.load_balancer_sku.lower() != "standard":
             raise CLIError("--load-balancer-sku can only be standard or basic")
+
+
+def validate_sku_tier(namespace):
+    """Validates the sku tier string."""
+    if namespace.tier is not None:
+        if namespace.tier == '':
+            return
+        if namespace.tier.lower() not in (CONST_MANAGED_CLUSTER_SKU_TIER_FREE, CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD):
+            raise InvalidArgumentValueError("--tier can only be free or standard")
 
 
 def validate_load_balancer_outbound_ips(namespace):
@@ -211,14 +237,34 @@ def validate_load_balancer_idle_timeout(namespace):
             raise CLIError("--load-balancer-idle-timeout must be in the range [4,100]")
 
 
+def validate_network_policy(namespace):
+    """validate network policy to be in lowercase"""
+    if namespace.network_policy is not None and namespace.network_policy.islower() is False:
+        raise InvalidArgumentValueError("--network-policy should be provided in lowercase")
+
+
+def validate_nat_gateway_managed_outbound_ip_count(namespace):
+    """validate NAT gateway profile managed outbound IP count"""
+    if namespace.nat_gateway_managed_outbound_ip_count is not None:
+        if namespace.nat_gateway_managed_outbound_ip_count < 1 or namespace.nat_gateway_managed_outbound_ip_count > 16:
+            raise InvalidArgumentValueError("--nat-gateway-managed-outbound-ip-count must be in the range [1,16]")
+
+
+def validate_nat_gateway_idle_timeout(namespace):
+    """validate NAT gateway profile idle timeout"""
+    if namespace.nat_gateway_idle_timeout is not None:
+        if namespace.nat_gateway_idle_timeout < 4 or namespace.nat_gateway_idle_timeout > 120:
+            raise InvalidArgumentValueError("--nat-gateway-idle-timeout must be in the range [4,120]")
+
+
 def validate_nodes_count(namespace):
-    """Validates that min_count and max_count is set between 1-100"""
+    """Validates that min_count and max_count is set between 0-1000"""
     if namespace.min_count is not None:
-        if namespace.min_count < 1 or namespace.min_count > 100:
-            raise CLIError('--min-count must be in the range [1,100]')
+        if namespace.min_count < 0 or namespace.min_count > 1000:
+            raise CLIError('--min-count must be in the range [0,1000]')
     if namespace.max_count is not None:
-        if namespace.max_count < 1 or namespace.max_count > 100:
-            raise CLIError('--max-count must be in the range [1,100]')
+        if namespace.max_count < 0 or namespace.max_count > 1000:
+            raise CLIError('--max-count must be in the range [0,1000]')
 
 
 def validate_taints(namespace):
@@ -283,12 +329,19 @@ def validate_nodepool_tags(ns):
 
 
 def validate_vnet_subnet_id(namespace):
-    if namespace.vnet_subnet_id is not None:
-        if namespace.vnet_subnet_id == '':
-            return
-        from msrestazure.tools import is_valid_resource_id
-        if not is_valid_resource_id(namespace.vnet_subnet_id):
-            raise CLIError("--vnet-subnet-id is not a valid Azure resource ID.")
+    _validate_subnet_id(namespace.vnet_subnet_id, "--vnet-subnet-id")
+
+
+def validate_pod_subnet_id(namespace):
+    _validate_subnet_id(namespace.pod_subnet_id, "--pod-subnet-id")
+
+
+def _validate_subnet_id(subnet_id, name):
+    if subnet_id is None or subnet_id == '':
+        return
+    from msrestazure.tools import is_valid_resource_id
+    if not is_valid_resource_id(subnet_id):
+        raise InvalidArgumentValueError(name + " is not a valid Azure resource ID.")
 
 
 def validate_ppg(namespace):
@@ -418,6 +471,13 @@ def validate_snapshot_id(namespace):
             raise InvalidArgumentValueError("--snapshot-id is not a valid Azure resource ID.")
 
 
+def validate_host_group_id(namespace):
+    if namespace.host_group_id:
+        from msrestazure.tools import is_valid_resource_id
+        if not is_valid_resource_id(namespace.host_group_id):
+            raise InvalidArgumentValueError("--host-group-id is not a valid Azure resource ID.")
+
+
 def extract_comma_separated_string(
     raw_string,
     enable_strip=False,
@@ -489,3 +549,114 @@ def validate_credential_format(namespace):
         namespace.credential_format.lower() != "azure" and \
             namespace.credential_format.lower() != "exec":
         raise InvalidArgumentValueError("--format can only be azure or exec.")
+
+
+def validate_keyvault_secrets_provider_disable_and_enable_parameters(namespace):
+    if namespace.disable_secret_rotation and namespace.enable_secret_rotation:
+        raise MutuallyExclusiveArgumentError(
+            "Providing both --disable-secret-rotation and --enable-secret-rotation flags is invalid"
+        )
+
+
+def validate_defender_config_parameter(namespace):
+    if namespace.defender_config and not namespace.enable_defender:
+        raise RequiredArgumentMissingError("Please specify --enable-defnder")
+
+
+def validate_defender_disable_and_enable_parameters(namespace):
+    if namespace.disable_defender and namespace.enable_defender:
+        raise ArgumentUsageError('Providing both --disable-defender and --enable-defender flags is invalid')
+
+
+def validate_azure_keyvault_kms_key_id(namespace):
+    key_id = namespace.azure_keyvault_kms_key_id
+    if key_id:
+        # pylint:disable=line-too-long
+        err_msg = '--azure-keyvault-kms-key-id is not a valid Key Vault key ID. See https://docs.microsoft.com/en-us/azure/key-vault/general/about-keys-secrets-certificates#vault-name-and-object-name'
+
+        https_prefix = "https://"
+        if not key_id.startswith(https_prefix):
+            raise InvalidArgumentValueError(err_msg)
+
+        segments = key_id[len(https_prefix):].split("/")
+        if len(segments) != 4 or segments[1] != "keys":
+            raise InvalidArgumentValueError(err_msg)
+
+
+def validate_azure_keyvault_kms_key_vault_resource_id(namespace):
+    key_vault_resource_id = namespace.azure_keyvault_kms_key_vault_resource_id
+    if key_vault_resource_id is None or key_vault_resource_id == '':
+        return
+    from msrestazure.tools import is_valid_resource_id
+    if not is_valid_resource_id(key_vault_resource_id):
+        raise InvalidArgumentValueError("--azure-keyvault-kms-key-vault-resource-id is not a valid Azure resource ID.")
+
+
+def validate_image_cleaner_enable_disable_mutually_exclusive(namespace):
+    enable_image_cleaner = namespace.enable_image_cleaner
+    disable_image_cleaner = namespace.disable_image_cleaner
+
+    if enable_image_cleaner and disable_image_cleaner:
+        raise MutuallyExclusiveArgumentError(
+            "Cannot specify --enable-image-cleaner and --disable-image-cleaner at the same time."
+        )
+
+
+def validate_registry_name(cmd, namespace):
+    """Append login server endpoint suffix."""
+    registry = namespace.acr
+    suffixes = cmd.cli_ctx.cloud.suffixes
+    # Some clouds do not define 'acr_login_server_endpoint' (e.g. AzureGermanCloud)
+    from azure.cli.core.cloud import CloudSuffixNotSetException
+    try:
+        acr_suffix = suffixes.acr_login_server_endpoint
+    except CloudSuffixNotSetException:
+        acr_suffix = None
+    if registry and acr_suffix:
+        pos = registry.find(acr_suffix)
+        if pos == -1:
+            logger.warning("The login server endpoint suffix '%s' is automatically appended.", acr_suffix)
+            namespace.acr = registry + acr_suffix
+
+
+def sanitize_resource_id(resource_id):
+    resource_id = resource_id.strip()
+    if not resource_id.startswith("/"):
+        resource_id = "/" + resource_id
+    if resource_id.endswith("/"):
+        resource_id = resource_id.rstrip("/")
+    return resource_id.lower()
+
+
+# pylint:disable=line-too-long
+def validate_azuremonitorworkspaceresourceid(namespace):
+    resource_id = namespace.azure_monitor_workspace_resource_id
+    if resource_id is None:
+        return
+    resource_id = sanitize_resource_id(resource_id)
+    if (bool(re.match(r'/subscriptions/.*/resourcegroups/.*/providers/microsoft.monitor/accounts/.*', resource_id))) is False:
+        raise InvalidArgumentValueError("--azure-monitor-workspace-resource-id not in the correct format. It should match `/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/microsoft.monitor/accounts/<resourceName>`")
+
+
+# pylint:disable=line-too-long
+def validate_grafanaresourceid(namespace):
+    resource_id = namespace.grafana_resource_id
+    if resource_id is None:
+        return
+    resource_id = sanitize_resource_id(resource_id)
+    if (bool(re.match(r'/subscriptions/.*/resourcegroups/.*/providers/microsoft.dashboard/grafana/.*', resource_id))) is False:
+        raise InvalidArgumentValueError("--grafana-resource-id not in the correct format. It should match `/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/microsoft.dashboard/grafana/<resourceName>`")
+
+
+def validate_os_sku(namespace):
+    os_sku = namespace.os_sku
+    if os_sku in [CONST_OS_SKU_MARINER, CONST_OS_SKU_CBLMARINER]:
+        logger.warning(
+            'The osSKU "%s" should be used going forward instead of "%s" or "%s". '
+            'The osSKUs "%s" and "%s" will eventually be deprecated.',
+            CONST_OS_SKU_AZURELINUX,
+            CONST_OS_SKU_CBLMARINER,
+            CONST_OS_SKU_MARINER,
+            CONST_OS_SKU_CBLMARINER,
+            CONST_OS_SKU_MARINER,
+        )

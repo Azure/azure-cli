@@ -69,8 +69,15 @@ def generate_sas(client, table_name, permission=None, expiry=None, start=None, i
 
 
 def insert_entity(client, entity, if_exists='fail'):
+    from azure.core.exceptions import ResourceNotFoundError, ResourceExistsError
     if if_exists == 'fail':
-        return client.upsert_entity(entity, mode='merge')
+        partition_key = entity.get('PartitionKey')
+        row_key = entity.get('RowKey')
+        try:
+            client.get_entity(partition_key, row_key)
+            raise ResourceExistsError("The specified entity already exists.")
+        except ResourceNotFoundError:
+            return client.upsert_entity(entity)
     if if_exists == 'merge' or if_exists == 'replace':
         return client.upsert_entity(entity, mode=if_exists)
     from knack.util import CLIError

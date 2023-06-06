@@ -130,6 +130,11 @@ class CacheObject:
             raise CLIError('cloud name unexpectedly empty')
         copy_kwargs = kwargs.copy()
         copy_kwargs.pop('self', None)
+        # handle "content_type" introduced by https://gist.github.com/iscai-msft/47fe6ecbdd06013bb19a2e16f85a0b43
+        # e.g., 2018-03-01-hybrid when execute "az network vnet update"
+        #       https://github.com/Azure/azure-sdk-for-python/pull/24162
+        #       sdk/network/azure-mgmt-network/azure/mgmt/network/v2017_10_01/operations/_operations.py:22897
+        copy_kwargs.pop('content_type', None)
         resource_group = copy_kwargs.pop('resource_group_name', None) or args[0]
 
         if len(args) > 2:
@@ -1140,13 +1145,14 @@ def _is_paged(obj):
             and not isinstance(obj, dict):
         from msrest.paging import Paged
         from azure.core.paging import ItemPaged as AzureCorePaged
-        return isinstance(obj, (AzureCorePaged, Paged))
+        from azure.cli.core.aaz._paging import AAZPaged
+        return isinstance(obj, (AzureCorePaged, Paged, AAZPaged))
     return False
 
 
 def _is_poller(obj):
     # Since loading msrest is expensive, we avoid it until we have to
-    if obj.__class__.__name__ in ['AzureOperationPoller', 'LROPoller']:
+    if obj.__class__.__name__ in ['AzureOperationPoller', 'LROPoller', 'AAZLROPoller']:
         return isinstance(obj, poller_classes())
     return False
 

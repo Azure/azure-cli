@@ -5,6 +5,7 @@
 from azure.cli.testsdk import ResourceGroupPreparer, JMESPathCheck
 from azure.cli.testsdk import ScenarioTest, record_only
 from .afdx_scenario_mixin import CdnAfdScenarioMixin
+from azure.mgmt.cdn.models import (AfdCertificateType, AfdMinimumTlsVersion)
 
 
 class CdnAfdRouteScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
@@ -44,7 +45,7 @@ class CdnAfdRouteScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         create_options = f"--origin-group {origin_group_name} " \
                          + "--supported-protocols Https Http --link-to-default-domain Enabled " \
                          + "--https-redirect Enabled --forwarding-protocol MatchRequest"
-
+       
         create_checks = [JMESPathCheck('supportedProtocols[0]', "Https"),
                          JMESPathCheck('supportedProtocols[1]', "Http"),
                          JMESPathCheck('linkToDefaultDomain', "Enabled"),
@@ -60,6 +61,43 @@ class CdnAfdRouteScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                                   create_options,
                                   create_checks)
 
+        custom_domain_name = self.create_random_name(prefix='customdomain', length=24)
+        custom_domain_id = f'/subscriptions/{self.get_subscription_id()}/resourceGroups/{resource_group}/providers/Microsoft.Cdn/profiles/{profile_name}/customDomains/{custom_domain_name}'
+        host_name = f"{custom_domain_name}.localdev.cdn.azure.cn"
+        self.afd_custom_domain_create_cmd(resource_group,
+                                          profile_name,
+                                          custom_domain_name,
+                                          host_name,
+                                          AfdCertificateType.managed_certificate,
+                                          AfdMinimumTlsVersion.tls12,
+                                          None,
+                                          None)
+
+        create_options_1 = f"--origin-group {origin_group_name} " \
+                         + "--supported-protocols Https Http --link-to-default-domain Disabled " \
+                         + "--https-redirect Enabled --forwarding-protocol MatchRequest " \
+                         + f"--custom-domains {custom_domain_name} --patterns-to-match /test2/*"
+        route_name_1 = self.create_random_name(prefix='route-wd', length=16)
+        
+        create_checks_1 = [JMESPathCheck('supportedProtocols[0]', "Https"),
+                          JMESPathCheck('supportedProtocols[1]', "Http"),
+                          JMESPathCheck('customDomains[0].id', custom_domain_id, False),
+                          JMESPathCheck('patternsToMatch[0]', "/test2/*"),
+                          JMESPathCheck('linkToDefaultDomain', "Disabled"),
+                          JMESPathCheck('forwardingProtocol', "MatchRequest"),
+                          JMESPathCheck('httpsRedirect', "Enabled"),
+                          JMESPathCheck('enabledState', "Enabled"),
+                          JMESPathCheck('cacheConfiguration.queryStringCachingBehavior', None),
+                          JMESPathCheck('originGroup.id', origin_group_id)]
+        self.afd_route_create_cmd(resource_group,
+                                  profile_name,
+                                  endpoint_name,
+                                  route_name_1,
+                                  create_options_1,
+                                  create_checks_1)
+
+        self.afd_route_delete_cmd(resource_group, profile_name, endpoint_name, route_name_1)
+
         list_checks = [JMESPathCheck('length(@)', 1),
                        JMESPathCheck('@[0].name', route_name)]
         self.afd_route_list_cmd(resource_group, profile_name, endpoint_name, checks=list_checks)
@@ -68,6 +106,7 @@ class CdnAfdRouteScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                          JMESPathCheck('enabledState', "Enabled"),
                          JMESPathCheck('supportedProtocols[1]', "Http"),
                          JMESPathCheck('linkToDefaultDomain', "Enabled"),
+                         JMESPathCheck('customDomains[0].id', custom_domain_id, False),
                          JMESPathCheck('forwardingProtocol', "HttpsOnly"),
                          JMESPathCheck('httpsRedirect', "Enabled"),
                          JMESPathCheck('cacheConfiguration.queryStringCachingBehavior', "IgnoreQueryString"),
@@ -76,7 +115,7 @@ class CdnAfdRouteScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                          JMESPathCheck('cacheConfiguration.compressionSettings.contentTypesToCompress[0]', 'text/javascript'),
                          JMESPathCheck('cacheConfiguration.compressionSettings.contentTypesToCompress[1]', 'text/plain'),
                          JMESPathCheck('originGroup.id', origin_group_id)]
-        options = '--enable-caching True --forwarding-protocol HttpsOnly --query-string-caching-behavior IgnoreQueryString --enable-compression True --content-types-to-compress text/javascript text/plain'
+        options = f'--custom-domains {custom_domain_name} --enable-caching True --forwarding-protocol HttpsOnly --query-string-caching-behavior IgnoreQueryString --enable-compression True --content-types-to-compress text/javascript text/plain'
         self.afd_route_update_cmd(resource_group,
                                   profile_name,
                                   endpoint_name,
@@ -87,6 +126,7 @@ class CdnAfdRouteScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         update_checks = [JMESPathCheck('supportedProtocols[0]', "Https"),
                          JMESPathCheck('supportedProtocols[1]', "Http"),
                          JMESPathCheck('linkToDefaultDomain', "Enabled"),
+                         JMESPathCheck('customDomains[0].id', custom_domain_id, False),
                          JMESPathCheck('enabledState', "Disabled"),
                          JMESPathCheck('forwardingProtocol', "HttpsOnly"),
                          JMESPathCheck('httpsRedirect', "Enabled"),
@@ -108,6 +148,7 @@ class CdnAfdRouteScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                          JMESPathCheck('supportedProtocols[1]', "Http"),
                          JMESPathCheck('enabledState', "Enabled"),
                          JMESPathCheck('linkToDefaultDomain', "Enabled"),
+                         JMESPathCheck('customDomains[0].id', custom_domain_id, False),
                          JMESPathCheck('forwardingProtocol', "HttpsOnly"),
                          JMESPathCheck('httpsRedirect', "Enabled"),
                          JMESPathCheck('cacheConfiguration.queryStringCachingBehavior', "UseQueryString"),
@@ -131,6 +172,7 @@ class CdnAfdRouteScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                          JMESPathCheck('supportedProtocols[1]', "Http"),
                          JMESPathCheck('enabledState', "Enabled"),
                          JMESPathCheck('linkToDefaultDomain', "Enabled"),
+                         JMESPathCheck('customDomains[0].id', custom_domain_id, False),
                          JMESPathCheck('forwardingProtocol', "HttpsOnly"),
                          JMESPathCheck('httpsRedirect', "Enabled"),
                          JMESPathCheck('cacheConfiguration.queryStringCachingBehavior', "UseQueryString"),
@@ -148,6 +190,7 @@ class CdnAfdRouteScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         update_checks = [JMESPathCheck('supportedProtocols[0]', "Https"),
                          JMESPathCheck('supportedProtocols[1]', "Http"),
                          JMESPathCheck('linkToDefaultDomain', "Enabled"),
+                         JMESPathCheck('customDomains[0].id', custom_domain_id, False),
                          JMESPathCheck('enabledState', "Enabled"),
                          JMESPathCheck('forwardingProtocol', "HttpsOnly"),
                          JMESPathCheck('httpsRedirect', "Disabled"),
@@ -167,6 +210,7 @@ class CdnAfdRouteScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         update_checks = [JMESPathCheck('supportedProtocols[0]', "Https"),
                          JMESPathCheck('supportedProtocols[1]', "Http"),
                          JMESPathCheck('linkToDefaultDomain', "Enabled"),
+                         JMESPathCheck('customDomains[0].id', custom_domain_id, False),
                          JMESPathCheck('enabledState', "Enabled"),
                          JMESPathCheck('forwardingProtocol', "HttpsOnly"),
                          JMESPathCheck('httpsRedirect', "Disabled"),
@@ -187,6 +231,7 @@ class CdnAfdRouteScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
         update_checks = [JMESPathCheck('supportedProtocols[0]', "Https"),
                          JMESPathCheck('supportedProtocols[1]', "Http"),
                          JMESPathCheck('linkToDefaultDomain', "Enabled"),
+                         JMESPathCheck('customDomains[0].id', custom_domain_id, False),
                          JMESPathCheck('forwardingProtocol', "HttpsOnly"),
                          JMESPathCheck('enabledState', "Enabled"),
                          JMESPathCheck('httpsRedirect', "Disabled"),
@@ -202,7 +247,70 @@ class CdnAfdRouteScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                                   route_name,
                                   options=options,
                                   checks=update_checks)
+
+        # update origin group
+        new_origin_group_name = self.create_random_name(prefix='og', length=16)
+        self.afd_origin_group_create_cmd(resource_group,
+                                         profile_name,
+                                         new_origin_group_name,
+                                         "--probe-request-type GET --probe-protocol Http --probe-interval-in-seconds 120 --probe-path /test1/azure.txt "
+                                         "--sample-size 4 --successful-samples-required 3 --additional-latency-in-milliseconds 50")
+
+        new_origin_name = self.create_random_name(prefix='origin', length=16)
+        create_options = "--host-name plstestcli.blob.core.windows.net " \
+                         + "--origin-host-header plstestcli.blob.core.windows.net " \
+                         + "--priority 1 --weight 1000 --http-port 80 --https-port 443 --enabled-state Enabled"
+
+        self.afd_origin_create_cmd(resource_group,
+                                   profile_name,
+                                   new_origin_group_name,
+                                   new_origin_name,
+                                   create_options)
+
+        new_origin_group_id = f'/subscriptions/{self.get_subscription_id()}/resourceGroups/{resource_group}/providers/Microsoft.Cdn/profiles/{profile_name}/originGroups/{new_origin_group_name}'
+        options = f'--origin-group {new_origin_group_name} --link-to-default-domain Disabled --patterns-to-match /test2/*'
+        update_checks = [JMESPathCheck('supportedProtocols[0]', "Https"),
+                         JMESPathCheck('supportedProtocols[1]', "Http"),
+                         JMESPathCheck('linkToDefaultDomain', "Disabled"),
+                         JMESPathCheck('customDomains[0].id', custom_domain_id, False),
+                         JMESPathCheck('patternsToMatch[0]', "/test2/*"),
+                         JMESPathCheck('forwardingProtocol', "HttpsOnly"),
+                         JMESPathCheck('enabledState', "Enabled"),
+                         JMESPathCheck('httpsRedirect', "Disabled"),
+                         JMESPathCheck('cacheConfiguration.queryStringCachingBehavior', "IncludeSpecifiedQueryStrings"),
+                         JMESPathCheck('cacheConfiguration.queryParameters', "x,y,z"),
+                         JMESPathCheck('cacheConfiguration.compressionSettings.isCompressionEnabled', True),
+                         JMESPathCheck('length(cacheConfiguration.compressionSettings.contentTypesToCompress)', 41),
+                         JMESPathCheck('originGroup.id', new_origin_group_id),
+                         JMESPathCheck('length(ruleSets)', 0)]
+        self.afd_route_update_cmd(resource_group,
+                                  profile_name,
+                                  endpoint_name,
+                                  route_name,
+                                  options=options,
+                                  checks=update_checks)
         
+        options = f'--link-to-default-domain Enabled'
+        update_checks = [JMESPathCheck('supportedProtocols[0]', "Https"),
+                         JMESPathCheck('supportedProtocols[1]', "Http"),
+                         JMESPathCheck('linkToDefaultDomain', "Enabled"),
+                         JMESPathCheck('customDomains[0].id', custom_domain_id, False),
+                         JMESPathCheck('forwardingProtocol', "HttpsOnly"),
+                         JMESPathCheck('enabledState', "Enabled"),
+                         JMESPathCheck('httpsRedirect', "Disabled"),
+                         JMESPathCheck('cacheConfiguration.queryStringCachingBehavior', "IncludeSpecifiedQueryStrings"),
+                         JMESPathCheck('cacheConfiguration.queryParameters', "x,y,z"),
+                         JMESPathCheck('cacheConfiguration.compressionSettings.isCompressionEnabled', True),
+                         JMESPathCheck('length(cacheConfiguration.compressionSettings.contentTypesToCompress)', 41),
+                         JMESPathCheck('originGroup.id', new_origin_group_id),
+                         JMESPathCheck('length(ruleSets)', 0)]
+        self.afd_route_update_cmd(resource_group,
+                                  profile_name,
+                                  endpoint_name,
+                                  route_name,
+                                  options=options,
+                                  checks=update_checks)
+
         self.afd_route_delete_cmd(resource_group, profile_name, endpoint_name, route_name)
 
         list_checks = [JMESPathCheck('length(@)', 0)]

@@ -19,12 +19,12 @@ class StorageSASReplacer(RecordingProcessor):
     def process_request(self, request):
         request.uri = self._replace_sas(request.uri)
         if request.body:
-            request.body = self._replace_sas(_py3_byte_to_str(request.body))
+            request.body = self._replace_sas(_byte_to_str(request.body))
         return request
 
     def process_response(self, response):
         if is_text_payload(response) and response["body"]["string"]:
-            body_string = _py3_byte_to_str(response["body"]["string"])
+            body_string = _byte_to_str(response["body"]["string"])
             response["body"]["string"] = self._replace_sas(body_string)
         return response
 
@@ -64,7 +64,7 @@ class BatchAccountKeyReplacer(RecordingProcessor):
         body = None
 
         if is_text_payload(request) and request.body:
-            body_string = _py3_byte_to_str(request.body)
+            body_string = _byte_to_str(request.body)
             body = json.loads(body_string)
 
         pattern = r"/providers/Microsoft\.Batch/batchAccounts/[^/]+/(list|regenerate)Keys$"
@@ -85,7 +85,7 @@ class BatchAccountKeyReplacer(RecordingProcessor):
 
     def process_response(self, response):
         if is_text_payload(response) and response['body']['string']:
-            body_string = _py3_byte_to_str(response['body']['string'])
+            body_string = _byte_to_str(response['body']['string'])
 
             if self._activated:
                 body = json.loads(body_string)
@@ -137,7 +137,7 @@ class KeyReplacement:
         return "".join([self.KEY_PREFIX, str(self._key_index), self.KEY_SUFFIX])
 
 
-def _py3_byte_to_str(byte_or_str):
+def _byte_to_str(byte_or_str):
     try:
         return str(byte_or_str, 'utf-8') if isinstance(byte_or_str, bytes) else byte_or_str
     except TypeError:  # python 2 doesn't allow decoding through str

@@ -8,8 +8,8 @@ from knack.util import CLIError
 
 def validate_alert_status(namespace):
     lower_status = namespace.status.lower()
-    if lower_status not in ['dismiss', 'activate', 'resolve']:
-        raise CLIError('--status can only accept "dismiss", "activate" or "resolve" values')
+    if lower_status not in ['dismiss', 'activate', 'resolve', 'inprogress']:
+        raise CLIError('--status can only accept "Dismiss", "Activate", "InProgress" or "Resolve" values')
 
 
 def validate_auto_provisioning_toggle(namespace):

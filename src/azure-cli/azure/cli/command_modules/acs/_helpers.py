@@ -6,7 +6,7 @@
 import re
 from typing import Any, List, TypeVar
 
-from azure.cli.command_modules.acs._client_factory import cf_snapshots, get_msi_client
+from azure.cli.command_modules.acs._client_factory import get_snapshots_client, get_msi_client
 from azure.cli.core.azclierror import (
     AzureInternalError,
     AzureResponseError,
@@ -64,6 +64,18 @@ def safe_lower(obj: Any) -> Any:
     return obj
 
 
+def get_property_from_dict_or_object(obj, property_name) -> Any:
+    """Get the value corresponding to the property name from a dictionary or object.
+
+    Note: Would raise exception if the property does not exist.
+
+    :return: Any
+    """
+    if isinstance(obj, dict):
+        return obj[property_name]
+    return getattr(obj, property_name)
+
+
 def check_is_msi_cluster(mc: ManagedCluster) -> bool:
     """Check `mc` object to determine whether managed identity is enabled.
 
@@ -83,6 +95,16 @@ def check_is_private_cluster(mc: ManagedCluster) -> bool:
     """
     if mc and mc.api_server_access_profile:
         return bool(mc.api_server_access_profile.enable_private_cluster)
+    return False
+
+
+def check_is_managed_aad_cluster(mc: ManagedCluster) -> bool:
+    """Check `mc` object to determine whether managed aad is enabled.
+
+    :return: bool
+    """
+    if mc and mc.aad_profile is not None and mc.aad_profile.managed:
+        return True
     return False
 
 
@@ -121,14 +143,15 @@ def get_snapshot_by_snapshot_id(cli_ctx, snapshot_id):
     snapshot_id = snapshot_id.lower()
     match = _re_snapshot_resource_id.search(snapshot_id)
     if match:
+        subscription_id = match.group(1)
         resource_group_name = match.group(2)
         snapshot_name = match.group(3)
-        return get_snapshot(cli_ctx, resource_group_name, snapshot_name)
+        return get_snapshot(cli_ctx, subscription_id, resource_group_name, snapshot_name)
     raise InvalidArgumentValueError("Cannot parse snapshot name from provided resource id '{}'.".format(snapshot_id))
 
 
-def get_snapshot(cli_ctx, resource_group_name, snapshot_name):
-    snapshot_client = cf_snapshots(cli_ctx)
+def get_snapshot(cli_ctx, subscription_id, resource_group_name, snapshot_name):
+    snapshot_client = get_snapshots_client(cli_ctx, subscription_id=subscription_id)
     try:
         snapshot = snapshot_client.get(resource_group_name, snapshot_name)
     # track 2 sdk raise exception from azure.core.exceptions

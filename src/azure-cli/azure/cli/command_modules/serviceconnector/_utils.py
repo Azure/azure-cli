@@ -4,12 +4,22 @@
 # --------------------------------------------------------------------------------------------
 
 import time
-from knack.util import todict
+from knack.log import get_logger
+from knack.util import todict, CLIError
 from msrestazure.tools import parse_resource_id
 from azure.cli.core.azclierror import (
     ValidationError,
     CLIInternalError
 )
+from azure.cli.core._profile import Profile
+from ._resource_config import (
+    SOURCE_RESOURCES_USERTOKEN,
+    TARGET_RESOURCES_USERTOKEN,
+    RESOURCE
+)
+
+
+logger = get_logger(__name__)
 
 
 def should_load_source(source):
@@ -40,7 +50,8 @@ def generate_random_string(length=5, prefix='', lower_only=False, ensure_complex
     import string
 
     if lower_only and ensure_complexity:
-        raise CLIInternalError('lower_only and ensure_complexity can not both be specified to True')
+        raise CLIInternalError(
+            'lower_only and ensure_complexity can not both be specified to True')
     if ensure_complexity and length < 8:
         raise CLIInternalError('ensure_complexity needs length >= 8')
 
@@ -49,7 +60,8 @@ def generate_random_string(length=5, prefix='', lower_only=False, ensure_complex
         character_set = string.ascii_lowercase
 
     while True:
-        randstr = '{}{}'.format(prefix, ''.join(random.sample(character_set, length)))
+        randstr = '{}{}'.format(prefix, ''.join(
+            random.sample(character_set, length)))
         lowers = [c for c in randstr if c.islower()]
         uppers = [c for c in randstr if c.isupper()]
         numbers = [c for c in randstr if c.isnumeric()]
@@ -59,28 +71,34 @@ def generate_random_string(length=5, prefix='', lower_only=False, ensure_complex
     return randstr
 
 
-def run_cli_cmd(cmd, retry=0):
+def run_cli_cmd(cmd, retry=0, interval=0, should_retry_func=None):
     '''Run a CLI command
     :param cmd: The CLI command to be executed
     :param retry: The times to re-try
+    :param interval: The seconds wait before retry
     '''
     import json
     import subprocess
 
-    output = subprocess.run(cmd, shell=True, check=False, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    if output.returncode != 0:
+    output = subprocess.run(cmd, shell=True, check=False,
+                            stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    logger.debug(output)
+    if output.returncode != 0 or (should_retry_func and should_retry_func(output)):
         if retry:
-            run_cli_cmd(cmd, retry - 1)
-        else:
-            raise CLIInternalError('Command execution failed, command is: '
-                                   '{}, error message is: {}'.format(cmd, output.stderr))
-
-    return json.loads(output.stdout) if output.stdout else None
+            time.sleep(interval)
+            return run_cli_cmd(cmd, retry - 1, interval)
+        err = output.stderr.decode(encoding='UTF-8', errors='ignore')
+        raise CLIInternalError('Command execution failed, command is: '
+                               '{}, error message is: \n {}'.format(cmd, err))
+    try:
+        return json.loads(output.stdout.decode(encoding='UTF-8', errors='ignore')) if output.stdout else None
+    except ValueError as e:
+        logger.debug(e)
+        return output.stdout or None
 
 
 def set_user_token_header(client, cli_ctx):
     '''Set user token header to work around OBO'''
-    from azure.cli.core._profile import Profile
 
     # pylint: disable=protected-access
     # HACK: set custom header to work around OBO
@@ -88,8 +106,16 @@ def set_user_token_header(client, cli_ctx):
     creds, _, _ = profile.get_raw_token()
     client._client._config.headers_policy._headers['x-ms-serviceconnector-user-token'] = creds[1]
     # HACK: hide token header
-    client._config.logging_policy.headers_to_redact.append('x-ms-serviceconnector-user-token')
+    client._config.logging_policy.headers_to_redact.append(
+        'x-ms-serviceconnector-user-token')
 
+    return client
+
+
+def set_user_token_by_source_and_target(client, cli_ctx, source, target):
+    '''Set user token header to work around OBO according to source and target'''
+    if source in SOURCE_RESOURCES_USERTOKEN or target in TARGET_RESOURCES_USERTOKEN:
+        return set_user_token_header(client, cli_ctx)
     return client
 
 
@@ -98,16 +124,14 @@ def provider_is_registered(subscription=None):
     subs_arg = ''
     if subscription:
         subs_arg = '--subscription {}'.format(subscription)
-    output = run_cli_cmd('az provider show -n Microsoft.ServiceLinker {}'.format(subs_arg))
+    output = run_cli_cmd(
+        'az provider show -n Microsoft.ServiceLinker {}'.format(subs_arg))
     if output.get('registrationState') == 'NotRegistered':
         return False
     return True
 
 
 def register_provider(subscription=None):
-    from knack.log import get_logger
-    logger = get_logger(__name__)
-
     logger.warning('Provider Microsoft.ServiceLinker is not registered, '
                    'trying to register. This usually takes 1-2 minutes.')
 
@@ -116,7 +140,8 @@ def register_provider(subscription=None):
         subs_arg = '--subscription {}'.format(subscription)
 
     # register the provider
-    run_cli_cmd('az provider register -n Microsoft.ServiceLinker {}'.format(subs_arg))
+    run_cli_cmd(
+        'az provider register -n Microsoft.ServiceLinker {}'.format(subs_arg))
 
     # verify the registration, 30 * 10s polling the result
     MAX_RETRY_TIMES = 30
@@ -125,7 +150,8 @@ def register_provider(subscription=None):
     count = 0
     while count < MAX_RETRY_TIMES:
         time.sleep(RETRY_INTERVAL)
-        output = run_cli_cmd('az provider show -n Microsoft.ServiceLinker {}'.format(subs_arg))
+        output = run_cli_cmd(
+            'az provider show -n Microsoft.ServiceLinker {}'.format(subs_arg))
         current_state = output.get('registrationState')
         if current_state == 'Registered':
             return True
@@ -155,18 +181,19 @@ def auto_register(func, *args, **kwargs):
         if ex.error and ex.error.code == 'SubscriptionNotRegistered':
             if register_provider():
                 return func(*args, **kwargs_backup)
-            raise CLIInternalError('Registeration failed, please manually run command '
+            raise CLIInternalError('Registration failed, please manually run command '
                                    '`az provider register -n Microsoft.ServiceLinker` to register the provider.')
         # target subscription is not registered, raw check
         if ex.error and ex.error.code == 'UnauthorizedResourceAccess' and 'not registered' in ex.error.message:
             if 'parameters' in kwargs_backup and 'target_id' in kwargs_backup.get('parameters'):
-                segments = parse_resource_id(kwargs_backup.get('parameters').get('target_id'))
+                segments = parse_resource_id(
+                    kwargs_backup.get('parameters').get('target_id'))
                 target_subs = segments.get('subscription')
                 # double check whether target subscription is registered
                 if not provider_is_registered(target_subs):
                     if register_provider(target_subs):
                         return func(*args, **kwargs_backup)
-                    raise CLIInternalError('Registeration failed, please manually run command '
+                    raise CLIInternalError('Registration failed, please manually run command '
                                            '`az provider register -n Microsoft.ServiceLinker --subscription {}` '
                                            'to register the provider.'.format(target_subs))
         raise ex
@@ -174,32 +201,43 @@ def auto_register(func, *args, **kwargs):
 
 def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id):
     from ._validators import get_source_resource_name
-    from knack.log import get_logger
-    logger = get_logger(__name__)
 
-    logger.warning('get valid key vualt reference connection')
-    all_connections = todict(client.list(resource_uri=source_id))
+    logger.warning('get valid key vault reference connection')
     key_vault_connections = []
-    for connection in all_connections:  # pylint: disable=not-an-iterable
-        if connection.get('targetId') == key_vault_id:
+    for connection in client.list(resource_uri=source_id):
+        connection = todict(connection)
+        if connection.get('targetService', dict()).get('id') == key_vault_id:
             key_vault_connections.append(connection)
 
     source_name = get_source_resource_name(cmd)
-    auth_info = get_auth_if_no_valid_key_vault_connection(logger, source_name, source_id, key_vault_connections)
+    auth_info = get_auth_if_no_valid_key_vault_connection(
+        source_name, source_id, key_vault_connections)
     if not auth_info:
         return
 
     # No Valid Key Vault Connection, Create
     logger.warning('no valid key vault connection found. Creating...')
 
-    from ._resource_config import CLIENT_TYPE
+    from ._resource_config import (
+        CLIENT_TYPE
+    )
 
     connection_name = generate_random_string(prefix='keyvault_')
     parameters = {
-        'target_id': key_vault_id,
+        'target_service': {
+            "type": "AzureResource",
+            "id": key_vault_id
+        },
         'auth_info': auth_info,
-        'client_type': CLIENT_TYPE.Dotnet,  # Key Vault Configuration are same across all client types
+        # Key Vault Configuration are same across all client types
+        'client_type': CLIENT_TYPE.Dotnet,
     }
+
+    if source_name == RESOURCE.KubernetesCluster:
+        parameters['target_service']['resource_properties'] = {
+            'type': 'KeyVault',
+            'connect_as_kubernetes_csi_driver': True,
+        }
 
     return auto_register(client.begin_create_or_update,
                          resource_uri=source_id,
@@ -207,13 +245,12 @@ def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, k
                          parameters=parameters)
 
 
-def get_auth_if_no_valid_key_vault_connection(logger, source_name, source_id, key_vault_connections):
+def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_connections):
     auth_type = 'systemAssignedIdentity'
     client_id = None
     subscription_id = None
 
     if key_vault_connections:
-        from ._resource_config import RESOURCE
         from msrestazure.tools import (
             is_valid_resource_id
         )
@@ -221,8 +258,10 @@ def get_auth_if_no_valid_key_vault_connection(logger, source_name, source_id, ke
         # https://docs.microsoft.com/azure/app-service/app-service-key-vault-references
         if source_name == RESOURCE.WebApp:
             try:
-                webapp = run_cli_cmd('az rest -u {}?api-version=2020-09-01 -o json'.format(source_id))
-                reference_identity = webapp.get('properties').get('keyVaultReferenceIdentity')
+                webapp = run_cli_cmd(
+                    'az rest -u {}?api-version=2020-09-01 -o json'.format(source_id))
+                reference_identity = webapp.get(
+                    'properties').get('keyVaultReferenceIdentity')
             except Exception as e:
                 raise ValidationError('{}. Unable to get "properties.keyVaultReferenceIdentity" from {}.'
                                       'Please check your source id is correct.'.format(e, source_id))
@@ -232,11 +271,13 @@ def get_auth_if_no_valid_key_vault_connection(logger, source_name, source_id, ke
                 segments = parse_resource_id(reference_identity)
                 subscription_id = segments.get('subscription')
                 try:
-                    identity = webapp.get('identity').get('userAssignedIdentities').get(reference_identity)
+                    identity = webapp.get('identity').get(
+                        'userAssignedIdentities').get(reference_identity)
                     client_id = identity.get('clientId')
                 except Exception:  # pylint: disable=broad-except
                     try:
-                        identity = run_cli_cmd('az identity show --ids {} -o json'.format(reference_identity))
+                        identity = run_cli_cmd(
+                            'az identity show --ids {} -o json'.format(reference_identity))
                         client_id = identity.get('clientId')
                     except Exception:  # pylint: disable=broad-except
                         pass
@@ -246,15 +287,27 @@ def get_auth_if_no_valid_key_vault_connection(logger, source_name, source_id, ke
                 for connection in key_vault_connections:
                     auth_info = connection.get('authInfo')
                     if auth_info.get('clientId') == client_id and auth_info.get('subscriptionId') == subscription_id:
-                        logger.warning('key vualt reference connection: %s', connection.get('id'))
+                        logger.warning(
+                            'key vault reference connection: %s', connection.get('id'))
                         return
             else:  # System Identity
                 for connection in key_vault_connections:
                     if connection.get('authInfo').get('authType') == auth_type:
-                        logger.warning('key vualt reference connection: %s', connection.get('id'))
+                        logger.warning(
+                            'key vault reference connection: %s', connection.get('id'))
                         return
+
+        # any connection with csi enabled is a valid connection
+        elif source_name == RESOURCE.KubernetesCluster:
+            for connection in key_vault_connections:
+                if connection.get('target_service', dict()).get(
+                        'resource_properties', dict()).get('connect_as_kubernetes_csi_driver'):
+                    return
+            return {'authType': 'userAssignedIdentity'}
+
         else:
-            logger.warning('key vualt reference connection: %s', key_vault_connections[0].get('id'))
+            logger.warning('key vault reference connection: %s',
+                           key_vault_connections[0].get('id'))
             return
 
     auth_info = {
@@ -264,3 +317,121 @@ def get_auth_if_no_valid_key_vault_connection(logger, source_name, source_id, ke
         auth_info['clientId'] = client_id
         auth_info['subscriptionId'] = subscription_id
     return auth_info
+
+
+def is_packaged_installed(package_name):
+    import pkg_resources
+    installed_packages = pkg_resources.working_set
+    # pylint: disable=not-an-iterable
+    pkg_installed = any((package_name) in d.key.lower()
+                        for d in installed_packages)
+    return pkg_installed
+
+
+def get_object_id_of_current_user():
+    signed_in_user = run_cli_cmd('az account show').get('user')
+    user_type = signed_in_user.get('type')
+    try:
+        if user_type == 'user':
+            user_info = run_cli_cmd('az ad signed-in-user show')
+            user_object_id = user_info.get('objectId') if user_info.get(
+                'objectId') else user_info.get('id')
+            return user_object_id
+        if user_type == 'servicePrincipal':
+            user_info = run_cli_cmd(
+                f'az ad sp show --id {signed_in_user.get("name")}')
+            user_object_id = user_info.get('id')
+            return user_object_id
+    except CLIInternalError as e:
+        if 'AADSTS530003' in e.error_msg:
+            logger.warning(
+                'Please ask your IT department for help to join this device to Azure Active Directory.')
+        raise e
+
+
+def get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto,
+                             user_identity_auth_info, system_identity_auth_info,
+                             service_principal_auth_info_secret, new_addon):
+    all_auth_info = []
+    if secret_auth_info is not None:
+        all_auth_info.append(secret_auth_info)
+    if secret_auth_info_auto is not None:
+        all_auth_info.append(secret_auth_info_auto)
+    if user_identity_auth_info is not None:
+        all_auth_info.append(user_identity_auth_info)
+    if system_identity_auth_info is not None:
+        all_auth_info.append(system_identity_auth_info)
+    if service_principal_auth_info_secret is not None:
+        all_auth_info.append(service_principal_auth_info_secret)
+    if not new_addon and len(all_auth_info) != 1:
+        raise ValidationError('Only one auth info is needed')
+    auth_info = all_auth_info[0] if len(all_auth_info) == 1 else None
+    return auth_info
+
+
+def get_local_conn_auth_info(secret_auth_info, secret_auth_info_auto,
+                             user_account_auth_info, service_principal_auth_info_secret):
+    all_auth_info = []
+    if secret_auth_info is not None:
+        all_auth_info.append(secret_auth_info)
+    if secret_auth_info_auto is not None:
+        all_auth_info.append(secret_auth_info_auto)
+    if user_account_auth_info is not None:
+        all_auth_info.append(user_account_auth_info)
+    if service_principal_auth_info_secret is not None:
+        all_auth_info.append(service_principal_auth_info_secret)
+    auth_info = all_auth_info[0] if len(all_auth_info) == 1 else None
+    return auth_info
+
+
+def _get_azext_module(extension_name, module_name):
+    try:
+        # Adding the installed extension in the path
+        from azure.cli.core.extension.operations import add_extension_to_path
+        add_extension_to_path(extension_name)
+        # Import the extension module
+        from importlib import import_module
+        azext_custom = import_module(module_name)
+        return azext_custom
+    except ImportError as ie:
+        raise CLIInternalError(ie)
+
+
+def _get_or_add_extension(cmd, extension_name, extension_module, update=False):
+    from azure.cli.core.extension import (
+        ExtensionNotInstalledException, get_extension)
+    try:
+        get_extension(extension_name)
+        if update:
+            return _update_extension(cmd, extension_name, extension_module)
+    except ExtensionNotInstalledException:
+        return _install_extension(cmd, extension_name)
+    return True
+
+
+def _update_extension(cmd, extension_name):
+    from azure.cli.core.extension import ExtensionNotInstalledException
+    try:
+        from azure.cli.core.extension import operations
+        operations.update_extension(cmd=cmd, extension_name=extension_name)
+        operations.reload_extension(extension_name=extension_name)
+    except CLIError as err:
+        logger.info(err)
+    except ExtensionNotInstalledException as err:
+        logger.debug(err)
+        return False
+    except ModuleNotFoundError as err:
+        logger.debug(err)
+        logger.error(
+            "Error occurred attempting to load the extension module. Use --debug for more information.")
+        return False
+    return True
+
+
+def _install_extension(cmd, extension_name):
+    try:
+        from azure.cli.core.extension import operations
+        operations.add_extension(cmd=cmd, extension_name=extension_name)
+    except Exception:  # nopa pylint: disable=broad-except
+        return False
+    return True

@@ -13,7 +13,8 @@ from knack.log import get_logger
 from msrest.exceptions import ValidationError
 from msrestazure.tools import resource_id
 
-NETWORK_CONTRIBUTOR = '4d97b98b-1d4f-4787-a291-c67834d212e7'
+ROLE_NETWORK_CONTRIBUTOR = '4d97b98b-1d4f-4787-a291-c67834d212e7'
+ROLE_READER = 'acdd72a7-3385-48ef-bd42-f606fba81ae7'
 
 logger = get_logger(__name__)
 
@@ -36,7 +37,7 @@ def _create_role_assignment(auth_client, resource, params):
             logger.warning("%s; retry %d of %d", ex, retries, max_retries)
 
 
-def assign_network_contributor_to_resource(cli_ctx, resource, object_id):
+def assign_role_to_resource(cli_ctx, resource, object_id, role_name):
     auth_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION)
 
     RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
@@ -47,7 +48,7 @@ def assign_network_contributor_to_resource(cli_ctx, resource, object_id):
         subscription=get_subscription_id(cli_ctx),
         namespace='Microsoft.Authorization',
         type='roleDefinitions',
-        name=NETWORK_CONTRIBUTOR,
+        name=role_name,
     )
 
     _create_role_assignment(auth_client, resource, RoleAssignmentCreateParameters(
@@ -57,14 +58,14 @@ def assign_network_contributor_to_resource(cli_ctx, resource, object_id):
     ))
 
 
-def has_network_contributor_on_resource(cli_ctx, resource, object_id):
+def has_role_assignment_on_resource(cli_ctx, resource, object_id, role_name):
     auth_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION)
 
     role_definition_id = resource_id(
         subscription=get_subscription_id(cli_ctx),
         namespace='Microsoft.Authorization',
         type='roleDefinitions',
-        name=NETWORK_CONTRIBUTOR,
+        name=role_name,
     )
 
     for assignment in auth_client.role_assignments.list_for_scope(resource):

@@ -11,64 +11,12 @@ from azure.cli.testsdk import (
     record_only,
     live_only
 )
-from azure.cli.testsdk.scenario_tests import RecordingProcessor
-from azure.cli.testsdk.scenario_tests.utilities import is_text_payload
 from azure.cli.command_modules.serviceconnector._resource_config import (
     RESOURCE,
     SOURCE_RESOURCES,
     TARGET_RESOURCES
 )
-
-
-class CredentialReplacer(RecordingProcessor):
-
-    def recursive_hide(self, props):
-        # hide sensitive data recursively
-        fake_content = 'hidden'
-        sensitive_data = ['password=', 'key=']
-
-        if isinstance(props, dict):
-            for key, val in props.items():
-                props[key] = self.recursive_hide(val)
-        elif isinstance(props, list):
-            for index, val in enumerate(props):
-                props[index] = self.recursive_hide(val)
-        elif isinstance(props, str):
-            for data in sensitive_data:
-                if data in props.lower():
-                    props = fake_content
-
-        return props
-
-    def process_request(self, request):
-        import json
-
-        # hide secrets in request body
-        if is_text_payload(request) and request.body and json.loads(request.body):
-            body = self.recursive_hide(json.loads(request.body))
-            request.body = json.dumps(body)
-
-        # hide token in header
-        if 'x-ms-cupertino-test-token' in request.headers:
-            request.headers['x-ms-cupertino-test-token'] = 'hidden'
-        if 'x-ms-serviceconnector-user-token' in request.headers:
-            request.headers['x-ms-serviceconnector-user-token'] = 'hidden'
-        
-        return request
-
-    def process_response(self, response):
-        import json
-
-        if is_text_payload(response) and response['body']['string']:
-            try:
-                body = json.loads(response['body']['string'])
-                body = self.recursive_hide(body)
-                response['body']['string'] = json.dumps(body)
-            except Exception:
-                pass
-
-        return response
-
+from ._test_utils import CredentialReplacer
 
 class WebAppConnectionScenarioTest(ScenarioTest):
 
@@ -84,8 +32,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-config-app2',
-            'config_store': 'servicelinker-app-configuration2'
+            'site': 'servicelinker-config-app',
+            'config_store': 'servicelinker-app-configuration'
         })
 
         # prepare params
@@ -95,8 +43,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # create connection
         self.cmd('webapp connection create appconfig --connection {} --source-id {} --target-id {} '
-                 '--system-identity --client-type python'.format(name, source_id, target_id))
-        
+                 '--system-identity --client-type python --customized-keys AZURE_APPCONFIGURATION_ENDPOINT=test_endpoint'.format(name, source_id, target_id))
+
         # list connection
         connections = self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
@@ -108,9 +56,14 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         ).get_output_in_json()
         connection_id = connections[0].get('id')
 
-        # list configuration
-        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+        # update connection
+        self.cmd('webapp connection update appconfig --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
 
+        # list configuration
+        configs = self.cmd('webapp connection list-configuration --id {}'.format(connection_id)).get_output_in_json()
+        self.assertTrue(any(x.get('name') == 'test_endpoint' for x in configs.get('configurations')))
+        
         # validate connection
         self.cmd('webapp connection validate --id {}'.format(connection_id))
 
@@ -127,8 +80,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-win-group',
             'target_resource_group': 'servicelinker-test-win-group',
-            'site': 'servicelinker-cassandra-cosmos-asp-app2',
-            'account': 'servicelinker-cassandra-cosmos2',
+            'site': 'servicelinker-cassandra-cosmos-asp-app',
+            'account': 'servicelinker-cassandra-cosmos',
             'key_space': 'coredb'
         })
 
@@ -140,7 +93,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # create connection
         self.cmd('webapp connection create cosmos-cassandra --connection {} --source-id {} --target-id {} '
                  '--system-identity --client-type python'.format(name, source_id, target_id))
-        
+
         # list connection
         connections = self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
@@ -151,6 +104,10 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update cosmos-cassandra --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
         self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
@@ -171,8 +128,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-win-group',
             'target_resource_group': 'servicelinker-test-win-group',
-            'site': 'servicelinker-gremlin-cosmos-asp-app2',
-            'account': 'servicelinker-gremlin-cosmos2',
+            'site': 'servicelinker-gremlin-cosmos-asp-app',
+            'account': 'servicelinker-gremlin-cosmos',
             'database': 'coreDB',
             'graph': 'MyItem'
         })
@@ -185,7 +142,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # create connection
         self.cmd('webapp connection create cosmos-gremlin --connection {} --source-id {} --target-id {} '
                  '--system-identity --client-type python'.format(name, source_id, target_id))
-        
+
         # list connection
         connections = self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
@@ -196,6 +153,10 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update cosmos-gremlin --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
         self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
@@ -216,8 +177,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-win-group',
             'target_resource_group': 'servicelinker-test-win-group',
-            'site': 'servicelinker-mongo-cosmos-asp-app2',
-            'account': 'servicelinker-mongo-cosmos2',
+            'site': 'servicelinker-mongo-cosmos-asp-app',
+            'account': 'servicelinker-mongo-cosmos',
             'database': 'coreDB'
         })
 
@@ -229,7 +190,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # create connection
         self.cmd('webapp connection create cosmos-mongo --connection {} --source-id {} --target-id {} '
                  '--system-identity --client-type dotnet'.format(name, source_id, target_id))
-        
+
         # list connection
         connections = self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
@@ -240,6 +201,10 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update cosmos-mongo --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
         self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
@@ -253,15 +218,14 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
-
     @record_only()
     def test_webapp_cosmossql_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-win-group',
             'target_resource_group': 'servicelinker-test-win-group',
-            'site': 'servicelinker-sql-cosmos-asp-app2',
-            'account': 'servicelinker-sql-cosmos2',
+            'site': 'servicelinker-sql-cosmos-asp-app',
+            'account': 'servicelinker-sql-cosmos',
             'database': 'coreDB'
         })
 
@@ -273,7 +237,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # create connection
         self.cmd('webapp connection create cosmos-sql --connection {} --source-id {} --target-id {} '
                  '--system-identity --client-type python'.format(name, source_id, target_id))
-        
+
         # list connection
         connections = self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
@@ -284,6 +248,10 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update cosmos-sql --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
         self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
@@ -304,8 +272,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-win-group',
             'target_resource_group': 'servicelinker-test-win-group',
-            'site': 'servicelinker-table-cosmos-asp-app2',
-            'account': 'servicelinker-table-cosmos2',
+            'site': 'servicelinker-table-cosmos-asp-app',
+            'account': 'servicelinker-table-cosmos',
             'table': 'MyItem'
         })
 
@@ -317,7 +285,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # create connection
         self.cmd('webapp connection create cosmos-table --connection {} --source-id {} --target-id {} '
                  '--system-identity --client-type python'.format(name, source_id, target_id))
-        
+
         # list connection
         connections = self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
@@ -328,6 +296,10 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update cosmos-table --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
         self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
@@ -348,8 +320,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-eventhub-app2',
-            'namespace': 'servicelinkertesteventhub2' 
+            'site': 'servicelinker-eventhub-app',
+            'namespace': 'servicelinkertesteventhub'
         })
 
         # prepare params
@@ -360,7 +332,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # create connection
         self.cmd('webapp connection create eventhub --connection {} --source-id {} --target-id {} '
                  '--system-identity --client-type python'.format(name, source_id, target_id))
-        
+
         # list connection
         connections = self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
@@ -371,6 +343,10 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update eventhub --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
         self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
@@ -391,8 +367,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-servicebus-app2',
-            'namespace': 'servicelinkertestservicebus2' 
+            'site': 'servicelinker-servicebus-app',
+            'namespace': 'servicelinkertestservicebus'
         })
 
         # prepare params
@@ -403,7 +379,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # create connection
         self.cmd('webapp connection create servicebus --connection {} --source-id {} --target-id {} '
                  '--system-identity --client-type python'.format(name, source_id, target_id))
-        
+
         # list connection
         connections = self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
@@ -414,6 +390,10 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update servicebus --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
         self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
@@ -434,8 +414,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-signalr-app2',
-            'signalr': 'servicelinker-signalr2' 
+            'site': 'servicelinker-signalr-app',
+            'signalr': 'servicelinker-signalr'
         })
 
         # prepare params
@@ -446,7 +426,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # create connection
         self.cmd('webapp connection create signalr --connection {} --source-id {} --target-id {} '
                  '--system-identity --client-type dotnet'.format(name, source_id, target_id))
-        
+
         # list connection
         connections = self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
@@ -457,6 +437,57 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update signalr --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    @record_only()
+    def test_webapp_webpubsub_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-webpubsub-app',
+            'webpubsub': 'servicelinker-webpubsub'
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.WebPubSub).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create webpubsub --connection {} --source-id {} --target-id {} '
+                 '--system-identity --client-type dotnet'.format(name, source_id, target_id))
+
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].clientType', 'dotnet')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update webpubsub --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
         self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
@@ -477,8 +508,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-keyvault-app2',
-            'vault': 'servicelinker-test-kv2'
+            'site': 'servicelinker-keyvault-app',
+            'vault': 'servicelinker-test-kv'
         })
 
         # prepare params
@@ -489,7 +520,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # create connection
         self.cmd('webapp connection create keyvault --connection {} --source-id {} --target-id {} '
                  '--system-identity --client-type python'.format(name, source_id, target_id))
-        
+
         # list connection
         connections = self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
@@ -500,6 +531,10 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update keyvault --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
         self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
@@ -520,8 +555,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-flexiblepostgresql-app2',
-            'server': 'servicelinker-flexiblepostgresql2',
+            'site': 'servicelinker-flexiblepostgresql-app',
+            'server': 'servicelinker-flexiblepostgresql',
             'database': 'test'
         })
 
@@ -538,7 +573,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # create connection
         self.cmd('webapp connection create postgres-flexible --connection {} --source-id {} --target-id {} '
                  '--secret name={} secret={} --client-type python'.format(name, source_id, target_id, user, password))
-        
+
         # list connection
         connections = self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
@@ -549,6 +584,11 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update postgres-flexible --id {} --client-type dotnet '
+                 '--secret name={} secret={}'.format(connection_id, user, password),
+                 checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
         self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
@@ -582,7 +622,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # create connection
         self.cmd('webapp connection create redis --connection {} --source-id {} --target-id {} '
                  '--secret --client-type python'.format(name, source_id, target_id))
-        
+
         # list connection
         connections = self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
@@ -593,6 +633,10 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update redis --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
         self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
@@ -626,7 +670,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # create connection
         self.cmd('webapp connection create redis-enterprise --connection {} --source-id {} --target-id {} '
                  '--secret --client-type python'.format(name, source_id, target_id))
-        
+
         # list connection
         connections = self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
@@ -637,6 +681,10 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update redis-enterprise --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
         self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
@@ -657,8 +705,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-mysql-app2',
-            'server': 'servicelinker-mysql2',
+            'site': 'servicelinker-mysql-app',
+            'server': 'servicelinker-mysql',
             'database': 'mysqlDB'
         })
 
@@ -675,7 +723,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # create connection
         self.cmd('webapp connection create mysql --connection {} --source-id {} --target-id {} '
                  '--secret name={} secret={} --client-type python'.format(name, source_id, target_id, user, password))
-        
+
         # list connection
         connections = self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
@@ -686,6 +734,11 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update mysql --id {} --client-type dotnet '
+                 '--secret name={} secret={}'.format(connection_id, user, password),
+                 checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
         self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
@@ -699,15 +752,14 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
-
     @record_only()
     def test_webapp_mysqlflexible_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-flexiblemysql-app2',
-            'server': 'servicelinker-flexible-mysql2',
+            'site': 'servicelinker-flexiblemysql-app',
+            'server': 'servicelinker-flexible-mysql',
             'database': 'mysqlDB'
         })
 
@@ -715,6 +767,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         user = 'servicelinker'
         password = self.cmd('keyvault secret show --vault-name cupertino-kv-test -n TestDbPassword')\
             .get_output_in_json().get('value')
+        keyvaultUri = "https://cupertino-kv-test.vault.azure.net/secrets/TestDbPassword"
 
         # prepare params
         name = 'testconn'
@@ -724,7 +777,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # create connection
         self.cmd('webapp connection create mysql-flexible --connection {} --source-id {} --target-id {} '
                  '--secret name={} secret={} --client-type python'.format(name, source_id, target_id, user, password))
-        
+
         # list connection
         connections = self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
@@ -735,6 +788,11 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update mysql-flexible --id {} --client-type dotnet '
+                 '--secret name={} secret-uri={}'.format(connection_id, user, keyvaultUri),
+                 checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
         self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
@@ -755,8 +813,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-postgresql-app2',
-            'server': 'servicelinker-postgresql2',
+            'site': 'servicelinker-postgresql-app',
+            'server': 'servicelinker-postgresql',
             'database': 'test'
         })
 
@@ -773,7 +831,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # create connection
         self.cmd('webapp connection create postgres --connection {} --source-id {} --target-id {} '
                  '--secret name={} secret={} --client-type python'.format(name, source_id, target_id, user, password))
-        
+
         # list connection
         connections = self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
@@ -784,6 +842,11 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update postgres --id {} --client-type dotnet '
+                 '--secret name={} secret={}'.format(connection_id, user, password),
+                 checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
         self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
@@ -799,7 +862,6 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     @record_only()
-    @unittest.skip('Temporarily removed from supported target resources')
     def test_webapp_sql_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -823,7 +885,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # create connection
         self.cmd('webapp connection create sql --connection {} --source-id {} --target-id {} '
                  '--secret name={} secret={} --client-type python'.format(name, source_id, target_id, user, password))
-        
+
         # list connection
         connections = self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
@@ -834,6 +896,11 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update sql --id {} --client-type dotnet '
+                 '--secret name={} secret={}'.format(connection_id, user, password),
+                 checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
         self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
@@ -849,13 +916,58 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     @record_only()
+    def test_webapp_sql_connection_string(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-sql-app',
+            'server': 'servicelinker-sql',
+            'database': 'handler-test'
+        })
+
+        # prepare password
+        user = 'servicelinker'
+        password = self.cmd('keyvault secret show --vault-name cupertino-kv-test -n TestDbPassword')\
+            .get_output_in_json().get('value')
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.Sql).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create sql --connection {} --source-id {} --target-id {} --secret name={} secret={} '
+                 '--client-type dotnet --config-connstr'.format(name, source_id, target_id, user, password))
+
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'secret'),
+                self.check('[0].clientType', 'dotnet-connectionString')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update sql --id {} --client-type dotnet --config-connstr '
+                 '--secret name={} secret={}'.format(connection_id, user, password),
+                 checks = [ self.check('clientType', 'dotnet-connectionString') ])
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    @record_only()
     def test_webapp_storageblob_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-storageblob-app2',
-            'account': 'servicelinkerstorage2'
+            'site': 'servicelinker-storageblob-app',
+            'account': 'servicelinkerstorage'
         })
 
         # prepare params
@@ -866,7 +978,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # create connection
         self.cmd('webapp connection create storage-blob --connection {} --source-id {} --target-id {} '
                  '--system-identity --client-type python'.format(name, source_id, target_id))
-        
+
         # list connection
         connections = self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
@@ -877,6 +989,10 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update storage-blob --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
         self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
@@ -892,7 +1008,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     @live_only()
-    @unittest.skip('"run_cli_cmd" could only work at live mode, please comment it for live test')
+    # @unittest.skip('"run_cli_cmd" could only work at live mode, please comment it for live test')
     def test_webapp_storageblob_keyvault_ref(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -987,7 +1103,6 @@ class WebAppConnectionScenarioTest(ScenarioTest):
                 self.check('vNetSolution.type', "serviceEndpoint"),
             ]
         ).get_output_in_json()
-        print(update_result)
 
         # update connection vnet solution
         self.cmd('webapp connection update storage-blob --id {} '
@@ -1003,6 +1118,67 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         for conn in self.cmd('webapp connection list --source-id {}'.format(source_id)).get_output_in_json():
             self.cmd('webapp connection delete --id {} --yes'.format(conn.get('id')))
 
+    @record_only()
+    def test_webapp_storageblob_vnet_pe(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-storageblob-app',
+            'account': 'servicelinkerteststorage',
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(
+            RESOURCE.StorageBlob).format(**self.kwargs)
+
+        # create connection
+        output = self.cmd('webapp connection create storage-blob --connection {} --source-id {} --target-id {} '
+                          '--secret --client-type python --private-endpoint'.format(name, source_id, target_id)).get_output_in_json()
+
+        id = output.get('id')
+        self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks=[
+                self.check('length(@)', 1),
+            ]
+        )
+
+        self.cmd(
+            'webapp connection show --id {}'.format(id),
+            checks=[
+                self.check('vNetSolution.type', "privateLink"),
+            ]
+        )
+
+        # update connection without vNetSolution
+        result = self.cmd('webapp connection update storage-blob --id {} '
+                          '--secret'.format(id)).get_output_in_json()
+
+        update_result = self.cmd(
+            'webapp connection show --id {}'.format(id),
+            checks=[
+                self.check('vNetSolution.type', "privateLink"),
+            ]
+        ).get_output_in_json()
+
+        # update connection vnet solution
+        self.cmd('webapp connection update storage-blob --id {} '
+                 '--secret --private-endpoint false'.format(id))
+
+        update_result = self.cmd(
+            'webapp connection show --id {}'.format(id),
+            checks=[
+                self.check('vNetSolution', None),
+            ]
+        ).get_output_in_json()
+
+        for conn in self.cmd('webapp connection list --source-id {}'.format(source_id)).get_output_in_json():
+            self.cmd(
+                'webapp connection delete --id {} --yes'.format(conn.get('id')))
+
 
 
 
@@ -1012,8 +1188,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-storagequeue-app2',
-            'account': 'servicelinkerstorage2'
+            'site': 'servicelinker-storagequeue-app',
+            'account': 'servicelinkerstorage'
         })
 
         # prepare params
@@ -1024,7 +1200,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # create connection
         self.cmd('webapp connection create storage-queue --connection {} --source-id {} --target-id {} '
                  '--secret --client-type python'.format(name, source_id, target_id))
-        
+
         # list connection
         connections = self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
@@ -1035,6 +1211,10 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
+
+        # update connection
+        self.cmd('webapp connection update storage-queue --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
 
         # list configuration
         self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
@@ -1055,8 +1235,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-storagefile-app2',
-            'account': 'servicelinkerstorage2'
+            'site': 'servicelinker-storagefile-app',
+            'account': 'servicelinkerstorage'
         })
 
         # prepare params
@@ -1079,6 +1259,10 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         ).get_output_in_json()
         connection_id = connections[0].get('id')
 
+        # update connection
+        self.cmd('webapp connection update storage-file --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
+
         # list configuration
         self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
 
@@ -1098,8 +1282,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-storagetable-app2',
-            'account': 'servicelinkerstorage2'
+            'site': 'servicelinker-storagetable-app',
+            'account': 'servicelinkerstorage'
         })
 
         # prepare params
@@ -1122,6 +1306,10 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         ).get_output_in_json()
         connection_id = connections[0].get('id')
 
+        # update connection
+        self.cmd('webapp connection update storage-table --id {} --client-type dotnet'.format(connection_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
+
         # list configuration
         self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
 
@@ -1141,7 +1329,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-kafka-app2',
+            'site': 'servicelinker-kafka-app',
         })
 
         # prepare params
@@ -1164,9 +1352,14 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         ).get_output_in_json()
         connection_id = connections[0].get('id')
 
-        # list configuration
-        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+        # update connection
+        self.cmd('webapp connection update confluent-cloud --connection {} '
+                 '--source-id {} --client-type dotnet --kafka-secret Secret --customized-keys CONFLUENTCLOUD_KAFKA_BOOTSTRAPSERVER=test_server'.format(name, source_id),
+                 checks = [ self.check('clientType', 'dotnet') ])
 
+        # list configuration
+        configs = self.cmd('webapp connection list-configuration --id {}'.format(connection_id)).get_output_in_json()
+        self.assertTrue(any(x.get('name') == 'test_server' for x in configs.get('configurations')))
         # validate connection
         self.cmd('webapp connection validate --id {}'.format(connection_id))
 
@@ -1178,7 +1371,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     @live_only()
-    @unittest.skip('"run_cli_cmd" could only work at live mode, please comment it for live test')
+    # @unittest.skip('"run_cli_cmd" could only work at live mode, please comment it for live test')
     def test_webapp_confluentkafka_keyvault_ref(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),

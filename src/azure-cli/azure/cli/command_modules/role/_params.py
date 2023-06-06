@@ -6,7 +6,6 @@
 # pylint: disable=line-too-long
 
 from knack.arguments import CLIArgumentType
-from azure.graphrbac.models import ConsentType
 
 from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag
 from azure.cli.core.commands.validators import validate_file_or_dict
@@ -14,9 +13,11 @@ from azure.cli.core.commands.validators import validate_file_or_dict
 
 
 from azure.cli.command_modules.role._completers import get_role_definition_name_completion_list
-from azure.cli.command_modules.role._validators import validate_group, validate_member_id, validate_cert, VARIANT_GROUP_ID_ARGS
+from azure.cli.command_modules.role._validators import validate_group, validate_cert, VARIANT_GROUP_ID_ARGS
 
 name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
+
+JSON_PROPERTY_HELP = "Should be JSON file path or in-line JSON string. See examples for details"
 
 
 # pylint: disable=too-many-statements
@@ -32,41 +33,124 @@ def load_arguments(self, _):
         c.argument('app_id', help='application id')
         c.argument('application_object_id', options_list=('--object-id',))
         c.argument('display_name', help='the display name of the application')
-        c.argument('homepage', help='the url where users can sign in and use your app.')
+
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id')
-        c.argument('identifier_uris', nargs='+', help='space-separated unique URIs that Azure AD can use for this app.')
-        c.argument('reply_urls', nargs='+', help='space-separated URIs to which Azure AD will redirect in response to an OAuth 2.0 request. The value does not need to be a physical endpoint, but must be a valid URI.')
-        c.argument('start_date', help="Date or datetime at which credentials become valid(e.g. '2017-01-01T01:00:00+00:00' or '2017-01-01'). Default value is current time")
-        c.argument('end_date', help="Date or datetime after which credentials expire(e.g. '2017-12-31T11:59:59+00:00' or '2017-12-31'). Default value is one year after current time")
-        c.argument('available_to_other_tenants', help='the application can be used from any Azure AD tenants', arg_type=get_three_state_flag())
-        c.argument('key_value', help='the value for the key credentials associated with the application')
-        # TODO: Update these with **enum_choice_list(...) when SDK supports proper enums
-        c.argument('key_type', help='the type of the key credentials associated with the application', arg_type=get_enum_type(['AsymmetricX509Cert', 'Password', 'Symmetric'], default='AsymmetricX509Cert'))
-        c.argument('key_usage', help='the usage of the key credentials associated with the application.', arg_type=get_enum_type(['Sign', 'Verify'], default='Verify'))
-        c.argument('password', help="app password, aka 'client secret'")
-        c.argument('oauth2_allow_implicit_flow', arg_type=get_three_state_flag(), help='whether to allow implicit grant flow for OAuth2')
-        c.argument('required_resource_accesses', type=validate_file_or_dict,
-                   help="resource scopes and roles the application requires access to. Should be in manifest json format. See examples below for details")
-        c.argument('app_roles', type=validate_file_or_dict,
-                   help="declare the roles you want to associate with your application. Should be in manifest json format. See examples below for details")
-        c.argument('optional_claims', type=validate_file_or_dict,
-                   help="declare the optional claims for the application. Should be in manifest json format. See examples below for details. Please reference https://docs.microsoft.com/azure/active-directory/develop/active-directory-optional-claims#optionalclaim-type for optional claim properties.")
-        c.argument('native_app', arg_type=get_three_state_flag(), help="an application which can be installed on a user's device or computer")
-        c.argument('credential_description', help="the description of the password")
+        c.argument('identifier_uris', nargs='+',
+                   help='space-separated values. '
+                        'Also known as App ID URI, this value is set when an application is used as a resource app. '
+                        'The identifierUris acts as the prefix for the scopes you\'ll reference in your API\'s code, '
+                        'and it must be globally unique. You can use the default value provided, which is in the '
+                        'form api://<application-client-id>, or specify a more readable URI like '
+                        'https://contoso.com/api.')
+
+        c.argument('is_fallback_public_client', arg_type=get_three_state_flag(),
+                   help="Specifies the fallback application type as public client, such as an installed application "
+                        "running on a mobile device. The default value is false which means the fallback application "
+                        "type is confidential client such as a web app.")
+        c.argument('sign_in_audience',
+                   arg_type=get_enum_type(['AzureADMyOrg', 'AzureADMultipleOrgs', 'AzureADandPersonalMicrosoftAccount',
+                                           'PersonalMicrosoftAccount']),
+                   help='Specifies the Microsoft accounts that are supported for the current application.')
+
+        # web
+        c.argument('web_home_page_url', arg_group='web', help='Home page or landing page of the application.')
+        c.argument('web_redirect_uris', arg_group='web', nargs='+',
+                   help='Space-separated values. '
+                        'Specifies the URLs where user tokens are sent for sign-in, or the redirect URIs '
+                        'where OAuth 2.0 authorization codes and access tokens are sent.')
+        c.argument('enable_id_token_issuance', arg_group='web',
+                   arg_type=get_three_state_flag(),
+                   help='Specifies whether this web application can request an ID token using the OAuth 2.0 '
+                        'implicit flow.')
+        c.argument('enable_access_token_issuance', arg_group='web',
+                   arg_type=get_three_state_flag(),
+                   help='Specifies whether this web application can request an access token using the OAuth 2.0 '
+                        'implicit flow.')
+
+        # publicClient
+        c.argument('public_client_redirect_uris', arg_group='publicClient', nargs='+',
+                   help='Space-separated values. '
+                        'Specifies the URLs where user tokens are sent for sign-in, or the redirect URIs '
+                        'where OAuth 2.0 authorization codes and access tokens are sent.')
+
+        # keyCredential
+        c.argument('start_date', arg_group='keyCredential',
+                   help="Date or datetime at which credentials become valid (e.g. '2017-01-01T01:00:00+00:00' or "
+                        "'2017-01-01'). Default value is current time")
+        c.argument('end_date', arg_group='keyCredential',
+                   help="Date or datetime after which credentials expire (e.g. '2017-12-31T11:59:59+00:00' or "
+                        "'2017-12-31'). Default value is one year after current time")
+        c.argument('key_value', arg_group='keyCredential',
+                   help='the value for the key credentials associated with the application')
+        c.argument('key_type', arg_group='keyCredential',
+                   help='the type of the key credentials associated with the application',
+                   arg_type=get_enum_type(['AsymmetricX509Cert', 'Password', 'Symmetric'],
+                                          default='AsymmetricX509Cert'))
+        c.argument('key_usage', arg_group='keyCredential',
+                   help='the usage of the key credentials associated with the application.',
+                   arg_type=get_enum_type(['Sign', 'Verify'], default='Verify'))
+        c.argument('key_display_name', arg_group='keyCredential',
+                   help="Friendly name for the key.")
+
+        # JSON properties
+        c.argument('required_resource_accesses', arg_group='JSON property', type=validate_file_or_dict,
+                   help="Specifies the resources that the application needs to access. This property also specifies "
+                        "the set of delegated permissions and application roles that it needs for each of those "
+                        "resources. This configuration of access to the required resources drives the consent "
+                        "experience. " + JSON_PROPERTY_HELP)
+        c.argument('app_roles', arg_group='JSON property', type=validate_file_or_dict,
+                   help="The collection of roles assigned to the application. With app role assignments, these roles "
+                        "can be assigned to users, groups, or service principals associated with other applications. " +
+                        JSON_PROPERTY_HELP)
+        c.argument('optional_claims', arg_group='JSON property', type=validate_file_or_dict,
+                   help="Application developers can configure optional claims in their Azure AD applications to "
+                        "specify the claims that are sent to their application by the Microsoft security token "
+                        "service. For more information, see https://docs.microsoft.com/azure/active-directory/develop"
+                        "/active-directory-optional-claims. " + JSON_PROPERTY_HELP)
 
     with self.argument_context('ad app owner list') as c:
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the application')
 
     with self.argument_context('ad app permission') as c:
-        # https://github.com/Azure/azure-rest-api-specs/blob/32e56f061668a1bf1eeca6209000fad4c09afca8/specification/graphrbac/data-plane/Microsoft.GraphRbac/stable/1.6/graphrbac.json#L2817
-        c.argument('api', help='Specify `RequiredResourceAccess.resourceAppId` - The unique identifier for the resource that the application requires access to. This should be equal to the appId declared on the target resource application.')
-        # https://github.com/Azure/azure-rest-api-specs/blob/32e56f061668a1bf1eeca6209000fad4c09afca8/specification/graphrbac/data-plane/Microsoft.GraphRbac/stable/1.6/graphrbac.json#L2833
-        c.argument('api_permissions', nargs='+', help='Specify `ResourceAccess.id` - The unique identifier for one of the OAuth2Permission or AppRole instances that the resource application exposes. Space-separated list of `<resource-access-id>=<type>`.')
-        c.argument('expires', help='Expiry date for the permissions in years. e.g. 1, 2 or "never"')
-        c.argument('scope', help='Specifies the value of the scope claim that the resource application should expect in the OAuth 2.0 access token, e.g. User.Read')
-        c.argument('consent_type', arg_type=get_enum_type(ConsentType), default=ConsentType.all_principals.value,
-                   help="Indicates if consent was provided by the administrator (on behalf of the organization) or by an individual.")
-        c.argument('principal_id', help='If --consent-type is "Principal", this argument specifies the object of the user that granted consent and applies only for that user.')
+        # https://docs.microsoft.com/en-us/graph/api/resources/requiredresourceaccess
+        c.argument('api',
+                   help='requiredResourceAccess.resourceAppId - '
+                        'The unique identifier for the resource that the application requires access to. '
+                        'This should be equal to the appId declared on the target resource application.')
+        # https://docs.microsoft.com/en-us/graph/api/resources/resourceaccess
+        c.argument('api_permissions', nargs='+',
+                   help='Space-separated list of {id}={type}. '
+                        "{id} is resourceAccess.id - The unique identifier for one of the oauth2PermissionScopes or "
+                        'appRole instances that the resource application exposes. '
+                        "{type} is resourceAccess.type - Specifies whether the id property references an "
+                        'oauth2PermissionScopes or an appRole. The possible values are: Scope (for OAuth 2.0 '
+                        'permission scopes) or Role (for app roles).')
+
+    with self.argument_context('ad app permission grant') as c:
+        c.argument('identifier', options_list=['--id, --client-id'],
+                   help='The id of the client service principal for the application which is authorized to act on '
+                        'behalf of a signed-in user when accessing an API.')
+        c.argument('scope', nargs='*',
+                   help='A space-separated list of the claim values for delegated permissions which should be included '
+                        'in access tokens for the resource application (the API). '
+                        'For example, openid User.Read GroupMember.Read.All. '
+                        'Each claim value should match the value field of one of the delegated permissions defined by '
+                        'the API, listed in the oauth2PermissionScopes property of the resource service principal.')
+        c.argument('consent_type', arg_type=get_enum_type(["AllPrincipals", "Principal"]), default="AllPrincipals",
+                   help="Indicates whether authorization is granted for the client application to impersonate all "
+                        "users or only a specific user. 'AllPrincipals' indicates authorization to impersonate all "
+                        "users. 'Principal' indicates authorization to impersonate a specific user. Consent on behalf "
+                        "of all users can be granted by an administrator. Non-admin users may be authorized to consent "
+                        "on behalf of themselves in some cases, for some delegated permissions.")
+        c.argument('principal_id',
+                   help='The id of the user on behalf of whom the client is authorized to access the resource, '
+                        "when consentType is 'Principal'. If consentType is 'AllPrincipals' this value is null. "
+                        "Required when consentType is 'Principal'.")
+        c.argument('api', options_list=['--api, --resource-id'],
+                   help='The id of the resource service principal to which access is authorized. This identifies the '
+                        'API which the client is authorized to attempt to call on behalf of a signed-in user.')
+
+    with self.argument_context('ad app permission list-grants') as c:
         c.argument('show_resource_name', options_list=['--show-resource-name', '-r'],
                    arg_type=get_three_state_flag(), help="show resource's display name")
 
@@ -84,8 +168,15 @@ def load_arguments(self, _):
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the associated application')
 
     with self.argument_context('ad sp create-for-rbac') as c:
-        c.argument('scopes', nargs='+')
-        c.argument('role', completer=get_role_definition_name_completion_list)
+        c.argument('display_name', options_list=['--display-name', '--name', '-n'],
+                   help='Display name of the service principal. If not present, default to azure-cli-%Y-%m-%d-%H-%M-%S '
+                        'where the suffix is the time of creation.')
+        c.argument('scopes', nargs='+',
+                   help="Space-separated list of scopes the service principal's role assignment applies to. e.g., "
+                        "subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, "
+                        "/subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM")
+        c.argument('role', completer=get_role_definition_name_completion_list,
+                   help='Role of the service principal.')
         c.argument('skip_assignment', arg_type=get_three_state_flag(),
                    deprecate_info=c.deprecate(target='--skip-assignment', hide=True), help='No-op.')
         c.argument('show_auth_for_sdk', options_list='--sdk-auth', deprecate_info=c.deprecate(target='--sdk-auth'),
@@ -94,35 +185,49 @@ def load_arguments(self, _):
     with self.argument_context('ad sp owner list') as c:
         c.argument('identifier', options_list=['--id'], help='service principal name, or object id or the service principal')
 
-    for item in ['create-for-rbac', 'credential reset']:
-        with self.argument_context('ad sp {}'.format(item)) as c:
-            c.argument('name', name_arg_type)
-            c.argument('cert', arg_group='Credential', validator=validate_cert)
-            c.argument('years', type=int, default=None, arg_group='Credential')
+    for item in ['ad app credential reset', 'ad sp credential reset', 'ad sp create-for-rbac']:
+        with self.argument_context(item) as c:
+            # general credential arguments
+            c.argument('years', type=int, default=None, arg_group='Credential',
+                       help='Number of years for which the credentials will be valid. Default: 1 year')
+            c.argument('append', action='store_true', arg_group='Credential',
+                       help='Append the new credential instead of overwriting.')
             c.argument('end_date', default=None, arg_group='Credential',
-                       help="Finer grain of expiry time if '--years' is insufficient, e.g. '2020-12-31T11:59:59+00:00' or '2299-12-31'")
-            c.argument('create_cert', action='store_true', arg_group='Credential')
-            c.argument('keyvault', arg_group='Credential')
-            c.argument('append', action='store_true', help='Append the new credential instead of overwriting.')
-            c.argument('credential_description', help="the description of the password", arg_group='Credential')
+                       help="Finer grain of expiry time if '--years' is insufficient, e.g. '2020-12-31T11:59:59+00:00' "
+                            "or '2299-12-31'")
 
-    with self.argument_context('ad sp credential reset') as c:
-        c.argument('password', options_list=['--password', '-p'], arg_group='Credential',
-                   help="If missing, CLI will generate a strong password")
+            # keyCredential arguments
+            c.argument('cert', arg_group='keyCredential', validator=validate_cert,
+                       help='Certificate to use for credentials. When used with `--keyvault,`, indicates the name of the '
+                            'cert to use or create. Otherwise, supply a PEM or DER formatted public certificate string. '
+                            'Use `@{path}` to load from a file. Do not include private key info.')
+            c.argument('create_cert', arg_group='keyCredential', action='store_true',
+                       help='Create a self-signed certificate to use for the credential. Only the current OS user has '
+                            'read/write permission to this certificate. Use with `--keyvault` to create the certificate in '
+                            'Key Vault. Otherwise, a certificate will be created locally.')
+            c.argument('keyvault', arg_group='keyCredential',
+                       help='Name or ID of a KeyVault to use for creating or retrieving certificates.')
 
-    with self.argument_context('ad app credential reset') as c:
-        c.argument('name', options_list=['--id'], help='identifier uri, application id, or object id')
-        c.argument('cert', arg_group='Credential', validator=validate_cert, help='Certificate to use for credentials')
-        c.argument('password', options_list=['--password', '-p'], arg_group='Credential')
-        c.argument('years', type=int, default=None, arg_group='Credential', help='Number of years for which the credentials will be valid')
-        c.argument('create_cert', action='store_true', arg_group='Credential', help='Create a self-signed certificate to use for the credential')
-        c.argument('keyvault', arg_group='Credential', help='Name or ID of a KeyVault to use for creating or retrieving certificates.')
-        c.argument('append', action='store_true', help='Append the new credential instead of overwriting.')
+    # --display-name in `ad sp create-for-rbac` is for the sp, not credential, so we only apply it to `credential reset`
+    # commands.
+    for item in ['ad app credential reset', 'ad sp credential reset']:
+        with self.argument_context(item) as c:
+            c.argument('display_name', arg_group='Credential',
+                       help="Friendly name for the credential.")
 
-    for item in ['ad sp credential delete', 'ad sp credential list', 'ad app credential delete', 'ad app credential list']:
+    for item in ['ad app credential list', 'ad app credential delete',
+                 'ad sp credential list', 'ad sp credential delete']:
         with self.argument_context(item) as c:
             c.argument('key_id', help='credential key id')
-            c.argument('cert', action='store_true', help='a certificate based credential')
+            c.argument('cert', action='store_true', help='Operate on certificate credentials')
+
+    with self.argument_context('ad app federated-credential') as c:
+        c.argument('app_identifier', options_list=['--id'],
+                   help="Application's appId, identifierUri, or id (formerly known as objectId)")
+        c.argument('federated_identity_credential_id_or_name', options_list=['--federated-credential-id'],
+                   help='ID or name of the federated identity credential')
+        c.argument('parameters', type=validate_file_or_dict,
+                   help='Parameters for creating federated identity credential. ' + JSON_PROPERTY_HELP)
 
     with self.argument_context('ad') as c:
         c.argument('display_name', help='object\'s display name or its prefix')
@@ -136,11 +241,25 @@ def load_arguments(self, _):
         c.argument('force_change_password_next_login', arg_type=get_three_state_flag(), help='Require the user to change their password the next time they log in. Only valid when --password is specified')
         c.argument('account_enabled', arg_type=get_three_state_flag(), help='enable the user account')
         c.argument('password', help='user password')
-        c.argument('upn_or_object_id', options_list=['--id', c.deprecate(target='--upn-or-object-id', redirect='--id', hide=True)], help='The object ID or principal name of the user for which to get information')
+        c.argument('upn_or_object_id', options_list=['--id'],
+                   help='The object ID or principal name of the user for which to get information')
+        c.argument('force_change_password_next_sign_in', arg_type=get_three_state_flag(),
+                   help='If the user must change her password on the next login.')
+
+    with self.argument_context('ad user create') as c:
+        c.argument('immutable_id', help="This must be specified if you are using a federated domain for "
+                                        "the user's userPrincipalName (UPN) property when creating a new user account."
+                                        " It is used to associate an on-premises Active Directory user account with "
+                                        "their Azure AD user object.")
+        c.argument('user_principal_name',
+                   help="The user principal name (someuser@contoso.com). It must contain one of the verified domains "
+                        "for the tenant.")
 
     with self.argument_context('ad user get-member-groups') as c:
-        c.argument('security_enabled_only', action='store_true',
-                   help='If true, only membership in security-enabled groups should be checked. Otherwise, membership in all groups should be checked.')
+        c.argument('security_enabled_only', arg_type=get_three_state_flag(),
+                   help='true to specify that only security groups that the entity is a member of should be returned; '
+                        'false to specify that all groups and directory roles that the entity is a member of should be '
+                        'returned.')
 
     group_help_msg = "group's object id or display name(prefix also works if there is a unique match)"
     with self.argument_context('ad group') as c:
@@ -158,11 +277,14 @@ def load_arguments(self, _):
 
     member_id_help_msg = 'The object ID of the contact, group, user, or service principal'
     with self.argument_context('ad group get-member-groups') as c:
-        c.argument('security_enabled_only', arg_type=get_three_state_flag(), default=False, required=False)
+        c.argument('security_enabled_only', arg_type=get_three_state_flag(),
+                   help='true to specify that only security groups that the entity is a member of should be returned; '
+                        'false to specify that all groups and directory roles that the entity is a member of should be '
+                        'returned.')
         c.extra('cmd')
 
-    with self.argument_context('ad group member add') as c:
-        c.argument('url', options_list='--member-id', validator=validate_member_id, help=member_id_help_msg)
+    # with self.argument_context('ad group member add') as c:
+    #     c.argument('url', options_list='--member-id', validator=validate_member_id, help=member_id_help_msg)
 
     for item in ['member add', 'member check', 'member list', 'member remove', 'delete']:
         with self.argument_context('ad group {}'.format(item)) as c:
@@ -179,7 +301,6 @@ def load_arguments(self, _):
         c.argument('resource_group_name', options_list=['--resource-group', '-g'], help='use it only if the role or assignment was added at the level of a resource group')
 
     with self.argument_context('role assignment') as c:
-        c.argument('role_assignment_name', options_list=['--name', '-n'])
         c.argument('role', help='role name or id', completer=get_role_definition_name_completion_list)
         c.argument('show_all', options_list=['--all'], action='store_true', help='show all assignments under the current subscription')
         c.argument('include_inherited', action='store_true', help='include assignments applied on parent scopes')
@@ -194,6 +315,8 @@ def load_arguments(self, _):
         c.argument('description', is_preview=True, min_api='2020-04-01-preview', help='Description of role assignment.')
         c.argument('condition', is_preview=True, min_api='2020-04-01-preview', help='Condition under which the user can be granted permission.')
         c.argument('condition_version', is_preview=True, min_api='2020-04-01-preview', help='Version of the condition syntax. If --condition is specified without --condition-version, default to 2.0.')
+        c.argument('assignment_name', name_arg_type,
+                   help='A GUID for the role assignment. It must be unique and different for each role assignment. If omitted, a new GUID is generetd.')
 
     time_help = ('The {} of the query in the format of %Y-%m-%dT%H:%M:%SZ, e.g. 2000-12-31T12:59:59Z. Defaults to {}')
     with self.argument_context('role assignment list-changelogs') as c:

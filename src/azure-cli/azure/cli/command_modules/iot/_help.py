@@ -18,56 +18,6 @@ type: group
 short-summary: Manage Azure IoT Hub Device Provisioning Service.
 """
 
-helps['iot dps access-policy'] = """
-type: group
-short-summary: Manage shared access policies for an Azure IoT Hub Device Provisioning Service instance.
-"""
-
-helps['iot dps access-policy create'] = """
-type: command
-short-summary: Create a new shared access policy in an Azure IoT Hub Device Provisioning Service instance.
-examples:
-  - name: Create a new shared access policy in an Azure IoT Hub Device Provisioning Service instance with EnrollmentRead right
-    text: >
-        az iot dps access-policy create --dps-name MyDps --resource-group MyResourceGroup --name MyPolicy --rights EnrollmentRead
-"""
-
-helps['iot dps access-policy delete'] = """
-type: command
-short-summary: Delete a shared access policies in an Azure IoT Hub Device Provisioning Service instance.
-examples:
-  - name: Delete shared access policy 'MyPolicy' in the Azure IoT Hub Device Provisioning Service instance 'MyDps'
-    text: >
-        az iot dps access-policy delete --dps-name MyDps --resource-group MyResourceGroup --name MyPolicy
-"""
-
-helps['iot dps access-policy list'] = """
-type: command
-short-summary: List all shared access policies in an Azure IoT Hub Device Provisioning Service instance.
-examples:
-  - name: List all shared access policies in the Azure IoT Hub Device Provisioning Service instance 'MyDps'
-    text: >
-        az iot dps access-policy list --dps-name MyDps --resource-group MyResourceGroup
-"""
-
-helps['iot dps access-policy show'] = """
-type: command
-short-summary: Show details of a shared access policies in an Azure IoT Hub Device Provisioning Service instance.
-examples:
-  - name: Show details of shared access policy 'MyPolicy' in the Azure IoT Hub Device Provisioning Service instance 'MyDps'
-    text: >
-        az iot dps access-policy show --dps-name MyDps --resource-group MyResourceGroup --name MyPolicy
-"""
-
-helps['iot dps access-policy update'] = """
-type: command
-short-summary: Update a shared access policy in an Azure IoT Hub Device Provisioning Service instance.
-examples:
-  - name: Update shared access policy 'MyPolicy' in an Azure IoT Hub Device Provisioning Service instance with EnrollmentWrite right
-    text: >
-        az iot dps access-policy update --dps-name MyDps --resource-group MyResourceGroup --name MyPolicy --rights EnrollmentWrite
-"""
-
 helps['iot dps policy'] = """
 type: group
 short-summary: Manage shared access policies for an Azure IoT Hub Device Provisioning Service instance.
@@ -234,10 +184,10 @@ short-summary: Create a linked IoT hub in an Azure IoT Hub Device Provisioning S
 examples:
   - name: Create a linked IoT hub in an Azure IoT Hub Device Provisioning Service instance
     text: >
-        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --connection-string HostName=test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=XNBhoasdfhqRlgGnasdfhivtshcwh4bJwe7c0RIGuWsirW0= --location westus
+        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --connection-string "HostName=test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=XNBhoasdfhqRlgGnasdfhivtshcwh4bJwe7c0RIGuWsirW0=" --location westus
   - name: Create a linked IoT hub in an Azure IoT Hub Device Provisioning Service which applies allocation weight and weight being 10
     text: >
-        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --connection-string HostName=test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=XNBhoasdfhqRlgGnasdfhivtshcwh4bJwe7c0RIGuWsirW0= --location westus --allocation-weight 10 --apply-allocation-policy True
+        az iot dps linked-hub create --dps-name MyDps --resource-group MyResourceGroup --connection-string "HostName=test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=XNBhoasdfhqRlgGnasdfhivtshcwh4bJwe7c0RIGuWsirW0=" --location westus --allocation-weight 10 --apply-allocation-policy True
 """
 
 helps['iot dps linked-hub delete'] = """
@@ -894,6 +844,21 @@ examples:
         az iot hub update -n MyIoTHub --disable-local-auth --disable-device-sas false --disable-module-sas true
 """
 
+helps['iot hub wait'] = """
+type: command
+short-summary: Wait until an operation on an IoT Hub instance is complete.
+examples:
+  - name: Wait until an existing IoT Hub instance is created
+    text: >
+        az iot hub wait -n MyIoTHub --created
+  - name: Wait until an IoT Hub instance is deleted
+    text: >
+        az iot hub wait -n MyIoTHub --deleted
+  - name: Wait until an existing IoT Hub instance has an Active state
+    text: >
+        az iot hub wait -n MyIoTHub --custom "properties.state=='Active'"
+"""
+
 helps['iot central'] = """
 type: group
 short-summary: Manage IoT Central resources.
@@ -1008,4 +973,130 @@ examples:
   - name: Remove a system-assigned managed identity from an IoT Central application.
     text: >
         az iot central app identity remove --name my-iotc-app --resource-group MyResourceGroup --system-assigned
+"""
+
+helps['iot central app private-endpoint-connection'] = """
+type: group
+short-summary: Manage private endpoint connection of IoT Central application.
+"""
+
+helps['iot central app private-endpoint-connection approve'] = """
+type: command
+short-summary: Approve a private endpoint connection request for an IoT Central application.
+examples:
+  - name: Approve a private endpoint connection request for an IoT Central application by ID.
+    text: |
+        az iot central app private-endpoint-connection approve --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.IoTCentral/IoTApps/my-iotc-app/privateEndpointConnections/my-iotc-app.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Approve a private endpoint connection request for an IoT Central application by ID.
+    text: |
+        id = (az iot central app show -n my-iotc-app --query "privateEndpointConnections[0].id")
+        az iot central app private-endpoint-connection approve --id $id
+  - name: Approve a private endpoint connection request for an IoT Central application using account name and connection name.
+    text: |
+        az iot central app private-endpoint-connection approve -g myRg --account-name my-iotc-app --name myconnection
+  - name: Approve a private endpoint connection request for an IoT Central application using account name and connection name.
+    text: |
+        name = (az iot central app show -n my-iotc-app --query "privateEndpointConnections[0].name")
+        az iot central app private-endpoint-connection approve -g myRg --account-name my-iotc-app --name $name
+"""
+
+helps['iot central app private-endpoint-connection delete'] = """
+type: command
+short-summary: Delete a private endpoint connection for an IoT Central application.
+examples:
+  - name: Delete a private endpoint connection for an IoT Central application by ID.
+    text: |
+        az iot central app private-endpoint-connection delete --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.IoTCentral/IoTApps/my-iotc-app/privateEndpointConnections/my-iotc-app.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Delete a private endpoint connection for an IoT Central application by ID.
+    text: |
+        id = (az iot central app show -n my-iotc-app --query "privateEndpointConnections[0].id")
+        az iot central app private-endpoint-connection delete --id $id
+  - name: Delete a private endpoint connection for an IoT Central application using account name and connection name.
+    text: |
+        az iot central app private-endpoint-connection delete -g myRg --account-name my-iotc-app --name myconnection
+  - name: Delete a private endpoint connection for an IoT Central application using account name and connection name.
+    text: |
+        name = (az iot central app show -n my-iotc-app --query "privateEndpointConnections[0].name")
+        az iot central app private-endpoint-connection delete -g myRg --account-name my-iotc-app --name $name
+"""
+
+helps['iot central app private-endpoint-connection reject'] = """
+type: command
+short-summary: Reject a private endpoint connection request for an IoT Central application.
+examples:
+  - name: Reject a private endpoint connection request for an IoT Central application by ID.
+    text: |
+        az iot central app private-endpoint-connection reject --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.IoTCentral/IoTApps/my-iotc-app/privateEndpointConnections/my-iotc-app.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Reject a private endpoint connection request for an IoT Central application by ID.
+    text: |
+        id = (az iot central app show -n my-iotc-app --query "privateEndpointConnections[0].id")
+        az iot central app private-endpoint-connection reject --id $id
+  - name: Reject a private endpoint connection request for an IoT Central application app using account name and connection name.
+    text: |
+        az iot central app private-endpoint-connection reject -g myRg --account-name my-iotc-app --name myconnection
+  - name: Reject a private endpoint connection request for an IoT Central application using account name and connection name.
+    text: |
+        name = (az iot central app show -n my-iotc-app --query "privateEndpointConnections[0].name")
+        az iot central app private-endpoint-connection reject -g myRg --account-name my-iotc-app --name $name
+"""
+
+helps['iot central app private-endpoint-connection show'] = """
+type: command
+short-summary: Show details of a private endpoint connection request for an IoT Central application.
+examples:
+  - name: Show details of a private endpoint connection request for an IoT Central application by ID.
+    text: |
+        az iot central app private-endpoint-connection show --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.IoTCentral/IoTApps/my-iotc-app/privateEndpointConnections/my-iotc-app.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Show details of a private endpoint connection request for an IoT Central application by ID.
+    text: |
+        id = (az iot central app show -n my-iotc-app --query "privateEndpointConnections[0].id")
+        az iot central app private-endpoint-connection show --id $id
+  - name: Show details of a private endpoint connection request for an IoT Central application using account name and connection name.
+    text: |
+        az iot central app private-endpoint-connection show -g myRg --account-name my-iotc-app --name myconnection
+  - name: Show details of a private endpoint connection request for an IoT Central application using account name and connection name.
+    text: |
+        name = (az iot central app show -n my-iotc-app --query "privateEndpointConnections[0].name")
+        az iot central app private-endpoint-connection show -g myRg --account-name my-iotc-app --name $name
+"""
+
+helps['iot central app private-endpoint-connection list'] = """
+type: command
+short-summary: List all of the private endpoint connections for an IoT Central application.
+examples:
+  - name: List all of the private endpoint connections in the IoT Central application given the resource group and application name.
+    text: |
+        az iot central app private-endpoint-connection list -g MyResourceGroup --account-name my-iotc-app
+  - name: List all of the private endpoint connections in the IoT Central application given a connection id
+    text: |
+        az iot central app private-endpoint-connection list --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.IoTCentral/IoTApps/my-iotc-app/privateEndpointConnections/my-iotc-app.b56b5a95-0588-4f8b-b348-15db61590a6c"
+"""
+
+helps['iot central app private-link-resource'] = """
+type: group
+short-summary: Manage an IoT Central application private link resources.
+"""
+
+helps['iot central app private-link-resource list'] = """
+type: command
+short-summary: List all of the IoT Central application private link resources in the specified account.
+examples:
+  - name: List all of the private link resources in the IoT Central application given the resource group and application name.
+    text: |
+        az iot central app private-link-resource list -g MyResourceGroup --n my-iotc-app
+  - name: List all of the private link resources in the IoT Central application given a connection id
+    text: |
+        az iot central app private-link-resource list --id PrivateLinkResourceID
+"""
+
+helps['iot central app private-link-resource show'] = """
+type: command
+short-summary: Show details of a private link resource in the specified IoT Central application.
+examples:
+  - name: Show details of the private link resources in the IoT Central application given the resource group application name and group id.
+    text: |
+        az iot central app private-link-resource show -g MyResourceGroup --n my-iotc-app --group-id iotApp
+  - name: Show details of the  private link resources in the IoT Central application given a connection id
+    text: |
+        az iot central app private-link-resource show --id PrivateLinkResourceID
 """

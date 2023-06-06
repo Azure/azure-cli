@@ -7,11 +7,8 @@ import os
 import shutil
 import tempfile
 import unittest
-
-# pylint: skip-file
 from unittest import mock
 
-import requests
 import yaml
 from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_POLICY_ADDON_NAME,
@@ -19,171 +16,31 @@ from azure.cli.command_modules.acs._consts import (
     CONST_KUBE_DASHBOARD_ADDON_NAME,
     CONST_MONITORING_ADDON_NAME,
 )
-from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
 from azure.cli.command_modules.acs.custom import (
-    _acs_browse_internal,
-    _add_role_assignment,
     _get_command_context,
-    _get_default_dns_prefix,
     _update_addons,
-    create_application,
     k8s_install_kubectl,
     k8s_install_kubelogin,
-    list_acs_locations,
     merge_kubernetes_configurations,
 )
-from azure.cli.command_modules.acs.tests.latest.mocks import MockUrlretrieveUrlValidator
-from azure.cli.command_modules.acs.tests.latest.utils import create_kubelogin_zip, get_test_data_file_path
-from azure.cli.core._config import ENV_VAR_PREFIX, GLOBAL_CONFIG_DIR
-from azure.cli.core.cloud import get_active_cloud
-from azure.cli.core.profiles import ResourceType, get_sdk
-from azure.cli.core.util import CLIError
-from azure.graphrbac.models import GraphErrorException
-from azure.mgmt.containerservice.models import (
-    ContainerService,
-    ContainerServiceOrchestratorProfile,
-    ContainerServiceOrchestratorTypes,
+from azure.cli.command_modules.acs.tests.latest.mocks import (
+    MockCLI,
+    MockCmd,
+    MockUrlretrieveUrlValidator,
 )
-from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterAddonProfile
-from knack import CLI
-from msrestazure.azure_exceptions import CloudError
+from azure.cli.command_modules.acs.tests.latest.utils import (
+    create_kubelogin_zip,
+    get_test_data_file_path,
+)
+from azure.cli.core.util import CLIError
+from azure.mgmt.containerservice.v2020_03_01.models import (
+    ManagedClusterAddonProfile,
+)
 
-
-class MockCLI(CLI):
-    def __init__(self):
-        super(MockCLI, self).__init__(cli_name='mock_cli', config_dir=GLOBAL_CONFIG_DIR,
-                                      config_env_var_prefix=ENV_VAR_PREFIX, commands_loader_cls=MockLoader)
-        self.cloud = get_active_cloud(self)
-
-
-class MockLoader(object):
-    def __init__(self, ctx):
-        self.ctx = ctx
-
-    def get_models(self, *attr_args, **_):
-        from azure.cli.core.profiles import get_sdk
-        return get_sdk(self.ctx, ResourceType.MGMT_CONTAINERSERVICE, 'ManagedClusterAddonProfile',
-                       mod='models', operation_group='managed_clusters')
-
-
-class MockCmd(object):
-    def __init__(self, ctx, arguments={}):
-        self.cli_ctx = ctx
-        self.loader = MockLoader(self.cli_ctx)
-        self.arguments = arguments
-
-    def get_models(self, *attr_args, **kwargs):
-        return get_sdk(self.cli_ctx, ResourceType.MGMT_CONTAINERSERVICE, 'ManagedClusterAddonProfile',
-                       mod='models', operation_group='managed_clusters')
 
 class AcsCustomCommandTest(unittest.TestCase):
     def setUp(self):
         self.cli = MockCLI()
-
-    def test_list_acs_locations(self):
-        client, cmd = mock.MagicMock(), mock.MagicMock()
-        regions = list_acs_locations(client, cmd)
-        prodregions = regions["productionRegions"]
-        previewregions = regions["previewRegions"]
-        self.assertListEqual(prodregions, regions_in_prod, "Production regions doesn't match")
-        self.assertListEqual(previewregions, regions_in_preview, "Preview regions doesn't match")
-
-    def test_get_default_dns_prefix(self):
-        name = 'test5678910'
-        resource_group_name = 'resource_group_with_underscore'
-        sub_id = '123456789'
-
-        dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, sub_id)
-        self.assertEqual(dns_name_prefix, "test567891-resourcegroupwit-123456")
-
-        name = '1test5678910'
-        dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, sub_id)
-        self.assertEqual(dns_name_prefix, "a1test5678-resourcegroupwit-123456")
-
-    def test_add_role_assignment_basic(self):
-        role = 'Owner'
-        sp = '1234567'
-        cli_ctx = mock.MagicMock()
-
-        with mock.patch(
-                'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
-            ok = _add_role_assignment(cli_ctx, role, sp, delay=0)
-            create_role_assignment.assert_called_with(cli_ctx, role, sp, True, scope=None)
-            self.assertTrue(ok, 'Expected _add_role_assignment to succeed')
-
-    def test_add_role_assignment_msi_basic(self):
-        role = 'Owner'
-        sp = '1234567'
-        cli_ctx = mock.MagicMock()
-
-        with mock.patch(
-                'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
-            ok = _add_role_assignment(cli_ctx, role, sp, False, delay=0)
-            create_role_assignment.assert_called_with(cli_ctx, role, sp, False, scope=None)
-            self.assertTrue(ok, 'Expected _add_role_assignment with msi to succeed')
-
-    def test_add_role_assignment_exists(self):
-        role = 'Owner'
-        sp = '1234567'
-        cli_ctx = mock.MagicMock()
-
-        with mock.patch(
-                'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
-            resp = requests.Response()
-            resp.status_code = 409
-            resp._content = b'Conflict'
-            err = CloudError(resp)
-            err.message = 'The role assignment already exists.'
-            create_role_assignment.side_effect = err
-            ok = _add_role_assignment(cli_ctx, role, sp, delay=0)
-
-            create_role_assignment.assert_called_with(cli_ctx, role, sp, True, scope=None)
-            self.assertTrue(ok, 'Expected _add_role_assignment to succeed')
-
-    def test_add_role_assignment_fails(self):
-        role = 'Owner'
-        sp = '1234567'
-        cli_ctx = mock.MagicMock()
-
-        with mock.patch(
-                'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
-            resp = requests.Response()
-            resp.status_code = 500
-            resp._content = b'Internal Error'
-            err = CloudError(resp)
-            err.message = 'Internal Error'
-            create_role_assignment.side_effect = err
-            ok = _add_role_assignment(cli_ctx, role, sp, delay=0)
-
-            create_role_assignment.assert_called_with(cli_ctx, role, sp, True, scope=None)
-            self.assertFalse(ok, 'Expected _add_role_assignment to fail')
-
-    @mock.patch('azure.cli.core.commands.client_factory.get_subscription_id')
-    def test_browse_k8s(self, get_subscription_id):
-        acs_info = ContainerService(location="location", orchestrator_profile={}, master_profile={}, linux_profile={})
-        acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
-            orchestrator_type=ContainerServiceOrchestratorTypes.kubernetes)
-        client, cmd = mock.MagicMock(), mock.MagicMock()
-
-        with mock.patch('azure.cli.command_modules.acs.custom._get_acs_info',
-                        return_value=acs_info) as get_acs_info:
-            with mock.patch(
-                    'azure.cli.command_modules.acs.custom._k8s_browse_internal') as k8s_browse:
-                _acs_browse_internal(client, cmd, acs_info, 'resource-group', 'name', False, 'ssh/key/file')
-                get_acs_info.assert_called_once()
-                k8s_browse.assert_called_with('name', acs_info, False, 'ssh/key/file')
-
-    @mock.patch('azure.cli.core.commands.client_factory.get_subscription_id')
-    def test_browse_dcos(self, get_subscription_id):
-        acs_info = ContainerService(location="location", orchestrator_profile={}, master_profile={}, linux_profile={})
-        acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
-            orchestrator_type=ContainerServiceOrchestratorTypes.dcos)
-        client, cmd = mock.MagicMock(), mock.MagicMock()
-
-        with mock.patch(
-                'azure.cli.command_modules.acs.custom._dcos_browse_internal') as dcos_browse:
-            _acs_browse_internal(client, cmd, acs_info, 'resource-group', 'name', False, 'ssh/key/file')
-            dcos_browse.assert_called_with(acs_info, False, 'ssh/key/file')
 
     def test_merge_credentials_non_existent(self):
         self.assertRaises(CLIError, merge_kubernetes_configurations, 'non', 'existent', False)
@@ -607,31 +464,10 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertEqual(merged['users'], expected_users)
         self.assertEqual(merged['current-context'], obj2['current-context'])
 
-    def test_acs_sp_create_failed_with_polished_error_if_due_to_permission(self):
-
-        class FakedError(object):
-            def __init__(self, message):
-                self.message = message
-
-        def _test_deserializer(resp_type, response):
-            err = FakedError('Insufficient privileges to complete the operation')
-            return err
-
-        client = mock.MagicMock()
-        client.create.side_effect = GraphErrorException(_test_deserializer, None)
-
-        # action
-        with self.assertRaises(CLIError) as context:
-            create_application(client, 'acs_sp', 'http://acs_sp', ['http://acs_sp'])
-
-        # assert we handled such error
-        self.assertTrue(
-            'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))
-
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location', return_value='eastus')
-    @mock.patch('azure.cli.command_modules.acs.custom.cf_resource_groups', autospec=True)
-    @mock.patch('azure.cli.command_modules.acs.custom.cf_resources', autospec=True)
-    def test_update_addons(self, rg_def, cf_resource_groups, cf_resources):
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client', autospec=True)
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client', autospec=True)
+    def test_update_addons(self, rg_def, get_resource_groups_client, get_resources_client):
         # http_application_routing enabled
         instance = mock.MagicMock()
         instance.addon_profiles = None
@@ -649,19 +485,12 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertFalse(addon_profile.enabled)
 
         # monitoring added
-        with mock.patch(
-            "azure.cli.command_modules.acs.addonconfiguration.cf_resource_groups",
-            autospec=True,
-        ), mock.patch(
-            "azure.cli.command_modules.acs.addonconfiguration.cf_resources",
-            autospec=True,
-        ):
-            instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
-                                      'clitest000001', 'clitest000001', 'monitoring', enable=True)
-            monitoring_addon_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
-            self.assertTrue(monitoring_addon_profile.enabled)
-            routing_addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
-            self.assertFalse(routing_addon_profile.enabled)
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=True)
+        monitoring_addon_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
+        self.assertTrue(monitoring_addon_profile.enabled)
+        routing_addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
+        self.assertFalse(routing_addon_profile.enabled)
 
         # monitoring disabled, routing enabled
         instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
@@ -731,23 +560,15 @@ class AcsCustomCommandTest(unittest.TestCase):
         # monitoring enabled and then enabled again should error
         instance = mock.Mock()
         instance.addon_profiles = None
-        with mock.patch(
-            "azure.cli.command_modules.acs.addonconfiguration.cf_resource_groups",
-            autospec=True,
-        ), mock.patch(
-            "azure.cli.command_modules.acs.addonconfiguration.cf_resources",
-            autospec=True,
-        ):
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=True)
+        with self.assertRaises(CLIError):
             instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                       'clitest000001', 'clitest000001', 'monitoring', enable=True)
-            with self.assertRaises(CLIError):
-                instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
-                                          'clitest000001', 'clitest000001', 'monitoring', enable=True)
 
         # virtual-node enabled
         instance = mock.MagicMock()
         instance.addon_profiles = None
-        cmd = mock.MagicMock()
         instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'virtual-node', enable=True, subnet_name='foo')
         self.assertIn('aciConnectorLinux', instance.addon_profiles)
@@ -763,7 +584,6 @@ class AcsCustomCommandTest(unittest.TestCase):
         # ingress-appgw enabled
         instance = mock.MagicMock()
         instance.addon_profiles = None
-        cmd = mock.MagicMock()
         instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'ingress-appgw', enable=True, appgw_subnet_cidr='10.2.0.0/16')
         self.assertIn('ingressApplicationGateway', instance.addon_profiles)
@@ -785,8 +605,8 @@ class AcsCustomCommandTest(unittest.TestCase):
             test_location = os.path.join(temp_dir, 'kubectl')
             k8s_install_kubectl(mock.MagicMock(), client_version='1.2.3', install_location=test_location)
             self.assertEqual(mock_url_retrieve.call_count, 1)
-            # 2 warnings, 1st for download result; 2nd for updating PATH
-            self.assertEqual(logger_mock.warning.call_count, 2)  # 2 warnings, one for download result
+            # 3 warnings, 1st for arch, 2nd for download result, 3rd for updating PATH
+            self.assertEqual(logger_mock.warning.call_count, 3)  # 3 warnings, one for download result
         finally:
             shutil.rmtree(temp_dir)
 
@@ -802,7 +622,6 @@ class AcsCustomCommandTest(unittest.TestCase):
         finally:
             shutil.rmtree(temp_dir)
 
-    @unittest.skip('Update api version')
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_k8s_install_kubelogin_emit_warnings(self, logger_mock, mock_url_retrieve):
@@ -810,14 +629,13 @@ class AcsCustomCommandTest(unittest.TestCase):
         try:
             temp_dir = os.path.realpath(tempfile.mkdtemp())  # tempfile.TemporaryDirectory() is no available on 2.7
             test_location = os.path.join(temp_dir, 'kubelogin')
-            k8s_install_kubelogin(mock.MagicMock(), client_version='0.0.4', install_location=test_location)
+            k8s_install_kubelogin(mock.MagicMock(), client_version='0.0.4', install_location=test_location, arch="amd64")
             self.assertEqual(mock_url_retrieve.call_count, 1)
-            # 2 warnings, 1st for download result; 2nd for updating PATH
-            self.assertEqual(logger_mock.warning.call_count, 2)  # 2 warnings, one for download result
+            # 3 warnings, 1st for download result, 2nd for moving file, 3rd for updating PATH
+            self.assertEqual(logger_mock.warning.call_count, 3)  # 3 warnings, one for download result
         finally:
             shutil.rmtree(temp_dir)
 
-    @unittest.skip('Update api version')
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_k8s_install_kubelogin_create_installation_dir(self, logger_mock, mock_url_retrieve):
@@ -825,7 +643,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         try:
             temp_dir = tempfile.mkdtemp()  # tempfile.TemporaryDirectory() is no available on 2.7
             test_location = os.path.join(temp_dir, 'foo', 'kubelogin')
-            k8s_install_kubelogin(mock.MagicMock(), client_version='0.0.4', install_location=test_location)
+            k8s_install_kubelogin(mock.MagicMock(), client_version='0.0.4', install_location=test_location, arch="amd64")
             self.assertTrue(os.path.exists(test_location))
         finally:
             shutil.rmtree(temp_dir)
@@ -854,7 +672,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             test_location = os.path.join(temp_dir, 'foo', 'kubelogin')
             test_ver = '1.2.6'
             test_source_url = 'http://url2'
-            k8s_install_kubelogin(mock.MagicMock(), client_version=test_ver, install_location=test_location, source_url=test_source_url)
+            k8s_install_kubelogin(mock.MagicMock(), client_version=test_ver, install_location=test_location, source_url=test_source_url, arch="amd64")
             mock_url_retrieve.assert_called_with(MockUrlretrieveUrlValidator(test_source_url, test_ver), mock.ANY)
         finally:
             shutil.rmtree(temp_dir)

@@ -32,6 +32,7 @@ def load_command_table(self, _):
     from ._client_factory import cf_kusto_pool
     from ._client_factory import cf_kusto_script
     from ._client_factory import cf_kusto_scripts
+    from ._client_factory import cf_synapse_client_azure_ad_only_authentications_factory
 
     def get_custom_sdk(custom_module, client_factory):
         return CliCommandType(
@@ -205,6 +206,15 @@ def load_command_table(self, _):
     synapse_kusto_script_sdk = CliCommandType(
         operations_tmpl='azure.synapse.artifacts.operations#KqlScriptOperations.{}',
         client_factory=cf_kusto_script,
+    )
+
+    synapse_adonlyauthentications_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations#AzureADOnlyAuthenticationsOperations.{}',
+        client_factory=cf_synapse_client_azure_ad_only_authentications_factory,
+    )
+    synapse_link_connection_sdk = CliCommandType(
+        operations_tmpl='azure.synapse.artifacts.operations#linkconnectionOperations.{}',
+        client_factory=None,
     )
 
     # Management Plane Commands --Workspace
@@ -552,9 +562,6 @@ def load_command_table(self, _):
         g.custom_show_command('export', 'export_sql_script')
         g.custom_command('import', 'create_sql_script', supports_no_wait=True)
 
-    with self.command_group('synapse', is_preview=True):
-        pass
-
     # synapse kusto pool Commands --Managed kusto pool Commands
     with self.command_group('synapse kusto pool',
                             command_type=synapse_kusto_pool_sdk,
@@ -577,3 +584,25 @@ def load_command_table(self, _):
         g.custom_command('list', 'synapse_kusto_script_list', client_factory=cf_kusto_scripts)
         g.custom_command('export', 'synapse_kusto_script_export')
         g.custom_wait_command('wait', 'synapse_kusto_script_show')
+
+    with self.command_group('synapse ad-only-auth', command_type=synapse_adonlyauthentications_sdk,
+                            custom_command_type=get_custom_sdk('adonlyauthentications', cf_synapse_client_azure_ad_only_authentications_factory),
+                            client_factory=cf_synapse_client_azure_ad_only_authentications_factory) as g:
+        g.custom_command('enable', 'synapse_enable_adonly_auth')
+        g.custom_command('disable', 'synapse_disable_adonly_auth')
+        g.command('get', 'list')
+
+    with self.command_group('synapse link-connection', synapse_link_connection_sdk,
+                            custom_command_type=get_custom_sdk('artifacts', None)) as g:
+        g.custom_command('list', 'list_link_connection')
+        g.custom_show_command('show', 'get_link_connection')
+        g.custom_command('delete', 'delete_link_connection')
+        g.custom_command('create', 'create_or_update_link_connection')
+        g.custom_command('update', 'create_or_update_link_connection')
+        g.custom_command('get-status', 'get_link_connection_status')
+        g.custom_command('start ', 'start_link_connection')
+        g.custom_command('stop', 'stop_link_connection')
+        g.custom_command('list-link-tables', 'synapse_list_link_table')
+        g.custom_command('edit-link-tables', 'synapse_edit_link_table')
+        g.custom_command('get-link-tables-status', 'synapse_get_link_tables_status')
+        g.custom_command('update-landing-zone-credential', 'synapse_update_landing_zone_credential')

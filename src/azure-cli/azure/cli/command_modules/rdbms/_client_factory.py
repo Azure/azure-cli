@@ -5,14 +5,12 @@
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.auth.identity import get_environment_credential, AZURE_CLIENT_ID
 
 # pylint: disable=import-outside-toplevel
 
 RM_URI_OVERRIDE = 'AZURE_CLI_RDBMS_RM_URI'
 SUB_ID_OVERRIDE = 'AZURE_CLI_RDBMS_SUB_ID'
-CLIENT_ID = 'AZURE_CLIENT_ID'
-TENANT_ID = 'AZURE_TENANT_ID'
-CLIENT_SECRET = 'AZURE_CLIENT_SECRET'
 
 
 def get_mariadb_management_client(cli_ctx, **_):
@@ -24,13 +22,9 @@ def get_mariadb_management_client(cli_ctx, **_):
     # variable.
     rm_uri_override = getenv(RM_URI_OVERRIDE)
     if rm_uri_override:
-        client_id = getenv(CLIENT_ID)
+        client_id = getenv(AZURE_CLIENT_ID)
         if client_id:
-            from azure.identity import ClientSecretCredential
-            credentials = ClientSecretCredential(
-                client_id=client_id,
-                client_secret=getenv(CLIENT_SECRET),
-                tenant_id=getenv(TENANT_ID))
+            credentials = get_environment_credential()
         else:
             from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()
@@ -52,13 +46,9 @@ def get_mysql_management_client(cli_ctx, **_):
     # variable.
     rm_uri_override = getenv(RM_URI_OVERRIDE)
     if rm_uri_override:
-        client_id = getenv(CLIENT_ID)
+        client_id = getenv(AZURE_CLIENT_ID)
         if client_id:
-            from azure.identity import ClientSecretCredential
-            credentials = ClientSecretCredential(
-                client_id=client_id,
-                client_secret=getenv(CLIENT_SECRET),
-                tenant_id=getenv(TENANT_ID))
+            credentials = get_environment_credential()
         else:
             from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()
@@ -80,13 +70,9 @@ def get_mysql_flexible_management_client(cli_ctx, **_):
     # variable.
     rm_uri_override = getenv(RM_URI_OVERRIDE)
     if rm_uri_override:
-        client_id = getenv(CLIENT_ID)
+        client_id = getenv(AZURE_CLIENT_ID)
         if client_id:
-            from azure.identity import ClientSecretCredential
-            credentials = ClientSecretCredential(
-                client_id=client_id,
-                client_secret=getenv(CLIENT_SECRET),
-                tenant_id=getenv(TENANT_ID))
+            credentials = get_environment_credential()
         else:
             from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()
@@ -108,13 +94,9 @@ def get_postgresql_management_client(cli_ctx, **_):
     # variable.
     rm_uri_override = getenv(RM_URI_OVERRIDE)
     if rm_uri_override:
-        client_id = getenv(CLIENT_ID)
+        client_id = getenv(AZURE_CLIENT_ID)
         if client_id:
-            from azure.identity import ClientSecretCredential
-            credentials = ClientSecretCredential(
-                client_id=client_id,
-                client_secret=getenv(CLIENT_SECRET),
-                tenant_id=getenv(TENANT_ID))
+            credentials = get_environment_credential()
         else:
             from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()
@@ -135,13 +117,9 @@ def get_postgresql_flexible_management_client(cli_ctx, **_):
     # variable.
     rm_uri_override = getenv(RM_URI_OVERRIDE)
     if rm_uri_override:
-        client_id = getenv(CLIENT_ID)
+        client_id = getenv(AZURE_CLIENT_ID)
         if client_id:
-            from azure.identity import ClientSecretCredential
-            credentials = ClientSecretCredential(
-                client_id=client_id,
-                client_secret=getenv(CLIENT_SECRET),
-                tenant_id=getenv(TENANT_ID))
+            credentials = get_environment_credential()
         else:
             from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()
@@ -327,8 +305,24 @@ def cf_mysql_flexible_location_capabilities(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).location_based_capabilities
 
 
+def cf_mysql_flexible_log(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).log_files
+
+
+def cf_mysql_flexible_backups(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).backups
+
+
+def cf_mysql_flexible_adadmin(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).azure_ad_administrators
+
+
 def cf_mysql_check_resource_availability(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).check_name_availability
+
+
+def cf_mysql_check_resource_availability_without_location(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).check_name_availability_without_location
 
 
 def cf_mysql_flexible_private_dns_zone_suffix_operations(cli_ctx, _):
@@ -347,8 +341,20 @@ def cf_postgres_flexible_config(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).configurations
 
 
+def cf_postgres_flexible_replica(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).replicas
+
+
 def cf_postgres_flexible_location_capabilities(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).location_based_capabilities
+
+
+def cf_postgres_flexible_backups(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).backups
+
+
+def cf_postgres_flexible_adadmin(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).administrators
 
 
 def cf_postgres_check_resource_availability(cli_ctx, _):
@@ -359,16 +365,16 @@ def cf_postgres_flexible_db(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).databases
 
 
+def cf_postgres_check_resource_availability_with_location(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).check_name_availability_with_location
+
+
 def cf_postgres_flexible_private_dns_zone_suffix_operations(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).get_private_dns_zone_suffix
 
 
 def resource_client_factory(cli_ctx, subscription_id=None):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, subscription_id=subscription_id)
-
-
-def network_client_factory(cli_ctx, subscription_id=None):
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK, subscription_id=subscription_id)
 
 
 def private_dns_client_factory(cli_ctx, subscription_id=None):

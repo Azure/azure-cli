@@ -14,6 +14,18 @@ def topics_factory(cli_ctx, _):
     return cf_eventgrid(cli_ctx).topics
 
 
+def topic_event_subscriptions_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).topic_event_subscriptions
+
+
+def domain_topic_event_subscriptions_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).domain_topic_event_subscriptions
+
+
+def domain_event_subscriptions_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).domain_event_subscriptions
+
+
 def domains_factory(cli_ctx, _):
     return cf_eventgrid(cli_ctx).domains
 
@@ -46,12 +58,28 @@ def event_channels_factory(cli_ctx, _):
     return cf_eventgrid(cli_ctx).event_channels
 
 
+def channels_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).channels
+
+
 def partner_topics_factory(cli_ctx, _):
     return cf_eventgrid(cli_ctx).partner_topics
 
 
 def partner_topic_event_subscriptions_factory(cli_ctx, _):
     return cf_eventgrid(cli_ctx).partner_topic_event_subscriptions
+
+
+def partner_configurations_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).partner_configurations
+
+
+def partner_destinations_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).partner_destinations
+
+
+def verified_partners_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).verified_partners
 
 
 def event_subscriptions_factory(cli_ctx, _):
