@@ -655,12 +655,6 @@ class ResourceIdType(Enum):
     system_assigned_user_assigned = 'SystemAssigned,UserAssigned'
     none = 'None'
 
-class ServicePrincipalType(Enum):
-    '''
-    Types of service principal.
-    '''
-    system_assigned = 'SystemAssigned'
-    none = 'None'
 
 class ServicePrincipalType(Enum):
     '''
