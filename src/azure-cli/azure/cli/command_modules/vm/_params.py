@@ -42,7 +42,7 @@ def load_arguments(self, _):
     RebootSetting, VMGuestPatchClassificationWindows, VMGuestPatchClassificationLinux = self.get_models('VMGuestPatchRebootSetting', 'VMGuestPatchClassificationWindows', 'VMGuestPatchClassificationLinux')
     GallerySharingPermissionTypes = self.get_models('GallerySharingPermissionTypes', operation_group='shared_galleries')
     ReplicationMode = self.get_models('ReplicationMode', operation_group='gallery_image_versions')
-    DiskControllerTypes, SecurityTypes = self.get_models('DiskControllerTypes', 'SecurityTypes', operation_group='virtual_machines')
+    DiskControllerTypes = self.get_models('DiskControllerTypes', operation_group='virtual_machines')
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')

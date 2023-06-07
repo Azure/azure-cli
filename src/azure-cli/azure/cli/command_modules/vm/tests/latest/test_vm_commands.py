@@ -9057,16 +9057,16 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True)
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_trusted_launch_on_v2_', location='westus')
-    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_trusted_launch_on_v2_', location='eastus')
     def test_enable_trusted_launch_on_v2(self, resource_group):
         self.kwargs.update({
             'vm1': self.create_random_name('vm1', 10),
             'vm2': self.create_random_name('vm2', 10),
             'vm3': self.create_random_name('vm3', 10),
+            'vm4': self.create_random_name('vm4', 10),
             'disk1': self.create_random_name('disk1', 10),
             'disk2': self.create_random_name('disk2', 10),
-            'disk3': self.create_random_name('disk3', 10)
+            'image1': self.create_random_name('image1', 10),
         })
 
         # create Gen2 VM
@@ -9084,29 +9084,35 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
 
         # create Gen1 VM
         self.cmd(
-            'disk create -g {rg} -n {disk2} --image-reference MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --hyper-v-generation V1',
-            checks=[
-                self.check('hyperVGeneration', 'V1')
-            ])
-        self.cmd('vm create -g {rg} -n {vm2} --attach-os-disk {disk2} --nsg-rule NONE --os-type windows')
+            'vm create -g {rg} -n {vm2} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
         self.cmd('vm deallocate -g {rg} -n {vm2}')
+        self.cmd('vm generalize -g {rg} -n {vm2}')
+        self.kwargs['image_id'] = self.cmd('image create -g {rg} -n {image1} --source {vm2} --hyper-v-generation V1',
+                                           checks=[
+                                               self.check('hyperVGeneration', 'V1')
+                                           ]).get_output_in_json()['id']
+        self.cmd(
+            'vm create -g {rg} -n {vm3} --image {image_id} --admin-username clitest1 --generate-ssh-key --nsg-rule NONE')
 
         message = 'Trusted Launch security configuration can be enabled only with Azure Gen2 VMs. Please visit https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch for more details.'
         with self.assertRaisesRegex(InvalidArgumentValueError, message):
-            self.cmd('vm update -g {rg} -n {vm2} --security-type TrustedLaunch')
+            self.cmd('vm update -g {rg} -n {vm3} --security-type TrustedLaunch')
 
         # create ConfidentialVM VM
         self.cmd(
-            'disk create -g {rg} -n {disk3} --image-reference MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --hyper-v-generation V2',
-            checks=[
-                self.check('hyperVGeneration', 'V2')
-            ])
-        self.cmd('vm create -g {rg} -n {vm3} --attach-os-disk {disk3} --nsg-rule NONE --os-type windows --security-type confidentialvm')
-        self.cmd('vm deallocate -g {rg} -n {vm3}')
+            'disk create -g {rg} -n {disk2} --image-reference MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --hyper-v-generation V2  --security-type ConfidentialVM_DiskEncryptedWithPlatformKey')
+        self.cmd(
+            'vm create -g {rg} -n {vm4} --attach-os-disk {disk2} --nsg-rule NONE --os-type windows --security-type confidentialvm '
+            '--os-disk-security-encryption-type diskwithvmgueststate --size Standard_DC2as_v5 --enable-secure-boot true --enable-vtpm true')
+        self.cmd('vm show -g {rg} -n {vm4}',
+                 checks=[
+                     self.check('securityProfile.securityType', 'ConfidentialVM')
+                 ])
 
-        message = '{} is already configured with {}. Security Configuration cannot be updated from ConfidentialVM to TrustedLaunch.'.format(self.kwargs['vm3'], 'ConfidentialVM')
+        message = '{} is already configured with {}. Security Configuration cannot be updated from ConfidentialVM to TrustedLaunch.'.format(
+            self.kwargs['vm4'], 'ConfidentialVM')
         with self.assertRaisesRegex(InvalidArgumentValueError, message):
-            self.cmd('vm update -g {rg} -n {vm3} --security-type TrustedLaunch')
+            self.cmd('vm update -g {rg} -n {vm4} --security-type TrustedLaunch')
 
 
 class DiskHibernationScenarioTest(ScenarioTest):

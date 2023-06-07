@@ -584,8 +584,6 @@ def validate_update_vm_trusted_launch_supported(cmd, vm, os_disk_resource_group,
                                         "Security Configuration cannot be updated from ConfidentialVM to TrustedLaunch."
                                         .format(vm.name))
 
-    return True
-
 
 def display_region_recommendation(cmd, namespace):
 
