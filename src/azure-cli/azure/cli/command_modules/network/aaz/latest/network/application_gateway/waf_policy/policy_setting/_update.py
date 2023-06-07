@@ -75,6 +75,11 @@ class Update(AAZCommand):
                 minimum=0,
             ),
         )
+        _args_schema.file_upload_enforcement = AAZBoolArg(
+            options=["--file-upload-enforce", "--file-upload-enforcement"],
+            help="Whether allow WAF to enforce file upload limits.",
+            nullable=True,
+        )
         _args_schema.file_upload_limit_in_mb = AAZIntArg(
             options=["--file-upload-limit-in-mb"],
             help="Maximum file upload size in Mb for WAF.",
@@ -101,6 +106,16 @@ class Update(AAZCommand):
             options=["--request-body-check"],
             help="Specified to require WAF to check request body.",
             default=False,
+            nullable=True,
+        )
+        _args_schema.request_body_enforcement = AAZBoolArg(
+            options=["--request-body-enforce", "--request-body-enforcement"],
+            help="Whether allow WAF to enforce request body limits.",
+            nullable=True,
+        )
+        _args_schema.request_body_inspect_limit_in_kb = AAZIntArg(
+            options=["--request-limit-in-kb", "--request-body-inspect-limit-in-kb"],
+            help="Max inspection limit in KB for request body inspection for WAF.",
             nullable=True,
         )
         _args_schema.state = AAZStrArg(
@@ -151,12 +166,10 @@ class Update(AAZCommand):
         )
         _element.state = AAZStrArg(
             options=["state"],
-            help="Defines the state of log scrubbing rule. Default value is Enabled.",
+            help="Define the state of log scrubbing rule. Default value is Enabled.",
             nullable=True,
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
-
-        # define Arg Group "Parameters.properties.policySettings"
         return cls._args_schema
 
     def _execute_operations(self):
@@ -391,11 +404,14 @@ class Update(AAZCommand):
             )
             _builder.set_prop("customBlockResponseBody", AAZStrType, ".custom_body")
             _builder.set_prop("customBlockResponseStatusCode", AAZIntType, ".custom_status_code")
+            _builder.set_prop("fileUploadEnforcement", AAZBoolType, ".file_upload_enforcement")
             _builder.set_prop("fileUploadLimitInMb", AAZIntType, ".file_upload_limit_in_mb")
             _builder.set_prop("logScrubbing", AAZObjectType)
             _builder.set_prop("maxRequestBodySizeInKb", AAZIntType, ".max_request_body_size_in_kb")
             _builder.set_prop("mode", AAZStrType, ".mode")
             _builder.set_prop("requestBodyCheck", AAZBoolType, ".request_body_check")
+            _builder.set_prop("requestBodyEnforcement", AAZBoolType, ".request_body_enforcement")
+            _builder.set_prop("requestBodyInspectLimitInKB", AAZIntType, ".request_body_inspect_limit_in_kb")
             _builder.set_prop("state", AAZStrType, ".state")
 
             log_scrubbing = _builder.get(".logScrubbing")
@@ -3976,7 +3992,6 @@ class _UpdateHelper:
         _element = _schema_web_application_firewall_policy_read.properties.custom_rules.Element.match_conditions.Element
         _element.match_values = AAZListType(
             serialized_name="matchValues",
-            flags={"required": True},
         )
         _element.match_variables = AAZListType(
             serialized_name="matchVariables",
