@@ -7,7 +7,7 @@ import re
 from knack.util import CLIError
 from knack.log import get_logger
 from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id, is_valid_resource_name
-from azure.cli.core.azclierror import ValidationError, ArgumentUsageError
+from azure.cli.core.azclierror import ValidationError, ArgumentUsageError, InvalidArgumentValueError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.util import parse_proxy_resource_id
 from azure.cli.core.profiles import ResourceType
@@ -139,23 +139,25 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
 def _mysql_import_data_source_type_validator(data_source_type):
     allowed_values = ['mysql_single']
     if data_source_type is not None and data_source_type.lower() not in allowed_values:
-        raise ArgumentUsageError('Incorrect value for --data-source-type. Allowed values : {}'.format(allowed_values))
+        raise InvalidArgumentValueError('Incorrect value for --data-source-type. Allowed values : {}'.format(allowed_values))
 
 
 def mysql_import_data_source_validator(cli_ctx, source_server_id, resource_group_name):
     id_parts = parse_resource_id(source_server_id)
     if id_parts['resource_group'] != resource_group_name:
-        raise CLIError('Migrations are only supported under the same resource group. '
-                       'Make sure both single and flexible server are under the same resource group. ')
+        raise ValidationError('Different resource groups were found for single and flexible server. '
+                              'Migrations are only supported under the same resource group. '
+                              'Make sure to provide the same resource group by --resource-group. ')
     if id_parts['subscription'] != get_subscription_id(cli_ctx):
-        raise CLIError('Migrations are only supported under the same subscription. '
-                       'Make sure both single and flexible server are under the same subscription. ')
+        raise ValidationError('Different subscriptions were found for single and flexible server. '
+                              'Migrations are only supported under the same subscription. '
+                              'Make sure to provide the same subscription. ')
 
 
 def _mysql_import_mode_validator(mode):
     allowed_values = ['offline']
     if mode is not None and mode.lower() not in allowed_values:
-        raise ArgumentUsageError('Incorrect value for --mode. Allowed values : {}'.format(allowed_values))
+        raise InvalidArgumentValueError('Incorrect value for --mode. Allowed values : {}'.format(allowed_values))
 
 
 def mysql_retention_validator(backup_retention, sku_info, tier):
