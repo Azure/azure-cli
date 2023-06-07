@@ -118,4 +118,3 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
         self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename} ')
         self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename1} ')
         self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename2} ')
-
