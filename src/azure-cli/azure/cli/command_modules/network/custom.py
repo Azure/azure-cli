@@ -5155,8 +5155,6 @@ def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
                                    ttl=30, tags=None, interval=None, timeout=None, max_failures=None,
                                    monitor_custom_headers=None, status_code_ranges=None, max_return=None):
     from .aaz.latest.network.traffic_manager.profile import Create
-    Create_Profile = Create(cmd.loader)
-
     if monitor_path is None and monitor_protocol == 'HTTP':
         monitor_path = '/'
     args = {
@@ -5179,7 +5177,7 @@ def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
         "max_failures": max_failures
     }
 
-    return Create_Profile(args)
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 def update_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_group_name,
@@ -5188,8 +5186,6 @@ def update_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
                                    ttl=None, timeout=None, interval=None, max_failures=None,
                                    monitor_custom_headers=None, status_code_ranges=None, max_return=None):
     from .aaz.latest.network.traffic_manager.profile import Update
-    Update_Profile = Update(cmd.loader)
-
     args = {
         "name": traffic_manager_profile_name,
         "resource_group": resource_group_name
@@ -5221,7 +5217,7 @@ def update_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
     if max_failures is not None:
         args["max_failures"] = max_failures
 
-    return Update_Profile(args)
+    return Update(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endpoint_type, endpoint_name,
@@ -5231,8 +5227,6 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                     min_child_endpoints=None, min_child_ipv4=None, min_child_ipv6=None,
                                     geo_mapping=None, monitor_custom_headers=None, subnets=None, always_serve=None):
     from .aaz.latest.network.traffic_manager.endpoint import Create
-    Create_Endpoint = Create(cmd.loader)
-
     args = {
         "name": endpoint_name,
         "type": endpoint_type,
@@ -5254,7 +5248,7 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
         "always_serve": always_serve,
     }
 
-    return Create_Endpoint(args)
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 def update_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endpoint_name,
@@ -5265,8 +5259,6 @@ def update_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                     min_child_ipv6=None, geo_mapping=None,
                                     subnets=None, monitor_custom_headers=None, always_serve=None):
     from .aaz.latest.network.traffic_manager.endpoint import Update
-    Update_Endpoint = Update(cmd.loader)
-
     args = {
         "name": endpoint_name,
         "type": endpoint_type,
@@ -5302,20 +5294,17 @@ def update_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
     if always_serve is not None:
         args["always_serve"] = always_serve
 
-    return Update_Endpoint(args)
+    return Update(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpoint_type=None):
     from .aaz.latest.network.traffic_manager.profile import Show
-    Show_Profile = Show(cmd.loader)
-
-    args = {
+    profile = Show(cli_ctx=cmd.cli_ctx)(command_args={
+        "profile_name": profile_name,
         "resource_group": resource_group_name,
-        "profile_name": profile_name
-    }
-    profile = Show_Profile(args)
+    })
 
-    return [e for e in profile['endpoints'] if not endpoint_type or e['type'].endswith(endpoint_type)]
+    return [endpoint for endpoint in profile["endpoints"] if not endpoint_type or endpoint["type"].endswith(endpoint_type)]
 # endregion
 
 
