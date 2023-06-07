@@ -479,11 +479,11 @@ def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until,
 
     backup_item_type = item_uri.split(';')[0]
 
-    # if not cust_help.is_sql(backup_item_type) and enable_compression:
-    #     raise CLIError(
-    #         """
-    #         Enable compression is not applicable for SAPHanaDatabase item type.
-    #         """)
+    if not (cust_help.is_sql(backup_item_type) or cust_help.is_hana(backup_item_type)) and enable_compression:
+        raise CLIError(
+            """
+            Enable compression is only applicable for SQLDataBase and SAPHanaDatabase item types.
+            """)
 
     if cust_help.is_hana(backup_item_type) and backup_type.lower() in ['log', 'copyonlyfull', 'incremental']:
         raise CLIError(
