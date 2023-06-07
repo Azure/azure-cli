@@ -125,6 +125,7 @@ def transform_stacks_export(result):
 
 
 def load_command_table(self, _):
+    # pylint: disable=too-many-locals
     from azure.cli.core.commands.arm import deployment_validate_table_format
 
     resource_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.resource.custom#{}')
@@ -415,7 +416,7 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_template_spec', validator=_validate_template_spec, confirmation=True)
 
     with self.command_group('stack mg', resource_deploymentstacks_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
-        g.custom_command('show', 'show_deployment_stack_at_management_group', table_transformer=transform_stacks)
+        g.custom_show_command('show', 'show_deployment_stack_at_management_group', table_transformer=transform_stacks)
         g.custom_command('list', 'list_deployment_stack_at_management_group', table_transformer=transform_stacks_list)
         g.custom_command('delete', 'delete_deployment_stack_at_management_group')
         g.custom_command('create', 'create_deployment_stack_at_management_group',
@@ -424,7 +425,7 @@ def load_command_table(self, _):
                          table_transformer=transform_stacks_export)
 
     with self.command_group('stack sub', resource_deploymentstacks_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
-        g.custom_command('show', 'show_deployment_stack_at_subscription', table_transformer=transform_stacks)
+        g.custom_show_command('show', 'show_deployment_stack_at_subscription', table_transformer=transform_stacks)
         g.custom_command('list', 'list_deployment_stack_at_subscription', table_transformer=transform_stacks_list)
         g.custom_command('delete', 'delete_deployment_stack_at_subscription')
         g.custom_command('create', 'create_deployment_stack_at_subscription',
@@ -433,7 +434,7 @@ def load_command_table(self, _):
                          table_transformer=transform_stacks_export)
 
     with self.command_group('stack group', resource_deploymentstacks_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
-        g.custom_command('show', 'show_deployment_stack_at_resource_group', table_transformer=transform_stacks)
+        g.custom_show_command('show', 'show_deployment_stack_at_resource_group', table_transformer=transform_stacks)
         g.custom_command('list', 'list_deployment_stack_at_resource_group', table_transformer=transform_stacks_list)
         g.custom_command('delete', 'delete_deployment_stack_at_resource_group')
         g.custom_command('create', 'create_deployment_stack_at_resource_group',

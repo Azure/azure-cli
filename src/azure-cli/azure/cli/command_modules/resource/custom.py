@@ -1154,71 +1154,8 @@ def _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, del
         confirmation = prompt_y_n(build_confirmation_string + "\n")
         if not confirmation:
             return None
-        pass
 
     return build_confirmation_string
-
-
-def delete_deployment_stack_at_subscription(cmd, name=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False):
-    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-    confirmation = "Are you sure you want to delete this stack"
-    delete_list = []
-
-    delete_resources_enum = rcf.deployment_stacks.models.UnmanageActionResourceMode.Detach
-    delete_resource_groups_enum = rcf.deployment_stacks.models.UnmanageActionResourceGroupMode.Detach
-
-    if delete_all:
-        delete_list.append("resources")
-        delete_list.append("resource groups")
-        delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-
-    if delete_resource_groups:
-        delete_list.append("resource groups")
-        delete_resource_groups_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-
-    if delete_resources:
-        delete_list.append("resources")
-        delete_resources_enum = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-
-    # build confirmation string
-    from knack.prompting import prompt_y_n
-    if not yes:
-        if not delete_list:
-            response = prompt_y_n(confirmation + "?")
-            if not response:
-                return None
-        else:
-            confirmation += " and the specified resources: "
-            response = prompt_y_n(confirmation + ", ".join(set(delete_list)) + '?')
-            if not response:
-                return None
-
-    if name or id:
-        rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-        delete_name = None
-        try:
-            if name:
-                delete_name = name
-                rcf.deployment_stacks.get_at_subscription(name)
-            else:
-                name = id.split('/')[-1]
-                delete_name = name
-                rcf.deployment_stacks.get_at_subscription(name)
-        except:
-            raise ResourceNotFoundError("DeploymentStack " + delete_name +
-                                        " not found in the current subscription scope.")
-        return rcf.deployment_stacks.begin_delete_at_subscription(delete_name, unmanage_action_resources=delete_resources_enum, unmanage_action_resource_groups=delete_resource_groups_enum)
-    raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
-
-
-def export_template_deployment_stack_at_subscription(cmd, name=None, id=None):
-    if name or id:
-        rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-        if name:
-            return rcf.deployment_stacks.export_template_at_subscription(name)
-        return rcf.deployment_stacks.export_template_at_subscription(id.split('/')[-1])
-    raise InvalidArgumentValueError("Please enter the stack name or stack resource id.")
 
 
 def _prepare_stacks_delete_detach_models(rcf, delete_all, delete_resource_groups, delete_resources):
@@ -1300,7 +1237,6 @@ def _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, del
         confirmation = prompt_y_n(build_confirmation_string + "\n")
         if not confirmation:
             return None
-        pass
 
     return build_confirmation_string
 
@@ -2482,7 +2418,7 @@ def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_m
                 raise CLIError("Cannot change location of an already existing stack at subscription scope.")
             # bypass if yes flag is true
             _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
-    except:
+    except:  # pylint: disable=bare-except
         pass
 
     if not deployment_resource_group:
@@ -2505,7 +2441,7 @@ def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_m
     return sdk_no_wait(False, rcf.deployment_stacks.begin_create_or_update_at_subscription, name, deployment_stack_model)
 
 
-def show_deployment_stack_at_subscription(cmd, name=None, id=None):
+def show_deployment_stack_at_subscription(cmd, name=None, id=None):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     if name or id:
         if name:
@@ -2519,7 +2455,7 @@ def list_deployment_stack_at_subscription(cmd):
     return rcf.deployment_stacks.list_at_subscription()
 
 
-def delete_deployment_stack_at_subscription(cmd, name=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False):
+def delete_deployment_stack_at_subscription(cmd, name=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     confirmation = "Are you sure you want to delete this stack"
     delete_list = []
@@ -2572,7 +2508,7 @@ def delete_deployment_stack_at_subscription(cmd, name=None, id=None, delete_reso
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 
 
-def export_template_deployment_stack_at_subscription(cmd, name=None, id=None):
+def export_template_deployment_stack_at_subscription(cmd, name=None, id=None):  # pylint: disable=redefined-builtin
     if name or id:
         rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
         if name:
@@ -2604,7 +2540,7 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, deny_se
     try:
         if rcf.deployment_stacks.get_at_resource_group(resource_group, name):
             _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
-    except:
+    except:  # pylint: disable=bare-except
         pass
 
     action_on_unmanage_model = rcf.deployment_stacks.models.DeploymentStackPropertiesActionOnUnmanage(
@@ -2622,7 +2558,7 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, deny_se
     return sdk_no_wait(False, rcf.deployment_stacks.begin_create_or_update_at_resource_group, resource_group, name, deployment_stack_model)
 
 
-def show_deployment_stack_at_resource_group(cmd, name=None, resource_group=None, id=None):
+def show_deployment_stack_at_resource_group(cmd, name=None, resource_group=None, id=None):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     if name and resource_group:
         return rcf.deployment_stacks.get_at_resource_group(resource_group, name)
@@ -2641,7 +2577,7 @@ def list_deployment_stack_at_resource_group(cmd, resource_group):
     raise InvalidArgumentValueError("Please enter the resource group")
 
 
-def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False):
+def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     confirmation = "Are you sure you want to delete this stack"
     delete_list = []
@@ -2696,7 +2632,7 @@ def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group=Non
     raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
 
 
-def export_template_deployment_stack_at_resource_group(cmd, name=None, resource_group=None, id=None):
+def export_template_deployment_stack_at_resource_group(cmd, name=None, resource_group=None, id=None):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     if name and resource_group:
         return rcf.deployment_stacks.export_template_at_resource_group(resource_group, name)
@@ -2731,7 +2667,7 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
         get_mg_response = rcf.deployment_stacks.get_at_management_group(management_group_id, name)
         if get_mg_response:
             _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
-    except:
+    except:  # pylint: disable=bare-except
         pass
 
     if not deployment_subscription:
@@ -2753,7 +2689,7 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
     return sdk_no_wait(False, rcf.deployment_stacks.begin_create_or_update_at_management_group, management_group_id, name, deployment_stack_model)
 
 
-def show_deployment_stack_at_management_group(cmd, management_group_id, name=None, id=None):
+def show_deployment_stack_at_management_group(cmd, management_group_id, name=None, id=None):  # pylint: disable=redefined-builtin
     if name or id:
         rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
         if name:
@@ -2767,7 +2703,7 @@ def list_deployment_stack_at_management_group(cmd, management_group_id):
     return rcf.deployment_stacks.list_at_management_group(management_group_id)
 
 
-def delete_deployment_stack_at_management_group(cmd, management_group_id, name=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False):
+def delete_deployment_stack_at_management_group(cmd, management_group_id, name=None, id=None, delete_resources=False, delete_resource_groups=False, delete_all=False, yes=False):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     confirmation = "Are you sure you want to delete this stack"
     delete_list = []
@@ -2820,7 +2756,7 @@ def delete_deployment_stack_at_management_group(cmd, management_group_id, name=N
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 
 
-def export_template_deployment_stack_at_management_group(cmd, management_group_id, name=None, id=None):
+def export_template_deployment_stack_at_management_group(cmd, management_group_id, name=None, id=None):  # pylint: disable=redefined-builtin
     if name or id:
         rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
         if name:
