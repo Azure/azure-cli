@@ -3743,7 +3743,6 @@ class _ShowHelper:
         _element = _schema_web_application_firewall_policy_read.properties.custom_rules.Element.match_conditions.Element
         _element.match_values = AAZListType(
             serialized_name="matchValues",
-            flags={"required": True},
         )
         _element.match_variables = AAZListType(
             serialized_name="matchVariables",

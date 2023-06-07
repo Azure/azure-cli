@@ -1452,7 +1452,6 @@ class Wait(AAZWaitCommand):
             _element = cls._schema_on_200.properties.custom_rules.Element.match_conditions.Element
             _element.match_values = AAZListType(
                 serialized_name="matchValues",
-                flags={"required": True},
             )
             _element.match_variables = AAZListType(
                 serialized_name="matchVariables",

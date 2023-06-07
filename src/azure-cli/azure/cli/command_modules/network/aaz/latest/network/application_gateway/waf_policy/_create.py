@@ -170,7 +170,6 @@ class Create(AAZCommand):
         _element.values = AAZListArg(
             options=["values"],
             help="Space-separated list of values to match.",
-            required=True,
         )
         _element.variables = AAZListArg(
             options=["variables"],
@@ -573,7 +572,7 @@ class Create(AAZCommand):
 
             _elements = _builder.get(".properties.customRules[].matchConditions[]")
             if _elements is not None:
-                _elements.set_prop("matchValues", AAZListType, ".values", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("matchValues", AAZListType, ".values")
                 _elements.set_prop("matchVariables", AAZListType, ".variables", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("negationConditon", AAZBoolType, ".negate")
                 _elements.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
@@ -2019,7 +2018,6 @@ class Create(AAZCommand):
             _element = cls._schema_on_200_201.properties.custom_rules.Element.match_conditions.Element
             _element.match_values = AAZListType(
                 serialized_name="matchValues",
-                flags={"required": True},
             )
             _element.match_variables = AAZListType(
                 serialized_name="matchVariables",

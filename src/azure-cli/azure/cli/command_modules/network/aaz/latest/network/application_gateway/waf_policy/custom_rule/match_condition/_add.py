@@ -66,7 +66,6 @@ class Add(AAZCommand):
         _args_schema.values = AAZListArg(
             options=["--values"],
             help="Space-separated list of values to match.",
-            required=True,
         )
         _args_schema.variables = AAZListArg(
             options=["--variables"],
@@ -379,7 +378,7 @@ class Add(AAZCommand):
                 self.ctx.args,
                 typ=AAZObjectType
             )
-            _builder.set_prop("matchValues", AAZListType, ".values", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("matchValues", AAZListType, ".values")
             _builder.set_prop("matchVariables", AAZListType, ".variables", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("negationConditon", AAZBoolType, ".negate")
             _builder.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
@@ -3956,7 +3955,6 @@ class _AddHelper:
         _element = _schema_web_application_firewall_policy_read.properties.custom_rules.Element.match_conditions.Element
         _element.match_values = AAZListType(
             serialized_name="matchValues",
-            flags={"required": True},
         )
         _element.match_variables = AAZListType(
             serialized_name="matchVariables",
