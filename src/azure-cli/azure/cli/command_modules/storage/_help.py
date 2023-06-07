@@ -668,6 +668,9 @@ examples:
     text: |
         az storage account update --default-action Allow --name MyStorageAccount --resource-group MyResourceGroup
     crafted: true
+  - name: Use a user-assigned managed identity instead of system-assigned managed identity
+    text: |
+        az storage account update --name <storage-account-name> --resource-group <resource-group-name> --encryption-key-vault <keyvault-uri> --encryption-key-name <key-name-in-keyvault> --encryption-key-source Microsoft.Keyvault --key-vault-user-identity-id <user-assigned-identity-id> --identity-type UserAssigned --user-identity-id <user-assigned-identity-id>`
 """
 
 helps['storage account hns-migration'] = """

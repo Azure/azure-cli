@@ -702,12 +702,10 @@ def load_arguments(self, _):
     for operation in ['create', 'update']:
         with self.argument_context('managedapp definition {}'.format(operation)) as c:
             c.argument('lock_level', arg_type=get_enum_type(ApplicationLockLevel), help='The type of lock restriction.')
-            c.argument('authorizations', options_list=['--authorizations', '-a'], nargs='+',
-                       help="space-separated authorization pairs in a format of `<principalId>:<roleDefinitionId>`")
-            c.argument('create_ui_definition', options_list=[
-                       '--create-ui-definition', '-c'], help='JSON formatted string or a path to a file with such content', type=file_type)
-            c.argument('main_template', options_list=[
-                       '--main-template', '-t'], help='JSON formatted string or a path to a file with such content', type=file_type)
+            c.argument('authorizations', options_list=['--authorizations', '-a'], nargs='+', help="space-separated authorization pairs in a format of `<principalId>:<roleDefinitionId>`")
+            c.argument('create_ui_definition', options_list=['--create-ui-definition', '-c'], help='JSON formatted string or a path to a file with such content', type=file_type)
+            c.argument('main_template', options_list=['--main-template', '-t'], help='JSON formatted string or a path to a file with such content', type=file_type)
+            c.argument('deployment_mode', arg_type=get_enum_type(self.get_models('DeploymentMode')), help='The managed application deployment mode.')
 
     with self.argument_context('account') as c:
         c.argument('subscription', options_list=['--subscription', '-s'],
