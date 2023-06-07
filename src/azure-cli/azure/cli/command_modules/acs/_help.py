@@ -479,7 +479,7 @@ parameters:
   - name: --enable-keda
     type: bool
     short-summary: Enable KEDA workload auto-scaler.
-  - name: --enable-azure-monitor-metrics
+  - name: --enable-azuremonitormetrics
     type: bool
     short-summary: Enable Azure Monitor Metrics Profile
   - name: --azure-monitor-workspace-resource-id
@@ -568,7 +568,7 @@ examples:
   - name: Create a kubernetes cluster with KEDA workload autoscaler enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-keda
   - name: Create a kubernetes cluster with Azure Monitor Metrics enabled.
-    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-metrics
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azuremonitormetrics
 """
 
 helps['aks update'] = """
@@ -811,7 +811,7 @@ parameters:
   - name: --disable-keda
     type: bool
     short-summary: Disable KEDA workload auto-scaler.
-  - name: --enable-azure-monitor-metrics
+  - name: --enable-azuremonitormetrics
     type: bool
     short-summary: Enable Azure Monitor Metrics Profile
   - name: --azure-monitor-workspace-resource-id
