@@ -168,7 +168,7 @@ def import_config(cmd,
                 dest_features.append(feature)
 
         need_feature_change = __print_features_preview(
-            old_json=__serialize_features_from_kv_list_to_comparable_json_object(keyvalues=dest_features),
+            old_json=__serialize_features_from_kv_list_to_comparable_json_object(keyvalues=dest_features, is_dest=True),
             new_json=__serialize_features_from_kv_list_to_comparable_json_object(keyvalues=src_features),
             strict=strict,
             yes=yes)
