@@ -1625,6 +1625,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               security_type=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
+    SecurityProfile, UefiSettings = cmd.get_models('SecurityProfile', 'UefiSettings')
     vm = kwargs['parameters']
 
     disk_resource_group, disk_name = None, None
@@ -1642,7 +1643,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         vm.storage_profile.os_disk.managed_disk.id = disk_id
         vm.storage_profile.os_disk.name = disk_name
 
-    if security_type is not None and security_type == "TrustedLaunch":
+    if security_type == "TrustedLaunch":
         if disk_name is None and vm.storage_profile.os_disk.managed_disk is not None:
             os_disk_id_parsed = parse_resource_id(vm.storage_profile.os_disk.managed_disk.id)
             disk_resource_group, disk_name = os_disk_id_parsed['resource_group'], os_disk_id_parsed['name']
@@ -1652,9 +1653,13 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
             validate_update_vm_trusted_launch_supported(cmd=cmd, vm=vm, os_disk_resource_group=disk_resource_group,
                                                         os_disk_name=disk_name)
+            # Set --enable-secure-boot False and --enable-vtpm True if not specified by end user.
+            enable_secure_boot = enable_secure_boot if enable_secure_boot is not None else False
+            enable_vtpm = enable_vtpm if enable_vtpm is not None else True
+
             if vm.security_profile is None:
-                vm.security_profile = {}
-            vm.security_profile['security_type'] = security_type
+                vm.security_profile = SecurityProfile()
+            vm.security_profile.security_type = security_type
 
     if write_accelerator is not None:
         update_write_accelerator_settings(vm.storage_profile, write_accelerator)
@@ -1725,12 +1730,10 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
     if enable_secure_boot is not None or enable_vtpm is not None:
         if vm.security_profile is None:
-            vm.security_profile = {}
+            vm.security_profile = SecurityProfile()
 
-        vm.security_profile.uefiSettings = {
-            'secureBootEnabled': enable_secure_boot,
-            'vTpmEnabled': enable_vtpm
-        }
+        vm.security_profile.uefi_settings = UefiSettings(secure_boot_enabled=enable_secure_boot,
+                                                         v_tpm_enabled=enable_vtpm)
 
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)

@@ -9079,7 +9079,9 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         self.cmd('vm deallocate -g {rg} -n {vm1}')
 
         self.cmd('vm update -g {rg} -n {vm1} --security-type TrustedLaunch', checks=[
-            self.check('securityProfile.securityType', 'TrustedLaunch')
+            self.check('securityProfile.securityType', 'TrustedLaunch'),
+            self.check('securityProfile.uefiSettings.secureBootEnabled', 'False'),
+            self.check('securityProfile.uefiSettings.vTpmEnabled', 'True'),
         ])
 
         # create Gen1 VM
