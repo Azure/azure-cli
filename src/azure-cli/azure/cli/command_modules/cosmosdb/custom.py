@@ -2643,6 +2643,7 @@ def cli_cosmosdb_managed_cassandra_datacenter_create(client,
                                                      disk_sku=None,
                                                      disk_capacity=None,
                                                      availability_zone=None):
+
     """Creates an Azure Managed Cassandra DataCenter"""
 
     data_center_properties = DataCenterResourceProperties(
@@ -2674,6 +2675,7 @@ def cli_cosmosdb_managed_cassandra_datacenter_update(client,
                                                      base64_encoded_cassandra_yaml_fragment=None,
                                                      managed_disk_customer_key_uri=None,
                                                      backup_storage_customer_key_uri=None):
+
     """Updates an Azure Managed Cassandra DataCenter"""
 
     data_center_resource = client.get(resource_group_name, cluster_name, data_center_name)
