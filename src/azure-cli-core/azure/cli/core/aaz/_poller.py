@@ -123,9 +123,11 @@ class AAZLROPoller:
         """
         if self._thread is None:
             return
+
         self._thread.join(timeout=timeout)
 
-        raise self._exception
+        if self._exception:  # derive from BaseException
+            raise self._exception
 
     def done(self):
         """Check status of the long running operation.
