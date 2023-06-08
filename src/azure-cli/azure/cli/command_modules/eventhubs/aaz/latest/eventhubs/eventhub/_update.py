@@ -107,7 +107,6 @@ class Update(AAZCommand):
             nullable=True,
             enum={"Avro": "Avro", "AvroDeflate": "AvroDeflate"},
         )
-        _args_schema.encoding._registered = False
         _args_schema.capture_interval = AAZIntArg(
             options=["--capture-interval"],
             arg_group="CaptureDescription",
@@ -155,7 +154,7 @@ class Update(AAZCommand):
             arg_group="RetentionDescription",
             help="Enumerates the possible values for cleanup policy",
             nullable=True,
-            enum={"Compaction": "Compaction", "Delete": "Delete"},
+            enum={"Compact": "Compact", "Delete": "Delete"},
         )
         _args_schema.retention_time_in_hours = AAZIntArg(
             options=["--retention-time", "--retention-time-in-hours"],
