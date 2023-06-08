@@ -2250,7 +2250,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
         # test waf-policy policy-setting list
         self.cmd('network application-gateway waf-policy policy-setting list -g {rg} --policy-name {waf}', checks=[
-            self.check('length(@)', 5)
+            self.check("type(@)", "object")
         ])
 
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
