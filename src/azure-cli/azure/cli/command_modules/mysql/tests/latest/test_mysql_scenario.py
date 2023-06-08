@@ -224,7 +224,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         # flexible server details
         storage_size = 32
         version = '5.7'
-        location = 'eastus'
         sku_name = 'Standard_B1ms'
         tier = 'Burstable'
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
