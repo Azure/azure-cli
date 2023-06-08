@@ -5015,6 +5015,7 @@ def _build_onedeploy_url(params):
         return _build_onedeploy_arm_url(params)
     return _build_onedeploy_scm_url(params)
 
+
 def _build_onedeploy_scm_url(params):
     scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
     deploy_url = scm_url + '/api/publish?type=' + params.artifact_type
@@ -5035,6 +5036,7 @@ def _build_onedeploy_scm_url(params):
         deploy_url = deploy_url + '&path=' + params.target_path
 
     return deploy_url
+
 
 def _build_onedeploy_arm_url(params):
     from azure.cli.core.commands.client_factory import get_subscription_id
