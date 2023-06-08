@@ -451,7 +451,7 @@ def flexible_server_create(cmd, client,
 def flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time=None, zone=None,
                             no_wait=False, subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                             private_dns_zone_arguments=None, public_access=None, yes=False, sku_name=None, tier=None,
-                            storage_gb=None, auto_grow=None, backup_retention=None, geo_redundant_backup=None):
+                            storage_gb=None, auto_grow=None, backup_retention=None, geo_redundant_backup=None, tags=None):
     provider = 'Microsoft.DBforMySQL'
     server_name = server_name.lower()
 
@@ -529,6 +529,7 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
         sku = mysql_flexibleservers.models.Sku(name=sku_name, tier=tier)
 
         parameters = mysql_flexibleservers.models.Server(
+            tags=tags,
             location=location,
             identity=identity,
             restore_point_in_time=restore_point_in_time,
@@ -580,10 +581,8 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
 
 
 # pylint: disable=too-many-locals, too-many-statements, raise-missing-from
-def flexible_server_georestore(cmd, client,
-                               resource_group_name, server_name,
-                               source_server, location, zone=None, no_wait=False,
-                               subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
+def flexible_server_georestore(cmd, client, resource_group_name, server_name, source_server, location, zone=None, no_wait=False,
+                               subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None, tags=None,
                                private_dns_zone_arguments=None, public_access=None, yes=False, sku_name=None, tier=None,
                                storage_gb=None, auto_grow=None, backup_retention=None, geo_redundant_backup=None):
     provider = 'Microsoft.DBforMySQL'
@@ -661,6 +660,7 @@ def flexible_server_georestore(cmd, client,
         sku = mysql_flexibleservers.models.Sku(name=sku_name, tier=tier)
 
         parameters = mysql_flexibleservers.models.Server(
+            tags=tags,
             location=location,
             source_server_resource_id=source_server_id,  # this should be the source server name, not id
             create_mode="GeoRestore",
@@ -982,7 +982,7 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
 
 # Replica commands
 # Custom functions for server replica, will add MySQL part after backend ready in future
-def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, location=None,
+def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, location=None, tags=None,
                             private_dns_zone_arguments=None, vnet=None, subnet=None, zone=None, public_access=None, no_wait=False):
     provider = 'Microsoft.DBforMySQL'
     replica_name = replica_name.lower()
@@ -1012,8 +1012,6 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
 
     sku_name = source_server_object.sku.name
     tier = source_server_object.sku.tier
-    if not zone:
-        zone = source_server_object.availability_zone
 
     identity, data_encryption = get_identity_and_data_encryption(source_server_object)
 
@@ -1021,6 +1019,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
         sku=mysql_flexibleservers.models.Sku(name=sku_name, tier=tier),
         source_server_resource_id=source_server_id,
         location=location,
+        tags=tags,
         availability_zone=zone,
         identity=identity,
         data_encryption=data_encryption,
