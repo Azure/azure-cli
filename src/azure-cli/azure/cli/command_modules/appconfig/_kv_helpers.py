@@ -583,11 +583,25 @@ def __serialize_kv_list_to_comparable_json_object(keyvalues, level):
     return res
 
 
-def __serialize_features_from_kv_list_to_comparable_json_object(keyvalues):
+def __serialize_features_from_kv_list_to_comparable_json_object(keyvalues, is_dest=False):
     features = []
+    invalid_ffs = 0
     for kv in keyvalues:
-        feature = map_keyvalue_to_featureflag(kv)
-        features.append(feature)
+        try:
+            feature = map_keyvalue_to_featureflag(kv)
+            features.append(feature)
+
+        except ValueError:
+            invalid_ffs += 1
+
+    if invalid_ffs > 0:
+        if is_dest:
+            logger.warning(
+                "\n%i invalid feature flags from the destination configuration could not be previewed.", invalid_ffs)
+
+        else:
+            logger.warning(
+                "\n%i invalid feature flags from the source configuration could not be previewed but will be imported.", invalid_ffs)
 
     return __serialize_feature_list_to_comparable_json_object(features)
 
