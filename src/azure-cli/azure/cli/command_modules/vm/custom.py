@@ -3856,7 +3856,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 vm_sku=None, ephemeral_os_disk_placement=None, force_deletion=None, enable_secure_boot=None,
                 enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None, v_cpus_per_core=None,
                 regular_priority_count=None, regular_priority_percentage=None, disk_controller_type=None,
-                enable_osimage_notification=None, **kwargs):
+                enable_osimage_notification=None, custom_data=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -4035,6 +4035,10 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
     if disk_controller_type is not None:
         vmss.virtual_machine_profile.storage_profile.disk_controller_type = disk_controller_type
+
+    if custom_data is not None:
+        custom_data = read_content_if_is_file(custom_data)
+        vmss.virtual_machine_profile.os_profile.custom_data = b64encode(custom_data)
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)
