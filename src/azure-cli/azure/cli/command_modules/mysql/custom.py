@@ -1010,8 +1010,6 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     if not location:
         location = source_server_object.location
 
-    validate_replica_location(cmd, source_server_object.location, location)
-
     sku_name = source_server_object.sku.name
     tier = source_server_object.sku.tier
     if not zone:
