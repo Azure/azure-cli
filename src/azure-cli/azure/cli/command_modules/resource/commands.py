@@ -228,7 +228,7 @@ def load_command_table(self, _):
 
     with self.command_group('group', resource_group_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
-        g.show_command('show', 'get')
+        g.custom_show_command('show', 'get_resource_group')
         g.command('exists', 'check_existence')
         g.custom_command('list', 'list_resource_groups', table_transformer=transform_resource_group_list)
         g.custom_command('create', 'create_resource_group')

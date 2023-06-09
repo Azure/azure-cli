@@ -101,7 +101,18 @@ class ResourceGroupScenarioTest(ScenarioTest):
 
         self.cmd('group delete -n testrg -f Microsoft.Compute/virtualMachines --yes')
         self.cmd('group exists -n testrg',
-                 checks=self.check('@', False))        
+                 checks=self.check('@', False))
+
+    def test_show_not_existing_resource_group(self):
+        self.kwargs.update({
+            'group': self.create_random_name('not_exist_group_', 30)
+        })
+        subscriptionId = self.get_subscription_id()
+        from azure.core.exceptions import ResourceNotFoundError
+        message = "Resource group '{}' could not be found in subscription '{}'." \
+            .format(self.kwargs['group'], subscriptionId)
+        with self.assertRaisesRegex(ResourceNotFoundError, message):
+            self.cmd('group show -n {group}')
 
 
 class ResourceGroupNoWaitScenarioTest(ScenarioTest):
