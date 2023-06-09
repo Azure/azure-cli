@@ -13,10 +13,22 @@ if "%CLI_VERSION%"=="" (
     echo Please set the CLI_VERSION environment variable, e.g. 2.0.13
     goto ERROR
 )
+
+if "%ARCH%"=="" (
+    set ARCH=x86
+)
+if "%ARCH%"=="x86" (
+    set PYTHON_ARCH=win32
+) else if "%ARCH%"=="x64" (
+    set PYTHON_ARCH=amd64
+) else (
+    echo Please set ARCH to "x86" or "x64"
+    goto ERROR
+)
 set PYTHON_VERSION=3.10.10
 
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
-set PYTHON_DOWNLOAD_URL="https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-embed-win32.zip"
+set PYTHON_DOWNLOAD_URL="https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-embed-%PYTHON_ARCH%.zip"
 
 REM https://pip.pypa.io/en/stable/installation/#get-pip-py
 set GET_PIP_DOWNLOAD_URL="https://bootstrap.pypa.io/get-pip.py"
@@ -27,14 +39,17 @@ set OUTPUT_DIR=%~dp0..\out
 if exist %OUTPUT_DIR% rmdir /s /q %OUTPUT_DIR%
 mkdir %OUTPUT_DIR%
 
-set ARTIFACTS_DIR=%~dp0..\artifacts
+set ARTIFACTS_DIR=%~dp0..\artifacts\%ARCH%
 mkdir %ARTIFACTS_DIR%
 set TEMP_SCRATCH_FOLDER=%ARTIFACTS_DIR%\cli_scratch
 set BUILDING_DIR=%ARTIFACTS_DIR%\cli
 set WIX_DIR=%ARTIFACTS_DIR%\wix
 set PYTHON_DIR=%ARTIFACTS_DIR%\Python
 
-set REPO_ROOT=%~dp0..\..\..
+REM Get the absolute directory since we pushd into different levels of subdirectories.
+PUSHD %~dp0..\..\..
+SET REPO_ROOT=%CD%
+POPD
 
 REM reset working folders
 if exist %BUILDING_DIR% rmdir /s /q %BUILDING_DIR%
@@ -71,6 +86,9 @@ if not exist %WIX_DIR% (
     echo Wix downloaded and extracted successfully.
     popd
 )
+
+REM Use only downloaded python and ignore machine state
+set PYTHONHOME=%PYTHON_DIR%
 
 REM ensure Python is available
 if exist %PYTHON_DIR% (
@@ -181,7 +199,7 @@ popd
 if %errorlevel% neq 0 goto ERROR
 
 echo Building MSI...
-msbuild /t:rebuild /p:Configuration=Release %REPO_ROOT%\build_scripts\windows\azure-cli.wixproj
+msbuild /t:rebuild /p:Configuration=Release /p:Platform=%ARCH% %REPO_ROOT%\build_scripts\windows\azure-cli.wixproj
 
 if %errorlevel% neq 0 goto ERROR
 
