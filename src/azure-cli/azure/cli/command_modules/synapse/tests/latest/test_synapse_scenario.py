@@ -1212,6 +1212,12 @@ class SynapseScenarioTests(ScenarioTest):
                     self.check('sparkConfigProperties.filename','sparkconfigfile'),
                     self.check('dynamicExecutorAllocation.maxExecutors',2)
                  ])
+        
+        # create a existing spark pool
+        spark_pool = self.cmd('az synapse spark pool create --name {spark-pool} --spark-version {spark-version}'
+                              ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size Medium'
+                              ' --spark-config-file-path "{file}"',
+                              expect_failure=True)
 
         # delete spark pool with spark pool name
         self.cmd(
