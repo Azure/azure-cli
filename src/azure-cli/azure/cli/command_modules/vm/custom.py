@@ -925,9 +925,11 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             logger.warning('Consider using the "Ubuntu2204" alias. On April 30, 2023,'
                            'the image deployed by the "UbuntuLTS" alias reaches its end of life. '
                            'The "UbuntuLTS" will be removed with the breaking change release of Fall 2023.')
-        if image in ["RHEL", "Debian", "CentOS", "Flatcar"]:
+        if image in ["RHEL", "Debian", "CentOS", "Flatcar", "SLES", "openSUSE-Leap"]:
             logger.warning('Consider using the image alias including the version of the distribution you want to use. '
-                           'For example: please use Debian11 instead of Debian')
+                           'For example: please use Debian11 instead of Debian.\nIn Ignite (November) 2023, '
+                           'the aliases without version suffix (such as: `UbuntuLTS`, `CentOS`, `Debian`, `Flatcar`, '
+                           '`SLES`, `openSUSE-Leap` and `RHEL`) will be removed.')
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if os_disk_encryption_set is not None and not is_valid_resource_id(os_disk_encryption_set):
@@ -3181,9 +3183,11 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             logger.warning('Consider using the "Ubuntu2204" alias. On April 30, 2023,'
                            'the image deployed by the "UbuntuLTS" alias reaches its end of life. '
                            'The "UbuntuLTS" will be removed with the breaking change release of Fall 2023.')
-        if image in ["RHEL", "Debian", "CentOS", "Flatcar"]:
+        if image in ["RHEL", "Debian", "CentOS", "Flatcar", "SLES", "openSUSE-Leap"]:
             logger.warning('Consider using the image alias including the version of the distribution you want to use. '
-                           'For example: please use Debian11 instead of Debian')
+                           'For example: please use Debian11 instead of Debian.\nIn Ignite (November) 2023, '
+                           'the aliases without version suffix (such as: `UbuntuLTS`, `CentOS`, `Debian`, `Flatcar`, '
+                           '`SLES`, `openSUSE-Leap` and `RHEL`) will be removed.')
 
     # The default load balancer will be expected to be changed from Basic to Standard.
     # In order to avoid breaking change which has a big impact to users,
