@@ -4047,7 +4047,7 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "\\b(network|Network|NETWORK|monitor|Monitor|MONITOR|bastion|Bastion|BASTION)\\b",
+                    "titlePattern": "\\b(network|Network|NETWORK|bastion|Bastion|BASTION)\\b",
                     "isRegex": true
                   }
                 }
@@ -4793,6 +4793,95 @@
             "name": "addLabel",
             "parameters": {
               "label": "question"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "PullRequestResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isAction",
+              "parameters": {
+                "action": "opened"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "[Aa]z [Mm]onitor",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "[Aa]z [Mm]onitor",
+                    "isRegex": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "pull_request",
+        "eventNames": [
+          "pull_request",
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[Monitor] Auto assign labels and reviewers based on PR title/description.",
+        "actions": [
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "yonzhan"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "AllyW"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "kairu-ms"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "necusjz"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "AllyW"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Monitor"
             }
           }
         ]
@@ -5754,20 +5843,6 @@
                   "parameters": {
                     "bodyPattern": "az \\b(ad)\\b",
                     "isRegex": true
-                  }
-                },
-                {
-                  "name": "titleContains",
-                  "parameters": {
-                    "isRegex": true,
-                    "titlePattern": "\\b([Gg][Rr][Aa][Pp][Hh])\\b"
-                  }
-                },
-                {
-                  "name": "bodyContains",
-                  "parameters": {
-                    "isRegex": true,
-                    "bodyPattern": "\\b([Gg][Rr][Aa][Pp][Hh])\\b"
                   }
                 }
               ]
@@ -9139,20 +9214,6 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "\\b([Gg][Rr][Aa][Pp][Hh])\\b",
-                    "isRegex": true
-                  }
-                },
-                {
-                  "name": "bodyContains",
-                  "parameters": {
-                    "bodyPattern": "\\b([Gg][Rr][Aa][Pp][Hh])\\b",
-                    "isRegex": true
-                  }
-                },
-                {
-                  "name": "titleContains",
-                  "parameters": {
                     "titlePattern": "az \\b(ad)\\b",
                     "isRegex": true
                   }
@@ -12355,6 +12416,12 @@
             "parameters": {
               "user": "kairu-ms"
             }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Reservations"
+            }
           }
         ]
       }
@@ -13468,6 +13535,75 @@
             "name": "addLabel",
             "parameters": {
               "label": "Event Hubs"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "az reservations",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "az reservations",
+                    "isRegex": true
+                  }
+                }
+              ]
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "isAction",
+                  "parameters": {
+                    "action": "opened"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[Reservations] auto assign labels and users based on issue description.",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Reservations"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
             }
           }
         ]

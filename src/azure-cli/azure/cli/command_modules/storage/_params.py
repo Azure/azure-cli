@@ -228,7 +228,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='The tier value to set the blob to. For page blob, the tier correlates to the size of the blob '
              'and number of allowed IOPS. Possible values are P10, P15, P20, P30, P4, P40, P50, P6, P60, P70, P80 '
              'and this is only applicable to page blobs on premium storage accounts; For block blob, possible '
-             'values are Archive, Cool and Hot. This is only applicable to block blobs on standard storage accounts.'
+             'values are Archive, Cold, Cool, and Hot. This is only applicable to block blobs on standard '
+             'storage accounts.'
     )
     rehydrate_priority_type = CLIArgumentType(
         arg_type=get_enum_type(t_rehydrate_priority), options_list=('--rehydrate-priority', '-r'),

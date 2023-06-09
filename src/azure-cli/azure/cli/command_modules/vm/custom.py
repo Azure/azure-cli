@@ -925,9 +925,11 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             logger.warning('Consider using the "Ubuntu2204" alias. On April 30, 2023,'
                            'the image deployed by the "UbuntuLTS" alias reaches its end of life. '
                            'The "UbuntuLTS" will be removed with the breaking change release of Fall 2023.')
-        if image in ["RHEL", "Debian", "CentOS", "Flatcar"]:
+        if image in ["RHEL", "Debian", "CentOS", "Flatcar", "SLES", "openSUSE-Leap"]:
             logger.warning('Consider using the image alias including the version of the distribution you want to use. '
-                           'For example: please use Debian11 instead of Debian')
+                           'For example: please use Debian11 instead of Debian.\nIn Ignite (November) 2023, '
+                           'the aliases without version suffix (such as: `UbuntuLTS`, `CentOS`, `Debian`, `Flatcar`, '
+                           '`SLES`, `openSUSE-Leap` and `RHEL`) will be removed.')
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if os_disk_encryption_set is not None and not is_valid_resource_id(os_disk_encryption_set):
@@ -1622,20 +1624,44 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               enable_vtpm=None, user_data=None, capacity_reservation_group=None,
               dedicated_host=None, dedicated_host_group=None, size=None, ephemeral_os_disk_placement=None,
               enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, disk_controller_type=None,
-              **kwargs):
+              security_type=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
+    SecurityProfile, UefiSettings = cmd.get_models('SecurityProfile', 'UefiSettings')
     vm = kwargs['parameters']
+
+    disk_resource_group, disk_name = None, None
     if os_disk is not None:
         if is_valid_resource_id(os_disk):
-            disk_id, disk_name = os_disk, parse_resource_id(os_disk)['name']
+            disk_id = os_disk
+            os_disk_id_parsed = parse_resource_id(os_disk)
+            disk_resource_group, disk_name = os_disk_id_parsed['resource_group'], os_disk_id_parsed['name']
         else:
-            res = parse_resource_id(vm.id)
-            disk_id = resource_id(subscription=res['subscription'], resource_group=res['resource_group'],
+            vm_id_parsed = parse_resource_id(vm.id)
+            disk_id = resource_id(subscription=vm_id_parsed['subscription'],
+                                  resource_group=vm_id_parsed['resource_group'],
                                   namespace='Microsoft.Compute', type='disks', name=os_disk)
-            disk_name = os_disk
+            disk_resource_group, disk_name = vm_id_parsed['resource_group'], os_disk
         vm.storage_profile.os_disk.managed_disk.id = disk_id
         vm.storage_profile.os_disk.name = disk_name
+
+    if security_type == "TrustedLaunch":
+        if disk_name is None and vm.storage_profile.os_disk.managed_disk is not None:
+            os_disk_id_parsed = parse_resource_id(vm.storage_profile.os_disk.managed_disk.id)
+            disk_resource_group, disk_name = os_disk_id_parsed['resource_group'], os_disk_id_parsed['name']
+
+        if disk_name is not None:
+            from ._vm_utils import validate_update_vm_trusted_launch_supported
+
+            validate_update_vm_trusted_launch_supported(cmd=cmd, vm=vm, os_disk_resource_group=disk_resource_group,
+                                                        os_disk_name=disk_name)
+            # Set --enable-secure-boot False and --enable-vtpm True if not specified by end user.
+            enable_secure_boot = enable_secure_boot if enable_secure_boot is not None else False
+            enable_vtpm = enable_vtpm if enable_vtpm is not None else True
+
+            if vm.security_profile is None:
+                vm.security_profile = SecurityProfile()
+            vm.security_profile.security_type = security_type
 
     if write_accelerator is not None:
         update_write_accelerator_settings(vm.storage_profile, write_accelerator)
@@ -1705,10 +1731,11 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         vm.proximity_placement_group = {'id': proximity_placement_group}
 
     if enable_secure_boot is not None or enable_vtpm is not None:
-        vm.security_profile = {'uefiSettings': {
-            'secureBootEnabled': enable_secure_boot,
-            'vTpmEnabled': enable_vtpm
-        }}
+        if vm.security_profile is None:
+            vm.security_profile = SecurityProfile()
+
+        vm.security_profile.uefi_settings = UefiSettings(secure_boot_enabled=enable_secure_boot,
+                                                         v_tpm_enabled=enable_vtpm)
 
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
@@ -3156,9 +3183,11 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             logger.warning('Consider using the "Ubuntu2204" alias. On April 30, 2023,'
                            'the image deployed by the "UbuntuLTS" alias reaches its end of life. '
                            'The "UbuntuLTS" will be removed with the breaking change release of Fall 2023.')
-        if image in ["RHEL", "Debian", "CentOS", "Flatcar"]:
+        if image in ["RHEL", "Debian", "CentOS", "Flatcar", "SLES", "openSUSE-Leap"]:
             logger.warning('Consider using the image alias including the version of the distribution you want to use. '
-                           'For example: please use Debian11 instead of Debian')
+                           'For example: please use Debian11 instead of Debian.\nIn Ignite (November) 2023, '
+                           'the aliases without version suffix (such as: `UbuntuLTS`, `CentOS`, `Debian`, `Flatcar`, '
+                           '`SLES`, `openSUSE-Leap` and `RHEL`) will be removed.')
 
     # The default load balancer will be expected to be changed from Basic to Standard.
     # In order to avoid breaking change which has a big impact to users,
