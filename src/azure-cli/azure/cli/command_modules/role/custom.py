@@ -1155,9 +1155,9 @@ def list_service_principal_owners(client, identifier):
 
 # pylint: disable=inconsistent-return-statements
 def create_service_principal_for_rbac(
-        # pylint:disable=too-many-statements,too-many-locals, too-many-branches, unused-argument
+        # pylint:disable=too-many-statements,too-many-locals, too-many-branches
         cmd, display_name=None, years=None, create_cert=False, cert=None, scopes=None, role=None,
-        show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
+        show_auth_for_sdk=None, keyvault=None):
     import time
 
     if role and not scopes or not role and scopes:

@@ -461,7 +461,7 @@ class TestRoleMocked(unittest.TestCase):
         cmd = mock.MagicMock()
         cmd.cli_ctx = DummyCli()
         with mock.patch("time.sleep", lambda _: None):
-            create_service_principal_for_rbac(cmd, skip_assignment=True)
+            create_service_principal_for_rbac(cmd)
 
 
 if __name__ == '__main__':
