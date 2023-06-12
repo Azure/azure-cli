@@ -24,7 +24,7 @@ from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flex
     cf_mysql_flexible_servers, cf_mysql_flexible_replica, cf_mysql_flexible_adadmin, cf_mysql_flexible_private_dns_zone_suffix_operations
 from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_skus_info, generate_password, parse_maintenance_window, \
     replace_memory_optimized_tier, build_identity_and_data_encryption, get_identity_and_data_encryption, get_tenant_id, run_subprocess, \
-    run_subprocess_get_output, fill_action_template, get_git_root_dir, GITHUB_ACTION_PATH
+    run_subprocess_get_output, fill_action_template, get_git_root_dir, get_location_from_resource_group, GITHUB_ACTION_PATH
 from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, \
     mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, validate_georestore_location, \
@@ -463,9 +463,6 @@ def flexible_server_import_create(cmd, client,
                                   yes=False):
     provider = 'Microsoft.DBforMySQL'
 
-    # Generate missing parameters
-    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name, server_name)
-
     # Generating source_server_id from data_source depending on whether it is a server_name or resource_id
     if not is_valid_resource_id(data_source):
         if len(data_source.split('/')) == 1:
@@ -480,87 +477,93 @@ def flexible_server_import_create(cmd, client,
     else:
         source_server_id = data_source
 
-    db_context = DbContext(
-        cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
-        cf_availability=cf_mysql_check_resource_availability,
-        cf_availability_without_location=cf_mysql_check_resource_availability_without_location,
-        cf_private_dns_zone_suffix=cf_mysql_flexible_private_dns_zone_suffix_operations,
-        logging_name='MySQL', command_group='mysql', server_client=client, location=location)
+    try:
+        location = get_location_from_resource_group(cmd, resource_group_name, location)
 
-    # Process parameters
-    server_name = server_name.lower()
+        db_context = DbContext(
+            cmd=cmd, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
+            cf_availability=cf_mysql_check_resource_availability,
+            cf_availability_without_location=cf_mysql_check_resource_availability_without_location,
+            cf_private_dns_zone_suffix=cf_mysql_flexible_private_dns_zone_suffix_operations,
+            logging_name='MySQL', command_group='mysql', server_client=client, location=location)
 
-    # MySQL chnged MemoryOptimized tier to BusinessCritical (only in client tool not in list-skus return)
-    if tier == 'BusinessCritical':
-        tier = 'MemoryOptimized'
-    mysql_arguments_validator(db_context,
-                              data_source_type=data_source_type,
-                              mode=mode,
-                              server_name=server_name,
-                              location=location,
-                              tier=tier,
-                              sku_name=sku_name,
-                              storage_gb=storage_gb,
-                              backup_retention=backup_retention,
-                              high_availability=high_availability,
-                              standby_availability_zone=standby_availability_zone,
-                              zone=zone,
-                              subnet=subnet,
-                              public_access=public_access,
-                              auto_grow=auto_grow,
-                              version=version,
-                              geo_redundant_backup=geo_redundant_backup,
-                              byok_identity=byok_identity,
-                              backup_byok_identity=backup_byok_identity,
-                              byok_key=byok_key,
-                              backup_byok_key=backup_byok_key,
-                              auto_io_scaling=auto_scale_iops,
-                              iops=iops)
-    list_skus_info = get_mysql_list_skus_info(db_context.cmd, location)
-    iops_info = list_skus_info['iops_info']
+        # Process parameters
+        server_name = server_name.lower()
 
-    server_result = firewall_name = None
+        # MySQL chnged MemoryOptimized tier to BusinessCritical (only in client tool not in list-skus return)
+        if tier == 'BusinessCritical':
+            tier = 'MemoryOptimized'
+        mysql_arguments_validator(db_context,
+                                  data_source_type=data_source_type,
+                                  mode=mode,
+                                  server_name=server_name,
+                                  location=location,
+                                  tier=tier,
+                                  sku_name=sku_name,
+                                  storage_gb=storage_gb,
+                                  backup_retention=backup_retention,
+                                  high_availability=high_availability,
+                                  standby_availability_zone=standby_availability_zone,
+                                  zone=zone,
+                                  subnet=subnet,
+                                  public_access=public_access,
+                                  auto_grow=auto_grow,
+                                  version=version,
+                                  geo_redundant_backup=geo_redundant_backup,
+                                  byok_identity=byok_identity,
+                                  backup_byok_identity=backup_byok_identity,
+                                  byok_key=byok_key,
+                                  backup_byok_key=backup_byok_key,
+                                  auto_io_scaling=auto_scale_iops,
+                                  iops=iops)
+        list_skus_info = get_mysql_list_skus_info(db_context.cmd, location)
+        iops_info = list_skus_info['iops_info']
 
-    network, start_ip, end_ip = flexible_server_provision_network_resource(cmd=cmd,
-                                                                           resource_group_name=resource_group_name,
-                                                                           server_name=server_name,
-                                                                           location=location,
-                                                                           db_context=db_context,
-                                                                           private_dns_zone_arguments=private_dns_zone_arguments,
-                                                                           public_access=public_access,
-                                                                           vnet=vnet,
-                                                                           subnet=subnet,
-                                                                           vnet_address_prefix=vnet_address_prefix,
-                                                                           subnet_address_prefix=subnet_address_prefix,
-                                                                           yes=yes)
+        server_result = firewall_name = None
 
-    # determine IOPS
-    iops = _determine_iops(storage_gb=storage_gb,
-                           iops_info=iops_info,
-                           iops_input=iops,
-                           tier=tier,
-                           sku_name=sku_name)
+        network, start_ip, end_ip = flexible_server_provision_network_resource(cmd=cmd,
+                                                                               resource_group_name=resource_group_name,
+                                                                               server_name=server_name,
+                                                                               location=location,
+                                                                               db_context=db_context,
+                                                                               private_dns_zone_arguments=private_dns_zone_arguments,
+                                                                               public_access=public_access,
+                                                                               vnet=vnet,
+                                                                               subnet=subnet,
+                                                                               vnet_address_prefix=vnet_address_prefix,
+                                                                               subnet_address_prefix=subnet_address_prefix,
+                                                                               yes=yes)
 
-    storage = mysql_flexibleservers.models.Storage(storage_size_gb=storage_gb,
-                                                   iops=iops,
-                                                   auto_grow=auto_grow,
-                                                   auto_io_scaling=auto_scale_iops)
+        # determine IOPS
+        iops = _determine_iops(storage_gb=storage_gb,
+                               iops_info=iops_info,
+                               iops_input=iops,
+                               tier=tier,
+                               sku_name=sku_name)
 
-    backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
-                                                 geo_redundant_backup=geo_redundant_backup)
+        storage = mysql_flexibleservers.models.Storage(storage_size_gb=storage_gb,
+                                                       iops=iops,
+                                                       auto_grow=auto_grow,
+                                                       auto_io_scaling=auto_scale_iops)
 
-    sku = mysql_flexibleservers.models.Sku(name=sku_name, tier=tier)
+        backup = mysql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
+                                                     geo_redundant_backup=geo_redundant_backup)
 
-    high_availability = mysql_flexibleservers.models.HighAvailability(mode=high_availability,
-                                                                      standby_availability_zone=standby_availability_zone)
+        sku = mysql_flexibleservers.models.Sku(name=sku_name, tier=tier)
 
-    administrator_login_password = generate_password(administrator_login_password)
+        high_availability = mysql_flexibleservers.models.HighAvailability(mode=high_availability,
+                                                                          standby_availability_zone=standby_availability_zone)
 
-    identity, data_encryption = build_identity_and_data_encryption(db_engine='mysql',
-                                                                   byok_identity=byok_identity,
-                                                                   backup_byok_identity=backup_byok_identity,
-                                                                   byok_key=byok_key,
-                                                                   backup_byok_key=backup_byok_key)
+        administrator_login_password = generate_password(administrator_login_password)
+
+        identity, data_encryption = build_identity_and_data_encryption(db_engine='mysql',
+                                                                       byok_identity=byok_identity,
+                                                                       backup_byok_identity=backup_byok_identity,
+                                                                       byok_key=byok_key,
+                                                                       backup_byok_key=backup_byok_key)
+
+    except Exception as e:
+        raise ResourceNotFoundError(e)
 
     # Create mysql server
     # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
