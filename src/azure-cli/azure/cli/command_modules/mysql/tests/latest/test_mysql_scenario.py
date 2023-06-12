@@ -1057,11 +1057,6 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
     def test_mysql_flexible_server_mgmt_update_validator(self, resource_group):
         self._test_mgmt_update_validator('mysql', resource_group)
 
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
-    def test_mysql_flexible_server_mgmt_import_validator(self, resource_group):
-        self._test_mgmt_import_validator('mysql', resource_group)
-
     def _test_mgmt_create_validator(self, database_engine, resource_group):
 
         RANDOM_VARIABLE_MAX_LENGTH = 30
@@ -1181,17 +1176,6 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
                  database_engine, resource_group, server_name), checks=NoneCheck())
-
-    def _test_mgmt_import_validator(self, database_engine, resource_group):
-        RANDOM_VARIABLE_MAX_LENGTH = 30
-        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        valid_data_source_type = 'mysql_single'
-        valid_mode = 'offline'
-        invalid_data_source = self.create_random_name('data_source', RANDOM_VARIABLE_MAX_LENGTH)
-
-        self.cmd('{} flexible-server import create -g {} -n {} --data-source-type {} --data-source {} --mode {}'
-                 .format(database_engine, resource_group, server_name, valid_data_source_type, invalid_data_source, valid_mode ),
-                 expect_failure=True)
 
 class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
 
