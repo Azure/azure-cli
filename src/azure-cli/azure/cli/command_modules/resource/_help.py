@@ -2866,11 +2866,11 @@ examples:
   - name: Create a deployment stack using parameters from key/value pairs
     text: az stack mg create --name StackName --management-group-id myMg --template-file simpleTemplate.json --location westus --description description --parameters simpleTemplateParams.json value1=foo value2=bar --deny-settings-mode None
   - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
-    text: az stack mg create --name rollout01 --management-group-id myMg --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus --deny-settings-mode None
+    text: az stack mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus --deny-settings-mode None
   - name: Create a deployment stack from a local template, using deny settings.
-    text: az stack mg create --name rollout01 --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --location westus --deny-settings-mode None
+    text: az stack mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --location westus --deny-settings-mode None
   - name: Create a deployment stack from a local template, apply deny settings to child scope.
-    text: az stack mg create --name rollout01 --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --location westus --deny-settings-mode None
+    text: az stack mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --location westus --deny-settings-mode None
 """
 
 helps['stack mg list'] = """
@@ -2888,7 +2888,7 @@ examples:
   - name: Get stack by name.
     text: az stack mg show --name StackName --management-group-id myMg
   - name: Get stack by stack resource id.
-    text: az stack mg show --id StackResourceID --management-group-id myMg
+    text: az stack mg show --id /providers/Microsoft.Management/managementGroups/myMg/providers/Microsoft.Resources/deploymentStacks/StackName --management-group-id myMg
 """
 
 helps['stack mg export'] = """
@@ -2898,7 +2898,7 @@ examples:
   - name: Export template by name.
     text: az stack mg export --name StackName --management-group-id myMg
   - name: Export template by stack resource id.
-    text: az stack mg export --id StackResourceID --management-group-id myMg
+    text: az stack mg export --id /providers/Microsoft.Management/managementGroups/myMg/providers/Microsoft.Resources/deploymentStacks/StackName --management-group-id myMg
 """
 
 helps['stack mg delete'] = """
@@ -2908,7 +2908,7 @@ examples:
   - name: Delete stack by name.
     text: az stack mg delete --name StackName --management-group-id myMg
   - name: Delete stack by stack resource id.
-    text: az stack mg delete --id StackResourceID --management-group-id myMg
+    text: az stack mg delete --id /providers/Microsoft.Management/managementGroups/myMg/providers/Microsoft.Resources/deploymentStacks/StackName --management-group-id myMg
 """
 
 helps['stack sub'] = """
@@ -2935,11 +2935,11 @@ examples:
   - name: Create a deployment stack using parameters from key/value pairs
     text: az stack sub create --name StackName --template-file simpleTemplate.json --location westus --description description --parameters simpleTemplateParams.json value1=foo value2=bar --deny-settings-mode None
   - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
-    text: az stack sub create --name rollout01 --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus --deny-settings-mode None
+    text: az stack sub create --name StackName --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus --deny-settings-mode None
   - name: Create a deployment stack from a local template, using deny settings.
-    text: az stack sub create --name rollout01 --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --location westus --deny-settings-mode None
+    text: az stack sub create --name StackName --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --location westus --deny-settings-mode None
   - name: Create a deployment stack from a local template, apply deny settings to child scopes.
-    text: az stack sub create --name rollout01 --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --location westus --deny-settings-mode None
+    text: az stack sub create --name StackName --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --location westus --deny-settings-mode None
 """
 
 helps['stack sub list'] = """
@@ -2957,7 +2957,7 @@ examples:
   - name: Get stack by name.
     text: az stack sub show --name StackName
   - name: Get stack by stack resource id.
-    text: az stack sub show --id StackResourceID
+    text: az stack sub show --id /subscriptions/111111111111/providers/Microsoft.Resources/deploymentStacks/StackName
 """
 
 helps['stack sub export'] = """
@@ -2967,7 +2967,7 @@ examples:
   - name: Export template by name.
     text: az stack sub export --name StackName
   - name: Export template by stack resource id.
-    text: az stack sub export --id StackResourceID
+    text: az stack sub export --id /subscriptions/111111111111/providers/Microsoft.Resources/deploymentStacks/StackName
 """
 
 helps['stack sub delete'] = """
@@ -2977,7 +2977,7 @@ examples:
   - name: Delete stack by name.
     text: az stack sub delete --name StackName
   - name: Delete stack by stack resource id.
-    text: az stack sub delete --id StackResourceID
+    text: az stack sub delete --id /subscriptions/111111111111/providers/Microsoft.Resources/deploymentStacks/StackName
 """
 
 helps['stack group'] = """
@@ -3002,11 +3002,11 @@ examples:
   - name: Create a deployment stack using parameters from key/value pairs
     text: az stack group create --name StackName --template-file simpleTemplate.json --resource-group ResourceGroup --description description --parameters simpleTemplateParams.json value1=foo value2=bar --deny-settings-mode None
   - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
-    text: az stack group create --name rollout01 --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --resource-group ResourceGroup --deny-settings-mode None
+    text: az stack group create --name StackName --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --resource-group ResourceGroup --deny-settings-mode None
   - name: Create a deployment stack from a local template, using deny settings.
-    text: az stack group create --name rollout01 --resource-group ResourceGroup --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --deny-settings-mode None
+    text: az stack group create --name StackName --resource-group ResourceGroup --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --deny-settings-mode None
   - name: Create a deployment stack from a local template, apply deny setting to child scopes.
-    text: az stack group create --name rollout01 --resource-group ResourceGroup --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --deny-settings-mode None
+    text: az stack group create --name StackName --resource-group ResourceGroup --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --deny-settings-mode None
 """
 
 helps['stack group list'] = """
@@ -3024,7 +3024,7 @@ examples:
   - name: Get stack by name.
     text: az stack group show --name StackName --resource-group ResourceGroup
   - name: Get stack by stack resource id.
-    text: az stack group show --id StackResourceID
+    text: az stack group show --id /subscriptions/111111111111/resourceGroups/ResourceGroup/providers/Microsoft.Resources/deploymentStacks/StackName
 """
 
 helps['stack group export'] = """
@@ -3034,7 +3034,7 @@ examples:
   - name: Export template by name.
     text: az stack group export --name StackName --resource-group ResourceGroup
   - name: Export template by stack resource id.
-    text: az stack group export --id StackResourceID
+    text: az stack group export --id /subscriptions/111111111111/resourceGroups/ResourceGroup/providers/Microsoft.Resources/deploymentStacks/StackName
 """
 
 helps['stack group delete'] = """
@@ -3044,7 +3044,7 @@ examples:
   - name: Delete stack by name.
     text: az stack group delete --name StackName --resource-group ResourceGroup
   - name: Delete stack by stack resource id.
-    text: az stack group delete --id StackResourceID
+    text: az stack group delete --id /subscriptions/111111111111/resourceGroups/ResourceGroup/providers/Microsoft.Resources/deploymentStacks/StackName
 """
 
 helps['bicep generate-params'] = """
