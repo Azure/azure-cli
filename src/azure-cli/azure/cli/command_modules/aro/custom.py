@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import random
+from base64 import b64decode
 
 import azure.mgmt.redhatopenshift.models as openshiftcluster
 
@@ -11,7 +12,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import sdk_no_wait
-from azure.cli.core.azclierror import ResourceNotFoundError, UnauthorizedError
+from azure.cli.core.azclierror import FileOperationError, ResourceNotFoundError, UnauthorizedError
 from azure.cli.command_modules.aro._aad import AADManager
 from azure.cli.command_modules.aro._rbac import assign_role_to_resource, \
     has_role_assignment_on_resource
@@ -194,6 +195,18 @@ def aro_show(client, resource_group_name, resource_name):
 
 def aro_list_credentials(client, resource_group_name, resource_name):
     return client.open_shift_clusters.list_credentials(resource_group_name, resource_name)
+
+
+def aro_get_admin_kubeconfig(client, resource_group_name, resource_name, file="kubeconfig"):
+    query_result = client.open_shift_clusters.list_admin_credentials(resource_group_name, resource_name)
+    file_mode = "x"
+    yaml_data = b64decode(query_result.kubeconfig).decode('UTF-8')
+    try:
+        with open(file, file_mode, encoding="utf-8") as f:
+            f.write(yaml_data)
+    except FileExistsError as e:
+        raise FileOperationError(f"File {file} already exists.") from e
+    logger.info("Kubeconfig written to file: %s", file)
 
 
 def aro_get_versions(client, location):
