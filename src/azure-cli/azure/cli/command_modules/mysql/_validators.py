@@ -143,18 +143,6 @@ def _mysql_import_data_source_type_validator(data_source_type):
                                         .format(allowed_values))
 
 
-def mysql_import_data_source_validator(cli_ctx, source_server_id, resource_group_name):
-    id_parts = parse_resource_id(source_server_id)
-    if id_parts['resource_group'] != resource_group_name:
-        raise ValidationError('Different resource groups were found for single and flexible server. '
-                              'Migrations are only supported under the same resource group. '
-                              'Make sure to provide the same resource group by --resource-group. ')
-    if id_parts['subscription'] != get_subscription_id(cli_ctx):
-        raise ValidationError('Different subscriptions were found for single and flexible server. '
-                              'Migrations are only supported under the same subscription. '
-                              'Make sure to provide the same subscription. ')
-
-
 def _mysql_import_mode_validator(mode):
     allowed_values = ['offline']
     if mode is not None and mode.lower() not in allowed_values:
