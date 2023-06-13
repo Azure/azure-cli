@@ -28,7 +28,7 @@ from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_s
 from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, \
     mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, validate_georestore_location, \
-    validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_replica_location, validate_public_access_server
+    validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_public_access_server
 
 logger = get_logger(__name__)
 DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
