@@ -59,9 +59,9 @@ class Remove(AAZCommand):
             help="Name of the IP configuration.",
             required=True,
         )
-        _args_schema.inbound_nat_rule = AAZResourceIdArg(
-            options=["--inbound-nat-rule"],
-            help="Name or ID of an existing inbound NAT rule. If name is used, `--lb-name` must be specified.",
+        _args_schema.load_balancer_inbound_nat_rule_id = AAZResourceIdArg(
+            options=["--load-balancer-inbound-nat-rule-id"],
+            help="Resource ID.",
             required=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/loadBalancers/{}/inboundNatRules/{}",
@@ -109,7 +109,7 @@ class Remove(AAZCommand):
             result = result.properties.loadBalancerInboundNatRules
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].id == self.ctx.args.inbound_nat_rule,
+                lambda e: e[1].id == self.ctx.args.load_balancer_inbound_nat_rule_id,
                 filters
             )
             idx = next(filters)[0]
@@ -128,7 +128,7 @@ class Remove(AAZCommand):
             result = result.properties.loadBalancerInboundNatRules
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].id == self.ctx.args.inbound_nat_rule,
+                lambda e: e[1].id == self.ctx.args.load_balancer_inbound_nat_rule_id,
                 filters
             )
             idx = next(filters, [len(result)])[0]
