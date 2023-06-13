@@ -121,9 +121,9 @@ def load_arguments(self, _):
         options_list=['--description'], help='The description of deployment stack.')
     stacks_stack_type = CLIArgumentType(help='The deployment stack resource id.')
     stacks_stack_name_type = CLIArgumentType(help='The deployment stack name')
-    stacks_stack_deployment_resource_group = CLIArgumentType(options_list=['--deployment-resource-group', '-r'],
+    stacks_stack_deployment_resource_group = CLIArgumentType(options_list=['--deployment-resource-group', '--dr'],
                                                              help='The scope at which the initial deployment should be created. If a scope is not specified, it will default to the scope of the deployment stack.')
-    stacks_stack_deployment_subscription = CLIArgumentType(options_list=['--deployment-subscription', '-d'],
+    stacks_stack_deployment_subscription = CLIArgumentType(options_list=['--deployment-subscription', '--ds'],
                                                            help='The scope at which the initial deployment should be created. If a scope is not specified, it will default to the scope of the deployment stack.')
     stacks_delete_resources_type = CLIArgumentType(
         options_list=['--delete-resources'], help='Flag to indicate delete rather than detach for the resources.')
@@ -133,12 +133,12 @@ def load_arguments(self, _):
         options_list=['--delete-all'], help='Flag to indicate delete rather than detach for the resources and resource groups.')
     stacks_deny_settings_mode = CLIArgumentType(
         help='Define which operations are denied on resources managed by the stack: denyDelete or denyWriteAndDelete.')
-    stacks_excluded_principals = CLIArgumentType(options_list=['--deny-settings-excluded-principals', '-e'],
+    stacks_excluded_principals = CLIArgumentType(options_list=['--deny-settings-excluded-principals', '--ep'],
                                                  help='List of AAD principal IDs excluded from the lock. Up to 5 principals are permitted.')
-    stacks_excluded_actions = CLIArgumentType(options_list=['--deny-settings-excluded-actions', '-a'],
+    stacks_excluded_actions = CLIArgumentType(options_list=['--deny-settings-excluded-actions', '--ea'],
                                               help="List of role-based management operations that are excluded from the denySettings. Up to 200 actions are permitted.")
     stacks_apply_to_child_scopes = CLIArgumentType(
-        options_list=['--deny-settings-apply-to-child-scopes', '-c'], help='DenySettings will be applied to child scopes.')
+        options_list=['--deny-settings-apply-to-child-scopes', '--cs'], help='DenySettings will be applied to child scopes.')
 
     bicep_file_type = CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(), type=file_type)
     bicep_force_type = CLIArgumentType(options_list=['--force'], action='store_true')
@@ -702,10 +702,14 @@ def load_arguments(self, _):
     for operation in ['create', 'update']:
         with self.argument_context('managedapp definition {}'.format(operation)) as c:
             c.argument('lock_level', arg_type=get_enum_type(ApplicationLockLevel), help='The type of lock restriction.')
-            c.argument('authorizations', options_list=['--authorizations', '-a'], nargs='+', help="space-separated authorization pairs in a format of `<principalId>:<roleDefinitionId>`")
-            c.argument('create_ui_definition', options_list=['--create-ui-definition', '-c'], help='JSON formatted string or a path to a file with such content', type=file_type)
-            c.argument('main_template', options_list=['--main-template', '-t'], help='JSON formatted string or a path to a file with such content', type=file_type)
-            c.argument('deployment_mode', arg_type=get_enum_type(self.get_models('DeploymentMode')), help='The managed application deployment mode.')
+            c.argument('authorizations', options_list=['--authorizations', '-a'], nargs='+',
+                       help="space-separated authorization pairs in a format of `<principalId>:<roleDefinitionId>`")
+            c.argument('create_ui_definition', options_list=[
+                       '--create-ui-definition', '-c'], help='JSON formatted string or a path to a file with such content', type=file_type)
+            c.argument('main_template', options_list=[
+                       '--main-template', '-t'], help='JSON formatted string or a path to a file with such content', type=file_type)
+            c.argument('deployment_mode', arg_type=get_enum_type(self.get_models(
+                'DeploymentMode')), help='The managed application deployment mode.')
 
     with self.argument_context('account') as c:
         c.argument('subscription', options_list=['--subscription', '-s'],
