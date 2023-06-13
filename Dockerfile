@@ -29,10 +29,10 @@ LABEL maintainer="Microsoft" \
 # openssh - included for ssh-keygen
 # ca-certificates
 
-# curl - required for installing jp
+# wget - required for installing jp
 # jq - we include jq as a useful tool
 # pip wheel - required for CLI packaging
-# jmespath-terminal - we include jpterm as a useful tool
+# jmespath-community-terminal - we include jpterm as a useful tool
 # libintl and icu-libs - required by azure devops artifact (az extension add --name azure-devops)
 
 # We don't use openssl (3.0) for now. We only install it so that users can use it.
@@ -42,10 +42,11 @@ RUN apk add --no-cache bash openssh ca-certificates jq curl openssl perl git zip
  && apk add --no-cache bash-completion \
  && update-ca-certificates
 
-ARG JP_VERSION="0.1.3"
+ARG JP_VERSION="1.1.0"
 
-RUN curl -L https://github.com/jmespath/jp/releases/download/${JP_VERSION}/jp-linux-amd64 -o /usr/local/bin/jp \
- && chmod +x /usr/local/bin/jp
+RUN curl -L https://github.com/jmespath-community/jp/releases/download/v${JP_VERSION}/jp-linux-amd64 -o /usr/local/bin/jp \
+ && chmod +x /usr/local/bin/jp \
+ && pip install --no-cache-dir --upgrade jmespath-community-terminal
 
 WORKDIR azure-cli
 COPY . /azure-cli

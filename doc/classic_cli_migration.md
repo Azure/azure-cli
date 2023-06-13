@@ -187,7 +187,7 @@ $ azure vm list --json \
 $ MY_SUBSCRIPTION_ID=$(azure account show --json | jq -r '.[0].id')
 ```
 
-With the Azure CLI, you can now use the `--query '[expression]'` parameter and the [JMESPath](http://jmespath.org/)
+With the Azure CLI, you can now use the `--query '[expression]'` parameter and the [JMESPath](http://jmespath.site/main)
 query language to extract values.
 
 ```azurecli

@@ -26,9 +26,11 @@ def _aks_agentpool_table_format(result):
         maxPods: maxPods,
         provisioningState: provisioningState,
         mode: mode
-    }""")
+    }""", Options(enable_legacy_literals=True))
     # use ordered dicts so headers are predictable
-    return parsed.search(result, Options(dict_cls=OrderedDict))
+    # enable compatibility with legacy JSON literals
+    return parsed.search(result,
+        Options(dict_cls=OrderedDict, enable_legacy_literals=True))
 
 
 def aks_agentpool_list_table_format(results):
@@ -70,9 +72,11 @@ def _aks_table_format(result):
         currentKubernetesVersion: currentKubernetesVersion,
         provisioningState: provisioningState,
         fqdn: fqdn || privateFqdn
-    }""")
+    }""", Options(enable_legacy_literals=True))
     # use ordered dicts so headers are predictable
-    return parsed.search(result, Options(dict_cls=OrderedDict))
+    # enable compatibility with legacy JSON literals
+    return parsed.search(result,
+        Options(dict_cls=OrderedDict, enable_legacy_literals=True))
 
 
 def aks_upgrades_table_format(result):
@@ -92,9 +96,11 @@ def aks_upgrades_table_format(result):
         resourceGroup: resourceGroup,
         masterVersion: controlPlaneProfile.kubernetesVersion || `unknown`,
         upgrades: controlPlaneProfile.upgrades[].kubernetesVersion || [`None available`] | sort_versions(@) | set_preview_array(@) | join(`, `, @)
-    }""")
+    }""", Options(enable_legacy_literals=True))
     # use ordered dicts so headers are predictable
-    return parsed.search(result, Options(dict_cls=OrderedDict, custom_functions=_custom_functions(preview)))
+    # enable compatibility with legacy JSON literals
+    return parsed.search(result,
+        Options(dict_cls=OrderedDict, custom_functions=_custom_functions(preview), enable_legacy_literals=True))
 
 
 def aks_versions_table_format(result):
@@ -111,11 +117,12 @@ def aks_versions_table_format(result):
     parsed = compile_jmes("""orchestrators[].{
         kubernetesVersion: orchestratorVersion | set_preview(@),
         upgrades: upgrades[].orchestratorVersion || [`None available`] | sort_versions(@) | set_preview_array(@) | join(`, `, @)
-    }""")
+    }""", Options(enable_legacy_literals=True))
 
     # use ordered dicts so headers are predictable
-    results = parsed.search(result, Options(
-        dict_cls=OrderedDict, custom_functions=_custom_functions(preview)))
+    # enable compatibility with legacy JSON literals
+    return parsed.search(result,
+        Options(dict_cls=OrderedDict, custom_functions=_custom_functions(preview), enable_legacy_literals=True))
     return sorted(results, key=lambda x: version_to_tuple(x.get('kubernetesVersion')), reverse=True)
 
 
@@ -138,9 +145,11 @@ def _aks_nodepool_snapshot_table_format(result):
         kubernetesVersion: kubernetesVersion,
         osType: osType,
         enableFIPS: enableFIPS
-    }""")
+    }""", Options(enable_legacy_literals=True))
     # use ordered dicts so headers are predictable
-    return parsed.search(result, Options(dict_cls=OrderedDict))
+    # enable compatibility with legacy JSON literals
+    return parsed.search(result,
+        Options(dict_cls=OrderedDict, enable_legacy_literals=True))
 
 
 def version_to_tuple(version):

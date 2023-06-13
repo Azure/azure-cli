@@ -135,7 +135,7 @@ class StorageAccountTests(ScenarioTest):
 
 Notes:
 
-1. The first argument in the `check` method is a JMESPath query. [JMESPath is a query language for JSON](http://jmespath.org/).
+1. The first argument in the `check` method is a JMESPath query. [JMESPath is a query language for JSON](http://jmespath.site/main/).
 2. If a command returns JSON, multiple JMESPath based checks can be added to the checks list to validate the result.
 3. In addition to the `check` method, there are other checks like `is_empty` which validate the output is `None`. The check mechanism is extensible. Any callable accepting a single `ExecutionResult` argument can act as a check: see [checkers.py](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli-testsdk/azure/cli/testsdk/checkers.py).
 
