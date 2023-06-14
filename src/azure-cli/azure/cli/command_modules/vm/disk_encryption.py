@@ -143,9 +143,8 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
         'AADClientSecret': aad_client_secret if is_linux else (aad_client_secret or '')
     }
 
-    VirtualMachineExtension, DiskEncryptionSettings, KeyVaultSecretReference, KeyVaultKeyReference, SubResource = \
-        cmd.get_models('VirtualMachineExtension', 'DiskEncryptionSettings', 'KeyVaultSecretReference',
-                       'KeyVaultKeyReference', 'SubResource')
+    from azure.mgmt.compute.models import (VirtualMachineExtension, DiskEncryptionSettings, KeyVaultSecretReference,
+                                           KeyVaultKeyReference, SubResource)
 
     ext = VirtualMachineExtension(
         location=vm.location,  # pylint: disable=no-member
@@ -242,8 +241,7 @@ def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False)
         'SequenceVersion': sequence_version,
     }
 
-    VirtualMachineExtension, DiskEncryptionSettings = cmd.get_models(
-        'VirtualMachineExtension', 'DiskEncryptionSettings')
+    from azure.mgmt.compute.models import VirtualMachineExtension, DiskEncryptionSettings
 
     ext = VirtualMachineExtension(
         location=vm.location,  # pylint: disable=no-member
@@ -390,10 +388,8 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
                  volume_type=None,
                  force=False):
     from msrestazure.tools import parse_resource_id
-
-    # pylint: disable=no-member
-    UpgradeMode, VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = cmd.get_models(
-        'UpgradeMode', 'VirtualMachineScaleSetExtension', 'VirtualMachineScaleSetExtensionProfile')
+    from azure.mgmt.compute.models import UpgradeMode, VirtualMachineScaleSetExtension, \
+        VirtualMachineScaleSetExtensionProfile
 
     compute_client = _compute_client_factory(cmd.cli_ctx)
     vmss = compute_client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
@@ -455,7 +451,8 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
 
 
 def decrypt_vmss(cmd, resource_group_name, vmss_name, volume_type=None, force=False):
-    UpgradeMode, VirtualMachineScaleSetExtension = cmd.get_models('UpgradeMode', 'VirtualMachineScaleSetExtension')
+    from azure.mgmt.compute.models import UpgradeMode, VirtualMachineScaleSetExtension
+
     compute_client = _compute_client_factory(cmd.cli_ctx)
     vmss = compute_client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
     is_linux = _is_linux_os(vmss.virtual_machine_profile)
