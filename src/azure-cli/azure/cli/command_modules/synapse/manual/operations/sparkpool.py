@@ -23,21 +23,12 @@ def create_spark_pool(cmd, client, resource_group_name, workspace_name, spark_po
                       enable_auto_pause=None, delay=None, spark_events_folder="/events",
                       spark_log_folder="/logs", enable_dynamic_executor_allocation=None, min_executors=None,
                       max_executors=None, tags=None, no_wait=False):
-    # existing_spark_pools = client.list_by_workspace(resource_group_name, workspace_name)
-    # existing_names = []
-    # for pool in existing_spark_pools:
-    #     existing_names.append(pool.name)
-    # if spark_pool_name in existing_names:
-    #     from azure.cli.core.azclierror import ValidationError
-    #     err_msg = 'The input spark pool is existing.'
-    #     raise ValidationError(err_msg)
-    
     try:
         existing_spark_pool = client.get(resource_group_name, workspace_name, spark_pool_name)
         if existing_spark_pool.id:
-           from azure.cli.core.azclierror import ValidationError
-           err_msg = 'The input spark pool is existing.'
-           raise ValidationError(err_msg)
+            from azure.cli.core.azclierror import ValidationError
+            err_msg = 'The input spark pool is existing.'
+            raise ValidationError(err_msg)
     except ResourceNotFoundError:
         pass
 
