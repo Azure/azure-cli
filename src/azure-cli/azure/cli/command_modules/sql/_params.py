@@ -2724,7 +2724,7 @@ def load_arguments(self, _):
                    required=True,
                    options_list=['--dest-mi'],
                    help='Name of the managed instance to move the managed database to.')
-        
+
     with self.argument_context('sql midb copy') as c:
         c.argument('dest_resource_group_name',
                    required=False,
@@ -2752,17 +2752,17 @@ def load_arguments(self, _):
                    required=False,
                    options_list=['--dest-mi'],
                    help='Name of the target managed instance to show move operations for.')
-        
+
         c.argument('dest_resource_group',
                    required=False,
                    options_list=['--dest-resource-group', '--dest-rg'],
                    help='Name of the target resource group to show move operations for.')
-        
+
         c.argument('only_latest_per_database',
                    required=False,
                    options_list=['--only-latest-per-database', '--latest'],
                    help='Flag that only shows latest move operation per managed database.')
-    
+
     with self.argument_context('sql midb copy list') as c:
         c.argument('resource_group_name',
                    options_list=['--resource-group', '-g'],
@@ -2783,7 +2783,7 @@ def load_arguments(self, _):
                    required=False,
                    options_list=['--dest-resource-group', '--dest-rg'],
                    help='Name of the target resource group to show copy operations for.')
-        
+
         c.argument('only_latest_per_database',
                    required=False,
                    options_list=['--only-latest-per-database', '--latest'],

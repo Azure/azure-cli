@@ -1010,18 +1010,18 @@ def load_command_table(self, _):
                             managed_databases_operations,
                             client_factory=get_sql_managed_databases_operations) as g:
 
-        g.custom_command('start', 'managed_db_move_start')
-        g.custom_command('complete', 'managed_db_move_copy_complete')
-        g.custom_command('cancel', 'managed_db_move_copy_cancel')
+        g.custom_command('start', 'managed_db_move_start', supports_no_wait=True)
+        g.custom_command('complete', 'managed_db_move_copy_complete', supports_no_wait=True)
+        g.custom_command('cancel', 'managed_db_move_copy_cancel', supports_no_wait=True)
 
     with self.command_group('sql midb copy',
                             managed_databases_operations,
                             client_factory=get_sql_managed_databases_operations) as g:
 
-        g.custom_command('start', 'managed_db_copy_start')
-        g.custom_command('complete', 'managed_db_move_copy_complete')
-        g.custom_command('cancel', 'managed_db_move_copy_cancel')
-    
+        g.custom_command('start', 'managed_db_copy_start', supports_no_wait=True)
+        g.custom_command('complete', 'managed_db_move_copy_complete', supports_no_wait=True)
+        g.custom_command('cancel', 'managed_db_move_copy_cancel', supports_no_wait=True)
+
     managed_databases_move_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ManagedDatabaseMoveOperationsOperations.{}',
         client_factory=get_sql_managed_database_move_operations)

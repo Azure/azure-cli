@@ -6013,6 +6013,7 @@ def managed_ledger_digest_uploads_disable(
         database_name=database_name,
         ledger_digest_uploads=LedgerDigestUploadsName.CURRENT)
 
+
 def managed_db_move_start(
         cmd,
         client,
@@ -6037,6 +6038,7 @@ def managed_db_move_start(
         'Move',
         **kwargs)
 
+
 def managed_db_copy_start(
         cmd,
         client,
@@ -6060,6 +6062,7 @@ def managed_db_copy_start(
         dest_instance_name,
         'Copy',
         **kwargs)
+
 
 def managed_db_move_copy_start(
         cmd,
@@ -6088,6 +6091,7 @@ def managed_db_move_copy_start(
         database_name=database_name,
         parameters=kwargs)
 
+
 def managed_db_move_copy_complete(
         cmd,
         client,
@@ -6112,6 +6116,7 @@ def managed_db_move_copy_complete(
         managed_instance_name=managed_instance_name,
         database_name=database_name,
         parameters=kwargs)
+
 
 def managed_db_move_copy_cancel(
         cmd,
@@ -6138,6 +6143,7 @@ def managed_db_move_copy_cancel(
         database_name=database_name,
         parameters=kwargs)
 
+
 def managed_db_move_list(
         cmd,
         client,
@@ -6151,7 +6157,8 @@ def managed_db_move_list(
     Lists managed database move operations
     '''
 
-    return managed_db_move_copy_list(cmd,
+    return managed_db_move_copy_list(
+        cmd,
         client,
         resource_group_name,
         managed_instance_name,
@@ -6160,6 +6167,7 @@ def managed_db_move_list(
         dest_instance_name,
         dest_resource_group,
         only_latest_per_database)
+
 
 def managed_db_copy_list(
         cmd,
@@ -6174,7 +6182,8 @@ def managed_db_copy_list(
     Lists managed database copy operations
     '''
 
-    return managed_db_move_copy_list(cmd,
+    return managed_db_move_copy_list(
+        cmd,
         client,
         resource_group_name,
         managed_instance_name,
@@ -6184,14 +6193,15 @@ def managed_db_copy_list(
         dest_resource_group,
         only_latest_per_database,)
 
+
 def managed_db_move_copy_list(
         cmd,
         client,
         resource_group_name,
-        managed_instance_name,        
+        managed_instance_name,
         operation_mode,
         database_name,
-        dest_instance_name,        
+        dest_instance_name,
         dest_resource_group,
         only_latest_per_database):
     '''
@@ -6209,17 +6219,17 @@ def managed_db_move_copy_list(
     )
 
     if dest_instance_name is not None:
-       custom_filter += " and Properties/TargetManagedInstanceName eq '{}'".format(dest_instance_name)
+        custom_filter += " and Properties/TargetManagedInstanceName eq '{}'".format(dest_instance_name)
 
     if database_name is not None:
-       custom_filter += " and Properties/TargetDatabaseName eq '{}'".format(database_name)
+        custom_filter += " and Properties/TargetDatabaseName eq '{}'".format(database_name)
 
     result = client.list_by_location(
         resource_group_name=resource_group_name,
         location_name=location,
         only_latest_per_database=only_latest_per_database,
         filter=custom_filter)
-    
+
     if dest_resource_group is not None:
         result = list(filter(lambda operation: "resourceGroups/{}/".format(dest_resource_group).lower() in operation.target_managed_instance_id.lower(), result))
 
