@@ -415,6 +415,9 @@ def _send(cli_ctx, method, url, param=None, body=None):
             raise InvalidArgumentValueError(MICROSOFT_GRAPH_API_ERROR.format(ex)) from ex
 
         if r.text:
+            if 'InternalServerError' in r.text:
+                return None
+
             dic = r.json()
 
             # The result is a list. Add value to list_result.
@@ -443,10 +446,28 @@ def _send(cli_ctx, method, url, param=None, body=None):
 def _directory_role_list(cli_ctx, principal_id):
     DIRECTORY_ROLE_URL = "/servicePrincipals/{}/transitiveMemberOf/microsoft.graph.directoryRole"
     try:
-        return _send(cli_ctx, "GET", DIRECTORY_ROLE_URL.format(principal_id))
+        role_list = _send(cli_ctx, "GET", DIRECTORY_ROLE_URL.format(principal_id))
+        if role_list is None:
+            role_list = _directory_role_list2(cli_ctx, principal_id)
+        return role_list
     except Exception as ex:
         raise InvalidArgumentValueError(MICROSOFT_GRAPH_API_ERROR.format(ex)) from ex
 
+# https://graph.microsoft.com/v1.0/servicePrincipals/{principalId}/transitiveMemberOf
+# Currently there is a bug in Graph API that causes internal server error in the Graph API service side filtering 
+# when the MSI is a member of an AAD group. The ICM incident is as below:
+# https://portal.microsofticm.com/imp/v3/incidents/details/392112435/home
+#
+# This method is doing the same thing as _directory_role_list but via client side filtering.
+def _directory_role_list2(cli_ctx, principal_id):
+    DIRECTORY_ROLE_CLIENT_FILTERING_URL = "/servicePrincipals/{}/transitiveMemberOf"
+    try:
+        role_list = _send(cli_ctx, "GET", DIRECTORY_ROLE_CLIENT_FILTERING_URL.format(principal_id))
+
+        # Filter out the directory role
+        return [role for role in role_list if role["@odata.type"] == "#microsoft.graph.directoryRole"]
+    except Exception as ex:
+        raise InvalidArgumentValueError(MICROSOFT_GRAPH_API_ERROR.format(ex)) from ex
 
 # https://graph.microsoft.com/v1.0/servicePrincipals/{principalId}/appRoleAssignments
 # retrieve all app role assignments to a service principal
