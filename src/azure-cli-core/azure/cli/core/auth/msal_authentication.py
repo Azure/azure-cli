@@ -18,7 +18,7 @@ azure.cli.core.auth.util.AccessToken to build the return value. See below creden
 
 from knack.log import get_logger
 from knack.util import CLIError
-from msal import PublicClientApplication, ConfidentialClientApplication
+from msal import PublicClientApplication, ConfidentialClientApplication, ManagedIdentity
 
 from .util import check_result, build_sdk_access_token
 
@@ -139,4 +139,42 @@ class ServicePrincipalCredential(ConfidentialClientApplication):
         if not result:
             result = self.acquire_token_for_client(scopes, **kwargs)
         check_result(result)
+        return build_sdk_access_token(result)
+
+
+class ManagedIdentityCredential(ManagedIdentity):
+
+    def __init__(self, client_id=None, object_id=None, mi_res_id=None):
+        import requests
+        super().__init__(requests.Session(), client_id=client_id, object_id=object_id, mi_res_id=mi_res_id)
+
+    def get_token(self, *scopes, **kwargs):
+        logger.debug("ManagedIdentityCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
+
+        from .util import scopes_to_resource
+        result = self.acquire_token(scopes_to_resource(scopes))
+        check_result(result)
+        return build_sdk_access_token(result)
+
+
+class CloudShellCredential:  # pylint: disable=too-few-public-methods
+
+    def __init__(self):
+        from .identity import AZURE_CLI_CLIENT_ID
+        self.msal_app = PublicClientApplication(
+            AZURE_CLI_CLIENT_ID,  # Use a real client_id, so that cache would work
+            # TODO: This PoC does not currently maintain a token cache;
+            #   Ideally we should reuse the real MSAL app object which has cache configured.
+            # token_cache=...,
+        )
+
+    def get_token(self, *scopes, **kwargs):  # pylint: disable=no-self-use
+        logger.debug("CloudShellCredential.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
+        if 'data' in kwargs:
+            # Get a VM SSH certificate
+            result = self.msal_app.acquire_token_interactive(list(scopes), prompt="none", data=kwargs["data"])
+        else:
+            # Get an access token
+            result = self.msal_app.acquire_token_interactive(list(scopes), prompt="none")
+        check_result(result, scopes=scopes)
         return build_sdk_access_token(result)

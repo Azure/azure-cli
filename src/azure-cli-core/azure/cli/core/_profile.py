@@ -193,61 +193,73 @@ class Profile:
         return deepcopy(consolidated)
 
     def login_with_managed_identity(self, identity_id=None, allow_no_subscriptions=None):
+        from azure.cli.core.auth.msal_authentication import ManagedIdentityCredential
         import jwt
-        from azure.mgmt.core.tools import is_valid_resource_id
-        from azure.cli.core.auth.adal_authentication import MSIAuthenticationWrapper
-        resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
+
+        cred = None
 
         if identity_id:
+            from azure.mgmt.core.tools import is_valid_resource_id
             if is_valid_resource_id(identity_id):
-                msi_creds = MSIAuthenticationWrapper(resource=resource, msi_res_id=identity_id)
-                identity_type = MsiAccountTypes.user_assigned_resource_id
+                cred = ManagedIdentityCredential(mi_res_id=identity_id)
+                identity_type = ManagedIdentityAuth.id_type_resource_id
             else:
                 authenticated = False
-                from azure.cli.core.azclierror import AzureResponseError
+                # Use trial and error approach to determine the ID type - client ID or object ID
                 try:
-                    msi_creds = MSIAuthenticationWrapper(resource=resource, client_id=identity_id)
-                    identity_type = MsiAccountTypes.user_assigned_client_id
+                    cred = ManagedIdentityCredential(client_id=identity_id)
+                    cred.get_token(*self._arm_scope)
+                    identity_type = ManagedIdentityAuth.id_type_client_id
                     authenticated = True
-                except AzureResponseError as ex:
-                    if 'http error: 400, reason: Bad Request' in ex.error_msg:
-                        logger.info('Sniff: not an MSI client id')
+                except AuthenticationError as ex:
+                    if 'Identity not found' in str(ex):
+                        logger.info('Sniff: not a client ID')
                     else:
                         raise
 
                 if not authenticated:
                     try:
-                        identity_type = MsiAccountTypes.user_assigned_object_id
-                        msi_creds = MSIAuthenticationWrapper(resource=resource, object_id=identity_id)
+                        cred = ManagedIdentityCredential(object_id=identity_id)
+                        cred.get_token(*self._arm_scope)
+                        identity_type = ManagedIdentityAuth.id_type_object_id
                         authenticated = True
-                    except AzureResponseError as ex:
-                        if 'http error: 400, reason: Bad Request' in ex.error_msg:
-                            logger.info('Sniff: not an MSI object id')
+                    except AuthenticationError as ex:
+                        if 'Identity not found' in str(ex):
+                            logger.info('Sniff: not an object ID')
                         else:
                             raise
 
                 if not authenticated:
-                    raise CLIError('Failed to connect to MSI, check your managed service identity id.')
-
+                    raise CLIError('Failed to connect to managed identity, check your managed identity ID.')
         else:
-            identity_type = MsiAccountTypes.system_assigned
-            msi_creds = MSIAuthenticationWrapper(resource=resource)
+            cred = ManagedIdentityCredential()
+            identity_type = ManagedIdentityAuth.id_type_no_id
 
-        token_entry = msi_creds.token
-        token = token_entry['access_token']
-        logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
-        decode = jwt.decode(token, algorithms=['RS256'], options={"verify_signature": False})
-        tenant = decode['tid']
+        access_token = cred.get_token(*self._arm_scope)
+
+        logger.info('Managed identity token was retrieved. Now trying to initialize local accounts...')
+        decoded = jwt.decode(access_token.token, algorithms=['RS256'], options={"verify_signature": False})
+        tenant = decoded['tid']
+        resource_id = decoded['xms_mirid']
+        # user.name is the managed identity type - systemAssignedIdentity or userAssignedIdentity.
+        # It should be deduced from whether /Microsoft.ManagedIdentity/userAssignedIdentities exists in xms_mirid
+        # claim. It shouldn't be deduced from whether identity_id is provided. This is because if identity_id
+        # is not provided, the token can be for either a system-assigned identity or a user-assigned identity.
+        # https://github.com/Azure/azure-cli/issues/13188
+        user = _USER_ASSIGNED_IDENTITY if '/Microsoft.ManagedIdentity/userAssignedIdentities' in resource_id \
+            else _SYSTEM_ASSIGNED_IDENTITY
 
         subscription_finder = SubscriptionFinder(self.cli_ctx)
-        subscriptions = subscription_finder.find_using_specific_tenant(tenant, msi_creds)
+        subscriptions = subscription_finder.find_using_specific_tenant(tenant, cred)
+
+        # user.assignedIdentityInfo is the ID info: MSI, MSIClient-{id}, MSIObject-{id}, MSIResource-{id}
         base_name = ('{}-{}'.format(identity_type, identity_id) if identity_id else identity_type)
-        user = _USER_ASSIGNED_IDENTITY if identity_id else _SYSTEM_ASSIGNED_IDENTITY
+
         if not subscriptions:
             if allow_no_subscriptions:
                 subscriptions = self._build_tenant_level_accounts([tenant])
             else:
-                raise CLIError('No access was configured for the VM, hence no subscriptions were found. '
+                raise CLIError('No access was configured for the managed identity, hence no subscriptions were found. '
                                "If this is expected, use '--allow-no-subscriptions' to have tenant level access.")
 
         consolidated = self._normalize_properties(user, subscriptions, is_service_principal=True,
@@ -257,17 +269,16 @@ class Profile:
 
     def login_in_cloud_shell(self):
         import jwt
-        from azure.cli.core.auth.adal_authentication import MSIAuthenticationWrapper
+        from .auth.msal_authentication import CloudShellCredential
 
-        msi_creds = MSIAuthenticationWrapper(resource=self.cli_ctx.cloud.endpoints.active_directory_resource_id)
-        token_entry = msi_creds.token
-        token = token_entry['access_token']
-        logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
-        decode = jwt.decode(token, algorithms=['RS256'], options={"verify_signature": False})
+        cred = CloudShellCredential()
+        access_token = cred.get_token(*self._arm_scope)
+        logger.info('Cloud Shell token was retrieved. Now trying to initialize local accounts...')
+        decode = jwt.decode(access_token.token, algorithms=['RS256'], options={"verify_signature": False})
         tenant = decode['tid']
 
         subscription_finder = SubscriptionFinder(self.cli_ctx)
-        subscriptions = subscription_finder.find_using_specific_tenant(tenant, msi_creds)
+        subscriptions = subscription_finder.find_using_specific_tenant(tenant, cred)
         if not subscriptions:
             raise CLIError('No subscriptions were found in the cloud shell')
         user = decode.get('unique_name', 'N/A')
@@ -296,15 +307,15 @@ class Profile:
         identity.logout_all_users()
         identity.logout_all_service_principal()
 
-    def get_login_credentials(self, resource=None, client_id=None, subscription_id=None, aux_subscriptions=None,
-                              aux_tenants=None):
+    def get_login_credentials(self, resource=None, subscription_id=None, aux_subscriptions=None, aux_tenants=None):
         """Get a CredentialAdaptor instance to be used with both Track 1 and Track 2 SDKs.
+        Only one of aux_subscriptions or aux_tenants can be provided.
 
         :param resource: The resource ID to acquire an access token. Only provide it for Track 1 SDKs.
-        :param client_id:
-        :param subscription_id:
-        :param aux_subscriptions:
-        :param aux_tenants:
+        :param subscription_id: The primary key to select the account from `az account list`. If not provided, use
+            the account with isDefault=true.
+        :param aux_subscriptions: Auxiliary subscriptions for cross-tenant authentication.
+        :param aux_tenants: Auxiliary tenants for cross-tenant authentication.
         """
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
@@ -313,14 +324,23 @@ class Profile:
 
         account = self.get_subscription(subscription_id)
 
-        managed_identity_type, managed_identity_id = Profile._try_parse_msi_account_name(account)
+        managed_identity_type, managed_identity_id = Profile._parse_managed_identity_info(account)
+        external_credentials = []
 
-        # Cloud Shell is just a system assignment managed identity
-        if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
-            managed_identity_type = MsiAccountTypes.system_assigned
+        if managed_identity_type:
+            # managed identity
+            cred = ManagedIdentityAuth.credential_factory(managed_identity_type, managed_identity_id)
 
-        if managed_identity_type is None:
+        elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
+            # Cloud Shell
+            from .auth.msal_authentication import CloudShellCredential
+            cred = CloudShellCredential()
+
+        else:
             # user and service principal
+            cred = self._create_credential(account)
+
+            # Create external credentials
             external_tenants = []
             if aux_tenants:
                 external_tenants = [tenant for tenant in aux_tenants if tenant != account[_TENANT_ID]]
@@ -331,17 +351,15 @@ class Profile:
                     if sub[_TENANT_ID] != account[_TENANT_ID]:
                         external_tenants.append(sub[_TENANT_ID])
 
-            credential = self._create_credential(account, client_id=client_id)
-            external_credentials = []
             for external_tenant in external_tenants:
-                external_credentials.append(self._create_credential(account, external_tenant, client_id=client_id))
-            from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
-            cred = CredentialAdaptor(credential,
-                                     auxiliary_credentials=external_credentials,
-                                     resource=resource)
-        else:
-            # managed identity
-            cred = MsiAccountTypes.msi_auth_factory(managed_identity_type, managed_identity_id, resource)
+                external_credentials.append(self._create_credential(account, external_tenant))
+
+        # Make the credential compatible with Track 1 SDK
+        from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
+        cred = CredentialAdaptor(cred,
+                                 auxiliary_credentials=external_credentials,
+                                 resource=resource)
+
         return (cred,
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
@@ -361,26 +379,26 @@ class Profile:
 
         account = self.get_subscription(subscription)
 
-        identity_type, identity_id = Profile._try_parse_msi_account_name(account)
-        if identity_type:
+        managed_identity_type, managed_identity_id = Profile._parse_managed_identity_info(account)
+
+        if managed_identity_type:
             # managed identity
             if tenant:
                 raise CLIError("Tenant shouldn't be specified for managed identity account")
-            from .auth.util import scopes_to_resource
-            msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id,
-                                                         scopes_to_resource(scopes))
-            sdk_token = msi_creds.get_token(*scopes)
+            cred = ManagedIdentityAuth.credential_factory(managed_identity_type, managed_identity_id)
+
         elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
-            # Cloud Shell, which is just a system-assigned managed identity.
+            # Cloud Shell
             if tenant:
                 raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
-            from .auth.util import scopes_to_resource
-            msi_creds = MsiAccountTypes.msi_auth_factory(MsiAccountTypes.system_assigned, identity_id,
-                                                         scopes_to_resource(scopes))
-            sdk_token = msi_creds.get_token(*scopes)
+            from .auth.msal_authentication import CloudShellCredential
+            cred = CloudShellCredential()
+
         else:
-            credential = self._create_credential(account, tenant)
-            sdk_token = credential.get_token(*scopes)
+            # user and service principal
+            cred = self._create_credential(account, tenant_id=tenant)
+
+        sdk_token = cred.get_token(*scopes)
 
         # Convert epoch int 'expires_on' to datetime string 'expiresOn' for backward compatibility
         # WARNING: expiresOn is deprecated and will be removed in future release.
@@ -563,29 +581,32 @@ class Profile:
         return self.get_subscription(subscription)[_SUBSCRIPTION_ID]
 
     @staticmethod
-    def _try_parse_msi_account_name(account):
-        msi_info, user = account[_USER_ENTITY].get(_ASSIGNED_IDENTITY_INFO), account[_USER_ENTITY].get(_USER_NAME)
+    def _parse_managed_identity_info(account):
+        identity_info = account[_USER_ENTITY].get(_ASSIGNED_IDENTITY_INFO)
+        user_name = account[_USER_ENTITY].get(_USER_NAME)
 
-        if user in [_SYSTEM_ASSIGNED_IDENTITY, _USER_ASSIGNED_IDENTITY]:
-            if not msi_info:
-                msi_info = account[_SUBSCRIPTION_NAME]  # fall back to old persisting way
-            parts = msi_info.split('-', 1)
-            if parts[0] in MsiAccountTypes.valid_msi_account_types():
-                return parts[0], (None if len(parts) <= 1 else parts[1])
+        if user_name in [_SYSTEM_ASSIGNED_IDENTITY, _USER_ASSIGNED_IDENTITY]:
+            # We no longer support login profile created by versions < 2.0.51, which uses _SUBSCRIPTION_NAME as
+            # _ASSIGNED_IDENTITY_INFO.
+            # https://github.com/Azure/azure-cli/pull/7744
+            if not identity_info:
+                raise CLIError(f'{_ASSIGNED_IDENTITY_INFO} property is missing from the current account. '
+                               'Please run `az login --identity`.')
+            parts = identity_info.split('-', 1)
+            return parts[0], (None if len(parts) <= 1 else parts[1])
         return None, None
 
-    def _create_credential(self, account, tenant_id=None, client_id=None):
-        """Create a credential object driven by MSAL
+    def _create_credential(self, account, tenant_id=None):
+        """Create a user or service principal credential object driven by MSAL.
 
-        :param account:
+        :param account: Azure CLI account from `az account list`
         :param tenant_id: If not None, override tenantId from 'account'
-        :param client_id:
         :return:
         """
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         tenant_id = tenant_id if tenant_id else account[_TENANT_ID]
-        identity = _create_identity_instance(self.cli_ctx, self._authority, tenant_id=tenant_id, client_id=client_id)
+        identity = _create_identity_instance(self.cli_ctx, self._authority, tenant_id=tenant_id)
 
         # User
         if user_type == _USER:
@@ -595,7 +616,7 @@ class Profile:
         if user_type == _SERVICE_PRINCIPAL:
             return identity.get_service_principal_credential(username_or_sp_id)
 
-        raise NotImplementedError
+        raise ValueError('Invalid user type.')
 
     def refresh_accounts(self):
         subscriptions = self.load_cached_subscriptions()
@@ -692,30 +713,27 @@ class Profile:
         return installation_id
 
 
-class MsiAccountTypes:
-    # pylint: disable=no-method-argument,no-self-argument
-    system_assigned = 'MSI'
-    user_assigned_client_id = 'MSIClient'
-    user_assigned_object_id = 'MSIObject'
-    user_assigned_resource_id = 'MSIResource'
+class ManagedIdentityAuth:  # pylint: disable=too-few-public-methods
+
+    # String constants defined in this class are saved to azureProfile.json, so this class shouldn't be put
+    # under auth/identity.py
+    id_type_no_id = 'MSI'  # Not necessarily system-assigned. It merely means no ID is provided.
+    id_type_client_id = 'MSIClient'
+    id_type_object_id = 'MSIObject'
+    id_type_resource_id = 'MSIResource'
 
     @staticmethod
-    def valid_msi_account_types():
-        return [MsiAccountTypes.system_assigned, MsiAccountTypes.user_assigned_client_id,
-                MsiAccountTypes.user_assigned_object_id, MsiAccountTypes.user_assigned_resource_id]
-
-    @staticmethod
-    def msi_auth_factory(cli_account_name, identity, resource):
-        from azure.cli.core.auth.adal_authentication import MSIAuthenticationWrapper
-        if cli_account_name == MsiAccountTypes.system_assigned:
-            return MSIAuthenticationWrapper(resource=resource)
-        if cli_account_name == MsiAccountTypes.user_assigned_client_id:
-            return MSIAuthenticationWrapper(resource=resource, client_id=identity)
-        if cli_account_name == MsiAccountTypes.user_assigned_object_id:
-            return MSIAuthenticationWrapper(resource=resource, object_id=identity)
-        if cli_account_name == MsiAccountTypes.user_assigned_resource_id:
-            return MSIAuthenticationWrapper(resource=resource, msi_res_id=identity)
-        raise ValueError("unrecognized msi account name '{}'".format(cli_account_name))
+    def credential_factory(identity_type, identity_id):
+        from azure.cli.core.auth.msal_authentication import ManagedIdentityCredential
+        if identity_type == ManagedIdentityAuth.id_type_no_id:
+            return ManagedIdentityCredential()
+        if identity_type == ManagedIdentityAuth.id_type_client_id:
+            return ManagedIdentityCredential(client_id=identity_id)
+        if identity_type == ManagedIdentityAuth.id_type_object_id:
+            return ManagedIdentityCredential(object_id=identity_id)
+        if identity_type == ManagedIdentityAuth.id_type_resource_id:
+            return ManagedIdentityCredential(mi_res_id=identity_id)
+        raise ValueError("Unrecognized managed identity account type '{}'".format(identity_type))
 
 
 class SubscriptionFinder:

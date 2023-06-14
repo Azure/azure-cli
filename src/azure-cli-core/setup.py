@@ -53,7 +53,7 @@ DEPENDENCIES = [
     'jmespath',
     'knack~=0.10.1',
     'msal-extensions~=1.0.0',
-    'msal[broker]==1.20.0',
+    'msal[broker]==1.21.0',
     'msrestazure~=0.6.4',
     'packaging>=20.9',
     'paramiko>=2.0.8,<4.0.0',

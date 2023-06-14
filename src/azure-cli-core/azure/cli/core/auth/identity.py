@@ -34,10 +34,10 @@ logger = get_logger(__name__)
 
 
 class Identity:  # pylint: disable=too-many-instance-attributes
-    """Class to manage identities:
-        - user
-        - service principal
-        - TODO: managed identity
+    """Class to manage MSAL user and service principal identities. It provides following functionalities:
+        - log in
+        - log out
+        - get credential object that can be used with Track 2 SDK
     """
 
     # MSAL token cache.
@@ -187,12 +187,6 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         entry = sp_auth.get_entry_to_persist()
         self._service_principal_store.save_entry(entry)
 
-    def login_with_managed_identity(self, scopes, identity_id=None):  # pylint: disable=too-many-statements
-        raise NotImplementedError
-
-    def login_in_cloud_shell(self, scopes):
-        raise NotImplementedError
-
     def logout_user(self, user):
         accounts = self._msal_app.get_accounts(user)
         for account in accounts:
@@ -228,9 +222,6 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         entry = self._service_principal_store.load_entry(client_id, self.tenant_id)
         sp_auth = ServicePrincipalAuth(entry)
         return ServicePrincipalCredential(sp_auth, **self._msal_app_kwargs)
-
-    def get_managed_identity_credential(self, client_id=None):
-        raise NotImplementedError
 
 
 class ServicePrincipalAuth:
