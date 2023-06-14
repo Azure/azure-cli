@@ -193,10 +193,13 @@ type: command
 short-summary: Create a new import workflow for flexible server.
 long-summary: >
     Migrate a MySQL single server to flexible server with custom or default configuration. For more information for network configuration, see
+
     - Configure public access
     https://docs.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-firewall-cli
+
     - Configure private access
     https://docs.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-virtual-network-cli
+
 examples:
   - name: >
       Trigger a Import from single server to flexible server

@@ -1083,17 +1083,17 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # disable virtual-node add-on
-        self.cmd('aks disable-addons -a virtual-node -g {resource_group} -n {name}', checks=[
-            self.check('addonProfiles.aciConnectorLinux.enabled', False),
-            self.check('addonProfiles.aciConnectorLinux.config', None)
-        ])
+        disable_addon_output = self.cmd('aks disable-addons -a virtual-node -g {resource_group} -n {name}').get_output_in_json()
+        assert disable_addon_output["addonProfiles"]["aciConnectorLinux"]["enabled"] == False
+        # None for addon v1, {} for addon v2 
+        assert bool(disable_addon_output["addonProfiles"]["aciConnectorLinux"]["config"]) == False
+
 
         # show again
-        self.cmd('aks show -g {resource_group} -n {name}', checks=[
-            self.check('addonProfiles.aciConnectorLinux.enabled', False),
-            self.check('addonProfiles.aciConnectorLinux.config', None)
-
-        ])
+        show_output = self.cmd('aks show -g {resource_group} -n {name}').get_output_in_json()
+        assert show_output["addonProfiles"]["aciConnectorLinux"]["enabled"] == False
+        # None for addon v1, {} for addon v2 
+        assert bool(show_output["addonProfiles"]["aciConnectorLinux"]["config"]) == False
 
         # enable virtual node add-on
         self.cmd('aks enable-addons -a virtual-node -g {resource_group} -n {name} --subnet-name default', checks=[

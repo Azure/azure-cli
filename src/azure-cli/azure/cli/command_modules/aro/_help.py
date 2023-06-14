@@ -20,7 +20,7 @@ helps['aro create'] = """
   - name: Create a cluster with a supported OpenShift version.
     text: az aro create --resource-group MyResourceGroup --name MyCluster --vnet MyVnet --master-subnet MyMasterSubnet --worker-subnet MyWorkerSubnet --version X.Y.Z
   - name: Create a cluster with 5 compute nodes and Red Hat pull secret.
-    text: az aro create --resource-group MyResourceGroup --name MyCluster --vnet MyVnet --master-subnet MyMasterSubnet --worker-subnet MyWorkerSubnet --worker-count 5 --pull-secret @pullsecret.txt
+    text: az aro create --resource-group MyResourceGroup --name MyCluster --vnet MyVnet --master-subnet MyMasterSubnet --worker-subnet MyWorkerSubnet --worker-count 5 --pull-secret pullsecret.txt
   - name: Create a private cluster.
     text: az aro create --resource-group MyResourceGroup --name MyCluster --vnet MyVnet --master-subnet MyMasterSubnet --worker-subnet MyWorkerSubnet --apiserver-visibility Private --ingress-visibility Private
 """
@@ -75,6 +75,14 @@ helps['aro list-credentials'] = """
   examples:
   - name: List credentials of a cluster.
     text: az aro list-credentials --name MyCluster --resource-group MyResourceGroup
+"""
+
+helps['aro get-admin-kubeconfig'] = """
+  type: command
+  short-summary: List admin kubeconfig of a cluster.
+  examples:
+  - name: List admin kubeconfig of a cluster. The default is to save it in a file named "kubeconfig".
+    text: az aro get-admin-kubeconfig --name MyCluster --resource-group MyResourceGroup
 """
 
 helps['aro wait'] = """
