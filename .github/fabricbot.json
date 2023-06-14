@@ -7836,18 +7836,30 @@
               }
             },
             {
-              "name": "titleContains",
-              "parameters": {
-                "titlePattern": "\\b(rdbms|Rdbms|RDBMS)\\b",
-                "isRegex": true
-              }
-            },
-            {
-              "name": "titleContains",
-              "parameters": {
-                "titlePattern": "az mysql",
-                "isRegex": true
-              }
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "\\b(rdbms|Rdbms|RDBMS)\\b",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "[Aa]z mysql",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "[Aa]z mysql",
+                    "isRegex": true
+                  }
+                }
+              ]
             }
           ]
         },
