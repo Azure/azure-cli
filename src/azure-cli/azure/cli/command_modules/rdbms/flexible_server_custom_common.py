@@ -20,10 +20,8 @@ from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.util import send_raw_request
 from azure.cli.core.util import user_confirmation
 from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, FileOperationError, BadRequestError
-from azure.mgmt.rdbms.mysql_flexibleservers.operations._servers_operations import ServersOperations as MySqlServersOperations
-from ._client_factory import cf_mysql_flexible_replica, cf_postgres_flexible_replica
-from ._flexible_server_util import run_subprocess, run_subprocess_get_output, fill_action_template, get_git_root_dir, \
-    resolve_poller, GITHUB_ACTION_PATH
+from ._client_factory import cf_postgres_flexible_replica
+from ._flexible_server_util import run_subprocess, run_subprocess_get_output, fill_action_template, get_git_root_dir, resolve_poller, GITHUB_ACTION_PATH
 from .validators import validate_public_access_server
 
 logger = get_logger(__name__)
@@ -36,7 +34,7 @@ def flexible_server_update_get(client, resource_group_name, server_name):
 
 
 def flexible_server_stop(client, resource_group_name=None, server_name=None, no_wait=False):
-    days = 30 if isinstance(client, MySqlServersOperations) else 7
+    days = 7
     logger.warning("Server will be automatically started after %d days "
                    "if you do not perform a manual start operation", days)
     return sdk_no_wait(no_wait, client.begin_stop, resource_group_name, server_name)
@@ -279,10 +277,7 @@ def github_actions_setup(cmd, client, resource_group_name, server_name, database
         action_name = server.name + '_' + database_name + "_deploy"
     gitcli_check_and_login()
 
-    if isinstance(client, MySqlServersOperations):
-        database_engine = 'mysql'
-    else:
-        database_engine = 'postgresql'
+    database_engine = 'postgresql'
 
     fill_action_template(cmd,
                          database_engine=database_engine,
@@ -372,28 +367,13 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
     if current_version >= int(version):
         raise CLIError("The version to upgrade to must be greater than the current version.")
 
-    if isinstance(client, MySqlServersOperations):
-        replica_operations_client = cf_mysql_flexible_replica(cmd.cli_ctx, '_')
-        mysql_version_map = {
-            '8': '8.0.21',
-        }
-        version_mapped = mysql_version_map[version]
-    else:
-        replica_operations_client = cf_postgres_flexible_replica(cmd.cli_ctx, '_')
-        version_mapped = version
+    replica_operations_client = cf_postgres_flexible_replica(cmd.cli_ctx, '_')
+    version_mapped = version
 
     replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
 
-    if isinstance(client, MySqlServersOperations):
-        for replica in replicas:
-            current_replica_version = int(replica.version.split('.')[0])
-            if current_replica_version < int(version):
-                raise CLIError("Primary server version must not be greater than replica server version. "
-                               "First upgrade {} server version to {} and try again."
-                               .format(replica.name, version))
-    else:
-        if 'replica' in instance.replication_role.lower() or len(list(replicas)) > 0:
-            raise CLIError("Major version upgrade is not yet supported for servers in a read replica setup.")
+    if 'replica' in instance.replication_role.lower() or len(list(replicas)) > 0:
+        raise CLIError("Major version upgrade is not yet supported for servers in a read replica setup.")
 
     parameters = {
         'version': version_mapped
