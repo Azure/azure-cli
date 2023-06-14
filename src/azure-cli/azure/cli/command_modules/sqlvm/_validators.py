@@ -453,8 +453,9 @@ def _directory_role_list(cli_ctx, principal_id):
     except Exception as ex:
         raise InvalidArgumentValueError(MICROSOFT_GRAPH_API_ERROR.format(ex)) from ex
 
+
 # https://graph.microsoft.com/v1.0/servicePrincipals/{principalId}/transitiveMemberOf
-# Currently there is a bug in Graph API that causes internal server error in the Graph API service side filtering 
+# Currently there is a bug in Graph API that causes internal server error in the Graph API service side filtering
 # when the MSI is a member of an AAD group. The ICM incident is as below:
 # https://portal.microsofticm.com/imp/v3/incidents/details/392112435/home
 #
@@ -468,6 +469,7 @@ def _directory_role_list2(cli_ctx, principal_id):
         return [role for role in role_list if role["@odata.type"] == "#microsoft.graph.directoryRole"]
     except Exception as ex:
         raise InvalidArgumentValueError(MICROSOFT_GRAPH_API_ERROR.format(ex)) from ex
+
 
 # https://graph.microsoft.com/v1.0/servicePrincipals/{principalId}/appRoleAssignments
 # retrieve all app role assignments to a service principal
