@@ -444,10 +444,12 @@ def _send(cli_ctx, method, url, param=None, body=None):
 # https://graph.microsoft.com/v1.0/servicePrincipals/{principalId}/transitiveMemberOf/microsoft.graph.directoryRole
 # retrieve all directory role assigned to a service principal
 def _directory_role_list(cli_ctx, principal_id):
+    logger.debug("Retrieving transitive directory roles of a MSI from Graph API with server side filtering.")
     DIRECTORY_ROLE_URL = "/servicePrincipals/{}/transitiveMemberOf/microsoft.graph.directoryRole"
     try:
         role_list = _send(cli_ctx, "GET", DIRECTORY_ROLE_URL.format(principal_id))
         if role_list is None:
+            logger.warning("Graph API server side filtering failed, Retry retrieving transitive directory roles of a MSI from Graph API with client side filtering. It is NOT a failure.")
             role_list = _directory_role_list2(cli_ctx, principal_id)
         return role_list
     except Exception as ex:
