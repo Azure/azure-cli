@@ -435,3 +435,29 @@ def _install_extension(cmd, extension_name):
     except Exception:  # nopa pylint: disable=broad-except
         return False
     return True
+
+
+def springboot_migration_warning(require_update=False):
+    warning_message = '''It is recommended to use Spring Cloud Azure with version 4.0 and above. 
+    New configuration properties and more authentication options are supported. 
+    The previous configurations will no longer be supported in the future. 
+    Please refer to https:// for more details. '''
+    update_message = "Please update your connection to include the configurations for the newer version."
+    return warning_message + (update_message if require_update else "")
+
+
+def decorate_springboot_cosmossql_config(configs):
+    is_springboot_cosmossql = False
+    require_update = True
+
+    for config in configs.configurations:
+        if config.name in ["azure.cosmos.uri", "azure.cosmos.key", "azure.cosmos.database"]:
+            is_springboot_cosmossql = True
+            config.note = "This configuration property is used in Spring Cloud Azure version 3.x and below."
+        elif config.name in ["spring.cloud.azure.cosmos.uri", "spring.cloud.azure.cosmos.key", "spring.cloud.azure.cosmos.database"]:
+            is_springboot_cosmossql = True
+            require_update = False
+            config.note = "This configuration property is used in Spring Cloud Azure version 4.0 and above."
+    
+    if is_springboot_cosmossql:
+        logger.warning(springboot_migration_warning(require_update=require_update))
