@@ -1,5 +1,10 @@
 The document provides instructions and guidelines on how to author individual commands.
 
+> **Note**
+> 
+> [aaz-dev-tools](https://azure.github.io/aaz-dev-tools/) is our codegen tool which can be used for Control Plane APIs. Highly recommend using it in new commands.
+> If you have any issues, you can post it in Teams [channel](https://aka.ms/azure-cli-codegen-channel).
+
 **AUTHORING COMMANDS**
 
 [1. Write the Command Loader](#write-the-command-loader)
