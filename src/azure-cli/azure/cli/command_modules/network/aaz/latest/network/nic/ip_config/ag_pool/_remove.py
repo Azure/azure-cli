@@ -53,8 +53,8 @@ class Remove(AAZCommand):
             help="Name of the IP configuration.",
             required=True,
         )
-        _args_schema.application_gateway_backend_address_pool_id = AAZStrArg(
-            options=["--application-gateway-backend-address-pool-id"],
+        _args_schema.pool_id = AAZStrArg(
+            options=["--pool-id"],
             help="Resource ID.",
             required=True,
         )
@@ -100,7 +100,7 @@ class Remove(AAZCommand):
             result = result.properties.applicationGatewayBackendAddressPools
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].id == self.ctx.args.application_gateway_backend_address_pool_id,
+                lambda e: e[1].id == self.ctx.args.pool_id,
                 filters
             )
             idx = next(filters)[0]
@@ -119,7 +119,7 @@ class Remove(AAZCommand):
             result = result.properties.applicationGatewayBackendAddressPools
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].id == self.ctx.args.application_gateway_backend_address_pool_id,
+                lambda e: e[1].id == self.ctx.args.pool_id,
                 filters
             )
             idx = next(filters, [len(result)])[0]

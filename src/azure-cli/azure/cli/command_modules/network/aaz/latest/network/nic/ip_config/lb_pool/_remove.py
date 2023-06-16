@@ -53,8 +53,8 @@ class Remove(AAZCommand):
             help="Name of the IP configuration.",
             required=True,
         )
-        _args_schema.load_balancer_backend_address_pool_id = AAZResourceIdArg(
-            options=["--load-balancer-backend-address-pool-id"],
+        _args_schema.pool_id = AAZResourceIdArg(
+            options=["--pool-id"],
             help="Resource ID.",
             required=True,
             fmt=AAZResourceIdArgFormat(
@@ -103,7 +103,7 @@ class Remove(AAZCommand):
             result = result.properties.loadBalancerBackendAddressPools
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].id == self.ctx.args.load_balancer_backend_address_pool_id,
+                lambda e: e[1].id == self.ctx.args.pool_id,
                 filters
             )
             idx = next(filters)[0]
@@ -122,7 +122,7 @@ class Remove(AAZCommand):
             result = result.properties.loadBalancerBackendAddressPools
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].id == self.ctx.args.load_balancer_backend_address_pool_id,
+                lambda e: e[1].id == self.ctx.args.pool_id,
                 filters
             )
             idx = next(filters, [len(result)])[0]
