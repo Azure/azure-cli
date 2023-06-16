@@ -23,7 +23,7 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from azure.mgmt.resource.resources.models import GenericResource, DeploymentMode
 
-from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, RequiredArgumentMissingError, ResourceNotFoundError
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import get_file_json, read_file_content, shell_safe_json_parse, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
@@ -1053,6 +1053,7 @@ def _get_deployment_management_client(cli_ctx, aux_subscriptions=None, aux_tenan
     )
 
     return deployment_client
+
 
 def _prepare_stacks_delete_detach_models(rcf, delete_all, delete_resource_groups, delete_resources):
     detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
@@ -2363,6 +2364,7 @@ def list_template_specs(cmd, resource_group_name=None, name=None):
         return rcf.template_specs.list_by_resource_group(resource_group_name)
     return rcf.template_specs.list_by_subscription()
 
+
 def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_mode, delete_resources=False, delete_resource_groups=False, delete_all=False, deployment_resource_group=None, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, tags=None, yes=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
@@ -2472,8 +2474,7 @@ def delete_deployment_stack_at_subscription(cmd, name=None, id=None, delete_reso
                 delete_name = name
                 rcf.deployment_stacks.get_at_subscription(name)
         except:
-            raise ResourceNotFoundError("DeploymentStack " + delete_name +
-                                        " not found in the current subscription scope.")
+            raise ResourceNotFoundError("DeploymentStack " + delete_name + " not found in the current subscription scope.")
         return rcf.deployment_stacks.begin_delete_at_subscription(delete_name, unmanage_action_resources=delete_resources_enum, unmanage_action_resource_groups=delete_resource_groups_enum)
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 

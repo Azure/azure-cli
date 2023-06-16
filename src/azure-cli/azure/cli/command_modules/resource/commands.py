@@ -74,6 +74,7 @@ def transform_resource_list(result):
         transformed.append(res)
     return transformed
 
+
 def transform_stacks(result):
     return OrderedDict([('Name', result['name']),
                         ('State', result['provisioningState']),
@@ -99,6 +100,7 @@ def transform_stacks_export(result):
     return OrderedDict([('$schema', result['template']['$schema']),
                        ('ContentVersion', result['template']['contentVersion'])])
 
+
 # pylint: disable=too-many-statements
 def transform_deployment(result):
     r = result
@@ -114,6 +116,7 @@ def transform_deployment(result):
     return format_result
 
 
+# pylint: disable=too-many-locals
 def transform_deployments_list(result):
     sort_list = sorted(result, key=lambda deployment: deployment['properties']['timestamp'])
     return [transform_deployment(r) for r in sort_list]
