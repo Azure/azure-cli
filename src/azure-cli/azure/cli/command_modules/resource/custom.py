@@ -23,7 +23,7 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from azure.mgmt.resource.resources.models import GenericResource, DeploymentMode
 
-from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, RequiredArgumentMissingError, ResourceNotFoundError
+from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, RequiredArgumentMissingError
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import get_file_json, read_file_content, shell_safe_json_parse, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
@@ -57,6 +57,7 @@ from ._bicep import (
 )
 
 from ._utils import _build_preflight_error_message, _build_http_response_error_message
+
 logger = get_logger(__name__)
 
 RPAAS_APIS = {'microsoft.datadog': '/subscriptions/{subscriptionId}/providers/Microsoft.Datadog/agreements/default?api-version=2020-02-01-preview',
@@ -306,8 +307,7 @@ def _remove_comments_from_json(template, preserve_order=True, file_path=None):
     # In order to solve the package conflict introduced by jsmin, the jsmin code is referenced into json_min
     minified = json_min(template)
     try:
-        # use strict=False to allow multiline strings
-        return shell_safe_json_parse(minified, preserve_order, strict=False)
+        return shell_safe_json_parse(minified, preserve_order, strict=False)  # use strict=False to allow multiline strings
     except CLIError:
         # Because the processing of removing comments and compression will lead to misplacement of error location,
         # so the error message should be wrapped.
@@ -450,8 +450,7 @@ def deploy_arm_template_at_subscription_scope(cmd,
             return None
 
         ChangeType = cmd.get_models('ChangeType')
-        has_change = any(change.change_type not in [ChangeType.no_change,
-                         ChangeType.ignore] for change in what_if_result.changes)
+        has_change = any(change.change_type not in [ChangeType.no_change, ChangeType.ignore] for change in what_if_result.changes)
 
         if not proceed_if_no_change or has_change:
             from knack.prompting import prompt_y_n
@@ -489,8 +488,7 @@ def _deploy_arm_template_at_subscription_scope(cmd,
                                                                       no_prompt=no_prompt,
                                                                       template_spec=template_spec, query_string=query_string)
 
-    mgmt_client = _get_deployment_management_client(
-        cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
 
     from azure.core.exceptions import HttpResponseError
     Deployment = cmd.get_models('Deployment')
@@ -537,8 +535,7 @@ def deploy_arm_template_at_resource_group(cmd,
             return None
 
         ChangeType = cmd.get_models('ChangeType')
-        has_change = any(change.change_type not in [ChangeType.no_change,
-                         ChangeType.ignore] for change in what_if_result.changes)
+        has_change = any(change.change_type not in [ChangeType.no_change, ChangeType.ignore] for change in what_if_result.changes)
 
         if not proceed_if_no_change or has_change:
             from knack.prompting import prompt_y_n
@@ -629,8 +626,7 @@ def deploy_arm_template_at_management_group(cmd,
             return None
 
         ChangeType = cmd.get_models('ChangeType')
-        has_change = any(change.change_type not in [ChangeType.no_change,
-                         ChangeType.ignore] for change in what_if_result.changes)
+        has_change = any(change.change_type not in [ChangeType.no_change, ChangeType.ignore] for change in what_if_result.changes)
 
         if not proceed_if_no_change or has_change:
             from knack.prompting import prompt_y_n
@@ -674,8 +670,7 @@ def _deploy_arm_template_at_management_group(cmd,
                                                                       parameters=parameters, mode=mode,
                                                                       no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
 
-    mgmt_client = _get_deployment_management_client(
-        cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
 
     from azure.core.exceptions import HttpResponseError
     ScopedDeployment = cmd.get_models('ScopedDeployment')
@@ -723,8 +718,7 @@ def deploy_arm_template_at_tenant_scope(cmd,
             return None
 
         ChangeType = cmd.get_models('ChangeType')
-        has_change = any(change.change_type not in [ChangeType.no_change,
-                         ChangeType.ignore] for change in what_if_result.changes)
+        has_change = any(change.change_type not in [ChangeType.no_change, ChangeType.ignore] for change in what_if_result.changes)
 
         if not proceed_if_no_change or has_change:
             from knack.prompting import prompt_y_n
@@ -760,8 +754,7 @@ def _deploy_arm_template_at_tenant_scope(cmd,
                                                                       parameters=parameters, mode='Incremental',
                                                                       no_prompt=no_prompt, template_spec=template_spec, query_string=query_string,)
 
-    mgmt_client = _get_deployment_management_client(
-        cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
 
     from azure.core.exceptions import HttpResponseError
     ScopedDeployment = cmd.get_models('ScopedDeployment')
@@ -816,8 +809,7 @@ def _what_if_deploy_arm_template_at_resource_group_core(cmd, resource_group_name
     deployment_what_if = DeploymentWhatIf(properties=what_if_properties)
     what_if_poller = mgmt_client.begin_what_if(resource_group_name, deployment_name,
                                                parameters=deployment_what_if)
-    what_if_result = _what_if_deploy_arm_template_core(
-        cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
+    what_if_result = _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
 
     return what_if_result if no_pretty_print or return_result else None
 
@@ -842,14 +834,12 @@ def _what_if_deploy_arm_template_at_subscription_scope_core(cmd,
                                                             return_result=None):
     what_if_properties = _prepare_deployment_what_if_properties(cmd, 'subscription', template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt, template_spec, query_string)
-    mgmt_client = _get_deployment_management_client(
-        cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
     ScopedDeploymentWhatIf = cmd.get_models('ScopedDeploymentWhatIf')
     scoped_deployment_what_if = ScopedDeploymentWhatIf(location=deployment_location, properties=what_if_properties)
     what_if_poller = mgmt_client.begin_what_if_at_subscription_scope(deployment_name,
                                                                      parameters=scoped_deployment_what_if)
-    what_if_result = _what_if_deploy_arm_template_core(
-        cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
+    what_if_result = _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
 
     return what_if_result if no_pretty_print or return_result else None
 
@@ -874,14 +864,12 @@ def _what_if_deploy_arm_template_at_management_group_core(cmd, management_group_
                                                           return_result=None):
     what_if_properties = _prepare_deployment_what_if_properties(cmd, 'managementGroup', template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt, template_spec=template_spec, query_string=query_string)
-    mgmt_client = _get_deployment_management_client(
-        cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
     ScopedDeploymentWhatIf = cmd.get_models('ScopedDeploymentWhatIf')
     scoped_deployment_what_if = ScopedDeploymentWhatIf(location=deployment_location, properties=what_if_properties)
     what_if_poller = mgmt_client.begin_what_if_at_management_group_scope(management_group_id, deployment_name,
                                                                          parameters=scoped_deployment_what_if)
-    what_if_result = _what_if_deploy_arm_template_core(
-        cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
+    what_if_result = _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
 
     return what_if_result if no_pretty_print or return_result else None
 
@@ -906,13 +894,11 @@ def _what_if_deploy_arm_template_at_tenant_scope_core(cmd,
                                                       return_result=None):
     what_if_properties = _prepare_deployment_what_if_properties(cmd, 'tenant', template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt, template_spec, query_string)
-    mgmt_client = _get_deployment_management_client(
-        cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
     ScopedDeploymentWhatIf = cmd.get_models('ScopedDeploymentWhatIf')
     scoped_deployment_what_if = ScopedDeploymentWhatIf(location=deployment_location, properties=what_if_properties)
     what_if_poller = mgmt_client.begin_what_if_at_tenant_scope(deployment_name, parameters=scoped_deployment_what_if)
-    what_if_result = _what_if_deploy_arm_template_core(
-        cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
+    what_if_result = _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
 
     return what_if_result if no_pretty_print or return_result else None
 
@@ -950,8 +936,7 @@ def _prepare_template_uri_with_query_string(template_uri, input_query_string):
 
         return urlunsplit((scheme, netloc, path, new_query_string, fragment))
     except Exception:  # pylint: disable=broad-except
-        raise InvalidArgumentValueError(
-            'Unable to parse parameter: {} .Make sure the value is formed correctly.'.format(input_query_string))
+        raise InvalidArgumentValueError('Unable to parse parameter: {} .Make sure the value is formed correctly.'.format(input_query_string))
 
 
 def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_file=None, template_uri=None, parameters=None,
@@ -971,8 +956,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
     if template_uri:
         if query_string:
             template_link = TemplateLink(uri=template_uri, query_string=query_string)
-            template_uri = _prepare_template_uri_with_query_string(
-                template_uri=template_uri, input_query_string=query_string)
+            template_uri = _prepare_template_uri_with_query_string(template_uri=template_uri, input_query_string=query_string)
         else:
             template_link = TemplateLink(uri=template_uri)
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
@@ -982,25 +966,21 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         # ResourceType.MGMT_RESOURCE_TEMPLATESPECS than our designated version. This ensures the api-version of all the rest requests for
         # template_spec are consistent in the same profile:
         api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS)
-        template_obj = show_resource(cmd=cmd, resource_ids=[template_spec],
-                                     api_version=api_version).properties['mainTemplate']
+        template_obj = show_resource(cmd=cmd, resource_ids=[template_spec], api_version=api_version).properties['mainTemplate']
     else:
         if _is_bicepparam_file_provided(parameters):
             ensure_bicep_installation(cli_ctx)
 
             minimum_supported_version = "0.14.85"
             if not bicep_version_greater_than_or_equal_to(minimum_supported_version):
-                raise ArgumentUsageError(
-                    f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to {minimum_supported_version} or later.")
+                raise ArgumentUsageError(f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to {minimum_supported_version} or later.")
             if len(parameters) > 1:
-                raise ArgumentUsageError(
-                    "Can not use --parameters argument more than once when using a .bicepparam file")
+                raise ArgumentUsageError("Can not use --parameters argument more than once when using a .bicepparam file")
             bicepparam_file = parameters[0][0]
             if not is_bicep_file(template_file):
                 raise ArgumentUsageError("Only a .bicep template is allowed with a .bicepparam parameter file")
 
-            build_bicepparam_output = run_bicep_command(
-                cmd.cli_ctx, ["build-params", bicepparam_file, "--bicep-file", template_file, "--stdout"])
+            build_bicepparam_output = run_bicep_command(cmd.cli_ctx, ["build-params", bicepparam_file, "--bicep-file", template_file, "--stdout"])
             build_bicepparam_output_json = json.loads(build_bicepparam_output)
             template_content = build_bicepparam_output_json["templateJson"]
             bicepparam_json_content = build_bicepparam_output_json["parametersJson"]
@@ -1073,7 +1053,6 @@ def _get_deployment_management_client(cli_ctx, aux_subscriptions=None, aux_tenan
     )
 
     return deployment_client
-
 
 def _prepare_stacks_delete_detach_models(rcf, delete_all, delete_resource_groups, delete_resources):
     detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
@@ -1413,8 +1392,7 @@ def _update_provider(cmd, namespace, registering, wait, properties=None, mg_id=N
         if is_rpaas and accept_terms and registering and mg_id is None:
             # call accept term API
             from azure.cli.core.util import send_raw_request
-            send_raw_request(cmd.cli_ctx, 'put', RPAAS_APIS[namespace.lower()],
-                             body=json.dumps({"properties": {"accepted": True}}))
+            send_raw_request(cmd.cli_ctx, 'put', RPAAS_APIS[namespace.lower()], body=json.dumps({"properties": {"accepted": True}}))
     else:
         action = 'Registering' if registering else 'Unregistering'
         msg_template = '%s is still on-going. You can monitor using \'az provider show -n %s\''
@@ -2236,11 +2214,9 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
         exists = False
         if no_prompt is False:
             try:  # Check if child template spec already exists.
-                rcf.template_spec_versions.get(resource_group_name=resource_group_name,
-                                               template_spec_name=name, template_spec_version=version)
+                rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
                 from knack.prompting import prompt_y_n
-                confirmation = prompt_y_n(
-                    "This will override template spec {} version {}. Proceed?".format(name, version))
+                confirmation = prompt_y_n("This will override template spec {} version {}. Proceed?".format(name, version))
                 if not confirmation:
                     return None
                 exists = True
@@ -2265,28 +2241,22 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
 
         if not exists:
             try:  # Check if parent template spec already exists.
-                existing_parent = rcf.template_specs.get(
-                    resource_group_name=resource_group_name, template_spec_name=name)
+                existing_parent = rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
                 if tags is None:  # New version should inherit tags from parent if none are provided.
                     tags = getattr(existing_parent, 'tags')
             except Exception:  # pylint: disable=broad-except
                 tags = tags or {}
-                TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS,
-                                       'TemplateSpec', mod='models')
-                template_spec_parent = TemplateSpec(
-                    location=location, description=description, display_name=display_name, tags=tags)
+                TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
+                template_spec_parent = TemplateSpec(location=location, description=description, display_name=display_name, tags=tags)
                 rcf.template_specs.create_or_update(resource_group_name, name, template_spec_parent)
 
-        TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS,
-                                      'TemplateSpecVersion', mod='models')
-        template_spec_version = TemplateSpecVersion(location=location, linked_templates=artifacts, description=version_description,
-                                                    main_template=input_template, tags=tags, ui_form_definition=input_ui_form_definition)
+        TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpecVersion', mod='models')
+        template_spec_version = TemplateSpecVersion(location=location, linked_templates=artifacts, description=version_description, main_template=input_template, tags=tags, ui_form_definition=input_ui_form_definition)
         return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, template_spec_version)
 
     tags = tags or {}
     TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
-    template_spec_parent = TemplateSpec(location=location, description=description,
-                                        display_name=display_name, tags=tags)
+    template_spec_parent = TemplateSpec(location=location, description=description, display_name=display_name, tags=tags)
     return rcf.template_specs.create_or_update(resource_group_name, name, template_spec_parent)
 
 
@@ -2320,8 +2290,7 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
         input_ui_form_definition = json.loads(json.dumps(ui_form_definition_content))
 
     if version:
-        existing_template = rcf.template_spec_versions.get(
-            resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
+        existing_template = rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
 
         location = getattr(existing_template, 'location')
 
@@ -2334,11 +2303,9 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
             input_template = getattr(existing_template, 'main_template')
         if ui_form_definition_file is None:
             input_ui_form_definition = getattr(existing_template, 'ui_form_definition')
-        TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS,
-                                      'TemplateSpecVersion', mod='models')
+        TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpecVersion', mod='models')
 
-        updated_template_spec = TemplateSpecVersion(location=location, linked_templates=artifacts, description=version_description,
-                                                    main_template=input_template, tags=tags, ui_form_definition=input_ui_form_definition)
+        updated_template_spec = TemplateSpecVersion(location=location, linked_templates=artifacts, description=version_description, main_template=input_template, tags=tags, ui_form_definition=input_ui_form_definition)
         return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, updated_template_spec)
 
     existing_template = rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
@@ -2395,7 +2362,6 @@ def list_template_specs(cmd, resource_group_name=None, name=None):
             return rcf.template_spec_versions.list(resource_group_name=resource_group_name, template_spec_name=name)
         return rcf.template_specs.list_by_resource_group(resource_group_name)
     return rcf.template_specs.list_by_subscription()
-
 
 def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_mode, delete_resources=False, delete_resource_groups=False, delete_all=False, deployment_resource_group=None, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, tags=None, yes=False):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
@@ -2829,12 +2795,9 @@ def list_resources(cmd, resource_group_name=None,
 def register_provider(cmd, resource_provider_namespace, consent_to_permissions=False, mg=None, wait=False, accept_terms=None):
     properties = None
     if cmd.supported_api_version(min_api='2021-04-01') and consent_to_permissions:
-        ProviderRegistrationRequest, ProviderConsentDefinition = cmd.get_models(
-            'ProviderRegistrationRequest', 'ProviderConsentDefinition')
-        properties = ProviderRegistrationRequest(third_party_provider_consent=ProviderConsentDefinition(
-            consent_to_authorization=consent_to_permissions))
-    _update_provider(cmd, resource_provider_namespace, registering=True, wait=wait,
-                     properties=properties, mg_id=mg, accept_terms=accept_terms)
+        ProviderRegistrationRequest, ProviderConsentDefinition = cmd.get_models('ProviderRegistrationRequest', 'ProviderConsentDefinition')
+        properties = ProviderRegistrationRequest(third_party_provider_consent=ProviderConsentDefinition(consent_to_authorization=consent_to_permissions))
+    _update_provider(cmd, resource_provider_namespace, registering=True, wait=wait, properties=properties, mg_id=mg, accept_terms=accept_terms)
 
 
 def unregister_provider(cmd, resource_provider_namespace, wait=False):
@@ -2942,8 +2905,7 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
     params = _load_file_string_or_uri(params, 'params', False)
 
     PolicyAssignment = cmd.get_models('PolicyAssignment')
-    assignment = PolicyAssignment(display_name=display_name, policy_definition_id=policy_id,
-                                  scope=scope, enforcement_mode=enforcement_mode, description=description)
+    assignment = PolicyAssignment(display_name=display_name, policy_definition_id=policy_id, scope=scope, enforcement_mode=enforcement_mode, description=description)
     assignment.parameters = params if params else None
 
     if cmd.supported_api_version(min_api='2017-06-01-preview'):
@@ -2979,8 +2941,7 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
     # Create the identity's role assignment if requested
     if identities is not None and identity_scope:
         from azure.cli.core.commands.arm import assign_identity as _assign_identity_helper
-        _assign_identity_helper(cmd.cli_ctx, lambda: createdAssignment,
-                                lambda resource: createdAssignment, identity_role, identity_scope)
+        _assign_identity_helper(cmd.cli_ctx, lambda: createdAssignment, lambda resource: createdAssignment, identity_role, identity_scope)
 
     return createdAssignment
 
@@ -3092,8 +3053,7 @@ def list_policy_assignment(cmd, disable_scope_strict_match=None, resource_group_
     management_group = _parse_management_group_id(scope)
 
     if management_group:
-        result = policy_client.policy_assignments.list_for_management_group(
-            management_group_id=management_group, filter='atScope()')
+        result = policy_client.policy_assignments.list_for_management_group(management_group_id=management_group, filter='atScope()')
     elif all([resource_type, resource_group, subscription]):
         namespace = id_parts.get('namespace')
         parent_resource_path = '' if not id_parts.get('child_name_1') else (id_parts['type'] + '/' + id_parts['name'])
@@ -3131,8 +3091,7 @@ def create_policy_non_compliance_message(cmd, name, message, scope=None, resourc
     assignment = policy_client.policy_assignments.get(scope, name)
 
     NonComplianceMessage = cmd.get_models('NonComplianceMessage')
-    created_message = NonComplianceMessage(
-        message=message, policy_definition_reference_id=policy_definition_reference_id)
+    created_message = NonComplianceMessage(message=message, policy_definition_reference_id=policy_definition_reference_id)
     if not assignment.non_compliance_messages:
         assignment.non_compliance_messages = []
     assignment.non_compliance_messages.append(created_message)
@@ -3149,11 +3108,9 @@ def delete_policy_non_compliance_message(cmd, name, message, scope=None, resourc
     assignment = policy_client.policy_assignments.get(scope, name)
 
     NonComplianceMessage = cmd.get_models('NonComplianceMessage')
-    message_to_remove = NonComplianceMessage(
-        message=message, policy_definition_reference_id=policy_definition_reference_id)
+    message_to_remove = NonComplianceMessage(message=message, policy_definition_reference_id=policy_definition_reference_id)
     if assignment.non_compliance_messages:
-        assignment.non_compliance_messages = [
-            existingMessage for existingMessage in assignment.non_compliance_messages if not _is_non_compliance_message_equivalent(existingMessage, message_to_remove)]
+        assignment.non_compliance_messages = [existingMessage for existingMessage in assignment.non_compliance_messages if not _is_non_compliance_message_equivalent(existingMessage, message_to_remove)]
 
     return policy_client.policy_assignments.create(scope, name, assignment).non_compliance_messages
 
@@ -3356,8 +3313,7 @@ def update_policy_definition(cmd, policy_definition_name, rules=None, params=Non
     params = _load_file_string_or_uri(params, 'params', False)
 
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
-    definition = _get_custom_or_builtin_policy(
-        cmd, policy_client, policy_definition_name, subscription, management_group)
+    definition = _get_custom_or_builtin_policy(cmd, policy_client, policy_definition_name, subscription, management_group)
     # pylint: disable=line-too-long,no-member
 
     PolicyDefinition = cmd.get_models('PolicyDefinition')
@@ -3392,8 +3348,7 @@ def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=Non
     definition_groups = _load_file_string_or_uri(definition_groups, 'definition_groups', False)
 
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
-    definition = _get_custom_or_builtin_policy(
-        cmd, policy_client, policy_set_definition_name, subscription, management_group, True)
+    definition = _get_custom_or_builtin_policy(cmd, policy_client, policy_set_definition_name, subscription, management_group, True)
     # pylint: disable=line-too-long,no-member
     PolicySetDefinition = cmd.get_models('PolicySetDefinition')
     parameters = PolicySetDefinition(
@@ -3484,8 +3439,7 @@ def list_policy_exemption(cmd, disable_scope_strict_match=None, resource_group_n
     management_group = _parse_management_group_id(scope)
 
     if management_group:
-        result = policy_client.policy_exemptions.list_for_management_group(
-            management_group_id=management_group, filter='atScope()')
+        result = policy_client.policy_exemptions.list_for_management_group(management_group_id=management_group, filter='atScope()')
     elif all([resource_type, resource_group, subscription]):
         namespace = id_parts.get('namespace')
         parent_resource_path = '' if not id_parts.get('child_name_1') else (id_parts['type'] + '/' + id_parts['name'])
@@ -3502,8 +3456,7 @@ def list_policy_exemption(cmd, disable_scope_strict_match=None, resource_group_n
         raise ArgumentUsageError('usage error: --scope ARM_ID | --resource-group NAME')
 
     if not disable_scope_strict_match:
-        result = [i for i in result if i.id.lower().strip('/').startswith(_scope.lower().strip('/') +
-                                                                          "/providers/microsoft.authorization/policyexemptions")]
+        result = [i for i in result if i.id.lower().strip('/').startswith(_scope.lower().strip('/') + "/providers/microsoft.authorization/policyexemptions")]
 
     return result
 
@@ -3679,8 +3632,7 @@ def cli_hierarchy_settings_create(
         require_authorization_for_group_creation=None,
         default_management_group=None):
     from azure.mgmt.managementgroups.models import CreateOrUpdateSettingsRequest
-    create_or_update_parameters = CreateOrUpdateSettingsRequest(
-        require_authorization_for_group_creation=require_authorization_for_group_creation, default_management_group=default_management_group)
+    create_or_update_parameters = CreateOrUpdateSettingsRequest(require_authorization_for_group_creation=require_authorization_for_group_creation, default_management_group=default_management_group)
     return client.create_or_update(group_name, create_or_update_parameters)
 
 
@@ -3702,8 +3654,7 @@ def cli_hierarchysettings_group_update_custom_func(
 
 def cli_hierarchysettings_group_update_get():
     from azure.mgmt.managementgroups.models import CreateOrUpdateSettingsRequest
-    update_parameters = CreateOrUpdateSettingsRequest(
-        require_authorization_for_group_creation=None, default_management_group=None)
+    update_parameters = CreateOrUpdateSettingsRequest(require_authorization_for_group_creation=None, default_management_group=None)
     return update_parameters
 
 
@@ -4453,15 +4404,13 @@ def publish_bicep_file(cmd, file, target, documentationUri=None, force=None):
             if bicep_version_greater_than_or_equal_to(minimum_supported_version_for_documentationUri_parameter):
                 args += ["--documentationUri", documentationUri]
             else:
-                logger.error("az bicep publish with --documentationUri/-d parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.",
-                             minimum_supported_version_for_documentationUri_parameter)
+                logger.error("az bicep publish with --documentationUri/-d parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_documentationUri_parameter)
         if force:
             minimum_supported_version_for_publish_force = "0.17.1"
             if bicep_version_greater_than_or_equal_to(minimum_supported_version_for_publish_force):
                 args += ["--force"]
             else:
-                logger.error("az bicep publish with --force parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.",
-                             minimum_supported_version_for_publish_force)
+                logger.error("az bicep publish with --force parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_publish_force)
         run_bicep_command(cmd.cli_ctx, args)
     else:
         logger.error("az bicep publish could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
