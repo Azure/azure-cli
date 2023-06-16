@@ -63,6 +63,12 @@ RUN ./scripts/install_full.sh && python ./scripts/trim_sdk.py \
     )" \
  && apk add --virtual .rundeps $runDeps
 
+# update vulnerabilities
+RUN apk upgrade openssl
+RUN apk upgrade binutils --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main
+RUN pip install cryptography -U
+RUN pip install requests -U
+
 WORKDIR /
 
 # Remove CLI source code from the final image and normalize line endings.
