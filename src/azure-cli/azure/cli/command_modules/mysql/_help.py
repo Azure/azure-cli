@@ -183,6 +183,36 @@ examples:
         --backup-key $backupKeyIdentifier --backup-identity testBackupIdentity
 """
 
+helps['mysql flexible-server import'] = """
+type: group
+short-summary: Manage import workflows for MySQL Flexible Servers.
+"""
+
+helps['mysql flexible-server import create'] = """
+type: command
+short-summary: Create a new import workflow for flexible server.
+long-summary: >
+    Migrate a MySQL single server to flexible server with custom or default configuration. For more information for network configuration, see
+
+    - Configure public access
+    https://docs.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-firewall-cli
+
+    - Configure private access
+    https://docs.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-virtual-network-cli
+
+examples:
+  - name: >
+      Trigger a Import from single server to flexible server
+    text: >
+        az mysql flexible-server import create --data-source-type mysql_single \\
+          --data-source test-single-server --resource-group test-rg \\
+          --location northeurope --name testserver \\
+          --admin-user username --admin-password password \\
+          --sku-name Standard_B1ms --tier Burstable --public-access 0.0.0.0 \\
+          --storage-size 32 --tags "key=value" --version 5.7 --high-availability ZoneRedundant \\
+          --zone 1 --standby-zone 3 --storage-auto-grow Enabled --iops 500
+"""
+
 helps['mysql flexible-server show'] = """
 type: command
 short-summary: Get the details of a flexible server.

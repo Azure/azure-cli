@@ -129,7 +129,7 @@ DEPENDENCIES = [
     'azure-mgmt-synapse==2.1.0b5',
     'azure-mgmt-trafficmanager~=1.0.0',
     'azure-mgmt-web==7.0.0',
-    'azure-multiapi-storage~=1.1.0',
+    'azure-multiapi-storage~=1.2.0',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
     'azure-synapse-artifacts~=0.15.0',
@@ -149,7 +149,7 @@ DEPENDENCIES = [
     'semver==2.13.0',
     'six>=1.10.0',  # six is still used by countless extensions
     'sshtunnel~=0.1.4',
-    'urllib3[secure]',
+    'urllib3',
     'websocket-client~=1.3.1',
     'xmltodict~=0.12'
 ]

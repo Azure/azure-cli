@@ -146,7 +146,7 @@ class Create(AAZCommand):
             options=["--cleanup-policy"],
             arg_group="RetentionDescription",
             help="Enumerates the possible values for cleanup policy",
-            enum={"Compaction": "Compaction", "Delete": "Delete"},
+            enum={"Compact": "Compact", "Delete": "Delete"},
         )
         _args_schema.retention_time_in_hours = AAZIntArg(
             options=["--retention-time", "--retention-time-in-hours"],
@@ -393,7 +393,7 @@ class Create(AAZCommand):
             properties.data_lake_subscription_id = AAZStrType(
                 serialized_name="dataLakeSubscriptionId",
             )
-            properties.storage_account = AAZStrType(
+            properties.storage_account_resource_id = AAZStrType(
                 serialized_name="storageAccountResourceId",
             )
 
