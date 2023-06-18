@@ -1088,6 +1088,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # None for addon v1, {} for addon v2 
         assert bool(disable_addon_output["addonProfiles"]["aciConnectorLinux"]["config"]) == False
 
+
         # show again
         show_output = self.cmd('aks show -g {resource_group} -n {name}').get_output_in_json()
         assert show_output["addonProfiles"]["aciConnectorLinux"]["enabled"] == False
