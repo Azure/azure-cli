@@ -1085,14 +1085,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # disable virtual-node add-on
         self.cmd('aks disable-addons -a virtual-node -g {resource_group} -n {name}', checks=[
             self.check('addonProfiles.aciConnectorLinux.enabled', False),
-            self.check('addonProfiles.aciConnectorLinux.config', None)
+            self.check('addonProfiles.aciConnectorLinux.config', dict()),
         ])
 
         # show again
         self.cmd('aks show -g {resource_group} -n {name}', checks=[
             self.check('addonProfiles.aciConnectorLinux.enabled', False),
-            self.check('addonProfiles.aciConnectorLinux.config', None)
-
+            self.check('addonProfiles.aciConnectorLinux.config', dict()),
         ])
 
         # enable virtual node add-on
