@@ -43,7 +43,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'argcomplete~=2.0',
+    'argcomplete~=3.1.1',
     'azure-cli-telemetry==1.0.8.*',
     'azure-mgmt-core>=1.2.0,<2',
     'cryptography',
