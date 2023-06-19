@@ -3719,11 +3719,6 @@ type: group
 short-summary: Manage capacity.
 """
 
-helps['capacity reservation group'] = """
-type: group
-short-summary: Manage capacity reservation group.
-"""
-
 helps['capacity reservation group create'] = """
 type: command
 short-summary: Create capacity reservation group.
@@ -3762,16 +3757,6 @@ examples:
     text: az capacity reservation group list -g MyResourceGroup
   - name: List the capacity reservation groups containing VM instances and VMSS instance which are associated to capacity reservation group
     text: az capacity reservation group list -g MyResourceGroup --vm-instance --vmss-instance
-"""
-
-helps['capacity'] = """
-type: group
-short-summary: Manage capacity.
-"""
-
-helps['capacity reservation'] = """
-type: group
-short-summary: Manage capacity reservation.
 """
 
 helps['capacity reservation create'] = """
