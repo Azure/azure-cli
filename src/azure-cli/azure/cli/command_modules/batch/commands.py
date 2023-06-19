@@ -125,7 +125,6 @@ def load_command_table(self, _):
     pool_type = get_data_type('pool')
     with self.command_group('batch pool', pool_type, client_factory=get_data_factory('pool')) as g:
         g.batch_command('usage-metrics list', 'list_usage_metrics')
-        g.batch_command('all-statistics show', 'get_all_lifetime_statistics')
         g.batch_command('create', 'add', validator=validate_pool_settings, flatten=10)
         g.batch_command('list', 'list')
         g.batch_command('delete', 'delete')
@@ -141,7 +140,6 @@ def load_command_table(self, _):
         g.batch_command('delete', 'remove_nodes')
 
     with self.command_group('batch job', get_data_type('job'), client_factory=get_data_factory('job')) as g:
-        g.batch_command('all-statistics show', 'get_all_lifetime_statistics')
         g.batch_command('create', 'add')
         g.batch_command('delete', 'delete')
         g.batch_command('show', 'get')
