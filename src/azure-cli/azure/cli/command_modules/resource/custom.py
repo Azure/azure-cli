@@ -1117,7 +1117,7 @@ def _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, del
         from knack.prompting import prompt_y_n
         build_confirmation_string = "The DeploymentStack {} you're trying to create already exists in the current subscription.\n".format(
             name)
-        build_confirmation_string += "The following actions will be applied to any resources the are no longer managed by the deployment stack after the template is applied:\n"
+        build_confirmation_string += "The following actions will be applied to any resources that are no longer managed by the deployment stack after the template is applied:\n"
         # first case we have only detach
         if delete_resources_enum == detach_model and delete_resource_groups_enum == detach_model:
             build_confirmation_string += "\nDetach: resources and resource groups\n"

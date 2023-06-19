@@ -11,6 +11,7 @@ def load_arguments(self, _):
 
     from azure.mgmt.resource.locks.models import LockLevel
     from azure.mgmt.resource.managedapplications.models import ApplicationLockLevel
+    from azure.mgmt.resource.deploymentstacks.models import DenySettingsMode
     from azure.mgmt.resource.policy.models import (ExemptionCategory, EnforcementMode)
     from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
@@ -106,7 +107,7 @@ def load_arguments(self, _):
     stacks_delete_resources_type = CLIArgumentType(arg_type=get_three_state_flag(), options_list=['--delete-resources'], help='Flag to indicate delete rather than detach for the resources.')
     stacks_delete_resource_groups_type = CLIArgumentType(arg_type=get_three_state_flag(), options_list=['--delete-resource-groups'], help='Flag to indicate delete rather than detach for the resource groups.')
     stacks_delete_all_type = CLIArgumentType(arg_type=get_three_state_flag(), options_list=['--delete-all'], help='Flag to indicate delete rather than detach for the resources and resource groups.')
-    stacks_deny_settings_mode = CLIArgumentType(arg_type=get_enum_type(['none', 'denyDelete', 'denyWriteAndDelete']), help='Define which operations are denied on resources managed by the stack: denyDelete or denyWriteAndDelete.')
+    stacks_deny_settings_mode = CLIArgumentType(arg_type=get_enum_type(DenySettingsMode), help='Define which operations are denied on resources managed by the stack.')
     stacks_excluded_principals = CLIArgumentType(options_list=['--deny-settings-excluded-principals', '--ep'], help='List of AAD principal IDs excluded from the lock. Up to 5 principals are permitted.')
     stacks_excluded_actions = CLIArgumentType(options_list=['--deny-settings-excluded-actions', '--ea'], help="List of role-based management operations that are excluded from the denySettings. Up to 200 actions are permitted.")
     stacks_apply_to_child_scopes = CLIArgumentType(options_list=['--deny-settings-apply-to-child-scopes', '--cs'], help='DenySettings will be applied to child scopes.')
@@ -680,11 +681,10 @@ def load_arguments(self, _):
         c.argument('resource_group', arg_type=resource_group_name_type)
 
     with self.argument_context('stack mg') as c:
-        c.argument('management_group_id', arg_type=management_group_id_type,
-                   help='The management group id to create stack at.')
+        c.argument('management_group_id', arg_type=management_group_id_type, help='The management group id to create stack at.')
 
     with self.argument_context('stack mg create') as c:
-        c.argument('name', options_list=['--name', '-n'], arg_type=stacks_name_type)
+        c.argument('name', arg_type=stacks_name_type)
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help='The location to store deployment stack.')
         c.argument('template_file', arg_type=deployment_template_file_type)
         c.argument('template_spec', arg_type=deployment_template_spec_type)
@@ -722,7 +722,7 @@ def load_arguments(self, _):
         c.argument('subscription', arg_type=subscription_type)
 
     with self.argument_context('stack sub create') as c:
-        c.argument('name', options_list=['--name', '-n'], arg_type=stacks_name_type)
+        c.argument('name', arg_type=stacks_name_type)
         c.argument('deployment_resource_group', arg_type=stacks_stack_deployment_resource_group)
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help='The location to store deployment stack.')
         c.argument('template_file', arg_type=deployment_template_file_type)
@@ -758,15 +758,13 @@ def load_arguments(self, _):
         c.argument('yes', help='Do not prompt for confirmation')
 
     with self.argument_context('stack group create') as c:
-        c.argument('name', options_list=['--name', '-n'], arg_type=stacks_name_type)
-        c.argument('resource_group', arg_type=resource_group_name_type,
-                   help='The resource group where the deployment stack will be created.')
+        c.argument('name', arg_type=stacks_name_type)
+        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack will be created.')
         c.argument('template_file', arg_type=deployment_template_file_type)
         c.argument('template_spec', arg_type=deployment_template_spec_type)
         c.argument('template_uri', arg_type=deployment_template_uri_type)
         c.argument('query_string', arg_type=deployment_query_string_type)
-        c.argument('parameters', arg_type=deployment_parameters_type,
-                   help='Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.')
+        c.argument('parameters', arg_type=deployment_parameters_type, help='Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.')
         c.argument('description', arg_type=stacks_description_type)
         c.argument('subscription', arg_type=subscription_type)
         c.argument('delete_resources', arg_type=stacks_delete_resources_type)
@@ -782,14 +780,12 @@ def load_arguments(self, _):
     for scope in ['stack group show', 'stack group export']:
         with self.argument_context(scope) as c:
             c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
-            c.argument('resource_group', arg_type=resource_group_name_type,
-                       help='The resource group where the deployment stack exists')
+            c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
             c.argument('id', arg_type=stacks_stack_type)
             c.argument('subscription', arg_type=subscription_type)
 
     with self.argument_context('stack group list') as c:
-        c.argument('resource_group', arg_type=resource_group_name_type,
-                   help='The resource group where the deployment stack exists')
+        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
         c.argument('subscription', arg_type=subscription_type)
 
     with self.argument_context('stack group delete') as c:
