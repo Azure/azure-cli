@@ -7367,6 +7367,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 self.check('properties.dataSources.extensions[0].extensionSettings.dataCollectionSettings.namespaces[0]', f'kube-system')
             ])
              self.cmd(get_cmd, checks=[
+                self.check('properties.dataSources.extensions[0].extensionSettings.dataCollectionSettings.enableContainerLogV2', f'true')
+            ])
+             self.cmd(get_cmd, checks=[
                 self.check('properties.dataSources.extensions[0].extensionSettings.dataCollectionSettings.streams[0]', f'Microsoft-ContainerLogV2')
             ])
              self.cmd(get_cmd, checks=[
