@@ -6,6 +6,7 @@ The document provides instructions and guidelines on how to author individual co
 > - Shorten development cycle (save 50%+ development time).
 > - Consistent code style improves command quality and saves PR review time.
 > - Directly generate CLI commands from swagger instead of waiting for SDK release.
+>
 > If you have any question, you can post it in this Teams [channel](https://aka.ms/azure-cli-codegen-channel).
 
 **AUTHORING COMMANDS**
