@@ -176,7 +176,6 @@ def _get_resource_group_location(cli_ctx, resource_group_name):
 def _get_sku_object(cmd, sku):
     if cmd.supported_api_version(min_api='2017-03-30'):
         from azure.mgmt.compute.models import DiskSku
-        # DiskSku = cmd.get_models('DiskSku')
         return DiskSku(name=sku)
     return sku
 
@@ -184,7 +183,6 @@ def _get_sku_object(cmd, sku):
 def _grant_access(cmd, resource_group_name, name, duration_in_seconds, is_disk, access_level,
                   secure_vm_guest_state_sas=None):
     from azure.mgmt.compute.models import AccessLevel, GrantAccessData
-    # AccessLevel, GrantAccessData = cmd.get_models('AccessLevel', 'GrantAccessData')
     client = _compute_client_factory(cmd.cli_ctx)
     op = client.disks if is_disk else client.snapshots
     grant_access_data = GrantAccessData(access=access_level or AccessLevel.read,
@@ -312,8 +310,6 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     from azure.mgmt.compute.models import Disk, CreationData, DiskCreateOption, Encryption
-    # Disk, CreationData, DiskCreateOption, Encryption = cmd.get_models(
-    #     'Disk', 'CreationData', 'DiskCreateOption', 'Encryption')
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     if security_data_uri:
@@ -512,7 +508,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         if disk.supported_capabilities is None:
             from azure.mgmt.compute.models import SupportedCapabilities
             supportedCapabilities = SupportedCapabilities(accelerated_network=accelerated_network,
-                                                                            architecture=architecture)
+                                                          architecture=architecture)
             disk.supported_capabilities = supportedCapabilities
         else:
             disk.supported_capabilities.accelerated_network = accelerated_network
@@ -521,7 +517,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.data_access_auth_mode = data_access_auth_mode
 
     client = _compute_client_factory(cmd.cli_ctx)
-    return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk=disk)
+    return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name=resource_group_name,
+                       disk_name=disk_name, disk=disk)
 
 
 def grant_disk_access(cmd, resource_group_name, disk_name, duration_in_seconds, access_level=None,
@@ -534,7 +531,7 @@ def grant_disk_access(cmd, resource_group_name, disk_name, duration_in_seconds, 
 def list_managed_disks(cmd, resource_group_name=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if resource_group_name:
-        return client.disks.list_by_resource_group(resource_group_name)
+        return client.disks.list_by_resource_group(resource_group_name=resource_group_name)
     return client.disks.list()
 
 
@@ -610,8 +607,6 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
                  os_disk=None, os_disk_caching=None, data_disks=None, data_disk_caching=None,
                  tags=None, zone_resilient=None, edge_zone=None):
     from azure.mgmt.compute.models import ImageOSDisk, ImageDataDisk, ImageStorageProfile, Image, SubResource, OperatingSystemStateTypes
-    # ImageOSDisk, ImageDataDisk, ImageStorageProfile, Image, SubResource, OperatingSystemStateTypes = cmd.get_models(
-    #     'ImageOSDisk', 'ImageDataDisk', 'ImageStorageProfile', 'Image', 'SubResource', 'OperatingSystemStateTypes')
 
     if source_virtual_machine:
         location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
@@ -686,8 +681,6 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     from azure.mgmt.compute.models import Snapshot, CreationData, DiskCreateOption, Encryption
-    # Snapshot, CreationData, DiskCreateOption, Encryption = cmd.get_models(
-    #     'Snapshot', 'CreationData', 'DiskCreateOption', 'Encryption')
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     if source_blob_uri:
@@ -870,7 +863,6 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
 def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
                storage_container='vhds', overwrite=True):
     from azure.mgmt.compute.models import VirtualMachineCaptureParameters
-    # VirtualMachineCaptureParameters = cmd.get_models('VirtualMachineCaptureParameters')
     client = _compute_client_factory(cmd.cli_ctx)
     parameter = VirtualMachineCaptureParameters(vhd_prefix=vhd_name_prefix,
                                                 destination_container_name=storage_container,
@@ -1219,7 +1211,6 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             publisher = 'Microsoft.Azure.Security.WindowsAttestation'
         version = _normalize_extension_version(cmd.cli_ctx, publisher, 'GuestAttestation', None, vm.location)
         from azure.mgmt.compute.models import VirtualMachineExtension
-        # VirtualMachineExtension = cmd.get_models('VirtualMachineExtension')
         ext = VirtualMachineExtension(location=vm.location,
                                       publisher=publisher,
                                       type_properties_type='GuestAttestation',
@@ -1672,8 +1663,6 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
     if capacity_reservation_group is not None:
         from azure.mgmt.compute.models import CapacityReservationProfile, SubResource
-        # CapacityReservationProfile = cmd.get_models('CapacityReservationProfile')
-        # SubResource = cmd.get_models('SubResource')
         if capacity_reservation_group == 'None':
             capacity_reservation_group = None
         sub_resource = SubResource(id=capacity_reservation_group)
@@ -1683,7 +1672,6 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     if dedicated_host is not None:
         if vm.host is None:
             from azure.mgmt.compute.models import SubResource as DedicatedHost
-            # DedicatedHost = cmd.get_models('SubResource')
             vm.host = DedicatedHost(additional_properties={}, id=dedicated_host)
         else:
             vm.host.id = dedicated_host
@@ -1693,7 +1681,6 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     if dedicated_host_group is not None:
         if vm.host_group is None:
             from azure.mgmt.compute.models import SubResource as DedicatedHostGroup
-            # DedicatedHostGroup = cmd.get_models('SubResource')
             vm.host_group = DedicatedHostGroup(additional_properties={}, id=dedicated_host_group)
         else:
             vm.host_group.id = dedicated_host_group
@@ -1703,7 +1690,6 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     if ultra_ssd_enabled is not None:
         if vm.additional_capabilities is None:
             from azure.mgmt.compute.models import AdditionalCapabilities
-            # AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
             vm.additional_capabilities = AdditionalCapabilities(ultra_ssd_enabled=ultra_ssd_enabled)
         else:
             vm.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
@@ -1711,7 +1697,6 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     if enable_hibernation is not None:
         if vm.additional_capabilities is None:
             from azure.mgmt.compute.models import AdditionalCapabilities
-            # AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
             vm.additional_capabilities = AdditionalCapabilities(hibernation_enabled=enable_hibernation)
         else:
             vm.additional_capabilities.hibernation_enabled = enable_hibernation
@@ -1722,7 +1707,6 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     if max_price is not None:
         if vm.billing_profile is None:
             from azure.mgmt.compute.models import BillingProfile
-            # BillingProfile = cmd.get_models('BillingProfile')
             vm.billing_profile = BillingProfile(max_price=max_price)
         else:
             vm.billing_profile.max_price = max_price
@@ -1890,7 +1874,6 @@ def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage=None):
         storage_uri = get_storage_blob_uri(cmd.cli_ctx, storage)
 
     from azure.mgmt.compute.models import DiagnosticsProfile, BootDiagnostics
-    # DiagnosticsProfile, BootDiagnostics = cmd.get_models('DiagnosticsProfile', 'BootDiagnostics')
 
     boot_diag = BootDiagnostics(enabled=True, storage_uri=storage_uri)
     if vm.diagnostics_profile is None:
@@ -2009,7 +1992,9 @@ def set_diagnostics_extension(
                  not e.type_handler_version.startswith(major_ver + '.')), None):
             logger.warning('There is an incompatible version of diagnostics extension installed. '
                            'We will update it with a new version')
-            poller = client.virtual_machine_extensions.begin_delete(resource_group_name, vm_name, vm_extension_name)
+            poller = client.virtual_machine_extensions.begin_delete(resource_group_name=resource_group_name,
+                                                                    vm_name=vm_name,
+                                                                    vm_extension_name=vm_extension_name)
             LongRunningOperation(cmd.cli_ctx)(poller)
 
     return set_extension(cmd, resource_group_name, vm_name, vm_extension_name,
@@ -2041,8 +2026,6 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
     vm = get_vm_to_update(cmd, resource_group_name, vm_name)
 
     from azure.mgmt.compute.models import DataDisk, ManagedDiskParameters, DiskCreateOptionTypes as DiskCreateOption
-    # DataDisk, ManagedDiskParameters, DiskCreateOption = cmd.get_models(
-    #     'DataDisk', 'ManagedDiskParameters', 'DiskCreateOptionTypes')
 
     for disk_item in disks:
         if lun:
@@ -2156,7 +2139,8 @@ def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publishe
     if force_update:
         ext.force_update_tag = str(_gen_guid())
     return sdk_no_wait(no_wait, client.virtual_machine_extensions.begin_create_or_update,
-                       resource_group_name, vm_name, instance_name, ext)
+                       resource_group_name=resource_group_name, vm_name=vm_name, vm_extension_name=instance_name,
+                       extension_parameters=ext)
 # endregion
 
 
@@ -2227,7 +2211,6 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
 def _remove_disk_encryption_set_identities(cmd, resource_group_name, name,
                                            mi_system_assigned, mi_user_assigned, getter, setter):
     from azure.mgmt.compute.models import DiskEncryptionSetIdentityType as IdentityType
-    # IdentityType = cmd.get_models('DiskEncryptionSetIdentityType', operation_group='disk_encryption_sets')
     remove_system_assigned_identity = mi_system_assigned is not None
 
     resource = getter(cmd, resource_group_name, name)
@@ -2356,7 +2339,8 @@ def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=N
                                     skus=sku, version=version)
     else:
         client = _compute_client_factory(cmd.cli_ctx)
-        return client.virtual_machine_images.get(location, publisher, offer, sku, version)
+        return client.virtual_machine_images.get(location=location, publisher_name=publisher,
+                                                 offer=offer, skus=sku, version=version)
 
 
 def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
@@ -2533,7 +2517,6 @@ def _build_nic_list(cmd, nic_ids):
     NicShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nic").Show
 
     from azure.mgmt.compute.models import NetworkInterfaceReference
-    # NetworkInterfaceReference = cmd.get_models('NetworkInterfaceReference')
     nic_list = []
     if nic_ids:
         # pylint: disable=no-member
@@ -2557,7 +2540,6 @@ def _get_existing_nics(vm):
 
 def _update_vm_nics(cmd, vm, nics, primary_nic):
     from azure.mgmt.compute.models import NetworkProfile
-    # NetworkProfile = cmd.get_models('NetworkProfile')
 
     if primary_nic:
         try:
@@ -2590,7 +2572,6 @@ def _update_vm_nics(cmd, vm, nics, primary_nic):
 # region VirtualMachines RunCommand
 def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scripts=None, parameters=None, instance_id=None):  # pylint: disable=line-too-long
     from azure.mgmt.compute.models import RunCommandInput, RunCommandInputParameter
-    # RunCommandInput, RunCommandInputParameter = cmd.get_models('RunCommandInput', 'RunCommandInputParameter')
 
     parameters = parameters or []
     run_command_input_parameters = []
@@ -2612,8 +2593,8 @@ def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scrip
     # if instance_id, this is a vmss instance
     if instance_id:
         return client.virtual_machine_scale_set_vms.begin_run_command(
-            resource_group_name, vm_vmss_name, instance_id,
-            RunCommandInput(command_id=command_id, script=scripts, parameters=run_command_input_parameters))  # pylint: disable=line-too-long
+            resource_group_name=resource_group_name, vm_scale_set_name=vm_vmss_name, instance_id=instance_id,
+            parameters=RunCommandInput(command_id=command_id, script=scripts, parameters=run_command_input_parameters))  # pylint: disable=line-too-long
     # otherwise this is a regular vm instance
     return client.virtual_machines.begin_run_command(
         resource_group_name=resource_group_name, vm_name=vm_vmss_name,
@@ -2872,8 +2853,6 @@ def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, cert
     from ._vm_utils import create_keyvault_data_plane_client, get_key_vault_base_url
 
     from azure.mgmt.compute.models import VaultSecretGroup, SubResource, VaultCertificate
-    # VaultSecretGroup, SubResource, VaultCertificate = cmd.get_models(
-    #     'VaultSecretGroup', 'SubResource', 'VaultCertificate')
     vm = get_vm_to_update(cmd, resource_group_name, vm_name)
 
     if '://' not in certificate:  # has a cert name rather a full url?
@@ -2940,8 +2919,6 @@ def remove_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate=No
 def attach_unmanaged_data_disk(cmd, resource_group_name, vm_name, new=False, vhd_uri=None, lun=None,
                                disk_name=None, size_gb=1023, caching=None):
     from azure.mgmt.compute.models import DataDisk, DiskCreateOptionTypes, VirtualHardDisk
-    # DataDisk, DiskCreateOptionTypes, VirtualHardDisk = cmd.get_models(
-    #     'DataDisk', 'DiskCreateOptionTypes', 'VirtualHardDisk')
     if not new and not disk_name:
         raise CLIError('Please provide the name of the existing disk to attach')
     create_option = DiskCreateOptionTypes.empty if new else DiskCreateOptionTypes.attach
@@ -2980,7 +2957,6 @@ def _update_linux_access_extension(cmd, vm_instance, resource_group_name, protec
     client = _compute_client_factory(cmd.cli_ctx)
 
     from azure.mgmt.compute.models import VirtualMachineExtension
-    # VirtualMachineExtension = cmd.get_models('VirtualMachineExtension')
 
     # pylint: disable=no-member
     instance_name = _get_extension_instance_name(vm_instance.instance_view,
@@ -2999,7 +2975,8 @@ def _update_linux_access_extension(cmd, vm_instance, resource_group_name, protec
                                   settings={},
                                   auto_upgrade_minor_version=auto_upgrade)
     return sdk_no_wait(no_wait, client.virtual_machine_extensions.begin_create_or_update,
-                       resource_group_name, vm_instance.name, instance_name, ext)
+                       resource_group_name=resource_group_name, vm_name=vm_instance.name,
+                       vm_extension_name=instance_name, extension_parameters=ext)
 
 
 def _set_linux_user(cmd, vm_instance, resource_group_name, username,
@@ -3026,7 +3003,6 @@ def _reset_windows_admin(cmd, vm_instance, resource_group_name, username, passwo
     '''Update the password. You can only change the password. Adding a new user is not supported. '''
     client = _compute_client_factory(cmd.cli_ctx)
     from azure.mgmt.compute.models import VirtualMachineExtension
-    # VirtualMachineExtension = cmd.get_models('VirtualMachineExtension')
 
     publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
         vm_instance.resources, _WINDOWS_ACCESS_EXT)
@@ -3046,9 +3022,12 @@ def _reset_windows_admin(cmd, vm_instance, resource_group_name, username, passwo
 
     if no_wait:
         return sdk_no_wait(no_wait, client.virtual_machine_extensions.create_or_update,
-                           resource_group_name, vm_instance.name, instance_name, ext)
+                           resource_group_name=resource_group_name, vm_name=vm_instance.name,
+                           vm_extension_name=instance_name, extension_parameters=ext)
+
     poller = client.virtual_machine_extensions.begin_create_or_update(
-        resource_group_name, vm_instance.name, instance_name, ext)
+        resource_group_name=resource_group_name, vm_name=vm_instance.name, vm_extension_name=instance_name,
+        extension_parameters=ext)
     return ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'resetting admin', 'done')(poller)
 
 
@@ -3091,8 +3070,6 @@ def reset_linux_ssh(cmd, resource_group_name, vm_name, no_wait=False):
 def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=None, identity_role='Contributor',
                          identity_role_id=None, identity_scope=None):
     from azure.mgmt.compute.models import VirtualMachineScaleSetIdentity, UpgradeMode, ResourceIdentityType, VirtualMachineScaleSetUpdate
-    # VirtualMachineScaleSetIdentity, UpgradeMode, ResourceIdentityType, VirtualMachineScaleSetUpdate = cmd.get_models(
-    #     'VirtualMachineScaleSetIdentity', 'UpgradeMode', 'ResourceIdentityType', 'VirtualMachineScaleSetUpdate')
     from azure.mgmt.compute.models import VirtualMachineScaleSetIdentityUserAssignedIdentitiesValue, UserAssignedIdentitiesValue
     IdentityUserAssignedIdentitiesValue = VirtualMachineScaleSetIdentityUserAssignedIdentitiesValue or UserAssignedIdentitiesValue
     from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
@@ -3100,7 +3077,7 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
     _, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
 
     def getter():
-        return client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        return client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
 
     def setter(vmss, external_identities=external_identities):
 
@@ -3123,11 +3100,12 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
                 vmss.identity.user_assigned_identities[identity] = IdentityUserAssignedIdentitiesValue()
         vmss_patch = VirtualMachineScaleSetUpdate()
         vmss_patch.identity = vmss.identity
-        poller = client.virtual_machine_scale_sets.begin_update(resource_group_name, vmss_name, vmss_patch)
+        poller = client.virtual_machine_scale_sets.begin_update(resource_group_name=resource_group_name,
+                                                                vm_scale_set_name=vmss_name, parameters=vmss_patch)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
     assign_identity_helper(cmd.cli_ctx, getter, setter, identity_role=identity_role_id, identity_scope=identity_scope)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
     if vmss.upgrade_policy.mode == UpgradeMode.manual:
         logger.warning("With manual upgrade mode, you will need to run 'az vmss update-instances -g %s -n %s "
                        "--instance-ids *' to propagate the change", resource_group_name, vmss_name)
@@ -3567,12 +3545,11 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         enable_vtpm and enable_secure_boot
     if is_trusted_launch and not disable_integrity_monitoring:
         client = _compute_client_factory(cmd.cli_ctx)
-        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name,
+                                                     vm_scale_set_name=vmss_name)
         vmss.virtual_machine_profile.storage_profile.image_reference = None
 
         from azure.mgmt.compute.models import VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile
-        # VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = cmd.get_models(
-        #     'VirtualMachineScaleSetExtension', 'VirtualMachineScaleSetExtensionProfile')
         if vmss.virtual_machine_profile.storage_profile.os_disk.os_type == 'Linux':
             publisher = 'Microsoft.Azure.Security.LinuxAttestation'
         if vmss.virtual_machine_profile.storage_profile.os_disk.os_type == 'Windows':
@@ -3592,14 +3569,13 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         vmss.virtual_machine_profile.extension_profile.extensions.append(ext)
         try:
             LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_scale_sets.begin_create_or_update(
-                resource_group_name, vmss_name, vmss))
+                resource_group_name=resource_group_name, vm_scale_set_name=vmss_name, parameters=vmss))
             logger.info('Guest Attestation Extension has been successfully installed by default'
                         'when Trusted Launch configuration is met')
             from azure.mgmt.compute.models import VirtualMachineScaleSetVMInstanceRequiredIDs
-            # VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
             instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=['*'])
             LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_scale_sets.begin_update_instances(
-                resource_group_name, vmss_name, instance_ids))
+                resource_group_name=resource_group_name, vm_scale_set_name=vmss_name, vm_instance_i_ds=instance_ids))
         except Exception as e:
             logger.error('Failed to install Guest Attestation Extension for Trusted Launch. %s', e)
 
@@ -3624,9 +3600,6 @@ def _build_identities_info(identities):
 
 def _build_identities_info_from_system_user_assigned(cmd, mi_system_assigned, mi_user_assigned):
     from azure.mgmt.compute.models import DiskEncryptionSetIdentityType as IdentityType, UserAssignedIdentitiesValue
-    # IdentityType, UserAssignedIdentitiesValue = cmd.get_models('DiskEncryptionSetIdentityType',
-    #                                                            'UserAssignedIdentitiesValue',
-    #                                                            operation_group='disk_encryption_sets')
 
     identity_types = IdentityType.SYSTEM_ASSIGNED
     user_assigned_identities = None
@@ -3646,22 +3619,23 @@ def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=No
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_ids and len(instance_ids) == 1:
         return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_deallocate,
-                           resource_group_name, vm_scale_set_name, instance_ids[0])
+                           resource_group_name=resource_group_name, vm_scale_set_name=vm_scale_set_name,
+                           instance_id=instance_ids[0])
 
     from azure.mgmt.compute.models import VirtualMachineScaleSetVMInstanceIDs
-    # VirtualMachineScaleSetVMInstanceIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceIDs')
     vm_instance_i_ds = VirtualMachineScaleSetVMInstanceIDs(instance_ids=instance_ids)
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
-                       resource_group_name, vm_scale_set_name, vm_instance_i_ds)
+                       resource_group_name=resource_group_name, vm_scale_set_name=vm_scale_set_name,
+                       vm_instance_i_ds=vm_instance_i_ds)
 
 
 def delete_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     from azure.mgmt.compute.models import VirtualMachineScaleSetVMInstanceRequiredIDs
-    # VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
     instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_delete_instances,
-                       resource_group_name, vm_scale_set_name, instance_ids)
+                       resource_group_name=resource_group_name, vm_scale_set_name=vm_scale_set_name,
+                       vm_instance_i_ds=instance_ids)
 
 
 def get_vmss(cmd, resource_group_name, name, instance_id=None, include_user_data=False):
@@ -3673,23 +3647,27 @@ def get_vmss(cmd, resource_group_name, name, instance_id=None, include_user_data
 
     if instance_id is not None:
         if cmd.supported_api_version(min_api='2020-12-01', operation_group='virtual_machine_scale_sets'):
-            return client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id, expand=expand)
-        return client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id)
+            return client.virtual_machine_scale_set_vms.get(
+                resource_group_name=resource_group_name, vm_scale_set_name=name, instance_id=instance_id, expand=expand)
+        return client.virtual_machine_scale_set_vms.get(
+            resource_group_name=resource_group_name, vm_scale_set_name=name, instance_id=instance_id)
 
     if cmd.supported_api_version(min_api='2021-03-01', operation_group='virtual_machine_scale_sets'):
-        return client.virtual_machine_scale_sets.get(resource_group_name, name, expand=expand)
-    return client.virtual_machine_scale_sets.get(resource_group_name, name)
+        return client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name,
+                                                     vm_scale_set_name=name, expand=expand)
+    return client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=name)
 
 
 def get_vmss_modified(cmd, resource_group_name, name, instance_id=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id is not None:
-        vms = client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id)
+        vms = client.virtual_machine_scale_set_vms.get(
+            resource_group_name=resource_group_name, vm_scale_set_name=name, instance_id=instance_id)
         # To avoid unnecessary permission check of image
         if hasattr(vms, "storage_profile") and vms.storage_profile:
             vms.storage_profile.image_reference = None
         return vms
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, name)
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=name)
     # To avoid unnecessary permission check of image
     if hasattr(vmss, "virtual_machine_profile") and vmss.virtual_machine_profile \
             and vmss.virtual_machine_profile.storage_profile:
@@ -3703,18 +3681,21 @@ def get_vmss_instance_view(cmd, resource_group_name, vm_scale_set_name, instance
         if instance_id == '*':
 
             return [x.instance_view for x in (client.virtual_machine_scale_set_vms.list(
-                resource_group_name, vm_scale_set_name, select='instanceView', expand='instanceView'))]
+                resource_group_name=resource_group_name, virtual_machine_scale_set_name=vm_scale_set_name,
+                select='instanceView', expand='instanceView'))]
 
-        return client.virtual_machine_scale_set_vms.get_instance_view(resource_group_name, vm_scale_set_name,
-                                                                      instance_id)
+        return client.virtual_machine_scale_set_vms.get_instance_view(resource_group_name=resource_group_name,
+                                                                      vm_scale_set_name=vm_scale_set_name,
+                                                                      instance_id=instance_id)
 
-    return client.virtual_machine_scale_sets.get_instance_view(resource_group_name, vm_scale_set_name)
+    return client.virtual_machine_scale_sets.get_instance_view(resource_group_name=resource_group_name,
+                                                               vm_scale_set_name=vm_scale_set_name)
 
 
 def list_vmss(cmd, resource_group_name=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if resource_group_name:
-        return client.virtual_machine_scale_sets.list(resource_group_name)
+        return client.virtual_machine_scale_sets.list(resource_group_name=resource_group_name)
     return client.virtual_machine_scale_sets.list_all()
 
 
@@ -3725,7 +3706,7 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
     PublicIPAddress = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.public_ip").Show
 
     client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vm_scale_set_name)
 
     from ._vm_utils import raise_unsupported_error_for_flex_vmss
     raise_unsupported_error_for_flex_vmss(
@@ -3810,7 +3791,8 @@ def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
     ListInstancePublicIps = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "vmss").ListInstancePublicIps
 
     compute_client = _compute_client_factory(cmd.cli_ctx)
-    vmss = compute_client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
+    vmss = compute_client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name,
+                                                         vm_scale_set_name=vm_scale_set_name)
     from ._vm_utils import raise_unsupported_error_for_flex_vmss
     raise_unsupported_error_for_flex_vmss(
         vmss, 'This command is not available for VMSS in Flex mode. '
@@ -3828,31 +3810,33 @@ def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None,
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_ids:
         from azure.mgmt.compute.models import VirtualMachineScaleSetVMInstanceIDs
-        # VirtualMachineScaleSetVMInstanceIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceIDs')
         instance_ids = VirtualMachineScaleSetVMInstanceIDs(instance_ids=instance_ids)
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_reimage_all, resource_group_name,
-                           vm_scale_set_name, instance_ids)
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_reimage_all,
+                           resource_group_name=resource_group_name, vm_scale_set_name=vm_scale_set_name,
+                           vm_instance_i_ds=instance_ids)
 
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_reimage, resource_group_name, vm_scale_set_name)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_reimage,
+                       resource_group_name=resource_group_name, vm_scale_set_name=vm_scale_set_name)
 
 
 def restart_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     from azure.mgmt.compute.models import VirtualMachineScaleSetVMInstanceRequiredIDs
-    # VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
     if instance_ids is None:
         instance_ids = ['*']
     instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_restart, resource_group_name, vm_scale_set_name,
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_restart,
+                       resource_group_name=resource_group_name,
+                       vm_scale_set_name=vm_scale_set_name,
                        vm_instance_i_ds=instance_ids)
 
 
 # pylint: disable=inconsistent-return-statements
 def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wait=False):
     from azure.mgmt.compute.models import VirtualMachineScaleSet
-    # VirtualMachineScaleSet = cmd.get_models('VirtualMachineScaleSet')
     client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name,
+                                                 vm_scale_set_name=vm_scale_set_name)
     # pylint: disable=no-member
     if vmss.sku.capacity == new_capacity:
         return
@@ -3860,42 +3844,43 @@ def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wai
     vmss.sku.capacity = new_capacity
     vmss_new = VirtualMachineScaleSet(location=vmss.location, sku=vmss.sku)
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
-                       resource_group_name, vm_scale_set_name, vmss_new)
+                       resource_group_name=resource_group_name, vm_scale_set_name=vm_scale_set_name,
+                       parameters=vmss_new)
 
 
 def start_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     from azure.mgmt.compute.models import VirtualMachineScaleSetVMInstanceRequiredIDs
-    # VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
     if instance_ids is None:
         instance_ids = ['*']
     instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_start,
-                       resource_group_name, vm_scale_set_name, vm_instance_i_ds=instance_ids)
+                       resource_group_name=resource_group_name, vm_scale_set_name=vm_scale_set_name,
+                       vm_instance_i_ds=instance_ids)
 
 
 def stop_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False, skip_shutdown=False):
     client = _compute_client_factory(cmd.cli_ctx)
     from azure.mgmt.compute.models import VirtualMachineScaleSetVMInstanceRequiredIDs
-    # VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
     if instance_ids is None:
         instance_ids = ['*']
     instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
     if cmd.supported_api_version(min_api='2020-06-01', operation_group='virtual_machine_scale_sets'):
         return sdk_no_wait(
-            no_wait, client.virtual_machine_scale_sets.begin_power_off, resource_group_name, vm_scale_set_name,
-            vm_instance_i_ds=instance_ids, skip_shutdown=skip_shutdown)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_power_off, resource_group_name,
-                       vm_scale_set_name, vm_instance_i_ds=instance_ids)
+            no_wait, client.virtual_machine_scale_sets.begin_power_off, resource_group_name=resource_group_name,
+            vm_scale_set_name=vm_scale_set_name, vm_instance_i_ds=instance_ids, skip_shutdown=skip_shutdown)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_power_off,
+                       resource_group_name=resource_group_name, vm_scale_set_name=vm_scale_set_name,
+                       vm_instance_i_ds=instance_ids)
 
 
 def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     from azure.mgmt.compute.models import VirtualMachineScaleSetVMInstanceRequiredIDs
-    # VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
     instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_update_instances,
-                       resource_group_name, vm_scale_set_name, instance_ids)
+                       resource_group_name=resource_group_name, vm_scale_set_name=vm_scale_set_name,
+                       vm_instance_i_ds=instance_ids)
 
 
 def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, instance_id=None,
@@ -3921,7 +3906,6 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
 
     from azure.mgmt.compute.models import VirtualMachineScaleSetVMProtectionPolicy
-    # VMProtectionPolicy = cmd.get_models('VirtualMachineScaleSetVMProtectionPolicy')
 
     # handle vmss instance update
     from azure.cli.core.util import b64encode
@@ -3934,7 +3918,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss.user_data = b64encode(user_data)
 
         if not vmss.protection_policy:
-            vmss.protection_policy = VMProtectionPolicy()
+            vmss.protection_policy = VirtualMachineScaleSetVMProtectionPolicy()
 
         if protect_from_scale_in is not None:
             vmss.protection_policy.protect_from_scale_in = protect_from_scale_in
@@ -3943,7 +3927,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss.protection_policy.protect_from_scale_set_actions = protect_from_scale_set_actions
 
         return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_update,
-                           resource_group_name, name, instance_id, **kwargs)
+                           resource_group_name=resource_group_name, vm_scale_set_name=name,
+                           instance_id=instance_id, **kwargs)
 
     # else handle vmss update
     if license_type is not None:
@@ -3954,15 +3939,12 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
     if v_cpus_available is not None or v_cpus_per_core is not None:
         from azure.mgmt.compute.models import HardwareProfile, VMSizeProperties
-        # HardwareProfile = cmd.get_models('HardwareProfile')
-        # VMSizeProperties = cmd.get_models('VMSizeProperties')
         hardware_profile = HardwareProfile(vm_size_properties=VMSizeProperties(v_cpus_available=v_cpus_available,
                                                                                v_cpus_per_core=v_cpus_per_core))
         vmss.virtual_machine_profile.hardware_profile = hardware_profile
 
     if capacity_reservation_group is not None:
         from azure.mgmt.compute.models import CapacityReservationProfile
-        # CapacityReservationProfile = cmd.get_models('CapacityReservationProfile')
         SubResource = cmd.get_models('SubResource')
         if capacity_reservation_group == 'None':
             capacity_reservation_group = None
@@ -3973,10 +3955,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     if enable_terminate_notification is not None or terminate_notification_time is not None:
         if vmss.virtual_machine_profile.scheduled_events_profile is None:
             from azure.mgmt.compute.models import ScheduledEventsProfile
-            # ScheduledEventsProfile = cmd.get_models('ScheduledEventsProfile')
             vmss.virtual_machine_profile.scheduled_events_profile = ScheduledEventsProfile()
         from azure.mgmt.compute.models import TerminateNotificationProfile
-        # TerminateNotificationProfile = cmd.get_models('TerminateNotificationProfile')
         vmss.virtual_machine_profile.scheduled_events_profile.terminate_notification_profile =\
             TerminateNotificationProfile(not_before_timeout=terminate_notification_time,
                                          enable=enable_terminate_notification)
@@ -3986,13 +3966,11 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             from azure.mgmt.compute.models import ScheduledEventsProfile
             vmss.virtual_machine_profile.scheduled_events_profile = ScheduledEventsProfile()
         from azure.mgmt.compute.models import OSImageNotificationProfile
-        # OSImageNotificationProfile = cmd.get_models('OSImageNotificationProfile')
         vmss.virtual_machine_profile.scheduled_events_profile.os_image_notification_profile = \
             OSImageNotificationProfile(enable=enable_osimage_notification)
     if enable_automatic_repairs is not None or \
             automatic_repairs_grace_period is not None or automatic_repairs_action is not None:
         from azure.mgmt.compute.models import AutomaticRepairsPolicy
-        # AutomaticRepairsPolicy = cmd.get_models('AutomaticRepairsPolicy')
         vmss.automatic_repairs_policy = \
             AutomaticRepairsPolicy(enabled=enable_automatic_repairs,
                                    grace_period=automatic_repairs_grace_period,
@@ -4002,14 +3980,12 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         if cmd.supported_api_version(min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):
             if vmss.additional_capabilities is None:
                 from azure.mgmt.compute.models import AdditionalCapabilities
-                # AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
                 vmss.additional_capabilities = AdditionalCapabilities(ultra_ssd_enabled=ultra_ssd_enabled)
             else:
                 vmss.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
         else:
             if vmss.virtual_machine_profile.additional_capabilities is None:
                 from azure.mgmt.compute.models import AdditionalCapabilities
-                # AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
                 vmss.virtual_machine_profile.additional_capabilities = AdditionalCapabilities(
                     ultra_ssd_enabled=ultra_ssd_enabled)
             else:
@@ -4017,7 +3993,6 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
     if scale_in_policy is not None or force_deletion is not None:
         from azure.mgmt.compute.models import ScaleInPolicy
-        # ScaleInPolicy = cmd.get_models('ScaleInPolicy')
         vmss.scale_in_policy = ScaleInPolicy(rules=scale_in_policy, force_deletion=force_deletion)
 
     if enable_spot_restore is not None:
@@ -4032,7 +4007,6 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     if max_price is not None:
         if vmss.virtual_machine_profile.billing_profile is None:
             from azure.mgmt.compute.models import BillingProfile
-            # BillingProfile = cmd.get_models('BillingProfile')
             vmss.virtual_machine_profile.billing_profile = BillingProfile(max_price=max_price)
         else:
             vmss.virtual_machine_profile.billing_profile.max_price = max_price
@@ -4102,7 +4076,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         vmss.virtual_machine_profile.storage_profile.disk_controller_type = disk_controller_type
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
-                       resource_group_name, name, **kwargs)
+                       resource_group_name=resource_group_name, vm_scale_set_name=name, **kwargs)
 
 # endregion
 
@@ -4112,7 +4086,7 @@ def set_vmss_diagnostics_extension(
         cmd, resource_group_name, vmss_name, settings, protected_settings=None, version=None,
         no_auto_upgrade=False):
     client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
     # pylint: disable=no-member
     is_linux_os = _is_linux_os(vmss.virtual_machine_profile)
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
@@ -4138,7 +4112,6 @@ def set_vmss_diagnostics_extension(
 
     result = LongRunningOperation(cmd.cli_ctx)(poller)
     from azure.mgmt.compute.models import UpgradeMode
-    # UpgradeMode = cmd.get_models('UpgradeMode')
     if vmss.upgrade_policy.mode == UpgradeMode.manual:
         poller2 = update_vmss_instances(cmd, resource_group_name, vmss_name, ['*'])
         LongRunningOperation(cmd.cli_ctx)(poller2)
@@ -4165,41 +4138,44 @@ def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_g
         storage_profile.data_disks = data_disks
 
     from azure.mgmt.compute.models import DiskCreateOptionTypes, ManagedDiskParameters
-    # DiskCreateOptionTypes, ManagedDiskParameters = cmd.get_models(
-    #     'DiskCreateOptionTypes', 'ManagedDiskParameters')
     if disk is None:
         from azure.mgmt.compute.models import VirtualMachineScaleSetDataDisk as DataDisk
-        # DataDisk = cmd.get_models('VirtualMachineScaleSetDataDisk')
     else:
         from azure.mgmt.compute.models import DataDisk
-        # DataDisk = cmd.get_models('DataDisk')
 
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id is None:
-        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name,
+                                                     vm_scale_set_name=vmss_name)
         # Avoid unnecessary permission error
         vmss.virtual_machine_profile.storage_profile.image_reference = None
         # pylint: disable=no-member
         _init_data_disk(vmss.virtual_machine_profile.storage_profile, lun)
-        return client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss_name, vmss)
+        return client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name=resource_group_name,
+                                                                        vm_scale_set_name=vmss_name, parameters=vmss)
 
-    vmss_vm = client.virtual_machine_scale_set_vms.get(resource_group_name, vmss_name, instance_id)
+    vmss_vm = client.virtual_machine_scale_set_vms.get(resource_group_name=resource_group_name,
+                                                       vm_scale_set_name=vmss_name, instance_id=instance_id)
     # Avoid unnecessary permission error
     vmss_vm.storage_profile.image_reference = None
     _init_data_disk(vmss_vm.storage_profile, lun, disk)
-    return client.virtual_machine_scale_set_vms.begin_update(resource_group_name, vmss_name, instance_id, vmss_vm)
+    return client.virtual_machine_scale_set_vms.begin_update(resource_group_name=resource_group_name,
+                                                             vm_scale_set_name=vmss_name, instance_id=instance_id,
+                                                             parameters=vmss_vm)
 
 
 def detach_disk_from_vmss(cmd, resource_group_name, vmss_name, lun, instance_id=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id is None:
-        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name,
+                                                     vm_scale_set_name=vmss_name)
         # Avoid unnecessary permission error
         vmss.virtual_machine_profile.storage_profile.image_reference = None
         # pylint: disable=no-member
         data_disks = vmss.virtual_machine_profile.storage_profile.data_disks
     else:
-        vmss_vm = client.virtual_machine_scale_set_vms.get(resource_group_name, vmss_name, instance_id)
+        vmss_vm = client.virtual_machine_scale_set_vms.get(resource_group_name=resource_group_name,
+                                                           vm_scale_set_name=vmss_name, instance_id=instance_id)
         # Avoid unnecessary permission error
         vmss_vm.storage_profile.image_reference = None
         data_disks = vmss_vm.storage_profile.data_disks
@@ -4213,16 +4189,19 @@ def detach_disk_from_vmss(cmd, resource_group_name, vmss_name, lun, instance_id=
 
     if instance_id is None:
         vmss.virtual_machine_profile.storage_profile.data_disks = leftovers
-        return client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss_name, vmss)
+        return client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name=resource_group_name,
+                                                                        vm_scale_set_name=vmss_name, parameters=vmss)
     vmss_vm.storage_profile.data_disks = leftovers
-    return client.virtual_machine_scale_set_vms.begin_update(resource_group_name, vmss_name, instance_id, vmss_vm)
+    return client.virtual_machine_scale_set_vms.begin_update(resource_group_name=resource_group_name,
+                                                             vm_scale_set_name=vmss_name, instance_id=instance_id,
+                                                             parameters=vmss_vm)
 # endregion
 
 
 # region VirtualMachineScaleSets Extensions
 def delete_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
     client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
     # Avoid unnecessary permission error
     vmss.virtual_machine_profile.storage_profile.image_reference = None
     # pylint: disable=no-member
@@ -4236,13 +4215,14 @@ def delete_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
 
     vmss.virtual_machine_profile.extension_profile.extensions = keep_list
 
-    return client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss_name, vmss)
+    return client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name=resource_group_name,
+                                                                    vm_scale_set_name=vmss_name, parameters=vmss)
 
 
 # pylint: disable=inconsistent-return-statements
 def get_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
     client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
     # pylint: disable=no-member
     if not vmss.virtual_machine_profile.extension_profile:
         return
@@ -4252,7 +4232,7 @@ def get_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
 
 def list_vmss_extensions(cmd, resource_group_name, vmss_name):
     client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
     # pylint: disable=no-member
     if vmss.virtual_machine_profile and vmss.virtual_machine_profile.extension_profile:
         return vmss.virtual_machine_profile.extension_profile.extensions
@@ -4267,12 +4247,10 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
         extension_instance_name = extension_name
 
     client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
     # Avoid unnecessary permission error
     vmss.virtual_machine_profile.storage_profile.image_reference = None
     from azure.mgmt.compute.models import VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile
-    # VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = cmd.get_models(
-    #     'VirtualMachineScaleSetExtension', 'VirtualMachineScaleSetExtensionProfile')
 
     # pylint: disable=no-member
     version = _normalize_extension_version(cmd.cli_ctx, publisher, extension_name, version, vmss.location)
@@ -4312,7 +4290,7 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
     vmss.virtual_machine_profile.extension_profile.extensions.append(ext)
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
-                       resource_group_name, vmss_name, vmss)
+                       resource_group_name=resource_group_name, vm_scale_set_name=vmss_name, parameters=vmss)
 
 
 def set_orchestration_service_state(cmd, resource_group_name, vm_scale_set_name, service_name, action, no_wait=False):
@@ -4321,10 +4299,10 @@ def set_orchestration_service_state(cmd, resource_group_name, vm_scale_set_name,
     # we define service_name as a required parameter here to avoid introducing a breaking change in the future.
     client = _compute_client_factory(cmd.cli_ctx)
     from azure.mgmt.compute.models import OrchestrationServiceStateInput
-    # OrchestrationServiceStateInput = cmd.get_models('OrchestrationServiceStateInput')
     state_input = OrchestrationServiceStateInput(service_name=service_name, action=action)
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_set_orchestration_service_state,
-                       resource_group_name, vm_scale_set_name, state_input)
+                       resource_group_name=resource_group_name, vm_scale_set_name=vm_scale_set_name,
+                       parameters=state_input)
 
 
 def upgrade_vmss_extension(cmd, resource_group_name, vm_scale_set_name, no_wait=False):
@@ -4538,14 +4516,13 @@ def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities=None):
     client = _compute_client_factory(cmd.cli_ctx)
 
     def _get_vmss(_, resource_group_name, vmss_name):
-        return client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        return client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
 
     def _set_vmss(resource_group_name, name, vmss_instance):
         from azure.mgmt.compute.models import VirtualMachineScaleSetUpdate
-        # VirtualMachineScaleSetUpdate = cmd.get_models('VirtualMachineScaleSetUpdate',
-        #                                               operation_group='virtual_machine_scale_sets')
         vmss_update = VirtualMachineScaleSetUpdate(identity=vmss_instance.identity)
-        return client.virtual_machine_scale_sets.begin_update(resource_group_name, vmss_name, vmss_update)
+        return client.virtual_machine_scale_sets.begin_update(resource_group_name=resource_group_name,
+                                                              vm_scale_set_name=vmss_name, parameters=vmss_update)
 
     if identities is None:
         from ._vm_utils import MSI_LOCAL_ID
@@ -4564,7 +4541,6 @@ def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, perm
     if permissions:
         if gallery.sharing_profile is None:
             from azure.mgmt.compute.models import SharingProfile
-            # SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
             gallery.sharing_profile = SharingProfile(permissions=permissions)
         else:
             gallery.sharing_profile.permissions = permissions
@@ -4576,7 +4552,6 @@ def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, perm
                                                    ' --publisher-uri, --publisher-email, --eula, --public-name-prefix.')
 
             from azure.mgmt.compute.models import CommunityGalleryInfo
-            # CommunityGalleryInfo = cmd.get_models('CommunityGalleryInfo', operation_group='shared_galleries')
             community_gallery_info = CommunityGalleryInfo(publisher_uri=publisher_uri,
                                                           publisher_contact=publisher_contact,
                                                           eula=eula,
@@ -4591,21 +4566,22 @@ def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, perm
 
     client = _compute_client_factory(cmd.cli_ctx)
 
-    return client.galleries.begin_create_or_update(resource_group_name, gallery_name, gallery, **kwargs)
+    return client.galleries.begin_create_or_update(resource_group_name=resource_group_name,
+                                                   gallery_name=gallery_name, gallery=gallery, **kwargs)
 
 
 def show_image_gallery(cmd, resource_group_name, gallery_name, select=None, sharing_groups=None):
     if sharing_groups:
         sharing_groups = 'sharingProfile/Groups'
     client = _compute_client_factory(cmd.cli_ctx)
-    return client.galleries.get(resource_group_name, gallery_name, select=select, expand=sharing_groups)
+    return client.galleries.get(resource_group_name=resource_group_name, gallery_name=gallery_name,
+                                select=select, expand=sharing_groups)
 
 
 def create_image_gallery(cmd, resource_group_name, gallery_name, description=None,
                          location=None, no_wait=False, tags=None, permissions=None, soft_delete=None,
                          publisher_uri=None, publisher_contact=None, eula=None, public_name_prefix=None):
     from azure.mgmt.compute.models import Gallery
-    # Gallery = cmd.get_models('Gallery')
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     gallery = Gallery(description=description, location=location, tags=(tags or {}))
     if soft_delete is not None:
@@ -4614,7 +4590,6 @@ def create_image_gallery(cmd, resource_group_name, gallery_name, description=Non
     # client.galleries
     if permissions:
         from azure.mgmt.compute.models import SharingProfile
-        # SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
         gallery.sharing_profile = SharingProfile(permissions=permissions)
         if permissions == 'Community':
             if publisher_uri is None or publisher_contact is None or eula is None or public_name_prefix is None:
@@ -4623,14 +4598,13 @@ def create_image_gallery(cmd, resource_group_name, gallery_name, description=Non
                                                    ' --publisher-uri, --publisher-email, --eula, --public-name-prefix.')
 
             from azure.mgmt.compute.models import CommunityGalleryInfo
-            # CommunityGalleryInfo = cmd.get_models('CommunityGalleryInfo', operation_group='shared_galleries')
             gallery.sharing_profile.community_gallery_info = CommunityGalleryInfo(publisher_uri=publisher_uri,
                                                                                   publisher_contact=publisher_contact,
                                                                                   eula=eula,
                                                                                   public_name_prefix=public_name_prefix)
 
     return sdk_no_wait(no_wait, client.galleries.begin_create_or_update,
-                       resource_group_name, gallery_name, gallery)
+                       resource_group_name=resource_group_name, gallery_name=gallery_name, gallery=gallery)
 
 
 def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_name, os_type, publisher, offer, sku,
@@ -4640,9 +4614,8 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                          disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None, tags=None,
                          hyper_v_generation='V1', features=None, architecture=None):
     # pylint: disable=line-too-long
-    from azure.mgmt.compute.models import GalleryImage, GalleryImageIdentifier, RecommendedMachineConfiguration, ResourceRange, Disallowed, ImagePurchasePlan, GalleryImageFeature
-    # GalleryImage, GalleryImageIdentifier, RecommendedMachineConfiguration, ResourceRange, Disallowed, ImagePurchasePlan, GalleryImageFeature = cmd.get_models(
-    #     'GalleryImage', 'GalleryImageIdentifier', 'RecommendedMachineConfiguration', 'ResourceRange', 'Disallowed', 'ImagePurchasePlan', 'GalleryImageFeature')
+    from azure.mgmt.compute.models import (GalleryImage, GalleryImageIdentifier, RecommendedMachineConfiguration,
+                                           ResourceRange, Disallowed, ImagePurchasePlan, GalleryImageFeature)
     client = _compute_client_factory(cmd.cli_ctx)
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
@@ -4674,7 +4647,9 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                          recommended=recommendation, disallowed=Disallowed(disk_types=disallowed_disk_types),
                          purchase_plan=purchase_plan, location=location, eula=eula, tags=(tags or {}),
                          hyper_v_generation=hyper_v_generation, features=feature_list, architecture=architecture)
-    return client.gallery_images.begin_create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
+    return client.gallery_images.begin_create_or_update(resource_group_name=resource_group_name,
+                                                        gallery_name=gallery_name,
+                                                        gallery_image_name=gallery_image_name, gallery_image=image)
 
 
 def _add_aux_subscription(aux_subscriptions, resource_id):
@@ -4706,10 +4681,9 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
-    from azure.mgmt.compute.models import GalleryImageVersionPublishingProfile as ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, GalleryImageVersion as ImageVersion, TargetRegion
-    # ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
-    #     'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion',
-    #     'TargetRegion')
+    from azure.mgmt.compute.models import (GalleryImageVersionPublishingProfile as ImageVersionPublishingProfile,
+                                           GalleryArtifactSource, ManagedArtifact,
+                                           GalleryImageVersion as ImageVersion, TargetRegion)
     aux_subscriptions = _get_image_version_aux_subscription(managed_image, os_snapshot, data_snapshots)
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
 
@@ -4745,20 +4719,15 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     if cmd.supported_api_version(min_api='2019-07-01', operation_group='gallery_image_versions'):
         if managed_image is None and os_snapshot is None and os_vhd_uri is None:
             raise RequiredArgumentMissingError('usage error: Please provide --managed-image or --os-snapshot or --vhd')
-        from azure.mgmt.compute.models import GalleryImageVersionStorageProfile, GalleryOSDiskImage, GalleryDataDiskImage
+        from azure.mgmt.compute.models import (GalleryImageVersionStorageProfile, GalleryOSDiskImage,
+                                               GalleryDataDiskImage)
 
-        # GalleryImageVersionStorageProfile = cmd.get_models('GalleryImageVersionStorageProfile')
-        # GalleryOSDiskImage = cmd.get_models('GalleryOSDiskImage')
-        # GalleryDataDiskImage = cmd.get_models('GalleryDataDiskImage')
         if cmd.supported_api_version(min_api='2022-03-03', operation_group='gallery_image_versions'):
-            from azure.mgmt.compute.models import GalleryArtifactVersionFullSource as GalleryArtifactVersionFullSource, GalleryDiskImageSource as GalleryDiskImageSource
-            # GalleryArtifactVersionFullSource = cmd.get_models('GalleryArtifactVersionFullSource')
-            # GalleryDiskImageSource = cmd.get_models('GalleryDiskImageSource')
+            from azure.mgmt.compute.models import (GalleryArtifactVersionFullSource as GalleryArtifactVersionFullSource,
+                                                   GalleryDiskImageSource as GalleryDiskImageSource)
         else:
-            from azure.mgmt.compute.models import GalleryArtifactVersionSource as GalleryArtifactVersionFullSource, \
-                GalleryArtifactVersionSource as GalleryDiskImageSource
-            # GalleryArtifactVersionFullSource = cmd.get_models('GalleryArtifactVersionSource')
-            # GalleryDiskImageSource = cmd.get_models('GalleryArtifactVersionSource')
+            from azure.mgmt.compute.models import (GalleryArtifactVersionSource as GalleryArtifactVersionFullSource,
+                                                   GalleryArtifactVersionSource as GalleryDiskImageSource)
 
         source = os_disk_image = data_disk_images = None
         if managed_image is not None:
@@ -4826,8 +4795,6 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                                      storage_profile=storage_profile)
         if allow_replicated_location_deletion is not None:
             from azure.mgmt.compute.models import GalleryImageVersionSafetyProfile
-            # GalleryImageVersionSafetyProfile = cmd.get_models('GalleryImageVersionSafetyProfile',
-            #                                                   operation_group='gallery_image_versions')
             image_version.safety_profile = GalleryImageVersionSafetyProfile(
                 allow_deletion_of_replicated_locations=allow_replicated_location_deletion)
     else:
@@ -4854,7 +4821,9 @@ def fix_gallery_image_date_info(date_info):
 # pylint: disable=line-too-long
 def get_image_version_to_update(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name):
     client = _compute_client_factory(cmd.cli_ctx)
-    version = client.gallery_image_versions.get(resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name)
+    version = client.gallery_image_versions.get(
+        resource_group_name=resource_group_name, gallery_name=gallery_name, gallery_image_name=gallery_image_name,
+        gallery_image_version_name=gallery_image_version_name)
     # To avoid unnecessary permission check of image
     version.storage_profile.source = None
     if version.storage_profile.os_disk_image and version.storage_profile.os_disk_image.source:
@@ -4886,8 +4855,10 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
 
     client = _compute_client_factory(cmd.cli_ctx)
 
-    return sdk_no_wait(no_wait, client.gallery_image_versions.begin_create_or_update, resource_group_name, gallery_name,
-                       gallery_image_name, gallery_image_version_name, **kwargs)
+    return sdk_no_wait(no_wait, client.gallery_image_versions.begin_create_or_update,
+                       resource_group_name=resource_group_name, gallery_name=gallery_name,
+                       gallery_image_name=gallery_image_name, gallery_image_version_name=gallery_image_version_name,
+                       **kwargs)
 # endregion
 
 
@@ -4899,7 +4870,6 @@ def create_proximity_placement_group(cmd, client, proximity_placement_group_name
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
     from azure.mgmt.compute.models import ProximityPlacementGroup, ProximityPlacementGroupType as PPGType
-    # ProximityPlacementGroup, PPGType = cmd.get_models('ProximityPlacementGroup', 'ProximityPlacementGroupType')
     choices = CaseInsensitiveList([x.value for x in PPGType])
 
     if ppg_type and ppg_type not in choices:
@@ -4911,7 +4881,6 @@ def create_proximity_placement_group(cmd, client, proximity_placement_group_name
 
     if intent_vm_sizes:
         from azure.mgmt.compute.models import ProximityPlacementGroupPropertiesIntent as Intent
-        # Intent = cmd.get_models('ProximityPlacementGroupPropertiesIntent')
         intent = Intent(vm_sizes=intent_vm_sizes)
         ppg_params.intent = intent
 
@@ -4922,7 +4891,6 @@ def create_proximity_placement_group(cmd, client, proximity_placement_group_name
 def update_ppg(cmd, instance, intent_vm_sizes=None):
     if intent_vm_sizes:
         from azure.mgmt.compute.models import ProximityPlacementGroupPropertiesIntent as Intent
-        # Intent = cmd.get_models('ProximityPlacementGroupPropertiesIntent')
         intent = Intent(vm_sizes=intent_vm_sizes)
         instance.intent = intent
     return instance
@@ -4939,7 +4907,6 @@ def list_proximity_placement_groups(client, resource_group_name=None):
 def create_dedicated_host_group(cmd, client, host_group_name, resource_group_name, platform_fault_domain_count,
                                 automatic_placement=None, location=None, zones=None, tags=None, ultra_ssd_enabled=None):
     from azure.mgmt.compute.models import DedicatedHostGroup
-    # DedicatedHostGroup = cmd.get_models('DedicatedHostGroup')
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
     host_group_params = DedicatedHostGroup(location=location, platform_fault_domain_count=platform_fault_domain_count,
@@ -4948,18 +4915,17 @@ def create_dedicated_host_group(cmd, client, host_group_name, resource_group_nam
         additionalCapabilities = {'ultraSSDEnabled': ultra_ssd_enabled}
         host_group_params.additional_capabilities = additionalCapabilities
 
-    return client.create_or_update(resource_group_name, host_group_name, parameters=host_group_params)
+    return client.create_or_update(resource_group_name=resource_group_name, host_group_name=host_group_name,
+                                   parameters=host_group_params)
 
 
 def get_dedicated_host_group_instance_view(cmd, client, host_group_name, resource_group_name):
-    return client.get(resource_group_name, host_group_name, expand="instanceView")
+    return client.get(resource_group_name=resource_group_name, host_group_name=host_group_name, expand="instanceView")
 
 
 def create_dedicated_host(cmd, client, host_group_name, host_name, resource_group_name, sku, platform_fault_domain=None,
                           auto_replace_on_failure=None, license_type=None, location=None, tags=None):
     from azure.mgmt.compute.models import DedicatedHost as DedicatedHostType, Sku as SkuType
-    # DedicatedHostType = cmd.get_models('DedicatedHost')
-    # SkuType = cmd.get_models('Sku')
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     sku = SkuType(name=sku)
@@ -4968,11 +4934,13 @@ def create_dedicated_host(cmd, client, host_group_name, host_name, resource_grou
                                     auto_replace_on_failure=auto_replace_on_failure, license_type=license_type,
                                     sku=sku, tags=tags)
 
-    return client.begin_create_or_update(resource_group_name, host_group_name, host_name, parameters=host_params)
+    return client.begin_create_or_update(resource_group_name=resource_group_name, host_group_name=host_group_name,
+                                         host_name=host_name, parameters=host_params)
 
 
 def get_dedicated_host_instance_view(cmd, client, host_group_name, host_name, resource_group_name):
-    return client.get(resource_group_name, host_group_name, host_name, expand="instanceView")
+    return client.get(resource_group_name=resource_group_name, host_group_name=host_group_name,
+                      host_name=host_name, expand="instanceView")
 
 # endregion
 
@@ -5096,8 +5064,6 @@ def create_disk_encryption_set(
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     from azure.mgmt.compute.models import DiskEncryptionSet, EncryptionSetIdentity, KeyForDiskEncryptionSet, SourceVault
-    # DiskEncryptionSet, EncryptionSetIdentity, KeyForDiskEncryptionSet, SourceVault = cmd.get_models(
-    #     'DiskEncryptionSet', 'EncryptionSetIdentity', 'KeyForDiskEncryptionSet', 'SourceVault')
 
     identity_type, user_assigned_identities = \
         _build_identities_info_from_system_user_assigned(cmd, mi_system_assigned, mi_user_assigned)
@@ -5121,13 +5087,13 @@ def create_disk_encryption_set(
     if federated_client_id is not None:
         disk_encryption_set.federated_client_id = federated_client_id
 
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, disk_encryption_set_name,
-                       disk_encryption_set)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name=resource_group_name,
+                       disk_encryption_set_name=disk_encryption_set_name, disk_encryption_set=disk_encryption_set)
 
 
 def list_disk_encryption_sets(cmd, client, resource_group_name=None):
     if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
+        return client.list_by_resource_group(resource_group_name=resource_group_name)
     return client.list()
 
 
@@ -5157,17 +5123,15 @@ def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_u
 def assign_disk_encryption_set_identity(cmd, client, resource_group_name, disk_encryption_set_name,
                                         mi_system_assigned=None, mi_user_assigned=None):
     from azure.mgmt.compute.models import DiskEncryptionSetUpdate, EncryptionSetIdentity
-    # DiskEncryptionSetUpdate, EncryptionSetIdentity = cmd.get_models('DiskEncryptionSetUpdate', 'EncryptionSetIdentity',
-    #                                                                 operation_group='disk_encryption_sets')
     from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
     client = _compute_client_factory(cmd.cli_ctx)
 
     def getter():
-        return client.disk_encryption_sets.get(resource_group_name, disk_encryption_set_name)
+        return client.disk_encryption_sets.get(resource_group_name=resource_group_name,
+                                               disk_encryption_set_name=disk_encryption_set_name)
 
     def setter(disk_encryption_set, mi_system_assigned=mi_system_assigned, mi_user_assigned=mi_user_assigned):
         from azure.mgmt.compute.models import DiskEncryptionSetIdentityType as IdentityType
-        # IdentityType = cmd.get_models('DiskEncryptionSetIdentityType', operation_group='disk_encryption_sets')
         existing_system_identity = False
         existing_user_identities = set()
         if disk_encryption_set.identity is not None:
@@ -5199,16 +5163,17 @@ def assign_disk_encryption_set_identity(cmd, client, resource_group_name, disk_e
 def remove_disk_encryption_set_identity(cmd, client, resource_group_name, disk_encryption_set_name,
                                         mi_system_assigned=None, mi_user_assigned=None):
     from azure.mgmt.compute.models import DiskEncryptionSetUpdate
-    # DiskEncryptionSetUpdate = cmd.get_models('DiskEncryptionSetUpdate', operation_group='disk_encryption_sets')
     client = _compute_client_factory(cmd.cli_ctx)
 
     def getter(cmd, resource_group_name, disk_encryption_set_name):
-        return client.disk_encryption_sets.get(resource_group_name, disk_encryption_set_name)
+        return client.disk_encryption_sets.get(resource_group_name=resource_group_name,
+                                               disk_encryption_set_name=disk_encryption_set_name)
 
     def setter(resource_group_name, disk_encryption_set_name, disk_encryption_set):
         disk_encryption_set_update = DiskEncryptionSetUpdate(identity=disk_encryption_set.identity)
-        return client.disk_encryption_sets.begin_update(resource_group_name, disk_encryption_set_name,
-                                                        disk_encryption_set_update)
+        return client.disk_encryption_sets.begin_update(resource_group_name=resource_group_name,
+                                                        disk_encryption_set_name=disk_encryption_set_name,
+                                                        disk_encryption_set=disk_encryption_set_update)
 
     return _remove_disk_encryption_set_identities(cmd, resource_group_name, disk_encryption_set_name,
                                                   mi_system_assigned, mi_user_assigned, getter, setter)
@@ -5216,7 +5181,8 @@ def remove_disk_encryption_set_identity(cmd, client, resource_group_name, disk_e
 
 def show_disk_encryption_set_identity(cmd, resource_group_name, disk_encryption_set_name):
     client = _compute_client_factory(cmd.cli_ctx)
-    return client.disk_encryption_sets.get(resource_group_name, disk_encryption_set_name).identity
+    return client.disk_encryption_sets.get(resource_group_name=resource_group_name,
+                                           disk_encryption_set_name=disk_encryption_set_name).identity
 
 # endregion
 
@@ -5224,19 +5190,17 @@ def show_disk_encryption_set_identity(cmd, resource_group_name, disk_encryption_
 # region Disk Access
 def create_disk_access(cmd, client, resource_group_name, disk_access_name, location=None, tags=None, no_wait=False):
     from azure.mgmt.compute.models import DiskAccess
-    # DiskAccess = cmd.get_models('DiskAccess')
     disk_access = DiskAccess(location=location, tags=tags)
-    return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       resource_group_name, disk_access_name, disk_access)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name=resource_group_name,
+                       disk_access_name=disk_access_name, disk_access=disk_access)
 
 
 def set_disk_access(cmd, client, parameters, resource_group_name, disk_access_name, tags=None, no_wait=False):
     location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     from azure.mgmt.compute.models import DiskAccess
-    # DiskAccess = cmd.get_models('DiskAccess')
     disk_access = DiskAccess(location=location, tags=tags)
-    return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       resource_group_name, disk_access_name, disk_access)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name=resource_group_name,
+                       disk_access_name=disk_access_name, disk_access=disk_access)
 
 # endregion
 
@@ -5245,7 +5209,6 @@ def set_disk_access(cmd, client, parameters, resource_group_name, disk_access_na
 def install_vm_patches(cmd, client, resource_group_name, vm_name, maximum_duration, reboot_setting, classifications_to_include_win=None, classifications_to_include_linux=None, kb_numbers_to_include=None, kb_numbers_to_exclude=None,
                        exclude_kbs_requiring_reboot=None, package_name_masks_to_include=None, package_name_masks_to_exclude=None, no_wait=False):
     from azure.mgmt.compute.models import VirtualMachineInstallPatchesParameters as VMInstallPatchesParameters, WindowsParameters, LinuxParameters
-    # VMInstallPatchesParameters, WindowsParameters, LinuxParameters = cmd.get_models('VirtualMachineInstallPatchesParameters', 'WindowsParameters', 'LinuxParameters')
     windows_parameters = WindowsParameters(classifications_to_include=classifications_to_include_win, kb_numbers_to_inclunde=kb_numbers_to_include, kb_numbers_to_exclude=kb_numbers_to_exclude, exclude_kbs_requirig_reboot=exclude_kbs_requiring_reboot)
     linux_parameters = LinuxParameters(classifications_to_include=classifications_to_include_linux, package_name_masks_to_include=package_name_masks_to_include, package_name_masks_to_exclude=package_name_masks_to_exclude)
     install_patches_input = VMInstallPatchesParameters(maximum_duration=maximum_duration, reboot_setting=reboot_setting, linux_parameters=linux_parameters, windows_parameters=windows_parameters)
@@ -5302,8 +5265,6 @@ def list_generator(pages, num_results=50):
 def sig_share_update(cmd, client, resource_group_name, gallery_name, subscription_ids=None, tenant_ids=None,
                      op_type=None):
     from azure.mgmt.compute.models import SharingProfileGroup, SharingUpdate, SharingProfileGroupTypes
-    # SharingProfileGroup, SharingUpdate, SharingProfileGroupTypes = cmd.get_models(
-    #     'SharingProfileGroup', 'SharingUpdate', 'SharingProfileGroupTypes', operation_group='shared_galleries')
     if op_type != 'EnableCommunity':
         if subscription_ids is None and tenant_ids is None:
             raise RequiredArgumentMissingError('At least one of subscription ids or tenant ids must be provided')
@@ -5320,8 +5281,6 @@ def sig_share_update(cmd, client, resource_group_name, gallery_name, subscriptio
 
 def sig_share_reset(cmd, client, resource_group_name, gallery_name):
     from azure.mgmt.compute.models import SharingUpdate, SharingUpdateOperationTypes
-    # SharingUpdate, SharingUpdateOperationTypes = cmd.get_models('SharingUpdate', 'SharingUpdateOperationTypes',
-    #                                                             operation_group='shared_galleries')
     sharing_update = SharingUpdate(operation_type=SharingUpdateOperationTypes.RESET)
     return client.begin_update(resource_group_name=resource_group_name,
                                gallery_name=gallery_name,
@@ -5492,13 +5451,13 @@ def get_gallery_instance(cmd, resource_group_name, gallery_name):
     from ._client_factory import _compute_client_factory
     client = _compute_client_factory(cmd.cli_ctx)
     from azure.mgmt.compute.models import SelectPermissions
-    return client.galleries.get(resource_group_name, gallery_name, select=SelectPermissions.PERMISSIONS)
+    return client.galleries.get(resource_group_name=resource_group_name, gallery_name=gallery_name,
+                                select=SelectPermissions.PERMISSIONS)
 
 
 def create_capacity_reservation_group(cmd, client, resource_group_name, capacity_reservation_group_name, location=None,
                                       tags=None, zones=None):
     from azure.mgmt.compute.models import CapacityReservationGroup
-    # CapacityReservationGroup = cmd.get_models('CapacityReservationGroup')
     capacity_reservation_group = CapacityReservationGroup(location=location, tags=tags, zones=zones)
     return client.create_or_update(resource_group_name=resource_group_name,
                                    capacity_reservation_group_name=capacity_reservation_group_name,
@@ -5507,7 +5466,6 @@ def create_capacity_reservation_group(cmd, client, resource_group_name, capacity
 
 def update_capacity_reservation_group(cmd, client, resource_group_name, capacity_reservation_group_name, tags=None):
     from azure.mgmt.compute.models import CapacityReservationGroupUpdate
-    # CapacityReservationGroupUpdate = cmd.get_models('CapacityReservationGroupUpdate')
     capacity_reservation_group = CapacityReservationGroupUpdate(tags=tags)
     return client.update(resource_group_name=resource_group_name,
                          capacity_reservation_group_name=capacity_reservation_group_name,
@@ -5544,9 +5502,8 @@ def create_capacity_reservation(cmd, client, resource_group_name, capacity_reser
                                 capacity_reservation_name, location=None, sku_name=None, capacity=None,
                                 zone=None, tags=None):
     from azure.mgmt.compute.models import Sku, CapacityReservation
-    # Sku = cmd.get_models('Sku')
+
     sku = Sku(name=sku_name, capacity=capacity)
-    # CapacityReservation = cmd.get_models('CapacityReservation')
     capacity_reservation = CapacityReservation(location=location, sku=sku, zones=zone, tags=tags)
     return client.begin_create_or_update(resource_group_name=resource_group_name,
                                          capacity_reservation_group_name=capacity_reservation_group_name,
@@ -5557,7 +5514,6 @@ def create_capacity_reservation(cmd, client, resource_group_name, capacity_reser
 def update_capacity_reservation(cmd, client, resource_group_name, capacity_reservation_group_name,
                                 capacity_reservation_name, capacity=None, tags=None):
     from azure.mgmt.compute.models import Sku
-    # Sku = cmd.get_models('Sku')
     sku = Sku(capacity=capacity)
 
     # If only the data of SKU capacity is updated, the original tags will be cleared.
@@ -5569,7 +5525,6 @@ def update_capacity_reservation(cmd, client, resource_group_name, capacity_reser
         tags = capacity_reservation.tags
 
     from azure.mgmt.compute.models import CapacityReservationUpdate
-    # CapacityReservationUpdate = cmd.get_models('CapacityReservationUpdate')
     capacity_reservation_update = CapacityReservationUpdate(sku=sku, tags=tags)
     return client.begin_update(resource_group_name=resource_group_name,
                                capacity_reservation_group_name=capacity_reservation_group_name,
@@ -5590,7 +5545,6 @@ def show_capacity_reservation(client, resource_group_name, capacity_reservation_
 def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     from azure.mgmt.compute.models import ApplicationProfile, VMGalleryApplication
-    # ApplicationProfile, VMGalleryApplication = cmd.get_models('ApplicationProfile', 'VMGalleryApplication')
     try:
         vm = client.virtual_machines.get(resource_group_name=resource_group_name, vm_name=vm_name)
     except ResourceNotFoundError:
@@ -5633,9 +5587,8 @@ def list_vm_applications(cmd, vm_name, resource_group_name):
 def set_vmss_applications(cmd, vmss_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     from azure.mgmt.compute.models import ApplicationProfile, VMGalleryApplication
-    # ApplicationProfile, VMGalleryApplication = cmd.get_models('ApplicationProfile', 'VMGalleryApplication')
     try:
-        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
     except ResourceNotFoundError:
         raise ResourceNotFoundError('Could not find vmss {}.'.format(vmss_name))
 
@@ -5659,13 +5612,14 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
         for treat_as_failure in treat_deployment_as_failure:
             vmss.virtual_machine_profile.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = (treat_as_failure.lower() == 'true')
             index += 1
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_update, resource_group_name, vmss_name, vmss)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_update, resource_group_name=resource_group_name,
+                       vm_scale_set_name=vmss_name, parameters=vmss)
 
 
 def list_vmss_applications(cmd, vmss_name, resource_group_name):
     client = _compute_client_factory(cmd.cli_ctx)
     try:
-        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
     except ResourceNotFoundError:
         raise ResourceNotFoundError('Could not find vmss {}.'.format(vmss_name))
     return vmss.virtual_machine_profile.application_profile
