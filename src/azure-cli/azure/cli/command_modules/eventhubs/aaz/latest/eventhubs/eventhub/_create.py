@@ -19,9 +19,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-10-01-preview",
+        "version": "2023-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}", "2022-10-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}", "2023-01-01-preview"],
         ]
     }
 
@@ -55,6 +55,7 @@ class Create(AAZCommand):
             help="The Namespace name",
             required=True,
             fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -97,6 +98,11 @@ class Create(AAZCommand):
             help="Enumerates the possible values for the encoding format of capture description. Note: 'AvroDeflate' will be deprecated in New API Version",
             enum={"Avro": "Avro", "AvroDeflate": "AvroDeflate"},
         )
+        _args_schema.identity = AAZObjectArg(
+            options=["--identity"],
+            arg_group="CaptureDescription",
+            help="Properties describing the Azure Active Directory Identity to be used to to be used to capture events to Storage Accounts or Azure Data Lake. ",
+        )
         _args_schema.capture_interval = AAZIntArg(
             options=["--capture-interval"],
             arg_group="CaptureDescription",
@@ -111,6 +117,17 @@ class Create(AAZCommand):
             options=["--skip-empty-archives"],
             arg_group="CaptureDescription",
             help="A value that indicates whether to Skip Empty Archives",
+        )
+
+        identity = cls._args_schema.identity
+        identity.type = AAZStrArg(
+            options=["type"],
+            help="Type of Azure Active Directory Managed Identity.",
+            enum={"SystemAssigned": "SystemAssigned", "UserAssigned": "UserAssigned"},
+        )
+        identity.user_assigned_identity = AAZStrArg(
+            options=["user-assigned-identity"],
+            help="ARM ID of Managed User Identity. This property is required is the type is UserAssignedIdentity. If type is SystemAssigned, then the System Assigned Identity Associated with the namespace will be used.",
         )
 
         # define Arg Group "Properties"
@@ -229,7 +246,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01-preview",
+                    "api-version", "2023-01-01-preview",
                     required=True,
                 ),
             }
@@ -269,6 +286,7 @@ class Create(AAZCommand):
                 capture_description.set_prop("destination", AAZObjectType)
                 capture_description.set_prop("enabled", AAZBoolType, ".enable_capture")
                 capture_description.set_prop("encoding", AAZStrType, ".encoding")
+                capture_description.set_prop("identity", AAZObjectType, ".identity")
                 capture_description.set_prop("intervalInSeconds", AAZIntType, ".capture_interval")
                 capture_description.set_prop("sizeLimitInBytes", AAZIntType, ".capture_size_limit")
                 capture_description.set_prop("skipEmptyArchives", AAZBoolType, ".skip_empty_archives")
@@ -283,6 +301,11 @@ class Create(AAZCommand):
                 properties.set_prop("archiveNameFormat", AAZStrType, ".archive_name_format")
                 properties.set_prop("blobContainer", AAZStrType, ".blob_container")
                 properties.set_prop("storageAccountResourceId", AAZStrType, ".storage_account")
+
+            identity = _builder.get(".properties.captureDescription.identity")
+            if identity is not None:
+                identity.set_prop("type", AAZStrType, ".type")
+                identity.set_prop("userAssignedIdentity", AAZStrType, ".user_assigned_identity")
 
             retention_description = _builder.get(".properties.retentionDescription")
             if retention_description is not None:
@@ -361,6 +384,7 @@ class Create(AAZCommand):
             capture_description.destination = AAZObjectType()
             capture_description.enabled = AAZBoolType()
             capture_description.encoding = AAZStrType()
+            capture_description.identity = AAZObjectType()
             capture_description.interval_in_seconds = AAZIntType(
                 serialized_name="intervalInSeconds",
             )
@@ -395,6 +419,12 @@ class Create(AAZCommand):
             )
             properties.storage_account_resource_id = AAZStrType(
                 serialized_name="storageAccountResourceId",
+            )
+
+            identity = cls._schema_on_200.properties.capture_description.identity
+            identity.type = AAZStrType()
+            identity.user_assigned_identity = AAZStrType(
+                serialized_name="userAssignedIdentity",
             )
 
             partition_ids = cls._schema_on_200.properties.partition_ids

@@ -12,11 +12,12 @@ from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.eventhub import Up
 def cli_eventhub_create(cmd, resource_group_name, namespace_name, event_hub_name,
                         partition_count=None, status=None, retention_time_in_hours=None, cleanup_policy=None, tombstone_retention_time_in_hours=None,
                         enable_capture=None, skip_empty_archives=None, capture_interval=None, capture_size_limit=None, destination_name=None,
-                        blob_container=None, archive_name_format=None, storage_account=None):
+                        blob_container=None, archive_name_format=None, storage_account=None,
+                        mi_user_assigned=None, mi_system_assigned=False):
 
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.eventhub import Create
     command_arg_dict = {}
-
+    identity_type = "None"
     if cleanup_policy:
         command_arg_dict.update({
             "cleanup_policy": cleanup_policy
@@ -49,6 +50,28 @@ def cli_eventhub_create(cmd, resource_group_name, namespace_name, event_hub_name
             "storage_account": storage_account,
             "skip_empty_archives": skip_empty_archives
         })
+        if mi_system_assigned:
+            identity_type = SYSTEM
+
+        if mi_user_assigned:
+            if mi_system_assigned:
+                identity_type = SYSTEMUSER
+            else:
+                identity_type = USER
+            for val in mi_user_assigned:
+                user_assigned_identity[val] = {}
+            command_arg_dict.update({
+                "identity": {
+                    "type": identity_type,
+                    "user_assigned_identity": user_assigned_identity
+                }})
+        else:
+            command_arg_dict.update({
+                "identity": {
+                    "type": identity_type,
+                    "user_assigned_identity": None
+                }
+            })
     command_arg_dict.update({
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,

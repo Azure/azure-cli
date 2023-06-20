@@ -19,9 +19,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-10-01-preview",
+        "version": "2023-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs", "2022-10-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs", "2023-01-01-preview"],
         ]
     }
 
@@ -45,6 +45,7 @@ class List(AAZCommand):
             help="The Namespace name",
             required=True,
             fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -142,7 +143,7 @@ class List(AAZCommand):
                     "$top", self.ctx.args.top,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01-preview",
+                    "api-version", "2023-01-01-preview",
                     required=True,
                 ),
             }
@@ -235,6 +236,7 @@ class List(AAZCommand):
             capture_description.destination = AAZObjectType()
             capture_description.enabled = AAZBoolType()
             capture_description.encoding = AAZStrType()
+            capture_description.identity = AAZObjectType()
             capture_description.interval_in_seconds = AAZIntType(
                 serialized_name="intervalInSeconds",
             )
@@ -269,6 +271,12 @@ class List(AAZCommand):
             )
             properties.storage_account_resource_id = AAZStrType(
                 serialized_name="storageAccountResourceId",
+            )
+
+            identity = cls._schema_on_200.value.Element.properties.capture_description.identity
+            identity.type = AAZStrType()
+            identity.user_assigned_identity = AAZStrType(
+                serialized_name="userAssignedIdentity",
             )
 
             partition_ids = cls._schema_on_200.value.Element.properties.partition_ids
