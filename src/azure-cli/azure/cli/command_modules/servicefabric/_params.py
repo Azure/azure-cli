@@ -286,10 +286,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('description', help='network security rule description')
         c.argument('priority', help='integer that shows priority for rule')
         c.argument('protocol', help='enter one of the following: tcp, htpps, http, udp, icmp, ah, esp, any')
-        c.argument('sourcePortRanges', nargs='+', help='string of space separated source port ranges')
-        c.argument('destinationPortRanges', nargs='+', help='string of space separated destination port ranges')
-        c.argument('sourceAddressPrefixes', nargs='+', help='string of space separated source address prefixes')
-        c.argument('destinationAddressPrefixes', nargs='+', help='string of space separated destination address prefixes')
+        c.argument('source_port_ranges', nargs='+', help='string of space separated source port ranges')
+        c.argument('destination_port_ranges', nargs='+', help='string of space separated destination port ranges')
+        c.argument('source_address_prefixes', nargs='+', help='string of space separated source address prefixes')
+        c.argument('destination_address_prefixes', nargs='+', help='string of space separated destination address prefixes')
 
     # managed node type
 

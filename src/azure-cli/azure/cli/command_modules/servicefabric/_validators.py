@@ -124,7 +124,7 @@ def validate_add_network_security_rule(cmd, namespace):
     cluster = _safe_get_resource(client.managed_clusters.get,
                                  (namespace.resource_group_name, namespace.cluster_name))
 
-    if cluster.cluster_state != 'Ready':
+    if cluster is None or cluster.cluster_state != 'Ready':
         raise ValidationError("cluster state is invalid for this operation")
 
 def validate_create_managed_service(namespace):

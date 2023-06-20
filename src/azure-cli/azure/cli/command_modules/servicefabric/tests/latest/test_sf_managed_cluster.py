@@ -60,10 +60,10 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             'direction': 'inbound',
             'protocol': 'any',
             'priority': 1200,
-            'sourcePortRanges': '1-1000 1122-65535',
-            'destinationPortRanges': '1-1900 2200-65535',
-            'sourceAddressPrefixes': '167.220.242.0/27 167.220.0.0/23 131.107.132.16/28 167.220.81.128/26',
-            'destinationAddressPrefixes': '194.69.104.0/25 194.69.119.64/26 167.220.249.128/26 255.255.255.255/32'
+            'source_port_ranges': '1-1000 1122-65535',
+            'destination_port_ranges': '1-1900 2200-65535',
+            'source_address_prefixes': '167.220.242.0/27 167.220.0.0/23 131.107.132.16/28 167.220.81.128/26',
+            'destination_address_prefixes': '194.69.104.0/25 194.69.119.64/26 167.220.249.128/26 255.255.255.255/32'
         })
         
         cluster = self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --tags {tags}',
@@ -74,8 +74,9 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
                  checks=[self.check('provisioningState', 'Succeeded')])
 
         self.cmd('az sf managed-cluster network-security-rule add -g {rg} -c {cluster_name} '
-                '--name {name} --access {access} --description {description} --direction {direction} --protocol {protocol} --priority {priority} --sourcePortRanges {sourcePortRanges} --destinationPortRanges {destinationPortRanges}'
-                ' --sourceAddressPrefix {sourceAddressPrefixes} --destinationAddressPrefix {destinationAddressPrefixes}')
+                '--name {name} --access {access} --description {description} --direction {direction} --protocol {protocol} --priority {priority} --source_port_ranges {source_port_ranges} --destination_port_ranges {destination_port_ranges}'
+                ' --source_address_prefixes {source_address_prefixes} --destination_address_prefixes {destination_address_prefixes}',
+                checks=[self.check('provisioningState', 'Succeeded')])
 
     @ResourceGroupPreparer()
     def test_node_type_operation(self):

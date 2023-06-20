@@ -218,10 +218,10 @@ def add_network_security_rule(cmd,
                               direction=None,
                               protocol=None,
                               priority=None,
-                              sourcePortRanges=None,
-                              destinationPortRanges=None,
-                              destinationAddressPrefixes=None,
-                              sourceAddressPrefixes=None):
+                              source_port_ranges=None,
+                              destination_port_ranges=None,
+                              destination_address_prefixes=None,
+                              source_address_prefixes=None):
     try:
         cluster = client.managed_clusters.get(resource_group_name, cluster_name)
 
@@ -234,10 +234,10 @@ def add_network_security_rule(cmd,
                                      direction=direction,
                                      protocol= '*' if protocol == 'any' else protocol,
                                      priority=priority,
-                                     source_port_ranges=sourcePortRanges,
-                                     destination_port_ranges=destinationPortRanges,
-                                     destination_address_prefixes=destinationAddressPrefixes,
-                                     source_address_prefixes=sourceAddressPrefixes)
+                                     source_port_ranges=source_port_ranges,
+                                     destination_port_ranges=destination_port_ranges,
+                                     destination_address_prefixes=destination_address_prefixes,
+                                     source_address_prefixes=source_address_prefixes)
 
         cluster.network_security_rules.append(newNetworkSecurityRule)
 
