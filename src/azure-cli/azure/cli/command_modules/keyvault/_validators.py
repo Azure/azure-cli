@@ -506,14 +506,20 @@ def _get_base_url_type(cli_ctx, service):
 
     def base_url_type(name):
         if service == 'vault':
-            client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
-            for vault in client.list():
-                if vault.name.lower() == name.lower():
-                    from msrestazure.tools import parse_resource_id
-                    id_comps = parse_resource_id(vault.id)
-                    vault = client.get(resource_group_name=id_comps['resource_group'], vault_name=vault.name)
-                    logger.warning(f"Get vault uri from vault properties {vault.properties}.")
-                    return vault.properties.vault_uri
+            filter = "resourceType eq 'Microsoft.KeyVault/vaults' and name eq '{}'".format(name)
+            vaults = []
+            try:
+                resource_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).resources
+                vaults = list(resource_client.list(filter=filter))
+            except Exception as ex:
+                logger.debug(f"Failed to get vault with filter {filter}: {ex}")
+                return 'https://{}{}'.format(name, suffix)
+
+            if vaults:
+                vault_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
+                vault = vault_client.get(resource_group_name=vaults[0].resource_group, vault_name=name)
+                logger.warning(f"Get vault uri from vault properties {vault.properties}.")
+                return vault.properties.vault_uri
         return 'https://{}{}'.format(name, suffix)
 
     return base_url_type
