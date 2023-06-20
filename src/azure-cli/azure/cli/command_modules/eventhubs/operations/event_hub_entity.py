@@ -17,7 +17,6 @@ def cli_eventhub_create(cmd, resource_group_name, namespace_name, event_hub_name
 
     from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.eventhub import Create
     command_arg_dict = {}
-    identity_type = "None"
     if cleanup_policy:
         command_arg_dict.update({
             "cleanup_policy": cleanup_policy
@@ -50,6 +49,7 @@ def cli_eventhub_create(cmd, resource_group_name, namespace_name, event_hub_name
             "storage_account": storage_account,
             "skip_empty_archives": skip_empty_archives
         })
+        identity_type = "None"
         if mi_system_assigned:
             identity_type = SYSTEM
 
