@@ -61,7 +61,7 @@ class Create(AAZCommand):
             required=True,
         )
         _args_schema.zone_name = AAZStrArg(
-            options=["--zone-name"],
+            options=["-z", "--zone-name"],
             help="The name of the DNS zone (without a terminating dot).",
             required=True,
         )
@@ -187,17 +187,23 @@ class Create(AAZCommand):
             options=["algorithm"],
             help="The security algorithm type represents the standard security algorithm number of the DNSKEY Resource Record. See: https://www.iana.org/assignments/dns-sec-alg-numbers/dns-sec-alg-numbers.xhtml",
         )
-        _element.digest_algorithm_type = AAZIntArg(
-            options=["digest-algorithm-type"],
-            help="The digest algorithm type represents the standard digest algorithm number used to construct the digest. See: https://www.iana.org/assignments/ds-rr-types/ds-rr-types.xhtml",
-        )
-        _element.digest_value = AAZStrArg(
-            options=["digest-value"],
-            help="The digest value is a cryptographic hash value of the referenced DNSKEY Resource Record.",
+        _element.digest = AAZObjectArg(
+            options=["digest"],
+            help="The digest entity.",
         )
         _element.key_tag = AAZIntArg(
             options=["key-tag"],
             help="The key tag value is used to determine which DNSKEY Resource Record is used for signature verification.",
+        )
+
+        digest = cls._args_schema.ds_records.Element.digest
+        digest.algorithm_type = AAZIntArg(
+            options=["algorithm-type"],
+            help="The digest algorithm type represents the standard digest algorithm number used to construct the digest. See: https://www.iana.org/assignments/ds-rr-types/ds-rr-types.xhtml",
+        )
+        digest.value = AAZStrArg(
+            options=["value"],
+            help="The digest value is a cryptographic hash value of the referenced DNSKEY Resource Record.",
         )
 
         mx_records = cls._args_schema.mx_records
@@ -524,13 +530,13 @@ class Create(AAZCommand):
             _elements = _builder.get(".properties.DSRecords[]")
             if _elements is not None:
                 _elements.set_prop("algorithm", AAZIntType, ".algorithm")
-                _elements.set_prop("digest", AAZObjectType)
+                _elements.set_prop("digest", AAZObjectType, ".digest")
                 _elements.set_prop("keyTag", AAZIntType, ".key_tag")
 
             digest = _builder.get(".properties.DSRecords[].digest")
             if digest is not None:
-                digest.set_prop("algorithmType", AAZIntType, ".digest_algorithm_type")
-                digest.set_prop("value", AAZStrType, ".digest_value")
+                digest.set_prop("algorithmType", AAZIntType, ".algorithm_type")
+                digest.set_prop("value", AAZStrType, ".value")
 
             mx_records = _builder.get(".properties.MXRecords")
             if mx_records is not None:

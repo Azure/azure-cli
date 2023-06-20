@@ -280,7 +280,7 @@ def load_arguments(self, _):
                    options_list='--group-name',
                    help='The managed rule group for exclusion.')
         c.argument('rule_ids', nargs='+', help='List of rules that will be disabled. If provided, --group-name must be provided too.')
-    # region
+    # endregion
 
     # region DDoS Protection Plans
     with self.argument_context('network ddos-protection') as c:
@@ -312,11 +312,13 @@ def load_arguments(self, _):
                         'Number of private DNS zones with virtual network auto-registration enabled is 1. '
                         'If you need to increase this limit, please contact Azure Support: '
                         'https://docs.microsoft.com/en-us/azure/azure-subscription-service-limits',
+                    deprecate_info=c.deprecate(),
                    validator=get_vnet_validator('registration_vnets'))
         c.argument('resolution_vnets',
                    arg_group='Private Zone',
                    nargs='+',
                    help='Space-separated names or IDs of virtual networks that resolve records in this DNS zone.',
+                   deprecate_info=c.deprecate(),
                    validator=get_vnet_validator('resolution_vnets'))
 
     with self.argument_context('network dns zone import') as c:

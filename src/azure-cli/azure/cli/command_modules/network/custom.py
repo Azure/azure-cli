@@ -61,7 +61,11 @@ from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condit
 from .aaz.latest.network.application_gateway.waf_policy.policy_setting import Update as _WAFPolicySettingUpdate
 from .aaz.latest.network.custom_ip.prefix import Update as _CustomIpPrefixUpdate
 from .aaz.latest.network.dns.record_set import Create as _DNSRecordSetCreate, Delete as _DNSRecordSetDelete, \
-    ListByType as _DNSRecordSetListByType, Show as _DNSRecordSetShow, Update as _DNSRecordSetUpdate
+    ListByType as _DNSRecordSetListByType, Show as _DNSRecordSetShow, Update as _DNSRecordSetUpdate, \
+    List as _DNSRecordSetListByZone
+from .aaz.latest.network.dns.zone import Create as _DNSZoneCreate, Delete as _DNSZoneDelete, \
+    ListByRg as _DNSZoneListByRg, Show as _DNSZoneShow, Update as _DNSZoneUpdate, ListBySub as _DNSZoneListBySub
+from .aaz.latest.network.dns import ListReferences as _DNSListReferences
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
 from .aaz.latest.network.express_route.gateway import Create as _ExpressRouteGatewayCreate, \
     Update as _ExpressRouteGatewayUpdate
@@ -2383,6 +2387,23 @@ def _convert_to_snake_case(element):
     return element
 
 
+def get_by_target_resources(cmd, target_resources):
+    target_resources_dict = []
+    for target_resource in target_resources:
+        target_resources_dict.append({"id": target_resource.id})
+
+    return _DNSListReferences(cli_ctx=cmd.cli_ctx)(command_args={
+        "target_resources": target_resources_dict,
+    })
+
+
+def show_dns_zone(cmd, resource_group_name, zone_name):
+    return _DNSZoneShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "zone_name": zone_name        
+    })
+
+
 def add_dns_delegation(cmd, child_zone, parent_zone, child_rg, child_zone_name):
     """
      :param child_zone: the zone object corresponding to the child that is created.
@@ -2406,7 +2427,7 @@ def add_dns_delegation(cmd, child_zone, parent_zone, child_rg, child_zone_name):
     if all([parent_zone_name, parent_rg, child_zone_name, child_zone]) and child_zone_name.endswith(parent_zone_name):
         record_set_name = child_zone_name.replace('.' + parent_zone_name, '')
         try:
-            for dname in child_zone.name_servers:
+            for dname in child_zone["nameServers"]:
                 add_dns_ns_record(cmd, parent_rg, parent_zone_name, record_set_name, dname, parent_subscription_id)
             print('Delegation added successfully in \'{}\'\n'.format(parent_zone_name), file=sys.stderr)
         except HttpResponseError as ex:
@@ -2414,18 +2435,29 @@ def add_dns_delegation(cmd, child_zone, parent_zone, child_rg, child_zone_name):
             print('Could not add delegation in \'{}\'\n'.format(parent_zone_name), file=sys.stderr)
 
 
-def create_dns_zone(cmd, client, resource_group_name, zone_name, parent_zone_name=None, tags=None,
+def create_dns_zone(cmd, resource_group_name, zone_name, parent_zone_name=None, tags=None,
                     if_none_match=False, zone_type='Public', resolution_vnets=None, registration_vnets=None):
-    Zone = cmd.get_models('Zone', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    zone = Zone(location='global', tags=tags)
+        
+    resolution_vnets_dict = []
+    if resolution_vnets:
+        for resolution_vnet in resolution_vnets:
+            resolution_vnets_dict.append({"id": resolution_vnet.id})
+    
+    registration_vnets_dict = []
+    if registration_vnets:
+        for registration_vnet in registration_vnets:
+            registration_vnets_dict.append({"id": registration_vnet.id})
 
-    if hasattr(zone, 'zone_type'):
-        zone.zone_type = zone_type
-        zone.registration_virtual_networks = registration_vnets
-        zone.resolution_virtual_networks = resolution_vnets
-
-    created_zone = client.create_or_update(resource_group_name, zone_name, zone,
-                                           if_none_match='*' if if_none_match else None)
+    created_zone = _DNSZoneCreate(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "zone_name": zone_name,
+        "if_none_match": '*' if if_none_match else None,
+        "location": 'global',
+        "tags": tags,
+        "zone_type": zone_type,
+        "resolution_virtual_networks": resolution_vnets_dict,
+        "registration_virtual_networks": registration_vnets_dict
+    })
 
     if cmd.supported_api_version(min_api='2016-04-01', resource_type=ResourceType.MGMT_NETWORK_DNS) and parent_zone_name is not None:
         logger.info('Attempting to add delegation in the parent zone')
@@ -2433,31 +2465,55 @@ def create_dns_zone(cmd, client, resource_group_name, zone_name, parent_zone_nam
     return created_zone
 
 
-def update_dns_zone(instance, tags=None, zone_type=None, resolution_vnets=None, registration_vnets=None):
+def update_dns_zone(cmd, resource_group_name, zone_name, tags=None, zone_type=None, resolution_vnets=None, registration_vnets=None, if_match=None):
+
+    zone = {
+        "resource_group": resource_group_name,
+        "zone_name": zone_name,
+        "if_match": if_match,
+    }
 
     if tags is not None:
-        instance.tags = tags
+        zone["tags"] = tags
 
     if zone_type:
-        instance.zone_type = zone_type
+        zone["zone_type"] = zone_type
 
     if resolution_vnets == ['']:
-        instance.resolution_virtual_networks = None
+        zone["resolution_virtual_networks"] = None
     elif resolution_vnets:
-        instance.resolution_virtual_networks = resolution_vnets
+        resolution_vnets_dict = []
+        for resolution_vnet in resolution_vnets:
+            resolution_vnets_dict.append({"id": resolution_vnet.id})
+        zone["resolution_virtual_networks"] = resolution_vnets_dict
 
     if registration_vnets == ['']:
-        instance.registration_virtual_networks = None
+        zone["registration_virtual_networks"] = None
     elif registration_vnets:
-        instance.registration_virtual_networks = registration_vnets
-    return instance
+        registration_vnets_dict = []
+        for registration_vnet in registration_vnets:
+            registration_vnets_dict.append({"id": registration_vnet.id})
+        zone["registration_virtual_networks"] = registration_vnets_dict
+
+    return _DNSZoneUpdate(cli_ctx=cmd.cli_ctx)(command_args=zone)
 
 
 def list_dns_zones(cmd, resource_group_name=None):
-    ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS).zones
     if resource_group_name:
-        return ncf.list_by_resource_group(resource_group_name)
-    return ncf.list()
+        return _DNSZoneListByRg(cli_ctx=cmd.cli_ctx)(command_args={
+            "resource_group": resource_group_name
+        })
+    
+    return _DNSZoneListBySub(cli_ctx=cmd.cli_ctx)(command_args={})
+
+
+def delete_dns_zone(cmd, resource_group_name, zone_name, if_match=None, no_wait=False):
+    return _DNSZoneDelete(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "zone_name": zone_name,
+        "if_match": if_match,
+        "no_wait": no_wait
+    })
 
 
 def create_dns_record_set(cmd, resource_group_name, zone_name, record_set_name, record_set_type,
@@ -2481,6 +2537,24 @@ def create_dns_record_set(cmd, resource_group_name, zone_name, record_set_name, 
 
 def list_dns_record_set(cmd, resource_group_name, zone_name, record_type):
     return _DNSRecordSetListByType(cli_ctx=cmd.cli_ctx)(command_args={
+        "record_type": record_type,
+        "resource_group": resource_group_name,
+        "zone_name": zone_name
+    })
+
+
+def show_dns_record_set(cmd, resource_group_name, zone_name, record_set_name, record_type):
+    return _DNSRecordSetShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": record_set_name,
+        "record_type": record_type,
+        "resource_group": resource_group_name,
+        "zone_name": zone_name
+    })
+
+
+def delete_dns_record_set(cmd, resource_group_name, zone_name, record_set_name, record_type):
+    return _DNSRecordSetDelete(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": record_set_name,
         "record_type": record_type,
         "resource_group": resource_group_name,
         "zone_name": zone_name
@@ -2523,8 +2597,10 @@ def _type_to_property_name(key):
 def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint: disable=too-many-branches
     from time import localtime, strftime
 
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS)
-    record_sets = client.record_sets.list_by_dns_zone(resource_group_name, zone_name)
+    record_sets = _DNSRecordSetListByZone(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "zone_name": zone_name
+    })
 
     zone_obj = OrderedDict({
         '$origin': zone_name.rstrip('.') + '.',
@@ -2534,9 +2610,10 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
     })
 
     for record_set in record_sets:
-        record_type = record_set.type.rsplit('/', 1)[1].lower()
-        record_set_name = record_set.name
-        record_data = getattr(record_set, _type_to_property_name(record_type)[0], None)
+        record_set = _convert_to_snake_case(record_set)
+        record_type = record_set["type"].rsplit('/', 1)[1].lower()
+        record_set_name = record_set["name"]
+        record_data = record_set.get(_type_to_property_name(record_type)[0])
 
         if not record_data:
             record_data = []
@@ -2547,54 +2624,56 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
             zone_obj[record_set_name] = OrderedDict()
 
         for record in record_data:
-            record_obj = {'ttl': record_set.ttl}
+            record_obj = {'ttl': record_set["ttl"]}
 
             if record_type not in zone_obj[record_set_name]:
                 zone_obj[record_set_name][record_type] = []
             if record_type == 'aaaa':
-                record_obj.update({'ip': record.ipv6_address})
+                record_obj.update({'ip': record["ipv6_address"]})
             elif record_type == 'a':
-                record_obj.update({'ip': record.ipv4_address})
+                record_obj.update({'ip': record["ipv4_address"]})
             elif record_type == 'caa':
-                record_obj.update({'val': record.value, 'tag': record.tag, 'flags': record.flags})
+                record_obj.update({'val': record["value"], 'tag': record["tag"], 'flags': record["flags"]})
             elif record_type == 'cname':
-                record_obj.update({'alias': record.cname.rstrip('.') + '.'})
+                record_obj.update({'alias': record["cname"].rstrip('.') + '.'})
             elif record_type == 'ds':
-                record_obj.update({'key_tag': record.key_tag, 'algorithm': record.algorithm, 'digest_type': record.digest_algorithm_type, 'digest': record.digest_value})
+                record_obj.update({'key_tag': record["key_tag"], 'algorithm': record["algorithm"], 'digest_type': record["digest"]["algorithm_type"], 'digest': record["digest"]["value"]})
             elif record_type == 'mx':
-                record_obj.update({'preference': record.preference, 'host': record.exchange.rstrip('.') + '.'})
+                record_obj.update({'preference': record["preference"], 'host': record["exchange"].rstrip('.') + '.'})
             elif record_type == 'naptr':
-                record_obj.update({'order': record.order, 'preference': record.preference, 'flags': record.flags, 'services': record.services, 'regexp': record.regexp, 'replacement': record.replacement.rstrip('.') + '.'})
+                record_obj.update({'order': record["order"], 'preference': record["preference"], 'flags': record["flags"], 'services': record["services"], 'regexp': record["regexp"], 'replacement': record["replacement"].rstrip('.') + '.'})
             elif record_type == 'ns':
-                record_obj.update({'host': record.nsdname.rstrip('.') + '.'})
+                record_obj.update({'host': record["nsdname"].rstrip('.') + '.'})
             elif record_type == 'ptr':
-                record_obj.update({'host': record.ptrdname.rstrip('.') + '.'})
+                record_obj.update({'host': record["ptrdname"].rstrip('.') + '.'})
             elif record_type == 'soa':
                 record_obj.update({
-                    'mname': record.host.rstrip('.') + '.',
-                    'rname': record.email.rstrip('.') + '.',
-                    'serial': int(record.serial_number), 'refresh': record.refresh_time,
-                    'retry': record.retry_time, 'expire': record.expire_time,
-                    'minimum': record.minimum_ttl
+                    'mname': record["host"].rstrip('.') + '.',
+                    'rname': record["email"].rstrip('.') + '.',
+                    'serial': int(record["serial_number"]),
+                    'refresh': record["refresh_time"],
+                    'retry': record["retry_time"],
+                    'expire': record["expire_time"],
+                    'minimum': record["minimum_ttl"]
                 })
-                zone_obj['$ttl'] = record.minimum_ttl
+                zone_obj['$ttl'] = record["minimum_ttl"]
             elif record_type == 'srv':
-                record_obj.update({'priority': record.priority, 'weight': record.weight,
-                                   'port': record.port, 'target': record.target.rstrip('.') + '.'})
+                record_obj.update({'priority': record["priority"], 'weight': record["weight"],
+                                   'port': record["port"], 'target': record["target"].rstrip('.') + '.'})
             elif record_type == 'tlsa':
-                record_obj.update({'usage': record.usage, 'selector': record.selector, 'matching_type': record.matching_type, 'certificate': record.cert_association_data})
+                record_obj.update({'usage': record["usage"], 'selector': record["selector"], 'matching_type': record["matching_type"], 'certificate': record["cert_association_data"]})
             elif record_type == 'txt':
-                record_obj.update({'txt': ''.join(record.value)})
+                record_obj.update({'txt': ''.join(record["value"])})
             zone_obj[record_set_name][record_type].append(record_obj)
 
         if len(record_data) == 0:
-            record_obj = {'ttl': record_set.ttl}
+            record_obj = {'ttl': record_set["ttl"]}
 
             if record_type not in zone_obj[record_set_name]:
                 zone_obj[record_set_name][record_type] = []
             # Checking for alias record
-            if (record_type == 'a' or record_type == 'aaaa' or record_type == 'cname') and record_set.target_resource.id:
-                target_resource_id = record_set.target_resource.id
+            if (record_type == 'a' or record_type == 'aaaa' or record_type == 'cname') and record_set["target_resource"]["id"]:
+                target_resource_id = record_set["target_resource"]["id"]
                 record_obj.update({'target-resource-id': record_type.upper() + " " + target_resource_id})
                 record_type = 'alias'
                 if record_type not in zone_obj[record_set_name]:
@@ -2628,7 +2707,7 @@ def _build_record(cmd, data):
             return {"cname": data["alias"]}
         if record_type == 'ds':
             return {"key_tag": int(data["key_tag"]), "algorithm": int(data["algorithm"]),
-                    "digest_algorithm_type": int(data["digest_type"]), "digest_value": data["digest"]}
+                    "digest": {"algorithm_type": int(data["digest_type"]), "value": data["digest"]}}
         if record_type == 'mx':
             return {"preference": data["preference"], "exchange": data["host"]}
         if record_type == 'naptr':
@@ -2639,7 +2718,7 @@ def _build_record(cmd, data):
         if record_type == 'ptr':
             return {"ptrdname": data["host"]}
         if record_type == 'soa':
-            return {"host": data["host"], "email": data["email"], "serial_number": data["serial"],
+            return {"host": data["host"], "email": data["email"], "serial_number": int(data["serial"]),
                     "refresh_time": data["refresh"], "retry_time": data["retry"], "expire_time": data["expire"],
                     "minimum_ttl": data["minimum"]}
         if record_type == 'srv':
@@ -2684,7 +2763,6 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
     for record_set_name in zone_obj:
         for record_set_type in zone_obj[record_set_name]:
             record_set_obj = zone_obj[record_set_name][record_set_type]
-
             if record_set_type == 'soa':
                 origin = record_set_name.rstrip('.')
 
@@ -2702,11 +2780,13 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
                     record_set_key = '{}{}'.format(record_set_name.lower(), alias_record_type)
 
                 record = _build_record(cmd, entry)
+
                 if not record:
                     logger.warning('Cannot import %s. RecordType is not found. Skipping...', entry['delim'].lower())
                     continue
-
+                
                 record_set = record_sets.get(record_set_key, None)
+                
                 if not record_set:
 
                     # Workaround for issue #2824
@@ -2719,6 +2799,7 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
 
                     record_set = {"ttl": record_set_ttl}
                     record_sets[record_set_key] = record_set
+
                 _add_record(record_set, record, record_set_type,
                             is_list=record_set_type.lower() not in ['soa', 'cname', 'alias'])
 
@@ -2727,7 +2808,8 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
         rs_name, rs_type = key.lower().rsplit('.', 1)
         rs_name = rs_name[:-(len(origin) + 1)] if rs_name != origin else '@'
         try:
-            record_count = len(rs[_type_to_property_name(rs_type)[0]])
+            records_temp = rs[_type_to_property_name(rs_type)[0]]
+            record_count = len(records_temp) if isinstance(records_temp, list) else 1
         except (TypeError, KeyError):
             # There is some bug with `alias records` being mapped from `AZURE ALIAS A` to `ARecords`,
             # but `rs` does not contain `a_records`.  We could fix it, but this is just logging, so
@@ -2736,34 +2818,54 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
         total_records += record_count
     cum_records = 0
 
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS)
     print('== BEGINNING ZONE IMPORT: {} ==\n'.format(zone_name), file=sys.stderr)
 
-    Zone = cmd.get_models('Zone', resource_type=ResourceType.MGMT_NETWORK_DNS)
-    client.zones.create_or_update(resource_group_name, zone_name, Zone(location='global'))
-    for key, rs in record_sets.items():
+    _DNSZoneCreate(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'zone_name': zone_name,
+        'location': 'global'
+    })
 
+    for key, rs in record_sets.items():
         rs_name, rs_type = key.lower().rsplit('.', 1)
         rs_name = '@' if rs_name == origin else rs_name
+        
         if rs_name.endswith(origin):
             rs_name = rs_name[:-(len(origin) + 1)]
 
         try:
-            record_count = len(rs[_type_to_property_name(rs_type)[0]])
+            records_temp = rs[_type_to_property_name(rs_type)[0]]
+            record_count = len(records_temp) if isinstance(records_temp, list) else 1
         except (TypeError, KeyError):
             record_count = 1
+
         if rs_name == '@' and rs_type == 'soa':
-            root_soa = client.record_sets.get(resource_group_name, zone_name, '@', 'SOA')
-            rs["soa_record"]["host"] = root_soa.soa_record.host
+            root_soa = _DNSRecordSetShow(cli_ctx=cmd.cli_ctx)(command_args={
+                'resource_group': resource_group_name,
+                'zone_name': zone_name,
+                'record_type': 'SOA',
+                'name': '@'
+            })
+            rs["soa_record"]["host"] = root_soa["SOARecord"]["host"]
             rs_name = '@'
         elif rs_name == '@' and rs_type == 'ns':
-            root_ns = client.record_sets.get(resource_group_name, zone_name, '@', 'NS')
-            root_ns.ttl = rs["ttl"]
-            rs = root_ns
-            rs_type = rs.type.rsplit('/', 1)[1]
+            root_ns = _DNSRecordSetShow(cli_ctx=cmd.cli_ctx)(command_args={
+                'resource_group': resource_group_name,
+                'zone_name': zone_name,
+                'record_type': 'NS',
+                'name': '@'
+            })
+            root_ns["ttl"] = rs["ttl"]
+            rs = _convert_to_snake_case(root_ns)
         try:
-            client.record_sets.create_or_update(
-                resource_group_name, zone_name, rs_name, rs_type, rs)
+            _DNSRecordSetCreate(cli_ctx=cmd.cli_ctx)(command_args={
+                'resource_group': resource_group_name,
+                'zone_name': zone_name,
+                'record_type': rs_type,
+                'name': rs_name,
+                **rs
+            })
+            
             cum_records += record_count
             print("({}/{}) Imported {} records of type '{}' and name '{}'"
                   .format(cum_records, total_records, record_count, rs_type, rs_name), file=sys.stderr)
@@ -2806,7 +2908,7 @@ def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, c
 
 def add_dns_ds_record(cmd, resource_group_name, zone_name, record_set_name, key_tag, algorithm, digest_type, digest,
                        ttl=3600, if_none_match=None):
-    record = {"algorithm": algorithm, "key_tag": key_tag, "digest_algorithm_type": digest_type, "digest_value": digest}
+    record = {"algorithm": algorithm, "key_tag": key_tag, "digest": { "algorithm_type": digest_type, "value": digest}}
     record_type = 'ds'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             ttl=ttl, if_none_match=if_none_match)
@@ -2937,7 +3039,7 @@ def remove_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name
 
 
 def remove_dns_ds_record(cmd, resource_group_name, zone_name, record_set_name, key_tag, algorithm, digest_type, digest, keep_empty_record_set=False):
-    record = {"algorithm": algorithm, "key_tag": key_tag, "digest_algorithm_type": digest_type, "digest_value": digest}
+    record = {"algorithm": algorithm, "key_tag": key_tag, "digest": { "algorithm_type": digest_type, "value": digest}}
     record_type = 'ds'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
@@ -3150,6 +3252,8 @@ def _remove_record(cli_ctx, record, record_type, record_set_name, resource_group
     record_set["ttl"] = ret.get("TTL", None)
     record_set[record_snake] = ret.get(record_camel, None)
     record_set = _convert_to_snake_case(record_set)
+
+    logger.debug('Retrieved record: %s', str(record_set))
 
     if is_list:
         record_list = record_set[record_snake]
@@ -4053,7 +4157,7 @@ def _process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name):
 
         subnet = vnet + f'/subnets/{subnet}'
     return subnet
-
+# endregion
 
 # region cross-region lb
 def create_cross_region_load_balancer(cmd, load_balancer_name, resource_group_name, location=None, tags=None,

@@ -8,5 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
-from .__cmd_group import *
-from ._list_references import *
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "network dns zone",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Manage DNS zones.
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]

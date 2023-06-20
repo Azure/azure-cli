@@ -26,11 +26,14 @@ class RecordSetUpdate(_RecordSetUpdate):
         args_schema.aaaa_records._registered = False
         args_schema.caa_records._registered = False
         args_schema.cname_record._registered = False
+        args_schema.ds_records._registered = False
         args_schema.mx_records._registered = False
+        args_schema.naptr_records._registered = False
         args_schema.ns_records._registered = False
         args_schema.ptr_records._registered = False
         args_schema.soa_record._registered = False
         args_schema.srv_records._registered = False
+        args_schema.tlsa_records._registered = False
         args_schema.txt_records._registered = False
         return args_schema
 
@@ -63,6 +66,18 @@ class RecordSetAAAAUpdate(RecordSetUpdate):
         args.record_type = "AAAA"
 
 
+@register_command("network dns record-set ds update")
+class RecordSetDSUpdate(RecordSetUpdate):
+    """ Update an DS record set.
+
+    :example: Update an DS record set.
+        az network dns record-set ds update -g MyResourceGroup -z www.mysite.com -n MyRecordSet --metadata owner=WebTeam
+    """
+    def pre_operations(self):
+        args = self.ctx.args
+        args.record_type = "DS"
+
+
 @register_command("network dns record-set mx update")
 class RecordSetMXUpdate(RecordSetUpdate):
     """ Update an MX record set.
@@ -73,6 +88,18 @@ class RecordSetMXUpdate(RecordSetUpdate):
     def pre_operations(self):
         args = self.ctx.args
         args.record_type = "MX"
+
+
+@register_command("network dns record-set naptr update")
+class RecordSetNAPTRUpdate(RecordSetUpdate):
+    """ Update an NAPTR record set.
+
+    :example: Update an NAPTR record set.
+        az network dns record-set naptr update -g MyResourceGroup -z www.mysite.com -n MyRecordSet --metadata owner=WebTeam
+    """
+    def pre_operations(self):
+        args = self.ctx.args
+        args.record_type = "NAPTR"
 
 
 @register_command("network dns record-set ns update")
@@ -109,6 +136,18 @@ class RecordSetSRVUpdate(RecordSetUpdate):
     def pre_operations(self):
         args = self.ctx.args
         args.record_type = "SRV"
+
+
+@register_command("network dns record-set tlsa update")
+class RecordSetTLSAUpdate(RecordSetUpdate):
+    """ Update a TLSA record set.
+
+    :example: Update a TLSA record set.
+        az network dns record-set tlsa update -g MyResourceGroup -z www.mysite.com -n MyRecordSet --metadata owner=WebTeam
+    """
+    def pre_operations(self):
+        args = self.ctx.args
+        args.record_type = "TLSA"
 
 
 @register_command("network dns record-set txt update")

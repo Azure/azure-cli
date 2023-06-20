@@ -47,7 +47,7 @@ class ListByType(AAZCommand):
             required=True,
         )
         _args_schema.zone_name = AAZStrArg(
-            options=["--zone-name"],
+            options=["-z", "--zone-name"],
             help="The name of the DNS zone (without a terminating dot).",
             required=True,
         )
