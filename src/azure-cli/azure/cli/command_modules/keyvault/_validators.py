@@ -516,9 +516,11 @@ def _get_base_url_type(cli_ctx, service):
                 return 'https://{}{}'.format(name, suffix)
 
             if vaults:
+                from msrestazure.tools import parse_resource_id
+                id_comps = parse_resource_id(vaults[0].id)
                 vault_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
-                vault = vault_client.get(resource_group_name=vaults[0].resource_group, vault_name=name)
-                logger.warning(f"Get vault uri from vault properties {vault.properties}.")
+                vault = vault_client.get(resource_group_name=id_comps['resource_group'], vault_name=name)
+                logger.debug(f"Get vault uri from vault properties {vault.properties}.")
                 return vault.properties.vault_uri
         return 'https://{}{}'.format(name, suffix)
 
