@@ -9,12 +9,11 @@
 # --------------------------------------------------------------------------
 
 
-def cf_vm_cl(cli_ctx, *_):
+def _compute_client_factory(cli_ctx, *_):
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.compute import ComputeManagementClient
-    return get_mgmt_service_client(cli_ctx,
-                                   ComputeManagementClient)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE)
 
 
 def cf_ssh_public_key(cli_ctx, *_):
-    return cf_vm_cl(cli_ctx).ssh_public_keys
+    return _compute_client_factory(cli_ctx).ssh_public_keys

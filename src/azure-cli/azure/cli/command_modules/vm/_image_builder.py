@@ -523,7 +523,7 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
         image_template.customize = template_scripts
 
     return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=image_template,
-                      resource_group_name=resource_group_name, image_template_name=image_template_name, api_version=cmd.get_api_version())
+                      resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
 def assign_template_identity(cmd, client, resource_group_name, image_template_name, user_assigned=None):

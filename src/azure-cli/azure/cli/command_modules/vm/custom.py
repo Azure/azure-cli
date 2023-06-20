@@ -192,7 +192,7 @@ def _grant_access(cmd, resource_group_name, name, duration_in_seconds, is_disk, 
     if secure_vm_guest_state_sas:
         grant_access_data.get_secure_vm_guest_state_sas = secure_vm_guest_state_sas
 
-    return op.begin_grant_access(resource_group_name, name, grant_access_data)
+    return op.begin_grant_access(resource_group_name, name, grant_access_data=grant_access_data)
 
 
 def _is_linux_os(vm):
@@ -521,7 +521,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.data_access_auth_mode = data_access_auth_mode
 
     client = _compute_client_factory(cmd.cli_ctx)
-    return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk)
+    return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk=disk)
 
 
 def grant_disk_access(cmd, resource_group_name, disk_name, duration_in_seconds, access_level=None,
@@ -655,7 +655,7 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
         image.extended_location = edge_zone
 
     client = _compute_client_factory(cmd.cli_ctx)
-    return client.images.begin_create_or_update(resource_group_name, name, image)
+    return client.images.begin_create_or_update(resource_group_name, name, parameters=image)
 
 
 def update_image(instance, tags=None):
@@ -685,8 +685,6 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     from azure.mgmt.compute.models import Snapshot, CreationData, DiskCreateOption, Encryption
-    # Snapshot, CreationData, DiskCreateOption, Encryption = cmd.get_models(
-    #     'Snapshot', 'CreationData', 'DiskCreateOption', 'Encryption')
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     if source_blob_uri:
@@ -872,7 +870,7 @@ def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
     parameter = VirtualMachineCaptureParameters(vhd_prefix=vhd_name_prefix,
                                                 destination_container_name=storage_container,
                                                 overwrite_vhds=overwrite)
-    poller = client.virtual_machines.begin_capture(resource_group_name, vm_name, parameter)
+    poller = client.virtual_machines.begin_capture(resource_group_name, vm_name, parameters=parameter)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
     output = getattr(result, 'output', None) or result.resources[0]
     print(json.dumps(output, indent=2))  # pylint: disable=no-member
@@ -3664,11 +3662,11 @@ def get_vmss(cmd, resource_group_name, name, instance_id=None, include_user_data
 
     if instance_id is not None:
         if cmd.supported_api_version(min_api='2020-12-01', operation_group='virtual_machine_scale_sets'):
-            return client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id, expand)
+            return client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id, expand=expand)
         return client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id)
 
     if cmd.supported_api_version(min_api='2021-03-01', operation_group='virtual_machine_scale_sets'):
-        return client.virtual_machine_scale_sets.get(resource_group_name, name, expand)
+        return client.virtual_machine_scale_sets.get(resource_group_name, name, expand=expand)
     return client.virtual_machine_scale_sets.get(resource_group_name, name)
 
 
@@ -4621,7 +4619,7 @@ def create_image_gallery(cmd, resource_group_name, gallery_name, description=Non
                                                                                   public_name_prefix=public_name_prefix)
 
     return sdk_no_wait(no_wait, client.galleries.begin_create_or_update,
-                       resource_group_name, gallery_name, gallery, api_version=cmd.get_api_version(operation_group="galleries"))
+                       resource_group_name, gallery_name, gallery)
 
 
 def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_name, os_type, publisher, offer, sku,
@@ -4665,7 +4663,7 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                          recommended=recommendation, disallowed=Disallowed(disk_types=disallowed_disk_types),
                          purchase_plan=purchase_plan, location=location, eula=eula, tags=(tags or {}),
                          hyper_v_generation=hyper_v_generation, features=feature_list, architecture=architecture)
-    return client.gallery_images.begin_create_or_update(resource_group_name, gallery_name, gallery_image_name, image, api_version=cmd.get_api_version())
+    return client.gallery_images.begin_create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
 
 
 def _add_aux_subscription(aux_subscriptions, resource_id):
@@ -4831,7 +4829,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         gallery_name=gallery_name,
         gallery_image_name=gallery_image_name,
         gallery_image_version_name=gallery_image_version,
-        gallery_image_version=image_version, api_version=cmd.get_api_version()
+        gallery_image_version=image_version
     )
 
 
@@ -4845,7 +4843,7 @@ def fix_gallery_image_date_info(date_info):
 # pylint: disable=line-too-long
 def get_image_version_to_update(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name):
     client = _compute_client_factory(cmd.cli_ctx)
-    version = client.gallery_image_versions.get(resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name, api_version=cmd.get_api_version())
+    version = client.gallery_image_versions.get(resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name)
     # To avoid unnecessary permission check of image
     version.storage_profile.source = None
     if version.storage_profile.os_disk_image and version.storage_profile.os_disk_image.source:
@@ -4878,7 +4876,7 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     client = _compute_client_factory(cmd.cli_ctx)
 
     return sdk_no_wait(no_wait, client.gallery_image_versions.begin_create_or_update, resource_group_name, gallery_name,
-                       gallery_image_name, gallery_image_version_name, api_version=cmd.get_api_version(), **kwargs)
+                       gallery_image_name, gallery_image_version_name, **kwargs)
 # endregion
 
 
@@ -4907,7 +4905,7 @@ def create_proximity_placement_group(cmd, client, proximity_placement_group_name
         ppg_params.intent = intent
 
     return client.create_or_update(resource_group_name=resource_group_name,
-                                   proximity_placement_group_name=proximity_placement_group_name, parameters=ppg_params, api_version=cmd.get_api_version())
+                                   proximity_placement_group_name=proximity_placement_group_name, parameters=ppg_params)
 
 
 def update_ppg(cmd, instance, intent_vm_sizes=None):
@@ -4939,11 +4937,11 @@ def create_dedicated_host_group(cmd, client, host_group_name, resource_group_nam
         additionalCapabilities = {'ultraSSDEnabled': ultra_ssd_enabled}
         host_group_params.additional_capabilities = additionalCapabilities
 
-    return client.create_or_update(resource_group_name, host_group_name, parameters=host_group_params, api_version=cmd.get_api_version())
+    return client.create_or_update(resource_group_name, host_group_name, parameters=host_group_params)
 
 
 def get_dedicated_host_group_instance_view(cmd, client, host_group_name, resource_group_name):
-    return client.get(resource_group_name, host_group_name, expand="instanceView", api_version=cmd.get_api_version())
+    return client.get(resource_group_name, host_group_name, expand="instanceView")
 
 
 def create_dedicated_host(cmd, client, host_group_name, host_name, resource_group_name, sku, platform_fault_domain=None,
@@ -4959,11 +4957,11 @@ def create_dedicated_host(cmd, client, host_group_name, host_name, resource_grou
                                     auto_replace_on_failure=auto_replace_on_failure, license_type=license_type,
                                     sku=sku, tags=tags)
 
-    return client.begin_create_or_update(resource_group_name, host_group_name, host_name, parameters=host_params, api_version=cmd.get_api_version())
+    return client.begin_create_or_update(resource_group_name, host_group_name, host_name, parameters=host_params)
 
 
 def get_dedicated_host_instance_view(cmd, client, host_group_name, host_name, resource_group_name):
-    return client.get(resource_group_name, host_group_name, host_name, expand="instanceView", api_version=cmd.get_api_version())
+    return client.get(resource_group_name, host_group_name, host_name, expand="instanceView")
 
 # endregion
 
@@ -5113,13 +5111,13 @@ def create_disk_encryption_set(
         disk_encryption_set.federated_client_id = federated_client_id
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, disk_encryption_set_name,
-                       disk_encryption_set, api_version=cmd.get_api_version())
+                       disk_encryption_set)
 
 
 def list_disk_encryption_sets(cmd, client, resource_group_name=None):
     if resource_group_name:
-        return client.list_by_resource_group(resource_group_name, api_version=cmd.get_api_version())
-    return client.list(api_version=cmd.get_api_version())
+        return client.list_by_resource_group(resource_group_name)
+    return client.list()
 
 
 def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_url=None, source_vault=None,
@@ -5194,12 +5192,12 @@ def remove_disk_encryption_set_identity(cmd, client, resource_group_name, disk_e
     client = _compute_client_factory(cmd.cli_ctx)
 
     def getter(cmd, resource_group_name, disk_encryption_set_name):
-        return client.disk_encryption_sets.get(resource_group_name, disk_encryption_set_name, api_version=cmd.get_api_version())
+        return client.disk_encryption_sets.get(resource_group_name, disk_encryption_set_name)
 
     def setter(resource_group_name, disk_encryption_set_name, disk_encryption_set):
         disk_encryption_set_update = DiskEncryptionSetUpdate(identity=disk_encryption_set.identity)
         return client.disk_encryption_sets.begin_update(resource_group_name, disk_encryption_set_name,
-                                                        disk_encryption_set_update, api_version=cmd.get_api_version())
+                                                        disk_encryption_set_update)
 
     return _remove_disk_encryption_set_identities(cmd, resource_group_name, disk_encryption_set_name,
                                                   mi_system_assigned, mi_user_assigned, getter, setter)
@@ -5218,7 +5216,7 @@ def create_disk_access(cmd, client, resource_group_name, disk_access_name, locat
     # DiskAccess = cmd.get_models('DiskAccess')
     disk_access = DiskAccess(location=location, tags=tags)
     return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       resource_group_name, disk_access_name, disk_access, api_version=cmd.get_api_version())
+                       resource_group_name, disk_access_name, disk_access)
 
 
 def set_disk_access(cmd, client, parameters, resource_group_name, disk_access_name, tags=None, no_wait=False):
@@ -5227,7 +5225,7 @@ def set_disk_access(cmd, client, parameters, resource_group_name, disk_access_na
     # DiskAccess = cmd.get_models('DiskAccess')
     disk_access = DiskAccess(location=location, tags=tags)
     return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       resource_group_name, disk_access_name, disk_access, api_version=cmd.get_api_version())
+                       resource_group_name, disk_access_name, disk_access)
 
 # endregion
 
@@ -5241,7 +5239,7 @@ def install_vm_patches(cmd, client, resource_group_name, vm_name, maximum_durati
     linux_parameters = LinuxParameters(classifications_to_include=classifications_to_include_linux, package_name_masks_to_include=package_name_masks_to_include, package_name_masks_to_exclude=package_name_masks_to_exclude)
     install_patches_input = VMInstallPatchesParameters(maximum_duration=maximum_duration, reboot_setting=reboot_setting, linux_parameters=linux_parameters, windows_parameters=windows_parameters)
 
-    return sdk_no_wait(no_wait, client.begin_install_patches, resource_group_name=resource_group_name, vm_name=vm_name, install_patches_input=install_patches_input, api_version=cmd.get_api_version())
+    return sdk_no_wait(no_wait, client.begin_install_patches, resource_group_name=resource_group_name, vm_name=vm_name, install_patches_input=install_patches_input)
 
 # endregion
 
@@ -5250,7 +5248,7 @@ def sig_shared_gallery_list(cmd, client, location, shared_to=None):
     # Keep it here as it will add subscription in the future and we need to set it to None to make it work
     if shared_to == 'subscription':
         shared_to = None
-    return client.list(location=location, shared_to=shared_to, api_version=cmd.get_api_version(operation_group="shared_galleries"))
+    return client.list(location=location, shared_to=shared_to)
 
 
 def get_page_result(generator, marker, show_next_marker=None):
@@ -5306,7 +5304,7 @@ def sig_share_update(cmd, client, resource_group_name, gallery_name, subscriptio
     sharing_update = SharingUpdate(operation_type=op_type, groups=groups)
     return client.begin_update(resource_group_name=resource_group_name,
                                gallery_name=gallery_name,
-                               sharing_update=sharing_update, api_version=cmd.get_api_version())
+                               sharing_update=sharing_update)
 
 
 def sig_share_reset(cmd, client, resource_group_name, gallery_name):
@@ -5316,7 +5314,7 @@ def sig_share_reset(cmd, client, resource_group_name, gallery_name):
     sharing_update = SharingUpdate(operation_type=SharingUpdateOperationTypes.RESET)
     return client.begin_update(resource_group_name=resource_group_name,
                                gallery_name=gallery_name,
-                               sharing_update=sharing_update, api_version=cmd.get_api_version())
+                               sharing_update=sharing_update)
 
 
 def sig_shared_image_definition_list(client, location, gallery_unique_name,
@@ -5324,7 +5322,7 @@ def sig_shared_image_definition_list(client, location, gallery_unique_name,
     # Keep it here as it will add subscription in the future and we need to set it to None to make it work
     if shared_to == 'subscription':
         shared_to = None
-    generator = client.list(location=location, gallery_unique_name=gallery_unique_name, shared_to=shared_to, api_version=cmd.get_api_version())
+    generator = client.list(location=location, gallery_unique_name=gallery_unique_name, shared_to=shared_to)
     return get_page_result(generator, marker, show_next_marker)
 
 
@@ -5334,7 +5332,7 @@ def sig_shared_image_version_list(client, location, gallery_unique_name, gallery
     if shared_to == 'subscription':
         shared_to = None
     generator = client.list(location=location, gallery_unique_name=gallery_unique_name,
-                            gallery_image_name=gallery_image_name, shared_to=shared_to, api_version=cmd.get_api_version())
+                            gallery_image_name=gallery_image_name, shared_to=shared_to)
     return get_page_result(generator, marker, show_next_marker)
 
 
@@ -5360,7 +5358,7 @@ def gallery_application_create(client,
                        resource_group_name=resource_group_name,
                        gallery_name=gallery_name,
                        gallery_application_name=gallery_application_name,
-                       gallery_application=gallery_application, api_version=cmd.get_api_version())
+                       gallery_application=gallery_application)
 
 
 def gallery_application_update(client,
@@ -5382,7 +5380,7 @@ def gallery_application_update(client,
                        resource_group_name=resource_group_name,
                        gallery_name=gallery_name,
                        gallery_application_name=gallery_application_name,
-                       gallery_application=gallery_application, api_version=cmd.get_api_version())
+                       gallery_application=gallery_application)
 
 
 def gallery_application_version_create(cmd, client,
@@ -5438,7 +5436,7 @@ def gallery_application_version_create(cmd, client,
                        gallery_name=gallery_name,
                        gallery_application_name=gallery_application_name,
                        gallery_application_version_name=gallery_application_version_name,
-                       gallery_application_version=gallery_application_version, api_version=cmd.get_api_version())
+                       gallery_application_version=gallery_application_version)
 
 
 def gallery_application_version_update(cmd, client,
@@ -5476,15 +5474,15 @@ def gallery_application_version_update(cmd, client,
                        gallery_name=gallery_name,
                        gallery_application_name=gallery_application_name,
                        gallery_application_version_name=gallery_application_version_name,
-                       gallery_application_version=gallery_application_version, api_version=cmd.get_api_version())
+                       gallery_application_version=gallery_application_version)
 
 
 def get_gallery_instance(cmd, resource_group_name, gallery_name):
-    from ._client_factory import cf_vm_cl
-    client = cf_vm_cl(cmd.cli_ctx)
+    from ._client_factory import cf_galleries
+    client = cf_galleries(cmd.cli_ctx, '')
     from azure.mgmt.compute.models import SelectPermissions
     # SelectPermissions = cmd.get_models('SelectPermissions', operation_group='shared_galleries')
-    return client.galleries.get(resource_group_name, gallery_name, select=SelectPermissions.PERMISSIONS)
+    return client.get(resource_group_name, gallery_name, select=SelectPermissions.PERMISSIONS)
 
 
 def create_capacity_reservation_group(cmd, client, resource_group_name, capacity_reservation_group_name, location=None,
