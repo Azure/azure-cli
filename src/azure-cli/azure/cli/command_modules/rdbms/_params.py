@@ -480,6 +480,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                  'A GTID is represented as a pair of coordinates, separated by a colon character (:), as shown: source_id:transaction_id'
         )
 
+        pg_bouncer_arg_type = CLIArgumentType(
+            options_list=['--pg-bouncer'],
+            action='store_true',
+            help='Show connection strings for PgBouncer.'
+        )
+
         with self.argument_context('{} flexible-server'.format(command_group)) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
             c.argument('server_name', arg_type=server_name_arg_type)
@@ -684,6 +690,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('administrator_login', arg_type=administrator_login_arg_type,)
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
             c.argument('database_name', arg_type=database_name_arg_type)
+            c.argument('show_pg_bouncer', arg_type=pg_bouncer_arg_type)
 
         with self.argument_context('{} flexible-server replica list'.format(command_group)) as c:
             c.argument('server_name', id_part=None, options_list=['--name', '-n'], help='Name of the source server.')

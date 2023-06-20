@@ -349,6 +349,10 @@ def cf_postgres_flexible_location_capabilities(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).location_based_capabilities
 
 
+def cf_postgres_flexible_server_capabilities(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).server_capabilities
+
+
 def cf_postgres_flexible_backups(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).backups
 

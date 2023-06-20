@@ -89,8 +89,9 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
     @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='vault_name', location=postgres_location, additional_params='--enable-purge-protection true --retention-days 90')
-    def test_postgres_flexible_server_byok_mgmt(self, resource_group, vault_name):
-        self._test_flexible_server_byok_mgmt('postgres', resource_group, vault_name)
+    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='backup_vault_name', location=postgres_location, additional_params='--enable-purge-protection true --retention-days 90')
+    def test_postgres_flexible_server_byok_mgmt(self, resource_group, vault_name, backup_vault_name):
+        self._test_flexible_server_byok_mgmt('postgres', resource_group, vault_name, backup_vault_name)
 
     def _test_flexible_server_mgmt(self, database_engine, resource_group):
 
@@ -412,7 +413,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                 identity['id'],
             ), expect_failure=True)
 
-            # geo-redundant server with data encryption is not supported
+            # geo-redundant server with data encryption needs backup_key and backup_identity
             self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --geo-redundant-backup Enabled'.format(
                 database_engine,
                 resource_group,
@@ -512,16 +513,38 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
             sleep(max(0, seconds_to_wait))
 
+            data_encryption_key_id_flag = ''
+            if database_engine == 'postgres':
+                data_encryption_key_id_flag = '--key {} --identity {} {}'.format(key['key']['kid'], identity['id'], backup_key_id_flags)
+
             restore_result = self.cmd('{} flexible-server {} -g {} --name {} --source-server {} {}'.format(
                      database_engine,
-                     restore_type,
+                     'restore',
                      resource_group,
                      backup_name,
                      server_name,
-                     F"--key {key['key']['kid']} --identity {identity['id']}" if database_engine == 'postgres' else ''
+                     data_encryption_key_id_flag
             ), checks=main_checks).get_output_in_json()
 
+            # geo-restore backup
             if geo_redundant_backup:
+                current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
+                earliest_restore_time = result['backup']['earliestRestoreDate']
+                seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
+                sleep(max(0, seconds_to_wait))
+
+                data_encryption_key_id_flag = ''
+                if database_engine == 'postgres':
+                    data_encryption_key_id_flag = '--key {} --identity {} --backup-key {} --backup-identity {}'.format(backup_key['key']['kid'], backup_identity['id'], key['key']['kid'], identity['id'])
+
+                restore_result = self.cmd('{} flexible-server {} -g {} --name {} --source-server {} {}'.format(
+                        database_engine,
+                        'geo-restore --location {}'.format(backup_location),
+                        resource_group,
+                        backup_name,
+                        server_name,
+                        data_encryption_key_id_flag
+                ), checks=main_checks).get_output_in_json()
                 self.assertEqual(str(restore_result['location']).replace(' ', '').lower(), backup_location)
 
             # delete all servers
@@ -532,6 +555,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         invalid_input_tests()
         main_tests(False)
+        main_tests(True)
 
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
@@ -1428,19 +1452,19 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
         vnet_group_subnet = self.cmd('network vnet subnet show -g {} -n {} --vnet-name {}'.format(
                                        vnet_resource_group, vnet_group_subnet_name, vnet_group_vnet_name)).get_output_in_json()
         # no input, vnet in server rg
-        dns_zone = prepare_private_dns_zone(db_context, database_engine, server_resource_group, server_names[0], None, server_group_subnet["id"], location, True)
+        dns_zone = prepare_private_dns_zone(db_context, server_resource_group, server_names[0], None, server_group_subnet["id"], location, True)
         self.assertEqual(dns_zone,
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
                          self.get_subscription_id(), server_resource_group, server_names[0] + ".private." + database_engine + ".database.azure.com"))
 
         # no input, vnet in vnet rg
-        dns_zone = prepare_private_dns_zone(db_context, database_engine, server_resource_group, server_names[1], None, vnet_group_subnet["id"], location, True)
+        dns_zone = prepare_private_dns_zone(db_context, server_resource_group, server_names[1], None, vnet_group_subnet["id"], location, True)
         self.assertEqual(dns_zone,
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
                          self.get_subscription_id(), vnet_resource_group, server_names[1] + ".private." + database_engine + ".database.azure.com"))
 
-        # new private dns zone, zone name (vnet in smae rg)
-        dns_zone = prepare_private_dns_zone(db_context, database_engine, server_resource_group, server_names[2], private_dns_zone_names[0],
+        # new private dns zone, zone name (vnet in same rg)
+        dns_zone = prepare_private_dns_zone(db_context, server_resource_group, server_names[2], private_dns_zone_names[0],
                                             server_group_subnet["id"], location, True)
         self.assertEqual(dns_zone,
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(

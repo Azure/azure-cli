@@ -23,7 +23,7 @@ from ._flexible_server_util import (get_mysql_versions, get_mysql_skus, get_mysq
                                     get_postgres_versions,
                                     get_postgres_skus, get_postgres_storage_sizes, get_postgres_tiers,
                                     _is_resource_name)
-from ._flexible_server_location_capabilities_util import (get_postgres_location_capability_info)
+from ._flexible_server_location_capabilities_util import (get_postgres_location_capability_info, get_postgres_server_capability_info)
 
 logger = get_logger(__name__)
 
@@ -297,10 +297,15 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
                            version=None, geo_redundant_backup=None, byok_identity=None, byok_key=None, instance=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
-    list_location_capability_info = get_postgres_location_capability_info(
-        db_context.cmd,
-        location,
-        server_name=instance.name if instance else None)
+    if not instance:
+        list_location_capability_info = get_postgres_location_capability_info(
+            db_context.cmd,
+            location)
+    else:
+        list_location_capability_info = get_postgres_server_capability_info(
+            db_context.cmd,
+            resource_group = parse_resource_id(instance.id)["resource_group"],
+            server_name=instance.name)
     sku_info = list_location_capability_info['sku_info']
     single_az = list_location_capability_info['single_az']
     geo_backup_supported = list_location_capability_info['geo_backup_supported']
@@ -314,7 +319,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_storage_validator(storage_gb, sku_info, tier, instance)
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
     _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
-    _pg_version_validator(version, sku_info, tier, instance)
+    _pg_version_validator(version, list_location_capability_info['server_versions'])
     pg_byok_validator(byok_identity, byok_key, geo_redundant_backup, instance)
 
 
@@ -350,11 +355,8 @@ def _pg_sku_name_validator(sku_name, sku_info, tier, instance):
                            'Allowed values : {}'.format(tier, skus))
 
 
-def _pg_version_validator(version, sku_info, tier, instance):
-    if instance is not None:
-        tier = instance.sku.tier if tier is None else tier
+def _pg_version_validator(version, versions):
     if version:
-        versions = get_postgres_versions(sku_info, tier)
         if version not in versions:
             raise CLIError('Incorrect value for --version. Allowed values : {}'.format(versions))
 

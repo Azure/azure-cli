@@ -247,14 +247,16 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        maintenance_window=None,
                                        byok_identity=None, byok_key=None,
                                        active_directory_auth=None, password_auth=None,
-                                       tags=None):
+                                       private_dns_zone_arguments=None,
+                                       tags=None,
+                                       yes=False):
 
     # validator
     location = ''.join(instance.location.lower().split())
     db_context = DbContext(
         cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
         cf_db=cf_postgres_flexible_db, cf_availability=cf_postgres_check_resource_availability_with_location,
-        cf_availability_without_location=cf_postgres_check_resource_availability,
+        cf_availability_without_location=cf_postgres_check_resource_availability, cf_private_dns_zone_suffix=cf_postgres_flexible_private_dns_zone_suffix_operations,
         logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
 
     pg_arguments_validator(db_context,
@@ -272,6 +274,21 @@ def flexible_server_update_custom_func(cmd, client, instance,
     server_module_path = instance.__module__
     module = import_module(server_module_path)
     ServerForUpdate = getattr(module, 'ServerForUpdate')
+
+    
+    server_id_parts = parse_resource_id(instance.id)
+    resource_group_name = server_id_parts['resource_group']
+    server_name = server_id_parts['name']
+
+    if private_dns_zone_arguments:
+        private_dns_zone_id = prepare_private_dns_zone(db_context,
+                                                    resource_group_name,
+                                                    server_name,
+                                                    private_dns_zone=private_dns_zone_arguments,
+                                                    subnet_id=instance.network.delegated_subnet_resource_id,
+                                                    location=location,
+                                                    yes=yes)
+        instance.network.private_dns_zone_arm_resource_id = private_dns_zone_id
 
     if sku_name:
         instance.sku.name = sku_name
@@ -315,6 +332,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                              backup=instance.backup,
                              administrator_login_password=administrator_login_password,
                              maintenance_window=instance.maintenance_window,
+                             network=instance.network,
                              identity=identity,
                              data_encryption=data_encryption,
                              auth_config=auth_config,
@@ -632,12 +650,18 @@ def database_create_func(client, resource_group_name, server_name, database_name
 
 
 def flexible_server_connection_string(
-        server_name='{server}', database_name='{database}', administrator_login='{login}',
-        administrator_login_password='{password}'):
+        server_name='{server}',
+        database_name='{database}',
+        administrator_login='{login}',
+        administrator_login_password='{password}',
+        show_pg_bouncer=False):
     host = '{}.postgres.database.azure.com'.format(server_name)
+    port = 5432
+    if (show_pg_bouncer is True):
+        port = 6432
     return {
         'connectionStrings': _create_postgresql_connection_strings(host, administrator_login,
-                                                                   administrator_login_password, database_name)
+                                                                   administrator_login_password, database_name, port)
     }
 
 
@@ -775,7 +799,6 @@ def flexible_server_provision_network_resource(cmd, resource_group_name, server_
                                             subnet_address_pref=subnet_address_prefix,
                                             yes=yes)
         private_dns_zone_id = prepare_private_dns_zone(db_context,
-                                                       'PostgreSQL',
                                                        resource_group_name,
                                                        server_name,
                                                        private_dns_zone=private_dns_zone_arguments,
@@ -792,27 +815,31 @@ def flexible_server_provision_network_resource(cmd, resource_group_name, server_
     return network, start_ip, end_ip
 
 
-def _create_postgresql_connection_strings(host, user, password, database):
+def _create_postgresql_connection_strings(host, user, password, database, port):
     result = {
-        'psql_cmd': "postgresql://{user}:{password}@{host}/postgres?sslmode=require",
-        'ado.net': "Server={host};Database=postgres;Port=5432;User Id={user};Password={password};",
-        'jdbc': "jdbc:postgresql://{host}:5432/postgres?user={user}&password={password}",
-        'jdbc Spring': "spring.datasource.url=jdbc:postgresql://{host}:5432/postgres  "
+        'psql_cmd': "postgresql://{user}:{password}@{host}/{database}?sslmode=require",
+        'ado.net': "Server={host};Database={database};Port={port};User Id={user};Password={password};Ssl Mode=Require;",
+        'jdbc': "jdbc:postgresql://{host}:{port}/{database}?user={user}&password={password}&sslmode=require",
+        'jdbc Spring': "spring.datasource.url=jdbc:postgresql://{host}:{port}/{database}  "
                        "spring.datasource.username={user}  "
                        "spring.datasource.password={password}",
-        'node.js': "var client = new pg.Client('postgres://{user}:{password}@{host}:5432/postgres');",
-        'php': "host={host} port=5432 dbname=postgres user={user} password={password}",
-        'python': "cnx = psycopg2.connect(database='postgres', user='{user}', host='{host}', password='{password}', "
-                  "port='5432')",
-        'ruby': "cnx = PG::Connection.new(:host => '{host}', :user => '{user}', :dbname => 'postgres', "
-                ":port => '5432', :password => '{password}')",
+        'node.js': "var conn= new Client({open_brace}host:'{host}', user:'{user}', password:'{password}', database:'{database}', port:{port}, ssl:{open_brace}ca:fs.readFileSync(\"{ca-cert filename}\"){close_brace}{close_brace});",
+        'php': "pg_connect(\"host={host} port={port} dbname={database} user={user} password={password}\");",
+        'python': "cnx = psycopg2.connect(user='{user}', password='{password}', host='{host}', "
+                  "port={port}, database='{database}')",
+        'ruby': "connection = PG::Connection.new(user => \"{user}\", password => \"{password}\", database => \"{database}\", host => \"{host}\", "
+                "port => '{port}')",
     }
 
     connection_kwargs = {
         'host': host,
         'user': user,
         'password': password if password is not None else '{password}',
-        'database': database
+        'database': database,
+        'port': port,
+        'open_brace':'{',
+        'close_brace':'}',
+        'ca-cert filename': '{ca-cert filename}'
     }
 
     for k, v in result.items():
@@ -826,7 +853,7 @@ def _create_postgresql_connection_string(host, user, password):
         'host': host,
         'password': password if password is not None else '{password}'
     }
-    return 'postgresql://{user}:{password}@{host}/postgres?sslmode=require'.format(**connection_kwargs)
+    return 'postgresql://{user}:{password}@{host}/{database}?sslmode=require'.format(**connection_kwargs)
 
 
 def _form_response(username, sku, location, server_id, host, version, password, connection_string, database_name, firewall_id=None,
