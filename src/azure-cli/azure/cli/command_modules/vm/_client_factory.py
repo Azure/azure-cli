@@ -149,8 +149,8 @@ def _dev_test_labs_client_factory(cli_ctx, subscription_id, *_):
     from azure.mgmt.devtestlabs import DevTestLabsClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(cli_ctx, DevTestLabsClient, subscription_id=subscription_id)
-#
-#
+
+
 # def cf_vm_cl(cli_ctx, *_):
 #     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 #     from azure.mgmt.compute import ComputeManagementClient

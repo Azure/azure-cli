@@ -55,8 +55,6 @@ class BaseCommandOperation:
                     op_path = op_path.replace(rt.import_prefix,
                                               get_versioned_sdk_path(self.cli_ctx.cloud.profile, rt,
                                                                      operation_group=self.operation_group))
-        else:
-            print("test")
 
         try:
             mod_to_import, attr_path = op_path.split('#')

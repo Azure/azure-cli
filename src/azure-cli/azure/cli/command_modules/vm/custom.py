@@ -365,8 +365,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                 terms['child_name_1'], terms['child_name_3'], terms['child_name_4'], terms['child_name_5']
 
         client = _compute_client_factory(cmd.cli_ctx)
-        response = client.virtual_machine_images.get(location, disk_publisher, disk_offer, disk_sku,
-                                                     disk_version)
+        response = client.virtual_machine_images.get(location, publisher_name=disk_publisher, offer=disk_offer,
+                                                     skus=disk_sku, version=disk_version)
 
         if hasattr(response, 'hyper_v_generation'):
             if response.hyper_v_generation == 'V1':
@@ -655,7 +655,8 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
         image.extended_location = edge_zone
 
     client = _compute_client_factory(cmd.cli_ctx)
-    return client.images.begin_create_or_update(resource_group_name, name, parameters=image)
+    return client.images.begin_create_or_update(resource_group_name=resource_group_name, image_name=name,
+                                                parameters=image)
 
 
 def update_image(instance, tags=None):
@@ -667,7 +668,7 @@ def update_image(instance, tags=None):
 def list_images(cmd, resource_group_name=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if resource_group_name:
-        return client.images.list_by_resource_group(resource_group_name)
+        return client.images.list_by_resource_group(resource_group_name=resource_group_name)
     return client.images.list()
 # endregion
 
@@ -685,6 +686,8 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     from azure.mgmt.compute.models import Snapshot, CreationData, DiskCreateOption, Encryption
+    # Snapshot, CreationData, DiskCreateOption, Encryption = cmd.get_models(
+    #     'Snapshot', 'CreationData', 'DiskCreateOption', 'Encryption')
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     if source_blob_uri:
@@ -747,7 +750,8 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
             snapshot.supported_capabilities.architecture = architecture
 
     client = _compute_client_factory(cmd.cli_ctx)
-    return sdk_no_wait(no_wait, client.snapshots.begin_create_or_update, resource_group_name, snapshot_name, snapshot)
+    return sdk_no_wait(no_wait, client.snapshots.begin_create_or_update, resource_group_name=resource_group_name,
+                       snapshot_name=snapshot_name, snapshot=snapshot)
 
 
 def grant_snapshot_access(cmd, resource_group_name, snapshot_name, duration_in_seconds, access_level=None):
@@ -758,7 +762,7 @@ def grant_snapshot_access(cmd, resource_group_name, snapshot_name, duration_in_s
 def list_snapshots(cmd, resource_group_name=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if resource_group_name:
-        return client.snapshots.list_by_resource_group(resource_group_name)
+        return client.snapshots.list_by_resource_group(resource_group_name=resource_group_name)
     return client.snapshots.list()
 
 
@@ -806,12 +810,13 @@ def update_snapshot(cmd, resource_group_name, instance, sku=None, disk_encryptio
 # region VirtualMachines Identity
 def show_vm_identity(cmd, resource_group_name, vm_name):
     client = _compute_client_factory(cmd.cli_ctx)
-    return client.virtual_machines.get(resource_group_name, vm_name).identity
+    return client.virtual_machines.get(resource_group_name=resource_group_name, vm_name=vm_name).identity
 
 
 def show_vmss_identity(cmd, resource_group_name, vm_name):
     client = _compute_client_factory(cmd.cli_ctx)
-    return client.virtual_machine_scale_sets.get(resource_group_name, vm_name).identity
+    return client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name,
+                                                 vm_scale_set_name=vm_name).identity
 
 
 def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, identity_role='Contributor',
@@ -824,7 +829,7 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
     _, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
 
     def getter():
-        return client.virtual_machines.get(resource_group_name, vm_name)
+        return client.virtual_machines.get(resource_group_name=resource_group_name, vm_name=vm_name)
 
     def setter(vm, external_identities=external_identities):
         if vm.identity and vm.identity.type == ResourceIdentityType.system_assigned_user_assigned:
@@ -855,7 +860,7 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
         return patch_vm(cmd, resource_group_name, vm_name, vm_patch)
 
     assign_identity_helper(cmd.cli_ctx, getter, setter, identity_role=identity_role_id, identity_scope=identity_scope)
-    vm = client.virtual_machines.get(resource_group_name, vm_name)
+    vm = client.virtual_machines.get(resource_group_name=resource_group_name, vm_name=vm_name)
     return _construct_identity_info(identity_scope, identity_role, vm.identity.principal_id,
                                     vm.identity.user_assigned_identities)
 # endregion
@@ -870,7 +875,8 @@ def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
     parameter = VirtualMachineCaptureParameters(vhd_prefix=vhd_name_prefix,
                                                 destination_container_name=storage_container,
                                                 overwrite_vhds=overwrite)
-    poller = client.virtual_machines.begin_capture(resource_group_name, vm_name, parameters=parameter)
+    poller = client.virtual_machines.begin_capture(resource_group_name=resource_group_name, vm_name=vm_name,
+                                                   parameters=parameter)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
     output = getattr(result, 'output', None) or result.resources[0]
     print(json.dumps(output, indent=2))  # pylint: disable=no-member
@@ -1224,7 +1230,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                       enable_automatic_upgrade=None)
         try:
             LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_extensions.begin_create_or_update(
-                resource_group_name, vm_name, 'GuestAttestation', ext))
+                resource_group_name=resource_group_name, vm_name=vm_name, vm_extension_name='GuestAttestation',
+                extension_parameters=ext))
             logger.info('Guest Attestation Extension has been successfully installed by default '
                         'when Trusted Launch configuration is met')
         except Exception as e:
@@ -1302,12 +1309,12 @@ def get_instance_view(cmd, resource_group_name, vm_name, include_user_data=False
 
 def get_vm(cmd, resource_group_name, vm_name, expand=None):
     client = _compute_client_factory(cmd.cli_ctx)
-    return client.virtual_machines.get(resource_group_name, vm_name, expand=expand)
+    return client.virtual_machines.get(resource_group_name=resource_group_name, vm_name=vm_name, expand=expand)
 
 
 def get_vm_to_update(cmd, resource_group_name, vm_name):
     client = _compute_client_factory(cmd.cli_ctx)
-    vm = client.virtual_machines.get(resource_group_name, vm_name)
+    vm = client.virtual_machines.get(resource_group_name=resource_group_name, vm_name=vm_name)
     # To avoid unnecessary permission check of image
     vm.storage_profile.image_reference = None
     return vm
@@ -1584,8 +1591,10 @@ def resize_vm(cmd, resource_group_name, vm_name, size, no_wait=False):
 def restart_vm(cmd, resource_group_name, vm_name, no_wait=False, force=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if force:
-        return sdk_no_wait(no_wait, client.virtual_machines.begin_redeploy, resource_group_name, vm_name)
-    return sdk_no_wait(no_wait, client.virtual_machines.begin_restart, resource_group_name, vm_name)
+        return sdk_no_wait(no_wait, client.virtual_machines.begin_redeploy,
+                           resource_group_name=resource_group_name, vm_name=vm_name)
+    return sdk_no_wait(no_wait, client.virtual_machines.begin_restart,
+                       resource_group_name=resource_group_name, vm_name=vm_name)
 
 
 def set_vm(cmd, instance, lro_operation=None, no_wait=False):
@@ -1604,14 +1613,16 @@ def set_vm(cmd, instance, lro_operation=None, no_wait=False):
 
 def patch_vm(cmd, resource_group_name, vm_name, vm):
     client = _compute_client_factory(cmd.cli_ctx)
-    poller = client.virtual_machines.begin_update(resource_group_name, vm_name, vm)
+    poller = client.virtual_machines.begin_update(resource_group_name=resource_group_name,
+                                                  vm_name=vm_name, parameters=vm)
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
 
 def patch_disk_encryption_set(cmd, resource_group_name, disk_encryption_set_name, disk_encryption_set_update):
     client = _compute_client_factory(cmd.cli_ctx)
-    poller = client.disk_encryption_sets.begin_update(resource_group_name, disk_encryption_set_name,
-                                                      disk_encryption_set_update)
+    poller = client.disk_encryption_sets.begin_update(resource_group_name=resource_group_name,
+                                                      disk_encryption_set_name=disk_encryption_set_name,
+                                                      disk_encryption_set=disk_encryption_set_update)
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
 
@@ -1622,7 +1633,7 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False, include_user_
     expand = None
     if include_user_data:
         expand = "userData"
-    return get_vm(cmd, resource_group_name, vm_name, expand)
+    return get_vm(cmd, resource_group_name, vm_name, expand=expand)
 
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
@@ -1762,17 +1773,20 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         vm.storage_profile.disk_controller_type = disk_controller_type
 
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
-    return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, **kwargs)
+    return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name=resource_group_name,
+                       vm_name=vm_name, **kwargs)
 # endregion
 
 
 # region VirtualMachines AvailabilitySets
 def _get_availset(cmd, resource_group_name, name):
-    return _compute_client_factory(cmd.cli_ctx).availability_sets.get(resource_group_name, name)
+    return _compute_client_factory(cmd.cli_ctx).availability_sets.get(resource_group_name=resource_group_name,
+                                                                      availability_set_name=name)
 
 
 def _set_availset(cmd, resource_group_name, name, **kwargs):
-    return _compute_client_factory(cmd.cli_ctx).availability_sets.create_or_update(resource_group_name, name, **kwargs)
+    return _compute_client_factory(cmd.cli_ctx).availability_sets.create_or_update(
+        resource_group_name=resource_group_name, availability_set_name=name, **kwargs)
 
 
 # pylint: disable=inconsistent-return-statements
@@ -1838,7 +1852,8 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
                                                   resource_group_name, deployment_name, deployment))
 
     compute_client = _compute_client_factory(cmd.cli_ctx)
-    return compute_client.availability_sets.get(resource_group_name, availability_set_name)
+    return compute_client.availability_sets.get(resource_group_name=resource_group_name,
+                                                availability_set_name=availability_set_name)
 
 
 def update_av_set(instance, resource_group_name, proximity_placement_group=None):
@@ -1850,7 +1865,7 @@ def update_av_set(instance, resource_group_name, proximity_placement_group=None)
 def list_av_sets(cmd, resource_group_name=None):
     op_group = _compute_client_factory(cmd.cli_ctx).availability_sets
     if resource_group_name:
-        return op_group.list(resource_group_name)
+        return op_group.list(resource_group_name=resource_group_name)
     return op_group.list_by_subscription(expand='virtualMachines/$ref')
 # endregion
 
@@ -1919,7 +1934,8 @@ def get_boot_log(cmd, resource_group_name, vm_name):
 
     client = _compute_client_factory(cmd.cli_ctx)
 
-    virtual_machine = client.virtual_machines.get(resource_group_name, vm_name, expand='instanceView')
+    virtual_machine = client.virtual_machines.get(resource_group_name=resource_group_name, vm_name=vm_name,
+                                                  expand='instanceView')
     # pylint: disable=no-member
 
     blob_uri = None
@@ -1929,7 +1945,8 @@ def get_boot_log(cmd, resource_group_name, vm_name):
     # Managed storage
     if blob_uri is None:
         try:
-            boot_diagnostics_data = client.virtual_machines.retrieve_boot_diagnostics_data(resource_group_name, vm_name)
+            boot_diagnostics_data = client.virtual_machines.retrieve_boot_diagnostics_data(
+                resource_group_name=resource_group_name, vm_name=vm_name)
             blob_uri = boot_diagnostics_data.serial_console_log_blob_uri
         except HttpResponseError:
             pass
@@ -1972,7 +1989,7 @@ def get_boot_log(cmd, resource_group_name, vm_name):
 def get_boot_log_uris(cmd, resource_group_name, vm_name, expire=None):
     client = _compute_client_factory(cmd.cli_ctx)
     return client.virtual_machines.retrieve_boot_diagnostics_data(
-        resource_group_name, vm_name, sas_uri_expiration_time_in_minutes=expire)
+        resource_group_name=resource_group_name, vm_name=vm_name, sas_uri_expiration_time_in_minutes=expire)
 # endregion
 
 
@@ -1981,7 +1998,7 @@ def set_diagnostics_extension(
         cmd, resource_group_name, vm_name, settings, protected_settings=None, version=None,
         no_auto_upgrade=False):
     client = _compute_client_factory(cmd.cli_ctx)
-    vm = client.virtual_machines.get(resource_group_name, vm_name, 'instanceView')
+    vm = client.virtual_machines.get(resource_group_name=resource_group_name, vm_name=vm_name, expand='instanceView')
     # pylint: disable=no-member
     is_linux_os = _is_linux_os(vm)
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
@@ -2073,8 +2090,6 @@ def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name, force
             raise ResourceNotFoundError("No disk with the name '{}' was found".format(disk_name))
     else:
         from azure.mgmt.compute.models import DiskDetachOptionTypes
-        # DiskDetachOptionTypes = cmd.get_models('DiskDetachOptionTypes', resource_type=ResourceType.MGMT_COMPUTE,
-        #                                        operation_group='virtual_machines')
         leftovers = vm.storage_profile.data_disks
         is_contains = False
         for d in leftovers:
@@ -2118,9 +2133,6 @@ def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publishe
         extension_instance_name = vm_extension_name
 
     from azure.mgmt.compute.models import VirtualMachineExtension
-    # VirtualMachineExtension = cmd.get_models('VirtualMachineExtension',
-    #                                          resource_type=ResourceType.MGMT_COMPUTE,
-    #                                          operation_group='virtual_machines')
     instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name,
                                                  suggested_name=extension_instance_name)
     if instance_name != extension_instance_name:
@@ -2160,7 +2172,6 @@ def list_vm_extension_images(
 def _remove_identities(cmd, resource_group_name, name, identities, getter, setter):
     from ._vm_utils import MSI_LOCAL_ID
     from azure.mgmt.compute.models import ResourceIdentityType
-    # ResourceIdentityType = cmd.get_models('ResourceIdentityType', operation_group='virtual_machines')
     remove_system_assigned_identity = False
     if MSI_LOCAL_ID in identities:
         remove_system_assigned_identity = True
@@ -2201,9 +2212,9 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
     def setter(resource_group_name, vm_name, vm):
         client = _compute_client_factory(cmd.cli_ctx)
         from azure.mgmt.compute.models import VirtualMachineUpdate
-        # VirtualMachineUpdate = cmd.get_models('VirtualMachineUpdate', operation_group='virtual_machines')
         vm_update = VirtualMachineUpdate(identity=vm.identity)
-        return client.virtual_machines.begin_update(resource_group_name, vm_name, vm_update)
+        return client.virtual_machines.begin_update(resource_group_name=resource_group_name, vm_name=vm_name,
+                                                    parameters=vm_update)
 
     if identities is None:
         from ._vm_utils import MSI_LOCAL_ID
@@ -2605,8 +2616,8 @@ def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scrip
             RunCommandInput(command_id=command_id, script=scripts, parameters=run_command_input_parameters))  # pylint: disable=line-too-long
     # otherwise this is a regular vm instance
     return client.virtual_machines.begin_run_command(
-        resource_group_name, vm_vmss_name,
-        RunCommandInput(command_id=command_id, script=scripts, parameters=run_command_input_parameters))
+        resource_group_name=resource_group_name, vm_name=vm_vmss_name,
+        parameters=RunCommandInput(command_id=command_id, script=scripts, parameters=run_command_input_parameters))
 
 
 def vm_run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts=None, parameters=None):
@@ -5478,11 +5489,10 @@ def gallery_application_version_update(cmd, client,
 
 
 def get_gallery_instance(cmd, resource_group_name, gallery_name):
-    from ._client_factory import cf_galleries
-    client = cf_galleries(cmd.cli_ctx, '')
+    from ._client_factory import _compute_client_factory
+    client = _compute_client_factory(cmd.cli_ctx)
     from azure.mgmt.compute.models import SelectPermissions
-    # SelectPermissions = cmd.get_models('SelectPermissions', operation_group='shared_galleries')
-    return client.get(resource_group_name, gallery_name, select=SelectPermissions.PERMISSIONS)
+    return client.galleries.get(resource_group_name, gallery_name, select=SelectPermissions.PERMISSIONS)
 
 
 def create_capacity_reservation_group(cmd, client, resource_group_name, capacity_reservation_group_name, location=None,
@@ -5582,7 +5592,7 @@ def set_vm_applications(cmd, vm_name, resource_group_name, application_version_i
     from azure.mgmt.compute.models import ApplicationProfile, VMGalleryApplication
     # ApplicationProfile, VMGalleryApplication = cmd.get_models('ApplicationProfile', 'VMGalleryApplication')
     try:
-        vm = client.virtual_machines.get(resource_group_name, vm_name)
+        vm = client.virtual_machines.get(resource_group_name=resource_group_name, vm_name=vm_name)
     except ResourceNotFoundError:
         raise ResourceNotFoundError('Could not find vm {}.'.format(vm_name))
 
@@ -5607,13 +5617,14 @@ def set_vm_applications(cmd, vm_name, resource_group_name, application_version_i
             vm.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = \
                 (treat_as_failure.lower() == 'true')
             index += 1
-    return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, vm)
+    return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update,
+                       resource_group_name=resource_group_name, vm_name=vm_name, parameters=vm)
 
 
 def list_vm_applications(cmd, vm_name, resource_group_name):
     client = _compute_client_factory(cmd.cli_ctx)
     try:
-        vm = client.virtual_machines.get(resource_group_name, vm_name)
+        vm = client.virtual_machines.get(resource_group_name=resource_group_name, vm_name=vm_name)
     except ResourceNotFoundError:
         raise ResourceNotFoundError('Could not find vm {}.'.format(vm_name))
     return vm.application_profile
