@@ -5073,7 +5073,7 @@ def _update_artifact_type(params):
         return
 
     # Interpret deployment type from the file extension if the type parameter is not passed
-    file_name, file_extension = os.path.splitext(params.src_path)
+    _, file_extension = os.path.splitext(params.src_path)
     file_extension = file_extension[1:]
     if file_extension in ('war', 'jar', 'ear', 'zip'):
         params.artifact_type = file_extension
