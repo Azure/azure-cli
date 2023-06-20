@@ -796,3 +796,16 @@ class TestAAZArgBaseFmt(unittest.TestCase):
             self.format_arg(schema, {
                 "data": data_file,
             })
+
+    def test_aaz_pagination_token_fmt(self):
+        from azure.cli.core.aaz import AAZArgumentsSchema, AAZPaginationTokenArg, AAZPaginationTokenArgFormat
+        schema = AAZArgumentsSchema()
+        schema.token = AAZPaginationTokenArg(fmt=AAZPaginationTokenArgFormat())
+
+        data = "eyJuZXh0X2xpbmsiOiBudWxsLCAib2Zmc2V0IjogMH0="  # next_link: None, offset: 0
+        args = self.format_arg(schema, {"token": data})
+        self.assertEqual(args.to_serialized_data(), {"token": base64.b64decode(data).decode("utf-8")})
+
+        data = '{"next_link": null, "offset": 0}'
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            self.format_arg(schema, {"token": data})
