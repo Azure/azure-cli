@@ -336,12 +336,12 @@ def load_arguments(self, _):
         for item in ['record_type', 'record_set_type']:
             c.argument(item, ignore_type, validator=validate_dns_record_type)
 
-    for item in ['', 'a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
+    for item in ['', 'a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'naptr', 'ns', 'ptr', 'srv', 'tlsa', 'txt']:
         with self.argument_context('network dns record-set {} create'.format(item)) as c:
             c.argument('ttl', type=int, help='Record set TTL (time-to-live)')
             c.argument('if_none_match', help='Create the record set only if it does not already exist.', action='store_true')
 
-    for item in ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
+    for item in ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'naptr', 'ns', 'ptr', 'srv', 'tlsa', 'txt']:
         with self.argument_context('network dns record-set {} add-record'.format(item)) as c:
             c.argument('ttl', type=int, help='Record set TTL (time-to-live)')
             c.argument('record_set_name',
@@ -380,10 +380,24 @@ def load_arguments(self, _):
     with self.argument_context('network dns record-set cname') as c:
         c.argument('cname', options_list=['--cname', '-c'], help='Value of the cname record-set. It should be Canonical name.')
 
+    with self.argument_context('network dns record-set ds') as c:
+        c.argument('key_tag', help='The key tag value is used to determine which DNSKEY Resource Record is used for signature verification.', type=int)
+        c.argument('algorithm', help='The security algorithm type represents the standard security algorithm number of the DNSKEY Resource Record. See: https://www.iana.org/assignments/dns-sec-alg-numbers/dns-sec-alg-numbers.xhtml', type=int)
+        c.argument('digest_type', help='The digest algorithm type represents the standard digest algorithm number used to construct the digest. See: https://www.iana.org/assignments/ds-rr-types/ds-rr-types.xhtml', type=int)
+        c.argument('digest', help='The digest value is a cryptographic hash value of the referenced DNSKEY Resource Record.')
+
     with self.argument_context('network dns record-set mx') as c:
         c.argument('exchange', options_list=['--exchange', '-e'], help='Exchange metric.')
         c.argument('preference', options_list=['--preference', '-p'], help='Preference metric.')
 
+    with self.argument_context('network dns record-set naptr') as c:
+        c.argument('order', help='The order in which the NAPTR records MUST be processed in order to accurately represent the ordered list of rules. The ordering is from lowest to highest. Valid values: 0-65535.', type=int)
+        c.argument('preference', help='The preference specifies the order in which NAPTR records with equal "order" values should be processed, low numbers being processed before high numbers. Valid values: 0-65535.', type=int)
+        c.argument('flags', help='The flags specific to DDDS applications. Values currently defined in RFC 3404 are uppercase and lowercase letters "A", "P", "S", and "U", and the empty string, "". Enclose Flags in quotation marks.')
+        c.argument('services', help='The services specific to DDDS applications. Enclose Services in quotation marks.')
+        c.argument('regexp', help='The regular expression that the DDDS application uses to convert an input value into an output value. For example: an IP phone system might use a regular expression to convert a phone number that is entered by a user into a SIP URI. Enclose the regular expression in quotation marks. Specify either a value for "regexp" or a value for "replacement".')
+        c.argument('replacement', help='The replacement is a fully qualified domain name (FQDN) of the next domain name that you want the DDDS application to submit a DNS query for. The DDDS application replaces the input value with the value specified for replacement. Specify either a value for "regexp" or a value for "replacement". If you specify a value for "regexp", specify a dot (.) for "replacement".')
+        
     with self.argument_context('network dns record-set ns') as c:
         c.argument('dname', options_list=['--nsdname', '-d'], help='Name server domain name.')
 
@@ -408,6 +422,12 @@ def load_arguments(self, _):
         c.argument('weight', type=int, options_list=['--weight', '-w'], help='Weight metric.')
         c.argument('port', type=int, options_list=['--port', '-r'], help='Service port.')
         c.argument('target', options_list=['--target', '-t'], help='Target domain name.')
+
+    with self.argument_context('network dns record-set tlsa') as c:
+        c.argument('certificate_usage', help='The usage specifies the provided association that will be used to match the certificate presented in the TLS handshake.', type=int)
+        c.argument('selector', help='The selector specifies which part of the TLS certificate presented by the server will be matched against the association data.', type=int)
+        c.argument('matching_type', help='The matching type specifies how the certificate association is presented.', type=int)
+        c.argument('certificate_association_data', help='This specifies the certificate association data to be matched.')
 
     with self.argument_context('network dns record-set txt') as c:
         c.argument('value', options_list=['--value', '-v'], nargs='+', help='Space-separated list of text values which will be concatenated together.')

@@ -2408,7 +2408,7 @@ def add_dns_delegation(cmd, child_zone, parent_zone, child_rg, child_zone_name):
         try:
             for dname in child_zone.name_servers:
                 add_dns_ns_record(cmd, parent_rg, parent_zone_name, record_set_name, dname, parent_subscription_id)
-            print('Delegation added succesfully in \'{}\'\n'.format(parent_zone_name), file=sys.stderr)
+            print('Delegation added successfully in \'{}\'\n'.format(parent_zone_name), file=sys.stderr)
         except HttpResponseError as ex:
             logger.error(ex)
             print('Could not add delegation in \'{}\'\n'.format(parent_zone_name), file=sys.stderr)
@@ -2505,12 +2505,15 @@ def _type_to_property_name(key):
         'aaaa': ('aaaa_records', "AAAARecords"),
         'caa': ('caa_records', "caaRecords"),
         'cname': ('cname_record', "CNAMERecord"),
+        'ds': ('ds_records', "DSRecords"),
         'mx': ('mx_records', "MXRecords"),
+        'naptr': ('naptr_records', "NAPTRRecords"),
         'ns': ('ns_records', "NSRecords"),
         'ptr': ('ptr_records', "PTRRecords"),
         'soa': ('soa_record', "SOARecord"),
         'spf': ('txt_records', "TXTRecords"),
         'srv': ('srv_records', "SRVRecords"),
+        'tlsa': ('tlsa_records', "TLSARecords"),
         'txt': ('txt_records', "TXTRecords"),
         'alias': ('target_resource', "targetResource"),
     }
@@ -2556,8 +2559,12 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
                 record_obj.update({'val': record.value, 'tag': record.tag, 'flags': record.flags})
             elif record_type == 'cname':
                 record_obj.update({'alias': record.cname.rstrip('.') + '.'})
+            elif record_type == 'ds':
+                record_obj.update({'key_tag': record.key_tag, 'algorithm': record.algorithm, 'digest_type': record.digest_algorithm_type, 'digest': record.digest_value})
             elif record_type == 'mx':
                 record_obj.update({'preference': record.preference, 'host': record.exchange.rstrip('.') + '.'})
+            elif record_type == 'naptr':
+                record_obj.update({'order': record.order, 'preference': record.preference, 'flags': record.flags, 'services': record.services, 'regexp': record.regexp, 'replacement': record.replacement.rstrip('.') + '.'})
             elif record_type == 'ns':
                 record_obj.update({'host': record.nsdname.rstrip('.') + '.'})
             elif record_type == 'ptr':
@@ -2574,6 +2581,8 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
             elif record_type == 'srv':
                 record_obj.update({'priority': record.priority, 'weight': record.weight,
                                    'port': record.port, 'target': record.target.rstrip('.') + '.'})
+            elif record_type == 'tlsa':
+                record_obj.update({'usage': record.usage, 'selector': record.selector, 'matching_type': record.matching_type, 'certificate': record.cert_association_data})
             elif record_type == 'txt':
                 record_obj.update({'txt': ''.join(record.value)})
             zone_obj[record_set_name][record_type].append(record_obj)
@@ -2617,8 +2626,14 @@ def _build_record(cmd, data):
             return {"value": data["val"], "flags": int(data["flags"]), "tag": data["tag"]}
         if record_type == 'cname':
             return {"cname": data["alias"]}
+        if record_type == 'ds':
+            return {"key_tag": int(data["key_tag"]), "algorithm": int(data["algorithm"]),
+                    "digest_algorithm_type": int(data["digest_type"]), "digest_value": data["digest"]}
         if record_type == 'mx':
             return {"preference": data["preference"], "exchange": data["host"]}
+        if record_type == 'naptr':
+            return {"order": int(data["order"]), "preference": int(data["preference"]), "flags": data["flags"],
+                    "services": data["services"], "regexp": data["regexp"], "replacement": data["replacement"]}
         if record_type == 'ns':
             return {"nsdname": data["host"]}
         if record_type == 'ptr':
@@ -2630,6 +2645,9 @@ def _build_record(cmd, data):
         if record_type == 'srv':
             return {"priority": int(data["priority"]), "weight": int(data["weight"]), "port": int(data["port"]),
                     "target": data["target"]}
+        if record_type == 'tlsa':
+            return {"usage": int(data["usage"]), "selector": int(data["selector"]),
+                    "matching_type": int(data["matching_type"]), "cert_association_data": data["certificate"]}
         if record_type in ['txt', 'spf']:
             text_data = data['txt']
             return {"value": text_data} if isinstance(text_data, list) else {"value": [text_data]}
@@ -2786,10 +2804,26 @@ def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, c
                             is_list=False, ttl=ttl, if_none_match=if_none_match)
 
 
+def add_dns_ds_record(cmd, resource_group_name, zone_name, record_set_name, key_tag, algorithm, digest_type, digest,
+                       ttl=3600, if_none_match=None):
+    record = {"algorithm": algorithm, "key_tag": key_tag, "digest_algorithm_type": digest_type, "digest_value": digest}
+    record_type = 'ds'
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            ttl=ttl, if_none_match=if_none_match)
+
+
 def add_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, preference, exchange,
                       ttl=3600, if_none_match=None):
     record = {"preference": int(preference), "exchange": exchange}
     record_type = 'mx'
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            ttl=ttl, if_none_match=if_none_match)
+
+
+def add_dns_naptr_record(cmd, resource_group_name, zone_name, record_set_name, order, preference, flags, services, regexp, replacement,
+                       ttl=3600, if_none_match=None):
+    record = {"flags": flags, "order": order, "preference": preference, "regexp": regexp, "replacement": replacement, "services": services}
+    record_type = 'naptr'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             ttl=ttl, if_none_match=if_none_match)
 
@@ -2845,6 +2879,14 @@ def add_dns_srv_record(cmd, resource_group_name, zone_name, record_set_name, pri
                             if_none_match=if_none_match)
 
 
+def add_dns_tlsa_record(cmd, resource_group_name, zone_name, record_set_name, certificate_usage, selector,  matching_type, certificate_association_data,
+                       ttl=3600, if_none_match=None):
+    record = {"cert_association_data": certificate_association_data, "matching_type": matching_type, "selector": selector, "usage": certificate_usage}
+    record_type = 'tlsa'
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            ttl=ttl, if_none_match=if_none_match)
+
+
 def add_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, value, if_none_match=None):
     record = {"value": value}
     record_type = 'txt'
@@ -2894,10 +2936,24 @@ def remove_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name
                           is_list=False, keep_empty_record_set=keep_empty_record_set)
 
 
+def remove_dns_ds_record(cmd, resource_group_name, zone_name, record_set_name, key_tag, algorithm, digest_type, digest, keep_empty_record_set=False):
+    record = {"algorithm": algorithm, "key_tag": key_tag, "digest_algorithm_type": digest_type, "digest_value": digest}
+    record_type = 'ds'
+    return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
+                          keep_empty_record_set=keep_empty_record_set)
+
+
 def remove_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, preference, exchange,
                          keep_empty_record_set=False):
     record = {"preference": int(preference), "exchange": exchange}
     record_type = 'mx'
+    return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
+                          keep_empty_record_set=keep_empty_record_set)
+
+
+def remove_dns_naptr_record(cmd, resource_group_name, zone_name, record_set_name, order, preference, flags, services, regexp, replacement, keep_empty_record_set=False):
+    record = {"flags": flags, "order": order, "preference": preference, "regexp": regexp, "replacement": replacement, "services": services}
+    record_type = 'naptr'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
 
@@ -2922,6 +2978,13 @@ def remove_dns_srv_record(cmd, resource_group_name, zone_name, record_set_name, 
                           port, target, keep_empty_record_set=False):
     record = {"priority": priority, "weight": weight, "port": port, "target": target}
     record_type = 'srv'
+    return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
+                          keep_empty_record_set=keep_empty_record_set)
+
+
+def remove_dns_tlsa_record(cmd, resource_group_name, zone_name, record_set_name, certificate_usage, selector,  matching_type, certificate_association_data, keep_empty_record_set=False):
+    record = {"cert_association_data": certificate_association_data, "matching_type": matching_type, "selector": selector, "usage": certificate_usage}
+    record_type = 'tlsa'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
 
@@ -2962,9 +3025,23 @@ def _check_cname_record_exist(record, exist_list):
     return False
 
 
+def _check_ds_record_exist(record, exist_list):
+    for r in exist_list:
+        if (r["algorithm"], r["key_tag"], r["digest_algorithm_type"], r["digest_value"]) == (record["algorithm"], record["key_tag"], record["digest_algorithm_type"], record["digest_value"]):
+            return True
+    return False
+
+
 def _check_mx_record_exist(record, exist_list):
     for r in exist_list:
         if (r["preference"], r["exchange"]) == (record["preference"], record["exchange"]):
+            return True
+    return False
+
+
+def _check_naptr_record_exist(record, exist_list):
+    for r in exist_list:
+        if (r["flags"], r["order"], r["preference"], r["regexp"], r["replacement"], r["services"]) == (record["flags"], record["order"], record["preference"], record["regexp"], record["replacement"], record["services"]):
             return True
     return False
 
@@ -2986,6 +3063,13 @@ def _check_ptr_record_exist(record, exist_list):
 def _check_srv_record_exist(record, exist_list):
     for r in exist_list:
         if (r["priority"], r["weight"], r["port"], r["target"]) == (record["priority"], record["weight"], record["port"], record["target"]):
+            return True
+    return False
+
+
+def _check_tlsa_record_exist(record, exist_list):
+    for r in exist_list:
+        if (r["cert_association_data"], r["matching_type"], r["selector"], r["usage"]) == (record["cert_association_data"], record["matching_type"], record["selector"], record["usage"]):
             return True
     return False
 

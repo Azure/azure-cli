@@ -233,7 +233,7 @@ def load_command_table(self, _):
     api_version = api_version.replace('-', '_')
     dns_doc_string = 'azure.mgmt.dns.v' + api_version + '.operations#RecordSetsOperations.create_or_update'
 
-    supported_records = ['a', 'aaaa', 'mx', 'ns', 'ptr', 'srv', 'txt', 'caa']
+    supported_records = ['a', 'aaaa', 'ds', 'mx', 'naptr', 'ns', 'ptr', 'srv', 'tlsa', 'txt', 'caa']
     for record in supported_records:
         with self.command_group('network dns record-set {}'.format(record), network_dns_record_set_sdk, resource_type=ResourceType.MGMT_NETWORK_DNS) as g:
             g.show_command('show', 'get', transform=transform_dns_record_set_output)
