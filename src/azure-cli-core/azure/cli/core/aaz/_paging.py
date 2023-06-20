@@ -9,13 +9,13 @@ import json
 from azure.cli.core.aaz import AAZUndefined, has_value
 
 
-class AAZPageIterator:
+class AAZPageIterator:  # pylint: disable=too-many-instance-attributes
     def __init__(self, executor, extract_result, cli_ctx, next_link, offset, page_size):
         self._executor = executor
         self._extract_result = extract_result
         self._cli_ctx = cli_ctx
         self._next_link = next_link
-        self._did_once_already = False if next_link is None else True  # desired start
+        self._did_once_already = bool(next_link)  # desired start
         self._total = page_size + offset if has_value(page_size) else None
         self._start = offset
         self._curr_link = None
@@ -25,10 +25,10 @@ class AAZPageIterator:
         return self
 
     def __next__(self):
-        def next_token(_, result):
+        def next_token(_, result):  # pylint: disable=unused-argument
             from knack.log import get_logger
             logger = get_logger(__name__)
-            logger.warning(f"Token of next page: {base64.b64encode(token).decode('utf-8')}")
+            logger.warning("Token of next page: %s", base64.b64encode(token).decode("utf-8"))
 
         if self._total is not None and self._total < 0:
             from knack.events import EVENT_CLI_SUCCESSFUL_EXECUTE

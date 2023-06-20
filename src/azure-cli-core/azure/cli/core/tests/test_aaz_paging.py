@@ -31,7 +31,7 @@ class TestAAZPaging(unittest.TestCase):
         paged = AAZPaged(executor=executor, extract_result=extract_result, cli_ctx=DummyCli())
         self.assertTrue(list(paged) == ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'])
 
-    def test_aaz_paging_with_limit_and_token(self):
+    def test_aaz_paging_with_token_and_limit(self):
         data_by_pages = [
             (["a", "b", "c"], 1),
             (["d", "e"], 2),
