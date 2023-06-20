@@ -26,6 +26,9 @@ class TestConfigure(unittest.TestCase):
 
 class ConfigureGlobalDefaultsTest(ScenarioTest):
 
+    def __init__(self, *arg, **kwargs):
+        super().__init__(*arg, random_config_dir=True, **kwargs)
+
     def setUp(self):
         self.local_dir = tempfile.mkdtemp()
 
@@ -53,21 +56,6 @@ class ConfigureGlobalDefaultsTest(ScenarioTest):
         actual = set([(x['name'], x['value']) for x in res])
         expected = set([('global', 'global1'), ('global2', 'global2')])
         self.assertTrue(actual == expected)
-
-
-class LocalContextCommandsScenarioTest(LocalContextScenarioTest):
-
-    def test_local_context_commands(self):
-        self.cmd('local-context show')
-        self.cmd('local-context show --name resource_group_name vnet_name')
-        self.cmd('local-context delete --name resource_group_name vnet_name')
-        self.cmd('local-context delete --all -y')
-        self.cmd('local-context delete --all --purge -y')
-        self.cmd('local-context delete --all --purge -y --recursive')
-
-        from knack.util import CLIError
-        with self.assertRaises(CLIError):
-            self.cmd('local-context delete --name resource_group_name --all')
 
 
 if __name__ == '__main__':

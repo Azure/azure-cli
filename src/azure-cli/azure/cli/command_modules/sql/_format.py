@@ -373,6 +373,31 @@ def firewall_rule_table_format(result):
     return _apply_format(result, _firewall_rule_table_format)
 
 
+###############################################
+#           sql server ipv6-firewall-rule     #
+###############################################
+
+
+def ipv6_firewall_rule_table_format(result):
+    '''
+    Formats a single or list of server ipv6 firewall rules as summary results for display with "-o table".
+    '''
+
+    def _ipv6_firewall_rule_table_format(result):
+        '''
+        Formats a server ipv6 firewall rule as summary results for display with "-o table".
+        '''
+        from collections import OrderedDict
+
+        return OrderedDict([
+            ('name', result['name']),
+            ('startIPv6Address', result['startIPv6Address']),
+            ('endIPv6Address', result['endIPv6Address'])
+        ])
+
+    return _apply_format(result, _ipv6_firewall_rule_table_format)
+
+
 ########################################################
 #            sql server outbound-firewall-rule         #
 ########################################################
@@ -396,40 +421,3 @@ def outbound_firewall_rule_table_format(result):
         ])
 
     return _apply_format(result, _outbound_firewall_rule_table_format)
-
-
-###############################################
-#                sql mi             #
-###############################################
-
-
-#####
-#           sql mi transformers for json
-#####
-
-def mi_list_transform(results):
-    '''
-    Transforms the json response for a list of managed instances.
-    '''
-
-    return [mi_transform(r) for r in results]
-
-
-def mi_transform(result):
-    '''
-    Transforms the json response for a managed instance.
-    '''
-
-    if hasattr(result, 'storage_account_type'):
-        result.backupStorageRedundancy = _get_external_backup_storage_redundancy(result.storage_account_type)
-        del result.storage_account_type
-
-    return result
-
-
-def _get_external_backup_storage_redundancy(self):
-    return {
-        'lrs': 'Local',
-        'grs': 'Geo',
-        'zrs': 'Zone'
-    }.get(self.lower(), 'Invalid')

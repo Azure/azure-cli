@@ -16,7 +16,12 @@ class FeatureFlagConstants:
 
 class KeyVaultConstants:
     KEYVAULT_CONTENT_TYPE = "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
+
+
+class AppServiceConstants:
+    APPSVC_CONFIG_REFERENCE_PREFIX = "@Microsoft.AppConfiguration"
     APPSVC_KEYVAULT_PREFIX = "@Microsoft.KeyVault"
+    APPSVC_SLOT_SETTING_KEY = "AppService:SlotSetting"
 
 
 class SearchFilterOptions:
@@ -58,3 +63,18 @@ class StatusCodes:
 class HttpHeaders:
     from azure.cli.core import __version__ as core_version
     USER_AGENT = "AZURECLI.APPCONFIG/{0}".format(core_version)
+
+
+class KVSetConstants:
+    KVSETRootElementName = "items"
+
+
+class ImportExportProfiles:
+    KVSET = "appconfig/kvset"
+    DEFAULT = "appconfig/default"
+
+
+class JsonDiff:
+    ADD = "add"
+    DELETE = "delete"
+    UPDATE = "update"

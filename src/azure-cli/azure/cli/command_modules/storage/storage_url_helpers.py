@@ -22,7 +22,7 @@ class StorageResourceIdentifier:
         self.snapshot = None
         self.sas_token = None
 
-        from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
+        from urllib.parse import urlparse
         url = urlparse(moniker)
 
         self._is_url = (url.scheme == 'http' or url.scheme == 'https')

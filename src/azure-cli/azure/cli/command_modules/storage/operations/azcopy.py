@@ -10,7 +10,7 @@ from ..azcopy.util import AzCopy, client_auth_for_azcopy, login_auth_for_azcopy,
 def storage_copy(source, destination, put_md5=None, recursive=None, blob_type=None,
                  preserve_s2s_access_tier=None, content_type=None, follow_symlinks=None,
                  exclude_pattern=None, include_pattern=None, exclude_path=None, include_path=None,
-                 cap_mbps=None, **kwargs):
+                 cap_mbps=None, extra_options=None, **kwargs):
 
     azcopy = AzCopy()
     flags = []
@@ -28,7 +28,7 @@ def storage_copy(source, destination, put_md5=None, recursive=None, blob_type=No
         flags.append('--exclude-pattern=' + exclude_pattern)
     if include_path is not None:
         flags.append('--include-path=' + include_path)
-    if exclude_pattern is not None:
+    if exclude_path is not None:
         flags.append('--exclude-path=' + exclude_path)
     if content_type is not None:
         flags.append('--content-type=' + content_type)
@@ -36,6 +36,8 @@ def storage_copy(source, destination, put_md5=None, recursive=None, blob_type=No
         flags.append('--follow-symlinks=true')
     if cap_mbps is not None:
         flags.append('--cap-mbps=' + cap_mbps)
+    if extra_options is not None:
+        flags.extend(extra_options)
     azcopy.copy(source, destination, flags=flags)
 
 
@@ -56,6 +58,11 @@ def storage_remove(cmd, client, service, target, recursive=None, exclude_pattern
         flags.append('--include-path=' + include_path)
     if exclude_path is not None:
         flags.append('--exclude-path=' + exclude_path)
+
+    if service == 'file':
+        flags.append('--from-to=FileTrash')
+    elif service == 'blob':
+        flags.append('--from-to=BlobTrash')
 
     sas_token = client.sas_token
 
@@ -79,16 +86,20 @@ def storage_fs_directory_copy(cmd, source, destination, recursive=None, **kwargs
     azcopy.copy(source, destination, flags=flags)
 
 
-def storage_blob_sync(cmd, client, source, destination, exclude_pattern=None, include_pattern=None,
-                      exclude_path=None):
+def storage_blob_sync(cmd, client, source, destination, delete_destination='true', exclude_pattern=None,
+                      include_pattern=None, exclude_path=None, extra_options=None):
     azcopy = _azcopy_blob_client(cmd, client)
-    flags = ['--delete-destination=true']
+    flags = []
+    if delete_destination is not None:
+        flags.append('--delete-destination=' + delete_destination)
     if include_pattern is not None:
         flags.append('--include-pattern=' + include_pattern)
     if exclude_pattern is not None:
         flags.append('--exclude-pattern=' + exclude_pattern)
     if exclude_path is not None:
         flags.append('--exclude-path=' + exclude_path)
+    if extra_options is not None:
+        flags.extend(extra_options)
 
     sas_token = client.sas_token
 

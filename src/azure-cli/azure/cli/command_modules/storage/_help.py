@@ -105,6 +105,38 @@ examples:
     text: az storage account blob-service-properties update --default-service-version 2020-04-08 -n mystorageaccount -g myresourcegroup
 """
 
+helps['storage account blob-service-properties cors-rule'] = """
+type: group
+short-summary: Manage the Cross-Origin Resource Sharing (CORS) rules of a storage account's blob service properties.
+"""
+
+helps['storage account blob-service-properties cors-rule list'] = """
+type: command
+short-summary: List all CORS rules of a storage account's blob service properties.
+examples:
+  - name: List all CORS rules of a storage account
+    text: |
+        az storage account blob-service-properties cors-rule list --account-name mystorageaccount --resource-group myresourcegroup
+"""
+
+helps['storage account blob-service-properties cors-rule clear'] = """
+type: command
+short-summary: Clear all CORS rules for a storage account.
+examples:
+  - name: Clear all CORS rules for a storage account
+    text: |
+        az storage account blob-service-properties cors-rule clear --account-name mystorageaccount --resource-group myresourcegroup
+"""
+
+helps['storage account blob-service-properties cors-rule add'] = """
+type: command
+short-summary: Add a CORS rule for a storage account.
+examples:
+  - name: Add a CORS rule for a storage account
+    text: |
+        az storage account blob-service-properties cors-rule add --account-name mystorageaccount --resource-group myresourcegroup --allowed-origins "http://*.contoso.com" --allowed-methods PUT GET --max-age 200
+"""
+
 helps['storage account create'] = """
 type: command
 short-summary: Create a storage account.
@@ -159,6 +191,9 @@ examples:
   - name: List encryption scopes within storage account.
     text: |
         az storage account encryption-scope list --account-name mystorageaccount -g MyResourceGroup
+  - name: List encryption scopes starting with specific name.
+    text: |
+        az storage account encryption-scope list --account-name mystorageaccount -g myresourcegroup --filter 'startswith(name, value)'
 """
 
 helps['storage account encryption-scope show'] = """
@@ -633,6 +668,9 @@ examples:
     text: |
         az storage account update --default-action Allow --name MyStorageAccount --resource-group MyResourceGroup
     crafted: true
+  - name: Use a user-assigned managed identity instead of system-assigned managed identity
+    text: |
+        az storage account update --name <storage-account-name> --resource-group <resource-group-name> --encryption-key-vault <keyvault-uri> --encryption-key-name <key-name-in-keyvault> --encryption-key-source Microsoft.Keyvault --key-vault-user-identity-id <user-assigned-identity-id> --identity-type UserAssigned --user-identity-id <user-assigned-identity-id>`
 """
 
 helps['storage account hns-migration'] = """
@@ -656,6 +694,79 @@ short-summary: Stop the enabling hierarchical namespace migration of a storage a
 examples:
   - name: Stop the enabling hierarchical namespace migration of a storage account.
     text: az storage account hns-migration stop --name mystorageaccount --resource-group myresourcegroup
+"""
+
+helps['storage account local-user'] = """
+    type: group
+    short-summary: Manage storage account local users.
+"""
+
+helps['storage account local-user create'] = """
+    type: command
+    short-summary: Create a local user for a given storage account.
+    examples:
+        - name: Create a local-user with two permission scopes and an ssh-authorized-key
+          text: >
+              az storage account local-user create --account-name {account-name} -g {resource-group} -n {username}
+              --home-directory home --permission-scope permissions=r service=blob resource-name=container1
+              --permission-scope permissions=rw service=file resource-name=share2 --ssh-authorized-key key="ssh-rsa a2V5"
+              --has-ssh-key true --has-ssh-password --has-shared-key false
+"""
+
+helps['storage account local-user update'] = """
+    type: command
+    short-summary: Update properties for a local user.
+    examples:
+        - name: Update a local-user with one permission scopes and no ssh-key
+          text: >
+              az storage account local-user update --account-name {account-name} -g {resource-group} -n {username}
+              --permission-scope permissions=rw service=file resource-name=share2
+              --has-ssh-key false
+"""
+
+helps['storage account local-user delete'] = """
+    type: command
+    short-summary: Delete a local user.
+    examples:
+        - name: Delete a local-user
+          text: >
+              az storage account local-user delete --account-name {account-name} -g {resource-group} -n {username}
+"""
+
+helps['storage account local-user list'] = """
+    type: command
+    short-summary: List local users for a storage account.
+    examples:
+        - name: List local-user for a storage account
+          text: >
+              az storage account local-user list --account-name {account-name} -g {resource-group}
+"""
+
+helps['storage account local-user show'] = """
+    type: command
+    short-summary: Show info for a local user.
+    examples:
+        - name: Show info for a local-user
+          text: >
+              az storage account local-user show --account-name {account-name} -g {resource-group} -n {username}
+"""
+
+helps['storage account local-user list-keys'] = """
+    type: command
+    short-summary: List sharedkeys and sshAuthorizedKeys for a local user.
+    examples:
+        - name: List sharedkeys and sshAuthorizedKeys for a local-user
+          text: >
+              az storage account local-user list-keys --account-name {account-name} -g {resource-group} -n {username}
+"""
+
+helps['storage account local-user regenerate-password'] = """
+    type: command
+    short-summary: Regenerate sshPassword for a local user.
+    examples:
+        - name: Regenerate sshPassword for a local-user
+          text: >
+              az storage account local-user regenerate-password --account-name {account-name} -g {resource-group} -n {username}
 """
 
 helps['storage blob'] = """
@@ -731,6 +842,9 @@ examples:
   - name: Copy a blob asynchronously. Use `az storage blob show` to check the status of the blobs.
     text: |
         az storage blob copy start --account-name MyAccount --destination-blob MyDestinationBlob --destination-container MyDestinationContainer --sas-token $sas --source-uri https://storage.blob.core.windows.net/photos
+  - name: Copy a blob specific version
+    text: |
+        az storage blob copy start --account-name MyAccount --destination-blob MyDestinationBlob --destination-container MyDestinationContainer --source-uri https://my-account.blob.core.windows.net/my-container/my-blob?versionId=2022-03-21T18:28:44.4431011Z --auth-mode login
 """
 
 helps['storage blob copy start-batch'] = """
@@ -749,7 +863,7 @@ parameters:
     short-summary: List the files or blobs to be uploaded. No actual data transfer will occur.
   - name: --source-account-name
     type: string
-    short-summary: The source storage account from which the files or blobs are copied to the destination. If omitted, the source account is used.
+    short-summary: The source storage account from which the files or blobs are copied to the destination. If omitted, the destination account is used.
   - name: --source-account-key
     type: string
     short-summary: The account key for the source storage account.
@@ -784,6 +898,19 @@ examples:
     text: az storage blob delete -c mycontainer -n MyBlob
   - name: Delete a blob using login credentials.
     text: az storage blob delete -c mycontainer -n MyBlob --account-name mystorageaccount --auth-mode login
+"""
+
+helps['storage blob undelete'] = """
+type: command
+short-summary: Restore soft deleted blob or snapshot.
+long-summary: >
+    Operation will only be successful if used within the specified number of days set in the delete retention policy.
+    Attempting to undelete a blob or snapshot that is not soft deleted will succeed without any changes.
+examples:
+  - name: Undelete a blob.
+    text: az storage blob undelete -c mycontainer -n MyBlob
+  - name: Undelete a blob using login credentials.
+    text: az storage blob undelete -c mycontainer -n MyBlob --account-name mystorageaccount --auth-mode login
 """
 
 helps['storage blob delete-batch'] = """
@@ -953,6 +1080,21 @@ type: group
 short-summary: Manage blob metadata.
 """
 
+helps['storage blob metadata show'] = """
+type: command
+short-summary: Return all user-defined metadata for the specified blob or snapshot.
+examples:
+  - name: Show user-defined metadata for blob.
+    text: az storage blob metadata show --container-name mycontainer --name myblob
+"""
+
+helps['storage blob metadata update'] = """
+type: command
+examples:
+  - name: Set user-defined metadata for blob.
+    text: az storage blob metadata update --container-name mycontainer --name myblob --metadata key=value
+"""
+
 helps['storage blob query'] = """
 type: command
 short-summary: Enable users to select/project on blob or blob snapshot data by providing simple query expressions.
@@ -1054,6 +1196,39 @@ examples:
     crafted: true
 """
 
+helps['storage blob immutability-policy'] = """
+type: group
+short-summary: Manage blob immutability policy.
+"""
+
+helps['storage blob immutability-policy set'] = """
+type: command
+short-summary: Set blob's immutability policy.
+examples:
+  - name: Set an unlocked immutability policy.
+    text: az storage blob immutability-policy set --expiry-time 2021-09-07T08:00:00Z --policy-mode Unlocked -c mycontainer -n myblob --account-name mystorageaccount
+  - name: Lock a immutability policy.
+    text: az storage blob immutability-policy set --policy-mode Locked -c mycontainer -n myblob --account-name mystorageaccount
+"""
+
+helps['storage blob immutability-policy delete'] = """
+type: command
+short-summary: Delete blob's immutability policy.
+examples:
+  - name: Delete an unlocked immutability policy.
+    text: az storage blob immutability-policy delete -c mycontainer -n myblob --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage blob set-legal-hold'] = """
+type: command
+short-summary: Set blob legal hold.
+examples:
+  - name: Configure blob legal hold.
+    text: az storage blob set-legal-hold --legal-hold -c mycontainer -n myblob --account-name mystorageaccount --account-key 0000-0000
+  - name: Clear blob legal hold.
+    text: az storage blob set-legal-hold --legal-hold false -c mycontainer -n myblob --account-name mystorageaccount --account-key 0000-0000
+"""
+
 helps['storage blob show'] = """
 type: command
 short-summary: Get the details of a blob.
@@ -1074,28 +1249,35 @@ examples:
     text: az storage blob sync -c mycontainer -s "path/to/file" -d NewBlob
   - name: Sync a directory to a container.
     text: az storage blob sync -c mycontainer --account-name mystorageccount --account-key 00000000 -s "path/to/directory"
+  - name: Sync a directory to a container with azcopy options pass-through (in this case capping the upload bandwith to 20 MBit/s).
+    text: az storage blob sync -c mycontainer --account-name mystorageccount --account-key 00000000 -s "path/to/directory" -- --cap-mbps=20
 """
 
 helps['storage blob upload'] = """
 type: command
 short-summary: Upload a file to a storage blob.
-long-summary: Creates a new blob from a file path, or updates the content of an existing blob with automatic chunking and progress notifications.
+long-summary: Create a new blob from a file path, or updates the content of an existing blob with automatic chunking and progress notifications.
 parameters:
   - name: --type -t
-    short-summary: Defaults to 'page' for *.vhd files, or 'block' otherwise.
+    short-summary: Default to 'page' for *.vhd files, or 'block' otherwise.
   - name: --maxsize-condition
     short-summary: The max length in bytes permitted for an append blob.
   - name: --validate-content
-    short-summary: Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by the service when the chunk has arrived.
-  - name: --tier
-    short-summary: A page blob tier value to set the blob to. The tier correlates to the size of the blob and number of allowed IOPS. This is only applicable to page blobs on premium storage accounts.
+    short-summary: Specify that an MD5 hash shall be calculated for each chunk of the blob and verified by the service when the chunk has arrived.
 examples:
   - name: Upload to a blob.
     text: az storage blob upload -f /path/to/file -c mycontainer -n MyBlob
+  - name: Upload to a blob with blob sas url.
+    text: az storage blob upload -f /path/to/file --blob-url https://mystorageaccount.blob.core.windows.net/mycontainer/myblob?sv=2019-02-02&st=2020-12-22T07%3A07%3A29Z&se=2020-12-23T07%3A07%3A29Z&sr=b&sp=racw&sig=redacted
   - name: Upload a file to a storage blob. (autogenerated)
     text: |
         az storage blob upload --account-name mystorageaccount --account-key 0000-0000 --container-name mycontainer --file /path/to/file --name myblob
     crafted: true
+  - name: Upload a string to a blob.
+    text: az storage blob upload --data "teststring" -c mycontainer -n myblob --account-name mystorageaccount --account-key 0000-0000
+  - name: Upload to a through pipe.
+    text: |
+        echo $data | az storage blob upload --data @- -c mycontainer -n myblob --account-name mystorageaccount --account-key 0000-0000
 """
 
 helps['storage blob upload-batch'] = """
@@ -1144,6 +1326,16 @@ examples:
   - name: Upload all files with the format 'cli-201x-xx-xx.txt' except cli-2018-xx-xx.txt' and 'cli-2019-xx-xx.txt' in a container.
     text: |
         az storage blob upload-batch -d mycontainer -s <path-to-directory> --pattern cli-201[!89]-??-??.txt
+"""
+
+helps['storage blob download'] = """
+type: command
+short-summary: Download a blob to a file path.
+examples:
+  - name: Download a blob.
+    text: az storage blob download -f /path/to/file -c mycontainer -n MyBlob
+  - name: Download a blob content to stdout(pipe support).
+    text: az storage blob download -c mycontainer -n myblob --account-name mystorageaccount --account-key myaccountkey
 """
 
 helps['storage blob url'] = """
@@ -1274,7 +1466,7 @@ examples:
 
 helps['storage container delete'] = """
 type: command
-short-summary: Marks the specified container for deletion.
+short-summary: Mark the specified container for deletion.
 long-summary: >
     The container and any blobs contained within it are later deleted during garbage collection.
 examples:
@@ -1313,6 +1505,21 @@ examples:
     crafted: true
 """
 
+helps['storage container show'] = """
+type: command
+short-summary: Return all user-defined metadata and system properties for the specified container.
+"""
+
+helps['storage container show-permission'] = """
+type: command
+short-summary: Get the permissions for the specified container.
+"""
+
+helps['storage container set-permission'] = """
+type: command
+short-summary: Set the permissions for the specified container.
+"""
+
 helps['storage container immutability-policy'] = """
 type: group
 short-summary: Manage container immutability policies.
@@ -1332,6 +1539,61 @@ helps['storage container lease'] = """
 type: group
 short-summary: Manage blob storage container leases.
 """
+
+helps['storage container lease acquire'] = """
+type: command
+short-summary: Request a new lease.
+long-summary: If the container does not have an active lease, the Blob service creates a lease on the container and returns a new lease ID.
+examples:
+  - name: Request a new lease.
+    text: az storage container lease acquire --container-name mycontainer --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage container lease renew'] = """
+type: command
+short-summary: Renew the lease.
+long-summary: The lease can be renewed if the lease ID specified matches that associated with the
+        container. Note that the lease may be renewed even if it has expired as long as the
+        container has not been leased again since the expiration of that lease. When you renew a
+        lease, the lease duration clock resets.
+examples:
+  - name: Renew the lease.
+    text: az storage container lease renew -c mycontainer --lease-id "32fe23cd-4779-4919-adb3-357e76c9b1bb" --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage container lease break'] = """
+type: command
+short-summary: Break the lease, if the container has an active lease.
+long-summary: Once a lease is broken, it cannot be renewed. Any authorized request can break the lease;
+        the request is not required to specify a matching lease ID. When a lease is broken, the
+        lease break period is allowed to elapse, during which time no lease operation except break
+        and release can be performed on the container. When a lease is successfully broken, the
+        response indicates the interval in seconds until a new lease can be acquired.
+examples:
+  - name: Break the lease.
+    text: az storage container lease break -c mycontainer --lease-break-period 10 --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage container lease change'] = """
+type: command
+short-summary: Change the lease ID of an active lease.
+long-summary: A change must include the current lease ID and a new lease ID.
+examples:
+  - name: Change the lease.
+    text: az storage container lease change -c mycontainer --lease-id "32fe23cd-4779-4919-adb3-357e76c9b1bb" --proposed-lease-id "sef2ef2d-4779-4919-adb3-357e76c9b1bb" --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage container lease release'] = """
+type: command
+short-summary: Release the lease.
+long-summary: The lease may be released if the lease_id specified matches that associated with the
+        container. Releasing the lease allows another client to immediately acquire the lease for
+        the container as soon as the release is complete.
+examples:
+  - name: Release the lease.
+    text: az storage container lease release -c mycontainer --lease-id "32fe23cd-4779-4919-adb3-357e76c9b1bb" --account-name mystorageaccount --account-key 0000-0000
+"""
+
 
 helps['storage container legal-hold'] = """
 type: group
@@ -1381,6 +1643,16 @@ type: group
 short-summary: Manage container metadata.
 """
 
+helps['storage container metadata show'] = """
+type: command
+short-summary: Return all user-defined metadata for the specified container.
+"""
+
+helps['storage container metadata update'] = """
+type: command
+short-summary: Set one or more user-defined name-value pairs for the specified container.
+"""
+
 helps['storage container policy'] = """
 type: group
 short-summary: Manage container stored access policies.
@@ -1391,8 +1663,10 @@ type: command
 short-summary: Restore soft-deleted container.
 long-summary:  Operation will only be successful if used within the specified number of days set in the delete retention policy.
 examples:
-  - name: Restore soft-deleted container.
-    text: az storage container restore -n deletedcontainer --deleted-version deletedversion
+  - name: List and restore soft-deleted container.
+    text: |
+          az storage container list --include-deleted
+          az storage container restore -n deletedcontainer --deleted-version deletedversion
 """
 
 helps['storage copy'] = """
@@ -1457,6 +1731,8 @@ examples:
     text: az storage copy -s https://[account].file.core.windows.net/[share]/[path/to/directory] -d /path/to/dir --recursive
   - name: Download a set of files from Azure File Share using wildcards, and you can also specify your storage account and share information as above.
     text: az storage copy -s https://[account].file.core.windows.net/[share]/ --include-pattern foo* -d /path/to/dir --recursive
+  - name: Upload a single file to Azure Blob using url with azcopy options pass-through.
+    text: az storage copy -s /path/to/file.txt -d https://[account].blob.core.windows.net/[container]/[path/to/blob] -- --block-size-mb=0.25 --check-length
 """
 
 helps['storage cors'] = """
@@ -1519,6 +1795,21 @@ type: group
 short-summary: Manage file storage directories.
 """
 
+helps['storage directory create'] = """
+type: command
+short-summary: Create a new directory under the specified share or parent directory.
+"""
+
+helps['storage directory delete'] = """
+type: command
+short-summary: Delete the specified empty directory.
+"""
+
+helps['storage directory show'] = """
+type: command
+short-summary: Get all user-defined metadata and system properties for the specified directory
+"""
+
 helps['storage directory exists'] = """
 type: command
 short-summary: Check for the existence of a storage directory.
@@ -1544,6 +1835,16 @@ type: group
 short-summary: Manage file storage directory metadata.
 """
 
+helps['storage directory metadata show'] = """
+type: command
+short-summary: Get all user-defined metadata for the specified directory.
+"""
+
+helps['storage directory metadata update'] = """
+type: command
+short-summary: Set one or more user-defined name-value pairs for the specified directory.
+"""
+
 helps['storage entity'] = """
 type: group
 short-summary: Manage table storage entities.
@@ -1563,13 +1864,21 @@ parameters:
   - name: --if-exists
     type: string
     short-summary: Behavior when an entity already exists for the specified PartitionKey and RowKey.
-  - name: --timeout
-    short-summary: The server timeout, expressed in seconds.
 examples:
   - name: Insert an entity into a table. (autogenerated)
     text: |
         az storage entity insert --connection-string $connectionString --entity PartitionKey=AAA RowKey=BBB Content=ASDF2 --if-exists fail --table-name MyTable
     crafted: true
+"""
+
+helps['storage entity merge'] = """
+type: command
+short-summary: Update an existing entity by merging the entity's properties.
+"""
+
+helps['storage entity replace'] = """
+type: command
+short-summary: Update an existing entity in a table.
 """
 
 helps['storage entity query'] = """
@@ -1587,6 +1896,11 @@ examples:
     crafted: true
 """
 
+helps['storage entity delete'] = """
+type: command
+short-summary: Delete an existing entity in a table.
+"""
+
 helps['storage file'] = """
 type: group
 short-summary: Manage file shares that use the SMB 3.0 protocol.
@@ -1600,6 +1914,18 @@ short-summary: Manage file copy operations.
 helps['storage file copy start'] = """
 type: command
 short-summary: Copy a file asynchronously.
+parameters:
+  - name: --source-uri -u
+    type: string
+    short-summary: >
+        A URL of up to 2 KB in length that specifies an Azure file or blob.
+        The value should be URL-encoded as it would appear in a request URI.
+        If the source is in another account, the source must either be public
+        or must be authenticated via a shared access signature. If the source
+        is public, no authentication is required.
+        Examples:
+        https://myaccount.file.core.windows.net/myshare/mydir/myfile
+        https://otheraccount.file.core.windows.net/myshare/mydir/myfile?sastoken.
 examples:
     - name: Copy a file asynchronously.
       text: |
@@ -1682,6 +2008,12 @@ examples:
     crafted: true
 """
 
+helps['storage file download'] = """
+type: command
+short-summary: Download a file to a file path, with automatic chunking and progress notifications.
+long-summary: Return an instance of File with properties and metadata.
+"""
+
 helps['storage file download-batch'] = """
 type: command
 short-summary: Download files from an Azure Storage File Share to a local directory in a batch operation.
@@ -1734,6 +2066,7 @@ examples:
 
 helps['storage file generate-sas'] = """
 type: command
+short-summary: Generate a shared access signature for the file.
 examples:
   - name: Generate a sas token for a file.
     text: |
@@ -1747,6 +2080,15 @@ examples:
     text: |
         az storage file generate-sas --account-key 00000000 --account-name mystorageaccount --expiry 2037-12-31T23:59:00Z --https-only --path path/file.txt --permissions rcdw --share-name myshare
     crafted: true
+"""
+
+helps['storage file show'] = """
+type: command
+short-summary: Return all user-defined metadata, standard HTTP properties, and system properties for the file.
+examples:
+  - name:  Show properties of file in file share.
+    text: |
+        az storage file show -p dir/a.txt -s sharename --account-name myadlsaccount --account-key 0000-0000
 """
 
 helps['storage file list'] = """
@@ -1763,9 +2105,51 @@ examples:
     crafted: true
 """
 
+helps['storage file delete'] = """
+type: command
+short-summary: Mark the specified file for deletion.
+long-summary: The file is later deleted during garbage collection.
+"""
+
+helps['storage file resize'] = """
+type: command
+short-summary: Resize a file to the specified size.
+long-summary: If the specified byte value is less than the current size of the file, then all ranges above
+        the specified byte value are cleared.
+parameters:
+    - name: --size
+      short-summary: Size to resize file to (in bytes).
+"""
+
 helps['storage file metadata'] = """
 type: group
 short-summary: Manage file metadata.
+"""
+
+helps['storage file metadata show'] = """
+type: command
+short-summary:  Return all user-defined metadata for the file.
+examples:
+  - name: Show metadata for the file
+    text: az storage file metadata show -s MyShare --path /path/to/file
+"""
+
+helps['storage file metadata update'] = """
+type: command
+short-summary:  Update file metadata.
+examples:
+  - name: Update metadata for the file
+    text: az storage file metadata update -s MyShare --path /path/to/file --metadata key1=value1
+"""
+
+helps['storage file update'] = """
+type: command
+short-summary: Set system properties on the file.
+long-summary: If one property is set for the content_settings, all properties will be overriden.
+examples:
+  - name:  Set system properties on the file.
+    text: |
+        az storage file update -p dir/a.txt -s sharename --account-name myadlsaccount --account-key 0000-0000 --content-type test/type
 """
 
 helps['storage file upload'] = """
@@ -1985,6 +2369,48 @@ examples:
       crafted: true
 """
 
+helps['storage fs list-deleted-path'] = """
+type: command
+short-summary: List the deleted (file or directory) paths under the specified file system.
+examples:
+  - name: List the deleted (file or directory) paths under the specified file system..
+    text: |
+        az storage fs list-deleted-path -f myfilesystem --account-name mystorageccount --account-key 00000000
+"""
+
+helps['storage fs undelete-path'] = """
+type: command
+short-summary: Restore soft-deleted path.
+long-summary: Operation will only be successful if used within the specified number of days set in the delete retention policy.
+examples:
+  - name: Restore soft-deleted path.
+    text: |
+        az storage fs undelete-path -f myfilesystem --deleted-path-name dir --deletion-id 0000 --account-name mystorageccount --account-key 00000000
+"""
+
+helps['storage fs service-properties'] = """
+type: group
+short-summary: Manage storage datalake service properties.
+"""
+
+helps['storage fs service-properties show'] = """
+type: command
+short-summary: Show the properties of a storage account's datalake service, including Azure Storage Analytics.
+examples:
+  - name: Show the properties of a storage account's datalake service
+    text: |
+        az storage fs service-properties show --account-name mystorageccount --account-key 00000000
+"""
+
+helps['storage fs service-properties update'] = """
+type: command
+short-summary: Update the properties of a storage account's datalake service, including Azure Storage Analytics.
+examples:
+  - name: Update the properties of a storage account's datalake service
+    text: |
+        az storage fs service-properties update --delete-retention --delete-retention-period 7 --account-name mystorageccount --account-key 00000000
+"""
+
 helps['storage fs directory'] = """
 type: group
 short-summary: Manage directories in Azure Data Lake Storage Gen2 account.
@@ -2099,6 +2525,16 @@ helps['storage fs directory download'] = """
           text: az storage fs directory download -f myfilesystem --account-name mystorageaccount -s SourceDirectoryPath -d "<local-path>" --recursive
         - name: Download an entire subdirectory in ADLS Gen2 file system.
           text: az storage fs directory download -f myfilesystem --account-name mystorageaccount -s "path/to/subdirectory" -d "<local-path>" --recursive
+"""
+
+helps['storage fs directory generate-sas'] = """
+type: command
+short-summary: Generate a SAS token for directory in ADLS Gen2 account.
+examples:
+  - name: Generate a sas token for directory and use it to upload files.
+    text: |
+        end=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+        az storage fs directory generate-sas --name dir/ --file-system myfilesystem --https-only --permissions dlrw --expiry $end -o tsv
 """
 
 helps['storage fs file'] = """
@@ -2335,6 +2771,120 @@ type: group
 short-summary: Manage storage queues.
 """
 
+helps['storage queue stats'] = """
+    type: command
+    short-summary: >
+        Retrieve statistics related to replication for the Queue service.
+        It is only available when read-access geo-redundant replication is enabled for the storage account.
+    examples:
+        - name: Show statistics related to replication for the Queue service.
+          text: az storage queue stats --account-name mystorageaccount
+"""
+
+helps['storage queue exists'] = """
+    type: command
+    short-summary: Return a boolean indicating whether the queue exists.
+    examples:
+        - name: Check whether the queue exists.
+          text: az storage queue exists -n myqueue --account-name mystorageaccount
+"""
+
+helps['storage queue generate-sas'] = """
+    type: command
+    short-summary: Generate a shared access signature for the queue.Use the returned signature with the sas_token parameter of QueueService.
+    examples:
+        - name: Generate a sas token for the queue with read-only permissions.
+          text: |
+              end=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+              az storage queue generate-sas -n myqueue --account-name mystorageaccount --permissions r --expiry $end --https-only
+        - name: Generate a sas token for the queue with ip range specified.
+          text: |
+              end=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+              az storage queue generate-sas -n myqueue --account-name mystorageaccount --ip "176.134.171.0-176.134.171.255" --permissions r --expiry $end --https-only
+"""
+
+helps['storage queue create'] = """
+    type: command
+    short-summary:  Create a queue under the given account.
+    examples:
+        - name: Create a queue under the given account with metadata.
+          text: az storage queue create -n myqueue --metadata key1=value1 key2=value2 --account-name mystorageaccount
+"""
+
+helps['storage queue delete'] = """
+    type: command
+    short-summary:  Delete the specified queue and any messages it contains.
+    examples:
+        - name: Delete the specified queue, throw an exception if the queue doesn't exist.
+          text: az storage queue delete -n myqueue --fail-not-exist --account-name mystorageaccount
+"""
+
+helps['storage queue metadata show'] = """
+    type: command
+    short-summary:  Return all user-defined metadata for the specified queue.
+    examples:
+        - name: Return all user-defined metadata for the specified queue.
+          text: az storage queue metadata show -n myqueue --account-name mystorageaccount
+"""
+
+helps['storage queue metadata update'] = """
+    type: command
+    short-summary:  Set user-defined metadata on the specified queue.
+    examples:
+        - name: Set user-defined metadata on the specified queue.
+          text: az storage queue metadata update -n myqueue --metadata a=b c=d --account-name mystorageaccount
+"""
+
+helps['storage message put'] = """
+    type: command
+    short-summary:  Add a new message to the back of the message queue.
+    examples:
+        - name: Add a new message which will live one day.
+          text: az storage message put -q myqueue --content mymessagecontent --time-to-live 86400 --account-name mystorageaccount
+"""
+
+helps['storage message peek'] = """
+    type: command
+    short-summary:  Retrieve one or more messages from the front of the queue, but do not alter the visibility of the message.
+    examples:
+        - name: Retrieve 5 messages from the front of the queue (do not alter the visibility of the message).
+          text: az storage message peek -q myqueue --num-messages 5 --account-name mystorageaccount
+"""
+
+helps['storage message get'] = """
+    type: command
+    short-summary:  Retrieve one or more messages from the front of the queue.
+    examples:
+        - name: Retrieve one message from the front of the queue and reset the visibility timeout to 5 minutes later.
+          text: az storage message get -q myqueue --visibility-timeout 300 --account-name mystorageaccount
+"""
+
+helps['storage message update'] = """
+    type: command
+    short-summary:  Update the visibility timeout of a message.
+    examples:
+        - name: Update the visibility timeout and content of a message.
+          text: |
+              az storage message update --id messageid --pop-receipt popreceiptreturned -q myqueue
+              --visibility-timeout 3600 --content newmessagecontent --account-name mystorageaccount
+"""
+
+helps['storage message delete'] = """
+    type: command
+    short-summary:  Delete the specified message.
+    examples:
+        - name: Delete the specified message.
+          text: az storage message delete --id messageid --pop-receipt popreceiptreturned -q myqueue --account-name mystorageaccount
+"""
+
+helps['storage message clear'] = """
+    type: command
+    short-summary:  Delete all messages from the specified queue.
+    examples:
+        - name: Delete all messages from the specified queue.
+          text: az storage message clear -q myqueue --account-name mystorageaccount
+"""
+
 helps['storage queue list'] = """
 type: command
 short-summary: List queues in a storage account.
@@ -2526,6 +3076,7 @@ examples:
 
 helps['storage share generate-sas'] = """
 type: command
+short-summary: Generate a shared access signature for the share.
 examples:
   - name: Generate a sas token for a fileshare and use it to upload a file.
     text: |
@@ -2547,9 +3098,48 @@ type: command
 short-summary: List the file shares in a storage account.
 """
 
+helps['storage share show'] = """
+type: command
+short-summary: Return all user-defined metadata and system properties for the specified share.
+long-summary: The data returned does not include the shares's list of files or directories.
+"""
+
+helps['storage share delete'] = """
+type: command
+short-summary: Mark the specified share for deletion.
+long-summary: If the share does not exist, the operation fails on the service. By default, the exception is swallowed by the client. To expose the exception, specify True for fail_not_exist.
+"""
+
+helps['storage share stats'] = """
+type: command
+short-summary: Get the approximate size of the data stored on the share, rounded up to the nearest gigabyte.
+long-summary: Note that this value may not include all recently created or recently re-sized files.
+"""
+
+helps['storage share update'] = """
+type: command
+short-summary: Set service-defined properties for the specified share.
+"""
+
+helps['storage share snapshot'] = """
+type: command
+short-summary: Create a snapshot of an existing share under the specified account.
+"""
+
 helps['storage share metadata'] = """
 type: group
 short-summary: Manage the metadata of a file share.
+"""
+
+helps['storage share metadata show'] = """
+type: command
+short-summary: Return all user-defined metadata for the specified share.
+"""
+
+helps['storage share metadata update'] = """
+type: command
+short-summary: Set one or more user-defined name-value pairs for the specified share.
+long-summary: Each call to this operation replaces all existing metadata attached to the share. To remove all metadata from the share, call this operation with no metadata dict.
 """
 
 helps['storage share policy'] = """
@@ -2567,9 +3157,63 @@ examples:
     crafted: true
 """
 
+helps['storage share list-handle'] = """
+type: command
+short-summary: List file handles of a file share.
+examples:
+  - name: List all file handles of a file share recursively.
+    text: |
+        az storage share list-handle --account-name MyAccount --name MyFileShare --recursive
+  - name: List all file handles of a file directory recursively.
+    text: |
+        az storage share list-handle --account-name MyAccount --name MyFileShare --path 'dir1' --recursive
+  - name: List all file handles of a file.
+    text: |
+        az storage share list-handle --account-name MyAccount --name MyFileShare --path 'dir1/test.txt'
+"""
+
+helps['storage share close-handle'] = """
+type: command
+short-summary: Close file handles of a file share.
+examples:
+  - name: Close all file handles of a file share recursively.
+    text: |
+        az storage share close-handle --account-name MyAccount --name MyFileShare --close-all --recursive
+        az storage share close-handle --account-name MyAccount --name MyFileShare --handle-id "*" --recursive
+  - name: Close all file handles of a file directory recursively.
+    text: |
+        az storage share close-handle --account-name MyAccount --name MyFileShare --path 'dir1' --close-all --recursive
+  - name: Close all file handles of a file.
+    text: |
+        az storage share close-handle --account-name MyAccount --name MyFileShare --path 'dir1/test.txt' --close-all
+  - name: Close file handle with a specific handle-id of a file.
+    text: |
+        az storage share close-handle --account-name MyAccount --name MyFileShare --path 'dir1/test.txt' --handle-id "id"
+"""
+
 helps['storage table'] = """
 type: group
 short-summary: Manage NoSQL key-value storage.
+"""
+
+helps['storage table create'] = """
+type: command
+short-summary: Create a new table in the storage account.
+"""
+
+helps['storage table delete'] = """
+type: command
+short-summary: Delete the specified table and any data it contains.
+"""
+
+helps['storage table exists'] = """
+type: command
+short-summary: Return a boolean indicating whether the table exists.
+"""
+
+helps['storage table generate-sas'] = """
+type: command
+short-summary: Generate a shared access signature for the table.
 """
 
 helps['storage table list'] = """

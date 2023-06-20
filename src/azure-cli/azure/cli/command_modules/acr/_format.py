@@ -4,8 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 from collections import OrderedDict
+from datetime import datetime
 from knack.log import get_logger
-
+from ._constants import (
+    REF_KEY
+)
 
 logger = get_logger(__name__)
 
@@ -129,6 +132,29 @@ def connected_registry_list_output_format(result):
     return _output_format(result_list_format, _connected_registry_list_format_group)
 
 
+def list_referrers_output_format(result):
+    manifests = []
+    for manifest in result[REF_KEY]:
+        manifests.append(OrderedDict([
+            ('Digest', _get_value(manifest, 'digest')),
+            ('ArtifactType', _get_value(manifest, 'artifactType')),
+            ('MediaType', _get_value(manifest, 'mediaType')),
+            ('Size', _get_value(manifest, 'size'))
+        ]))
+    return manifests
+
+
+def manifest_output_format(result):
+    manifests = []
+    for manifest in result:
+        manifests.append(OrderedDict([
+            ('MediaType', _get_value(manifest, 'mediaType')),
+            ('ArtifactType', _get_value(manifest, 'artifactType')),
+            ('SubjectDigest', _get_value(manifest, 'subject', 'digest'))
+        ]))
+    return manifests
+
+
 def _recursive_format_list_acr_childs(family_tree, connected_registry_id):
     connected_registry = family_tree[connected_registry_id]
     childs = connected_registry['childs']
@@ -238,7 +264,8 @@ def _replication_format_group(item):
         ('NAME', _get_value(item, 'name')),
         ('LOCATION', _get_value(item, 'location')),
         ('PROVISIONING STATE', _get_value(item, 'provisioningState')),
-        ('STATUS', _get_value(item, 'status', 'displayStatus'))
+        ('STATUS', _get_value(item, 'status', 'displayStatus')),
+        ('REGION ENDPOINT ENABLED', _get_value(item, 'regionEndpointEnabled'))
     ])
 
 
@@ -497,3 +524,7 @@ def _get_duration(start_time, finish_time):
     except ValueError:
         logger.debug("Unable to get duration with start_time '%s' and finish_time '%s'", start_time, finish_time)
         return ' '
+
+
+def add_timestamp(message):
+    return "{} {}".format(datetime.utcnow(), message)

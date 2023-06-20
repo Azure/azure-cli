@@ -63,6 +63,31 @@ type: group
 short-summary: Manage Azure API Management API Version Set.
 """
 
+helps['apim api schema'] = """
+type: group
+short-summary: Manage Azure API Management API Schema's.
+"""
+
+helps['apim graphql'] = """
+type: group
+short-summary: Manage Azure API Management GraphQL API's.
+"""
+
+helps['apim graphql resolver'] = """
+type: group
+short-summary: Manage Azure API Management GraphQL API's Resolvers.
+"""
+
+helps['apim graphql resolver policy'] = """
+type: group
+short-summary: Manage Azure API Management GraphQL API's Resolvers Policies.
+"""
+
+helps['apim deletedservice'] = """
+type: group
+short-summary: Manage soft-deleted Azure API Management services.
+"""
+
 helps['apim backup'] = """
 type: command
 short-summary: Creates a backup of the API Management service to the given Azure Storage Account. This is long running operation and could take several minutes to complete.
@@ -83,6 +108,15 @@ examples:
         az apim restore --name MyApim -g MyResourceGroup --backup-name myBackup \
              --storage-account-name mystorageaccount --storage-account-container backups \
              --storage-account-key Ay2ZbdxLnD4OJPT29F6jLPkB6KynOzx85YCObhrw==
+"""
+
+helps['apim apply-network-updates'] = """
+type: command
+short-summary: Update the API Management resource running in the virtual network to pick the updated network settings.
+examples:
+  - name: Update the virtual network settings of the API Management service instance
+    text: |-
+        az apim apply-network-updates --name MyApim -g MyResourceGroup
 """
 
 helps['apim create'] = """
@@ -359,6 +393,15 @@ examples:
         az apim nv update --service-name MyApim -g MyResourceGroup --named-value-id MyNamedValue --value foo
 """
 
+helps['apim nv wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of an apim named value is met.
+examples:
+  - name: Place the CLI in a waiting state until a condition of a apim api is met.
+    text: |
+        az apim nv wait --created --service-name MyApim -g MyResourceGroup --named-value-id MyNamedValue --resource-group MyResourceGroup
+"""
+
 helps['apim api operation list'] = """
 type: command
 short-summary: List a collection of the operations for the specified API.
@@ -516,4 +559,184 @@ examples:
   - name: Deletes specific Api Version Set.
     text: |-
         az apim api versionset delete --resource-group MyResourceGroup --service-name MyServiceName --version-set-id MyVersionSetId
+"""
+
+helps['apim api schema create'] = """
+type: command
+short-summary: Create an API Management API Schema.
+parameters:
+  - name: --api-id
+    type: string
+    short-summary: unique name of the api for which schema needs to be created
+    long-summary: |
+        API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
+  - name: --schema-id
+    type: string
+    short-summary: unique name of the api schema to be created
+    long-summary: |
+        Schema identifier. Must be unique in the current API Management service instance.
+  - name: --schema-path
+    type: string
+    short-summary: File path specified to import schema of the API.
+    long-summary: |
+        Specify either --schema-path or --schema-content not both
+  - name: --schema-content
+    type: string
+    short-summary: Json escaped string defining the document representing the Schema
+    long-summary: |
+        Specify either --schema-path or --schema-content not both
+  - name: --schema-type
+    type: string
+    short-summary: Schema type  (e.g. application/json, application/vnd.ms-azure-apim.graphql.schema).
+    long-summary: |
+        Must be a valid media type used in a Content-Type header as defined in the RFC 2616. Media type of the schema document
+examples:
+  - name: Create a API Schema.
+    text: |-
+        az apim api schema create --service-name MyApim -g MyResourceGroup --api-id MyApi --schema-id schemaId --schema-type schemaType --schema-path schemaFilePath
+"""
+
+helps['apim api schema delete'] = """
+type: command
+short-summary: Delete an API Management API Schema.
+examples:
+  - name: delete a API Schema.
+    text: |-
+            az apim api schema delete --service-name MyApim -g MyResourceGroup --api-id MyApi --schema-id schemaId
+"""
+
+helps['apim api schema show'] = """
+type: command
+short-summary: Show details of an API Management API Schema.
+examples:
+  - name: Get a API Schema.
+    text: |-
+            az apim api schema show --service-name MyApim -g MyResourceGroup --api-id MyApi --schema-id schemaId
+"""
+
+helps['apim api schema list'] = """
+type: command
+short-summary: List API Management API schema's.
+examples:
+  - name: Get list of schema's associated with an api id.
+    text: |-
+            az apim api schema list --service-name MyApim -g MyResourceGroup --api-id MyApi
+"""
+
+helps['apim api schema get-etag'] = """
+type: command
+short-summary: Get etag of an API Management API schema.
+examples:
+  - name: get a schema entity tag.
+    text: |-
+            az apim api schema get-etag --service-name MyApim -g MyResourceGroup --api-id MyApi --schema-id schemaId
+"""
+
+helps['apim api schema wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of an apim api schema is met.
+examples:
+  - name: Place the CLI in a waiting state until a condition of a apim api schema is met.
+    text: |
+        az apim api schema wait --created --api-id MyApi --name MyApim --schema-id schemaId -g MyResourceGroup
+    crafted: true
+"""
+
+helps['apim deletedservice show'] = """
+type: command
+short-summary: Get soft-deleted Api Management service instances available for undelete by name.
+examples:
+  - name: Get a soft-deleted services with its name.
+    text: |
+        az apim deletedservice show --service-name MyApim --location westus
+"""
+
+helps['apim deletedservice list'] = """
+type: command
+short-summary: List all soft-deleted Api Management services instances available for undelete for the given subscription.
+examples:
+  - name: List all soft-deleted services in a subscription.
+    text: |
+        az apim deletedservice list
+"""
+
+helps['apim deletedservice purge'] = """
+type: command
+short-summary: Purge soft-deleted Api Management service instance (deletes it with no option to undelete)
+examples:
+  - name: Purge a soft-deleted serivce.
+    text: |
+        az apim deletedservice purge --service-name MyApim --location westus
+"""
+
+helps['apim graphql resolver create'] = """
+type: command
+short-summary: Create a new resolver in the GraphQL API or updates an existing one.
+examples:
+  - name: Create a new resolver.
+    text: |
+        az apim graphql resolver create --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId --display-name "Query-allFamilies" --path "Query/allFamilies" --description "A GraphQL Resolver example"
+"""
+
+helps['apim graphql resolver delete'] = """
+type: command
+short-summary: Delete the specified resolver in the GraphQL API.
+examples:
+  - name: Delete resolver.
+    text: |
+        az apim graphql resolver delete --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId
+"""
+
+helps['apim graphql resolver show'] = """
+type: command
+short-summary: Get the details of the GraphQL API Resolver specified by its identifier.
+examples:
+  - name: Get details of resolver.
+    text: |
+        az apim graphql resolver show --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId
+"""
+
+helps['apim graphql resolver list'] = """
+type: command
+short-summary: List a collection of the resolvers for the specified GraphQL API.
+examples:
+  - name: Get list of resolvers of an API.
+    text: |
+        az apim graphql resolver list --service-name MyApim -g MyResourceGroup --api-id MyApi
+"""
+
+helps['apim graphql resolver policy create'] = """
+type: command
+short-summary: Create or updates policy configuration for the GraphQL API Resolver level.
+examples:
+  - name: Create a resolver policy.
+    text: |
+        az apim graphql resolver policy create --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId --policy-format xml --value-path 'path to xml file'
+"""
+
+helps['apim graphql resolver policy show'] = """
+type: command
+short-summary: Get the policy configuration at the GraphQL API Resolver level.
+examples:
+  - name: Get policy configuration.
+    text: |
+        az apim graphql resolver policy show --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId
+"""
+
+helps['apim graphql resolver policy delete'] = """
+type: command
+short-summary: Delete the policy configuration at the GraphQL Api Resolver.
+examples:
+  - name: Delete policy configuration.
+    text: |
+        az apim graphql resolver policy delete --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId
+"""
+
+helps['apim graphql resolver policy list'] = """
+type: command
+short-summary: Get the list of policy configuration at the GraphQL API Resolver level.
+examples:
+  - name: Get list of policy configuration.
+    text: |
+        az apim graphql resolver policy list --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId
 """

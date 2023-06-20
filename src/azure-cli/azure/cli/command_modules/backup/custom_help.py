@@ -8,21 +8,22 @@ import json
 import re
 import os
 from datetime import datetime, timedelta
-from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
+from urllib.parse import urlparse
 
 from knack.log import get_logger
 
-from msrest.paging import Paged
-from msrestazure.tools import parse_resource_id, is_valid_resource_id
+from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
 
-from azure.mgmt.recoveryservicesbackup.models import OperationStatusValues, JobStatus
+from azure.mgmt.recoveryservicesbackup.activestamp.models import OperationStatusValues, JobStatus
+from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrrJobRequest
 
 from azure.cli.core.util import CLIError
+from azure.cli.core.commands import _is_paged
 from azure.cli.command_modules.backup._client_factory import (
     job_details_cf, protection_container_refresh_operation_results_cf,
     backup_operation_statuses_cf, protection_container_operation_results_cf,
-    backup_crr_job_details_cf, crr_operation_status_cf)
-from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError
+    backup_crr_job_details_cf, crr_operation_status_cf, resource_guard_proxies_cf, resource_guard_proxy_cf)
+from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError, InvalidArgumentValueError
 
 
 logger = get_logger(__name__)
@@ -32,9 +33,18 @@ os_windows = 'Windows'
 os_linux = 'Linux'
 password_offset = 33
 password_length = 15
+default_resource_guard = "VaultProxy"
 
 backup_management_type_map = {"AzureVM": "AzureIaasVM", "AzureWorkload": "AzureWorkLoad",
                               "AzureStorage": "AzureStorage", "MAB": "MAB"}
+
+rsc_type = "Microsoft.RecoveryServices/vaults"
+operation_name_map = {"deleteProtection": rsc_type + "/backupFabrics/protectionContainers/protectedItems/delete",
+                      "updateProtection": rsc_type + "/backupFabrics/protectionContainers/protectedItems/write",
+                      "updatePolicy": rsc_type + "/backupPolicies/write",
+                      "deleteRGMapping": rsc_type + "/backupResourceGuardProxies/delete",
+                      "getSecurityPIN": rsc_type + "/backupSecurityPIN/action",
+                      "disableSoftDelete": rsc_type + "/backupconfig/write"}
 
 # Client Utilities
 
@@ -90,12 +100,136 @@ def get_containers(client, container_type, status, resource_group_name, vault_na
 def get_resource_name_and_rg(resource_group_name, name_or_id):
     if is_valid_resource_id(name_or_id):
         id_parts = parse_resource_id(name_or_id)
-        name = id_parts['name']
-        resource_group = id_parts['resource_group']
+        name = id_parts.get('name')
+        resource_group = id_parts.get('resource_group')
+        if name is None or resource_group is None:
+            raise InvalidArgumentValueError("Please provide a valid resource id.")
     else:
         name = name_or_id
         resource_group = resource_group_name
     return name, resource_group
+
+
+def has_resource_guard_mapping(cli_ctx, resource_group_name, vault_name, operation_name=None):
+    resource_guard_proxies_client = resource_guard_proxies_cf(cli_ctx)
+    resource_guard_mappings = get_list_from_paged_response(resource_guard_proxies_client.get(vault_name,
+                                                                                             resource_group_name))
+    if not resource_guard_mappings:
+        return False
+    if operation_name is None:
+        return True
+    resource_guard_mapping = resource_guard_mappings[0]
+    result = False
+    for operation_detail in resource_guard_mapping.properties.resource_guard_operation_details:
+        if operation_detail.vault_critical_operation == operation_name_map[operation_name]:
+            result = True
+            break
+    return result
+
+
+def get_resource_guard_operation_request(cli_ctx, resource_group_name, vault_name, operation_name):
+    resource_guard_proxy_client = resource_guard_proxy_cf(cli_ctx)
+    resource_guard_mapping = resource_guard_proxy_client.get(vault_name, resource_group_name, default_resource_guard)
+    operation_request = ""
+    for operation_detail in resource_guard_mapping.properties.resource_guard_operation_details:
+        if operation_detail.vault_critical_operation == operation_name_map[operation_name]:
+            operation_request = operation_detail.default_resource_request
+            break
+    return operation_request
+
+
+def is_retention_duration_decreased(old_policy, new_policy, backup_management_type):
+    if backup_management_type == "AzureIaasVM":
+        if old_policy.properties.instant_rp_retention_range_in_days is not None:
+            if (new_policy.properties.instant_rp_retention_range_in_days is None or
+                (new_policy.properties.instant_rp_retention_range_in_days <
+                 old_policy.properties.instant_rp_retention_range_in_days)):
+                return True
+        return is_long_term_retention_decreased(old_policy.properties.retention_policy,
+                                                new_policy.properties.retention_policy)
+    if backup_management_type == "AzureStorage":
+        return is_long_term_retention_decreased(old_policy.properties.retention_policy,
+                                                new_policy.properties.retention_policy)
+    if backup_management_type == "AzureWorkload":
+        return is_workload_policy_retention_decreased(old_policy, new_policy)
+    return False
+
+
+def is_long_term_retention_decreased(old_retention_policy, new_retention_policy):
+    if old_retention_policy.daily_schedule is not None:
+        if (new_retention_policy.daily_schedule is None or
+            (new_retention_policy.daily_schedule.retention_duration.count <
+             old_retention_policy.daily_schedule.retention_duration.count)):
+            return True
+
+    if old_retention_policy.weekly_schedule is not None:
+        if (new_retention_policy.weekly_schedule is None or
+            (new_retention_policy.weekly_schedule.retention_duration.count <
+             old_retention_policy.weekly_schedule.retention_duration.count)):
+            return True
+
+    if old_retention_policy.monthly_schedule is not None:
+        if (new_retention_policy.monthly_schedule is None or
+            (new_retention_policy.monthly_schedule.retention_duration.count <
+             old_retention_policy.monthly_schedule.retention_duration.count)):
+            return True
+
+    if old_retention_policy.yearly_schedule is not None:
+        if (new_retention_policy.yearly_schedule is None or
+            (new_retention_policy.yearly_schedule.retention_duration.count <
+             old_retention_policy.yearly_schedule.retention_duration.count)):
+            return True
+
+    return False
+
+
+def is_simple_term_retention_decreased(old_retention_policy, new_retention_policy):
+    if new_retention_policy.retention_duration.count < old_retention_policy.retention_duration.count:
+        return True
+
+    return False
+
+
+def is_workload_policy_retention_decreased(old_policy, new_policy):
+    old_sub_protection_policies = old_policy.properties.sub_protection_policy
+    for old_sub_protection_policy in old_sub_protection_policies:
+        sub_policy_type = old_sub_protection_policy.policy_type
+        new_sub_protection_policy = get_sub_protection_policy(new_policy, sub_policy_type)
+        if new_sub_protection_policy is None:
+            return True
+        # is SnapshotCopyOnlyFull allowed from CLI?
+        if sub_policy_type == "SnapshotCopyOnlyFull":
+            if (new_sub_protection_policy.snapshot_backup_additional_details.instant_rp_retention_range_in_days <
+                    old_sub_protection_policy.snapshot_backup_additional_details.instant_rp_retention_range_in_days):
+                return True
+        else:
+            if old_sub_protection_policy.retention_policy.retention_policy_type == "SimpleRetentionPolicy":
+                if is_simple_term_retention_decreased(old_sub_protection_policy.retention_policy,
+                                                      new_sub_protection_policy.retention_policy):
+                    return True
+            elif old_sub_protection_policy.retention_policy.retention_policy_type == "LongTermRetentionPolicy":
+                if is_long_term_retention_decreased(old_sub_protection_policy.retention_policy,
+                                                    new_sub_protection_policy.retention_policy):
+                    return True
+    return False
+
+
+def get_sub_protection_policy(policy, sub_policy_type):
+    for sub_protection_policy in policy.properties.sub_protection_policy:
+        if sub_protection_policy.policy_type == sub_policy_type:
+            return sub_protection_policy
+    return None
+
+
+def replace_min_value_in_subtask(response):
+    # For a task in progress: replace min_value in start and end times with null.
+    tasks_list = response.properties.extended_info.tasks_list
+    for task in tasks_list:
+        if task.start_time == datetime.min:
+            task.start_time = None
+        if task.end_time == datetime.min:
+            task.end_time = None
+    return response
 
 
 def validate_container(container):
@@ -123,8 +257,8 @@ def validate_object(obj, error_message):
         raise ResourceNotFoundError(error_message)
 
 
-# def get_pipeline_response(pipeline_response, _0, _1):
-#    return pipeline_response
+def get_pipeline_response(pipeline_response, _0, _1):
+    return pipeline_response
 
 
 def get_target_path(resource_type, path, logical_name, data_directory_paths):
@@ -150,19 +284,18 @@ def track_backup_ilr(cli_ctx, result, vault_name, resource_group):
 # pylint: disable=inconsistent-return-statements
 def track_backup_job(cli_ctx, result, vault_name, resource_group):
     job_details_client = job_details_cf(cli_ctx)
-
     operation_status = track_backup_operation(cli_ctx, resource_group, result, vault_name)
-
     if operation_status.properties:
         job_id = operation_status.properties.job_id
         job_details = job_details_client.get(vault_name, resource_group, job_id)
         return job_details
+    return operation_status
 
 
 def track_backup_operation(cli_ctx, resource_group, result, vault_name):
     backup_operation_statuses_client = backup_operation_statuses_cf(cli_ctx)
 
-    operation_id = get_operation_id_from_header(result.response.headers['Azure-AsyncOperation'])
+    operation_id = get_operation_id_from_header(result.http_response.headers['Azure-AsyncOperation'])
     operation_status = backup_operation_statuses_client.get(vault_name, resource_group, operation_id)
     while operation_status.status == OperationStatusValues.in_progress.value:
         time.sleep(5)
@@ -172,19 +305,19 @@ def track_backup_operation(cli_ctx, resource_group, result, vault_name):
 
 def track_backup_crr_job(cli_ctx, result, azure_region, resource_id):
     crr_job_details_client = backup_crr_job_details_cf(cli_ctx)
-
     operation_status = track_backup_crr_operation(cli_ctx, result, azure_region)
-
     if operation_status.properties:
+        time.sleep(10)
         job_id = operation_status.properties.job_id
-        job_details = crr_job_details_client.get(azure_region, resource_id, job_id)
+        job_details = crr_job_details_client.get(azure_region, CrrJobRequest(resource_id=resource_id,
+                                                                             job_name=job_id))
         return job_details
 
 
 def track_backup_crr_operation(cli_ctx, result, azure_region):
     crr_operation_statuses_client = crr_operation_status_cf(cli_ctx)
 
-    operation_id = get_operation_id_from_header(result.response.headers['Azure-AsyncOperation'])
+    operation_id = get_operation_id_from_header(result.http_response.headers['Azure-AsyncOperation'])
     operation_status = crr_operation_statuses_client.get(azure_region, operation_id)
     while operation_status.status == OperationStatusValues.in_progress.value:
         time.sleep(5)
@@ -195,57 +328,43 @@ def track_backup_crr_operation(cli_ctx, result, azure_region):
 def track_refresh_operation(cli_ctx, result, vault_name, resource_group):
     protection_container_refresh_operation_results_client = protection_container_refresh_operation_results_cf(cli_ctx)
 
-    operation_id = get_operation_id_from_header(result.response.headers['Location'])
+    operation_id = get_operation_id_from_header(result.http_response.headers['Location'])
     result = protection_container_refresh_operation_results_client.get(vault_name, resource_group,
                                                                        fabric_name, operation_id,
-                                                                       raw=True)
-    while result.response.status_code == 202:
+                                                                       cls=get_pipeline_response)
+    while result.http_response.status_code == 202:
         time.sleep(5)
         result = protection_container_refresh_operation_results_client.get(vault_name, resource_group,
                                                                            fabric_name, operation_id,
-                                                                           raw=True)
+                                                                           cls=get_pipeline_response)
 
 
 def track_register_operation(cli_ctx, result, vault_name, resource_group, container_name):
     protection_container_operation_results_client = protection_container_operation_results_cf(cli_ctx)
 
-    operation_id = get_operation_id_from_header(result.response.headers['Location'])
+    operation_id = get_operation_id_from_header(result.http_response.headers['Location'])
     result = protection_container_operation_results_client.get(vault_name, resource_group,
                                                                fabric_name, container_name,
-                                                               operation_id, raw=True)
-    while result.response.status_code == 202:
+                                                               operation_id, cls=get_pipeline_response)
+    while result.http_response.status_code == 202:
         time.sleep(5)
         result = protection_container_operation_results_client.get(vault_name, resource_group,
                                                                    fabric_name, container_name,
-                                                                   operation_id, raw=True)
-
-
-# def track_mab_unregister_operation(cli_ctx, result, vault_name, resource_group, container_name):
-#    protection_container_operation_results_client = protection_container_operation_results_cf(cli_ctx)
-
-#    operation_id = get_operation_id_from_header(result.http_response.headers['Location'])
-#    result = protection_container_operation_results_client.get(vault_name, resource_group,
-#                                                               fabric_name, container_name,
-#                                                               operation_id, raw=True)
-#    while result.response.status_code == 202:
-#        time.sleep(5)
-#        result = protection_container_operation_results_client.get(vault_name, resource_group,
-#                                                                   fabric_name, container_name,
-#                                                                   operation_id, raw=True)
+                                                                   operation_id, cls=get_pipeline_response)
 
 
 def track_inquiry_operation(cli_ctx, result, vault_name, resource_group, container_name):
     protection_container_operation_results_client = protection_container_operation_results_cf(cli_ctx)
 
-    operation_id = get_operation_id_from_header(result.response.headers['Location'])
+    operation_id = get_operation_id_from_header(result.http_response.headers['Location'])
     result = protection_container_operation_results_client.get(vault_name, resource_group,
                                                                fabric_name, container_name,
-                                                               operation_id, raw=True)
-    while result.response.status_code == 202:
+                                                               operation_id, cls=get_pipeline_response)
+    while result.http_response.status_code == 202:
         time.sleep(5)
         result = protection_container_operation_results_client.get(vault_name, resource_group,
                                                                    fabric_name, container_name,
-                                                                   operation_id, raw=True)
+                                                                   operation_id, cls=get_pipeline_response)
 
 
 def job_in_progress(job_status):
@@ -255,7 +374,7 @@ def job_in_progress(job_status):
 
 
 def get_list_from_paged_response(obj_list):
-    return list(obj_list) if isinstance(obj_list, Paged) else obj_list
+    return list(obj_list) if _is_paged(obj_list) else obj_list
 
 
 def get_none_one_or_many(obj_list):
@@ -402,6 +521,14 @@ def get_resource_group_from_id(arm_id):
     return m.group(0)
 
 
+def get_subscription_from_id(arm_id):
+    # Search for the pattern following "/subscriptions/" in the ARM ID
+    # (?<=/subscriptions/)   Positive lookbehind: Match the pattern after "/subscriptions/"
+    # [^/]+                  Match one or more characters that are not a forward slash
+    m = re.search('(?<=/subscriptions/)[^/]+', arm_id)
+    return m.group(0)
+
+
 def get_operation_id_from_header(header):
     parse_object = urlparse(header)
     return parse_object.path.split("/")[-1]
@@ -421,12 +548,18 @@ def validate_and_extract_container_type(container_name, backup_management_type):
             return backup_management_type
         return backup_management_type_map[backup_management_type]
 
-    container_type = container_name.split(";")[0]
-    container_type_mappings = {"IaasVMContainer": "AzureIaasVM", "StorageContainer": "AzureStorage",
-                               "VMAppContainer": "AzureWorkload", "Windows": "MAB"}
+    container_type = container_name.split(";")[0].lower()
+    container_type_mappings = {"iaasvmcontainer": "AzureIaasVM", "storagecontainer": "AzureStorage",
+                               "vmappcontainer": "AzureWorkload", "windows": "MAB",
+                               "sqlagworkloadcontainer": "AzureWorkload", "hanahsrcontainer": "AzureWorkload"}
 
     if container_type in container_type_mappings:
         return container_type_mappings[container_type]
+    logger.warning(
+        """
+        Could not extract the backup management type. If the command fails check if the container name specified is
+        complete or try using container friendly name instead.
+        """)
     return None
 
 

@@ -61,6 +61,60 @@ examples:
           --image debian --secrets "$vm_secrets"
 """
 
+helps['keyvault certificate list'] = """
+type: command
+short-summary: List certificates in a specified key vault.
+long-summary: The GetCertificates operation returns the set of certificates resources in the specified key
+        vault. This operation requires the certificates/list permission.
+"""
+
+helps['keyvault certificate list-versions'] = """
+type: command
+short-summary: List the versions of a certificate.
+long-summary: The GetCertificateVersions operation returns the versions of a certificate in the specified
+        key vault. This operation requires the certificates/list permission.
+"""
+
+helps['keyvault certificate list-deleted'] = """
+type: command
+short-summary: Lists the currently-recoverable deleted certificates.
+long-summary: Possible only if vault is soft-delete enabled.  Requires certificates/get/list permission.
+        Retrieves the certificates in the current vault which are in a deleted state and ready for
+        recovery or purging. This operation includes deletion-specific information.
+"""
+
+helps['keyvault certificate show'] = """
+type: command
+short-summary: Gets information about a certificate.
+long-summary:  Gets information about a specific certificate. This operation requires the certificates/get
+        permission.
+"""
+
+helps['keyvault certificate delete'] = """
+type: command
+short-summary: Deletes a certificate from a specified key vault.
+long-summary: Deletes all versions of a certificate object along with its associated policy. Delete
+        certificate cannot be used to remove individual versions of a certificate object. This
+        operation requires the certificates/delete permission.
+"""
+
+helps['keyvault certificate purge'] = """
+type: command
+short-summary: Permanently deletes the specified deleted certificate.
+long-summary: The PurgeDeletedCertificate operation performs an irreversible deletion of the specified
+        certificate, without possibility for recovery. The operation is not available if the
+        recovery level does not specify 'Purgeable'. This operation requires the certificate/purge
+        permission.
+"""
+
+helps['keyvault certificate set-attributes'] = """
+type: command
+short-summary: Updates the specified attributes associated with the given certificate.
+long-summary: The UpdateCertificate operation applies the specified update on the given certificate; the
+        only elements updated are the certificate's attributes. This operation requires the
+        certificates/update permission.
+"""
+
 helps['keyvault certificate download'] = """
 type: command
 short-summary: Download the public portion of a Key Vault certificate.
@@ -115,6 +169,21 @@ examples:
           --image debian --secrets "$vm_secrets"
 """
 
+helps['keyvault certificate backup'] = """
+type: command
+short-summary: Backs up the specified certificate.
+long-summary: Requests that a backup of the specified certificate be downloaded to the client. All
+        versions of the certificate will be downloaded. This operation requires the
+        certificates/backup permission.
+"""
+
+helps['keyvault certificate restore'] = """
+type: command
+short-summary: Restores a backed up certificate to a vault.
+long-summary: Restores a backed up certificate, and all its versions, to a vault. This operation requires
+        the certificates/restore permission.
+"""
+
 helps['keyvault certificate issuer'] = """
 type: group
 short-summary: Manage certificate issuer information.
@@ -128,6 +197,42 @@ short-summary: Manage admin information for certificate issuers.
 helps['keyvault certificate pending'] = """
 type: group
 short-summary: Manage pending certificate creation operations.
+"""
+
+helps['keyvault certificate pending merge'] = """
+type: command
+short-summary: Merges a certificate or a certificate chain with a key pair existing on the server.
+long-summary: The MergeCertificate operation performs the merging of a certificate or certificate chain
+        with a key pair currently available in the service. This operation requires the
+        certificates/create permission.
+"""
+
+helps['keyvault certificate pending show'] = """
+type: command
+short-summary: Gets the creation operation of a certificate.
+long-summary: Gets the creation operation associated with a specified certificate. This operation requires
+        the certificates/get permission.
+"""
+
+helps['keyvault certificate pending delete'] = """
+type: command
+short-summary: Deletes the creation operation for a specific certificate.
+long-summary: Deletes the creation operation for a specified certificate that is in the process of being
+        created. The certificate is no longer created. This operation requires the
+        certificates/update permission.
+"""
+
+helps['keyvault certificate contact list'] = """
+type: command
+short-summary: Lists the certificate contacts for a specified key vault.
+long-summary: The GetCertificateContacts operation returns the set of certificate contact resources in the
+        specified key vault. This operation requires the certificates/managecontacts permission.
+"""
+
+helps['keyvault certificate issuer admin list'] = """
+type: command
+short-summary: List admins for a specified certificate issuer.
+long-summary: Requires certificates/manageissuers/getissuers permission.
 """
 
 helps['keyvault create'] = """
@@ -207,6 +312,13 @@ long-summary: The ENCRYPT operation encrypts an arbitrary sequence of bytes usin
     the key. This operation is supported for asymmetric keys as a convenience for callers that
     have a key-reference but do not have access to the public key material. This operation
     requires the keys/encrypt permission.
+examples:
+  - name: Encrypt value(Base64 encoded string) with valut's key using RSA-OAEP.
+    text: |
+        az keyvault key encrypt --name mykey --vault-name myvault --algorithm RSA-OAEP --value "YWJjZGVm" --data-type base64
+  - name: Encrypt value(plaintext) with MHSM's key using AES-GCM.
+    text: |
+        az keyvault key encrypt --name mykey --hsm-name myhsm --algorithm A256GCM --value "this is plaintext" --data-type plaintext --aad "101112131415161718191a1b1c1d1e1f"
 """
 
 helps['keyvault key decrypt'] = """
@@ -218,6 +330,14 @@ long-summary: The DECRYPT operation decrypts a well-formed block of ciphertext u
     and the algorithm to be used. The DECRYPT operation applies to asymmetric and symmetric keys
     stored in Vault or HSM since it uses the private portion of the key. This operation
     requires the keys/decrypt permission.
+examples:
+  - name: Decrypt value(Base64 encoded string returned by encrypt command) with valut's key using RSA-OAEP and get result as base64 encoded.
+    text: |
+        az keyvault key decrypt --name mykey --vault-name myvault --algorithm RSA-OAEP --data-type base64 --value "CbFcCxHG7WTU+nbpFRrHoqSduwlPy8xpWxf1JxZ2y12BY/qFJirMSYq1i4SO9rvSmvmEMxFV5kw5s9Tc+YoKmv8X6oe+xXx+JytYV8obA5l3OQD9epuuQHWW0kir/mp88lzhcYWxYuF7mKDpPKDV4if+wnAZqQ4woB6t2JEZU5MVK3s+3E/EU4ehb5XrVxAl6xpYy8VYbyF33uJ5s+aUsYIrsVtXgrW99HQ3ic7tJtIOGuWqKhPCdQRezRkOcyxkJcmnDHOLjWA/9strzzx/dyg/t884gT7qrkmIHh8if9SFal/vi1h4XhoDqUleMTnKev2IFHyDNcYVYG3pftJiuA=="
+  - name: Decrypt value(Base64 encoded string returned by encrypt command) with MHSM's key using AES-GCM and get result as plaintext.
+    text: |
+        az keyvault key decrypt --name mykey --hsm-name myhsm --algorithm A256GCM --value "N5w02jS77xg536Ddzv/xPWQ=" --data-type plaintext
+        --aad "101112131415161718191a1b1c1d1e1f" --iv "727b26f78e55cf4cd8d34216" --tag "f7207d02cead35a77a1c7e5f8af959e9"
 """
 
 helps['keyvault key backup'] = """
@@ -323,6 +443,55 @@ long-summary: The Get Deleted Key operation is applicable for soft-delete enable
 helps['keyvault key get-policy-template'] = """
 type: command
 short-summary: Return policy template as JSON encoded policy definition.
+"""
+
+helps['keyvault key rotate'] = """
+type: command
+short-summary: Rotate the key based on the key policy by generating a new version of the key.
+"""
+
+helps['keyvault key rotation-policy'] = """
+type: group
+short-summary: Manage key's rotation policy.
+"""
+
+helps['keyvault key rotation-policy update'] = """
+type: command
+short-summary: Update the rotation policy of a Key Vault key.
+examples:
+  - name: Set rotation policy using json file
+    text: |
+        az keyvault key rotation-policy update -n mykey --vault-name mykeyvault --value path/to/policy.json
+        A valid example for policy.json is:
+        {
+          "lifetimeActions": [
+            {
+              "trigger": {
+                "timeAfterCreate": "P90D", // ISO 8601 duration. For example: 90 days is "P90D", 3 months is "P3M", and 48 hours is "PT48H".
+                "timeBeforeExpiry" : null
+              },
+              "action": {
+                "type": "Rotate"
+              }
+            },
+            {
+              "trigger": {
+                "timeBeforeExpiry" : "P30D" // ISO 8601 duration.
+              },
+              "action": {
+                "type": "Notify"
+              }
+            }
+          ],
+          "attributes": {
+            "expiryTime": "P2Y" // ISO 8601 duration.
+          }
+        }
+"""
+
+helps['keyvault key rotation-policy show'] = """
+type: command
+short-summary: Get the rotation policy of a Key Vault key.
 """
 
 helps['keyvault list'] = """
@@ -576,6 +745,79 @@ examples:
         az keyvault secret set --name MySecretName --vault-name MyKeyVault --file /path/to/file --encoding MyEncoding
 """
 
+helps['keyvault secret list'] = """
+type: command
+short-summary: List secrets in a specified key vault.
+long-summary: The Get Secrets operation is applicable to the entire vault. However, only the base secret
+    identifier and its attributes are provided in the response. Individual secret versions are
+    not listed in the response. This operation requires the secrets/list permission.
+"""
+
+helps['keyvault secret list-versions'] = """
+type: command
+short-summary: List all versions of the specified secret.
+long-summary: The full secret identifier and attributes are provided in the response. No values are
+    returned for the secrets. This operations requires the secrets/list permission.
+"""
+
+helps['keyvault secret list-deleted'] = """
+type: command
+short-summary: Lists deleted secrets for the specified vault.
+long-summary: The Get Deleted Secrets operation returns the secrets that have been deleted for a vault
+    enabled for soft-delete. This operation requires the secrets/list permission.
+"""
+
+helps['keyvault secret set-attributes'] = """
+type: command
+short-summary: Updates the attributes associated with a specified secret in a given key vault.
+long-summary: The UPDATE operation changes specified attributes of an existing stored secret. Attributes
+    that are not specified in the request are left unchanged. The value of a secret itself
+    cannot be changed. This operation requires the secrets/set permission.
+"""
+
+helps['keyvault secret show'] = """
+type: command
+short-summary: Get a specified secret from a given key vault.
+long-summary: The GET operation is applicable to any secret stored in Azure Key Vault. This operation
+    requires the secrets/get permission.
+"""
+
+helps['keyvault secret show-deleted'] = """
+type: command
+short-summary: Gets the specified deleted secret.
+long-summary: The Get Deleted Secret operation returns the specified deleted secret along with its
+    attributes. This operation requires the secrets/get permission.
+"""
+
+helps['keyvault secret purge'] = """
+type: command
+short-summary: Permanently deletes the specified secret.
+long-summary: The purge deleted secret operation removes the secret permanently, without the possibility
+    of recovery. This operation can only be enabled on a soft-delete enabled vault. This
+    operation requires the secrets/purge permission.
+"""
+
+helps['keyvault secret recover'] = """
+type: command
+short-summary: Recovers the deleted secret to the latest version.
+long-summary: Recovers the deleted secret in the specified vault. This operation can only be performed on
+    a soft-delete enabled vault. This operation requires the secrets/recover permission.
+"""
+
+helps['keyvault secret backup'] = """
+type: command
+short-summary: Backs up the specified secret.
+long-summary: Requests that a backup of the specified secret be downloaded to the client. All versions of
+    the secret will be downloaded. This operation requires the secrets/backup permission.
+"""
+
+helps['keyvault secret restore'] = """
+type: command
+short-summary: Restores a backed up secret to a vault.
+long-summary: Restores a backed up secret, and all its versions, to a vault. This operation requires the
+        secrets/restore permission.
+"""
+
 helps['keyvault show'] = """
 type: command
 short-summary: Show details of a Vault or HSM.
@@ -710,6 +952,16 @@ examples:
         az keyvault security-domain init-recovery --hsm-name MyHSM --sd-exchange-key "{PATH_TO_RESTORE}"
 """
 
+helps['keyvault security-domain restore-blob'] = """
+type: command
+short-summary: Enable to decrypt and encrypt security domain file as blob. Can be run in offline environment, before file is uploaded to HSM using security-domain upload.
+examples:
+  - name: Security domain restore blob.
+    text: |
+        az keyvault security-domain restore-blob --sd-file "{SD_TRANSFER_FILE}" --sd-exchange-key "{PEM_FILE_NAME}" --sd-wrapping-keys "{PEM_PRIVATE_KEY1_FILE_NAME}" "{PEM_PRIVATE_KEY2_FILE_NAME}" --sd-file-restore-blob "{SD_TRANSFER_FILE_RESTORE_BLOB}"
+
+"""
+
 helps['keyvault security-domain upload'] = """
 type: command
 short-summary: Start to restore the HSM.
@@ -717,6 +969,9 @@ examples:
   - name: Security domain upload (M=2).
     text: |
         az keyvault security-domain upload --hsm-name MyHSM --sd-file "{SD_TRANSFER_FILE}" --sd-exchange-key "{PEM_FILE_NAME}" --sd-wrapping-keys "{PEM_PRIVATE_KEY1_FILE_NAME}" "{PEM_PRIVATE_KEY2_FILE_NAME}"
+  - name: Security domain upload, in which sd_file is already restored using keyvault security-domain restore-blob command
+    text: |
+        az keyvault security-domain upload --hsm-name MyHSM --sd-file "{SD_TRANSFER_FILE}" --restore-blob
 """
 
 helps['keyvault security-domain download'] = """
@@ -750,4 +1005,69 @@ examples:
   - name: Assign key permissions `get`, `list` to a SPN (Service Principal Name).
     text: |
         az keyvault set-policy -n MyVault --key-permissions get list --spn {SPN}
+"""
+
+helps['keyvault region'] = """
+type: group
+short-summary: Manage MHSM multi-regions.
+"""
+
+helps['keyvault region list'] = """
+type: command
+short-summary: Get regions information associated with the managed HSM Pool.
+"""
+
+helps['keyvault region add'] = """
+type: command
+short-summary: Add regions for the managed HSM Pool.
+examples:
+  - name: Add regions for the managed HSM.
+    text: |
+        az keyvault region add --region-name westus2 --hsm-name myhsm --resource-group myrg
+"""
+
+helps['keyvault region remove'] = """
+type: command
+short-summary: Remove regions for the managed HSM Pool.
+examples:
+  - name: Remove regions for the managed HSM.
+    text: |
+        az keyvault region remove --region-name westus2 --hsm-name myhsm --resource-group myrg
+"""
+
+helps['keyvault region wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the HSM is met.
+examples:
+  - name: Pause CLI until the regions are updated.
+    text: |
+        az keyvault region wait --hsm-name myhsm --updated
+"""
+
+helps['keyvault setting'] = """
+type: group
+short-summary: Manage MHSM settings.
+"""
+
+helps['keyvault setting list'] = """
+type: command
+short-summary: Get all settings associated with the managed HSM.
+"""
+
+helps['keyvault setting show'] = """
+type: command
+short-summary: Get specific setting associated with the managed HSM.
+examples:
+  - name: Add "AllowKeyManagementOperationsThroughARM" setting of the managed HSM.
+    text: |
+        az keyvault setting show --name AllowKeyManagementOperationsThroughARM --hsm-name myhsm
+"""
+
+helps['keyvault setting update'] = """
+type: command
+short-summary: Update specific setting associated with the managed HSM.
+examples:
+  - name: Allow key management operations through ARM for the managed HSM.
+    text: |
+        az keyvault setting update --name AllowKeyManagementOperationsThroughARM --value true --type boolean --hsm-name myhsm
 """

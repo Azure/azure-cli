@@ -218,7 +218,7 @@ class CdnOriginScenarioTest(CdnScenarioMixin, ScenarioTest):
                   JMESPathCheck('httpPort', 8080),
                   JMESPathCheck('httpsPort', 8443),
                   JMESPathCheck('privateLinkResourceId', private_link_id),
-                  JMESPathCheck('privateLinkLocation', private_link_location),
+                  JMESPathCheck('privateLinkLocation', private_link_location, False),
                   JMESPathCheck('privateLinkApprovalMessage', private_link_message)]
         self.origin_update_cmd(resource_group,
                                origin_name,
@@ -239,7 +239,7 @@ class CdnOriginScenarioTest(CdnScenarioMixin, ScenarioTest):
                   JMESPathCheck('httpPort', 8080),
                   JMESPathCheck('httpsPort', 8443),
                   JMESPathCheck('privateLinkResourceId', private_link_id),
-                  JMESPathCheck('privateLinkLocation', private_link_location),
+                  JMESPathCheck('privateLinkLocation', private_link_location, False),
                   JMESPathCheck('privateLinkApprovalMessage', private_link_message)]
         self.origin_show_cmd(resource_group,
                              endpoint_name,

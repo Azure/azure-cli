@@ -6,6 +6,7 @@
 import os
 import re
 import argparse
+from azure.cli.core.azclierror import ArgumentUsageError
 
 from knack.util import CLIError
 try:
@@ -128,12 +129,12 @@ def internal_validate_lock_parameters(namespace, resource_group, resource_provid
         return
 
     if not resource_type:
-        raise CLIError('--resource-type is required if the name, --resource, is present')
+        raise CLIError('--resource-type is required if the --name, --resource, --resource-group is present')
 
     parts = resource_type.split('/')
     if resource_provider_namespace is None:
         if len(parts) == 1:
-            raise CLIError('A resource namespace is required if the name, --resource, is present.'
+            raise CLIError('A resource namespace is required if the --name, --resource, --resource-group is present.'
                            'Expected <namespace>/<type> or --namespace=<namespace>')
     elif len(parts) != 1:
         raise CLIError('Resource namespace specified in both --resource-type and --namespace')
@@ -210,25 +211,54 @@ def validate_metadata(namespace):
         namespace.metadata = dict(x.split('=', 1) for x in namespace.metadata)
 
 
-def validate_msi(namespace):
-    if namespace.assign_identity is not None:
-        identities = namespace.assign_identity or []
-        if any(identity != MSI_LOCAL_ID for identity in identities):
-            raise CLIError("usage error: 'User assigned identities are not supported "
-                           "with --assign-identity and policy assignments'")
+def process_assign_identity_namespace(cmd, namespace):
+    validate_msi(cmd, namespace, from_identity_command=True)
+
+
+def process_assignment_create_namespace(cmd, namespace):
+    validate_msi(cmd, namespace)
+
+
+def validate_msi(cmd, namespace, from_identity_command=False):
+    identities = None
+    if from_identity_command:
+        if namespace.mi_system_assigned is not None or namespace.mi_user_assigned is None:
+            identities = [MSI_LOCAL_ID]
+            if namespace.mi_user_assigned is not None:
+                raise ArgumentUsageError(
+                    'Only one type of managed identity is allowed. '
+                    'Please use either --mi-system-assigned or --mi-user-assigned')
+    else:
+        if namespace.mi_system_assigned is not None or namespace.assign_identity is not None:
+            identities = [MSI_LOCAL_ID]
+            if namespace.mi_user_assigned is not None:
+                raise ArgumentUsageError(
+                    'Only one type of managed identity is allowed. '
+                    'Please use either --mi-system-assigned or --mi-user-assigned')
+
+    if namespace.mi_user_assigned is not None:
+        identities = [namespace.mi_user_assigned]
+
+    if identities is not None:
+        user_assigned_identities = [x for x in identities if x != MSI_LOCAL_ID]
+        if user_assigned_identities and not cmd.supported_api_version(min_api='2021-06-01'):
+            raise ArgumentUsageError(
+                'User assigned identity is only available under profile '
+                'with minimum Authorization API version of 2021-06-01')
 
         if not namespace.identity_scope and getattr(namespace.identity_role, 'is_default', None) is None:
-            raise CLIError("usage error: '--role {}' is not applicable as the '--identity-scope' is not provided"
-                           .format(namespace.identity_role))
+            raise ArgumentUsageError(
+                "'--role {}' is not applicable as the '--identity-scope' is not provided"
+                .format(namespace.identity_role))
 
         if namespace.identity_scope:
             if identities and MSI_LOCAL_ID not in identities:
-                raise CLIError(
-                    "usage error: '--identity-scope'/'--role' is only applicable when assigning a system identity")
+                raise ArgumentUsageError(
+                    "'--identity-scope'/'--role' is only applicable when assigning a system identity")
 
     elif namespace.identity_scope or getattr(namespace.identity_role, 'is_default', None) is None:
-        raise CLIError(
-            'usage error: --assign-identity [--identity-scope SCOPE] [--role ROLE]')
+        raise ArgumentUsageError(
+            "'--identity-scope'/'--role' is only applicable when assigning a system identity")
 
 
 # pylint: disable=too-few-public-methods

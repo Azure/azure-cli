@@ -7,8 +7,8 @@ import os
 import tempfile
 import unittest
 
-from six.moves.urllib.request import pathname2url  # pylint: disable=import-error
-from six.moves.urllib.parse import urljoin  # pylint: disable=import-error
+from urllib.request import pathname2url
+from urllib.parse import urljoin
 
 from unittest import mock
 

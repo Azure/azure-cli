@@ -11,7 +11,7 @@ from shutil import rmtree
 from msrestazure.azure_exceptions import CloudError
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, VirtualNetworkPreparer
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 from knack.util import CLIError
 

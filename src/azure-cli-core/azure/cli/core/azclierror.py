@@ -5,7 +5,7 @@
 
 import sys
 
-import azure.cli.core.telemetry as telemetry
+from azure.cli.core import telemetry
 from knack.util import CLIError
 from knack.log import get_logger
 
@@ -62,6 +62,11 @@ class AzCLIError(CLIError):
     def print_error(self):
         from azure.cli.core.azlogging import CommandLoggerContext
         from azure.cli.core.style import print_styled_text
+
+        # Print the traceback and exception message to debug log
+        import traceback
+        logger.debug(traceback.format_exc())
+
         with CommandLoggerContext(logger):
             # print error message
             logger.error(self.error_msg)
@@ -76,7 +81,7 @@ class AzCLIError(CLIError):
                 print(recommendation, file=sys.stderr)
 
         if self.aladdin_recommendations:
-            print('\nTRY THIS:', file=sys.stderr)
+            print('\nExamples from AI knowledge base:', file=sys.stderr)
             for recommendation, description in self.aladdin_recommendations:
                 print_styled_text(recommendation, file=sys.stderr)
                 print_styled_text(description, file=sys.stderr)
@@ -266,5 +271,15 @@ class RecommendationError(ClientError):
 
 class AuthenticationError(ServiceError):
     """ Raised when AAD authentication fails. """
+    def __init__(self, error_msg, msal_error=None, **kwargs):
+        super().__init__(error_msg, **kwargs)
+        self.msal_error = msal_error
+
+
+class HTTPError(CLIError):
+    """ Raised when send_raw_request receives HTTP status code >=400. """
+    def __init__(self, error_msg, response):
+        super().__init__(error_msg)
+        self.response = response
 
 # endregion

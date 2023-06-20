@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long
 
-from azure_devtools.scenario_tests import RecordingProcessor
+from azure.cli.testsdk.scenario_tests import RecordingProcessor
 
 
 class ExpressRoutePortLOAContentReplacer(RecordingProcessor):

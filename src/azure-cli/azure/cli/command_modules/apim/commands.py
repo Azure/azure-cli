@@ -9,7 +9,9 @@
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.apim._format import (service_output_format)
 from azure.cli.command_modules.apim._client_factory import (cf_service, cf_api, cf_product, cf_nv, cf_apiops,
-                                                            cf_apirelease, cf_apirevision, cf_apiversionset)
+                                                            cf_apirelease, cf_apirevision, cf_apiversionset,
+                                                            cf_apischema, cf_ds, cf_graphqlapiresolver,
+                                                            cf_graphqlapiresolverpolicy)
 
 
 def load_command_table(self, _):
@@ -21,6 +23,11 @@ def load_command_table(self, _):
     api_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.apimanagement.operations#ApiOperations.{}',
         client_factory=cf_api
+    )
+
+    api_schema = CliCommandType(
+        operations_tmpl='azure.mgmt.apimanagement.operations#ApiSchemaOperations.{}',
+        client_factory=cf_apischema
     )
 
     product_sdk = CliCommandType(
@@ -53,71 +60,120 @@ def load_command_table(self, _):
         client_factory=cf_apiversionset
     )
 
+    apids_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.apimanagement.operations#DeletedServicesOperations.{}',
+        client_factory=cf_ds
+    )
+
+    graphql_api_resolver = CliCommandType(
+        operations_tmpl='azure.mgmt.apimanagement.operations#GraphQLApiResolverOperations.{}',
+        client_factory=cf_graphqlapiresolver
+    )
+
+    graphql_api_resolver_policy = CliCommandType(
+        operations_tmpl='azure.mgmt.apimanagement.operations#GraphQLApiResolverPolicyOperations.{}',
+        client_factory=cf_graphqlapiresolverpolicy
+    )
+
     # pylint: disable=line-too-long
     with self.command_group('apim', service_sdk) as g:
-        g.custom_command('create', 'create_apim', supports_no_wait=True, table_transformer=service_output_format)
-        g.custom_show_command('show', 'get_apim', table_transformer=service_output_format)
-        g.custom_command('list', 'list_apim', table_transformer=service_output_format)
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
-        g.generic_update_command('update', custom_func_name='update_apim', getter_name='get', setter_name='create_or_update', supports_no_wait=True)
-        g.custom_command('check-name', 'check_name_availability')
+        g.custom_command('create', 'apim_create', supports_no_wait=True,
+                         table_transformer=service_output_format)
+        g.custom_show_command('show', 'apim_get',
+                              table_transformer=service_output_format)
+        g.custom_command('list', 'apim_list',
+                         table_transformer=service_output_format)
+        g.command('delete', 'begin_delete',
+                  confirmation=True, supports_no_wait=True)
+        g.generic_update_command('update', custom_func_name='apim_update', getter_name='get',
+                                 setter_name='begin_create_or_update', supports_no_wait=True)
+        g.custom_command('check-name', 'apim_check_name_availability')
         g.custom_command('backup', 'apim_backup', supports_no_wait=True)
         g.custom_command('restore', 'apim_restore', supports_no_wait=True)
-        g.custom_command('apply-network-updates', 'apim_apply_network_configuration_updates', supports_no_wait=True)
+        g.custom_command('apply-network-updates',
+                         'apim_apply_network_configuration_updates', supports_no_wait=True)
         g.wait_command('wait')
 
     with self.command_group('apim api', api_sdk) as g:
-        g.custom_command('import', 'import_apim_api', supports_no_wait=True)
-        g.custom_command('create', 'create_apim_api', supports_no_wait=True)
-        g.custom_show_command('show', 'get_apim_api')
-        g.custom_command('list', 'list_apim_api')
-        g.custom_command('delete', 'delete_apim_api', confirmation=True, supports_no_wait=True)
-        g.generic_update_command('update', custom_func_name='update_apim_api', supports_no_wait=True)
+        g.custom_command('import', 'apim_api_import', supports_no_wait=True)
+        g.custom_command('create', 'apim_api_create', supports_no_wait=True)
+        g.custom_show_command('show', 'apim_api_get')
+        g.custom_command('list', 'apim_api_list')
+        g.custom_command('delete', 'apim_api_delete',
+                         confirmation=True, supports_no_wait=True)
+        g.generic_update_command('update', custom_func_name='apim_api_update',
+                                 setter_name='begin_create_or_update', getter_name='get', supports_no_wait=True)
         g.wait_command('wait')
 
     with self.command_group('apim product api', api_sdk) as g:
-        g.custom_command('list', 'list_product_api')
-        g.custom_command('check', 'check_product_exists')
-        g.custom_command('add', 'add_product_api')
-        g.custom_command('delete', 'delete_product_api')
+        g.custom_command('list', 'apim_product_api_list')
+        g.custom_command('check', 'apim_product_api_check_association')
+        g.custom_command('add', 'apim_product_api_add')
+        g.custom_command('delete', 'apim_product_api_delete')
+
+    with self.command_group('apim api schema', api_schema) as g:
+        g.custom_command('create', 'apim_api_schema_create', supports_no_wait=True)
+        g.custom_command('delete', 'apim_api_schema_delete', confirmation=True, supports_no_wait=True)
+        g.custom_show_command('show', 'apim_api_schema_get')
+        g.custom_command('list', 'apim_api_schema_list')
+        g.custom_command('get-etag', 'apim_api_schema_entity')
+        g.wait_command('wait')
 
     with self.command_group('apim product', product_sdk) as g:
-        g.custom_command('list', 'list_products')
-        g.custom_show_command('show', 'show_product')
-        g.custom_command('create', 'create_product', supports_no_wait=True)
-        g.generic_update_command('update', custom_func_name='update_product', supports_no_wait=True)
-        g.custom_command('delete', 'delete_product', confirmation=True, supports_no_wait=True)
+        g.custom_command('list', 'apim_product_list')
+        g.custom_show_command('show', 'apim_product_show')
+        g.custom_command('create', 'apim_product_create', supports_no_wait=True)
+        g.generic_update_command('update', custom_func_name='apim_product_update', supports_no_wait=True)
+        g.custom_command('delete', 'apim_product_delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
 
     with self.command_group('apim nv', nv_sdk) as g:
-        g.custom_command('create', 'create_apim_nv')
-        g.custom_show_command('show', 'get_apim_nv')
-        g.custom_command('list', 'list_apim_nv')
-        g.custom_command('delete', 'delete_apim_nv', confirmation=True)
-        g.custom_command('show-secret', 'get_apim_nv_secret')
-        g.generic_update_command('update', custom_func_name='update_apim_nv')
+        g.custom_command('create', 'apim_nv_create', supports_no_wait=True)
+        g.custom_show_command('show', 'apim_nv_get')
+        g.custom_command('list', 'apim_nv_list')
+        g.custom_command('delete', 'apim_nv_delete', confirmation=True)
+        g.custom_command('show-secret', 'apim_nv_show_secret')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='apim_nv_update')
+        g.wait_command('wait')
 
     with self.command_group('apim api operation', apiops_sdk) as g:
-        g.custom_command('list', 'list_api_operation')
-        g.custom_show_command('show', 'get_api_operation')
-        g.custom_command('create', 'create_api_operation')
-        g.generic_update_command('update', custom_func_name='update_api_operation')
-        g.custom_command('delete', 'delete_api_operation')
+        g.custom_command('list', 'apim_api_operation_list')
+        g.custom_show_command('show', 'apim_api_operation_get')
+        g.custom_command('create', 'apim_api_operation_create')
+        g.generic_update_command('update', custom_func_name='apim_api_operation_update')
+        g.custom_command('delete', 'apim_api_operation_delete')
 
     with self.command_group('apim api release', apirel_sdk) as g:
-        g.custom_command('list', 'list_api_release')
-        g.custom_show_command('show', 'show_api_release')
-        g.custom_command('create', 'create_api_release')
-        g.generic_update_command('update', custom_func_name='update_api_release')
-        g.custom_command('delete', 'delete_api_release')
+        g.custom_command('list', 'apim_api_release_list')
+        g.custom_show_command('show', 'apim_api_release_show')
+        g.custom_command('create', 'apim_api_release_create')
+        g.generic_update_command('update', custom_func_name='apim_api_release_update')
+        g.custom_command('delete', 'apim_api_release_delete')
 
     with self.command_group('apim api revision', apirev_sdk) as g:
-        g.custom_command('list', 'list_api_revision')
-        g.custom_command('create', 'create_apim_api_revision')
+        g.custom_command('list', 'apim_api_revision_list')
+        g.custom_command('create', 'apim_api_revision_create')
 
     with self.command_group('apim api versionset', apivs_sdk) as g:
-        g.custom_command('list', 'list_api_vs')
-        g.custom_show_command('show', 'show_api_vs')
-        g.custom_command('create', 'create_api_vs')
-        g.generic_update_command('update', custom_func_name='update_api_apivs')
-        g.custom_command('delete', 'delete_api_vs')
+        g.custom_command('list', 'apim_api_vs_list')
+        g.custom_show_command('show', 'apim_api_vs_show')
+        g.custom_command('create', 'apim_api_vs_create')
+        g.generic_update_command('update', custom_func_name='apim_api_vs_update')
+        g.custom_command('delete', 'apim_api_vs_delete')
+
+    with self.command_group('apim deletedservice', apids_sdk) as g:
+        g.custom_command('list', 'apim_ds_list')
+        g.custom_show_command('show', 'apim_ds_get')
+        g.custom_command('purge', 'apim_ds_purge')
+
+    with self.command_group('apim graphql resolver', graphql_api_resolver) as g:
+        g.custom_command('create', 'apim_graphql_resolver_create')
+        g.custom_command('delete', 'apim_graphql_resolver_delete', confirmation=True)
+        g.custom_show_command('show', 'apim_graphql_resolver_show')
+        g.custom_command('list', 'apim_graphql_resolver_list')
+
+    with self.command_group('apim graphql resolver policy', graphql_api_resolver_policy) as g:
+        g.custom_command('create', 'apim_graphql_resolver_policy_create')
+        g.custom_command('delete', 'apim_graphql_resolver_policy_delete', confirmation=True)
+        g.custom_show_command('show', 'apim_graphql_resolver_policy_show')
+        g.custom_command('list', 'apim_graphql_resolver_policy_list')

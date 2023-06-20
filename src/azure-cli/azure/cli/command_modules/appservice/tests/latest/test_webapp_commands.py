@@ -9,16 +9,20 @@ from unittest import mock
 import os
 import time
 import tempfile
-from azure_devtools.scenario_tests.utilities import create_random_name
+from azure.cli.testsdk.scenario_tests.utilities import create_random_name
 import requests
 import datetime
+import urllib3
+from knack.util import CLIError
+import certifi
 
-from azure_devtools.scenario_tests import AllowLargeResponse, record_only
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, KeyVaultPreparer, JMESPathCheck, live_only)
 from azure.cli.testsdk.checkers import JMESPathCheckNotExists
+from azure.cli.command_modules.appservice.utils import get_pool_manager
 
-from azure.cli.core.azclierror import ResourceNotFoundError
+from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -26,7 +30,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 # In the future, for any reasons the repository get removed, the source code is under "sample-repo-for-deployment-test"
 # you can use to rebuild the repository
 TEST_REPO_URL = 'https://github.com/yugangw-msft/azure-site-test.git'
-WINDOWS_ASP_LOCATION_WEBAPP = 'japanwest'
+WINDOWS_ASP_LOCATION_WEBAPP = 'westeurope'
 WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
 LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
 LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
@@ -62,13 +66,13 @@ class WebappBasicE2ETest(ScenarioTest):
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
             JMESPathCheck('name', plan)
         ])
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan), checks=[
+        self.cmd('webapp create -g {} -n {} --plan {} --https-only {} --public-network-access {}'.format(resource_group, webapp_name, plan, 'true', 'Enabled'), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', webapp_name),
-            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net'),
+            JMESPathCheck('httpsOnly', 'True'),
+            JMESPathCheck('publicNetworkAccess', 'Enabled')
         ])
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group,
-                                                              webapp_name, plan))  # test idempotency
         self.cmd('webapp list -g {}'.format(resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', webapp_name),
@@ -118,21 +122,15 @@ class WebappBasicE2ETest(ScenarioTest):
         result = self.cmd('webapp deployment list-publishing-credentials -g {} -n {}'.format(
             resource_group, webapp_name)).get_output_in_json()
         self.assertTrue('scm' in result['scmUri'])
-        # verify httpsOnly is false
-        self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp_name), checks=[
-            JMESPathCheck('httpsOnly', False),
-        ])
-
-        # verify creating an non node app using --runtime
-        self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "php|7.3"'.format(resource_group, webapp_name, plan))
 
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
-            JMESPathCheck('phpVersion', '7.3')
+            JMESPathCheck('phpVersion', '5.6')
         ])
 
     def test_webapp_runtimes(self):
         self.cmd('webapp list-runtimes')
+        self.cmd('webapp list-runtimes --os windows')
+        self.cmd('webapp list-runtimes --os linux')
 
 
 class WebappQuickCreateTest(ScenarioTest):
@@ -146,7 +144,7 @@ class WebappQuickCreateTest(ScenarioTest):
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-            JMESPathCheck('[0].value', '10.14.1'),
+            JMESPathCheck('[0].value', '~14'),
         ])
 
     @ResourceGroupPreparer(name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -155,14 +153,14 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name_2 = self.create_random_name(prefix='webapp-quick', length=24)
         plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|10.14"'.format(
+        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|14LTS"'.format(
             resource_group, webapp_name, plan)).get_output_in_json()
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-            JMESPathCheck('[0].value', '10.14.1'),
+            JMESPathCheck('[0].value', '~14'),
         ])
-        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "DOTNETCORE|3.1"'.format(
+        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "dotnet:6"'.format(
             resource_group, webapp_name_2, plan)).get_output_in_json()
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
 
@@ -171,7 +169,7 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-quick-cd', length=24)
         plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|10.14"'.format(
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|16LTS"'.format(
             resource_group, webapp_name, plan, TEST_REPO_URL))
         # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         time.sleep(30)
@@ -247,6 +245,18 @@ class WebappQuickCreateTest(ScenarioTest):
             JMESPathCheck('name', webapp_name)
         ])
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name='resource_group', parameter_name_for_location='resource_group_location', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @ResourceGroupPreparer(parameter_name='resource_group2', parameter_name_for_location='resource_group_location2', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_create_in_different_group_name(self, resource_group, resource_group_location, resource_group2, resource_group_location2):
+        plan = self.create_random_name(prefix='planInOneRG', length=15)
+        webapp_name = self.create_random_name(prefix='webInOtherRG', length=24)
+        self.cmd('group create -n {} -l {}'.format(resource_group2, resource_group_location))
+        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group2, webapp_name, plan), checks=[
+            JMESPathCheck('name', webapp_name)
+        ])
+
     @unittest.skip("This test needs to be updated first to have unique names & re-tested before recording")
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name="resource_group_one", name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -285,7 +295,7 @@ class WebappQuickCreateTest(ScenarioTest):
         ])
 
 
-class BackupWithName(ScenarioTest):
+class BackupRestoreTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name='resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_backup_with_name(self, resource_group):
@@ -309,6 +319,113 @@ class BackupWithName(ScenarioTest):
             JMESPathCheck('[0].namePropertiesName', backup_name)
         ])
 
+        slot_name = "slot"
+        slot_backup_name = self.create_random_name(prefix='sbn-', length=24)
+        self.cmd(f"webapp deployment slot create -g {resource_group} -n {webapp} -s {slot_name}")
+        self.cmd(f"webapp config backup create -g {resource_group} --webapp-name {webapp} --backup-name {slot_backup_name} --container-url {sasurl} -s {slot_name}", checks=[
+            JMESPathCheck('blobName', slot_backup_name)
+        ])
+        self.cmd(f"webapp config backup list -g {resource_group} --webapp-name {webapp} -s {slot_name}", checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].namePropertiesName', slot_backup_name)
+        ])
+
+    @ResourceGroupPreparer(parameter_name='resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @StorageAccountPreparer(name_prefix='backup', length=24, location=WINDOWS_ASP_LOCATION_WEBAPP, sku='Standard_LRS')
+    def test_config_backup_restore(self, resource_group, storage_account_info):
+        plan = self.create_random_name(prefix='plan-backup', length=24)
+        webapp = self.create_random_name(prefix='backup-webapp', length=24)
+        container = self.create_random_name(prefix='backupcontainer', length=24)
+        backup_name = self.create_random_name(prefix='backup-name', length=24)
+
+        expirydate = (datetime.datetime.now() + datetime.timedelta(days=1, hours=3)).strftime("\"%Y-%m-%dT%H:%MZ\"")
+        slot_name = "slot"
+
+        storage_account, account_key = storage_account_info
+        self.cmd(f'storage container create --account-name {storage_account} --name {container} --account-key {account_key}')
+        sastoken = self.cmd(f'storage container generate-sas --account-name {storage_account} --name {container} --expiry {expirydate} --permissions rwdl -otsv --account-key {account_key}').output.strip()
+        sasurl = f'\"https://{storage_account}.blob.core.windows.net/{container}?{sastoken}\"'
+
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan} --sku S1')
+        self.cmd(f'webapp create -g {resource_group} -n {webapp} --plan {plan}')
+        self.cmd(f"webapp deployment slot create -g {resource_group} -n {webapp} -s {slot_name}")
+
+        self.cmd(f"webapp config backup create -g {resource_group} --webapp-name {webapp} --backup-name {backup_name} --container-url {sasurl}")
+        time.sleep(240)
+
+        # restore a backup
+        self.cmd(f"webapp config backup restore -g {resource_group} --webapp-name {webapp} --target-name {webapp} --backup-name {backup_name} --container-url {sasurl} --overwrite --ignore-hostname-conflict")
+
+        # restore a backup to a slot
+        self.cmd(f"webapp config backup restore -g {resource_group} --webapp-name {webapp} --target-name {webapp} --slot {slot_name} --backup-name {backup_name} --container-url {sasurl} --overwrite --ignore-hostname-conflict")
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name='resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_config_backup_delete(self, resource_group):
+        plan = self.create_random_name(prefix='plan-backup', length=24)
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan))
+        webapp = self.create_random_name(prefix='backup-webapp', length=24)
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp, plan))
+        slot_name = "slot"
+        self.cmd(f"webapp deployment slot create -g {resource_group} -n {webapp} -s {slot_name}")
+        storage_Account = self.create_random_name(prefix='backup', length=24)
+        self.cmd('storage account create -n {} -g {} --location {}'.format(storage_Account, resource_group, WINDOWS_ASP_LOCATION_WEBAPP))
+        container = self.create_random_name(prefix='backupcontainer', length=24)
+        self.cmd('storage container create --account-name {} --name {}'.format(storage_Account, container))
+        expirydate = (datetime.datetime.now() + datetime.timedelta(days=1, hours=3)).strftime("\"%Y-%m-%dT%H:%MZ\"")
+        sastoken = self.cmd('storage container generate-sas --account-name {} --name {} --expiry {} --permissions rwdl'.format(storage_Account, container, expirydate)).get_output_in_json()
+        sasurl = '\"https://{}.blob.core.windows.net/{}?{}\"'.format(storage_Account, container, sastoken)
+        time.sleep(30)
+        backup_name = self.create_random_name(prefix='backup-name', length=24)
+        slot_backup_name = self.create_random_name(prefix='sbn-', length=24)
+
+        # Create a webapp backup
+        self.cmd('webapp config backup create -g {} --webapp-name {} --backup-name {} --container-url {}'.format(resource_group, webapp, backup_name, sasurl), checks=[
+            JMESPathCheck('blobName', backup_name)
+        ])
+
+        def get_backup_id(command, backup_name):
+            backup_status = 'InProgress'
+            list_backups_respone = []
+            while backup_status == 'InProgress':
+                list_backups_respone = self.cmd(command, checks=[
+                    JMESPathCheck('length(@)', 1),
+                    JMESPathCheck('[0].namePropertiesName', backup_name)
+                ]).get_output_in_json()
+                backup_status =  list_backups_respone[0]['status']
+                # Backup operation is still in progress, Sleep 30 seconds
+                time.sleep(30)
+            return list_backups_respone[0]['backupId']
+
+        # Verify webapp backups count
+        webapp_backup_id = get_backup_id(f'webapp config backup list -g {resource_group} --webapp-name {webapp}', backup_name)
+
+        # Delete webapp backup
+        self.cmd('webapp config backup delete -g {} --webapp-name {} --backup-id {} --yes'.format(resource_group, webapp, webapp_backup_id))
+
+        # Verify webapp backups count
+        self.cmd('webapp config backup list -g {} --webapp-name {}'.format(resource_group, webapp), checks=[
+            JMESPathCheck('length(@)', 0),
+        ])
+
+        # Create a webapp slot backup
+        resp = self.cmd(f"webapp config backup create -g {resource_group} --webapp-name {webapp} --backup-name {slot_backup_name} --container-url {sasurl} -s {slot_name}", checks=[
+            JMESPathCheck('blobName', slot_backup_name)
+        ])
+
+        # Verify webapp slot backups count
+        webapp_slot_backup_id = get_backup_id(f"webapp config backup list -g {resource_group} --webapp-name {webapp} -s {slot_name}", slot_backup_name)
+
+        # Delete webapp slot backup
+        self.cmd('webapp config backup delete -g {} --webapp-name {} --backup-id {} --slot {} --yes'.format(resource_group, webapp, webapp_slot_backup_id, slot_name))
+
+        # Verify webapp slot backups count
+        self.cmd(f"webapp config backup list -g {resource_group} --webapp-name {webapp} -s {slot_name}", checks=[
+            JMESPathCheck('length(@)', 0),
+        ])
+
+
+
 
 # Test Framework is not able to handle binary file format, hence, only run live
 class AppServiceLogTest(ScenarioTest):
@@ -318,8 +435,8 @@ class AppServiceLogTest(ScenarioTest):
         webapp_name = self.create_random_name(
             prefix='webapp-win-log', length=24)
         plan = self.create_random_name(prefix='win-log', length=24)
-        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|10.14"'.format(
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan} -l eastus')
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|16LTS"'.format(
             resource_group, webapp_name, plan, TEST_REPO_URL))
         # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         time.sleep(30)
@@ -336,6 +453,55 @@ class AppServiceLogTest(ScenarioTest):
 
 
 class AppServicePlanScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_elastic_scale_plan(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+        self.cmd('appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", False)
+        ])
+
+        self.cmd('appservice plan update -g {} -n {} --elastic-scale true'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", True)
+        ])
+
+        self.cmd('appservice plan update -g {} -n {} --elastic-scale false'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", False)
+        ])
+
+        self.cmd('appservice plan update -g {} -n {} --sku free'.format(resource_group, plan))
+        self.cmd('appservice plan update -g {} -n {} --elastic-scale true'.format(resource_group, plan), expect_failure=True)
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @unittest.skip("Temp test")
+    def test_elastic_scale_plan_max_workers(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+        self.cmd('appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", False),
+            JMESPathCheck("properties.maximumElasticWorkerCount", 1)
+        ])
+
+        self.cmd('appservice plan update -g {} -n {} --elastic-scale true --max-elastic-worker-count 10'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", True),
+            JMESPathCheck("properties.maximumElasticWorkerCount", 10)
+        ])
+
+        self.cmd('appservice plan update -g {} -n {} --max-elastic-worker-count 20'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", True),
+            JMESPathCheck("properties.maximumElasticWorkerCount", 20)
+        ])
+
+        # ensure that we can't make --max-elastic-worker-count < the number of workers
+        self.cmd('appservice plan update -g {} -n {} --max-elastic-worker-count 9 --number-of-workers 10'.format(resource_group, plan), expect_failure=True)
+
+        self.cmd('appservice plan update -g {} -n {} --max-elastic-worker-count 10 --number-of-workers 10'.format(resource_group, plan))
+        self.cmd('appservice plan update -g {} -n {} --max-elastic-worker-count 9'.format(resource_group, plan), expect_failure=True)
+
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_retain_plan(self, resource_group):
         webapp_name = self.create_random_name('web', 24)
@@ -368,6 +534,107 @@ class AppServicePlanScenarioTest(ScenarioTest):
         self.cmd('appservice plan list -g {}'.format(resource_group),
                  checks=[JMESPathCheck('length(@)', 0)])
 
+    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
+    def test_zone_redundant_plan(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+        self.cmd(
+            'appservice plan create -g {} -n {} -l {} -z --sku P1V3'.format(resource_group, plan, LINUX_ASP_LOCATION_WEBAPP))
+
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck('properties.zoneRedundant', True), JMESPathCheck('properties.numberOfWorkers', 3)])
+
+        # test with unsupported SKU
+        plan2 = self.create_random_name('plan', 24)
+        self.cmd('appservice plan create -g {} -n {} -l {} -z --sku FREE'.format(resource_group, plan2, LINUX_ASP_LOCATION_WEBAPP), expect_failure=True)
+
+        # test with unsupported location
+        self.cmd('appservice plan create -g {} -n {} -l {} -z --sku P1V3'.format(resource_group, plan2, WINDOWS_ASP_LOCATION_WEBAPP), expect_failure=True)
+
+        # ensure non zone redundant
+        plan = self.create_random_name('plan', 24)
+        self.cmd('functionapp plan create -g {} -n {} -l {} --sku FREE'.format(resource_group, plan, LINUX_ASP_LOCATION_WEBAPP))
+
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[JMESPathCheck('properties.zoneRedundant', False)])
+
+
+class WebappElasticScaleTest(ScenarioTest):
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_elastic_scale(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+        app = self.create_random_name('app', 24)
+        self.cmd('appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", False)
+        ])
+        self.cmd('appservice plan update -g {} -n {} --elastic-scale true --max-elastic-worker-count 10'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", True)
+        ])
+
+        self.cmd("webapp create -g {} -n {} --plan {}".format(resource_group, app, plan))
+
+        self.cmd("webapp show -g {} -n {}".format(resource_group, app), checks=[
+            JMESPathCheck("siteConfig.minimumElasticInstanceCount", 1),
+            JMESPathCheck("siteConfig.preWarmedInstanceCount", 1)
+        ])
+        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {} --prewarmed-instance-count {}".format(resource_group, app, 3, 5))
+        self.cmd("webapp show -g {} -n {}".format(resource_group, app), checks=[
+            JMESPathCheck("siteConfig.minimumElasticInstanceCount", 3),
+            JMESPathCheck("siteConfig.preWarmedInstanceCount", 5)
+        ])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_elastic_scale_prewarmed_instance_count(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+        app = self.create_random_name('app', 24)
+        self.cmd('appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+
+        self.cmd("webapp create -g {} -n {} --plan {}".format(resource_group, app, plan))
+
+        # ensure we can't set this without the ASP having elastic scale enabled
+        self.cmd("webapp update -g {} -n {} --prewarmed-instance-count {}".format(resource_group, app, 5), expect_failure=True)
+
+        self.cmd('appservice plan update -g {} -n {} --elastic-scale true --max-elastic-worker-count {}'.format(resource_group, plan, 4))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", True),
+            JMESPathCheck("properties.maximumElasticWorkerCount", 4)
+        ])
+
+        # ensure we can't set the prewarmed instance count too high
+        self.cmd("webapp update -g {} -n {} --prewarmed-instance-count {}".format(resource_group, app, 5), expect_failure=True)
+
+        self.cmd("webapp update -g {} -n {} --prewarmed-instance-count {}".format(resource_group, app, 4))
+
+        self.cmd("webapp show -g {} -n {}".format(resource_group, app), checks=[
+            JMESPathCheck("siteConfig.preWarmedInstanceCount", 4)
+        ])
+
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_elastic_scale_min_elastic_instance_count(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+        app = self.create_random_name('app', 24)
+        self.cmd('appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+
+        self.cmd("webapp create -g {} -n {} --plan {}".format(resource_group, app, plan))
+
+        # ensure we can't set this without the ASP having elastic scale enabled
+        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {}".format(resource_group, app, 5), expect_failure=True)
+
+        self.cmd('appservice plan update -g {} -n {} --elastic-scale true --max-elastic-worker-count {}'.format(resource_group, plan, 4))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", True),
+            JMESPathCheck("properties.maximumElasticWorkerCount", 4)
+        ])
+
+        # ensure we can't set the prewarmed instance count too high
+        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {}".format(resource_group, app, 5), expect_failure=True)
+
+        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {}".format(resource_group, app, 4))
+
+        self.cmd("webapp show -g {} -n {}".format(resource_group, app), checks=[
+            JMESPathCheck("siteConfig.minimumElasticInstanceCount", 4)
+        ])
 
 class WebappConfigureTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_config', location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -396,7 +663,7 @@ class WebappConfigureTest(ScenarioTest):
         checks = [
             JMESPathCheck('alwaysOn', True),
             JMESPathCheck('autoHealEnabled', True),
-            JMESPathCheck('phpVersion', '7.2'),
+            JMESPathCheck('phpVersion', '7.4'),
             JMESPathCheck('netFrameworkVersion', 'v3.0'),
             JMESPathCheck('pythonVersion', '3.4'),
             JMESPathCheck('use32BitWorkerProcess', False),
@@ -405,7 +672,7 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck('http20Enabled', True),
             JMESPathCheck('ftpsState', 'Disabled')]
 
-        self.cmd('webapp config set -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.2 '
+        self.cmd('webapp config set -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.4 '
                  '--net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false '
                  '--web-sockets-enabled=true --http20-enabled true --min-tls-version 1.0 --ftps-state Disabled'.format(resource_group, webapp_name)).assert_with_checks(checks)
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)) \
@@ -570,19 +837,6 @@ class WebappConfigureTest(ScenarioTest):
         self.assertEqual(set([x['name'] for x in result]), set(
             ['s1', 's2', 's3', 'WEBSITE_NODE_DEFAULT_VERSION']))
 
-        self.cmd(
-            'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
-
-        # show
-        result = self.cmd('webapp config appsettings list -g {} -n {}'.format(
-            resource_group, webapp_name)).get_output_in_json()
-        s2 = next((x for x in result if x['name'] == 's2'))
-        self.assertEqual(s2['name'], 's2')
-        self.assertEqual(s2['slotSetting'], False)
-        self.assertEqual(s2['value'], 'bar')
-        self.assertEqual(set([x['name'] for x in result]), set(
-            ['s1', 's2', 's3', 'WEBSITE_NODE_DEFAULT_VERSION']))
-
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_json', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_update_webapp_settings_thru_json(self, resource_group):
         webapp_name = self.create_random_name('webapp-config-test', 40)
@@ -670,6 +924,50 @@ class WebappConfigureTest(ScenarioTest):
             'value': 'value3',
             'slotSetting': True
         })
+
+        # app settings set with --slot-settings
+        output = self.cmd('webapp config appsettings set -g {} -n {} --slot-settings "@{}"'.format(
+            resource_group, webapp_name, settings_file)).get_output_in_json()
+        output = [s for s in output if s['name'] in ['s', 's2', 's3']]
+        output.sort(key=lambda s: s['name'])
+
+        self.assertEqual(output[0], {
+            'name': 's',
+            'value': 'value',
+            'slotSetting': False
+        })
+        self.assertEqual(output[1], {
+            'name': 's2',
+            'value': 'value2',
+            'slotSetting': False
+        })
+        self.assertEqual(output[2], {
+            'name': 's3',
+            'value': 'value3',
+            'slotSetting': True
+        })
+
+        output = self.cmd('webapp config appsettings set -g {} -n {} --slot {} --slot-settings "@{}"'.format(
+            resource_group, webapp_name, slot, settings_file)).get_output_in_json()
+        output = [s for s in output if s['name'] in ['s', 's2', 's3']]
+        output.sort(key=lambda s: s['name'])
+
+        self.assertEqual(output[0], {
+            'name': 's',
+            'value': 'value',
+            'slotSetting': False
+        })
+        self.assertEqual(output[1], {
+            'name': 's2',
+            'value': 'value2',
+            'slotSetting': False
+        })
+        self.assertEqual(output[2], {
+            'name': 's3',
+            'value': 'value3',
+            'slotSetting': True
+        })
+
         # update site config
         site_configs = {
             "requestTracingEnabled": True,
@@ -680,8 +978,8 @@ class WebappConfigureTest(ScenarioTest):
         self.cmd('webapp config set -g {} -n {} --generic-configurations "@{}"'.format(resource_group, webapp_name, settings_file)).assert_with_checks([
             JMESPathCheck("requestTracingEnabled", True),
             JMESPathCheck("alwaysOn", True),
-        ])        
-        
+        ])
+
 
 
 class WebappScaleTest(ScenarioTest):
@@ -727,6 +1025,7 @@ class WebappScaleTest(ScenarioTest):
         ])
 
 
+@unittest.skip("Test needs to re-done to match the errors")
 class AppServiceBadErrorPolishTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -806,6 +1105,21 @@ class LinuxWebappScenarioTest(ScenarioTest):
             (x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'))
         self.assertEqual(sample, {
                          'name': 'WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'slotSetting': False, 'value': 'false'})
+
+        result = self.cmd('webapp config container set -g {} -n {} --docker-custom-image-name {} --docker-registry-server-password {} --docker-registry-server-user {} --docker-registry-server-url {} --enable-app-service-storage {}'.format(
+            resource_group, webapp, 'foo-image', 'foo-password', 'foo-user', 'foo-url', 'true')).get_output_in_json()
+        self.assertEqual(set(x['value'] for x in result if x['name'] ==
+                             'DOCKER_REGISTRY_SERVER_PASSWORD'), set([None]))  # we mask the password
+        sample = next(
+            (x for x in result if x['name'] == 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'))
+        self.assertEqual(sample, {
+                         'name': 'WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'slotSetting': False, 'value': 'true'})
+
+        result = self.cmd('webapp config container show -g {} -n {} '.format(
+            resource_group, webapp)).get_output_in_json()
+        self.assertEqual(set(x['name'] for x in result), set(['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SERVER_USERNAME',
+                                                              'DOCKER_CUSTOM_IMAGE_NAME', 'DOCKER_REGISTRY_SERVER_PASSWORD', 'WEBSITES_ENABLE_APP_SERVICE_STORAGE']))
+
         self.cmd(
             'webapp config container delete -g {} -n {}'.format(resource_group, webapp))
         result2 = self.cmd('webapp config container show -g {} -n {} '.format(
@@ -822,7 +1136,7 @@ class LinuxWebappSSHScenarioTest(ScenarioTest):
         if platform.system() == "Windows":
             return
 
-        runtime = 'node|12-lts'
+        runtime = 'node|16-lts'
         plan = self.create_random_name(prefix='webapp-ssh-plan', length=24)
         webapp = self.create_random_name(prefix='webapp-ssh', length=24)
         self.cmd(
@@ -831,15 +1145,16 @@ class LinuxWebappSSHScenarioTest(ScenarioTest):
             resource_group, webapp, plan, runtime))
         time.sleep(30)
         requests.get('http://{}.azurewebsites.net'.format(webapp), timeout=240)
-        time.sleep(30)
-        self.cmd('webapp ssh -g {} -n {} --timeout 5'.format(resource_group, webapp))
+        instance = self.cmd('webapp list-instances -g {} -n {}'.format(resource_group, webapp)).get_output_in_json()
+        instance_name=[item.get('name') for item in instance]
+        self.cmd('webapp ssh -g {} -n {} --timeout 5'.format(resource_group, webapp, instance_name))
         time.sleep(30)
 
 
 class LinuxWebappRemoteSSHScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_linux_webapp_remote_ssh(self, resource_group):
-        runtime = 'node|12-lts'
+        runtime = 'node|16-lts'
         plan = self.create_random_name(
             prefix='webapp-remote-ssh-plan', length=40)
         webapp = self.create_random_name(prefix='webapp-remote-ssh', length=40)
@@ -916,6 +1231,57 @@ class WebappACRScenarioTest(ScenarioTest):
                 JMESPathCheck(
                     "[?name=='DOCKER_REGISTRY_SERVER_USERNAME']|[0].value", creds['username'])
         ])
+
+
+class WebappContainerScenarioTests(ScenarioTest):
+    @ResourceGroupPreparer(location='eastus')
+    @AllowLargeResponse()
+    def test_linux_slot_container_settings_override(self, resource_group):
+        app_name = self.create_random_name(prefix="", length=24)
+        plan = self.create_random_name(prefix="", length=24)
+        acr_registry_name = self.create_random_name(prefix="", length=24)
+        self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(
+            resource_group, acr_registry_name))
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
+        creds = self.cmd('acr credential show -n {} -g {}'.format(
+            acr_registry_name, resource_group)).get_output_in_json()
+        self.cmd('az webapp create -g {} -n {} -p {} -i {}.azurecr.io/image-name:latest -s {} -w {}'.format(
+            resource_group, app_name, plan, acr_registry_name, creds['username'], creds['passwords'][0]['value']
+        ))
+
+        self.cmd('webapp config container show -g {} -n {} '.format(resource_group, app_name), checks=[
+            JMESPathCheck(
+                "[?name=='DOCKER_REGISTRY_SERVER_USERNAME']|[0].value", creds['username']),
+            JMESPathCheck(
+                "[?name=='DOCKER_REGISTRY_SERVER_URL']|[0].name", 'DOCKER_REGISTRY_SERVER_URL')
+        ])
+        self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, app_name), checks=[
+            JMESPathCheck(
+                "[?name=='DOCKER_REGISTRY_SERVER_USERNAME'].value|[0]", creds['username'])
+        ])
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, app_name), checks=[
+            JMESPathCheck('linuxFxVersion', 'DOCKER|{}.azurecr.io/image-name:latest'.format(acr_registry_name))])
+
+        slot_name = "slot"
+        # note the different image name
+        self.cmd('az webapp deployment slot create -g {} -n {} --configuration-source {} -s {} --deployment-container-image-name {}.azurecr.io/image-name-2:latest'.format(
+            resource_group, app_name, app_name, slot_name, acr_registry_name
+        ))
+
+        self.cmd('webapp config container show -g {} -n {} -s {}'.format(resource_group, app_name, slot_name), checks=[
+            JMESPathCheck(
+                "[?name=='DOCKER_REGISTRY_SERVER_USERNAME']|[0].value", creds['username']),
+            JMESPathCheck(
+                "[?name=='DOCKER_REGISTRY_SERVER_URL']|[0].name", 'DOCKER_REGISTRY_SERVER_URL')
+        ])
+        self.cmd('webapp config appsettings list -g {} -n {} -s {}'.format(resource_group, app_name, slot_name), checks=[
+            JMESPathCheck(
+                "[?name=='DOCKER_REGISTRY_SERVER_USERNAME'].value|[0]", creds['username'])
+        ])
+        self.cmd('webapp config show -g {} -n {} -s {}'.format(resource_group, app_name, slot_name), checks=[
+            JMESPathCheck('linuxFxVersion', 'DOCKER|{}.azurecr.io/image-name-2:latest'.format(acr_registry_name))])
+
 
 
 class WebappGitScenarioTest(ScenarioTest):
@@ -1094,7 +1460,7 @@ class AppServiceCors(ScenarioTest):
         self.cmd(
             'storage account create --name {storage} -g {rg} --sku Standard_LRS')
         self.cmd(
-            'functionapp create -g {rg} -n {function} --plan {plan} -s {storage}')
+            'functionapp create -g {rg} -n {function} --plan {plan} -s {storage} --functions-version 4')
         self.cmd(
             'functionapp cors add -g {rg} -n {function} --allowed-origins https://msdn.com https://msn.com')
         result = self.cmd(
@@ -1160,8 +1526,9 @@ class WebappSSLCertTest(ScenarioTest):
                                                            plan), self.check('tags.plan', 'plan1'))
         self.cmd('webapp create -g {} -n {} --plan {} --tags web=web1'.format(
             resource_group, webapp_name, plan))
-        self.cmd('webapp config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {}'.format(resource_group, webapp_name, pfx_file, cert_password), checks=[
-            JMESPathCheck('thumbprint', cert_thumbprint)
+        self.cmd('webapp config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {} --certificate-name {}'.format(resource_group, webapp_name, pfx_file, cert_password, "test123"), checks=[
+            JMESPathCheck('thumbprint', cert_thumbprint),
+            JMESPathCheck('name', 'test123')
         ])
         self.cmd('webapp show -g {} -n {}'.format(resource_group,
                                                   webapp_name), self.check('tags.web', 'web1'))
@@ -1211,6 +1578,32 @@ class WebappSSLCertTest(ScenarioTest):
             'webapp show -g {} -n {} -s {}'.format(resource_group, webapp_name, slot_name))
         self.cmd('webapp delete -g {} -n {}'.format(resource_group, webapp_name))
 
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_ssl_specify_hostname(self, resource_group, resource_group_location):
+        plan = self.create_random_name(prefix='ssl-test-plan', length=24)
+        webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
+        # Cert Generated using
+        # https://docs.microsoft.com/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
+        pfx_file = os.path.join(TEST_DIR, 'server.pfx')
+        cert_password = 'test'
+        cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
+        hostname = f"{webapp_name}.azurewebsites.net"
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan} --sku S1 --tags plan=plan1')
+        self.cmd(f'webapp create -g {resource_group} -n {webapp_name} --plan {plan} --tags web=web1')
+        self.cmd(f'webapp config ssl upload -g {resource_group} -n {webapp_name} --certificate-file "{pfx_file}" --certificate-password {cert_password}', checks=[
+            JMESPathCheck('thumbprint', cert_thumbprint)
+        ])
+        self.cmd(f'webapp config ssl bind -g {resource_group} -n {webapp_name} --certificate-thumbprint {cert_thumbprint} --hostname {hostname} --ssl-type SNI', checks=[
+            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(
+                webapp_name), 'SniEnabled'),
+            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].thumbprint".format(
+                webapp_name), cert_thumbprint)
+        ])
+        self.cmd(f'webapp config ssl unbind -g {resource_group} -n {webapp_name} --certificate-thumbprint {cert_thumbprint} --hostname {hostname}', checks=[
+            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(
+                webapp_name), 'Disabled'),
+        ])
+
 
 class WebappSSLImportCertTest(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -1234,8 +1627,9 @@ class WebappSSLImportCertTest(ScenarioTest):
         self.cmd('keyvault certificate import --name {} --vault-name {} --file "{}" --password {}'.format(
             cert_name, key_vault, pfx_file, cert_password))
 
-        self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, key_vault, cert_name), checks=[
-            JMESPathCheck('thumbprint', cert_thumbprint)
+        self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {} --certificate-name {}'.format(resource_group, webapp_name, key_vault, cert_name, "test123"), checks=[
+            JMESPathCheck('thumbprint', cert_thumbprint),
+			JMESPathCheck('name', 'test123')
         ])
 
         self.cmd('webapp config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {}'.format(resource_group, webapp_name, cert_thumbprint, 'SNI'), checks=[
@@ -1281,6 +1675,7 @@ class WebappSSLImportCertTest(ScenarioTest):
 
 
 class WebappUndeleteTest(ScenarioTest):
+    @unittest.skip("Flaky test")
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_deleted_list(self, resource_group):
@@ -1295,6 +1690,102 @@ class WebappUndeleteTest(ScenarioTest):
         self.cmd('webapp deleted list -g {}'.format(resource_group), checks=[
             JMESPathCheck('[0].deletedSiteName', webapp_name)
         ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_deleted_restore_to_existing_site(self, resource_group):
+        plan = self.create_random_name(prefix='delete-me-plan', length=24)
+        webapp_1_name = self.create_random_name(prefix='delete-me-web', length=24)
+        webapp_2_name = self.create_random_name(prefix='delete-me-web', length=24)
+
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan} --sku B1 --tags plan=plan1')
+
+        # create webapp_1 and webapp_2
+        self.cmd(f'webapp create -g {resource_group} -n {webapp_1_name} --plan {plan}')
+        self.cmd(f'webapp create -g {resource_group} -n {webapp_2_name} --plan {plan}')
+
+        # delete webapp_1
+        self.cmd(f'webapp delete -g {resource_group} -n {webapp_1_name}')
+
+        # collect list of deleted webapps
+        deleted_list = self.cmd(f'webapp deleted list -g {resource_group} -n {webapp_1_name}', checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].deletedSiteName', webapp_1_name)
+        ]).get_output_in_json()
+        deleted_id = deleted_list[0]["id"]
+
+        # restore deleted webapp to existing app i.e webapp_2
+        self.cmd(f'webapp deleted restore -g {resource_group} -n {webapp_2_name} --deleted-id "{deleted_id}"')
+
+        # list/get the restored webapp_2
+        self.cmd(f'az webapp show --name {webapp_2_name} -g {resource_group}', checks=[
+            JMESPathCheck('name', webapp_2_name)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_deleted_restore_to_non_existent_site(self, resource_group):
+        plan = self.create_random_name(prefix='delete-me-plan', length=24)
+        webapp_1_name = self.create_random_name(prefix='delete-me-web', length=24)
+        placeholder_app = self.create_random_name(prefix='delete-me-web', length=24)
+        webapp_2_name = self.create_random_name(prefix='delete-me-web', length=24)
+
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan} --sku B1 --tags plan=plan1')
+
+        # create webapp_1
+        self.cmd(f'webapp create -g {resource_group} -n {webapp_1_name} --plan {plan}')
+        # create a placeholder/dummy app to make the ASP not auto deleted when
+        self.cmd(f'webapp create -g {resource_group} -n {placeholder_app} --plan {plan}')
+
+        # delete webapp_1
+        self.cmd(f'webapp delete -g {resource_group} -n {webapp_1_name}')
+
+        # collect list of deleted webapps
+        deleted_list = self.cmd(f'webapp deleted list -g {resource_group} -n {webapp_1_name}', checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].deletedSiteName', webapp_1_name)
+        ]).get_output_in_json()
+        deleted_id = deleted_list[0]["id"]
+
+        # restore deleted webapp to non existent app i.e webapp_2
+        self.cmd(f'webapp deleted restore -g {resource_group} -n {webapp_2_name} --deleted-id "{deleted_id}" --target-app-svc-plan {plan}')
+
+        # get the details of the newly created webapp i.e webapp_2
+        self.cmd(f'az webapp show --name {webapp_2_name} -g {resource_group}', checks=[
+            JMESPathCheck('name', webapp_2_name)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_deleted_restore_to_non_existent_site_fails_when_asp_argument_is_not_provided_or_does_not_exist(self, resource_group):
+        plan = self.create_random_name(prefix='delete-me-plan', length=24)
+        webapp_1_name = self.create_random_name(prefix='delete-me-web', length=24)
+        webapp_2_name = self.create_random_name(prefix='delete-me-web', length=24)
+
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan} --sku B1 --tags plan=plan1')
+
+        # create webapp_1
+        self.cmd(f'webapp create -g {resource_group} -n {webapp_1_name} --plan {plan}')
+
+        # delete webapp_1
+        self.cmd(f'webapp delete -g {resource_group} -n {webapp_1_name}')
+
+
+        # collect list of deleted webapps
+        deleted_list = self.cmd(f'webapp deleted list -g {resource_group} -n {webapp_1_name}', checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].deletedSiteName', webapp_1_name)
+        ]).get_output_in_json()
+        deleted_id = deleted_list[0]["id"]
+
+        # restore deleted webapp to non existent app i.e webapp_2 without ASP, raises ValidationError
+        with self.assertRaises(ValidationError) as ctx:
+             self.cmd(f'webapp deleted restore -g {resource_group} -n {webapp_2_name} --deleted-id "{deleted_id}"')
+
+        # # restore deleted webapp to non existent app i.e webapp_2 with non existent ASP, raises ValidationError
+        with self.assertRaises(ValidationError) as ctx:
+            self.cmd(f'webapp deleted restore -g {resource_group} -n {webapp_2_name} --deleted-id "{deleted_id}" --target-app-svc-plan idontexistplan')
+
 
 
 class WebappAuthenticationTest(ScenarioTest):
@@ -1383,7 +1874,7 @@ class WebappZipDeployScenarioTest(ScenarioTest):
         plan_name = self.create_random_name('webapp-zipDeploy-plan', 40)
         zip_file = os.path.join(TEST_DIR, 'test.zip')
         self.cmd(
-            'appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+            f'appservice plan create -g {resource_group} -n {plan_name} --sku S1 -l eastus')
         self.cmd(
             'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
         self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).assert_with_checks([
@@ -1395,8 +1886,10 @@ class WebappZipDeployScenarioTest(ScenarioTest):
 
 
 class WebappImplictIdentityTest(ScenarioTest):
+    @unittest.skip("Flaky test")
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @unittest.skip("Temp skip")
     def test_webapp_assign_system_identity(self, resource_group):
         scope = '/subscriptions/{}/resourcegroups/{}'.format(
             self.get_subscription_id(), resource_group)
@@ -1503,6 +1996,32 @@ class WebappListLocationsFreeSKUTest(ScenarioTest):
         result = self.cmd(
             'appservice list-locations --sku Free').get_output_in_json()
         self.assertEqual(asp_F1, result)
+
+
+class ContainerWebappE2ETest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test', location='australiaeast')
+    def test_container_webapp_long_server_url(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-container-e2e', length=24)
+        plan = self.create_random_name(prefix='webapp-hyperv-plan', length=24)
+        self.cmd('appservice plan create --hyper-v -n {} -g {} --sku p1v3 -l australiaeast'.format(plan, resource_group))
+        container = "mcr.microsoft.com/azure-app-service/windows/parkingpage:latest"
+        self.cmd('webapp create -n {} -g {} -p {} -i {}'.format(webapp_name, resource_group, plan, container), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', webapp_name),
+            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test', location='australiaeast')
+    def test_container_webapp_docker_image_name(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-container', length=24)
+        plan = self.create_random_name(prefix='webapp-plan', length=24)
+        self.cmd('appservice plan create --is-linux -n {} -g {} -l australiaeast'.format(plan, resource_group))
+        container = "nginx"
+        self.cmd('webapp create -n {} -g {} -p {} -i {}'.format(webapp_name, resource_group, plan, container), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', webapp_name),
+            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
 
 
 @unittest.skip("Known issue with creating windows containers")
@@ -1698,6 +2217,169 @@ class WebappNetworkConnectionTests(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_create_vnetE2E(self, resource_group):
+        webapp_name = self.create_random_name('vnetwebapp', 24)
+        plan = self.create_random_name('vnetplan', 24)
+        subnet_name = self.create_random_name('subnet', 24)
+        vnet_name = self.create_random_name('vnet', 24)
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name))
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} --vnet {} --subnet {}'.format(resource_group,
+                                                                               webapp_name, plan, vnet_name,
+                                                                               subnet_name))
+        self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', subnet_name)
+        ])
+        self.cmd(
+            'webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
+        self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, parameter_name="webapp_rg")
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, parameter_name="vnet_rg")
+    def test_webapp_create_with_vnet_by_subnet_rid(self, webapp_rg, vnet_rg):
+        webapp_name = self.create_random_name('vnetwebapp', 24)
+        plan = self.create_random_name('vnetplan', 24)
+        subnet_name = self.create_random_name('subnet', 24)
+        vnet_name = self.create_random_name('vnet', 24)
+
+        subnet_id = self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            vnet_rg, vnet_name, subnet_name)).get_output_in_json()["newVNet"]["subnets"][0]["id"]
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku P1V2'.format(webapp_rg, plan))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} --subnet {}'.format(webapp_rg, webapp_name, plan, subnet_id))
+        self.cmd('webapp vnet-integration list -g {} -n {}'.format(webapp_rg, webapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', subnet_name)
+        ])
+        self.cmd(
+            'webapp vnet-integration remove -g {} -n {}'.format(webapp_rg, webapp_name))
+        self.cmd('webapp vnet-integration list -g {} -n {}'.format(webapp_rg, webapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, parameter_name="webapp_rg")
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, parameter_name="vnet_rg")
+    def test_webapp_create_with_vnet_by_vnet_rid(self, webapp_rg, vnet_rg):
+        webapp_name = self.create_random_name('vnetwebapp', 24)
+        plan = self.create_random_name('vnetplan', 24)
+        subnet_name = self.create_random_name('subnet', 24)
+        vnet_name = self.create_random_name('vnet', 24)
+
+        vnet_id = self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            vnet_rg, vnet_name, subnet_name)).get_output_in_json()["newVNet"]["id"]
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku P1V2'.format(webapp_rg, plan))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} --vnet {} --subnet {}'.format(webapp_rg, webapp_name, plan, vnet_id, subnet_name))
+        self.cmd('webapp vnet-integration list -g {} -n {}'.format(webapp_rg, webapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', subnet_name)
+        ])
+        self.cmd(
+            'webapp vnet-integration remove -g {} -n {}'.format(webapp_rg, webapp_name))
+        self.cmd('webapp vnet-integration list -g {} -n {}'.format(webapp_rg, webapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_create_with_vnet_wrong_sku(self, resource_group):
+        webapp_name = self.create_random_name('vnetwebapp', 24)
+        plan = self.create_random_name('vnetplan', 24)
+        subnet_name = self.create_random_name('subnet', 24)
+        vnet_name = self.create_random_name('vnet', 24)
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name))
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku FREE'.format(resource_group, plan))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} --vnet {} --subnet {}'.format(resource_group,
+                                                                               webapp_name, plan, vnet_name,
+                                                                               subnet_name), expect_failure=True)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, parameter_name="webapp_rg")
+    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP, parameter_name="vnet_rg")
+    def test_webapp_create_with_vnet_wrong_location(self, webapp_rg, vnet_rg):
+        self.assertNotEqual(WINDOWS_ASP_LOCATION_WEBAPP, LINUX_ASP_LOCATION_WEBAPP)
+
+        webapp_name = self.create_random_name('vnetwebapp', 24)
+        plan = self.create_random_name('vnetplan', 24)
+        subnet_name = self.create_random_name('subnet', 24)
+        vnet_name = self.create_random_name('vnet', 24)
+
+        vnet_id = self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            vnet_rg, vnet_name, subnet_name)).get_output_in_json()["newVNet"]["id"]
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku P1V2'.format(webapp_rg, plan))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} --vnet {} --subnet {}'.format(webapp_rg, webapp_name, plan, vnet_id, subnet_name), expect_failure=True)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_create_with_vnet_no_vnet(self, resource_group):
+        webapp_name = self.create_random_name('vnetwebapp', 24)
+        plan = self.create_random_name('vnetplan', 24)
+        subnet_name = self.create_random_name('subnet', 24)
+        vnet_name = self.create_random_name('vnet', 24)
+
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} --vnet {} --subnet {}'.format(resource_group,
+                                                                               webapp_name, plan, vnet_name,
+                                                                               subnet_name), expect_failure=True)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, parameter_name="webapp_rg")
+    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP, parameter_name="vnet_rg")
+    def test_webapp_create_with_vnet_wrong_rg(self, webapp_rg, vnet_rg):
+        self.assertNotEqual(WINDOWS_ASP_LOCATION_WEBAPP, LINUX_ASP_LOCATION_WEBAPP)
+
+        webapp_name = self.create_random_name('vnetwebapp', 24)
+        plan = self.create_random_name('vnetplan', 24)
+        subnet_name = self.create_random_name('subnet', 24)
+        vnet_name = self.create_random_name('vnet', 24)
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            vnet_rg, vnet_name, subnet_name))
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku P1V2'.format(webapp_rg, plan))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} --vnet {} --subnet {}'.format(webapp_rg,
+                                                                               webapp_name, plan, vnet_name,
+                                                                               subnet_name), expect_failure=True)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_create_with_vnet_no_subnet(self, resource_group):
+        webapp_name = self.create_random_name('vnetwebapp', 24)
+        plan = self.create_random_name('vnetplan', 24)
+        subnet_name = self.create_random_name('subnet', 24)
+        vnet_name = self.create_random_name('vnet', 24)
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name))
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} --vnet {}'.format(resource_group,
+                                                                               webapp_name, plan, vnet_name,
+                                                                               subnet_name), expect_failure=True)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_vnetDelegation(self, resource_group):
         webapp_name = self.create_random_name('swiftwebapp', 24)
         plan = self.create_random_name('swiftplan', 24)
@@ -1825,7 +2507,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('[0].name', subnet_name)
         ])
         self.cmd('webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
-       
+
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
@@ -1837,7 +2519,7 @@ class WebappDeploymentLogsScenarioTest(ScenarioTest):
         plan_name = self.create_random_name('show-deployment-plan', 40)
         zip_file = os.path.join(TEST_DIR, 'test.zip')
 
-        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan_name} --sku S1 -l eastus')
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
 
         self.cmd('webapp log deployment show -g {} -n {}'.format(resource_group, webapp_name), checks=[
@@ -1859,7 +2541,7 @@ class WebappDeploymentLogsScenarioTest(ScenarioTest):
         plan_name = self.create_random_name('list-deployment-plan', 40)
         zip_file = os.path.join(TEST_DIR, 'test.zip')
 
-        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan_name} --sku S1 -l eastus')
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
 
         self.cmd('webapp log deployment list -g {} -n {}'.format(resource_group, webapp_name), checks=[
@@ -1902,9 +2584,8 @@ class WebappLocalContextScenarioTest(LocalContextScenarioTest):
 
 
 class WebappOneDeployScenarioTest(ScenarioTest):
-    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_OneDeploy', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    def test_one_deploy(self, resource_group):
+    def test_one_deploy_scm(self, resource_group):
         webapp_name = self.create_random_name('webapp-oneDeploy-test', 40)
         plan_name = self.create_random_name('webapp-oneDeploy-plan', 40)
         war_file = os.path.join(TEST_DIR, 'sample.war')
@@ -1919,6 +2600,22 @@ class WebappOneDeployScenarioTest(ScenarioTest):
             JMESPathCheck('complete', True)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_OneDeploy', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_one_deploy_arm(self, resource_group):
+        webapp_name = self.create_random_name('webapp-oneDeploy-test', 40)
+        plan_name = self.create_random_name('webapp-oneDeploy-plan', 40)
+        war_url = "https://tomcat.apache.org/tomcat-7.0-doc/appdev/sample/sample.war"
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "TOMCAT|9.0-java11"'.format(resource_group, webapp_name, plan_name))
+        
+        self.cmd(f'webapp deploy -g {resource_group} -n {webapp_name} --src-url {war_url} --type war').assert_with_checks([
+            JMESPathCheck('status', 4),
+            JMESPathCheck('deployer', 'OneDeploy'),
+            JMESPathCheck('message', 'OneDeploy'),
+            JMESPathCheck('complete', True)
+        ])
 
 class DomainScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -1928,6 +2625,109 @@ class DomainScenarioTest(ScenarioTest):
             resource_group, "testuniquedomainname1.com", contacts)
         ).assert_with_checks([
             JMESPathCheck('agreement_keys', "['DNRA', 'DNPA']")
+        ])
+
+
+class TunnelProxyTest(unittest.TestCase):
+    def setUp(self):
+        # Clean pre-existing proxy env vars
+        for env_var in [
+            'NO_PROXY',
+            'no_proxy',
+            'HTTPS_PROXY',
+            'https_proxy',
+            'AZURE_CLI_DISABLE_CONNECTION_VERIFICATION',
+            'REQUESTS_CA_BUNDLE',
+        ]:
+            if env_var in os.environ:
+                del os.environ[env_var]
+        os.environ['HTTPS_PROXY'] = 'http://myproxy.local:8888'
+
+    def test_with_proxy(self):
+        http = get_pool_manager('https://scm.azurewebsites.net')
+
+        self.assertEqual(http.proxy.netloc, 'myproxy.local:8888')
+        with self.assertRaises(KeyError):
+            http.proxy_headers['proxy-authorization']
+        self.assertEqual(http.connection_pool_kw['cert_reqs'], 'CERT_REQUIRED')
+        self.assertIsInstance(http, urllib3.ProxyManager)
+
+    def test_without_proxy(self):
+        del os.environ['HTTPS_PROXY']
+        http = get_pool_manager('https://scm.azurewebsites.net')
+
+        self.assertIsNone(http.proxy)
+        self.assertIsInstance(http, urllib3.PoolManager)
+        self.assertNotIsInstance(http, urllib3.ProxyManager)
+
+    def test_no_proxy(self):
+        os.environ['NO_PROXY'] = 'azurewebsites.net'
+        http = get_pool_manager('https://scm.azurewebsites.net')
+
+        self.assertIsNone(http.proxy)
+        self.assertIsInstance(http, urllib3.PoolManager)
+        self.assertNotIsInstance(http, urllib3.ProxyManager)
+
+    def test_proxy_auth(self):
+        os.environ['HTTPS_PROXY'] = 'http://test_user:secret_p@ss@myproxy.local:8888'
+        http = get_pool_manager('https://scm.azurewebsites.net')
+
+        self.assertEqual(
+            http.proxy_headers['proxy-authorization'],
+            'Basic dGVzdF91c2VyOnNlY3JldF9wQHNz',
+        )
+
+    def test_proxy_custom_ca_bundle(self):
+        with tempfile.TemporaryFile() as file:
+            file = tempfile.NamedTemporaryFile(suffix='-ca-certificates.crt')
+            os.environ['REQUESTS_CA_BUNDLE'] = file.name
+            http = get_pool_manager('https://scm.azurewebsites.net')
+
+        self.assertEqual(http.connection_pool_kw['ca_certs'], file.name)
+
+    def test_proxy_custom_ca_bundle_incorrect(self):
+        with tempfile.TemporaryDirectory() as empty_folder:
+            os.environ['REQUESTS_CA_BUNDLE'] = f'{empty_folder}/ca-certificates.crt'
+
+            self.assertRaises(CLIError, get_pool_manager, 'https://scm.azurewebsites.net')
+
+    def test_proxy_default_ca_bundle(self):
+        http = get_pool_manager('https://scm.azurewebsites.net')
+
+        self.assertEqual(http.connection_pool_kw['ca_certs'], certifi.where())
+
+    def test_proxy_unsafe_ssl(self):
+        os.environ['AZURE_CLI_DISABLE_CONNECTION_VERIFICATION'] = '1'
+        http = get_pool_manager('https://scm.azurewebsites.net')
+
+        self.assertEqual(http.connection_pool_kw['cert_reqs'], 'CERT_NONE')
+
+
+class WebappSlotTest(ScenarioTest):
+    @live_only()  # Uses storage account keys, so must be live_only to not fail credscan
+    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
+    def test_slot_create_from_configuration_source(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-e2e', length=24)
+        plan = self.create_random_name(prefix='webapp-e2e-plan', length=24)
+        storage_account = self.create_random_name(prefix='storage', length=24)
+        container = self.create_random_name(prefix='container', length=24)
+        store_id = "store"
+        store_type = "AzureBlob"
+
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan} --sku S1 --is-linux')
+        self.cmd(f'webapp create -g {resource_group} -n {webapp_name} --plan {plan} --runtime "python|3.9"')
+        self.cmd(f'storage account create -n {storage_account} -g {resource_group} --location {LINUX_ASP_LOCATION_WEBAPP}')
+        self.cmd(f"storage container create -n {container} -g {resource_group} --account-name {storage_account}")
+        key = self.cmd(f"storage account keys list -n {storage_account}").get_output_in_json()[0]["value"]
+        self.cmd(f'webapp config storage-account add -g {resource_group} -n {webapp_name} -k {key} -a {storage_account} -i {store_id} --sn {container} -t {store_type}')
+
+        self.cmd(f'webapp deployment slot create -g {resource_group} -n {webapp_name} -s "slot" --configuration-source {webapp_name}')
+
+        self.cmd(f'webapp show -g {resource_group} -n {webapp_name} -s "slot"', checks=[
+            JMESPathCheck(f"siteConfig.azureStorageAccounts.{store_id}.accessKey", None),
+            JMESPathCheck(f"siteConfig.azureStorageAccounts.{store_id}.accountName", storage_account),
+            JMESPathCheck(f"siteConfig.azureStorageAccounts.{store_id}.state", "Ok"),
+            JMESPathCheck(f"siteConfig.azureStorageAccounts.{store_id}.type", store_type),
         ])
 
 

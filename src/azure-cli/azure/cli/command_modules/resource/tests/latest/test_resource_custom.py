@@ -7,9 +7,8 @@ import os
 import tempfile
 import unittest
 
-from six.moves.urllib.request import pathname2url  # pylint: disable=import-error
-from six.moves.urllib.parse import urljoin  # pylint: disable=import-error
-from six import assertRaisesRegex
+from urllib.request import pathname2url
+from urllib.parse import urljoin
 
 from unittest import mock
 
@@ -20,12 +19,14 @@ from azure.cli.command_modules.resource.custom import (
     _process_parameters,
     _find_missing_parameters,
     _prompt_for_parameters,
+    _is_bicepparam_file_provided,
     _load_file_string_or_uri,
     _what_if_deploy_arm_template_core,
     deploy_arm_template_at_resource_group,
     deploy_arm_template_at_subscription_scope,
     deploy_arm_template_at_management_group,
     deploy_arm_template_at_tenant_scope,
+    format_bicep_file,
 )
 
 from azure.cli.core.mock import DummyCli
@@ -240,7 +241,7 @@ class TestCustom(unittest.TestCase):
         def prompt_function(x):
             from knack.prompting import NoTTYException
             raise NoTTYException
-        with assertRaisesRegex(self, CLIError, "Missing input parameters: missing"):
+        with self.assertRaisesRegex(CLIError, "Missing input parameters: missing"):
             _get_missing_parameters(parameters, template, prompt_function)
 
     def test_deployment_parameters(self):
@@ -353,6 +354,13 @@ class TestCustom(unittest.TestCase):
                              "['arrayParam', 'boolParam', 'enumParam', 'objectParam', 'secureParam']"]
         results = _prompt_for_parameters(dict(missing_parameters), fail_on_no_tty=False)
         self.assertTrue(str(list(results.keys())) in param_alpha_order)
+
+    def test_deployment_bicepparam_file_input_check(self):
+        self.assertEqual(_is_bicepparam_file_provided(None), False)
+        self.assertEqual(_is_bicepparam_file_provided([]), False)
+        self.assertEqual(_is_bicepparam_file_provided([['test.json']]), False)
+        self.assertEqual(_is_bicepparam_file_provided([['test.bicepparam']]), True)
+        self.assertEqual(_is_bicepparam_file_provided([['test.bicepparam'], ['test.json'],  ['{ \"foo\": { \"value\": \"bar\" } }']]), True)
 
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
     @mock.patch("azure.cli.command_modules.resource.custom._what_if_deploy_arm_template_at_resource_group_core", autospec=True)
@@ -534,6 +542,21 @@ class TestCustom(unittest.TestCase):
         self.assertEqual(1, len(result.changes))
         self.assertEqual(ChangeType.modify, result.changes[0].change_type)
 
+class TestFormatBicepFile(unittest.TestCase):
+    @mock.patch("azure.cli.command_modules.resource.custom.bicep_version_greater_than_or_equal_to", return_value=True)
+    @mock.patch("azure.cli.command_modules.resource.custom.run_bicep_command", return_value="formatted content")
+    @mock.patch("builtins.print")
+    def test_format_bicep_file(self, mock_print, mock_run_bicep_command, mock_bicep_version_greater_than_or_equal_to):
+        # Arrange.
+        file_path = "path/to/file.bicep"
+        stdout = True
 
+        # Act.
+        format_bicep_file(cmd, file_path, stdout=stdout)
+
+        # Assert.
+        mock_bicep_version_greater_than_or_equal_to.assert_called_once_with("0.12.1")
+        mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ["format", file_path, "--stdout"])        
+        
 if __name__ == '__main__':
     unittest.main()

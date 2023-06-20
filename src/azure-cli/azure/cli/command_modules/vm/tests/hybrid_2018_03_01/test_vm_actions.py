@@ -15,7 +15,8 @@ from azure.cli.command_modules.vm._validators import (validate_ssh_key,
                                                       _validate_admin_username,
                                                       _validate_admin_password,
                                                       _parse_image_argument,
-                                                      process_disk_or_snapshot_create_namespace,
+                                                      process_disk_create_namespace,
+                                                      process_snapshot_create_namespace,
                                                       _validate_vmss_create_subnet,
                                                       _get_next_subnet_addr_suffix,
                                                       _validate_vm_vmss_msi,
@@ -87,15 +88,24 @@ class TestActions(unittest.TestCase):
 
     def test_figure_out_storage_source(self):
         test_data = 'https://av123images.blob.core.windows.net/images/TDAZBET.vhd'
-        src_blob_uri, src_disk, src_snapshot = _figure_out_storage_source(DummyCli(), 'tg1', test_data)
+        src_blob_uri, src_disk, src_snapshot, src_restore_point, _ = _figure_out_storage_source(DummyCli(), 'tg1', test_data)
         self.assertFalse(src_disk)
         self.assertFalse(src_snapshot)
+        self.assertFalse(src_restore_point)
         self.assertEqual(src_blob_uri, test_data)
 
         test_data = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/JAVACSMRG6017/providers/Microsoft.Compute/disks/ex.vhd'
-        src_blob_uri, src_disk, src_snapshot = _figure_out_storage_source(None, 'tg1', test_data)
+        src_blob_uri, src_disk, src_snapshot, src_restore_point, _ = _figure_out_storage_source(None, 'tg1', test_data)
         self.assertEqual(src_disk, test_data)
         self.assertFalse(src_snapshot)
+        self.assertFalse(src_restore_point)
+        self.assertFalse(src_blob_uri)
+
+        test_data = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/qinkaiwu-test/providers/Microsoft.Compute/restorePointCollections/vm_rpc/restorePoints/vm_rp'
+        src_blob_uri, src_disk, src_snapshot, src_restore_point, _ = _figure_out_storage_source(None, 'tg1', test_data)
+        self.assertFalse(src_disk)
+        self.assertFalse(src_snapshot)
+        self.assertEqual(src_restore_point, test_data)
         self.assertFalse(src_blob_uri)
 
     def test_source_storage_account_err_case(self):
@@ -109,11 +119,13 @@ class TestActions(unittest.TestCase):
         # action (should throw)
         kwargs = {'namespace': np}
         with self.assertRaises(CLIError):
-            process_disk_or_snapshot_create_namespace(cmd, **kwargs)
+            process_disk_create_namespace(cmd, **kwargs)
+            process_snapshot_create_namespace(cmd, **kwargs)
 
         # with blob uri, should be fine
         np.source = 'https://s1.blob.core.windows.net/vhds/s1.vhd'
-        process_disk_or_snapshot_create_namespace(cmd, **kwargs)
+        process_disk_create_namespace(cmd, **kwargs)
+        process_snapshot_create_namespace(cmd, **kwargs)
 
     def test_validate_admin_username_linux(self):
         # pylint: disable=line-too-long
@@ -207,7 +219,7 @@ class TestActions(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.vm._validators.logger.warning', autospec=True)
     def test_parse_staging_image_argument(self, logger_mock, client_factory_mock):
-        from msrestazure.azure_exceptions import CloudError
+        from azure.core.exceptions import ResourceNotFoundError
         compute_client = mock.MagicMock()
         resp = mock.MagicMock()
         cmd = mock.MagicMock()
@@ -215,7 +227,7 @@ class TestActions(unittest.TestCase):
         resp.status_code = 404
         resp.text = '{"Message": "Not Found"}'
 
-        compute_client.virtual_machine_images.get.side_effect = CloudError(resp, error='image not found')
+        compute_client.virtual_machine_images.get.side_effect = ResourceNotFoundError('image not found')
         client_factory_mock.return_value = compute_client
 
         np = mock.MagicMock()
@@ -288,23 +300,33 @@ class TestActions(unittest.TestCase):
     @mock.patch('azure.cli.core.commands.client_factory.get_subscription_id', autospec=True)
     def test_validate_msi_on_create(self, mock_get_subscription, mock_resolve_role_id):
         # check throw on : az vm/vmss create --assign-identity --role reader --scope ""
+        from azure.cli.core.azclierror import ArgumentUsageError
+
         np_mock = mock.MagicMock()
         cmd = mock.MagicMock()
         cmd.cli_ctx = DummyCli()
         np_mock.assign_identity = []
         np_mock.identity_scope = None
         np_mock.identity_role = 'reader'
-
-        with self.assertRaises(CLIError) as err:
+        with self.assertRaises(ArgumentUsageError) as err:
             _validate_vm_vmss_msi(cmd, np_mock)
-        self.assertTrue("usage error: '--role reader' is not applicable as the '--scope' is "
-                        "not provided" in str(err.exception))
+        self.assertTrue("usage error: please specify both --role and --scope "
+                        "when assigning a role to the managed identity" in str(err.exception))
+
+        np_mock = mock.MagicMock()
+        np_mock.assign_identity = []
+        np_mock.identity_scope = 'foo-scope'
+        np_mock.identity_role = None
+        with self.assertRaises(ArgumentUsageError) as err:
+            _validate_vm_vmss_msi(cmd, np_mock)
+        self.assertTrue("usage error: please specify both --role and --scope "
+                        "when assigning a role to the managed identity" in str(err.exception))
 
         # check throw on : az vm/vmss create --scope "some scope"
         np_mock = mock.MagicMock()
         np_mock.assign_identity = None
         np_mock.identity_scope = 'foo-scope'
-        with self.assertRaises(CLIError) as err:
+        with self.assertRaises(ArgumentUsageError) as err:
             _validate_vm_vmss_msi(cmd, np_mock)
         self.assertTrue('usage error: --assign-identity [--scope SCOPE] [--role ROLE]' in str(err.exception))
 
@@ -312,7 +334,7 @@ class TestActions(unittest.TestCase):
         np_mock = mock.MagicMock()
         np_mock.assign_identity = None
         np_mock.identity_role = 'reader'
-        with self.assertRaises(CLIError) as err:
+        with self.assertRaises(ArgumentUsageError) as err:
             _validate_vm_vmss_msi(cmd, np_mock)
         self.assertTrue('usage error: --assign-identity [--scope SCOPE] [--role ROLE]' in str(err.exception))
 
@@ -336,10 +358,11 @@ class TestActions(unittest.TestCase):
         np_mock.identity_scope = ''
         np_mock.identity_role = 'reader'
 
-        with self.assertRaises(CLIError) as err:
-            _validate_vm_vmss_msi(cmd, np_mock, from_set_command=True)
-        self.assertTrue("usage error: '--role reader' is not applicable as the '--scope' is set to None",
-                        str(err.exception))
+        from azure.cli.core.azclierror import ArgumentUsageError
+        with self.assertRaises(ArgumentUsageError) as err:
+            _validate_vm_vmss_msi(cmd, np_mock, is_identity_assign=True)
+        self.assertTrue("usage error: please specify --scope when assigning a role to the managed identity"
+                        in str(err.exception))
 
         # check we set right role id
         np_mock = mock.MagicMock()
@@ -347,7 +370,7 @@ class TestActions(unittest.TestCase):
         np_mock.identity_role = 'reader'
         np_mock.assign_identity = []
         mock_resolve_role_id.return_value = 'foo-role-id'
-        _validate_vm_vmss_msi(cmd, np_mock, from_set_command=True)
+        _validate_vm_vmss_msi(cmd, np_mock, is_identity_assign=True)
         self.assertEqual(np_mock.identity_role_id, 'foo-role-id')
         mock_resolve_role_id.assert_called_with(cmd.cli_ctx, 'reader', 'foo-scope')
 

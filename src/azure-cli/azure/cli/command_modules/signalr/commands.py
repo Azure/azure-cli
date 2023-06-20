@@ -8,7 +8,9 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
 from ._client_factory import (
-    cf_signalr)
+    cf_signalr,
+    cf_custom_domains,
+    cf_custom_certificates)
 
 
 def load_command_table(self, _):
@@ -41,6 +43,16 @@ def load_command_table(self, _):
     signalr_msi_utils = CliCommandType(
         operations_tmpl='azure.cli.command_modules.signalr.msi#{}',
         client_factory=cf_signalr
+    )
+
+    signalr_custom_domain_utils = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.signalr.customdomain#{}',
+        client_factory=cf_custom_domains
+    )
+
+    signalr_custom_certificate_utils = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.signalr.customcertificate#{}',
+        client_factory=cf_custom_certificates
     )
 
     with self.command_group('signalr', signalr_custom_utils) as g:
@@ -76,3 +88,17 @@ def load_command_table(self, _):
         g.command('assign', 'signalr_msi_assign')
         g.command('remove', 'signalr_msi_remove')
         g.show_command('show', 'signalr_msi_show')
+
+    with self.command_group('signalr custom-domain', signalr_custom_domain_utils) as g:
+        g.show_command('show', 'custom_domain_show', exception_handler=empty_on_404)
+        g.command('create', 'custom_domain_create')
+        g.command('delete', 'custom_domain_delete')
+        g.generic_update_command('update', getter_name='get_custom_domain', setter_name='set_custom_domain', custom_func_name='update', custom_func_type=signalr_custom_domain_utils)
+        g.command('list', 'custom_domain_list')
+
+    with self.command_group('signalr custom-certificate', signalr_custom_certificate_utils) as g:
+        g.show_command('show', 'custom_certificate_show', exception_handler=empty_on_404)
+        g.command('create', 'custom_certificate_create')
+        g.command('delete', 'custom_certificate_delete')
+        g.generic_update_command('update', getter_name='get_custom_certificate', setter_name='set_custom_certificate', custom_func_name='update', custom_func_type=signalr_custom_certificate_utils)
+        g.command('list', 'custom_certificate_list')

@@ -3,20 +3,21 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 import unittest
 
 
 class AzureSearchServicesTests(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
-    def test_shared_private_link_resource_crud(self, resource_group):
+    @StorageAccountPreparer(name_prefix='satest', kind='StorageV2')
+    def test_shared_private_link_resource_crud(self, resource_group, storage_account):
         self.kwargs.update({
             'sku_name': 'basic',
             'search_service_name': self.create_random_name(prefix='azstest', length=24),
             'public_network_access': 'Disabled',
             'shared_private_link_resource_name': self.create_random_name(prefix='spltest', length=24),
-            'storage_account_name': self.create_random_name(prefix='satest', length=24),
+            'storage_account_name': storage_account,
             'shared_private_link_resource_group_id': 'blob',
             'shared_private_link_resource_request_provisioning_state_default': 'Succeeded',
             'shared_private_link_resource_request_status_default': 'Pending',
@@ -30,10 +31,7 @@ class AzureSearchServicesTests(ScenarioTest):
                     self.check('sku.name', '{sku_name}'),
                     self.check('publicNetworkAccess', '{public_network_access}')])
 
-        self.cmd('az storage account create -n {storage_account_name} -g {rg} --kind StorageV2')
-
-        _account = self.cmd('az storage account show -n {storage_account_name} -g {rg}').get_output_in_json()
-        _account_resource_id = _account["id"]
+        _account_resource_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Storage/storageAccounts/{}".format(self.get_subscription_id(), resource_group, storage_account)
 
         self.kwargs.update({'_account_resource_id': _account_resource_id})
 

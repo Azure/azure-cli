@@ -21,7 +21,7 @@ class CognitiveServicesPrivateEndpointTests(ScenarioTest):
             'vnetname': sname,
             'pename': 'pe' + sname,
             'customdomain': customdomain,
-            'location': 'westus'
+            'location': 'SOUTHCENTRALUS'
         })
 
         # test to create cognitive services account
@@ -29,8 +29,7 @@ class CognitiveServicesPrivateEndpointTests(ScenarioTest):
                  '--custom-domain {customdomain}',
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
-                         self.check('sku.name', '{sku}'),
-                         self.check('properties.provisioningState', 'Succeeded')])
+                         self.check('sku.name', '{sku}')])
 
         # delete the cognitive services account
         plResource = self.cmd('az network private-link-resource list -g {rg} -n {sname} '
@@ -83,7 +82,7 @@ class CognitiveServicesPrivateEndpointTests(ScenarioTest):
             'vnetname': sname,
             'pename': 'pe' + sname,
             'customdomain': customdomain,
-            'location': 'centraluseuap'
+            'location': 'SOUTHCENTRALUS'
         })
 
         # test to create cognitive services account

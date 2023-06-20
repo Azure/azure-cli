@@ -83,9 +83,9 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 | DLS (CLI own)|  | **Completed (too old)** | N/A (Will incorporate into storage SDK) |N/A | DataLakeStore: Preview (0.5.0) | | Module |
 | ManagedServices | |**Completed (too old)**| N/A| Preview (6.0.0b1) | GA (1.0.0) | Low (Once two years) | Module |
 | BotService   |  |**Block by service team** | N/A|Preview (1.0.0b1) | Preview (0.2.0) | Low (Once two years) | Module |
-| APIM   | |**Block by service team** | N/A |APIManagement: GA (1.0.0) | APIManagement: Preview (0.2.0) | Low (Once a year) | Module |
-| ServiceFabric |  |**On demand (no new feature)** | N/A|Preview (1.0.0) | Preview (0.5.0) | Low (Once a year) | Module |
-| EventHub   |  |**On demand (no new feature)** | N/A |GA (8.0.0) | GA (4.2.0) | Low (Once a year) | Module |
+| APIM   | |**Completed**  | N/A |APIManagement: GA (1.0.0) | APIManagement: Preview (0.2.0) | Low (Once a year) | Module |
+| ServiceFabric |  |***Completed** | N/A|Preview (1.0.0) | Preview (0.5.0) | Low (Once a year) | Module |
+| EventHub   |  |**Completed**  | N/A |GA (8.0.0) | GA (4.2.0) | Low (Once a year) | Module |
 | Relay |  |**On demand (no new feature)** | N/A|GA (1.0.0) | Preview (0.2.0) | Low (Once two years) | Module |
 | Role (CLI own)  | |**On demand (no new feature)** | N/A | Authorization: GA (1.0.0)<br>MSI: N/A | Authorization: Preview (0.61.0)<br>MSI: GA (1.0.0) | Low (Once a year) | Module |
 | Lab  | |**On demand (no new feature)** | N/A |DevTestLabs: GA (9.0.0) | DevTestLabs: GA (4.0.0) | Low (Once half year) | Module |

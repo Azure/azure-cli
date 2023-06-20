@@ -395,6 +395,10 @@ class CdnScenarioMixin:
         test_dir = path.dirname(path.realpath(__file__))
         default_cert_policy = path.join(test_dir, "byoc_cert_policy.json")
 
+        self.cmd(f'keyvault set-policy --name {key_vault_name} '
+                 f'--secret-permissions get list --certificate-permissions list get '
+                 f'--object-id 4dbab725-22a4-44d5-ad44-c267ca38a954')
+
         return self.cmd(f'keyvault certificate create --vault-name {key_vault_name} '
                         f'-n {cert_name} --policy "@{default_cert_policy}"')
 

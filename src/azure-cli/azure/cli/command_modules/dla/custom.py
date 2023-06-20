@@ -67,7 +67,7 @@ def list_adla_jobs(client, account_name, top=500, name=None, submitter=None, sub
 def create_adla_account(cmd, client, resource_group_name, account_name, default_data_lake_store, location=None,
                         tags=None, max_degree_of_parallelism=30, max_job_count=3, query_store_retention=30, tier=None):
     from azure.mgmt.datalake.analytics.account.models import DataLakeAnalyticsAccount, DataLakeStoreAccountInfo
-    adls_list = list()
+    adls_list = []
     adls_list.append(DataLakeStoreAccountInfo(default_data_lake_store))
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     create_params = DataLakeAnalyticsAccount(location,

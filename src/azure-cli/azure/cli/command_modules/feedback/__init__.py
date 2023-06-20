@@ -19,11 +19,15 @@ class FeedbackCommandsLoader(AzCommandsLoader):
 
         with self.command_group('', custom_feedback) as g:
             g.command('feedback', 'handle_feedback')
+            g.command('survey', 'handle_survey')
 
         return self.command_table
 
     def load_arguments(self, command):
         with self.argument_context('feedback') as c:
+            c.ignore('_subscription')  # hide global subscription param
+
+        with self.argument_context('survey') as c:
             c.ignore('_subscription')  # hide global subscription param
 
 

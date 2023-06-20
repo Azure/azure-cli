@@ -13,9 +13,9 @@ interactions:
       ParameterSetName:
       - -g --profile-name
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies?api-version=2021-06-01
   response:
     body:
       string: '{"error":{"code":"ParentResourceNotFound","message":"Can not perform
@@ -29,7 +29,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Apr 2021 10:24:29 GMT
+      - Thu, 24 Mar 2022 07:19:16 GMT
       expires:
       - '-1'
       pragma:
@@ -44,7 +44,8 @@ interactions:
       code: 404
       message: Not Found
 - request:
-    body: '{"location": "global", "sku": {"name": "Standard_AzureFrontDoor"}}'
+    body: '{"location": "global", "sku": {"name": "Standard_AzureFrontDoor"}, "properties":
+      {"originResponseTimeoutSeconds": 30}}'
     headers:
       Accept:
       - application/json
@@ -55,29 +56,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '66'
+      - '118'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g --profile-name --sku
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest","type":"Microsoft.Cdn/profiles","name":"profilesecuritytest","location":"Global","kind":"frontdoor","tags":{},"sku":{"name":"Standard_AzureFrontDoor"},"properties":{"frontDoorId":"7dda964b-5654-4076-8e4d-2855398a70d4","resourceState":"Creating","provisioningState":"Creating"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest","type":"Microsoft.Cdn/profiles","name":"profilesecuritytest","location":"Global","kind":"frontdoor","tags":{},"sku":{"name":"Standard_AzureFrontDoor"},"properties":{"originResponseTimeoutSeconds":30,"frontDoorId":"3cd1b23c-587d-49a6-9ffe-f3e57d46709c","resourceState":"Creating","provisioningState":"Creating"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/05fade57-932a-4902-b6f9-5fa89a5401e8?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/69dd5108-b0fc-4529-9d71-a8ee1b838728?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
-      - '481'
+      - '456'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Apr 2021 10:24:37 GMT
+      - Thu, 24 Mar 2022 07:19:22 GMT
       expires:
       - '-1'
       pragma:
@@ -107,21 +108,21 @@ interactions:
       ParameterSetName:
       - -g --profile-name --sku
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/05fade57-932a-4902-b6f9-5fa89a5401e8?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/69dd5108-b0fc-4529-9d71-a8ee1b838728?api-version=2021-06-01
   response:
     body:
-      string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
+      string: '{"status":"InProgress","error":{"code":"None","message":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '61'
+      - '62'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Apr 2021 10:24:47 GMT
+      - Thu, 24 Mar 2022 07:19:32 GMT
       expires:
       - '-1'
       pragma:
@@ -153,21 +154,67 @@ interactions:
       ParameterSetName:
       - -g --profile-name --sku
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/69dd5108-b0fc-4529-9d71-a8ee1b838728?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest","type":"Microsoft.Cdn/profiles","name":"profilesecuritytest","location":"Global","kind":"frontdoor","tags":{},"sku":{"name":"Standard_AzureFrontDoor"},"properties":{"frontDoorId":"7dda964b-5654-4076-8e4d-2855398a70d4","resourceState":"Active","provisioningState":"Succeeded"}}'
+      string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '480'
+      - '61'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Apr 2021 10:24:47 GMT
+      - Thu, 24 Mar 2022 07:20:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - afd profile create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --profile-name --sku
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest?api-version=2021-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest","type":"Microsoft.Cdn/profiles","name":"profilesecuritytest","location":"Global","kind":"frontdoor","tags":{},"sku":{"name":"Standard_AzureFrontDoor"},"properties":{"originResponseTimeoutSeconds":30,"frontDoorId":"3cd1b23c-587d-49a6-9ffe-f3e57d46709c","resourceState":"Active","provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '455'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 24 Mar 2022 07:20:03 GMT
       expires:
       - '-1'
       pragma:
@@ -201,9 +248,9 @@ interactions:
       ParameterSetName:
       - -g --profile-name
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies?api-version=2021-06-01
   response:
     body:
       string: '{"value":[]}'
@@ -215,7 +262,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Apr 2021 10:24:49 GMT
+      - Thu, 24 Mar 2022 07:20:05 GMT
       expires:
       - '-1'
       pragma:
@@ -234,8 +281,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "global", "properties": {"originResponseTimeoutSeconds": 100,
-      "enabledState": "Enabled"}}'
+    body: '{"location": "global", "properties": {"enabledState": "Enabled", "autoGeneratedDomainNameLabelScope":
+      "TenantReuse"}}'
     headers:
       Accept:
       - application/json
@@ -246,29 +293,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '102'
+      - '117'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g --endpoint-name --profile-name --origin-response-timeout-seconds --enabled-state
+      - -g --endpoint-name --profile-name --enabled-state
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint1000002?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint1000002?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint1000002","type":"Microsoft.Cdn/profiles/afdendpoints","name":"endpoint1000002","location":"Global","tags":{},"properties":{"hostName":"endpoint1000002.z01.azurefd.net","originResponseTimeoutSeconds":100,"enabledState":"Enabled","provisioningState":"Creating","deploymentStatus":"NotStarted"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint1000002","type":"Microsoft.Cdn/profiles/afdendpoints","name":"endpoint1000002","location":"Global","tags":{},"properties":{"hostName":"endpoint1000002-c2eadkbzcxfef3bt.z01.azurefd.net","autoGeneratedDomainNameLabelScope":null,"enabledState":"Enabled","provisioningState":"Creating","deploymentStatus":"NotStarted"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/989043c7-5168-4a9d-9c2d-aac84eea333a?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/c361df4c-1a5e-4cd5-9da5-56d7febcf109?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
-      - '543'
+      - '480'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Apr 2021 10:24:56 GMT
+      - Thu, 24 Mar 2022 07:20:13 GMT
       expires:
       - '-1'
       pragma:
@@ -296,11 +343,11 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g --endpoint-name --profile-name --origin-response-timeout-seconds --enabled-state
+      - -g --endpoint-name --profile-name --enabled-state
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/989043c7-5168-4a9d-9c2d-aac84eea333a?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/c361df4c-1a5e-4cd5-9da5-56d7febcf109?api-version=2021-06-01
   response:
     body:
       string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
@@ -312,7 +359,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Apr 2021 10:25:07 GMT
+      - Thu, 24 Mar 2022 07:20:23 GMT
       expires:
       - '-1'
       pragma:
@@ -342,23 +389,23 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g --endpoint-name --profile-name --origin-response-timeout-seconds --enabled-state
+      - -g --endpoint-name --profile-name --enabled-state
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint1000002?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint1000002?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint1000002","type":"Microsoft.Cdn/profiles/afdendpoints","name":"endpoint1000002","location":"Global","tags":{},"properties":{"hostName":"endpoint1000002.z01.azurefd.net","originResponseTimeoutSeconds":100,"enabledState":"Enabled","provisioningState":"Succeeded","deploymentStatus":"NotStarted"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint1000002","type":"Microsoft.Cdn/profiles/afdendpoints","name":"endpoint1000002","location":"Global","tags":{},"properties":{"hostName":"endpoint1000002-c2eadkbzcxfef3bt.z01.azurefd.net","autoGeneratedDomainNameLabelScope":null,"enabledState":"Enabled","provisioningState":"Succeeded","deploymentStatus":"NotStarted"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '544'
+      - '481'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Apr 2021 10:25:07 GMT
+      - Thu, 24 Mar 2022 07:20:23 GMT
       expires:
       - '-1'
       pragma:
@@ -379,8 +426,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "global", "properties": {"originResponseTimeoutSeconds": 100,
-      "enabledState": "Enabled"}}'
+    body: '{"location": "global", "properties": {"enabledState": "Enabled", "autoGeneratedDomainNameLabelScope":
+      "TenantReuse"}}'
     headers:
       Accept:
       - application/json
@@ -391,29 +438,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '102'
+      - '117'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g --endpoint-name --profile-name --origin-response-timeout-seconds --enabled-state
+      - -g --endpoint-name --profile-name --enabled-state
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003","type":"Microsoft.Cdn/profiles/afdendpoints","name":"endpoint2000003","location":"Global","tags":{},"properties":{"hostName":"endpoint2000003.z01.azurefd.net","originResponseTimeoutSeconds":100,"enabledState":"Enabled","provisioningState":"Creating","deploymentStatus":"NotStarted"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003","type":"Microsoft.Cdn/profiles/afdendpoints","name":"endpoint2000003","location":"Global","tags":{},"properties":{"hostName":"endpoint2000003-dya0e2d7a4g9cuhu.z01.azurefd.net","autoGeneratedDomainNameLabelScope":null,"enabledState":"Enabled","provisioningState":"Creating","deploymentStatus":"NotStarted"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/ee202b73-4018-4c60-8aa1-0f73777a2e41?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/a40559e9-720d-445b-84a4-40e3c6c96f27?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
-      - '543'
+      - '480'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Apr 2021 10:25:14 GMT
+      - Thu, 24 Mar 2022 07:20:31 GMT
       expires:
       - '-1'
       pragma:
@@ -425,7 +472,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '98'
+      - '99'
     status:
       code: 201
       message: Created
@@ -441,11 +488,11 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g --endpoint-name --profile-name --origin-response-timeout-seconds --enabled-state
+      - -g --endpoint-name --profile-name --enabled-state
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/ee202b73-4018-4c60-8aa1-0f73777a2e41?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/a40559e9-720d-445b-84a4-40e3c6c96f27?api-version=2021-06-01
   response:
     body:
       string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
@@ -457,7 +504,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Apr 2021 10:25:25 GMT
+      - Thu, 24 Mar 2022 07:20:41 GMT
       expires:
       - '-1'
       pragma:
@@ -487,23 +534,23 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g --endpoint-name --profile-name --origin-response-timeout-seconds --enabled-state
+      - -g --endpoint-name --profile-name --enabled-state
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003","type":"Microsoft.Cdn/profiles/afdendpoints","name":"endpoint2000003","location":"Global","tags":{},"properties":{"hostName":"endpoint2000003.z01.azurefd.net","originResponseTimeoutSeconds":100,"enabledState":"Enabled","provisioningState":"Succeeded","deploymentStatus":"NotStarted"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003","type":"Microsoft.Cdn/profiles/afdendpoints","name":"endpoint2000003","location":"Global","tags":{},"properties":{"hostName":"endpoint2000003-dya0e2d7a4g9cuhu.z01.azurefd.net","autoGeneratedDomainNameLabelScope":null,"enabledState":"Enabled","provisioningState":"Succeeded","deploymentStatus":"NotStarted"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '544'
+      - '481'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Apr 2021 10:25:26 GMT
+      - Thu, 24 Mar 2022 07:20:42 GMT
       expires:
       - '-1'
       pragma:
@@ -519,10 +566,64 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '47'
+      - '49'
     status:
       code: 200
       message: OK
+- request:
+    body: '{"properties": {"parameters": {"type": "WebApplicationFirewall", "wafPolicy":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/CliDevReservedGroup/providers/Microsoft.Network/frontdoorwebapplicationfirewallpolicies/nonexist"},
+      "associations": [{"domains": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint1000002"},
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003"}],
+      "patternsToMatch": ["/*"]}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - afd security-policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '668'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --profile-name --security-policy-name --waf-policy --domains
+      User-Agent:
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies/security000004?api-version=2021-06-01
+  response:
+    body:
+      string: "{\n  \"error\": {\n    \"code\": \"BadRequest\",\n    \"message\":
+        \"Web Application Firewall Policy being attached to AFDX profile does not
+        exist.\"\n  }\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '142'
+      content-type:
+      - application/json
+      date:
+      - Thu, 24 Mar 2022 07:20:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '99'
+    status:
+      code: 400
+      message: Bad Request
 - request:
     body: '{"properties": {"parameters": {"type": "WebApplicationFirewall", "wafPolicy":
       {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/CliDevReservedGroup/providers/Microsoft.Network/frontdoorwebapplicationfirewallpolicies/SampleStandard"},
@@ -539,29 +640,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '810'
+      - '674'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g --profile-name --security-policy-name --waf-policy --domains
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies/security000004?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies/security000004?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securitypolicies/security000004","type":"Microsoft.Cdn/profiles/securityPolicies","name":"security000004","properties":{"parameters":{"wafPolicy":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/CliDevReservedGroup/providers/Microsoft.Network/frontdoorwebapplicationfirewallpolicies/SampleStandard"},"associations":[{"domains":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint1000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003"}],"patternsToMatch":["/*"]}],"type":"WebApplicationFirewall"},"deploymentStatus":"NotStarted","provisioningState":"Creating"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securitypolicies/security000004","type":"Microsoft.Cdn/profiles/securityPolicies","name":"security000004","properties":{"parameters":{"wafPolicy":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/CliDevReservedGroup/providers/Microsoft.Network/frontdoorwebapplicationfirewallpolicies/SampleStandard"},"associations":[{"domains":[{"isActive":true,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint1000002"},{"isActive":true,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003"}],"patternsToMatch":["/*"]}],"type":"WebApplicationFirewall"},"deploymentStatus":"NotStarted","provisioningState":"Creating"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/41408b70-7bdd-4a7e-ad58-ac7731c53482?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/1974e455-e8d7-4b8c-8a39-8d9909045644?api-version=2020-09-01
       cache-control:
       - no-cache
       content-length:
-      - '1187'
+      - '1004'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Apr 2021 10:25:28 GMT
+      - Thu, 24 Mar 2022 07:20:45 GMT
       expires:
       - '-1'
       pragma:
@@ -591,9 +692,9 @@ interactions:
       ParameterSetName:
       - -g --profile-name --security-policy-name --waf-policy --domains
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/41408b70-7bdd-4a7e-ad58-ac7731c53482?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/1974e455-e8d7-4b8c-8a39-8d9909045644?api-version=2020-09-01
   response:
     body:
       string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
@@ -605,7 +706,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Apr 2021 10:25:39 GMT
+      - Thu, 24 Mar 2022 07:20:56 GMT
       expires:
       - '-1'
       pragma:
@@ -637,21 +738,21 @@ interactions:
       ParameterSetName:
       - -g --profile-name --security-policy-name --waf-policy --domains
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies/security000004?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies/security000004?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securitypolicies/security000004","type":"Microsoft.Cdn/profiles/securityPolicies","name":"security000004","properties":{"parameters":{"wafPolicy":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/CliDevReservedGroup/providers/Microsoft.Network/frontdoorwebapplicationfirewallpolicies/SampleStandard"},"associations":[{"domains":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint1000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003"}],"patternsToMatch":["/*"]}],"type":"WebApplicationFirewall"},"deploymentStatus":"NotStarted","provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securitypolicies/security000004","type":"Microsoft.Cdn/profiles/securityPolicies","name":"security000004","properties":{"parameters":{"wafPolicy":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/CliDevReservedGroup/providers/Microsoft.Network/frontdoorwebapplicationfirewallpolicies/SampleStandard"},"associations":[{"domains":[{"isActive":true,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint1000002"},{"isActive":true,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003"}],"patternsToMatch":["/*"]}],"type":"WebApplicationFirewall"},"deploymentStatus":"NotStarted","provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1188'
+      - '1005'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Apr 2021 10:25:40 GMT
+      - Thu, 24 Mar 2022 07:20:57 GMT
       expires:
       - '-1'
       pragma:
@@ -683,21 +784,21 @@ interactions:
       ParameterSetName:
       - -g --profile-name --security-policy-name
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies/security000004?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies/security000004?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securitypolicies/security000004","type":"Microsoft.Cdn/profiles/securityPolicies","name":"security000004","properties":{"parameters":{"wafPolicy":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/CliDevReservedGroup/providers/Microsoft.Network/frontdoorwebapplicationfirewallpolicies/SampleStandard"},"associations":[{"domains":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint1000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003"}],"patternsToMatch":["/*"]}],"type":"WebApplicationFirewall"},"deploymentStatus":"NotStarted","provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securitypolicies/security000004","type":"Microsoft.Cdn/profiles/securityPolicies","name":"security000004","properties":{"parameters":{"wafPolicy":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/CliDevReservedGroup/providers/Microsoft.Network/frontdoorwebapplicationfirewallpolicies/SampleStandard"},"associations":[{"domains":[{"isActive":true,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint1000002"},{"isActive":true,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003"}],"patternsToMatch":["/*"]}],"type":"WebApplicationFirewall"},"deploymentStatus":"NotStarted","provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1188'
+      - '1005'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Apr 2021 10:25:41 GMT
+      - Thu, 24 Mar 2022 07:20:58 GMT
       expires:
       - '-1'
       pragma:
@@ -729,21 +830,21 @@ interactions:
       ParameterSetName:
       - -g --profile-name
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies?api-version=2021-06-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securitypolicies/security000004","type":"Microsoft.Cdn/profiles/securityPolicies","name":"security000004","properties":{"parameters":{"wafPolicy":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/CliDevReservedGroup/providers/Microsoft.Network/frontdoorwebapplicationfirewallpolicies/SampleStandard"},"associations":[{"domains":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint1000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003"}],"patternsToMatch":["/*"]}],"type":"WebApplicationFirewall"},"deploymentStatus":"NotStarted","provisioningState":"Succeeded"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securitypolicies/security000004","type":"Microsoft.Cdn/profiles/securityPolicies","name":"security000004","properties":{"parameters":{"wafPolicy":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/CliDevReservedGroup/providers/Microsoft.Network/frontdoorwebapplicationfirewallpolicies/SampleStandard"},"associations":[{"domains":[{"isActive":true,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint1000002"},{"isActive":true,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003"}],"patternsToMatch":["/*"]}],"type":"WebApplicationFirewall"},"deploymentStatus":"NotStarted","provisioningState":"Succeeded"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1200'
+      - '1017'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Apr 2021 10:25:42 GMT
+      - Thu, 24 Mar 2022 07:20:59 GMT
       expires:
       - '-1'
       pragma:
@@ -775,21 +876,21 @@ interactions:
       ParameterSetName:
       - -g --profile-name --security-policy-name --domains --waf-policy
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies/security000004?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies/security000004?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securitypolicies/security000004","type":"Microsoft.Cdn/profiles/securityPolicies","name":"security000004","properties":{"parameters":{"wafPolicy":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/CliDevReservedGroup/providers/Microsoft.Network/frontdoorwebapplicationfirewallpolicies/SampleStandard"},"associations":[{"domains":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint1000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003"}],"patternsToMatch":["/*"]}],"type":"WebApplicationFirewall"},"deploymentStatus":"NotStarted","provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securitypolicies/security000004","type":"Microsoft.Cdn/profiles/securityPolicies","name":"security000004","properties":{"parameters":{"wafPolicy":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/CliDevReservedGroup/providers/Microsoft.Network/frontdoorwebapplicationfirewallpolicies/SampleStandard"},"associations":[{"domains":[{"isActive":true,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint1000002"},{"isActive":true,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003"}],"patternsToMatch":["/*"]}],"type":"WebApplicationFirewall"},"deploymentStatus":"NotStarted","provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1188'
+      - '1005'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Apr 2021 10:25:43 GMT
+      - Thu, 24 Mar 2022 07:21:00 GMT
       expires:
       - '-1'
       pragma:
@@ -822,33 +923,33 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '565'
+      - '497'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g --profile-name --security-policy-name --domains --waf-policy
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies/security000004?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies/security000004?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securitypolicies/security000004","type":"Microsoft.Cdn/profiles/securityPolicies","name":"security000004","properties":{"parameters":{"wafPolicy":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/CliDevReservedGroup/providers/Microsoft.Network/frontdoorwebapplicationfirewallpolicies/SampleStandard"},"associations":[{"domains":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003"}],"patternsToMatch":["/*"]}],"type":"WebApplicationFirewall"},"deploymentStatus":"NotStarted","provisioningState":"Updating"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securitypolicies/security000004","type":"Microsoft.Cdn/profiles/securityPolicies","name":"security000004","properties":{"parameters":{"wafPolicy":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/CliDevReservedGroup/providers/Microsoft.Network/frontdoorwebapplicationfirewallpolicies/SampleStandard"},"associations":[{"domains":[{"isActive":true,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003"}],"patternsToMatch":["/*"]}],"type":"WebApplicationFirewall"},"deploymentStatus":"NotStarted","provisioningState":"Updating"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/7e8e00d8-124a-47d1-8365-dba8c2903eb0?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/9c812264-fbc3-44b4-8895-5f2efa4077d6?api-version=2020-09-01
       cache-control:
       - no-cache
       content-length:
-      - '944'
+      - '813'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Apr 2021 10:25:45 GMT
+      - Thu, 24 Mar 2022 07:21:02 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/7e8e00d8-124a-47d1-8365-dba8c2903eb0/profileresults/profilesecuritytest/securitypolicyresults/security000004?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/9c812264-fbc3-44b4-8895-5f2efa4077d6/profileresults/profilesecuritytest/securitypolicyresults/security000004?api-version=2020-09-01
       pragma:
       - no-cache
       server:
@@ -858,7 +959,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '99'
+      - '98'
     status:
       code: 202
       message: Accepted
@@ -876,9 +977,9 @@ interactions:
       ParameterSetName:
       - -g --profile-name --security-policy-name --domains --waf-policy
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/7e8e00d8-124a-47d1-8365-dba8c2903eb0?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/9c812264-fbc3-44b4-8895-5f2efa4077d6?api-version=2020-09-01
   response:
     body:
       string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
@@ -890,7 +991,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Apr 2021 10:25:55 GMT
+      - Thu, 24 Mar 2022 07:21:12 GMT
       expires:
       - '-1'
       pragma:
@@ -922,21 +1023,21 @@ interactions:
       ParameterSetName:
       - -g --profile-name --security-policy-name --domains --waf-policy
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies/security000004?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies/security000004?api-version=2021-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securitypolicies/security000004","type":"Microsoft.Cdn/profiles/securityPolicies","name":"security000004","properties":{"parameters":{"wafPolicy":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/CliDevReservedGroup/providers/Microsoft.Network/frontdoorwebapplicationfirewallpolicies/SampleStandard"},"associations":[{"domains":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003"}],"patternsToMatch":["/*"]}],"type":"WebApplicationFirewall"},"deploymentStatus":"NotStarted","provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securitypolicies/security000004","type":"Microsoft.Cdn/profiles/securityPolicies","name":"security000004","properties":{"parameters":{"wafPolicy":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/CliDevReservedGroup/providers/Microsoft.Network/frontdoorwebapplicationfirewallpolicies/SampleStandard"},"associations":[{"domains":[{"isActive":true,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/afdEndpoints/endpoint2000003"}],"patternsToMatch":["/*"]}],"type":"WebApplicationFirewall"},"deploymentStatus":"NotStarted","provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '945'
+      - '814'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Apr 2021 10:25:56 GMT
+      - Thu, 24 Mar 2022 07:21:13 GMT
       expires:
       - '-1'
       pragma:
@@ -970,25 +1071,25 @@ interactions:
       ParameterSetName:
       - -g --profile-name --security-policy-name --yes
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies/security000004?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies/security000004?api-version=2021-06-01
   response:
     body:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/bc954c70-9c04-4edb-88bd-870d49d5010e?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/58204501-9dda-4143-9169-9f1f1395c38c?api-version=2020-09-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Fri, 02 Apr 2021 10:25:59 GMT
+      - Thu, 24 Mar 2022 07:21:14 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/bc954c70-9c04-4edb-88bd-870d49d5010e/profileresults/profilesecuritytest/securitypolicyresults/security000004?api-version=2020-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/58204501-9dda-4143-9169-9f1f1395c38c/profileresults/profilesecuritytest/securitypolicyresults/security000004?api-version=2020-09-01
       pragma:
       - no-cache
       server:
@@ -998,7 +1099,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14997'
+      - '14999'
     status:
       code: 202
       message: Accepted
@@ -1016,55 +1117,9 @@ interactions:
       ParameterSetName:
       - -g --profile-name --security-policy-name --yes
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/bc954c70-9c04-4edb-88bd-870d49d5010e?api-version=2020-09-01
-  response:
-    body:
-      string: '{"status":"InProgress","error":{"code":"None","message":null}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '62'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 02 Apr 2021 10:26:09 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Kestrel
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - afd security-policy delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --profile-name --security-policy-name --yes
-      User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/bc954c70-9c04-4edb-88bd-870d49d5010e?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/58204501-9dda-4143-9169-9f1f1395c38c?api-version=2020-09-01
   response:
     body:
       string: '{"status":"Succeeded","error":{"code":"None","message":null}}'
@@ -1076,7 +1131,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Apr 2021 10:26:39 GMT
+      - Thu, 24 Mar 2022 07:21:24 GMT
       expires:
       - '-1'
       pragma:
@@ -1108,9 +1163,9 @@ interactions:
       ParameterSetName:
       - -g --profile-name
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-mgmt-cdn/11.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.0 azsdk-python-mgmt-cdn/12.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profilesecuritytest/securityPolicies?api-version=2021-06-01
   response:
     body:
       string: '{"value":[]}'
@@ -1122,7 +1177,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 02 Apr 2021 10:26:40 GMT
+      - Thu, 24 Mar 2022 07:21:26 GMT
       expires:
       - '-1'
       pragma:

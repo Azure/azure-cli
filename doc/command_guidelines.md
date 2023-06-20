@@ -426,7 +426,7 @@ Follow the [Error Handling Guidelines](https://github.com/Azure/azure-cli/blob/d
 
 ## Coding Practices
 
-- All code must support Python 3.6, 3.7 and 3.8
+- All code must support Python 3.7 ~ 3.10
 - PRs to Azure/azure-cli and Azure/azure-cli-extensions must pass CI
 - Code must pass style checks with pylint and pep8
 - (*) All commands should have tests

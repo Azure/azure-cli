@@ -6,6 +6,7 @@
 import json
 import os
 import re
+import importlib
 
 from azure.cli.core.commands.arm import ArmTemplateBuilder
 
@@ -19,19 +20,23 @@ from knack.util import CLIError
 
 logger = get_logger(__name__)
 
-
 MSI_LOCAL_ID = '[system]'
 
 
 def get_target_network_api(cli_ctx):
-    """ Since most compute calls don't need advanced network functionality, we can target a supported, but not
-        necessarily latest, network API version is order to avoid having to re-record every test that uses VM create
-        (which there are a lot) whenever NRP bumps their API version (which is often)!
     """
-    from azure.cli.core.profiles import get_api_version, ResourceType, AD_HOC_API_VERSIONS
-    version = get_api_version(cli_ctx, ResourceType.MGMT_NETWORK)
+    The fixed version of network used by ARM template deployment.
+    This is consistent with the version settings of other RP to ensure the stability of core commands "az vm create"
+    and "az vmss create".
+    In addition, it can also reduce the workload of re-recording a large number of vm tests after bumping the
+    network api-version.
+    Since it does not use the Python SDK, so it will not increase the dependence on the Python SDK
+    """
     if cli_ctx.cloud.profile == 'latest':
-        version = AD_HOC_API_VERSIONS[ResourceType.MGMT_NETWORK]['vm_default_target_network']
+        version = '2022-01-01'
+    else:
+        from azure.cli.core.profiles import get_api_version, ResourceType
+        version = get_api_version(cli_ctx, ResourceType.MGMT_NETWORK)
     return version
 
 
@@ -123,10 +128,42 @@ def list_sku_info(cli_ctx, location=None):
     return result
 
 
-# pylint: disable=too-many-statements
+def is_sku_available(cmd, sku_info, zone):
+    """
+    The SKU is unavailable in the following cases:
+    1. regional restriction and the region is restricted
+    2. parameter --zone is input which indicates only showing skus with availability zones.
+       Meanwhile, zonal restriction and all zones are restricted
+    """
+    is_available = True
+    is_restrict_zone = False
+    is_restrict_location = False
+    if not sku_info.restrictions:
+        return is_available
+    for restriction in sku_info.restrictions:
+        if restriction.reason_code == 'NotAvailableForSubscription':
+            # The attribute location_info is not supported in versions 2017-03-30 and earlier
+            if cmd.supported_api_version(max_api='2017-03-30'):
+                is_available = False
+                break
+            if restriction.type == 'Zone' and not (
+                    set(sku_info.location_info[0].zones or []) - set(restriction.restriction_info.zones or [])):
+                is_restrict_zone = True
+            if restriction.type == 'Location' and (
+                    sku_info.location_info[0].location in (restriction.restriction_info.locations or [])):
+                is_restrict_location = True
+
+            if is_restrict_location or (is_restrict_zone and zone):
+                is_available = False
+                break
+    return is_available
+
+
+# pylint: disable=too-many-statements, too-many-branches
 def normalize_disk_info(image_data_disks=None,
                         data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
-                        os_disk_caching=None, data_disk_cachings=None, size='', ephemeral_os_disk=False,
+                        os_disk_caching=None, data_disk_cachings=None, size='',
+                        ephemeral_os_disk=False, ephemeral_os_disk_placement=None,
                         data_disk_delete_option=None):
     from msrestazure.tools import is_valid_resource_id
     from ._validators import validate_delete_options
@@ -144,7 +181,13 @@ def normalize_disk_info(image_data_disks=None,
     data_disk_sizes_gb = data_disk_sizes_gb or []
     image_data_disks = image_data_disks or []
 
-    data_disk_delete_option = validate_delete_options(attach_data_disks, data_disk_delete_option)
+    if data_disk_delete_option:
+        if attach_data_disks:
+            data_disk_delete_option = validate_delete_options(attach_data_disks, data_disk_delete_option)
+        else:
+            if isinstance(data_disk_delete_option, list) and len(data_disk_delete_option) == 1 and len(
+                    data_disk_delete_option[0].split('=')) == 1:  # pylint: disable=line-too-long
+                data_disk_delete_option = data_disk_delete_option[0]
     info['os'] = {}
     # update os diff disk settings
     if ephemeral_os_disk:
@@ -152,6 +195,8 @@ def normalize_disk_info(image_data_disks=None,
         # local os disks require readonly caching, default to ReadOnly if os_disk_caching not specified.
         if not os_disk_caching:
             os_disk_caching = 'ReadOnly'
+        if ephemeral_os_disk_placement:
+            info['os']['diffDiskSettings']['placement'] = ephemeral_os_disk_placement
 
     # add managed image data disks
     for data_disk in image_data_disks:
@@ -178,8 +223,9 @@ def normalize_disk_info(image_data_disks=None,
             'managedDisk': {'storageAccountType': None},
             'createOption': 'empty',
             'diskSizeGB': sizes_copy.pop(0),
-            'deleteOption': data_disk_delete_option if isinstance(data_disk_delete_option, str) else None
         }
+        if isinstance(data_disk_delete_option, str):
+            info[i]['deleteOption'] = data_disk_delete_option
 
     # update storage skus for managed data disks
     if storage_sku is not None:
@@ -207,7 +253,7 @@ def normalize_disk_info(image_data_disks=None,
         }
 
         d = attach_data_disks_copy.pop(0)
-
+        info[i]['name'] = d.split('/')[-1].split('.')[0]
         if is_valid_resource_id(d):
             info[i]['managedDisk'] = {'id': d}
             if data_disk_delete_option:
@@ -215,7 +261,6 @@ def normalize_disk_info(image_data_disks=None,
                     else data_disk_delete_option.get(info[i]['name'], None)
         else:
             info[i]['vhd'] = {'uri': d}
-            info[i]['name'] = d.split('/')[-1].split('.')[0]
             if data_disk_delete_option:
                 info[i]['deleteOption'] = data_disk_delete_option if isinstance(data_disk_delete_option, str) \
                     else data_disk_delete_option.get(info[i]['name'], None)
@@ -246,7 +291,6 @@ def normalize_disk_info(image_data_disks=None,
 
 
 def update_disk_caching(model, caching_settings):
-
     def _update(model, lun, value):
         if isinstance(model, dict):
             luns = model.keys() if lun is None else [lun]
@@ -281,7 +325,6 @@ def update_disk_caching(model, caching_settings):
 
 
 def update_write_accelerator_settings(model, write_accelerator_settings):
-
     def _update(model, lun, value):
         if isinstance(model, dict):
             luns = model.keys() if lun is None else [lun]
@@ -372,6 +415,61 @@ def is_shared_gallery_image_id(image_reference):
     return False
 
 
+def is_valid_vm_resource_id(vm_resource_id):
+    if not vm_resource_id:
+        return False
+
+    vm_id_pattern = re.compile(r'^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.Compute/'
+                               r'virtualMachines/.*$', re.IGNORECASE)
+    if vm_id_pattern.match(vm_resource_id):
+        return True
+
+    return False
+
+
+def is_valid_vmss_resource_id(vmss_resource_id):
+    if not vmss_resource_id:
+        return False
+
+    vmss_id_pattern = re.compile(r'^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.Compute/'
+                                 r'virtualMachineScaleSets/.*$', re.IGNORECASE)
+    if vmss_id_pattern.match(vmss_resource_id):
+        return True
+
+    return False
+
+
+def is_valid_image_version_id(image_version_id):
+    if not image_version_id:
+        return False
+
+    image_version_id_pattern = re.compile(r'^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.Compute/'
+                                          r'galleries/[^/]*/images/[^/]*/versions/.*$', re.IGNORECASE)
+    if image_version_id_pattern.match(image_version_id):
+        return True
+
+    return False
+
+
+def parse_gallery_image_id(image_reference):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+
+    if not image_reference:
+        raise InvalidArgumentValueError(
+            'Please pass in the gallery image id through the parameter --image')
+
+    image_info = re.search(r'^/subscriptions/([^/]*)/resourceGroups/([^/]*)/providers/Microsoft.Compute/'
+                           r'galleries/([^/]*)/images/([^/]*)/versions/.*$', image_reference, re.IGNORECASE)
+    if not image_info or len(image_info.groups()) < 2:
+        raise InvalidArgumentValueError(
+            'The gallery image id is invalid. The valid format should be "/subscriptions/{sub_id}'
+            '/resourceGroups/{rg}/providers/Microsoft.Compute/galleries/{gallery_name}'
+            '/Images/{gallery_image_name}/Versions/{image_version}"')
+
+    # Return the gallery subscription id, resource group name, gallery name and gallery image name.
+    return image_info.group(1), image_info.group(2), image_info.group(3), image_info.group(4)
+
+
 def parse_shared_gallery_image_id(image_reference):
     from azure.cli.core.azclierror import InvalidArgumentValueError
 
@@ -389,8 +487,125 @@ def parse_shared_gallery_image_id(image_reference):
     return image_info.group(1), image_info.group(2)
 
 
+def is_compute_gallery_image_id(image_reference):
+    if not image_reference:
+        return False
+
+    compute_gallery_id_pattern = re.compile(r'^/subscriptions/[^/]*/resourceGroups/[^/]*/providers/Microsoft.Compute/'
+                                            r'galleries/[^/]*/images/.*$', re.IGNORECASE)
+    if compute_gallery_id_pattern.match(image_reference):
+        return True
+
+    return False
+
+
+def is_community_gallery_image_id(image_reference):
+    if not image_reference:
+        return False
+
+    community_gallery_id_pattern = re.compile(r'^/CommunityGalleries/[^/]*/Images/[^/]*/Versions/.*$', re.IGNORECASE)
+    if community_gallery_id_pattern.match(image_reference):
+        return True
+
+    return False
+
+
+def parse_community_gallery_image_id(image_reference):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+
+    if not image_reference:
+        raise InvalidArgumentValueError(
+            'Please pass in the community gallery image id through the parameter --image')
+
+    image_info = re.search(r'^/CommunityGalleries/([^/]*)/Images/([^/]*)/Versions/.*$', image_reference, re.IGNORECASE)
+    if not image_info or len(image_info.groups()) < 2:
+        raise InvalidArgumentValueError(
+            'The community gallery image id is invalid. The valid format should be '
+            '"/CommunityGalleries/{gallery_unique_name}/Images/{gallery_image_name}/Versions/{image_version}"')
+
+    # Return the gallery unique name and gallery image name parsed from community gallery image id
+    return image_info.group(1), image_info.group(2)
+
+
 class ArmTemplateBuilder20190401(ArmTemplateBuilder):
 
     def __init__(self):
         super().__init__()
         self.template['$schema'] = 'https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#'
+
+
+def raise_unsupported_error_for_flex_vmss(vmss, error_message):
+    if hasattr(vmss, 'orchestration_mode') and vmss.orchestration_mode \
+            and vmss.orchestration_mode.lower() == 'flexible':
+        from azure.cli.core.azclierror import ArgumentUsageError
+        raise ArgumentUsageError(error_message)
+
+
+def is_trusted_launch_supported(supported_features):
+    if not supported_features:
+        return False
+
+    trusted_launch = {'TrustedLaunchSupported', 'TrustedLaunch', 'TrustedLaunchAndConfidentialVmSupported'}
+
+    return bool(trusted_launch.intersection({feature.value for feature in supported_features}))
+
+
+def trusted_launch_warning_log(namespace, generation_version, features):
+    if not generation_version:
+        return
+
+    log_message = 'Ignite (November) 2023 onwards "az vm/vmss create" command will deploy Gen2-Trusted ' \
+                  'Launch VM by default. To know more about the default change and Trusted Launch, ' \
+                  'please visit https://aka.ms/TLaD'
+
+    if generation_version == 'V1':
+        logger.warning(log_message)
+
+    if generation_version == 'V2':
+        if is_trusted_launch_supported(features) and not namespace.security_type:
+            logger.warning(log_message)
+
+
+def validate_update_vm_trusted_launch_supported(cmd, vm, os_disk_resource_group, os_disk_name):
+    from azure.cli.command_modules.vm._client_factory import _compute_client_factory
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+
+    client = _compute_client_factory(cmd.cli_ctx).disks
+    os_disk_info = client.get(os_disk_resource_group, os_disk_name)
+    generation_version = os_disk_info.hyper_v_generation if hasattr(os_disk_info, 'hyper_v_generation') else None
+
+    if generation_version != "V2":
+        raise InvalidArgumentValueError(
+            "Trusted Launch security configuration can be enabled only with Azure Gen2 VMs. Please visit "
+            "https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch for more details.")
+
+    if vm.security_profile is not None and vm.security_profile.security_type == "ConfidentialVM":
+        raise InvalidArgumentValueError("{} is already configured with ConfidentialVM. "
+                                        "Security Configuration cannot be updated from ConfidentialVM to TrustedLaunch."
+                                        .format(vm.name))
+
+
+def display_region_recommendation(cmd, namespace):
+
+    identified_region_maps = {
+        'westeurope': 'uksouth',
+        'francecentral': 'northeurope',
+        'germanywestcentral': 'northeurope'
+    }
+
+    identified_region = identified_region_maps.get(namespace.location)
+    from azure.cli.core import telemetry
+    telemetry.set_region_identified(namespace.location, identified_region)
+
+    if identified_region and cmd.cli_ctx.config.getboolean('core', 'display_region_identified', True):
+        logger.warning('Selecting "%s" may reduce your costs. '
+                       'The region you\'ve selected may cost more for the same services. '
+                       'You can disable this message in the future with the command'
+                       ' "az config set core.display_region_identified=false". '
+                       'Learn more at https://go.microsoft.com/fwlink/?linkid=222571 ',
+                       identified_region)
+
+
+def import_aaz_by_profile(profile, module_name):
+    profile_module_name = profile.lower().replace('-', '_')
+    return importlib.import_module(f"azure.cli.command_modules.vm.aaz.{profile_module_name}.{module_name}")

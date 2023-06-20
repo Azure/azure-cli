@@ -4,7 +4,7 @@
 # license information.
 # --------------------------------------------------------------------------
 
-from distutils.command.build_py import build_py
+from setuptools.command.build_py import build_py
 
 
 class azure_cli_build_py(build_py):

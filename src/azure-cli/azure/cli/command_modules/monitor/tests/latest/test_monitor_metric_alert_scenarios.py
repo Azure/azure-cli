@@ -6,7 +6,7 @@
 import unittest
 from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, StorageAccountPreparer, record_only
 from azure.cli.command_modules.backup.tests.latest.preparers import VMPreparer
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.command_modules.sql.tests.latest.test_sql_commands import SqlServerPreparer
 
 
@@ -91,28 +91,22 @@ class MonitorTests(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='test_metrics_alert_metric_name_with_special_characters')
     @StorageAccountPreparer()
-    def test_metrics_alert_metric_name_with_special_characters(self, resource_group):
+    def test_metrics_alert_metric_name_with_special_characters(self, resource_group, storage_account):
         self.kwargs.update({
             'alert_name': 'MS-ERRORCODE-SU001',
-            'rg': resource_group
-        })
-
-        storage_account = self.cmd('storage account show -n {sa}').get_output_in_json()
-        storage_account_id = storage_account['id']
-        storage_location = storage_account['location']
-        self.kwargs.update({
-            'storage_account_id': storage_account_id,
-            'storage_location': storage_location
+            'rg': resource_group,
+            'storage_account_id': f"/subscriptions/{self.get_subscription_id()}/resourceGroups/{resource_group}/providers/Microsoft.Storage/storageAccounts/{storage_account}",
+            'storage_location': 'westus'
         })
 
         from azure.core.exceptions import HttpResponseError
-        with self.assertRaisesRegexp(HttpResponseError, "Couldn't find a metric named MS-ERRORCODE-SU001"):
+        with self.assertRaisesRegex(HttpResponseError, "Couldn't find a metric named MS-ERRORCODE-SU001"):
             self.cmd('monitor metrics alert create -n {alert_name} -g {rg}'
                      ' --scopes {storage_account_id}'
                      ' --region {storage_location}'
                      ' --condition "count account.MS-ERRORCODE-SU001 > 4" --description "Cloud_lumico"')
 
-        with self.assertRaisesRegexp(HttpResponseError, "Couldn't find a metric named MS-ERRORCODE|,-SU001"):
+        with self.assertRaisesRegex(HttpResponseError, "Couldn't find a metric named MS-ERRORCODE|,-SU001"):
             self.cmd('monitor metrics alert create -n {alert_name} -g {rg}'
                      ' --scopes {storage_account_id}'
                      ' --region {storage_location}'
@@ -123,7 +117,7 @@ class MonitorTests(ScenarioTest):
         self.kwargs.update({
             'alert': 'alert1',
         })
-        self.cmd('network application-gateway create -g {rg} -n ag1 --public-ip-address ip1')
+        self.cmd('network application-gateway create -g {rg} -n ag1 --public-ip-address ip1 --priority 1001')
         gateway_json = self.cmd('network application-gateway show -g {rg} -n ag1').get_output_in_json()
         self.kwargs.update({
             'ag_id': gateway_json['id'],
@@ -272,7 +266,7 @@ class MonitorTests(ScenarioTest):
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v1_2')
-    @SqlServerPreparer(name_prefix='clitestservermatricalertA', parameter_name='server1')
+    @SqlServerPreparer(name_prefix='clitestservermatricalertA', parameter_name='server1', location='eastus')
     def test_metric_alert_for_sql_database_scope(self, resource_group, resource_group_location, server1):
         self.kwargs.update({
             'alert': 'alert1',
@@ -557,6 +551,62 @@ class MonitorTests(ScenarioTest):
                      self.check('evaluationFrequency', '0:01:00'),
                      self.check('length(scopes)', 2),
                  ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_skip_metric_validation')
+    @StorageAccountPreparer()
+    def test_metric_alert_skip_metric_validation(self, resource_group, storage_account):
+        from azure.mgmt.core.tools import resource_id
+        self.kwargs.update({
+            'alert': 'alert1',
+            'sa_id': resource_id(
+                resource_group=resource_group,
+                subscription=self.get_subscription_id(),
+                name=storage_account,
+                namespace='Microsoft.Storage',
+                type='storageAccounts')
+        })
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --region westus --description "Test"'
+                 ' --condition "avg MyNs.UnemittedMetric >= 10 with skipMetricValidation"',
+                 checks=[
+                     self.check('description', 'Test'),
+                     self.check('length(criteria.allOf)', 1),
+                     self.check('criteria.allOf[0].skipMetricValidation', True)
+                 ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_metric_namespace_special_character')
+    @StorageAccountPreparer()
+    def test_metric_namespace_special_character(self, resource_group, storage_account):
+        from azure.mgmt.core.tools import resource_id
+        self.kwargs.update({
+            'alert': 'alert1',
+            'alert2': 'alert2',
+            'sa_id': resource_id(
+                resource_group=resource_group,
+                subscription=self.get_subscription_id(),
+                name=storage_account,
+                namespace='Microsoft.Storage',
+                type='storageAccounts')
+        })
+        self.cmd(
+            'monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --region westus --description "Test"'
+            ' --condition "avg My-Ns.UnemittedMetric >= 10 with skipMetricValidation"',
+            checks=[
+                self.check('description', 'Test'),
+                self.check('length(criteria.allOf)', 1),
+                self.check('criteria.allOf[0].metricNamespace', 'My-Ns'),
+                self.check('criteria.allOf[0].metricName', 'UnemittedMetric'),
+                self.check('criteria.allOf[0].skipMetricValidation', True)
+            ])
+        self.cmd(
+            'monitor metrics alert create -g {rg} -n {alert2} --scopes {sa_id} --region westus --description "Test"'
+            ' --condition "avg My-Ns.\\LogicalDisk(C:)\% Free Space = 1 with skipMetricValidation"',
+            checks=[
+                self.check('description', 'Test'),
+                self.check('length(criteria.allOf)', 1),
+                self.check('criteria.allOf[0].metricNamespace', 'My-Ns'),
+                self.check('criteria.allOf[0].metricName', '\\LogicalDisk(C:)\% Free Space'),
+                self.check('criteria.allOf[0].skipMetricValidation', True)
+            ])
 
 
 if __name__ == '__main__':

@@ -8,7 +8,7 @@ import difflib
 import argparse
 import argcomplete
 
-import azure.cli.core.telemetry as telemetry
+from azure.cli.core import telemetry
 from azure.cli.core.extension import get_extension
 from azure.cli.core.commands import ExtensionCommandSource
 from azure.cli.core.commands import AzCliCommandInvoker
@@ -90,9 +90,6 @@ class AzCliCommandParser(CLICommandParser):
                 continue
 
             command_verb = command_name.split()[-1]
-            # To work around http://bugs.python.org/issue9253, we artificially add any new
-            # parsers we add to the "choices" section of the subparser.
-            subparser.choices[command_verb] = command_verb
 
             # inject command_module designer's help formatter -- default is HelpFormatter
             fc = metadata.formatter_class or argparse.HelpFormatter

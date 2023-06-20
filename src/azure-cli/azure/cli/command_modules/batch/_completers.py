@@ -20,11 +20,8 @@ def load_supported_images(cmd, prefix, namespace):  # pylint: disable=unused-arg
         client = account_client_factory(cmd.cli_ctx, client_creds)
         skus = client.list_supported_images()
         for sku in skus:
-            all_images.append("{}:{}:{}:{}".format(
-                sku.image_reference['publisher'],
-                sku.image_reference['offer'],
-                sku.image_reference['sku'],
-                sku.image_reference['version']))
+            all_images.append(f"{sku.image_reference['publisher']}:{sku.image_reference['offer']}" +
+                              f":{sku.image_reference['sku']}:{sku.image_reference['version']}")
         return all_images
     except (ClientRequestError, BatchErrorException):
         return []

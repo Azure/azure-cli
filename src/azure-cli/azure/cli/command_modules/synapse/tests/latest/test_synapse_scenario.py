@@ -16,6 +16,1092 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 class SynapseScenarioTests(ScenarioTest):
     location = "eastus"
 
+
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
+    def test_kusto_data_connection_event_grid(self):
+        self.kwargs.update({
+            'location': 'east us',
+            'kustoPool': self.create_random_name(prefix='testkstpool', length=15),
+            'database': self.create_random_name(prefix='testdtabase', length=15),
+            'dataConnectionName': self.create_random_name(prefix='dataConName', length=15),
+            "eventhub_name": self.create_random_name("ehsrv", 20),
+            "eventhub_namespace": self.create_random_name("ehnamespace", 20),
+        })
+
+        # create a workspace
+        self._create_workspace()
+
+        # check workspace name
+        self.cmd('az synapse workspace check-name --name {workspace}', checks=[
+            self.check('available', False)
+        ])
+
+        self.cmd('az synapse kusto pool create '
+                 '--name "{kustoPool}" '
+                 '--location "{location}" '
+                 '--enable-purge true '
+                 '--enable-streaming-ingest true '
+                 '--sku name="Storage optimized" capacity=2 size="Medium" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                     self.check('name', "{workspace}/{kustoPool}"),
+                     self.check('type', 'Microsoft.Synapse/workspaces/kustoPools'),
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('location', 'east us', case_sensitive=False),
+                     self.check("sku.name", "Storage optimized"),
+                     self.check('enablePurge', True),
+                     self.check('enableStreamingIngest', True),
+                 ])
+
+        self.cmd('az synapse kusto database create '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--read-write-database location="{location}" soft-delete-period="P1D" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                     self.check('name', "{workspace}/{kustoPool}/{database}"),
+                     self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/Databases'),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        # create event hub namespace
+        self.cmd('az eventhubs namespace create --resource-group {rg} -n {eventhub_namespace} --location eastus',
+                 checks=[
+                     self.check('provisioningState', 'Succeeded')])
+
+        # create event hub
+        self.kwargs['ehresourceid'] = self.cmd(
+            'az eventhubs eventhub create --resource-group {rg} -n {eventhub_name} --namespace-name {eventhub_namespace}',
+            checks=[
+                self.check('status', 'Active')]).get_output_in_json()['id']
+
+        self.kwargs['subscription_id'] = self.get_subscription_id()
+
+        self.cmd('az synapse kusto data-connection event-grid create '
+                 '--data-connection-name "{dataConnectionName}" '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--location "{location}" '
+                 '--consumer-group "$Default" '
+                 '--event-hub-resource-id "{ehresourceid}" '
+                 '--storage-account-resource-id  "/subscriptions/{subscription_id}/resourceGroups/{rg}/providers/Microsoft.Storage/storageAccounts/{storage-account}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                      self.check('name', "{workspace}/{kustoPool}/{database}/{dataConnectionName}"),
+                      self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/Databases/DataConnections'),
+                      self.check('provisioningState', 'Succeeded')
+                  ])
+
+        self.cmd('az synapse kusto data-connection show '
+                 '--data-connection-name "{dataConnectionName}" '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                       self.check('name', "{workspace}/{kustoPool}/{database}/{dataConnectionName}"),
+                       self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/Databases/DataConnections'),
+                       self.check('provisioningState', 'Succeeded')
+                   ])
+
+        self.cmd('az synapse kusto data-connection list '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                        self.check('[0].type', 'Microsoft.Synapse/workspaces/kustoPools/Databases/DataConnections')
+                    ])
+
+        self.cmd('az synapse kusto data-connection event-grid update '
+                 '--data-connection-name "{dataConnectionName}" '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--location "{location}" '
+                 '--consumer-group "$Default" '
+                 '--event-hub-resource-id "{ehresourceid}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                      self.check('name', "{workspace}/{kustoPool}/{database}/{dataConnectionName}"),
+                      self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/Databases/DataConnections'),
+                      self.check('provisioningState', 'Succeeded')
+                  ])
+
+        self.cmd('az synapse kusto data-connection delete -y '
+                 '--data-connection-name "{dataConnectionName}" '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"')
+
+        self.cmd('az synapse kusto data-connection show '
+                 '--data-connection-name "{dataConnectionName}" '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 expect_failure=True)
+
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
+    def test_kusto_data_connection_iot_hub(self):
+        self.kwargs.update({
+            'location': 'east us',
+            'kustoPool': self.create_random_name(prefix='testkstpool', length=15),
+            'database': self.create_random_name(prefix='testdtabase', length=15),
+            'dataConnectionName':  self.create_random_name(prefix='dataConName', length=15),
+            'iotHubName': self.create_random_name(prefix='testiothub', length=15),
+            'iotHubSharedAccessPolicyName': 'registryRead'
+        })
+
+
+        # create a workspace
+        self._create_workspace()
+
+        # check workspace name
+        self.cmd('az synapse workspace check-name --name {workspace}', checks=[
+            self.check('available', False)
+        ])
+
+        self.cmd('az synapse kusto pool create '
+                 '--name "{kustoPool}" '
+                 '--location "{location}" '
+                 '--enable-purge true '
+                 '--enable-streaming-ingest true '
+                 '--sku name="Storage optimized" capacity=2 size="Medium" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                     self.check('name', "{workspace}/{kustoPool}"),
+                     self.check('type', 'Microsoft.Synapse/workspaces/kustoPools'),
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('location', 'east us', case_sensitive=False),
+                     self.check("sku.name", "Storage optimized"),
+                     self.check('enablePurge', True),
+                     self.check('enableStreamingIngest', True),
+                 ])
+
+        self.cmd('az synapse kusto database create '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--read-write-database location="{location}" soft-delete-period="P1D" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                        self.check('name', "{workspace}/{kustoPool}/{database}"),
+                        self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/Databases'),
+                        self.check('provisioningState', 'Succeeded')
+                    ])
+
+
+        self.kwargs['iotresourceid'] = self.cmd(
+            'az iot hub create --resource-group "{rg}" --name "{iotHubName}" --location "{location}" ').get_output_in_json()['id']
+
+        self.cmd('az synapse kusto data-connection iot-hub create '
+                 '--data-connection-name "{dataConnectionName}" '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--location "{location}" '
+                 '--consumer-group "$Default" '
+                 '--iot-hub-resource-id "{iotresourceid}" '
+                 '--shared-access-policy-name "{iotHubSharedAccessPolicyName}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                      self.check('name', "{workspace}/{kustoPool}/{database}/{dataConnectionName}"),
+                      self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/Databases/DataConnections'),
+                      self.check('provisioningState', 'Succeeded')
+                  ])
+
+        self.cmd('az synapse kusto data-connection show '
+                 '--data-connection-name "{dataConnectionName}" '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                       self.check('name', "{workspace}/{kustoPool}/{database}/{dataConnectionName}"),
+                       self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/Databases/DataConnections'),
+                       self.check('provisioningState', 'Succeeded')
+                   ])
+
+        self.cmd('az synapse kusto data-connection list '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                            self.check('[0].type', 'Microsoft.Synapse/workspaces/kustoPools/Databases/DataConnections')
+                ])
+
+        self.cmd('az synapse kusto data-connection iot-hub update '
+                 '--data-connection-name "{dataConnectionName}" '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--location "{location}" '
+                 '--consumer-group "$Default" '
+                 '--iot-hub-resource-id "{iotresourceid}" '
+                 '--shared-access-policy-name "{iotHubSharedAccessPolicyName}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                           self.check('name', "{workspace}/{kustoPool}/{database}/{dataConnectionName}"),
+                           self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/Databases/DataConnections'),
+                           self.check('provisioningState', 'Succeeded')
+                       ])
+
+        self.cmd('az synapse kusto data-connection delete -y '
+                 '--data-connection-name "{dataConnectionName}" '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"')
+
+        self.cmd('az synapse kusto data-connection show '
+                 '--data-connection-name "{dataConnectionName}" '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 expect_failure=True)
+
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
+    def test_kusto_data_connection_event_hub(self):
+        self.kwargs.update({
+            'location': 'east us',
+            'kustoPool': self.create_random_name(prefix='testkstpool', length=15),
+            'database': self.create_random_name(prefix='testdtabase', length=15),
+            'dataConnectionName': self.create_random_name(prefix='dataConName', length=15),
+            "eventhub_name": self.create_random_name("ehsrv", 20),
+            "eventhub_namespace": self.create_random_name("ehnamespace", 20),
+        })
+
+        # create a workspace
+        self._create_workspace()
+
+        # check workspace name
+        self.cmd('az synapse workspace check-name --name {workspace}', checks=[
+            self.check('available', False)
+        ])
+
+        self.cmd('az synapse kusto pool create '
+                 '--name "{kustoPool}" '
+                 '--location "{location}" '
+                 '--enable-purge true '
+                 '--enable-streaming-ingest true '
+                 '--sku name="Storage optimized" capacity=2 size="Medium" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                     self.check('name', "{workspace}/{kustoPool}"),
+                     self.check('type', 'Microsoft.Synapse/workspaces/kustoPools'),
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('location', 'east us', case_sensitive=False),
+                     self.check("sku.name", "Storage optimized"),
+                     self.check('enablePurge', True),
+                     self.check('enableStreamingIngest', True),
+                 ])
+
+        self.cmd('az synapse kusto database create '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--read-write-database location="{location}" soft-delete-period="P1D" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                     self.check('name', "{workspace}/{kustoPool}/{database}"),
+                     self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/Databases'),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        # create event hub namespace
+        self.cmd('az eventhubs namespace create --resource-group {rg} -n {eventhub_namespace} --location eastus',
+                 checks=[
+                     self.check('provisioningState', 'Succeeded')])
+
+        # create event hub
+        self.kwargs['ehresourceid'] = self.cmd(
+            'az eventhubs eventhub create --resource-group {rg} -n {eventhub_name} --namespace-name {eventhub_namespace}',
+            checks=[
+                self.check('status', 'Active')]).get_output_in_json()['id']
+
+        self.cmd('az synapse kusto data-connection event-hub create '
+                 '--data-connection-name "{dataConnectionName}" '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--location "{location}" '
+                 '--consumer-group "$Default" '
+                 '--event-hub-resource-id "{ehresourceid}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                           self.check('name', "{workspace}/{kustoPool}/{database}/{dataConnectionName}"),
+                           self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/Databases/DataConnections'),
+                           self.check('provisioningState', 'Succeeded')
+                       ])
+
+        self.cmd('az synapse kusto data-connection show '
+                 '--data-connection-name "{dataConnectionName}" '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                            self.check('name', "{workspace}/{kustoPool}/{database}/{dataConnectionName}"),
+                            self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/Databases/DataConnections'),
+                            self.check('provisioningState', 'Succeeded')
+                        ])
+
+        self.cmd('az synapse kusto data-connection list '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                     self.check('[0].type', 'Microsoft.Synapse/workspaces/kustoPools/Databases/DataConnections')])
+
+        self.cmd('az synapse kusto data-connection event-hub update '
+                 '--data-connection-name "{dataConnectionName}" '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--location "{location}" '
+                 '--consumer-group "$Default" '
+                 '--event-hub-resource-id "{ehresourceid}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                           self.check('name', "{workspace}/{kustoPool}/{database}/{dataConnectionName}"),
+                           self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/Databases/DataConnections'),
+                           self.check('provisioningState', 'Succeeded')
+                       ])
+
+        self.cmd('az synapse kusto data-connection delete -y '
+                 '--data-connection-name "{dataConnectionName}" '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"')
+
+        self.cmd('az synapse kusto data-connection show '
+                 '--data-connection-name "{dataConnectionName}" '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 expect_failure=True)
+
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
+    def test_kusto_database_principal_assignment(self):
+        self.kwargs.update({
+            'location': 'east us',
+            'kustoPool': self.create_random_name(prefix='testkstpool', length=15),
+            'database': self.create_random_name(prefix='testdtabase', length=15),
+            'principalAssignmentName': self.create_random_name(prefix='kstprinpal', length=15),
+            'principalId': '9c527a58-9c1d-4c4f-970f-61feb236b74a'
+        })
+
+        # create a workspace
+        self._create_workspace()
+
+        # check workspace name
+        self.cmd('az synapse workspace check-name --name {workspace}', checks=[
+            self.check('available', False)
+        ])
+
+        self.cmd('az synapse kusto pool create '
+                 '--name "{kustoPool}" '
+                 '--location "{location}" '
+                 '--enable-purge true '
+                 '--enable-streaming-ingest true '
+                 '--sku name="Storage optimized" capacity=2 size="Medium" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                     self.check('name', "{workspace}/{kustoPool}"),
+                     self.check('type', 'Microsoft.Synapse/workspaces/kustoPools'),
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('location', 'east us', case_sensitive=False),
+                     self.check("sku.name", "Storage optimized"),
+                     self.check('enablePurge', True),
+                     self.check('enableStreamingIngest', True),
+                 ])
+
+        self.cmd('az synapse kusto database create '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--read-write-database location="{location}" soft-delete-period="P1D" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                       self.check('name', "{workspace}/{kustoPool}/{database}"),
+                       self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/Databases'),
+                       self.check('provisioningState', 'Succeeded')
+                   ])
+
+        self.cmd('az synapse kusto database-principal-assignment create '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--principal-id "{principalId}" '
+                 '--principal-type "App" '
+                 '--role "Admin" '
+                 '--principal-assignment-name "{principalAssignmentName}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                        self.check('name', "{workspace}/{kustoPool}/{database}/{principalAssignmentName}"),
+                        self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/Databases/PrincipalAssignments'),
+                        self.check('provisioningState', 'Succeeded')
+                    ])
+
+        self.cmd('az synapse kusto database-principal-assignment show '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--principal-assignment-name "{principalAssignmentName}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks= [
+                        self.check('name', "{workspace}/{kustoPool}/{database}/{principalAssignmentName}"),
+                        self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/Databases/PrincipalAssignments'),
+                        self.check('provisioningState', 'Succeeded')
+                    ])
+
+        self.cmd('az synapse kusto database-principal-assignment list '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                         self.check('[0].type', 'Microsoft.Synapse/workspaces/kustoPools/Databases/PrincipalAssignments')
+                     ])
+
+        self.cmd('az synapse kusto database-principal-assignment update '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--principal-id "{principalId}" '
+                 '--principal-type "App" '
+                 '--role "Admin" '
+                 '--principal-assignment-name "{principalAssignmentName}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                     self.check('name', "{workspace}/{kustoPool}/{database}/{principalAssignmentName}"),
+                     self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/Databases/PrincipalAssignments'),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('az synapse kusto database-principal-assignment delete -y '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--principal-assignment-name "{principalAssignmentName}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"')
+
+        self.cmd('az synapse kusto database-principal-assignment show '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--principal-assignment-name "{principalAssignmentName}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 expect_failure=True)
+
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
+    def test_kusto_pool_principal_assignment(self):
+        self.kwargs.update({
+            'location': 'east us',
+            'kustoPool': self.create_random_name(prefix='testkstpool', length=15),
+            'database': self.create_random_name(prefix='testdtabase', length=15),
+            'principalAssignmentName': self.create_random_name(prefix='kstprinpal', length=15),
+            'principalId': '9c527a58-9c1d-4c4f-970f-61feb236b74a'
+        })
+
+
+        # create a workspace
+        self._create_workspace()
+
+        # check workspace name
+        self.cmd('az synapse workspace check-name --name {workspace}', checks=[
+            self.check('available', False)
+        ])
+
+        self.cmd('az synapse kusto pool create '
+                 '--name "{kustoPool}" '
+                 '--location "{location}" '
+                 '--enable-purge true '
+                 '--enable-streaming-ingest true '
+                 '--sku name="Storage optimized" capacity=2 size="Medium" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                     self.check('name', "{workspace}/{kustoPool}"),
+                     self.check('type', 'Microsoft.Synapse/workspaces/kustoPools'),
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('location', 'east us', case_sensitive=False),
+                     self.check("sku.name", "Storage optimized"),
+                     self.check('enablePurge', True),
+                     self.check('enableStreamingIngest', True),
+                 ])
+
+        self.cmd('az synapse kusto database create '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--read-write-database location="{location}" soft-delete-period="P1D" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                      self.check('name', "{workspace}/{kustoPool}/{database}"),
+                      self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/Databases'),
+                      self.check('provisioningState', 'Succeeded')
+                  ])
+
+        self.cmd('az synapse kusto pool-principal-assignment create '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--principal-id "{principalId}" '
+                 '--principal-type "App" '
+                 '--role "AllDatabasesAdmin" '
+                 '--principal-assignment-name "{principalAssignmentName}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                       self.check('name', "{workspace}/{kustoPool}/{principalAssignmentName}"),
+                       self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/PrincipalAssignments'),
+                       self.check('provisioningState', 'Succeeded')
+                   ])
+
+        self.cmd('az synapse kusto pool-principal-assignment show '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--principal-assignment-name "{principalAssignmentName}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                        self.check('name', "{workspace}/{kustoPool}/{principalAssignmentName}"),
+                        self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/PrincipalAssignments'),
+                        self.check('provisioningState', 'Succeeded')
+                    ])
+
+        self.cmd('az synapse kusto pool-principal-assignment list '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                    self.check('[0].type', 'Microsoft.Synapse/workspaces/kustoPools/PrincipalAssignments')
+                ])
+
+        self.cmd('az synapse kusto pool-principal-assignment update '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--principal-id "{principalId}" '
+                 '--principal-type "App" '
+                 '--role "AllDatabasesAdmin" '
+                 '--principal-assignment-name "{principalAssignmentName}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                     self.check('name', "{workspace}/{kustoPool}/{principalAssignmentName}"),
+                     self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/PrincipalAssignments'),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('az synapse kusto pool-principal-assignment delete -y '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--principal-assignment-name "{principalAssignmentName}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"')
+
+        self.cmd('az synapse kusto pool-principal-assignment show '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--principal-assignment-name "{principalAssignmentName}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 expect_failure=True)
+
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
+    def test_kusto_attached_database_configuration(self):
+        self.kwargs.update({
+            'location': 'east us',
+            'kustoPool': self.create_random_name(prefix='testkstpool', length=15),
+            'leaderkustoPool': self.create_random_name(prefix='testkstpool', length=15),
+            'database': self.create_random_name(prefix='testdtabase', length=15),
+            'database-configuration-name': self.create_random_name(prefix='conf', length=15)
+        })
+
+
+        # create a workspace
+        self._create_workspace()
+
+        # check workspace name
+        self.cmd('az synapse workspace check-name --name {workspace}', checks=[
+            self.check('available', False)
+        ])
+
+        self.cmd('az synapse kusto pool create '
+                 '--name "{kustoPool}" '
+                 '--location "{location}" '
+                 '--enable-purge true '
+                 '--enable-streaming-ingest true '
+                 '--sku name="Storage optimized" capacity=2 size="Medium" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                     self.check('name', "{workspace}/{kustoPool}"),
+                     self.check('type', 'Microsoft.Synapse/workspaces/kustoPools'),
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('location', 'east us', case_sensitive=False),
+                     self.check("sku.name", "Storage optimized"),
+                     self.check('enablePurge', True),
+                     self.check('enableStreamingIngest', True),
+                 ])
+
+        self.cmd('az synapse kusto pool create '
+                 '--name "{leaderkustoPool}" '
+                 '--location "{location}" '
+                 '--enable-purge true '
+                 '--enable-streaming-ingest true '
+                 '--sku name="Storage optimized" capacity=2 size="Medium" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                     self.check('name', "{workspace}/{leaderkustoPool}"),
+                     self.check('type', 'Microsoft.Synapse/workspaces/kustoPools'),
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('location', 'east us', case_sensitive=False),
+                     self.check("sku.name", "Storage optimized"),
+                     self.check('enablePurge', True),
+                     self.check('enableStreamingIngest', True),
+                 ])
+
+
+        self.cmd('az synapse kusto database create '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{leaderkustoPool}" '
+                 '--read-write-database location="{location}" soft-delete-period="P1D" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                       self.check('name', "{workspace}/{leaderkustoPool}/{database}"),
+                       self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/Databases'),
+                       self.check('provisioningState', 'Succeeded')
+                   ])
+
+
+        self.kwargs['leaderkpoolsourceid'] = self.cmd('az synapse kusto pool show '
+                                                      '--name "{leaderkustoPool}" '
+                                                      '--resource-group "{rg}" '
+                                                      '--workspace-name "{workspace}"').get_output_in_json()['id']
+
+        self.kwargs['kpoolsourceid'] = self.cmd('az synapse kusto pool show '
+                                                '--name "{kustoPool}" '
+                                                '--resource-group "{rg}" '
+                                                '--workspace-name "{workspace}"').get_output_in_json()['id']
+
+        self.cmd('az synapse kusto attached-database-configuration create '
+                 '--attached-database-configuration-name "{database-configuration-name}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--location "{location}" '
+                 '--kusto-pool-resource-id "{leaderkpoolsourceid}" '
+                 '--database-name "{database}" '
+                 '--default-principals-modification-kind "Union" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                        self.check('name', "{workspace}/{kustoPool}/{database-configuration-name}"),
+                        self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/AttachedDatabaseConfigurations'),
+                        self.check('provisioningState', 'Succeeded')
+                    ])
+
+        self.cmd('az synapse kusto attached-database-configuration show '
+                 '--attached-database-configuration-name "{database-configuration-name}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                       self.check('name', "{workspace}/{kustoPool}/{database-configuration-name}"),
+                       self.check('location', "east us", case_sensitive=False),  # "{location}", case_sensitive=False),
+                       self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/AttachedDatabaseConfigurations'),
+                       self.check('provisioningState', 'Succeeded')
+                   ])
+
+        self.cmd('az synapse kusto attached-database-configuration list '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                       self.check('[0].type', 'Microsoft.Synapse/workspaces/kustoPools/AttachedDatabaseConfigurations')
+                 ])
+
+        self.cmd('az synapse kusto attached-database-configuration update '
+                 '--attached-database-configuration-name "{database-configuration-name}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--location "{location}" '
+                 '--kusto-pool-resource-id "{leaderkpoolsourceid}" '
+                 '--database-name "{database}" '
+                 '--default-principals-modification-kind "Union" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                     self.check('name', "{workspace}/{kustoPool}/{database-configuration-name}"),
+                     self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/AttachedDatabaseConfigurations'),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('az synapse kusto pool detach-follower-database '
+                 '--attached-database-configuration-name "{database-configuration-name}" '
+                 '--kusto-pool-resource-id "{kpoolsourceid}" '
+                 '--name "{leaderkustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"')
+
+        import time
+        time.sleep(60)
+
+        self.cmd('az synapse kusto attached-database-configuration create '
+                 '--attached-database-configuration-name "{database-configuration-name}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--location "{location}" '
+                 '--kusto-pool-resource-id "{leaderkpoolsourceid}" '
+                 '--database-name "{database}" '
+                 '--default-principals-modification-kind "Union" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                       self.check('name', "{workspace}/{kustoPool}/{database-configuration-name}"),
+                       self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/AttachedDatabaseConfigurations'),
+                       self.check('provisioningState', 'Succeeded')
+                   ])
+
+        self.cmd('az synapse kusto attached-database-configuration delete -y '
+                 '--attached-database-configuration-name "{database-configuration-name}" '
+                 '--kusto-pool-name "{leaderkustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"')
+
+        self.cmd('az synapse kusto attached-database-configuration show '
+                 '--attached-database-configuration-name "{database-configuration-name}" '
+                 '--kusto-pool-name "{leaderkustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                expect_failure=True)
+
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
+    def test_kusto_database(self):
+        self.kwargs.update({
+            'location': 'east us',
+            'kustoPool': self.create_random_name(prefix='testkstpool', length=15),
+            'database':  self.create_random_name(prefix='testdtabase', length=15)
+        })
+
+        # create a workspace
+        self._create_workspace()
+
+        # check workspace name
+        self.cmd('az synapse workspace check-name --name {workspace}', checks=[
+            self.check('available', False)
+        ])
+
+        self.cmd('az synapse kusto pool create '
+                 '--name "{kustoPool}" '
+                 '--location "{location}" '
+                 '--enable-purge true '
+                 '--enable-streaming-ingest true '
+                 '--sku name="Storage optimized" capacity=2 size="Medium" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                     self.check('name', "{workspace}/{kustoPool}"),
+                     self.check('type', 'Microsoft.Synapse/workspaces/kustoPools'),
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('location', 'east us', case_sensitive=False),
+                     self.check("sku.name", "Storage optimized"),
+                     self.check('enablePurge', True),
+                     self.check('enableStreamingIngest', True),
+        ])
+
+        self.cmd('az synapse kusto database create '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--read-write-database location="{location}" soft-delete-period="P1D" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                        self.check('name', "{workspace}/{kustoPool}/{database}"),
+                        self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/Databases'),
+                        self.check('provisioningState', 'Succeeded')
+                    ])
+
+        self.cmd('az synapse kusto database list '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                       self.check('[0].type', 'Microsoft.Synapse/workspaces/kustoPools/Databases')
+                   ])
+
+        self.cmd('az synapse kusto database show '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                     self.check('name', "{workspace}/{kustoPool}/{database}"),
+                     self.check('location', "east us", case_sensitive=False),#"{location}", case_sensitive=False),
+                     self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/Databases'),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('az synapse kusto database update '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--read-write-database soft-delete-period="P1D" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                       self.check('name', "{workspace}/{kustoPool}/{database}"),
+                       self.check('location', "east us", case_sensitive=False),#"{location}", case_sensitive=False),
+                       self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/Databases'),
+                       self.check('provisioningState', 'Succeeded')
+                   ])
+
+        self.cmd('az synapse kusto database delete -y --database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"')
+
+        self.cmd('az synapse kusto database show '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 expect_failure=True)
+
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
+    def test_kusto_pool(self):
+        self.kwargs.update({
+            'location': 'east us',
+            'kustoPool': self.create_random_name(prefix='testkstpool', length=15),
+        })
+
+        # create a workspace
+        self._create_workspace()
+
+        # check workspace name
+        self.cmd('az synapse workspace check-name --name {workspace}', checks=[
+            self.check('available', False)
+        ])
+
+        self.cmd('az synapse kusto pool create '
+                 '--name "{kustoPool}" '
+                 '--location "{location}" '
+                 '--enable-purge true '
+                 '--enable-streaming-ingest true '
+                 '--sku name="Storage optimized" capacity=2 size="Medium" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                    self.check('name',  "{workspace}/{kustoPool}"),
+                    self.check('type', 'Microsoft.Synapse/workspaces/kustoPools'),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('location', 'east us', case_sensitive=False),
+                    self.check("sku.name", "Storage optimized"),
+                    self.check('enablePurge', True),
+                    self.check('enableStreamingIngest', True),
+                 ])
+
+        self.cmd('az synapse kusto pool show '
+                 '--name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks= [
+                      self.check("location", 'east us', case_sensitive=False),
+                      self.check("sku.name", "Storage optimized", case_sensitive=False),
+                      self.check("sku.capacity", 2),
+                      self.check("sku.size", "Medium", case_sensitive=False),
+                  ])
+
+        # az synapse kusto pool list-sku
+        self.cmd('az synapse kusto pool list-sku '
+                 '--name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"')
+
+        # az synapse kusto pool list
+        self.cmd('az synapse kusto pool list '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"')
+
+        # az synapse kusto pool update
+        self.cmd('az synapse kusto pool update '
+                 '--name "{kustoPool}" '
+                 '--enable-purge true '
+                 '--enable-streaming-ingest true '
+                 '--sku name="Storage optimized" capacity=2 size="Medium" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                          self.check("name", "{workspace}/{kustoPool}", case_sensitive=False),
+                          self.check("location", 'east us', case_sensitive=False),
+                          self.check("enablePurge", True),
+                          self.check("enableStreamingIngest", True),
+                          self.check("sku.name", "Storage optimized", case_sensitive=False),
+                          self.check("sku.capacity", 2),
+                          self.check("sku.size", "Medium", case_sensitive=False),
+                      ])
+
+        # az synapse kusto pool add-language-extension
+        self.cmd('az synapse kusto pool add-language-extension '
+                 '--name "{kustoPool}" '
+                 '--value language-extension-name="PYTHON" '
+                 '--value language-extension-name="R" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"')
+
+        # az synapse kusto pool list-language-extension
+        self.cmd('az synapse kusto pool list-language-extension '
+                 '--name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"')
+
+        self.cmd('az synapse kusto pool remove-language-extension '
+                 '--name "{kustoPool}" '
+                 '--value language-extension-name="PYTHON" '
+                 '--value language-extension-name="R" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"')
+
+        self.cmd('az synapse kusto pool start '
+                 '--name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"')
+
+        self.cmd('az synapse kusto pool stop '
+                 '--name "{kustoPool}" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"')
+
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
+    def test_kusto_script(self):
+        self.kwargs.update({
+            'location': 'east us',
+            'kustoPool': self.create_random_name(prefix='testkstpool', length=15),
+            'database': self.create_random_name(prefix='testdtabase', length=15),
+            'scriptName': self.create_random_name(prefix='scriptname', length=15),
+            'scriptName2': self.create_random_name(prefix='scriptname2', length=15),
+            'fileName': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'kqlScript.kql')
+        })
+
+        # create a workspace
+        self._create_workspace()
+
+        # create firewall rule
+        self.cmd(
+            'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
+            '--start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255', checks=[
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
+        import time
+        time.sleep(20)
+
+        # check workspace name
+        self.cmd('az synapse workspace check-name --name {workspace}', checks=[
+            self.check('available', False)
+        ])
+
+        self.cmd('az synapse kusto pool create '
+                 '--name "{kustoPool}" '
+                 '--location "{location}" '
+                 '--enable-purge true '
+                 '--enable-streaming-ingest true '
+                 '--sku name="Storage optimized" capacity=2 size="Medium" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                     self.check('name', "{workspace}/{kustoPool}"),
+                     self.check('type', 'Microsoft.Synapse/workspaces/kustoPools'),
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('location', 'east us', case_sensitive=False),
+                     self.check("sku.name", "Storage optimized"),
+                     self.check('enablePurge', True),
+                     self.check('enableStreamingIngest', True),
+                 ])
+
+        self.cmd('az synapse kusto database create '
+                 '--database-name "{database}" '
+                 '--kusto-pool-name "{kustoPool}" '
+                 '--read-write-database location="{location}" soft-delete-period="P1D" '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"',
+                 checks=[
+                     self.check('name', "{workspace}/{kustoPool}/{database}"),
+                     self.check('type', 'Microsoft.Synapse/workspaces/kustoPools/Databases'),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        # create
+        self.cmd('az synapse kql-script create '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}"  --file "{fileName}" '
+                 '--name "{scriptName}"',
+                 checks=[
+                     self.check("resourceGroup", self.kwargs['rg'], case_sensitive=False),
+                     self.check("name", self.kwargs['scriptName'], case_sensitive=False),
+                     self.check("type", "Microsoft.Synapse/workspaces/kqlscripts", case_sensitive=False),
+                 ])
+
+        # import
+        self.cmd('az synapse kql-script import '
+                 '--resource-group "{rg}" '
+                 '--workspace-name "{workspace}" '
+                 '--kusto-pool-name "{kustoPool}" --kusto-database-name "{database}" --file "{fileName}" '
+                 '--name "{scriptName2}"',
+                 checks=[
+                     self.check("resourceGroup", self.kwargs['rg'], case_sensitive=False),
+                     self.check("name", self.kwargs['scriptName2'], case_sensitive=False),
+                     self.check("properties.content.currentConnection.poolName", self.kwargs['kustoPool'],
+                                case_sensitive=False),
+                     self.check("properties.content.currentConnection.databaseName", self.kwargs['database'],
+                                case_sensitive=False),
+                     self.check("type", "Microsoft.Synapse/workspaces/kqlscripts", case_sensitive=False),
+                 ])
+
+        self.cmd('az synapse kql-script show '
+                 '--workspace-name "{workspace}" '
+                 '--name "{scriptName}"',
+                 checks=[
+                     self.check("resourceGroup", self.kwargs['rg'], case_sensitive=False),
+                     self.check("name", self.kwargs['scriptName'], case_sensitive=False),
+                     self.check("type", "Microsoft.Synapse/workspaces/kqlscripts", case_sensitive=False),
+                 ])
+
+        self.cmd('az synapse kql-script list '
+                 '--workspace-name "{workspace}" ',
+                 checks=[
+                    self.check('[0].type', 'Microsoft.Synapse/workspaces/kqlscripts')
+                ])
+
+        # export
+        self.kwargs['output-folder'] = os.getcwd()
+        self.cmd(
+            'az synapse kql-script export --workspace-name {workspace} --name {scriptName} '
+            '--output-folder "{output-folder}"')
+        file_path = os.path.join(self.kwargs['output-folder'], self.kwargs['scriptName'] + '.kql')
+        self.assertTrue(os.path.isfile(file_path))
+        os.remove(file_path)
+
+        # delete
+        self.cmd('az synapse kql-script delete --workspace-name {workspace} --name {scriptName} --yes')
+        time.sleep(20)
+        self.cmd('az synapse kql-script show --workspace-name {workspace} --name {scriptName}', expect_failure=True)
+
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
@@ -70,14 +1156,14 @@ class SynapseScenarioTests(ScenarioTest):
             self.check('managedVirtualNetwork', 'default')
         ])
 
-    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_spark_pool(self):
         self.kwargs.update({
             'location': 'eastus',
             'spark-pool': self.create_random_name(prefix='testpool', length=15),
-            'spark-version': '2.4'
+            'spark-version': '2.4',
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sparkconfigfile.txt')
         })
 
         # create a workspace
@@ -90,11 +1176,13 @@ class SynapseScenarioTests(ScenarioTest):
 
         # create spark pool
         spark_pool = self.cmd('az synapse spark pool create --name {spark-pool} --spark-version {spark-version}'
-                              ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size Medium',
+                              ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size XLarge'
+                              ' --spark-config-file-path "{file}"',
                               checks=[
                                   self.check('name', self.kwargs['spark-pool']),
                                   self.check('type', 'Microsoft.Synapse/workspaces/bigDataPools'),
-                                  self.check('provisioningState', 'Succeeded')
+                                  self.check('provisioningState', 'Succeeded'),
+                                  self.check('sparkConfigProperties.filename','sparkconfigfile')
                               ]).get_output_in_json()
 
         self.kwargs['pool-id'] = spark_pool['id']
@@ -113,12 +1201,17 @@ class SynapseScenarioTests(ScenarioTest):
         ])
 
         # update spark pool
-        self.cmd('az synapse spark pool update --ids {pool-id} --tags key1=value1', checks=[
-            self.check('tags.key1', 'value1'),
-            self.check('name', self.kwargs['spark-pool']),
-            self.check('type', 'Microsoft.Synapse/workspaces/bigDataPools'),
-            self.check('provisioningState', 'Succeeded')
-        ])
+        self.cmd('az synapse spark pool update --ids {pool-id} --tags key1=value1'
+                 ' --spark-config-file-path "{file}"'
+                 ' --enable-dynamic-exec --min-executors 1 --max-executors 2',
+                 checks=[
+                    self.check('tags.key1', 'value1'),
+                    self.check('name', self.kwargs['spark-pool']),
+                    self.check('type', 'Microsoft.Synapse/workspaces/bigDataPools'),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('sparkConfigProperties.filename','sparkconfigfile'),
+                    self.check('dynamicExecutorAllocation.maxExecutors',2)
+                 ])
 
         # delete spark pool with spark pool name
         self.cmd(
@@ -228,16 +1321,17 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('managedVirtualNetworkSettings.allowedAadTenantIdsForLinking[0]', "72f988bf-86f1-41af-91ab-2d7cd011db47")
             ])
 
-    @record_only()
+    #@record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_sql_pool(self):
         self.kwargs.update({
-            'location': 'eastus2euap',
+            'location': 'eastus',
             'workspace': 'testsynapseworkspace',
-            'rg': 'rg',
             'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
-            'performance-level': 'DW400c'
+            'performance-level': 'DW400c',
+            'storage-type': 'GRS',
+            'collation':'SQL_Latin1_General_CP1_CS_AS'
         })
 
         # create a workspace
@@ -251,11 +1345,13 @@ class SynapseScenarioTests(ScenarioTest):
         # create sql pool
         sql_pool = self.cmd(
             'az synapse sql pool create --name {sql-pool} --performance-level {performance-level} '
-            '--workspace {workspace} --resource-group {rg}', checks=[
+            '--workspace {workspace} --resource-group {rg} --storage-type {storage-type} --collation {collation}', checks=[
                 self.check('name', self.kwargs['sql-pool']),
                 self.check('type', 'Microsoft.Synapse/workspaces/sqlPools'),
                 self.check('provisioningState', 'Succeeded'),
-                self.check('status', 'Online')
+                self.check('status', 'Online'),
+                self.check('storageAccountType', 'GRS'),
+                self.check('collation', self.kwargs['collation'])
             ]).get_output_in_json()
 
         self.kwargs['pool-id'] = sql_pool['id']
@@ -313,16 +1409,17 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd('az synapse sql pool show --name {sql-pool} --workspace {workspace} --resource-group {rg}',
                  expect_failure=True)
 
-    @record_only()
+    @unittest.skip('Resource group \'rgtesting\' could not be found')
+    # @record_only() # AssertionError: Can't overwrite existing cassette
     def test_sql_pool_restore_and_list_deleted(self):
         self.kwargs.update({
-            'location': 'eastus2euap',
-            'workspace': 'zes0219test',
-            'rg': 'chayang-test-rg',
-            'sql-pool': 'rivertiger0220 ',
+            'location': 'eastus',
+            'workspace': 'testingsynapseworkspace',
+            # 'rg': 'rgtesting',
+            'sql-pool': 'testrestoresqlpool ',
             'performance-level': 'DW1000c',
             'dest-sql-pool': self.create_random_name(prefix='destsqlpool', length=15),
-            'restore-point-time': '2021-05-24T08:09:15'
+            'restore-point-time': '2021-11-04T07:02:09'
         })
 
         # restore sql pool
@@ -357,10 +1454,10 @@ class SynapseScenarioTests(ScenarioTest):
     @record_only()
     def test_sql_pool_classification_and_recommendation(self):
         self.kwargs.update({
-            'location': 'eastus2euap',
-            'workspace': 'zes0514test',
-            'rg': 'chayang-test-rg',
-            'sql-pool': 'sqlzes0514test',
+            'location': 'eastus',
+            'workspace': 'testingsynapseworkspace',
+            'rg': 'rgtesting',
+            'sql-pool': 'testingsqlpool',
             'schema': 'dbo',
             'table': 'Persons',
             'column': 'City',
@@ -423,13 +1520,29 @@ class SynapseScenarioTests(ScenarioTest):
                  ])
 
     @record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_sql_pool_tde(self):
         self.kwargs.update({
-            'location': 'eastus2euap',
-            'workspace': 'zes0508test',
-            'rg': 'chayang-test-rg',
-            'sql-pool': 'zes0508test1pool' #self.create_random_name(prefix='testsqlpool', length=15),
+            'location': 'eastus',
+            'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
+            'performance-level': 'DW400c',
+            'storage-type': 'GRS'
         })
+
+        # create a workspace
+        self._create_workspace()
+
+        # create sql pool
+        self.cmd(
+            'az synapse sql pool create --name {sql-pool} --performance-level {performance-level} '
+            '--workspace {workspace} --resource-group {rg} --storage-type {storage-type}', checks=[
+                self.check('name', self.kwargs['sql-pool']),
+                self.check('type', 'Microsoft.Synapse/workspaces/sqlPools'),
+                self.check('provisioningState', 'Succeeded'),
+                self.check('status', 'Online'),
+                self.check('storageAccountType', 'GRS')
+            ]).get_output_in_json()
 
         self.cmd(
             'az synapse sql pool tde set --status Enabled --name {sql-pool} --workspace-name {workspace} \
@@ -443,15 +1556,30 @@ class SynapseScenarioTests(ScenarioTest):
                  ])
 
     @record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_sql_pool_threat_policy(self):
         self.kwargs.update({
-            'location': 'eastus2euap',
-            'workspace': 'zes0508test',
-            'rg': 'chayang-test-rg',
-            'sql-pool': 'zes0508test1pool',  # self.create_random_name(prefix='testsqlpool', length=15),
-            'storage-account': 'chayangstoragewestus2',
-            'threat-policy': 'threatpolicy'
+            'location': 'eastus',
+            'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
+            'performance-level': 'DW400c',
+            'threat-policy': 'threatpolicy',
+            'storage-type': 'GRS'
         })
+
+        # create a workspace
+        self._create_workspace()
+
+        # create sql pool
+        self.cmd(
+            'az synapse sql pool create --name {sql-pool} --performance-level {performance-level} '
+            '--workspace {workspace} --resource-group {rg} --storage-type {storage-type}', checks=[
+                self.check('name', self.kwargs['sql-pool']),
+                self.check('type', 'Microsoft.Synapse/workspaces/sqlPools'),
+                self.check('provisioningState', 'Succeeded'),
+                self.check('status', 'Online'),
+                self.check('storageAccountType', 'GRS')
+            ]).get_output_in_json()
 
         self.cmd('az synapse sql pool threat-policy update --state Enabled --storage-account {storage-account} '
                  '--name {sql-pool} --workspace-name {workspace} --resource-group {rg} --security-alert-policy-name {threat-policy}')
@@ -485,14 +1613,14 @@ class SynapseScenarioTests(ScenarioTest):
 
         # test show command
         self.cmd('az synapse sql audit-policy show '
-                 '--workspace-name {workspace} --resource-group {rg} --blob-auditing-policy-name bapname',
+                 '--workspace-name {workspace} --resource-group {rg}',
                  checks=[
                      self.check('state', 'Disabled')
                  ])
 
         self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
                  ' --state Enabled --bsts Enabled --storage-key {storage-key} --storage-endpoint={storage-endpoint}'
-                 ' --retention-days={retention-days} --actions {audit-actions-input} --blob-auditing-policy-name bapname',
+                 ' --retention-days={retention-days} --actions {audit-actions-input}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('storageEndpoint', self.kwargs['storage-endpoint']),
@@ -502,7 +1630,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # get audit policy
         self.cmd('az synapse sql audit-policy show '
-                 '--workspace-name {workspace} --resource-group {rg} --blob-auditing-policy-name bapname',
+                 '--workspace-name {workspace} --resource-group {rg}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('blobStorageTargetState', 'Enabled'),
@@ -512,7 +1640,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
                  ' --state Enabled --bsts Enabled --storage-account {storage-account}'
-                 ' --retention-days={retention-days} --actions {audit-actions-input} --blob-auditing-policy-name bapn',
+                 ' --retention-days={retention-days} --actions {audit-actions-input}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('storageEndpoint', self.kwargs['storage-endpoint']),
@@ -521,7 +1649,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update audit policy - disable
         self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
-                 ' --state Disabled --blob-auditing-policy-name bapn',
+                 ' --state Disabled',
                  checks=[
                      self.check('state', 'Disabled'),
                      self.check('retentionDays', self.kwargs['retention-days']),
@@ -537,16 +1665,14 @@ class SynapseScenarioTests(ScenarioTest):
         # update audit policy - enable log analytics target
         self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
                  ' --state Enabled'
-                 ' --lats Enabled --lawri {log_analytics_workspace_id} '
-                 ' --blob-auditing-policy-name bapn',
+                 ' --lats Enabled --lawri {log_analytics_workspace_id}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('retentionDays', self.kwargs['retention-days']),
                      self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
 
         # get audit policy - verify logAnalyticsTargetState is enabled and isAzureMonitorTargetEnabled is true
-        self.cmd('az synapse sql audit-policy show --resource-group {rg} --workspace-name {workspace}'
-                 ' --blob-auditing-policy-name bapn',
+        self.cmd('az synapse sql audit-policy show --resource-group {rg} --workspace-name {workspace}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('blobStorageTargetState', 'Enabled'),
@@ -556,16 +1682,14 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update audit policy - disable log analytics target
         self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
-                 ' --state Enabled --lats Disabled'
-                 ' --blob-auditing-policy-name bapn',
+                 ' --state Enabled --lats Disabled',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('retentionDays', self.kwargs['retention-days']),
                      self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
 
         # get audit policy - verify logAnalyticsTargetState is disabled and isAzureMonitorTargetEnabled is false
-        self.cmd('az synapse sql audit-policy show --resource-group {rg} --workspace-name {workspace}'
-                 ' --blob-auditing-policy-name bapname',
+        self.cmd('az synapse sql audit-policy show --resource-group {rg} --workspace-name {workspace}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('blobStorageTargetState', 'Enabled'),
@@ -591,16 +1715,14 @@ class SynapseScenarioTests(ScenarioTest):
         # update audit policy - enable event hub target
         self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
                  ' --state Enabled --event-hub-target-state Enabled'
-                 ' --ehari {eventhub_auth_rule_id} --event-hub {eventhub_name}'
-                 ' --blob-auditing-policy-name bapn',
+                 ' --ehari {eventhub_auth_rule_id} --event-hub {eventhub_name}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('retentionDays', self.kwargs['retention-days']),
                      self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
 
         # get audit policy - verify eventHubTargetState is enabled and isAzureMonitorTargetEnabled is true
-        self.cmd('az synapse sql audit-policy show --resource-group {rg} --workspace-name {workspace}'
-                 ' --blob-auditing-policy-name bapn',
+        self.cmd('az synapse sql audit-policy show --resource-group {rg} --workspace-name {workspace}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('blobStorageTargetState', 'Enabled'),
@@ -610,15 +1732,14 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update audit policy - disable event hub target
         self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
-                 ' --state Enabled --event-hub-target-state Disabled --blob-auditing-policy-name bapn',
+                 ' --state Enabled --event-hub-target-state Disabled',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('retentionDays', self.kwargs['retention-days']),
                      self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
 
         # get audit policy - verify eventHubTargetState is disabled and isAzureMonitorTargetEnabled is false
-        self.cmd('az synapse sql audit-policy show --resource-group {rg} --workspace-name {workspace}'
-                 ' --blob-auditing-policy-name bapn',
+        self.cmd('az synapse sql audit-policy show --resource-group {rg} --workspace-name {workspace}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('isAzureMonitorTargetEnabled', False),
@@ -642,6 +1763,7 @@ class SynapseScenarioTests(ScenarioTest):
             'eventhub_name': self.create_random_name("ehsrv", 20),
             'eventhub_namespace':  self.create_random_name("ehnamespace", 20),
             'eventhub_auth_rule': self.create_random_name("ehauthruledb", 20),
+            'storage-type': 'GRS'
         })
 
         # create a workspace
@@ -650,11 +1772,12 @@ class SynapseScenarioTests(ScenarioTest):
         # create sql pool
         sql_pool = self.cmd(
             'az synapse sql pool create --name {sql-pool} --performance-level {performance-level} '
-            '--workspace {workspace} --resource-group {rg}', checks=[
+            '--workspace {workspace} --resource-group {rg} --storage-type {storage-type}', checks=[
                 self.check('name', self.kwargs['sql-pool']),
                 self.check('type', 'Microsoft.Synapse/workspaces/sqlPools'),
                 self.check('provisioningState', 'Succeeded'),
-                self.check('status', 'Online')
+                self.check('status', 'Online'),
+                self.check('storageAccountType', 'GRS')
             ]).get_output_in_json()
 
         self.kwargs['storage-endpoint'] = self._get_storage_endpoint(self.kwargs['storage-account'], self.kwargs['rg'])
@@ -670,7 +1793,7 @@ class SynapseScenarioTests(ScenarioTest):
         # update audit policy - enable
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace} --name {sql-pool} '
              ' --state Enabled --bsts Enabled --storage-key {storage-key} --storage-endpoint={storage-endpoint}'
-             ' --retention-days={retention-days} --actions {audit-actions-input} --blob-auditing-policy-name bapname',
+             ' --retention-days={retention-days} --actions {audit-actions-input} ',
              checks=[
                  self.check('state', 'Enabled'),
                  self.check('storageEndpoint', self.kwargs['storage-endpoint']),
@@ -679,7 +1802,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # get audit policy
         self.cmd('az synapse sql pool audit-policy show '
-             '--workspace-name {workspace} --resource-group {rg} --name {sql-pool} --blob-auditing-policy-name bapname',
+             '--workspace-name {workspace} --resource-group {rg} --name {sql-pool}',
              checks=[
                  self.check('state', 'Enabled'),
                  self.check('blobStorageTargetState', 'Enabled'),
@@ -689,7 +1812,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
              ' --name {sql-pool} --state Enabled --bsts Enabled --storage-account {storage-account}'
-             ' --retention-days={retention-days} --actions {audit-actions-input} --blob-auditing-policy-name bapn',
+             ' --retention-days={retention-days} --actions {audit-actions-input}',
              checks=[
                  self.check('state', 'Enabled'),
                  self.check('storageEndpoint', self.kwargs['storage-endpoint']),
@@ -698,7 +1821,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update audit policy - disable
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
-             ' --name {sql-pool} --state Disabled --blob-auditing-policy-name bapn',
+             ' --name {sql-pool} --state Disabled',
              checks=[
                  self.check('state', 'Disabled'),
                  self.check('retentionDays', self.kwargs['retention-days']),
@@ -715,8 +1838,7 @@ class SynapseScenarioTests(ScenarioTest):
         # update audit policy - enable log analytics target
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
                  ' --name {sql-pool} --state Enabled'
-                 ' --lats Enabled --lawri {log_analytics_workspace_id} '
-                 ' --blob-auditing-policy-name bapn',
+                 ' --lats Enabled --lawri {log_analytics_workspace_id} ',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('retentionDays', self.kwargs['retention-days']),
@@ -734,8 +1856,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update audit policy - disable log analytics target
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
-                 ' --name {sql-pool} --state Enabled --lats Disabled'
-                 ' --blob-auditing-policy-name bapn',
+                 ' --name {sql-pool} --state Enabled --lats Disabled',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('retentionDays', self.kwargs['retention-days']),
@@ -770,8 +1891,7 @@ class SynapseScenarioTests(ScenarioTest):
         # update audit policy - enable event hub target
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
                  ' --name {sql-pool} --state Enabled --event-hub-target-state Enabled'
-                 ' --ehari {eventhub_auth_rule_id} --event-hub {eventhub_name}'
-                 ' --blob-auditing-policy-name bapn',
+                 ' --ehari {eventhub_auth_rule_id} --event-hub {eventhub_name}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('retentionDays', self.kwargs['retention-days']),
@@ -789,7 +1909,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update audit policy - disable event hub target
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
-                 '  --name {sql-pool} --state Enabled --event-hub-target-state Disabled --blob-auditing-policy-name bapn',
+                 '  --name {sql-pool} --state Enabled --event-hub-target-state Disabled',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('retentionDays', self.kwargs['retention-days']),
@@ -807,15 +1927,19 @@ class SynapseScenarioTests(ScenarioTest):
 
 
     @record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_sql_aad_admin(self):
         self.kwargs.update({
-            'location': 'eastus2euap',
-            'workspace': 'zes0508test',
-            'rg': 'chayang-test-rg',
+            'location': 'eastus',
             'user-name': 'fakeuser',
             'object-id': '00000000-0000-4002-becf-488f3e6ab703',
             'user-email': 'fakeuser@fakedomain.com'
         })
+
+        # create a workspace
+        self._create_workspace()
+
         # Test create cmdlet
         self.cmd('az synapse sql ad-admin create --workspace-name {workspace} --resource-group {rg} '
                  '--display-name {user-name} --object-id {object-id}',
@@ -1048,16 +2172,40 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('state', 'killed')
                  ])
 
-    @record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_access_control(self):
         self.kwargs.update({
-            'workspace': 'clitestsynapseworkspace',
             'role': 'Synapse Contributor',
             'userPrincipal': 'username@contoso.com',
             'servicePrincipal': 'testsynapsecli',
+            'sparkpool': 'test',
+            'sparkversion': '2.4',
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sparkconfigfile.txt'),
             'scopeName': 'workspaces/{workspaceName}/bigDataPools/{bigDataPoolName}',
             'itemType': 'bigDataPools',
-            'item': 'testitem'})
+            'item': 'test'})
+
+         # create a workspace
+        self._create_workspace()
+
+        # create firewall rule
+        self.cmd(
+            'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
+            '--start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255', checks=[
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
+        import time
+        time.sleep(20)
+
+        #create spark pool
+        self.cmd('az synapse spark pool create --name {sparkpool} --spark-version {sparkversion}'
+                 ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size Medium'
+                 ' --spark-config-file-path "{file}"',
+                 checks=[self.check('name', self.kwargs['sparkpool']),
+                         self.check('type', 'Microsoft.Synapse/workspaces/bigDataPools'),
+                         self.check('provisioningState', 'Succeeded')])
 
         self.cmd(
             'az synapse role scope list --workspace-name {workspace} ',
@@ -1074,7 +2222,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # get role definition
         role_definition_get = self.cmd(
-            'az synapse role definition show --workspace-name {workspace} --role "{role}" ',
+            'az synapse role definition show --workspace-name {workspace} --role "{role}"',
             checks=[
                 self.check('name', self.kwargs['role'])
             ]).get_output_in_json()
@@ -1438,7 +2586,6 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse data-flow show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
-    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_notebook(self):
@@ -1447,6 +2594,7 @@ class SynapseScenarioTests(ScenarioTest):
             'name': 'notebook',
             'spark-pool': 'testpool',
             'spark-version': '2.4',
+            'folder_path':'testfolder/testsubfolder',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'notebook.ipynb')
         })
 
@@ -1473,9 +2621,10 @@ class SynapseScenarioTests(ScenarioTest):
         # create notebook
         self.cmd(
             'az synapse notebook create --workspace-name {workspace} --name {name} --file @"{file}" '
-            '--spark-pool-name {spark-pool}',
+            '--spark-pool-name {spark-pool} --folder-path {folder_path}',
             checks=[
-                self.check('name', self.kwargs['name'])
+                self.check('name', self.kwargs['name']),
+                self.check('properties.folder.name', self.kwargs['folder_path'])
             ])
 
         # get notebook
@@ -1559,12 +2708,12 @@ class SynapseScenarioTests(ScenarioTest):
     @record_only()
     def test_integration_runtime(self):
         self.kwargs.update({
-            'rg': 'chayang-test-rg',
-            'workspace': 'zes0219test',
+            'rg': 'rgtesting',
+            'workspace': 'testingsynapseworkspace',
             'name': 'integrationruntime',
             'selfhosted-name': 'selfhostedir',
-            'selfhosted-integration-runtime': 'IntegrationRuntime0219selfhosted0507',
-            'ssisirname':'testssisir'})
+            'selfhosted-integration-runtime': 'SelfHostedIntegrationRuntime',
+            'ssisirname': 'testssisir'})
 
         # create managed integration runtime
         self.cmd(
@@ -1680,18 +2829,29 @@ class SynapseScenarioTests(ScenarioTest):
         return self.cmd('az storage account keys list -g {} -n {} --query [0].value'
                         .format(resource_group, storage_account)).get_output_in_json()
 
-    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_managed_private_endpoints(self):
         self.kwargs.update({
-            'workspace': 'testsynapseworkspacepe',
-            'name': 'AzureDataLakeStoragePE',
-            'privateLinkResourceId': '/subscriptions/051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3/resourceGroups/bigdataqa/providers/Microsoft.Storage/storageAccounts/hozhao0917gen2',
-            'groupId': 'dfs'})
+            'name': 'myPrivateLinkService',
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'managedprivateendpoints.json')})
+
+        # create a workspace
+        self._create_workspace("--enable-managed-virtual-network")
+        # create firewall rule
+        self.cmd(
+            'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
+            '--start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255', checks=[
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
+
+        import time
+        time.sleep(60)
 
         # create managed private endpoint
         self.cmd(
-            'az synapse  managed-private-endpoints create --workspace-name {workspace} --pe-name {name} --resource-id {privateLinkResourceId} --group-Id {groupId}',
+            'az synapse  managed-private-endpoints create --workspace-name {workspace} --pe-name {name} --file @"{file}"',
             checks=[
                 self.check('name', self.kwargs['name'])
             ])
@@ -1699,7 +2859,7 @@ class SynapseScenarioTests(ScenarioTest):
         # wait some time to improve robustness
         if self.is_live or self.in_recording:
             import time
-            time.sleep(90)
+            time.sleep(240)
         # get managed private endpoint
         self.cmd(
             'az synapse  managed-private-endpoints show --workspace-name {workspace} --pe-name {name}',
@@ -1719,7 +2879,7 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse  managed-private-endpoints delete --workspace-name {workspace} --pe-name {name} -y')
         if self.is_live or self.in_recording:
             import time
-            time.sleep(60)    
+            time.sleep(120)
         self.cmd(
             'az synapse managed-private-endpoints show --workspace-name {workspace} --pe-name {name}',
             expect_failure=True)
@@ -1731,6 +2891,7 @@ class SynapseScenarioTests(ScenarioTest):
             'name': 'SparkAutoCreate1',
             'spark-pool': 'testpool',
             'spark-version': '2.4',
+            'folder_path':'testfolder/testsubfolder',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sparkjobdefinition.json')
         })
 
@@ -1756,9 +2917,11 @@ class SynapseScenarioTests(ScenarioTest):
 
         # create a spark job definition
         self.cmd(
-            'az synapse spark-job-definition create --workspace-name {workspace} --name {name} --file @"{file}" ',
+            'az synapse spark-job-definition create --workspace-name {workspace} --name {name} --file @"{file}" '
+            '--folder-path {folder_path}',
             checks=[
-                self.check('name', self.kwargs['name'])
+                self.check('name', self.kwargs['name']),
+                self.check('properties.folder.name', self.kwargs['folder_path'])
             ])
 
         # Get a spark job definition
@@ -1780,5 +2943,172 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse spark-job-definition delete --workspace-name {workspace} --name {name}')
         self.cmd(
             'az synapse spark-job-definition show --workspace-name {workspace} --name {name}',
+            expect_failure=True)
+        
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
+    def test_sqlscript(self):
+        self.kwargs.update({
+            'name': 'test_sqlscript1',
+            'sql_pool_name': 'testsqlpool',
+            'performance_level': 'DW100c',
+            'data_base_name': 'testsqlpool',
+            'folder_name':'folder1/subfolder1',
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sqlscript.sql')
+        })
+
+        # create a workspace
+        self._create_workspace()
+
+        # create firewall rule
+        self.cmd(
+            'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
+            '--start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255', checks=[
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
+
+        # create sql pool
+        self.cmd(
+            'az synapse sql pool create --name {sql_pool_name} --performance-level {performance_level} '
+            '--workspace {workspace} --resource-group {rg}')
+        
+        # create sqlscript
+        self.cmd(
+            'az synapse sql-script create --workspace-name {workspace} --name {name} --file "{file}" '
+            '--sql-pool-name {sql_pool_name} --sql-database-name {data_base_name} --folder-name {folder_name}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # get sqlscript
+        self.cmd(
+            'az synapse sql-script show --workspace-name {workspace} --name {name}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # list sqlscript
+        self.cmd(
+            'az synapse sql-script list --workspace-name {workspace}',
+            checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/sqlscripts')
+            ])
+
+        # export sqlscript
+        self.kwargs['output_folder'] = os.getcwd()
+        self.cmd(
+            'az synapse sql-script export --workspace-name {workspace} --name {name} '
+            '--output-folder "{output_folder}"')
+        file_path = os.path.join(self.kwargs['output_folder'], self.kwargs['name'] + '.sql')
+        self.assertTrue(os.path.isfile(file_path))
+        os.remove(file_path)
+
+        # delete sqlscript
+        self.cmd(
+            'az synapse sql-script delete --workspace-name {workspace} --name {name}')
+        self.cmd(
+            'az synapse sql-script show --workspace-name {workspace} --name {name}',
+            expect_failure=True)
+
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
+    def test_ad_only_auth(self):
+        self.kwargs.update({
+        })
+
+        # create a workspace
+        self._create_workspace()
+
+        self.cmd(
+            'az synapse ad-only-auth get --resource-group {rg} --workspace-name {workspace}',
+            checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/azureADOnlyAuthentications')
+            ]
+        )
+
+        self.cmd(
+            'az synapse ad-only-auth disable --resource-group {rg} --workspace-name {workspace}',
+            checks=[
+                self.check('azureAdOnlyAuthentication', False)
+            ]
+        )
+
+        self.cmd(
+            'az synapse ad-only-auth enable --resource-group {rg} --workspace-name {workspace}',
+            checks=[
+                self.check('azureAdOnlyAuthentication', True)
+            ]
+        )
+
+    @record_only()
+    def test_link_connection(self):
+        self.kwargs.update({
+            'workspace_name': 'xiaoyuxingtestne',
+            'link_connection_name': 'linkconnectionfortest',
+            'link_table_id': '887e9d4df0fa4afaaad0d7a2c7f42d88',
+            'edit_table_file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'link-connection-table.json'),
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'linkconnectionfortest.json')
+        })
+        # create link connnection
+        self.cmd(
+            'az synapse link-connection create --workspace-name {workspace_name} '
+            '--name {link_connection_name} --file @"{file}" ',
+            checks=[
+                self.check('name', self.kwargs['link_connection_name'])
+            ])
+
+        time.sleep(600)
+        # get link connnection
+        self.cmd(
+            'az synapse link-connection show --workspace-name {workspace_name} --name {link_connection_name}',
+            checks=[
+                self.check('name', self.kwargs['link_connection_name'])
+            ])
+
+        # list link connnection
+        self.cmd(
+            'az synapse link-connection list --workspace-name {workspace_name}',
+            checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/linkconnections')
+            ])
+
+        # edit link tables
+        self.cmd(
+            'az synapse link-connection edit-link-tables --workspace-name {workspace_name} --n {link_connection_name} --file @"{edit_table_file}" ')
+        
+        time.sleep(600)
+        # start a link connnection
+        self.cmd(
+            'az synapse link-connection start --workspace-name {workspace_name} --name {link_connection_name}')
+        self.cmd(
+            'az synapse link-connection get-status --workspace-name {workspace_name} --name {link_connection_name}',
+            checks=[
+                self.check('status', 'Starting')
+            ])
+
+        time.sleep(120)
+        # stop a link connnection
+        self.cmd(
+            'az synapse link-connection stop --workspace-name {workspace_name} --name {link_connection_name}')
+        self.cmd(
+            'az synapse link-connection get-status --workspace-name {workspace_name} --name {link_connection_name}',
+            checks=[
+                self.check('status', 'Stopping')
+            ])
+
+         # list link tables
+        self.cmd(
+            'az synapse link-connection list-link-tables --workspace-name {workspace_name} --n {link_connection_name} ',
+            checks=[
+                self.check('[0].id', self.kwargs['link_table_id'])
+            ])
+
+        time.sleep(300)
+        #delete a link connnection
+        self.cmd(
+            'az synapse link-connection delete --workspace-name {workspace_name} --name {link_connection_name}')
+        self.cmd(
+            'az synapse link-connection show --workspace-name {workspace_name} --name {link_connection_name}',
             expect_failure=True)
 

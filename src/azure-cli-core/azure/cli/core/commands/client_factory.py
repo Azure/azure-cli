@@ -3,12 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import azure.cli.core._debug as _debug
+from azure.cli.core import _debug
+from azure.cli.core.auth.util import resource_to_scopes
 from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
-from azure.cli.core.profiles._shared import get_client_class, SDKProfile
 from azure.cli.core.profiles import ResourceType, CustomResourceType, get_api_version, get_sdk
+from azure.cli.core.profiles._shared import get_client_class, SDKProfile
 from azure.cli.core.util import get_az_user_agent, is_track2
-
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -48,10 +48,23 @@ def resolve_client_arg_name(operation, kwargs):
 
 
 def get_mgmt_service_client(cli_ctx, client_or_resource_type, subscription_id=None, api_version=None,
-                            aux_subscriptions=None, aux_tenants=None, **kwargs):
-    """
-     :params subscription_id: the current account's subscription
-     :param aux_subscriptions: mainly for cross tenant scenarios, say vnet peering.
+                            aux_subscriptions=None, aux_tenants=None, credential=None, **kwargs):
+    """Create Python SDK mgmt-plane client. In addition to directly creating the client instance, this centralized
+    client factory adds more features to the client instance:
+    - multi-API
+    - server telemetry
+    - safe logging
+    - cross-tenant authentication
+
+    :param cli_ctx: AzCli instance
+    :param client_or_resource_type: Python SDK mgmt-plane client type or a member of
+        azure.cli.core.profiles._shared.ResourceType
+    :param subscription_id: Override the current login context's subscription
+    :param api_version: Override the client or resource type's default API version
+    :param aux_subscriptions: For cross-tenant authentication, such as vnet peering
+    :param aux_tenants: For cross-tenant authentication, such as vnet peering
+    :param credential: Custom credential to override the current login context's credential
+        For more information, see src/azure-cli-core/azure/cli/core/auth/msal_authentication.py
     """
     if not subscription_id and 'subscription_id' in cli_ctx.data:
         subscription_id = cli_ctx.data['subscription_id']
@@ -70,7 +83,7 @@ def get_mgmt_service_client(cli_ctx, client_or_resource_type, subscription_id=No
     client, _ = _get_mgmt_service_client(cli_ctx, client_type, subscription_id=subscription_id,
                                          api_version=api_version, sdk_profile=sdk_profile,
                                          aux_subscriptions=aux_subscriptions,
-                                         aux_tenants=aux_tenants,
+                                         aux_tenants=aux_tenants, credential=credential,
                                          **kwargs)
     return client
 
@@ -167,21 +180,26 @@ def _prepare_mgmt_client_kwargs_track2(cli_ctx, cred):
     """Prepare kwargs for Track 2 SDK mgmt client."""
     client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
 
-    from azure.cli.core.util import resource_to_scopes
+    # Enable CAE support in mgmt SDK
+    from azure.mgmt.core.policies import ARMChallengeAuthenticationPolicy
+
     # Track 2 SDK maintains `scopes` and passes `scopes` to get_token.
     scopes = resource_to_scopes(cli_ctx.cloud.endpoints.active_directory_resource_id)
+    policy = ARMChallengeAuthenticationPolicy(cred, *scopes)
 
     client_kwargs['credential_scopes'] = scopes
+    client_kwargs['authentication_policy'] = policy
 
     # Track 2 currently lacks the ability to take external credentials.
     #   https://github.com/Azure/azure-sdk-for-python/issues/8313
     # As a temporary workaround, manually add external tokens to 'x-ms-authorization-auxiliary' header.
     #   https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/authenticate-multi-tenant
-    if getattr(cred, "_external_tenant_token_retriever", None):
-        *_, external_tenant_tokens = cred.get_all_tokens(*scopes)
-        # Hard-code scheme to 'Bearer' as _BearerTokenCredentialPolicyBase._update_headers does.
-        client_kwargs['headers']['x-ms-authorization-auxiliary'] = \
-            ', '.join("Bearer {}".format(t[1]) for t in external_tenant_tokens)
+    if hasattr(cred, "get_auxiliary_tokens"):
+        aux_tokens = cred.get_auxiliary_tokens(*scopes)
+        if aux_tokens:
+            # Hard-code scheme to 'Bearer' as _BearerTokenCredentialPolicyBase._update_headers does.
+            client_kwargs['headers']['x-ms-authorization-auxiliary'] = \
+                ', '.join("Bearer {}".format(token.token) for token in aux_tokens)
 
     return client_kwargs
 
@@ -196,14 +214,25 @@ def _get_mgmt_service_client(cli_ctx,
                              sdk_profile=None,
                              aux_subscriptions=None,
                              aux_tenants=None,
+                             credential=None,
                              **kwargs):
     from azure.cli.core._profile import Profile
     logger.debug('Getting management service client client_type=%s', client_type.__name__)
+
+    # Track 1 SDK doesn't maintain the `resource`. The `resource` of the token is the one passed to
+    # get_login_credentials.
     resource = resource or cli_ctx.cloud.endpoints.active_directory_resource_id
-    profile = Profile(cli_ctx=cli_ctx)
-    cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id, resource=resource,
-                                                             aux_subscriptions=aux_subscriptions,
-                                                             aux_tenants=aux_tenants)
+
+    if credential:
+        # Use a custom credential
+        if not subscription_id:
+            raise ValueError('credential and subscription_id must be specified at the same time.')
+    else:
+        # Get a credential for the current `az login` context
+        profile = Profile(cli_ctx=cli_ctx)
+        credential, subscription_id, _ = profile.get_login_credentials(
+            subscription_id=subscription_id, resource=resource,
+            aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants)
 
     client_kwargs = {}
     if base_url_bound:
@@ -216,12 +245,12 @@ def _get_mgmt_service_client(cli_ctx,
         client_kwargs.update(kwargs)
 
     if is_track2(client_type):
-        client_kwargs.update(_prepare_mgmt_client_kwargs_track2(cli_ctx, cred))
+        client_kwargs.update(_prepare_mgmt_client_kwargs_track2(cli_ctx, credential))
 
     if subscription_bound:
-        client = client_type(cred, subscription_id, **client_kwargs)
+        client = client_type(credential, subscription_id, **client_kwargs)
     else:
-        client = client_type(cred, **client_kwargs)
+        client = client_type(credential, **client_kwargs)
 
     if not is_track2(client):
         configure_common_settings(cli_ctx, client)

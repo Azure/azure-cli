@@ -115,7 +115,7 @@ def handle_template_based_exception(ex):
 
 
 def handle_long_running_operation_exception(ex):
-    import azure.cli.core.telemetry as telemetry
+    from azure.cli.core import telemetry
 
     telemetry.set_exception(
         ex,
@@ -169,7 +169,7 @@ def deployment_validate_table_format(result):
 class ResourceId(str):
 
     def __new__(cls, val):
-        from msrestazure.tools import is_valid_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id
         if not is_valid_resource_id(val):
             raise ValueError()
         return str.__new__(cls, val)
@@ -711,7 +711,7 @@ def _find_property(instance, path):
 
 def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=None):
     import time
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
 
     # get
     resource = getter()
@@ -726,7 +726,8 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
         RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
                                                  'RoleAssignmentCreateParameters', mod='models',
                                                  operation_group='role_assignments')
-        parameters = RoleAssignmentCreateParameters(role_definition_id=identity_role_id, principal_id=principal_id)
+        parameters = RoleAssignmentCreateParameters(role_definition_id=identity_role_id, principal_id=principal_id,
+                                                    principal_type=None)
 
         logger.info("Creating an assignment with a role '%s' on the scope of '%s'", identity_role_id, identity_scope)
         retry_times = 36
@@ -736,7 +737,7 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
                 assignments_client.create(scope=identity_scope, role_assignment_name=assignment_name,
                                           parameters=parameters)
                 break
-            except CloudError as ex:
+            except HttpResponseError as ex:
                 if 'role assignment already exists' in ex.message:
                     logger.info('Role assignment already exists')
                     break
@@ -782,7 +783,7 @@ def _gen_guid():
 
 
 def get_arm_resource_by_id(cli_ctx, arm_id, api_version=None):
-    from msrestazure.tools import parse_resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
 
     if not is_valid_resource_id(arm_id):
         raise CLIError("'{}' is not a valid ID.".format(arm_id))

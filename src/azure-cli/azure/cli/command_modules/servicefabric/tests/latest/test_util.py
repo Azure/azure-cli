@@ -47,7 +47,7 @@ def _create_cluster_with_separate_kv(test, kwargs):
 
 
 def _create_cluster(test, kwargs):
-    test.cmd('az sf cluster create -g {rg} -c {cluster_name} -l {loc} --certificate-output-folder MyCertificates --certificate-subject-name {cluster_name} --vm-password "{vm_password}" --cluster-size 3')
+    test.cmd('az sf cluster create -g {rg} -c {cluster_name} -l {loc} --certificate-subject-name {cluster_name} --vm-password "{vm_password}" --cluster-size {cluster_size}')
     timeout = time.time() + 900
     while True:
         cluster = test.cmd('az sf cluster show -g {rg} -c {cluster_name}').get_output_in_json()

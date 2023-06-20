@@ -3,12 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from msrestazure.tools import is_valid_resource_id, resource_id
+from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
 from knack.prompting import prompt_pass
+from azure.cli.core.azclierror import (
+    InvalidArgumentValueError,
+    RequiredArgumentMissingError,
+    ResourceNotFoundError,
+    AzureInternalError
+)
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import (
     sdk_no_wait
 )
+from azure.core.exceptions import HttpResponseError
 
 from azure.mgmt.sqlvirtualmachine.models import (
     WsfcDomainProfile,
@@ -24,7 +31,17 @@ from azure.mgmt.sqlvirtualmachine.models import (
     SqlWorkloadTypeUpdateSettings,
     AdditionalFeaturesServerConfigurations,
     ServerConfigurationsManagementSettings,
-    SqlVirtualMachine
+    Schedule,
+    AssessmentSettings,
+    SqlVirtualMachine,
+    AADAuthenticationSettings
+)
+
+from ._util import (
+    get_workspace_id_from_log_analytics_extension,
+    get_workspace_in_sub,
+    set_log_analytics_extension,
+    validate_and_set_assessment_custom_log
 )
 
 
@@ -59,8 +76,8 @@ def sqlvm_group_list(
 # pylint: disable= line-too-long, too-many-arguments
 def sqlvm_group_create(client, cmd, sql_virtual_machine_group_name, resource_group_name, sql_image_offer,
                        sql_image_sku, domain_fqdn, cluster_operator_account, sql_service_account,
-                       storage_account_url, storage_account_key=None, location=None, cluster_bootstrap_account=None,
-                       file_share_witness_path=None, ou_path=None, tags=None):
+                       storage_account_url, cluster_subnet_type="SingleSubnet", storage_account_key=None, location=None,
+                       cluster_bootstrap_account=None, file_share_witness_path=None, ou_path=None, tags=None):
     '''
     Creates a SQL virtual machine group.
     '''
@@ -77,12 +94,14 @@ def sqlvm_group_create(client, cmd, sql_virtual_machine_group_name, resource_gro
                                                    sql_service_account=sql_service_account,
                                                    file_share_witness_path=file_share_witness_path,
                                                    storage_account_url=storage_account_url,
-                                                   storage_account_primary_key=storage_account_key)
+                                                   storage_account_primary_key=storage_account_key,
+                                                   cluster_subnet_type=cluster_subnet_type)
 
     sqlvm_group_object = SqlVirtualMachineGroup(sql_image_offer=sql_image_offer,
                                                 sql_image_sku=sql_image_sku,
                                                 wsfc_domain_profile=wsfc_domain_profile_object,
                                                 location=location,
+                                                cluster_subnet_type=cluster_subnet_type,
                                                 tags=tags)
 
     # Since it's a running operation, we will do the put and then the get to display the instance.
@@ -95,7 +114,7 @@ def sqlvm_group_create(client, cmd, sql_virtual_machine_group_name, resource_gro
 # pylint: disable=line-too-long, too-many-arguments
 def sqlvm_group_update(instance, domain_fqdn=None, cluster_operator_account=None, sql_service_account=None,
                        storage_account_url=None, storage_account_key=None, cluster_bootstrap_account=None,
-                       file_share_witness_path=None, ou_path=None, tags=None):
+                       file_share_witness_path=None, ou_path=None, tags=None, cluster_subnet_type=None):
     '''
     Updates a SQL virtual machine group.
     '''
@@ -117,6 +136,8 @@ def sqlvm_group_update(instance, domain_fqdn=None, cluster_operator_account=None
         instance.wsfc_domain_profile.file_share_witness_path = file_share_witness_path
     if ou_path is not None:
         instance.wsfc_domain_profile.ou_path = ou_path
+    if cluster_subnet_type is not None:
+        instance.wsfc_domain_profile.cluster_subnet_type = cluster_subnet_type
     if tags is not None:
         instance.tags = tags
 
@@ -169,7 +190,7 @@ def aglistener_update(instance, sql_virtual_machine_instances=None):
 # pylint: disable=too-many-arguments, too-many-locals, line-too-long, too-many-boolean-expressions
 def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql_server_license_type=None,
                  location=None, sql_image_sku=None, enable_auto_patching=None, sql_management_mode="LightWeight",
-                 day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
+                 least_privilege_mode=None, day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
                  enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None,
                  storage_access_key=None, backup_password=None, backup_system_dbs=False, backup_schedule_type=None,
                  full_backup_frequency=None, full_backup_start_time=None, full_backup_window_hours=None, log_backup_frequency=None,
@@ -240,7 +261,7 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
 
     workload_type_object = SqlWorkloadTypeUpdateSettings(sql_workload_type=sql_workload_type)
 
-    additional_features_object = AdditionalFeaturesServerConfigurations(is_rservices_enabled=enable_r_services)
+    additional_features_object = AdditionalFeaturesServerConfigurations(is_r_services_enabled=enable_r_services)
 
     server_configuration_object = ServerConfigurationsManagementSettings(sql_connectivity_update_settings=connectivity_object,
                                                                          sql_workload_type_update_settings=workload_type_object,
@@ -249,6 +270,7 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
     sqlvm_object = SqlVirtualMachine(location=location,
                                      virtual_machine_resource_id=virtual_machine_resource_id,
                                      sql_server_license_type=sql_server_license_type,
+                                     least_privilege_mode=least_privilege_mode,
                                      sql_image_sku=sql_image_sku,
                                      sql_management=sql_management_mode,
                                      sql_image_offer=sql_image_offer,
@@ -265,14 +287,18 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
     return client.get(resource_group_name, sql_virtual_machine_name)
 
 
-# pylint: disable=too-many-statements, line-too-long, too-many-boolean-expressions
-def sqlvm_update(instance, sql_server_license_type=None, sql_image_sku=None, enable_auto_patching=None,
+# pylint: disable=too-many-statements, line-too-long, too-many-boolean-expressions, unused-argument
+def sqlvm_update(cmd, instance, sql_virtual_machine_name, resource_group_name, sql_server_license_type=None,
+                 sql_image_sku=None, least_privilege_mode=None, enable_auto_patching=None,
                  day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
                  enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None, prompt=True,
                  storage_access_key=None, backup_password=None, backup_system_dbs=False, backup_schedule_type=None, sql_management_mode=None,
                  full_backup_frequency=None, full_backup_start_time=None, full_backup_window_hours=None, log_backup_frequency=None,
                  enable_key_vault_credential=None, credential_name=None, azure_key_vault_url=None, service_principal_name=None,
-                 service_principal_secret=None, connectivity_type=None, port=None, sql_workload_type=None, enable_r_services=None, tags=None):
+                 service_principal_secret=None, connectivity_type=None, port=None, sql_workload_type=None, enable_r_services=None, tags=None,
+                 enable_assessment=None, enable_assessment_schedule=None, assessment_weekly_interval=None,
+                 assessment_monthly_occurrence=None, assessment_day_of_week=None, assessment_start_time_local=None,
+                 workspace_name=None, workspace_rg=None):
     '''
     Updates a SQL virtual machine.
     '''
@@ -282,14 +308,10 @@ def sqlvm_update(instance, sql_server_license_type=None, sql_image_sku=None, ena
         instance.sql_server_license_type = sql_server_license_type
     if sql_image_sku is not None:
         instance.sql_image_sku = sql_image_sku
-    if sql_management_mode is not None and instance.sql_management != "Full":
-        from knack.prompting import prompt_y_n
-        if not prompt:
-            instance.sql_management = sql_management_mode
-        else:
-            confirmation = prompt_y_n("Upgrading SQL manageability mode to Full will restart the SQL Server. Proceed?")
-            if confirmation:
-                instance.sql_management = sql_management_mode
+    if sql_management_mode is not None:
+        instance.sql_management = sql_management_mode
+    if least_privilege_mode is not None:
+        instance.least_privilege_mode = least_privilege_mode
 
     if (enable_auto_patching is not None or day_of_week is not None or maintenance_window_starting_hour is not None or maintenance_window_duration is not None):
 
@@ -346,7 +368,7 @@ def sqlvm_update(instance, sql_server_license_type=None, sql_image_sku=None, ena
         instance.server_configurations_management_settings.sql_workload_type_update_settings = SqlWorkloadTypeUpdateSettings(sql_workload_type=sql_workload_type)
 
     if enable_r_services is not None:
-        instance.server_configurations_management_settings.additional_features_server_configurations = AdditionalFeaturesServerConfigurations(is_rservices_enabled=enable_r_services)
+        instance.server_configurations_management_settings.additional_features_server_configurations = AdditionalFeaturesServerConfigurations(is_r_services_enabled=enable_r_services)
 
     # If none of the settings was modified, reset server_configurations_management_settings to be null
     if (instance.server_configurations_management_settings.sql_connectivity_update_settings is None and
@@ -355,7 +377,78 @@ def sqlvm_update(instance, sql_server_license_type=None, sql_image_sku=None, ena
             instance.server_configurations_management_settings.additional_features_server_configurations is None):
         instance.server_configurations_management_settings = None
 
+    set_assessment_properties(cmd,
+                              instance,
+                              enable_assessment,
+                              enable_assessment_schedule,
+                              assessment_weekly_interval,
+                              assessment_monthly_occurrence,
+                              assessment_day_of_week,
+                              assessment_start_time_local,
+                              resource_group_name,
+                              sql_virtual_machine_name,
+                              workspace_rg,
+                              workspace_name)
+
     return instance
+
+
+# pylint: disable=unused-argument
+def sqlvm_enable_azure_ad_auth(client, cmd, sql_virtual_machine_name, resource_group_name, msi_client_id=None, skip_client_validation=None):
+    ''' Enable Azure AD authentication on a SQL virtual machine.
+
+        :param cmd: The CLI command.
+        :type cmd: AzCliCommand.
+        :param instance: The Sql Virtual Machine instance.
+        :type instance: SqlVirtualMachine.
+        :param resource_group_name: The resource group name
+        :type resource_group_name: str.
+        :param msi_client_id: The clientId of the managed identity used in Azure AD authentication.
+                              None means system-assigned managed identity
+        :type: str.
+        :param skip_client_validation: Whether to skip the client side validation. The server side validation always happens.
+                                       This parameter is used in the validation and ignored here.
+        :type: bool.
+
+        :return: The updated Sql Virtual Machine instance.
+        :rtype: SqlVirtualMachine.
+    '''
+
+    sqlvm_object = client.get(resource_group_name, sql_virtual_machine_name)
+
+    if sqlvm_object.server_configurations_management_settings is None:
+        sqlvm_object.server_configurations_management_settings = ServerConfigurationsManagementSettings()
+
+    sqlvm_object.server_configurations_management_settings.azure_ad_authentication_settings = AADAuthenticationSettings(client_id=msi_client_id if msi_client_id else '')
+
+    # Since it's a running operation, we will do the put and then the get to display the instance.
+    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(False, client.begin_create_or_update,
+                                                  resource_group_name, sql_virtual_machine_name, sqlvm_object))
+
+    return client.get(resource_group_name, sql_virtual_machine_name)
+
+
+# pylint: disable=unused-argument
+def validate_azure_ad_auth(cmd, sql_virtual_machine_name, resource_group_name, msi_client_id=None):
+    ''' Valida if Azure AD authentication is ready on a SQL virtual machine.
+        The logic of validation is in the validator method. If the SQL virtual machine passes the validator,
+        it means this SQL virtual machine is valid for Azure AD authentication
+
+        :param cmd: The CLI command.
+        :type cmd: AzCliCommand.
+        :param resource_group_name: The resource group name
+        :type resource_group_name: str.
+        :param msi_client_id: The clientId of the managed identity used in Azure AD authentication.
+                              None means system-assigned managed identity
+        :type: str.
+
+        :return: The updated Sql Virtual Machine instance.
+        :rtype: SqlVirtualMachine.
+    '''
+
+    passing_validation_message = "Sql virtual machine {} is valid for Azure AD authentication.".format(sql_virtual_machine_name)
+
+    return passing_validation_message
 
 
 def sqlvm_add_to_group(client, cmd, sql_virtual_machine_name, resource_group_name,
@@ -401,3 +494,97 @@ def sqlvm_remove_from_group(client, cmd, sql_virtual_machine_name, resource_grou
                                                   resource_group_name, sql_virtual_machine_name, sqlvm_object))
 
     return client.get(resource_group_name, sql_virtual_machine_name)
+
+
+# region Helpers for custom commands
+def set_assessment_properties(cmd, instance, enable_assessment, enable_assessment_schedule,
+                              assessment_weekly_interval, assessment_monthly_occurrence,
+                              assessment_day_of_week, assessment_start_time_local,
+                              resource_group_name, sql_virtual_machine_name,
+                              workspace_rg, workspace_name):
+    '''
+    Set assessment properties to be sent in sql vm update
+    '''
+
+    # If assessment.schedule settings are provided but enable schedule is skipped, then ensure schedule is enabled
+    if (enable_assessment_schedule is None and
+            (assessment_weekly_interval is not None or assessment_monthly_occurrence or assessment_day_of_week or assessment_start_time_local)):
+        enable_assessment_schedule = True
+
+    # If assessment schedule is enabled but enable assessment is skipped, then ensure assessment is enabled
+    if (enable_assessment_schedule is not None and enable_assessment is None):
+        enable_assessment = True
+
+    if enable_assessment is not None:
+        instance.assessment_settings = AssessmentSettings()
+        instance.assessment_settings.enable = enable_assessment
+
+        if enable_assessment_schedule is not None:
+            instance.assessment_settings.schedule = Schedule()
+            instance.assessment_settings.schedule.enable = enable_assessment_schedule
+
+            if enable_assessment_schedule:
+                instance.assessment_settings.schedule.weekly_interval = assessment_weekly_interval
+                instance.assessment_settings.schedule.monthly_occurrence = assessment_monthly_occurrence
+                instance.assessment_settings.schedule.day_of_week = assessment_day_of_week
+                instance.assessment_settings.schedule.start_time = assessment_start_time_local
+
+    # Validate and deploy pre-requisites if necessary
+    # 1. Log Analytics extension for given workspace
+    # 2. Custom log definition on workspace
+    if enable_assessment:
+        workspace_id = None
+
+        # Check if Log Analytics extension is provisioned on VM and get workspace id (also called customer id)
+        try:
+            workspace_id = get_workspace_id_from_log_analytics_extension(cmd, resource_group_name, sql_virtual_machine_name)
+        except HttpResponseError as err:
+            raise AzureInternalError(f"Failed to validate and deploy assessment pre-requisities. Error: {err}")
+
+        # Log Analytics extension was not found, lets deploy it
+        if workspace_id is None:
+            # Raise error if workspace arguments not provided by user
+            if workspace_name is None or workspace_rg is None:
+                raise RequiredArgumentMissingError('Assessment requires a Log Analytics workspace and Log Analytics extension on VM - '
+                                                   'workspace name and workspace resource group must be specified to deploy pre-requisites.')
+
+            # Install extension using workspace arguments provided by user
+            _, workspace_id = set_log_analytics_extension(cmd,
+                                                          resource_group_name,
+                                                          sql_virtual_machine_name,
+                                                          workspace_rg,
+                                                          workspace_name)
+
+        # Get workspace details using workspace id fetched from extension
+        try:
+            workspace = get_workspace_in_sub(cmd, workspace_id)
+        except HttpResponseError as err:
+            raise AzureInternalError(f"Failed to validate and deploy assessment pre-requisities. Error: {err}")
+
+        if not workspace:
+            raise ResourceNotFoundError("Log Analytics workspace associated with VM does not exist in current subscription.")
+
+        workspace_resource_id_parts = parse_resource_id(workspace.id)
+        workspace_rg_found = workspace_resource_id_parts['resource_group']
+        workspace_name_found = workspace_resource_id_parts['name']
+
+        # In case workspace arguments provided by customer, verify they match with workspace associated with VM
+        if workspace_name is None:
+            workspace_name = workspace_name_found
+        elif workspace_name.lower() != workspace_name_found.lower():
+            raise InvalidArgumentValueError(f"VM is already associated with workspace '{workspace.id}'. "
+                                            "Skip workspace arguments to continue with associated workspace or dissociate workspace using Azure Portal first.")
+
+        if workspace_rg is None:
+            workspace_rg = workspace_rg_found
+        elif workspace_rg.lower() != workspace_rg_found.lower():
+            raise InvalidArgumentValueError(f"VM is already associated with workspace {workspace.id}. "
+                                            "Skip workspace arguments to continue with associated workspace or dissociate workspace from Azure Portal.")
+
+        # Validate custom log definition on workspace
+        try:
+            validate_and_set_assessment_custom_log(cmd, workspace_name, workspace_rg)
+        except BaseException as err:
+            raise AzureInternalError(f"Failed to validate and deploy assessment pre-requisities. Error: {err}")
+
+# endRegion

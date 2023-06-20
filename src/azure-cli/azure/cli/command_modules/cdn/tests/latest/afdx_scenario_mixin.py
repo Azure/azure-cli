@@ -26,10 +26,14 @@ class CdnAfdScenarioMixin:
 
         return self.cmd(command, checks, expect_failure=expect_failure)
 
-    def afd_profile_update_cmd(self, group, name, tags=None, checks=None):
+    def afd_profile_update_cmd(self, group, name, tags=None, checks=None, options=None):
         command = 'afd profile update -g {} --profile-name {}'.format(group, name)
         if tags:
             command = command + ' --tags {}'.format(tags)
+
+        if options:
+            command = command + ' ' + options
+
         return self.cmd(command, checks)
 
     def afd_profile_list_cmd(self, group, checks=None):
@@ -45,11 +49,14 @@ class CdnAfdScenarioMixin:
         return self.cmd(command, checks)
 
     def afd_endpoint_create_cmd(self, resource_group_name, profile_name, endpoint_name,
-                                origin_response_timeout_seconds, enabled_state,
-                                tags=None, checks=None):
+                                enabled_state,
+                                tags=None, checks=None, name_reuse_scope=None):
         cmd = f'afd endpoint create -g {resource_group_name} --endpoint-name {endpoint_name} ' \
-              f'--profile-name {profile_name} --origin-response-timeout-seconds {origin_response_timeout_seconds} ' \
+              f'--profile-name {profile_name} ' \
               f'--enabled-state {enabled_state}'
+
+        if name_reuse_scope:
+            cmd += f" --name-reuse-scope {name_reuse_scope}"
 
         if tags:
             cmd = add_tags(cmd, tags)
@@ -57,14 +64,12 @@ class CdnAfdScenarioMixin:
         return self.cmd(cmd, checks)
 
     def afd_endpoint_update_cmd(self, resource_group_name, profile_name, endpoint_name,
-                                origin_response_timeout_seconds=None,
                                 enabled_state=None, tags=None, checks=None, options=None):
         command = f'afd endpoint update -g {resource_group_name} --endpoint-name {endpoint_name} ' \
                   f'--profile-name {profile_name}'
         if tags:
             command = add_tags(command, tags)
 
-        command = _add_paramter_if_needed(command, "origin-response-timeout-seconds", origin_response_timeout_seconds)
         command = _add_paramter_if_needed(command, "enabled-state", enabled_state)
 
         if options:

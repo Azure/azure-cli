@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from six.moves import configparser  # pylint: disable=redefined-builtin
+import configparser
 
 
 def get_default_from_config(config, section, option, choice_list, fallback=1):

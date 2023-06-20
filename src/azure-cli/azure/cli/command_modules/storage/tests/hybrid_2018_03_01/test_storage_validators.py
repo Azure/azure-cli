@@ -6,7 +6,7 @@
 import unittest
 from unittest import mock
 from argparse import Namespace
-from six import StringIO
+from io import StringIO
 
 from knack import CLI
 

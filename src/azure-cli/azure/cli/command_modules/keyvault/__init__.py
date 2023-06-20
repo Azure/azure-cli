@@ -13,7 +13,7 @@ class KeyVaultCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
         from azure.cli.command_modules.keyvault._client_factory import keyvault_mgmt_client_factory
-        from azure.cli.command_modules.keyvault._command_type import KeyVaultCommandGroup, KeyVaultArgumentContext
+        from azure.cli.command_modules.keyvault._command_type import KeyVaultCommandGroup
         from azure.cli.core import ModExtensionSuppress
         keyvault_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
@@ -23,9 +23,9 @@ class KeyVaultCommandsLoader(AzCommandsLoader):
         super(KeyVaultCommandsLoader, self).__init__(
             cli_ctx=cli_ctx,
             resource_type=ResourceType.MGMT_KEYVAULT,
+            operation_group="vaults",
             custom_command_type=keyvault_custom,
             command_group_cls=KeyVaultCommandGroup,
-            argument_context_cls=KeyVaultArgumentContext,
             # Suppress myextension up to and including version 0.1.3
             suppress_extension=ModExtensionSuppress(__name__, 'keyvault-preview',
                                                     '0.1.3',

@@ -5,7 +5,7 @@
 
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer, StorageAccountPreparer, api_version_constraint)
 from azure.core.exceptions import HttpResponseError
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.profiles import ResourceType
 
 
@@ -21,6 +21,12 @@ class StorageImmutabilityPolicy(ScenarioTest):
             storage_account, container_name, resource_group), checks=[
                 JMESPathCheck('immutabilityPeriodSinceCreationInDays', 1),
                 JMESPathCheck('allowProtectedAppendWrites', True)
+        ])
+        # test without specifying rg
+        self.cmd('az storage container immutability-policy create --account-name {} -c {} --period 1 -w'.format(
+            storage_account, container_name), checks=[
+            JMESPathCheck('immutabilityPeriodSinceCreationInDays', 1),
+            JMESPathCheck('allowProtectedAppendWrites', True)
         ])
 
         policy_etag = self.cmd('az storage container immutability-policy show --account-name {} -c {} -g {}'.format(

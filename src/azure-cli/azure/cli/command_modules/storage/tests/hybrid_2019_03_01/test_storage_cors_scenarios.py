@@ -14,7 +14,7 @@ class StorageCorsTests(ScenarioTest):
     @StorageAccountPreparer(parameter_name='account')
     def test_storage_cors_scenario(self, resource_group, account):
         connection_string = self.cmd('storage account show-connection-string -n {} -g {} -otsv'
-                                     .format(account, resource_group)).output
+                                     .format(account, resource_group)).output.strip()
 
         self.cmd('storage cors list --connection-string "{}"'.format(connection_string),
                  checks=JMESPathCheck('length(@)', 0))

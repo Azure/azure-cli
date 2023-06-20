@@ -4,31 +4,18 @@
 # --------------------------------------------------------------------------------------------
 import os
 
-NODE_VERSION_DEFAULT = "10.14"
-NODE_VERSION_NEWER = "12-lts"
-NODE_EXACT_VERSION_DEFAULT = "10.14.1"
-NETCORE_VERSION_DEFAULT = "3.1"
-ASPDOTNET_VERSION_DEFAULT = "4.8"
-DOTNET_VERSION_DEFAULT = "5.0"
-DOTNET_TARGET_FRAMEWORK_STRING = "net5.0"
-PYTHON_VERSION_DEFAULT = "3.7"
+DOTNET_TARGET_FRAMEWORK_REGEX = r"^net\d+\.\d+$"
 NETCORE_RUNTIME_NAME = "dotnetcore"
 ASPDOTNET_RUNTIME_NAME = "aspnet"
 DOTNET_RUNTIME_NAME = "dotnet"
 NODE_RUNTIME_NAME = "node"
 PYTHON_RUNTIME_NAME = "python"
 OS_DEFAULT = "Windows"
+LINUX_OS_NAME = "linux"
+WINDOWS_OS_NAME = "windows"
 STATIC_RUNTIME_NAME = "static"  # not an official supported runtime but used for CLI logic
-NODE_VERSIONS = ['10.6', '10.14']
-PYTHON_VERSIONS = ['3.9', '3.8', '3.7', '3.6']
-NETCORE_VERSIONS = ['2.1', '3.1']
-DOTNET_VERSIONS = ['3.5', '4.8']
 LINUX_SKU_DEFAULT = "P1V2"
-FUNCTIONS_VERSIONS = ['2', '3']
-FUNCTIONS_STACKS_API_JSON_PATHS = {
-    'windows': os.path.abspath(os.path.join(os.path.abspath(__file__), '../resources/WindowsFunctionsStacks.json')),
-    'linux': os.path.abspath(os.path.join(os.path.abspath(__file__), '../resources/LinuxFunctionsStacks.json'))
-}
+FUNCTIONS_VERSIONS = ['2', '3', '4']
 FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX = r"^.*\|(.*)$"
 FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX = r"^~(.*)$"
 FUNCTIONS_NO_V2_REGIONS = {
@@ -43,6 +30,9 @@ GITHUB_OAUTH_SCOPES = [
     "repo",
     "workflow"
 ]
+LOGICAPP_KIND = "workflowapp"
+FUNCTIONAPP_KIND = "functionapp"
+DOTNET_REFERENCES_DIR_IN_ZIP = ".az-references"
 
 
 class FUNCTIONS_STACKS_API_KEYS():
@@ -66,10 +56,8 @@ class FUNCTIONS_STACKS_API_KEYS():
         self.SUPPORTED_EXTENSION_VERSIONS = 'supportedFunctionsExtensionVersions'
         self.USE_32_BIT_WORKER_PROC = 'use32BitWorkerProcess'
         self.FUNCTIONS_WORKER_RUNTIME = 'FUNCTIONS_WORKER_RUNTIME'
+        self.GIT_HUB_ACTION_SETTINGS = 'git_hub_action_settings'
 
-
-RUNTIME_STACKS = os.path.abspath(os.path.join(os.path.abspath(__file__),
-                                              '../resources/WebappRuntimeStacks.json'))
 
 GENERATE_RANDOM_APP_NAMES = os.path.abspath(os.path.join(os.path.abspath(__file__),
                                                          '../resources/GenerateRandomAppNames.json'))
@@ -91,3 +79,21 @@ WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
     'java': 'AppService/windows/java-jar-webapp-on-azure.yml',
     'tomcat': 'AppService/windows/java-war-webapp-on-azure.yml'
 }
+
+LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
+    'node': 'FunctionApp/linux-node.js-functionapp-on-azure.yml',
+    'python': 'FunctionApp/linux-python-functionapp-on-azure.yml',
+    'dotnet': 'FunctionApp/linux-dotnet-functionapp-on-azure.yml',
+    'java': 'FunctionApp/linux-java-functionapp-on-azure.yml',
+    'powershell': 'FunctionApp/linux-powershell-functionapp-on-azure.yml',
+}
+
+WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH = {
+    'node': 'FunctionApp/windows-node.js-functionapp-on-azure.yml',
+    'dotnet': 'FunctionApp/windows-dotnet-functionapp-on-azure.yml',
+    'java': 'FunctionApp/windows-java-functionapp-on-azure.yml',
+    'powershell': 'FunctionApp/windows-powershell-functionapp-on-azure.yml',
+}
+
+DEFAULT_CENTAURI_IMAGE = 'mcr.microsoft.com/azure-functions/dotnet7-quickstart-demo:1.0'
+ACR_IMAGE_SUFFIX = ".azurecr.io"

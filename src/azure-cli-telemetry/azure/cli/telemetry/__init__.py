@@ -10,7 +10,9 @@ import portalocker
 
 from azure.cli.telemetry.util import save_payload
 
-__version__ = "1.0.6"
+__version__ = "1.0.8"
+
+DEFAULT_INSTRUMENTATION_KEY = 'c4395b75-49cc-422c-bc95-c7d51aef5d46'
 
 
 def _start(config_dir):
@@ -46,10 +48,34 @@ def _start(config_dir):
 
 def save(config_dir, payload):
     from azure.cli.telemetry.util import should_upload
+    from azure.cli.telemetry.components.telemetry_client import CliTelemetryClient
     from azure.cli.telemetry.components.telemetry_logging import get_logger
 
-    if save_payload(config_dir, payload) and should_upload(config_dir):
-        logger = get_logger('main')
+    logger = get_logger('main')
+    try:
+        # Split payload to cli events and extra events by instrumentation key
+        # cli events should be stored in local cache and sent together
+        # extra events can be sent immediately
+        import json
+        events = json.loads(payload)
+
+        logger.info('Begin splitting cli events and extra events, total events: %s', len(events))
+        cli_events = {}
+        client = CliTelemetryClient()
+        for key, event in events.items():
+            if key == DEFAULT_INSTRUMENTATION_KEY:
+                cli_events[key] = event
+            else:
+                extra_event = {key: event}
+                client.add(json.dumps(extra_event), flush=True)
+        client.flush(force=True)
+        cli_payload = json.dumps(cli_events) if cli_events else None
+        logger.info('Finish splitting cli events and extra events, cli events: %s', len(cli_events))
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.info("Split cli events and extra events failure: %s", str(ex))
+        cli_payload = payload
+
+    if save_payload(config_dir, cli_payload) and should_upload(config_dir):
         logger.info('Begin creating telemetry upload process.')
         _start(config_dir)
         logger.info('Finish creating telemetry upload process.')

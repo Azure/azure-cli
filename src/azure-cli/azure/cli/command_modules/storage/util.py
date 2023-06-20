@@ -28,10 +28,22 @@ def collect_blob_objects(blob_service, container, pattern=None):
         raise ValueError('missing parameter container')
 
     if not _pattern_has_wildcards(pattern):
-        if blob_service.exists(container, pattern):
-            yield pattern, blob_service.get_blob_properties(container, pattern)
+        from azure.core.exceptions import ResourceNotFoundError
+        try:
+            yield pattern, blob_service.get_blob_client(container, pattern).get_blob_properties()
+        except ResourceNotFoundError:
+            return
     else:
-        for blob in blob_service.list_blobs(container):
+        if hasattr(blob_service, 'list_blobs'):
+            blobs = blob_service.list_blobs(container)
+        else:
+            container_client = blob_service.get_container_client(container=container)
+            prefix = _get_prefix(pattern)
+            if prefix:
+                blobs = container_client.list_blobs(name_starts_with=prefix)
+            else:
+                blobs = container_client.list_blobs()
+        for blob in blobs:
             try:
                 blob_name = blob.name.encode('utf-8') if isinstance(blob.name, unicode) else blob.name
             except NameError:
@@ -56,6 +68,23 @@ def collect_files(cmd, file_service, share, pattern=None):
         return [pattern]
 
     return glob_files_remotely(cmd, file_service, share, pattern)
+
+
+def collect_files_track2(file_service, share, pattern=None):
+    """
+    Search files in the given file share recursively. Filter the files by matching their path to the given pattern.
+    Returns an iterable of tuple (dir, name).
+    """
+    if not file_service:
+        raise ValueError('missing parameter file_service')
+
+    if not share:
+        raise ValueError('missing parameter share')
+
+    if not _pattern_has_wildcards(pattern):
+        return [pattern]
+
+    return glob_files_remotely_track2(file_service, share, pattern)
 
 
 def create_blob_service_from_storage_client(cmd, client):
@@ -105,6 +134,23 @@ def glob_files_remotely(cmd, client, share_name, pattern, snapshot=None):
                 queue.appendleft(os.path.join(current_dir, f.name))
 
 
+def glob_files_remotely_track2(client, share_name, pattern, snapshot=None, is_share_client=False):
+    """glob the files in remote file share based on the given pattern"""
+    from collections import deque
+
+    if not is_share_client:
+        client = client.get_share_client(share_name, snapshot=snapshot)
+    queue = deque([""])
+    while queue:
+        current_dir = queue.pop()
+        for f in client.list_directories_and_files(current_dir):
+            if not f['is_directory']:
+                if not pattern or _match_path(os.path.join(current_dir, f['name']), pattern):
+                    yield current_dir, f['name']
+            else:
+                queue.appendleft(os.path.join(current_dir, f['name']))
+
+
 def create_short_lived_blob_sas(cmd, account_name, account_key, container, blob):
     from datetime import timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
@@ -146,6 +192,19 @@ def create_short_lived_file_sas(cmd, account_name, account_key, share, directory
                              permission=t_file_permissions(read=True), expiry=expiry, protocol='https')
 
 
+def create_short_lived_file_sas_v2(cmd, account_name, account_key, share, directory_name, file_name):
+    from datetime import timedelta
+
+    t_sas = cmd.get_models('_shared_access_signature#FileSharedAccessSignature',
+                           resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+
+    t_file_permissions = cmd.get_models('_models#FileSasPermissions', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    sas = t_sas(account_name, account_key)
+    return sas.generate_file(share, directory_name=directory_name, file_name=file_name,
+                             permission=t_file_permissions(read=True), expiry=expiry, protocol='https')
+
+
 def create_short_lived_container_sas(cmd, account_name, account_key, container):
     from datetime import timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
@@ -157,6 +216,15 @@ def create_short_lived_container_sas(cmd, account_name, account_key, container):
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
     sas = t_sas(account_name, account_key)
     return sas.generate_container(container, permission=t_blob_permissions(read=True), expiry=expiry, protocol='https')
+
+
+def create_short_lived_container_sas_track2(cmd, account_name, account_key, container):
+    from datetime import timedelta
+    t_generate_container_sas = cmd.get_models('_shared_access_signature#generate_container_sas',
+                                              resource_type=ResourceType.DATA_STORAGE_BLOB)
+    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    return t_generate_container_sas(account_name, container, account_key, permission='r', expiry=expiry,
+                                    protocol='https')
 
 
 def create_short_lived_share_sas(cmd, account_name, account_key, share):
@@ -172,6 +240,14 @@ def create_short_lived_share_sas(cmd, account_name, account_key, share):
     return sas.generate_share(share, permission=t_file_permissions(read=True), expiry=expiry, protocol='https')
 
 
+def create_short_lived_share_sas_track2(cmd, account_name, account_key, share):
+    from datetime import timedelta
+    t_generate_share_sas = cmd.get_models('#generate_share_sas', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
+    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    return t_generate_share_sas(account_name, share, account_key, permission='r', expiry=expiry,
+                                protocol='https')
+
+
 def mkdir_p(path):
     import errno
     try:
@@ -185,6 +261,19 @@ def mkdir_p(path):
 
 def _pattern_has_wildcards(p):
     return not p or p.find('*') != -1 or p.find('?') != -1 or p.find('[') != -1
+
+
+def _get_prefix(p):
+    if not p:
+        return p
+    pattern_start = len(p)
+    for index, ch in enumerate(p):
+        if ch == '*' or ch == '?' or ch == '[':
+            pattern_start = index
+            break
+    if pattern_start == len(p):
+        return None
+    return p[:pattern_start]
 
 
 def _match_path(path, pattern):

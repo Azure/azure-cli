@@ -36,6 +36,13 @@ It is a requirement for the command owner to maintain their test in live mode.
 * Name test methods in the following format: `test_<module>_<feature>`.
 * The scenario test must be able to run repeatedly in live mode. The feature owner is responsible of maintaining their scenario tests.
 
+### Scenario Test Best Practice
+
+* 100% commands coverage of module: Scenerio tests __MUST__ cover all commands in the module except the `wait` commands. Please use `azdev cmdcov {module}` to check command coverage of module. If cannot add a test because of some reason, please add missing_command_test_coverage in the linter_exclusions.yml.
+* 100% examples coverage of command: Scenerio tests __MUST__ coverage all examples of the command.
+* 100% arguments coverage of command: Scenerio tests should coverage all arguments in the command. Please use `azdev cmdcov {module} --level argument` to check argument coverage. If cannot add a test because of some reason, please add missing_parameter_test_coverage in the linter_exclusions.yml.
+* 100% boundary values coverage of argument: Scenerio tests should coverage boundary values of argument, especially `''` (empty string), `null`, `0` and `False` values. These values have different meanings, but will all resolve to `False` in conditional expressions (`if {variable}`) of Python. It's important to make sure they work as expected.
+
 ## Recording Tests
 
 ### Preparation
@@ -269,7 +276,7 @@ class StorageAccountTests(ScenarioTest):
 Note:
 
 1. Like `ResourceGroupPreparer`, you can use `StorageAccountPreparer` to prepare a disposable storage account for the test. The account is deleted along with the resource group during test teardown.
-2. Creation of a storage account requires a resource group. Therefore `ResourceGroupPrepare` must be placed above `StorageAccountPreparer`, since preparers are designed to be executed from top to bottom. (The core preparer implementation is in the [AbstractPreparer](https://github.com/Azure/azure-python-devtools/blob/master/src/azure_devtools/scenario_tests/preparers.py) class in the [azure-devtools](https://pypi.python.org/pypi/azure-devtools) package.)
+2. Creation of a storage account requires a resource group. Therefore `ResourceGroupPrepare` must be placed above `StorageAccountPreparer`, since preparers are designed to be executed from top to bottom. (The core preparer implementation is in the `azure.cli.testsdk.scenario_tests.preparers.AbstractPreparer`.)
 3. The preparers communicate among themselves by adding values to the `kwargs` of the decorated methods. Therefore the `StorageAccountPreparer` uses the resource group created in the preceding `ResourceGroupPreparer`.
 4. The `StorageAccountPreparer` can be further customized to modify the parameters of the created storage account:
 

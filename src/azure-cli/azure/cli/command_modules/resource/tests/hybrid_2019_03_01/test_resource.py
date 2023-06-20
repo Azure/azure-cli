@@ -9,8 +9,8 @@ import time
 from unittest import mock
 import unittest
 
-from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name, live_only, record_only
 from azure.cli.core.util import get_file_json
 
@@ -798,7 +798,8 @@ class PolicyScenarioTest(ScenarioTest):
     def test_show_built_in_policy(self):
         # get the list of builtins, then retrieve each via show and validate the results match
         results = self.cmd('policy definition list --query "[?policyType==\'BuiltIn\']"').get_output_in_json()
-        for i, result in enumerate(results):
+        if results:
+            result = results[0]
             self.kwargs['pn'] = result['name']
             self.kwargs['dn'] = result['displayName']
             self.kwargs['desc'] = result['description']

@@ -26,7 +26,7 @@ from azure.cli.core.extension import get_extension
 from azure.cli.core.util import (
     get_command_type_kwarg, read_file_content, get_arg_list, poller_classes)
 from azure.cli.core.local_context import LocalContextAction
-import azure.cli.core.telemetry as telemetry
+from azure.cli.core import telemetry
 from azure.cli.core.commands.progress import IndeterminateProgressBar
 
 from knack.arguments import CLICommandArgument
@@ -35,7 +35,7 @@ from knack.deprecation import ImplicitDeprecated, resolve_deprecate_info
 from knack.invocation import CommandInvoker
 from knack.preview import ImplicitPreviewItem, PreviewItem, resolve_preview_info
 from knack.experimental import ImplicitExperimentalItem, ExperimentalItem, resolve_experimental_info
-from knack.log import get_logger
+from knack.log import get_logger, CLILogging
 from knack.util import CLIError, CommandResultItem, todict
 from knack.events import EVENT_INVOKER_TRANSFORM_RESULT
 from knack.validators import DefaultStr
@@ -130,6 +130,11 @@ class CacheObject:
             raise CLIError('cloud name unexpectedly empty')
         copy_kwargs = kwargs.copy()
         copy_kwargs.pop('self', None)
+        # handle "content_type" introduced by https://gist.github.com/iscai-msft/47fe6ecbdd06013bb19a2e16f85a0b43
+        # e.g., 2018-03-01-hybrid when execute "az network vnet update"
+        #       https://github.com/Azure/azure-sdk-for-python/pull/24162
+        #       sdk/network/azure-mgmt-network/azure/mgmt/network/v2017_10_01/operations/_operations.py:22897
+        copy_kwargs.pop('content_type', None)
         resource_group = copy_kwargs.pop('resource_group_name', None) or args[0]
 
         if len(args) > 2:
@@ -562,7 +567,8 @@ class AzCliCommandInvoker(CommandInvoker):
         self.cli_ctx.raise_event(EVENT_INVOKER_CMD_TBL_LOADED, cmd_tbl=self.commands_loader.command_table,
                                  parser=self.parser)
 
-        arg_check = [a for a in args if a not in ['--debug', '--verbose']]
+        arg_check = [a for a in args if a not in
+                     (CLILogging.DEBUG_FLAG, CLILogging.VERBOSE_FLAG, CLILogging.ONLY_SHOW_ERRORS_FLAG)]
         if not arg_check:
             self.parser.enable_autocomplete()
             subparser = self.parser.subparsers[tuple()]
@@ -1139,13 +1145,14 @@ def _is_paged(obj):
             and not isinstance(obj, dict):
         from msrest.paging import Paged
         from azure.core.paging import ItemPaged as AzureCorePaged
-        return isinstance(obj, (AzureCorePaged, Paged))
+        from azure.cli.core.aaz._paging import AAZPaged
+        return isinstance(obj, (AzureCorePaged, Paged, AAZPaged))
     return False
 
 
 def _is_poller(obj):
     # Since loading msrest is expensive, we avoid it until we have to
-    if obj.__class__.__name__ in ['AzureOperationPoller', 'LROPoller']:
+    if obj.__class__.__name__ in ['AzureOperationPoller', 'LROPoller', 'AAZLROPoller']:
         return isinstance(obj, poller_classes())
     return False
 

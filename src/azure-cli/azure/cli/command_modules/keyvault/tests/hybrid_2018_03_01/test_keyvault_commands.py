@@ -90,7 +90,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
             self.check('properties.sku.name', 'premium'),
         ])
         # test updating updating other properties
-        self.cmd('keyvault update -g {rg} -n {kv} --enable-soft-delete --enable-purge-protection '
+        self.cmd('keyvault update -g {rg} -n {kv} --enable-purge-protection '
                  '--enabled-for-deploymen --enabled-for-disk-encryption --enabled-for-template-deployment ',
                  checks=[
                      self.check('name', '{kv}'),
@@ -344,7 +344,7 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
 class KeyVaultCertificateContactsScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_contacts')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-co-')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-co-', skip_purge=True)
     def test_keyvault_certificate_contacts(self, resource_group):
 
         self.kwargs.update({
@@ -365,7 +365,7 @@ class KeyVaultCertificateContactsScenarioTest(ScenarioTest):
 class KeyVaultCertificateIssuerScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_issuer')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-is-')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-is-', skip_purge=True)
     def test_keyvault_certificate_issuers(self, resource_group):
 
         self.kwargs.update({
@@ -388,11 +388,10 @@ class KeyVaultCertificateIssuerScenarioTest(ScenarioTest):
         ])
         with self.assertRaises(CLIError):
             self.cmd('keyvault certificate issuer update --vault-name {kv} --issuer-name notexist --organization-id TestOrg --account-id test_account')
-        self.cmd('keyvault certificate issuer update --vault-name {kv} --issuer-name issuer1 --account-id ""', checks=[
+        self.cmd('keyvault certificate issuer update --vault-name {kv} --issuer-name issuer1', checks=[
             self.check('provider', 'Test'),
             self.check('attributes.enabled', True),
-            self.check('organizationDetails.id', 'TestOrg'),
-            self.check('credentials.accountId', None)
+            self.check('organizationDetails.id', 'TestOrg')
         ])
         self.cmd('keyvault certificate issuer list --vault-name {kv}',
                  checks=self.check('length(@)', 1))
@@ -525,7 +524,7 @@ class KeyVaultCertificateDefaultPolicyScenarioTest(ScenarioTest):
 class KeyVaultCertificateScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_cert')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-', skip_purge=True)
     def test_keyvault_certificate_crud(self, resource_group):
 
         self.kwargs.update({
@@ -676,7 +675,7 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
             'loc': 'eastus2'
         })
 
-        vault = _create_keyvault(self, self.kwargs, additional_args=' --enable-soft-delete true').get_output_in_json()
+        vault = _create_keyvault(self, self.kwargs).get_output_in_json()
 
         # add all purge permissions to default the access policy
         default_policy = vault['properties']['accessPolicies'][0]

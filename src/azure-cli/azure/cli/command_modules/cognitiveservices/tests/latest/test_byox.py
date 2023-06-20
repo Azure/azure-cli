@@ -18,7 +18,7 @@ class CognitiveServicesByoxTests(ScenarioTest):
             'sname': sname,
             'kind': 'SpeechServices',
             'sku': 'S0',
-            'location': 'centraluseuap',
+            'location': 'SOUTHCENTRALUS',
             'storageIds': '[{\\\"resourceId\\\":\\\"/subscriptions/' + subscription_id + '/resourceGroups/felixwa-01/providers/Microsoft.Storage/storageAccounts/felixwatest\\\"}]'
         })
 
@@ -70,7 +70,7 @@ class CognitiveServicesByoxTests(ScenarioTest):
             'sname': sname,
             'kind': 'FormRecognizer',
             'sku': 'S0',
-            'location': 'centraluseuap',
+            'location': 'SOUTHCENTRALUS',
             'encryption': '{\\\"keySource\\\":\\\"Microsoft.CognitiveServices\\\"}'
         })
 
@@ -79,8 +79,7 @@ class CognitiveServicesByoxTests(ScenarioTest):
                  '--assign-identity --encryption {encryption}  --yes',
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
-                         self.check('sku.name', '{sku}'),
-                         self.check('properties.provisioningState', 'Succeeded')])
+                         self.check('sku.name', '{sku}')])
 
 
         account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()

@@ -47,6 +47,44 @@ helps['ams account check-name'] = """
     short-summary: Checks whether the Media Service resource name is available.
 """
 
+helps['ams account identity'] = """
+    type: group
+    short-summary: Manage managed identity settings for an Azure Media Services account.
+"""
+
+helps['ams account identity show'] = """
+    type: command
+    short-summary: Show the details of managed identity settings for an Azure Media Services account.
+    examples:
+        - name: Show the media account's managed identity details
+          text: >
+            az ams account identity show -n myAmsAccount -g myRG
+"""
+
+helps['ams account identity assign'] = """
+    type: command
+    short-summary: Assign a managed identity to an Azure Media Services account.
+    examples:
+        - name: Assign a system managed identity to an Azure Media Services account.
+          text: >
+            az ams account identity assign -n myAmsAccount -g myRG --system-assigned
+        - name: Assign a user managed identity to an Azure Media Services account.
+          text: >
+            az ams account identity assign -n myAmsAccount -g myRG --user-assigned myUserId
+"""
+
+helps['ams account identity remove'] = """
+    type: command
+    short-summary: Remove a managed identity to an Azure Media Services account.
+    examples:
+        - name: Remove a system managed identity to an Azure Media Services account.
+          text: >
+            az ams account identity remove -n myAmsAccount -g myRG --system-assigned
+        - name: Remove a user managed identity to an Azure Media Services account.
+          text: >
+            az ams account identity remove -n myAmsAccount -g myRG --user-assigned myUserId
+"""
+
 helps['ams account encryption'] = """
     type: group
     short-summary: Manage encryption for an Azure Media Services account.
@@ -203,6 +241,31 @@ helps['ams account-filter'] = """
     short-summary: Manage account filters for an Azure Media Services account.
 """
 
+helps['ams asset-track'] = """
+    type: group
+    short-summary: Manage asset tracks for an Azure Media Services account.
+"""
+
+helps['ams asset-track show'] = """
+    type: command
+    short-summary: Show the details of a track.
+"""
+
+helps['ams asset-track create'] = """
+    type: command
+    short-summary: Create a track for an Azure Media Services asset.
+"""
+
+helps['ams asset-track update'] = """
+    type: command
+    short-summary: Update the parameters of a track.
+"""
+
+helps['ams asset-track update-data'] = """
+    type: command
+    short-summary: Update a track if the file in the storage container was recently modified.
+"""
+
 helps['ams asset show'] = """
     type: command
     short-summary: Show the details of an asset.
@@ -312,6 +375,10 @@ helps['ams content-key-policy update'] = """
 helps['ams content-key-policy list'] = """
     type: command
     short-summary: List all the content key policies within an Azure Media Services account.
+    examples:
+        - name: list the content key policies within an Azure Media Services account with a filter clause.
+          text: >
+            az ams content-key-policy list -a amsAccount -g resourceGroup --filter "properties/lastModified gt 2022-08-16 or properties/created lt 2022-08-17"
 """
 
 helps['ams content-key-policy option'] = """
@@ -433,6 +500,11 @@ helps['ams streaming-policy show'] = """
 helps['ams streaming-endpoint'] = """
     type: group
     short-summary: Manage streaming endpoints for an Azure Media Service account.
+"""
+
+helps['ams streaming-endpoint get-skus'] = """
+    type: command
+    short-summary: Get the sku details for a streaming endpoint.
 """
 
 helps['ams streaming-endpoint start'] = """

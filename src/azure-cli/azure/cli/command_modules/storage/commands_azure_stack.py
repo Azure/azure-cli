@@ -222,7 +222,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('update', 'update_file_service_properties')
 
     with self.command_group('storage logging', get_custom_sdk('logging', multi_service_properties_factory)) as g:
-        from ._transformers import transform_logging_list_output
+        from ._transformers_azure_stack import transform_logging_list_output
         g.storage_command('update', 'set_logging')
         g.storage_command('show', 'get_logging',
                           table_transformer=transform_logging_list_output,
@@ -230,7 +230,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('off', 'disable_logging', is_preview=True)
 
     with self.command_group('storage metrics', get_custom_sdk('metrics', multi_service_properties_factory)) as g:
-        from ._transformers import transform_metrics_list_output
+        from ._transformers_azure_stack import transform_metrics_list_output
         g.storage_command('update', 'set_metrics')
         g.storage_command('show', 'get_metrics',
                           table_transformer=transform_metrics_list_output,
@@ -471,7 +471,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage directory', command_type=file_sdk,
                             custom_command_type=get_custom_sdk('directory_azure_stack',
                                                                file_data_service_factory)) as g:
-        from ._format import transform_file_directory_result, transform_file_output
+        from ._format import transform_file_output
+        from ._format_azure_stack import transform_file_directory_result
 
         g.storage_command('create', 'create_directory', transform=create_boolean_result_output_transformer('created'),
                           table_transformer=transform_boolean_for_table)
@@ -492,7 +493,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage file', command_type=file_sdk,
                             custom_command_type=get_custom_sdk('file_azure_stack', file_data_service_factory)) as g:
-        from ._format import transform_file_directory_result, transform_boolean_for_table, transform_file_output
+        from ._format import transform_boolean_for_table, transform_file_output
         from ._transformers_azure_stack import transform_url
         g.storage_custom_command('list', 'list_share_files', transform=transform_file_directory_result(self.cli_ctx),
                                  table_transformer=transform_file_output,
@@ -522,8 +523,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command('delete-batch', 'storage_file_delete_batch')
         g.storage_custom_command('copy start-batch', 'storage_file_copy_batch')
 
-    with self.command_group('storage cors', get_custom_sdk('cors', multi_service_properties_factory)) as g:
-        from ._transformers import transform_cors_list_output
+    with self.command_group('storage cors', get_custom_sdk('cors_azure_stack', multi_service_properties_factory)) as g:
+        from ._transformers_azure_stack import transform_cors_list_output
 
         g.storage_command('add', 'add_cors')
         g.storage_command('clear', 'clear_cors')

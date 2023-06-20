@@ -14,7 +14,7 @@ from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.storage._client_factory import MISSING_CREDENTIALS_ERROR_MESSAGE
 from ..storage_test_util import StorageScenarioMixin
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
@@ -361,7 +361,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
         # test 403
         from azure.common import AzureException
-        with self.assertRaisesRegexp(AzureException, "Authentication failure"):
+        with self.assertRaisesRegex(AzureException, "Authentication failure"):
             self.cmd('storage blob show --account-name {} --account-key="YQ==" -c foo -n bar.txt '.format(storage_account))
 
 

@@ -13,12 +13,9 @@ interactions:
       ParameterSetName:
       - --policy -g -n --location --assign-identity -p
       User-Agent:
-      - python/3.8.8 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-resource/12.1.0 Azure-SDK-For-Python AZURECLI/2.21.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/5ffd78d9-436d-4b41-a421-5baa819e3008?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/5ffd78d9-436d-4b41-a421-5baa819e3008?api-version=2021-06-01
   response:
     body:
       string: '{"error":{"code":"PolicyDefinitionNotFound","message":"The policy definition
@@ -31,7 +28,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 05 Apr 2021 18:19:04 GMT
+      - Mon, 09 May 2022 23:41:24 GMT
       expires:
       - '-1'
       pragma:
@@ -59,12 +56,9 @@ interactions:
       ParameterSetName:
       - --policy -g -n --location --assign-identity -p
       User-Agent:
-      - python/3.8.8 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-resource/12.1.0 Azure-SDK-For-Python AZURECLI/2.21.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/providers/Microsoft.Authorization/policyDefinitions/5ffd78d9-436d-4b41-a421-5baa819e3008?api-version=2020-09-01
+    uri: https://management.azure.com/providers/Microsoft.Authorization/policyDefinitions/5ffd78d9-436d-4b41-a421-5baa819e3008?api-version=2021-06-01
   response:
     body:
       string: '{"properties":{"displayName":"Add or replace a tag on resources","policyType":"BuiltIn","mode":"Indexed","description":"Adds
@@ -83,7 +77,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 05 Apr 2021 18:19:05 GMT
+      - Mon, 09 May 2022 23:41:24 GMT
       expires:
       - '-1'
       pragma:
@@ -102,9 +96,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/5ffd78d9-436d-4b41-a421-5baa819e3008",
+    body: '{"location": "westus", "identity": {"type": "SystemAssigned"}, "properties":
+      {"policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/5ffd78d9-436d-4b41-a421-5baa819e3008",
       "parameters": {"tagName": {"value": "cliTagKey"}, "tagValue": {"value": "cliTagValue"}},
-      "enforcementMode": "Default"}, "location": "westus", "identity": {"type": "SystemAssigned"}}'
+      "enforcementMode": "Default"}}'
     headers:
       Accept:
       - application/json
@@ -117,28 +112,25 @@ interactions:
       Content-Length:
       - '312'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --policy -g -n --location --assign-identity -p
       User-Agent:
-      - python/3.8.8 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-resource/12.1.0 Azure-SDK-For-Python AZURECLI/2.21.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003?api-version=2021-06-01
   response:
     body:
-      string: '{"identity":{"principalId":"9a9ec698-8ba6-4fa9-8952-b92fc14dd723","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/5ffd78d9-436d-4b41-a421-5baa819e3008","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001","parameters":{"tagName":{"value":"cliTagKey"},"tagValue":{"value":"cliTagValue"}},"metadata":{"createdBy":"9d6d6799-f94d-4ccf-a96d-67761f19626b","createdOn":"2021-04-05T18:19:09.2670865Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000003","location":"westus"}'
+      string: '{"identity":{"principalId":"a8bbdd52-96ac-43bf-8a19-02c69f9336c2","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/5ffd78d9-436d-4b41-a421-5baa819e3008","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001","parameters":{"tagName":{"value":"cliTagKey"},"tagValue":{"value":"cliTagValue"}},"metadata":{"createdBy":"141fb5c0-e620-44a7-b52a-98ead875e310","createdOn":"2022-05-09T23:41:26.4871325Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000003","location":"westus","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-05-09T23:41:25.9361897Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-09T23:41:25.9361897Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1037'
+      - '1169'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 05 Apr 2021 18:19:09 GMT
+      - Mon, 09 May 2022 23:41:26 GMT
       expires:
       - '-1'
       pragma:
@@ -168,72 +160,65 @@ interactions:
       ParameterSetName:
       - -n -g -a --resource-discovery-mode
       User-Agent:
-      - python/3.8.8 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-resource/12.1.0 Azure-SDK-For-Python AZURECLI/2.21.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments?api-version=2020-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments?api-version=2021-06-01
   response:
     body:
-      string: '{"value":[{"identity":{"principalId":"93a1325f-d061-40d9-a5dc-ac1c1964b8c5","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"displayName":"PUX
-        Testing","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/b755afb5-655c-4ebd-b231-ed2ea62788da","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chegg1","/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cheggrg"],"parameters":{},"description":"asdf","metadata":{"assignedBy":"Chris
-        Eggert","parameterScopes":{},"createdBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","createdOn":"2020-08-24T19:55:15.037589Z","updatedBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","updatedOn":"2020-12-08T23:32:56.5545843Z"},"enforcementMode":"Default","nonComplianceMessages":[{"message":"general
-        msg"},{"policyDefinitionReferenceId":"13123074483967204561","message":"asdf"},{"policyDefinitionReferenceId":"3854513742587939697","message":"asdf"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/4d0340753bef49b2a49e3b24","type":"Microsoft.Authorization/policyAssignments","name":"4d0340753bef49b2a49e3b24","location":"eastus"},{"identity":{"principalId":"cc514f81-616b-428d-ad5d-5edf6eda6123","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"displayName":"delegated
-        test","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/cd3aa116-8754-49c9-a813-ad46512ece54","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{"tagName":{"value":"inheritThis"}},"description":"","metadata":{"assignedBy":"Chris
-        Eggert","parameterScopes":{},"createdBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","createdOn":"2020-10-27T20:42:49.4800137Z","updatedBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","updatedOn":"2020-12-08T23:51:32.0323505Z"},"enforcementMode":"Default","nonComplianceMessages":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/6cdf02569df44e97ac1207d8","type":"Microsoft.Authorization/policyAssignments","name":"6cdf02569df44e97ac1207d8","location":"eastus"},{"identity":{"principalId":"dee5ebd7-7c42-488f-9337-1e13990a5f0f","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"displayName":"Deploy
-        Auditing on SQL servers","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/f4c68484-132f-41f9-9b6d-3e4b1cb55036","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{"retentionDays":{"value":"365"},"storageAccountsResourceGroup":{"value":"fasdf"}},"description":"","metadata":{"createdBy":"62cf80f1-18ad-45ab-9f4a-31351e915e7a","createdOn":"2020-07-07T18:07:30.491332Z","updatedBy":"44b5ad13-adfa-4496-9ddf-e12eaf49394c","updatedOn":"2020-07-07T18:10:47.7361423Z"},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/9e393025809a24c62c491145acc450502c3afc6588a14895261fa17233b071f3","type":"Microsoft.Authorization/policyAssignments","name":"9e393025809a24c62c491145acc450502c3afc6588a14895261fa17233b071f3","location":"westus2"},{"identity":{"principalId":"c6cc2129-0f3b-4411-bf01-204c836e4254","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"displayName":"Deploy
-        SQL DB transparent data encryption","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/86a912f6-9a06-4e26-b447-11b16ba8659f","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"description":"","metadata":{"createdBy":"62cf80f1-18ad-45ab-9f4a-31351e915e7a","createdOn":"2020-07-07T18:07:24.6983719Z","updatedBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","updatedOn":"2020-09-04T17:44:25.5203202Z","parameterScopes":{}},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/a38877dbc1711e8fdfdb2f64ed05de993e32951e83934101f9678355b186af09","type":"Microsoft.Authorization/policyAssignments","name":"a38877dbc1711e8fdfdb2f64ed05de993e32951e83934101f9678355b186af09","location":"westus2"},{"identity":{"principalId":"f357a207-efa0-4712-bd1b-408ba7f7cf0b","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"displayName":"RegComp
-        with Manual Policies","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/44596757892f4cb8946d34c0","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{"logAnalyticsWorkspaceIdforVMReporting":{"value":"/doesntexist"},"listOfMembersToExcludeFromWindowsVMAdministratorsGroup":{"value":"none"},"listOfMembersToIncludeInWindowsVMAdministratorsGroup":{"value":"none"}},"metadata":{"assignedBy":"Chris
-        Eggert","parameterScopes":{},"createdBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","createdOn":"2021-02-01T21:29:09.2965279Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default","nonComplianceMessages":[{"message":"You
-        are not compliant"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/afe2a902a37a4a5fb474162f","type":"Microsoft.Authorization/policyAssignments","name":"afe2a902a37a4a5fb474162f","location":"eastus"},{"properties":{"displayName":"Enable
-        Monitoring in Azure Security Center","policyDefinitionId":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Chris
-        Eggert","parameterScopes":{},"createdBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","createdOn":"2020-03-31T22:09:50.4969437Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/c0921b86d1db4b8c9ac90f9f","type":"Microsoft.Authorization/policyAssignments","name":"c0921b86d1db4b8c9ac90f9f"},{"identity":{"principalId":"c93898bd-f9d0-4659-a5d1-c0031872b936","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"displayName":"Not
-        enforced subscription tag policy (cheggert)","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/61a4d60b-7326-440e-8051-9f94394d4dd1","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{"tagName":{"value":"notEnforced"},"tagValue":{"value":"notEnforcedVal"}},"description":"","metadata":{"assignedBy":"Chris
-        Eggert","parameterScopes":{},"createdBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","createdOn":"2021-02-08T19:39:08.440631Z","updatedBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","updatedOn":"2021-02-08T19:39:27.8198427Z"},"enforcementMode":"DoNotEnforce","nonComplianceMessages":[{"message":"This
-        subscription is not compliant (cheggert)"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/ea30901b981543ae98a3d2bf","type":"Microsoft.Authorization/policyAssignments","name":"ea30901b981543ae98a3d2bf","location":"eastus"},{"identity":{"principalId":"8b9d526a-9e43-4d1b-8bfe-cfe4d90f3b58","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"displayName":"chegg:
-        Replace tag without becoming compliant","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/270f0d11-af30-4c15-95f7-28ba884518f0","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Chris
-        Eggert","parameterScopes":{},"createdBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","createdOn":"2019-11-21T00:28:49.7568462Z","updatedBy":null,"updatedOn":null},"enforcementMode":"DoNotEnforce"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/ee5909f9ee3f4c12bbed6efc","type":"Microsoft.Authorization/policyAssignments","name":"ee5909f9ee3f4c12bbed6efc","location":"eastus"},{"identity":{"principalId":"dfd2385a-7700-420f-b164-bd9ffb52285b","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"displayName":"Empty
-        deployment on each KeyVault resource (SUB)","policyDefinitionId":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyDefinitions/78a38c70-5549-49bd-8a16-fe3619e5d2cf","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"description":"Deploys
-        an empty deployment (with one output) on each KeyVault vault.  Used for some
-        PolicyInsights SDK tests.","metadata":{"assignedBy":"Chris Eggert","parameterScopes":{},"createdBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","createdOn":"2019-11-21T17:43:53.4694168Z","updatedBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","updatedOn":"2021-02-24T18:26:48.4990411Z"},"enforcementMode":"Default","nonComplianceMessages":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/fcddeb6113ec43798567dce2","type":"Microsoft.Authorization/policyAssignments","name":"fcddeb6113ec43798567dce2","location":"eastus"},{"identity":{"principalId":"9a9ec698-8ba6-4fa9-8952-b92fc14dd723","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/5ffd78d9-436d-4b41-a421-5baa819e3008","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001","parameters":{"tagName":{"value":"cliTagKey"},"tagValue":{"value":"cliTagValue"}},"metadata":{"createdBy":"9d6d6799-f94d-4ccf-a96d-67761f19626b","createdOn":"2021-04-05T18:19:09.2670865Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000003","location":"westus"},{"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/96670d01-0a4d-4649-9c89-2d3abc0a5025","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_triggerscanx7x4fwt4yyp3z5k4ynhlzklshsaxk64jlbzvvmj4rs43o46wxyndjp6","parameters":{"tagName":{"value":"notThere"}},"metadata":{"createdBy":"9d6d6799-f94d-4ccf-a96d-67761f19626b","createdOn":"2021-04-05T18:18:09.0586403Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_triggerscanx7x4fwt4yyp3z5k4ynhlzklshsaxk64jlbzvvmj4rs43o46wxyndjp6/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignmentxan5ddwvf","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignmentxan5ddwvf"},{"properties":{"displayName":"CSEO
+      string: '{"value":[{"identity":{"principalId":"ebc588d6-4429-483e-af4a-d2d89940dd7e","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"displayName":"Audit
+        tag at MG 2","policyDefinitionId":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyDefinitions/03ae6c12-b46a-43f1-9f3d-c20620473106","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"description":"","metadata":{"assignedBy":"Meghana
+        Gupta","parameterScopes":{},"createdBy":"2c4638e2-9343-4565-be89-cbdad9762f57","createdOn":"2021-08-08T10:26:15.6690062Z","updatedBy":"2c4638e2-9343-4565-be89-cbdad9762f57","updatedOn":"2021-08-08T18:51:37.9684125Z"},"enforcementMode":"Default","nonComplianceMessages":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/110d81d8036643edbccb7f66","type":"Microsoft.Authorization/policyAssignments","name":"110d81d8036643edbccb7f66","location":"eastasia","systemData":{"createdBy":"meghanagupta@microsoft.com","createdByType":"User","createdAt":"2021-08-08T10:26:15.6405478Z","lastModifiedBy":"meghanagupta@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-08-08T18:51:33.4186957Z"}},{"identity":{"principalId":"a2cc83c7-16d0-41d6-9773-6762ecd00ba1","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"displayName":"Audit
+        tag at MG Test 09-20","policyDefinitionId":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyDefinitions/03ae6c12-b46a-43f1-9f3d-c20620473106","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"description":"","metadata":{"assignedBy":"Meghana
+        Gupta","parameterScopes":{},"createdBy":"2c4638e2-9343-4565-be89-cbdad9762f57","createdOn":"2021-09-20T15:14:01.2362735Z","updatedBy":"2c4638e2-9343-4565-be89-cbdad9762f57","updatedOn":"2021-09-22T15:34:16.8448224Z"},"enforcementMode":"Default","nonComplianceMessages":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/3f093a9fc7864a518a646b92","type":"Microsoft.Authorization/policyAssignments","name":"3f093a9fc7864a518a646b92","location":"centralus","systemData":{"createdBy":"meghanagupta@microsoft.com","createdByType":"User","createdAt":"2021-09-20T15:14:01.2152245Z","lastModifiedBy":"meghanagupta@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-09-22T15:34:15.87583Z"}},{"properties":{"displayName":"Azure
+        Security Benchmark","policyDefinitionId":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Namrata
+        Jagasia","parameterScopes":{},"createdBy":"141fb5c0-e620-44a7-b52a-98ead875e310","createdOn":"2021-06-09T18:37:24.8849783Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default","nonComplianceMessages":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/47df6bf13f7b4875978cd86c","type":"Microsoft.Authorization/policyAssignments","name":"47df6bf13f7b4875978cd86c"},{"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/meghanag/providers/Microsoft.ManagedIdentity/userAssignedIdentities/managedidentity2":{"principalId":"faa7de31-5e82-4507-a75f-702d6f3e35d1","clientId":"a3b39c10-bd6e-47d3-9f39-378b5f119359"}}},"properties":{"displayName":"Add
+        a tag to resources Test 09-20-2","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/4f9dc7db-30c1-420c-b61a-e1d640128d26","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{"tagName":{"value":"env"},"tagValue":{"value":"local"}},"description":"","metadata":{"assignedBy":"Meghana
+        Gupta","parameterScopes":{},"createdBy":"2c4638e2-9343-4565-be89-cbdad9762f57","createdOn":"2021-09-20T15:14:34.8261224Z","updatedBy":"2c4638e2-9343-4565-be89-cbdad9762f57","updatedOn":"2021-09-22T20:33:33.8546961Z"},"enforcementMode":"Default","nonComplianceMessages":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/56840c10e3674f1fbbdf2303","type":"Microsoft.Authorization/policyAssignments","name":"56840c10e3674f1fbbdf2303","location":"westus2","systemData":{"createdBy":"meghanagupta@microsoft.com","createdByType":"User","createdAt":"2021-09-20T15:14:33.6560942Z","lastModifiedBy":"meghanagupta@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-09-22T20:33:32.8689078Z"}},{"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/meghanag/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id2":{"principalId":"34fa352b-5654-4f36-b401-c8db69fcd33f","clientId":"c81a4cc6-d827-4eb0-80f2-64bd27e0f956"}}},"properties":{"displayName":"Audit
+        tag at MG Test 09-23","policyDefinitionId":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyDefinitions/03ae6c12-b46a-43f1-9f3d-c20620473106","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"description":"","metadata":{"parameterScopes":{},"createdBy":"2c4638e2-9343-4565-be89-cbdad9762f57","createdOn":"2021-09-23T23:36:24.1507583Z","updatedBy":"2c4638e2-9343-4565-be89-cbdad9762f57","updatedOn":"2021-09-23T23:42:30.9558749Z"},"enforcementMode":"Default","nonComplianceMessages":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/573a4fa6d45f41599dea326f","type":"Microsoft.Authorization/policyAssignments","name":"573a4fa6d45f41599dea326f","location":"centralus","systemData":{"createdBy":"meghanagupta@microsoft.com","createdByType":"User","createdAt":"2021-09-23T23:36:24.1244971Z","lastModifiedBy":"meghanagupta@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-09-23T23:42:29.234863Z"}},{"identity":{"principalId":"a6098c4c-4755-443f-b10a-fa2b5084efe2","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"displayName":"[DINE
+        Partial PUT 2] Deploy Azure Policy Add-on to Azure Kubernetes Service clusters","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/b78d91c1-4ece-4c52-bed5-61fb81444194","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Noah
+        Reisch","parameterScopes":{},"createdBy":"c281de91-d2d9-4490-950b-4e89d62c44e5","createdOn":"2022-01-20T17:04:01.5432145Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default","nonComplianceMessages":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/57af0842ef434ff28dc4c201","type":"Microsoft.Authorization/policyAssignments","name":"57af0842ef434ff28dc4c201","location":"eastus","systemData":{"createdBy":"noreisch@microsoft.com","createdByType":"User","createdAt":"2022-01-20T17:03:59.9121325Z","lastModifiedBy":"noreisch@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-01-20T17:03:59.9121325Z"}},{"properties":{"displayName":"There
+        should be more than one owner assigned to your subscription","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/09024ccc-0c5f-475e-9457-b7c0d9ed487b","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Namrata
+        Jagasia","parameterScopes":{},"createdBy":"141fb5c0-e620-44a7-b52a-98ead875e310","createdOn":"2021-06-09T22:38:26.2314286Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default","nonComplianceMessages":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/66c3e11f410a41bf812746c9","type":"Microsoft.Authorization/policyAssignments","name":"66c3e11f410a41bf812746c9"},{"identity":{"principalId":"d2b894a4-9527-41d2-8d61-9407255684e7","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"displayName":"Add
+        a tag to resources Test 09-23","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/4f9dc7db-30c1-420c-b61a-e1d640128d26","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{"tagName":{"value":"env"},"tagValue":{"value":"local"}},"metadata":{"assignedBy":"Meghana
+        Gupta","parameterScopes":{},"createdBy":"2c4638e2-9343-4565-be89-cbdad9762f57","createdOn":"2021-09-23T23:35:33.9420933Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default","nonComplianceMessages":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/67e2e2a1c60344f49379c80a","type":"Microsoft.Authorization/policyAssignments","name":"67e2e2a1c60344f49379c80a","location":"eastus2","systemData":{"createdBy":"meghanagupta@microsoft.com","createdByType":"User","createdAt":"2021-09-23T23:35:32.9789018Z","lastModifiedBy":"meghanagupta@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-09-23T23:35:32.9789018Z"}},{"identity":{"principalId":"5a5241f7-6036-4d95-b2b9-7d303de62698","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"displayName":"Add
+        a tag to resources Test 09-20","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/4f9dc7db-30c1-420c-b61a-e1d640128d26","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{"tagName":{"value":"env"},"tagValue":{"value":"local"}},"metadata":{"assignedBy":"Meghana
+        Gupta","parameterScopes":{},"createdBy":"2c4638e2-9343-4565-be89-cbdad9762f57","createdOn":"2021-09-20T15:13:44.2089862Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default","nonComplianceMessages":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/795da12bd6344c2281f3cc33","type":"Microsoft.Authorization/policyAssignments","name":"795da12bd6344c2281f3cc33","location":"eastus","systemData":{"createdBy":"meghanagupta@microsoft.com","createdByType":"User","createdAt":"2021-09-20T15:13:42.8896515Z","lastModifiedBy":"meghanagupta@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-09-20T15:13:42.8896515Z"}},{"properties":{"policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azurecli-test-policy-setaebfmhmil6lninkv","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"141fb5c0-e620-44a7-b52a-98ead875e310","createdOn":"2022-04-26T20:36:37.9231905Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment5s2sycsre","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment5s2sycsre","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-04-26T20:36:37.8715131Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-04-26T20:36:37.8715131Z"}},{"properties":{"policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azurecli-test-policy-set74exk7kibtknpwab","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"141fb5c0-e620-44a7-b52a-98ead875e310","createdOn":"2022-05-09T23:24:20.3008709Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment77ovy4bqr","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment77ovy4bqr","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-05-09T23:24:20.1197611Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-09T23:24:20.1197611Z"}},{"properties":{"policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azurecli-test-policy-set76oohzou7ibzc6uy","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"141fb5c0-e620-44a7-b52a-98ead875e310","createdOn":"2022-05-04T23:23:05.8813396Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignmentosdyecbl4","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignmentosdyecbl4","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-05-04T23:23:05.8265244Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-04T23:23:05.8265244Z"}},{"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"141fb5c0-e620-44a7-b52a-98ead875e310","createdOn":"2022-05-09T23:24:22.4158056Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignmentt75e4xicq","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignmentt75e4xicq","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-05-09T23:24:22.2594851Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-09T23:24:22.2594851Z"}},{"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"141fb5c0-e620-44a7-b52a-98ead875e310","createdOn":"2022-04-12T21:24:40.6368744Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignmentu6oo6ea3t","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignmentu6oo6ea3t","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-04-12T21:24:40.4097221Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-04-12T21:24:40.4097221Z"}},{"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"141fb5c0-e620-44a7-b52a-98ead875e310","createdOn":"2022-05-04T23:15:06.4979539Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignmentutzfm36ah","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignmentutzfm36ah","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-05-04T23:15:06.3434568Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-04T23:15:06.3434568Z"}},{"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"141fb5c0-e620-44a7-b52a-98ead875e310","createdOn":"2022-04-26T21:11:38.7356529Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignmentxgrwjybrx","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignmentxgrwjybrx","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-04-26T21:11:38.5805128Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-04-26T21:11:38.5805128Z"}},{"identity":{"principalId":"24bd3160-8bf5-4e48-9d39-da18c583e71c","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"displayName":"Audit
+        tag at MG Test 09-20-2","policyDefinitionId":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyDefinitions/03ae6c12-b46a-43f1-9f3d-c20620473106","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Meghana
+        Gupta","parameterScopes":{},"createdBy":"2c4638e2-9343-4565-be89-cbdad9762f57","createdOn":"2021-09-20T15:30:56.2525996Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default","nonComplianceMessages":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/d789452a93e04c288b3e0380","type":"Microsoft.Authorization/policyAssignments","name":"d789452a93e04c288b3e0380","location":"eastus2","systemData":{"createdBy":"meghanagupta@microsoft.com","createdByType":"User","createdAt":"2021-09-20T15:30:55.3519828Z","lastModifiedBy":"meghanagupta@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-09-20T15:30:55.3519828Z"}},{"properties":{"displayName":"Audit
+        resource location matches resource group location","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/0a914e76-4921-4c19-b460-a2d36003525a","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Namrata
+        Jagasia","parameterScopes":{},"createdBy":"141fb5c0-e620-44a7-b52a-98ead875e310","createdOn":"2021-06-09T19:20:27.9084702Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default","nonComplianceMessages":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/df0e2d7a85a141808e8b5412","type":"Microsoft.Authorization/policyAssignments","name":"df0e2d7a85a141808e8b5412"},{"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/meghanag/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id1":{"principalId":"74a502df-c4a2-450d-9ea2-a549e701cdf5","clientId":"4d63292d-8699-4032-8742-dc2154f4d757"}}},"properties":{"displayName":"Add
+        a tag to resources Test 9-24","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/4f9dc7db-30c1-420c-b61a-e1d640128d26","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{"tagName":{"value":"env"},"tagValue":{"value":"local"}},"description":"","metadata":{"assignedBy":"Meghana
+        Gupta","parameterScopes":{},"createdBy":"2c4638e2-9343-4565-be89-cbdad9762f57","createdOn":"2021-09-24T18:16:29.7493796Z","updatedBy":"2c4638e2-9343-4565-be89-cbdad9762f57","updatedOn":"2021-09-24T18:18:22.866605Z"},"enforcementMode":"Default","nonComplianceMessages":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/e8635cdc2a56464dbfe0c123","type":"Microsoft.Authorization/policyAssignments","name":"e8635cdc2a56464dbfe0c123","location":"eastus2","systemData":{"createdBy":"meghanagupta@microsoft.com","createdByType":"User","createdAt":"2021-09-24T18:16:28.8190938Z","lastModifiedBy":"meghanagupta@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-09-24T18:18:21.5556301Z"}},{"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/meghanag/providers/Microsoft.ManagedIdentity/userAssignedIdentities/managedidentity2":{"principalId":"faa7de31-5e82-4507-a75f-702d6f3e35d1","clientId":"a3b39c10-bd6e-47d3-9f39-378b5f119359"}}},"properties":{"displayName":"Add
+        a tag to resources Test 09-20-5","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/4f9dc7db-30c1-420c-b61a-e1d640128d26","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{"tagName":{"value":"env"},"tagValue":{"value":"local"}},"metadata":{"assignedBy":"Meghana
+        Gupta","parameterScopes":{},"createdBy":"2c4638e2-9343-4565-be89-cbdad9762f57","createdOn":"2021-09-20T19:04:17.1647837Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default","nonComplianceMessages":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/f386bf2852e54e67a9b494d9","type":"Microsoft.Authorization/policyAssignments","name":"f386bf2852e54e67a9b494d9","location":"westus2","systemData":{"createdBy":"meghanagupta@microsoft.com","createdByType":"User","createdAt":"2021-09-20T19:04:16.0338656Z","lastModifiedBy":"meghanagupta@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-09-20T19:04:16.0338656Z"}},{"properties":{"displayName":"PS
+        cmdlet tests: partially compliant audit policy (Sub)","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/PSTestAuditDefinition","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"141fb5c0-e620-44a7-b52a-98ead875e310","createdOn":"2022-04-06T02:05:00.0543895Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/PSTestAuditAssignmentSub","type":"Microsoft.Authorization/policyAssignments","name":"PSTestAuditAssignmentSub","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-04-06T02:04:59.8685798Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-04-06T02:04:59.8685798Z"}},{"properties":{"displayName":"PS
+        cmdlet tests: initiative with audit policy (Sub)","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/PSTestInitiative","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"141fb5c0-e620-44a7-b52a-98ead875e310","createdOn":"2022-04-06T02:05:07.1073813Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/PSTestAuditInitiativeAssignmentSub","type":"Microsoft.Authorization/policyAssignments","name":"PSTestAuditInitiativeAssignmentSub","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-04-06T02:05:06.8872921Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-04-06T02:05:06.8872921Z"}},{"identity":{"principalId":"3515d420-1910-4ac8-9680-dd4deb0710a5","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"displayName":"PS
+        cmdlet tests: never compliant DINE policy (Sub)","policyDefinitionId":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyDefinitions/PSTestDINEDefinition","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"141fb5c0-e620-44a7-b52a-98ead875e310","createdOn":"2022-04-06T02:01:57.7648501Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/PSTestDeployAssignmentSub","type":"Microsoft.Authorization/policyAssignments","name":"PSTestDeployAssignmentSub","location":"westus2","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-04-06T02:01:57.0320106Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-04-06T02:01:57.0320106Z"}},{"identity":{"principalId":"ae9e89fb-acab-4be3-952a-3f916289136a","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"displayName":"PS
+        cmdlet tests: never compliant modify policy","policyDefinitionId":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyDefinitions/PSTestModifyDefinition","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"141fb5c0-e620-44a7-b52a-98ead875e310","createdOn":"2022-04-06T02:01:59.8258248Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/PSTestModifyAssignmentSub","type":"Microsoft.Authorization/policyAssignments","name":"PSTestModifyAssignmentSub","location":"westus2","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-04-06T02:01:59.2099119Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-04-06T02:01:59.2099119Z"}},{"identity":{"principalId":"94b71d7c-2351-4cd3-bd17-19e9bd22e72b","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"displayName":"[[Remediation
+        bugbash] Remediation test assignment","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/remediation_test_initiative","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","metadata":{"createdBy":"5e3ea7e8-c6f8-4026-a517-53a24fc529ab","createdOn":"2021-12-07T00:10:34.5516833Z","updatedBy":"5e3ea7e8-c6f8-4026-a517-53a24fc529ab","updatedOn":"2021-12-07T00:49:22.0769066Z"},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/remediation_test_assignment","type":"Microsoft.Authorization/policyAssignments","name":"remediation_test_assignment","location":"eastus","systemData":{"createdBy":"elpere@microsoft.com","createdByType":"User","createdAt":"2021-12-07T00:10:33.3959304Z","lastModifiedBy":"elpere@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-12-07T00:49:21.7753952Z"}},{"identity":{"principalId":"a8bbdd52-96ac-43bf-8a19-02c69f9336c2","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/5ffd78d9-436d-4b41-a421-5baa819e3008","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001","parameters":{"tagName":{"value":"cliTagKey"},"tagValue":{"value":"cliTagValue"}},"metadata":{"createdBy":"141fb5c0-e620-44a7-b52a-98ead875e310","createdOn":"2022-05-09T23:41:26.4871325Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000003","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000003","location":"westus","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-05-09T23:41:25.9361897Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-09T23:41:25.9361897Z"}},{"properties":{"displayName":"PS
+        cmdlet tests: partially compliant audit policy (RG)","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/PSTestAuditDefinition","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSTestRG1","metadata":{"createdBy":"141fb5c0-e620-44a7-b52a-98ead875e310","createdOn":"2022-04-06T02:05:02.0584252Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/PSTestRG1/providers/Microsoft.Authorization/policyAssignments/PSTestAuditAssignmentRG","type":"Microsoft.Authorization/policyAssignments","name":"PSTestAuditAssignmentRG","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-04-06T02:05:01.8921874Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-04-06T02:05:01.8921874Z"}},{"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/96670d01-0a4d-4649-9c89-2d3abc0a5025","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_triggerscaniikbmcv5rb4jv46vf6xylwhdjjjpss7le7hqpnxzti4qapryyqvhsax","parameters":{"tagName":{"value":"notThere"}},"metadata":{"createdBy":"141fb5c0-e620-44a7-b52a-98ead875e310","createdOn":"2022-05-09T23:40:32.8979544Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_triggerscaniikbmcv5rb4jv46vf6xylwhdjjjpss7le7hqpnxzti4qapryyqvhsax/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignmentdnprahmwo","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignmentdnprahmwo","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-05-09T23:40:32.8484632Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-09T23:40:32.8484632Z"}},{"properties":{"displayName":"Audit
+        Windows machines that do not have the specified Windows PowerShell execution
+        policy","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/c648fbbb-591c-4acd-b465-ce9b176ca173","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/az-cli-policy-insights-test","notScopes":[],"parameters":{"ExecutionPolicy":{"value":"Restricted"}},"metadata":{"assignedBy":"Namrata
+        Jagasia","parameterScopes":{},"createdBy":"141fb5c0-e620-44a7-b52a-98ead875e310","createdOn":"2022-04-11T23:22:51.1537083Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default","nonComplianceMessages":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/az-cli-policy-insights-test/providers/Microsoft.Authorization/policyAssignments/087b19b3dc9042cdad84dd1d","type":"Microsoft.Authorization/policyAssignments","name":"087b19b3dc9042cdad84dd1d","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-04-11T23:22:51.1016515Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-04-11T23:22:51.1016515Z"}},{"identity":{"principalId":"9c6ef4fc-c18a-4b4e-bb46-1e51cc6300c2","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"displayName":"Deploy
+        Advanced Threat Protection on storage accounts","policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/361c2074-3595-4e5d-8cab-4f21dffc835c","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/az-cli-policy-insights-test","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Namrata
+        Jagasia","parameterScopes":{},"createdBy":"141fb5c0-e620-44a7-b52a-98ead875e310","createdOn":"2022-05-05T16:59:26.2731006Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default","nonComplianceMessages":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/az-cli-policy-insights-test/providers/Microsoft.Authorization/policyAssignments/9cc2d1c17e62430ba322b704","type":"Microsoft.Authorization/policyAssignments","name":"9cc2d1c17e62430ba322b704","location":"eastus","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-05-05T16:59:25.2094371Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-05T16:59:25.2094371Z"}},{"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/96670d01-0a4d-4649-9c89-2d3abc0a5025","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_triggerscanuupu52naag4lqqblo467skbs6eho3kqmkjeoe3yts6dx2uhhrblpzcd","parameters":{"tagName":{"value":"notThere"}},"metadata":{"createdBy":"141fb5c0-e620-44a7-b52a-98ead875e310","createdOn":"2022-05-09T23:23:59.6103274Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_triggerscanuupu52naag4lqqblo467skbs6eho3kqmkjeoe3yts6dx2uhhrblpzcd/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment3ei6qwlop","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment3ei6qwlop","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-05-09T23:23:59.5679392Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-09T23:23:59.5679392Z"}},{"properties":{"displayName":"denyDeleteTestdefnajagasi","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/6a89b34d-62c7-4809-95fc-d4b30d74eb2c","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testDenyDelete-najgasai","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Namrata
+        Jagasia","parameterScopes":{},"createdBy":"141fb5c0-e620-44a7-b52a-98ead875e310","createdOn":"2022-05-09T22:06:15.717135Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default","nonComplianceMessages":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testDenyDelete-najgasai/providers/Microsoft.Authorization/policyAssignments/f5891de82d7842bbb0865bec","type":"Microsoft.Authorization/policyAssignments","name":"f5891de82d7842bbb0865bec","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-05-09T22:06:15.7191098Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-09T22:06:15.7191098Z"}},{"properties":{"displayName":"CSEO
         Block WVD resource creation","policyDefinitionId":"/providers/Microsoft.Management/managementGroups/72f988bf-86f1-41af-91ab-2d7cd011db47/providers/Microsoft.Authorization/policyDefinitions/Deny
         WVD creation","scope":"/providers/Microsoft.Management/managementGroups/72f988bf-86f1-41af-91ab-2d7cd011db47","notScopes":["/providers/Microsoft.Management/managementGroups/MSFT-DSRE-ISO-IAM","/providers/Microsoft.Management/managementGroups/9ce3369a-545b-cfba-c329-3631400b552f","/providers/Microsoft.Management/managementGroups/WVDSelfhost","/subscriptions/00000000-0000-0000-0000-000000000000","/providers/Microsoft.Management/managementGroups/595d008b-0e4c-41f8-af09-254420fd7571","/providers/Microsoft.Management/managementGroups/CloudPCMSFTSubscriptions","/providers/Microsoft.Management/managementGroups/64cd7b97-58e0-44d3-832b-55657739bde3"],"description":"IAMAADENG@microsoft.com","metadata":{"createdBy":"7f1579a6-c648-43a1-ac1e-0c3020dd9b8e","createdOn":"2020-11-17T19:41:36.3082667Z","updatedBy":"7f1579a6-c648-43a1-ac1e-0c3020dd9b8e","updatedOn":"2021-03-03T20:26:00.9826574Z"},"enforcementMode":"Default"},"id":"/providers/Microsoft.Management/managementGroups/72f988bf-86f1-41af-91ab-2d7cd011db47/providers/Microsoft.Authorization/policyAssignments/Block
         WVD creation","type":"Microsoft.Authorization/policyAssignments","name":"Block
-        WVD creation"},{"properties":{"displayName":"Manual Policy Initiative","policyDefinitionId":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policySetDefinitions/648898cb915947e68e67f582","scope":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest","notScopes":[],"parameters":{},"description":"","metadata":{"assignedBy":"Chris
-        Eggert","parameterScopes":{},"createdBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","createdOn":"2021-01-20T20:53:12.4535246Z","updatedBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","updatedOn":"2021-01-21T19:02:48.9589454Z"},"enforcementMode":"Default","nonComplianceMessages":[{"policyDefinitionReferenceId":"Subscription
-        Manual Policy (parameterized effect)_1","message":"These subscriptions have
-        been manually set to non-compliant"},{"policyDefinitionReferenceId":"Subscription
-        Manual Policy (parameterized default)_1","message":"These subscriptions have
-        been manually set to non-compliant"}]},"id":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyAssignments/4347209461a74f558795177c","type":"Microsoft.Authorization/policyAssignments","name":"4347209461a74f558795177c"},{"properties":{"displayName":"Subscription
-        Manual Policy (parameterized effect)","policyDefinitionId":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyDefinitions/7f8c3bdf-74b5-4796-a396-4a71a14faf94","scope":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest","notScopes":[],"parameters":{"effect":{"value":"manual"}},"metadata":{"assignedBy":"Chris
-        Eggert","parameterScopes":{},"createdBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","createdOn":"2021-01-20T20:53:47.6246297Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyAssignments/6b90de548ea0486e925fcbad","type":"Microsoft.Authorization/policyAssignments","name":"6b90de548ea0486e925fcbad"},{"properties":{"displayName":"Subscription
-        Manual Policy (parameterized default)","policyDefinitionId":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyDefinitions/7f8c3bdf-74b5-4796-a396-4a71a14faf8a","scope":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest","notScopes":[],"parameters":{"defaultState":{"value":"NonCompliant"}},"metadata":{"assignedBy":"Chris
-        Eggert","parameterScopes":{},"createdBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","createdOn":"2021-01-20T20:53:36.5851095Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyAssignments/75aacc60963a4146a2e87f3e","type":"Microsoft.Authorization/policyAssignments","name":"75aacc60963a4146a2e87f3e"},{"properties":{"displayName":"Multi-type
-        Manual Policy (parameterized effect)","policyDefinitionId":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyDefinitions/d4094db5-f5c0-45d4-8540-67f60ba1b923","scope":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest","notScopes":[],"parameters":{"effect":{"value":"manual"}},"metadata":{"assignedBy":"Chris
-        Eggert","parameterScopes":{},"createdBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","createdOn":"2021-01-20T20:53:58.1343344Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyAssignments/92216833e0dd4e1793da2eb7","type":"Microsoft.Authorization/policyAssignments","name":"92216833e0dd4e1793da2eb7"},{"identity":{"principalId":"ce1d9a10-d84d-472f-8535-7db0fee761a0","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"displayName":"Add
-        time tag to subscriptions","policyDefinitionId":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyDefinitions/7637bcff-f8f5-4077-924a-287ae88f7299","scope":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest","notScopes":[],"parameters":{},"description":"","metadata":{"assignedBy":"Chris
-        Eggert","parameterScopes":{},"createdBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","createdOn":"2021-02-08T19:35:58.108131Z","updatedBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","updatedOn":"2021-02-16T20:32:03.7379054Z"},"enforcementMode":"Default","nonComplianceMessages":[{"message":"The
-        subscription did not have a time tag"}]},"id":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyAssignments/abd7b3be02774ce0b2e15d76","type":"Microsoft.Authorization/policyAssignments","name":"abd7b3be02774ce0b2e15d76","location":"eastus"},{"properties":{"displayName":"Subscription
-        Manual Policy (unknown default)","policyDefinitionId":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyDefinitions/7f8c3bdf-74b5-4796-a396-4a71a14fa603","scope":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Chris
-        Eggert","parameterScopes":{},"createdBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","createdOn":"2021-01-20T20:53:26.2531867Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyAssignments/c210fc4598ea42358daa72d0","type":"Microsoft.Authorization/policyAssignments","name":"c210fc4598ea42358daa72d0"},{"identity":{"principalId":"4977cd5b-1262-46b5-a5f2-0b4ebba35242","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"displayName":"Create
-        subscription greenfield resource group (cheggert)","policyDefinitionId":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyDefinitions/64f8fdd9-7ea8-48ba-938d-fec37063b311","scope":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Chris
-        Eggert","parameterScopes":{},"createdBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","createdOn":"2021-02-08T19:47:59.5901431Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default","nonComplianceMessages":[{"message":"The
-        resource group did not exist"}]},"id":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyAssignments/d1d1cbed1ed14901b4c6b81c","type":"Microsoft.Authorization/policyAssignments","name":"d1d1cbed1ed14901b4c6b81c","location":"eastus2"},{"identity":{"principalId":"067c1aa0-c425-4ad5-80fe-41d4639b1d42","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"displayName":"Empty
-        deployment on each KeyVault resource (MG)","policyDefinitionId":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyDefinitions/78a38c70-5549-49bd-8a16-fe3619e5d2cf","scope":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest","notScopes":[],"parameters":{},"description":"Deploys
-        an empty deployment (with one output) on each KeyVault vault.  Used for some
-        PolicyInsights SDK tests.","metadata":{"assignedBy":"Chris Eggert","parameterScopes":{},"createdBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","createdOn":"2019-11-21T17:44:17.3643721Z","updatedBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","updatedOn":"2020-09-04T17:44:00.7898442Z"},"enforcementMode":"DoNotEnforce"},"id":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyAssignments/d80d743b97874fd3bfd1d539","type":"Microsoft.Authorization/policyAssignments","name":"d80d743b97874fd3bfd1d539","location":"eastus"},{"properties":{"displayName":"Audit
-        tag at MG","policyDefinitionId":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyDefinitions/03ae6c12-b46a-43f1-9f3d-c20620473106","scope":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest","notScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"parameters":{},"metadata":{"assignedBy":"Chris
-        Eggert","parameterScopes":{},"createdBy":"327c26bf-bf3e-4128-9b75-fbbd99e98739","createdOn":"2019-09-19T21:02:48.2629834Z","updatedBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","updatedOn":"2019-10-01T17:50:28.4254014Z"},"enforcementMode":"Default"},"id":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyAssignments/ef26e8bbc3da423ebf7fcb80","type":"Microsoft.Authorization/policyAssignments","name":"ef26e8bbc3da423ebf7fcb80"}]}'
+        WVD creation"},{"identity":{"principalId":"41836378-8051-447b-9bed-079f93737108","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"properties":{"displayName":"PS
+        cmdlet tests: never compliant DINE policy (MG)","policyDefinitionId":"/providers/Microsoft.Management/managementGroups/AzGovPerfTest/providers/Microsoft.Authorization/policyDefinitions/PSTestDINEDefinition","scope":"/providers/microsoft.management/managementgroups/AzGovPerfTest","metadata":{"createdBy":"5e3ea7e8-c6f8-4026-a517-53a24fc529ab","createdOn":"2022-01-25T22:00:46.4699984Z","updatedBy":"141fb5c0-e620-44a7-b52a-98ead875e310","updatedOn":"2022-04-06T02:01:55.2139891Z"},"enforcementMode":"Default"},"id":"/providers/microsoft.management/managementgroups/AzGovPerfTest/providers/Microsoft.Authorization/policyAssignments/PSTestDeployAssignmentMG","type":"Microsoft.Authorization/policyAssignments","name":"PSTestDeployAssignmentMG","location":"westus2","systemData":{"createdBy":"elpere@microsoft.com","createdByType":"User","createdAt":"2022-01-25T22:00:46.0495662Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-04-06T02:01:54.8049456Z"}},{"properties":{"displayName":"Kubernetes
+        clusters should not use the default namespace custom policy","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/15f26922-7af4-4c7b-abf6-0cc3a2407272","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","notScopes":[],"parameters":{},"metadata":{"assignedBy":"Noah
+        Reisch","parameterScopes":{},"createdBy":"c281de91-d2d9-4490-950b-4e89d62c44e5","createdOn":"2022-01-14T17:46:03.6691616Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default","nonComplianceMessages":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/ec2e396d0e27421ba4b84fa9","type":"Microsoft.Authorization/policyAssignments","name":"ec2e396d0e27421ba4b84fa9","systemData":{"createdBy":"noreisch@microsoft.com","createdByType":"User","createdAt":"2022-01-14T17:46:03.6380146Z","lastModifiedBy":"noreisch@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-01-14T17:46:03.6380146Z"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '21552'
+      - '38121'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 05 Apr 2021 18:19:09 GMT
+      - Mon, 09 May 2022 23:41:27 GMT
       expires:
       - '-1'
       pragma:
@@ -264,42 +249,39 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '326'
+      - '274'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n -g -a --resource-discovery-mode
       User-Agent:
-      - python/3.8.8 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.21.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-policyinsights/1.1.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004?api-version=2021-10-01
   response:
     body:
-      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Accepted","createdOn":"2021-04-05T18:19:10.7033704Z","lastUpdatedOn":"2021-04-05T18:19:10.7033704Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0},"resourceDiscoveryMode":"ReEvaluateCompliance"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
+      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Accepted","createdOn":"2022-05-09T23:41:28.9548461Z","lastUpdatedOn":"2022-05-09T23:41:28.9550713Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0},"resourceDiscoveryMode":"ReEvaluateCompliance","correlationId":"4452cf6c-5eb3-46f8-b030-933bd09f97a7"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-05-09T23:41:28.5292521Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-09T23:41:28.5292521Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '869'
+      - '1041'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 05 Apr 2021 18:19:11 GMT
+      - Mon, 09 May 2022 23:41:28 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-HTTPAPI/2.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-policy-insights-requests:
-      - '146'
+      - '149'
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -319,30 +301,27 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.8.8 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.21.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-policyinsights/1.1.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004?api-version=2021-10-01
   response:
     body:
-      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Accepted","createdOn":"2021-04-05T18:19:10.7033704Z","lastUpdatedOn":"2021-04-05T18:19:10.7033704Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0},"resourceDiscoveryMode":"ReEvaluateCompliance"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
+      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Accepted","createdOn":"2022-05-09T23:41:28.9548461Z","lastUpdatedOn":"2022-05-09T23:41:28.9550713Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0},"resourceDiscoveryMode":"ReEvaluateCompliance","correlationId":"4452cf6c-5eb3-46f8-b030-933bd09f97a7"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-05-09T23:41:28.5292521Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-09T23:41:28.5292521Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '869'
+      - '1041'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 05 Apr 2021 18:19:11 GMT
+      - Mon, 09 May 2022 23:41:28 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-HTTPAPI/2.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -352,7 +331,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-policy-insights-requests:
-      - '144'
+      - '149'
     status:
       code: 200
       message: OK
@@ -370,30 +349,27 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - python/3.8.8 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.21.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-policyinsights/1.1.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.PolicyInsights/remediations?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.PolicyInsights/remediations?api-version=2021-10-01
   response:
     body:
-      string: '{"value":[{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Accepted","createdOn":"2021-04-05T18:19:10.7033704Z","lastUpdatedOn":"2021-04-05T18:19:10.7033704Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0},"resourceDiscoveryMode":"ReEvaluateCompliance"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}]}'
+      string: '{"value":[{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Accepted","createdOn":"2022-05-09T23:41:28.9548461Z","lastUpdatedOn":"2022-05-09T23:41:28.9550713Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0},"resourceDiscoveryMode":"ReEvaluateCompliance","correlationId":"4452cf6c-5eb3-46f8-b030-933bd09f97a7"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-05-09T23:41:28.5292521Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-09T23:41:28.5292521Z"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '881'
+      - '1053'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 05 Apr 2021 18:19:12 GMT
+      - Mon, 09 May 2022 23:41:29 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-HTTPAPI/2.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -403,7 +379,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-policy-insights-requests:
-      - '144'
+      - '149'
     status:
       code: 200
       message: OK
@@ -423,12 +399,9 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.8.8 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.21.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-policyinsights/1.1.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004/listDeployments?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004/listDeployments?api-version=2021-10-01
   response:
     body:
       string: '{"value":[]}'
@@ -440,13 +413,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 05 Apr 2021 18:19:12 GMT
+      - Mon, 09 May 2022 23:41:29 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-HTTPAPI/2.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -456,7 +429,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-policy-insights-requests:
-      - '145'
+      - '149'
     status:
       code: 200
       message: OK
@@ -476,30 +449,27 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.8.8 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.21.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.35.0 azsdk-python-mgmt-policyinsights/1.1.0b2 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004/cancel?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_remediation000001/providers/Microsoft.PolicyInsights/remediations/azurecli-test-remediation000004/cancel?api-version=2021-10-01
   response:
     body:
-      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Cancelling","createdOn":"2021-04-05T18:19:10.7033704Z","lastUpdatedOn":"2021-04-05T18:19:13.9377805Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0},"resourceDiscoveryMode":"ReEvaluateCompliance"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations"}'
+      string: '{"properties":{"policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000003","provisioningState":"Cancelling","createdOn":"2022-05-09T23:41:28.9548461Z","lastUpdatedOn":"2022-05-09T23:41:30.7386249Z","deploymentStatus":{"totalDeployments":0,"successfulDeployments":0,"failedDeployments":0},"resourceDiscoveryMode":"ReEvaluateCompliance","correlationId":"4452cf6c-5eb3-46f8-b030-933bd09f97a7"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_remediation000001/providers/microsoft.policyinsights/remediations/azurecli-test-remediation000004","name":"azurecli-test-remediation000004","type":"Microsoft.PolicyInsights/remediations","systemData":{"createdBy":"najagasi@microsoft.com","createdByType":"User","createdAt":"2022-05-09T23:41:28.5292521Z","lastModifiedBy":"najagasi@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-05-09T23:41:30.6759735Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '871'
+      - '1043'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 05 Apr 2021 18:19:13 GMT
+      - Mon, 09 May 2022 23:41:30 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Microsoft-HTTPAPI/2.0
+      - Kestrel
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -509,7 +479,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-policy-insights-requests:
-      - '143'
+      - '147'
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
