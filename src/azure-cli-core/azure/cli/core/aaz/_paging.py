@@ -25,7 +25,17 @@ class AAZPageIterator:
         return self
 
     def __next__(self):
+        def next_token(_, result):
+            from knack.log import get_logger
+            logger = get_logger(__name__)
+            logger.warning(f"Token of next page: {base64.b64encode(token).decode('utf-8')}")
+
         if self._total is not None and self._total < 0:
+            from knack.events import EVENT_CLI_SUCCESSFUL_EXECUTE
+            token = {"next_link": self._curr_link, "offset": self._page_size + self._total}
+            token = json.dumps(token).encode("utf-8")
+            self._cli_ctx.register_event(EVENT_CLI_SUCCESSFUL_EXECUTE, next_token)
+
             raise StopIteration
 
         if not self._next_link and self._did_once_already:
