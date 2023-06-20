@@ -248,14 +248,17 @@ class AAZCommand(CLICommand):
             self.ctx.next_link = next_link
             executor()
 
-        args = self.ctx.args
-        token = args.pagination_token.to_serialized_data()
-        limit = args.pagination_limit.to_serialized_data()
+        if self.AZ_SUPPORT_PAGINATION:
+            args = self.ctx.args
+            token = args.pagination_token.to_serialized_data()
+            limit = args.pagination_limit.to_serialized_data()
 
-        return AAZPaged(
-            executor=executor_wrapper, extract_result=extract_result, cli_ctx=self.cli_ctx,
-            next_token=token, page_size=limit
-        )
+            return AAZPaged(
+                executor=executor_wrapper, extract_result=extract_result, cli_ctx=self.cli_ctx,
+                next_token=token, page_size=limit
+            )
+
+        return AAZPaged(executor=executor_wrapper, extract_result=extract_result, cli_ctx=self.cli_ctx)
 
 
 class AAZWaitCommand(AAZCommand):
