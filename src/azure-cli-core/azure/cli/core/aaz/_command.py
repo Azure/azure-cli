@@ -17,8 +17,7 @@ from knack.preview import PreviewItem
 
 from azure.cli.core.azclierror import CLIInternalError
 from ._arg import AAZArgumentsSchema, AAZBoolArg, \
-    AAZGenericUpdateAddArg, AAZGenericUpdateSetArg, AAZGenericUpdateRemoveArg, AAZGenericUpdateForceStringArg, \
-    AAZPaginationTokenArg, AAZPaginationLimitArg
+    AAZGenericUpdateAddArg, AAZGenericUpdateSetArg, AAZGenericUpdateRemoveArg, AAZGenericUpdateForceStringArg
 from ._base import AAZUndefined, AAZBaseValue
 from ._field_type import AAZObjectType
 from ._paging import AAZPaged
@@ -62,7 +61,6 @@ class AAZCommand(CLICommand):
     AZ_HELP = None
     AZ_SUPPORT_NO_WAIT = False
     AZ_SUPPORT_GENERIC_UPDATE = False
-    AZ_SUPPORT_PAGINATION = False
 
     AZ_CONFIRMATION = None
     AZ_PREVIEW_INFO = None
@@ -92,9 +90,6 @@ class AAZCommand(CLICommand):
             schema.generic_update_set = AAZGenericUpdateSetArg()
             schema.generic_update_remove = AAZGenericUpdateRemoveArg()
             schema.generic_update_force_string = AAZGenericUpdateForceStringArg()
-        if cls.AZ_SUPPORT_PAGINATION:
-            schema.pagination_token = AAZPaginationTokenArg()
-            schema.pagination_limit = AAZPaginationLimitArg()
         return schema
 
     def __init__(self, loader=None, cli_ctx=None, callbacks=None, **kwargs):
