@@ -140,6 +140,65 @@ examples:
 
       az postgres flexible-server create -g testGroup -n testServer --location testLocation \\
         --active-directory-auth Enabled --password-auth Disabled
+  - name: >
+      Create a PostgreSQL flexible server with public access, geo-redundant backup enabled and add the range of IP address to have access to this server.
+      The --public-access parameter can be 'All', 'None', <startIpAddress>, or <startIpAddress>-<endIpAddress>
+    text: >
+      az postgres flexible-server create --resource-group testGroup --name testserver --geo-redundant-backup Enabled --public-access 125.23.54.31-125.23.54.35
+  - name: >
+      Create a PostgreSQL flexible server with data encryption for geo-rundundant backup enabled server.
+    text: >
+      # create keyvault
+
+      az keyvault create -g testGroup -n testVault --location testLocation \\
+        --enable-purge-protection true
+
+
+      # create key in keyvault and save its key identifier
+
+      keyIdentifier=$(az keyvault key create --name testKey -p software \\
+        --vault-name testVault --query key.kid -o tsv)
+
+
+      # create identity and save its principalId
+
+      identityPrincipalId=$(az identity create -g testGroup --name testIdentity \\
+        --location testLocation --query principalId -o tsv)
+
+
+      # add testIdentity as an access policy with key permissions 'Wrap Key', 'Unwrap Key', 'Get' and 'List' inside testVault
+
+      az keyvault set-policy -g testGroup -n testVault --object-id $identityPrincipalId \\
+        --key-permissions wrapKey unwrapKey get list
+
+      # create keyvault in geo-paired region
+
+      az keyvault create -g testGroup -n geoVault --location geoPairedLocation \\
+        --enable-purge-protection true
+
+
+      # create key in keyvault and save its key identifier
+
+      geoKeyIdentifier=$(az keyvault key create --name geoKey -p software \\
+        --vault-name geoVault --query key.kid -o tsv)
+
+
+      # create identity in geo-raired location and save its principalId
+
+      geoIdentityPrincipalId=$(az identity create -g testGroup --name geoIdentity \\
+        --location geoPairedLocation --query principalId -o tsv)
+
+
+      # add testIdentity as an access policy with key permissions 'Wrap Key', 'Unwrap Key', 'Get' and 'List' inside testVault
+
+      az keyvault set-policy -g testGroup -n geoVault --object-id $geoIdentityPrincipalId \\
+        --key-permissions wrapKey unwrapKey get list
+
+
+      # create flexible server with data encryption enabled for geo-backup Enabled server
+
+      az postgres flexible-server create -g testGroup -n testServer --location testLocation --geo-redundant-backup Enabled \\
+        --key $keyIdentifier --identity testIdentity --backup-key $geoKeyIdentifier --backup-identity geoIdentity
 """
 
 helps['postgres flexible-server show'] = """
@@ -186,6 +245,10 @@ examples:
 
       az postgres flexible-server update --resource-group testGroup --name testserver \\
         --key $newKeyIdentifier --identity newIdentity
+  - name: Update a flexible server to update private DNS zone for a VNET enabled server, using private DNS zone in the same resource group and subscription. Private DNS zone will be created Private DNS zone will be linked to the VNET if not already linked.
+    text: az postgres flexible-server update --resource-group testGroup --name testserver --private-dns-zone testDNS2.postgres.database.azure.com
+  - name: Update a flexible server to update private DNS zone for a VNET enabled server, using private DNS zone in the different resource group and subscription. Private DNS zone will be linked to the VNET if not already linked.
+    text: az postgres flexible-server update --resource-group testGroup --name testserver --private-dns-zone /subscriptions/{SubId2}/resourceGroups/{testGroup2}/providers/Microsoft.Network/privateDnsZones/testDNS.postgres.database.azure.com
 """
 
 helps['postgres flexible-server restore'] = """
@@ -449,6 +512,8 @@ short-summary: Show the connection strings for a PostgreSQL flexible-server data
 examples:
   - name: Show connection strings for cmd and programming languages.
     text: az postgres flexible-server show-connection-string -s testserver -u username -p password -d databasename
+  - name: Show connection strings for cmd and programming languages with PgBouncer enabled.
+    text: az postgres flexible-server show-connection-string -s testserver -u username -p password -d databasename --pg-bouncer
 """
 
 helps['postgres flexible-server deploy'] = """
