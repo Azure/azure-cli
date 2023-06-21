@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres private-endpoint-connection list",
-    is_preview=True,
 )
 class List(AAZCommand):
     """List private endpoint connections on a cluster.

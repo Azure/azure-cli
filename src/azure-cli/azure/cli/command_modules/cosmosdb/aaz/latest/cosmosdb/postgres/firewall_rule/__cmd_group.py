@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command_group(
     "cosmosdb postgres firewall-rule",
-    is_preview=True,
 )
 class __CMDGroup(AAZCommandGroup):
     """Manage Azure Cosmos DB for PostgreSQL firewall rules.

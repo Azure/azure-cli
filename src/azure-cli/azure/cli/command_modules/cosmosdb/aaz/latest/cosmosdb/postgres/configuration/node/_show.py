@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres configuration node show",
-    is_preview=True,
 )
 class Show(AAZCommand):
     """Get information of a configuration for worker nodes.

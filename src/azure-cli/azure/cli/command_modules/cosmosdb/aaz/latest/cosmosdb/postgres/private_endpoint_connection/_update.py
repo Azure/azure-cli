@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres private-endpoint-connection update",
-    is_preview=True,
 )
 class Update(AAZCommand):
     """Update a private endpoint connection with a given name.
@@ -73,7 +72,7 @@ class Update(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.private_link_service_connection_state = AAZObjectArg(
-            options=["--private-link-service-connection-state"],
+            options=["--pl-service-conn-state", "--private-link-service-connection-state"],
             arg_group="Properties",
             help="A collection of information about the state of the connection between service consumer and provider.",
         )

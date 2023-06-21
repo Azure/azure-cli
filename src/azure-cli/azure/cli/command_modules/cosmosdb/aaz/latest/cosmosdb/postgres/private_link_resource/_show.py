@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres private-link-resource show",
-    is_preview=True,
 )
 class Show(AAZCommand):
     """Get a private link resource for cluster.

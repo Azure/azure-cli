@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres cluster promote",
-    is_preview=True,
 )
 class Promote(AAZCommand):
     """Promotes read replica cluster to an independent read-write cluster.

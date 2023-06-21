@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres cluster list-by-resource-group",
-    is_preview=True,
 )
 class ListByResourceGroup(AAZCommand):
     """List all clusters in a subscription.

@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres private-endpoint-connection show",
-    is_preview=True,
 )
 class Show(AAZCommand):
     """Get private endpoint connection.

@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres cluster update",
-    is_preview=True,
 )
 class Update(AAZCommand):
     """Update an existing cluster. The request body can contain one or several properties from the cluster definition.
@@ -74,9 +73,9 @@ class Update(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.administrator_login_password = AAZPasswordArg(
-            options=["--administrator-login-password"],
+            options=["--login-password", "--administrator-login-password"],
             arg_group="Properties",
-            help="The password of the administrator login. Each cluster is created with pre-defined administrative role called ‘citus’. ",
+            help="The password of the administrator login. Required for creation.",
             blank=AAZPromptPasswordInput(
                 msg="Password:",
             ),
@@ -87,19 +86,19 @@ class Update(AAZCommand):
             help="The Citus extension version on all cluster servers.",
         )
         _args_schema.coordinator_enable_public_ip_access = AAZBoolArg(
-            options=["--coordinator-enable-public-ip-access"],
+            options=["--coord-public-ip-access", "--coordinator-enable-public-ip-access"],
             arg_group="Properties",
             help="If public access is enabled on coordinator.",
         )
         _args_schema.coordinator_server_edition = AAZStrArg(
-            options=["--coordinator-server-edition"],
+            options=["--coord-server-edition", "--coordinator-server-edition"],
             arg_group="Properties",
-            help="The edition of the coordinator (default: GeneralPurpose).",
+            help="The edition of a coordinator server (default: GeneralPurpose). Required for creation.",
         )
         _args_schema.coordinator_storage_quota_in_mb = AAZIntArg(
-            options=["--coordinator-storage-quota-in-mb"],
+            options=["--coordinator-storage", "--coordinator-storage-quota-in-mb"],
             arg_group="Properties",
-            help="The storage of the coordinator in MB.",
+            help="The storage of a server in MB. Required for creation. See https://learn.microsoft.com/azure/cosmos-db/postgresql/resources-compute for more information.",
         )
         _args_schema.coordinator_v_cores = AAZIntArg(
             options=["--coordinator-v-cores"],
@@ -112,7 +111,7 @@ class Update(AAZCommand):
             help="If high availability (HA) is enabled or not for the cluster.",
         )
         _args_schema.enable_shards_on_coordinator = AAZBoolArg(
-            options=["--enable-shards-on-coordinator"],
+            options=["--enable-shards-on-coord", "--enable-shards-on-coordinator"],
             arg_group="Properties",
             help="If shards on coordinator is enabled or not for the cluster.",
         )
@@ -132,9 +131,9 @@ class Update(AAZCommand):
             help="The edition of a node (default: MemoryOptimized).",
         )
         _args_schema.node_storage_quota_in_mb = AAZIntArg(
-            options=["--node-storage-quota-in-mb"],
+            options=["--node-storage", "--node-storage-quota-in-mb"],
             arg_group="Properties",
-            help="The storage in MB on each worker node.",
+            help="The storage in MB on each worker node. See https://learn.microsoft.com/azure/cosmos-db/postgresql/resources-compute for more information.",
         )
         _args_schema.node_v_cores = AAZIntArg(
             options=["--node-v-cores"],

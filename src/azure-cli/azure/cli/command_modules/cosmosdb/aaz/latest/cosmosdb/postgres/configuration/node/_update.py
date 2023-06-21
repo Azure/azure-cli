@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres configuration node update",
-    is_preview=True,
 )
 class Update(AAZCommand):
     """Updates configuration of worker nodes in a cluster
