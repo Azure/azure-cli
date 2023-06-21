@@ -34,6 +34,8 @@ class RecordSetUpdate(_RecordSetUpdate):
         args_schema.srv_records._registered = False
         args_schema.tlsa_records._registered = False
         args_schema.txt_records._registered = False
+
+        args_schema.naptr_records._registered = False
         return args_schema
 
     def post_instance_update(self, instance):

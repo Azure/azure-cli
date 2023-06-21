@@ -1814,6 +1814,9 @@ examples:
 helps['network dns record-set a delete'] = """
 type: command
 short-summary: Delete an A record set and all associated records.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
 examples:
   - name: Delete an A record set and all associated records.
     text: az network dns record-set a delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
@@ -1888,6 +1891,9 @@ examples:
 helps['network dns record-set aaaa delete'] = """
 type: command
 short-summary: Delete an AAAA record set and all associated records.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
 examples:
   - name: Delete an AAAA record set and all associated records.
     text: az network dns record-set aaaa delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
@@ -1966,6 +1972,9 @@ examples:
 helps['network dns record-set caa delete'] = """
 type: command
 short-summary: Delete a CAA record set and all associated records.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
 examples:
   - name: Delete a CAA record set and all associated records.
     text: az network dns record-set caa delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
@@ -2034,6 +2043,9 @@ examples:
 helps['network dns record-set cname delete'] = """
 type: command
 short-summary: Delete a CNAME record set and its associated record.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
 examples:
   - name: Delete a CNAME record set and its associated record.
     text: az network dns record-set cname delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
@@ -2108,6 +2120,9 @@ examples:
 helps['network dns record-set ds delete'] = """
 type: command
 short-summary: Delete a DS record set and all associated records.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
 examples:
   - name: Delete a DS record set and all associated records.
     text: az network dns record-set ds delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
@@ -2194,6 +2209,9 @@ examples:
 helps['network dns record-set mx delete'] = """
 type: command
 short-summary: Delete an MX record set and all associated records.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
 examples:
   - name: Delete an MX record set and all associated records.
     text: az network dns record-set mx delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
@@ -2276,6 +2294,9 @@ examples:
 helps['network dns record-set ns delete'] = """
 type: command
 short-summary: Delete an NS record set and all associated records.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
 examples:
   - name: Delete an NS record set and all associated records.
     text: az network dns record-set ns delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
@@ -2362,6 +2383,9 @@ examples:
 helps['network dns record-set ptr delete'] = """
 type: command
 short-summary: Delete a PTR record set and all associated records.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
 examples:
   - name: Delete a PTR record set and all associated records.
     text: az network dns record-set ptr delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
@@ -2477,6 +2501,9 @@ examples:
 helps['network dns record-set srv delete'] = """
 type: command
 short-summary: Delete an SRV record set and all associated records.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
 examples:
   - name: Delete an SRV record set and all associated records.
     text: az network dns record-set srv delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
@@ -2552,6 +2579,9 @@ examples:
 helps['network dns record-set tlsa delete'] = """
 type: command
 short-summary: Delete a TLSA record set and all associated records.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
 examples:
   - name: Delete a TLSA record set and all associated records.
     text: az network dns record-set tlsa delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
@@ -2631,6 +2661,9 @@ examples:
 helps['network dns record-set txt delete'] = """
 type: command
 short-summary: Delete a TXT record set and all associated records.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
 examples:
   - name: Delete a TXT record set and all associated records.
     text: az network dns record-set txt delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
@@ -2709,6 +2742,9 @@ examples:
 helps['network dns zone delete'] = """
 type: command
 short-summary: Delete a DNS zone and all associated records.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
 examples:
   - name: Delete a DNS zone using a fully qualified domain name.
     text: >

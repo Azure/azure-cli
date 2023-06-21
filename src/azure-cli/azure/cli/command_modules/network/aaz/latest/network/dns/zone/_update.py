@@ -47,10 +47,6 @@ class Update(AAZCommand):
             options=["--if-match"],
             help="The etag of the DNS zone. Omit this value to always overwrite the current zone. Specify the last-seen etag value to prevent accidentally overwriting any concurrent changes.",
         )
-        _args_schema.if_none_match = AAZStrArg(
-            options=["--if-none-match"],
-            help="Set to '*' to allow a new DNS zone to be created, but to prevent updating an existing zone. Other values will be ignored.",
-        )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
@@ -64,12 +60,6 @@ class Update(AAZCommand):
         # define Arg Group "Parameters"
 
         _args_schema = cls._args_schema
-        _args_schema.etag = AAZStrArg(
-            options=["--etag"],
-            arg_group="Parameters",
-            help="The etag of the zone.",
-            nullable=True,
-        )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
             arg_group="Parameters",
@@ -313,9 +303,6 @@ class Update(AAZCommand):
                     "If-Match", self.ctx.args.if_match,
                 ),
                 **self.serialize_header_param(
-                    "If-None-Match", self.ctx.args.if_none_match,
-                ),
-                **self.serialize_header_param(
                     "Content-Type", "application/json",
                 ),
                 **self.serialize_header_param(
@@ -364,7 +351,6 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
-            _builder.set_prop("etag", AAZStrType, ".etag")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
 
