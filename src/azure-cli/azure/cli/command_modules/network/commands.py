@@ -234,8 +234,10 @@ def load_command_table(self, _):
     dns_doc_string = 'azure.mgmt.dns.v' + api_version + '.operations#RecordSetsOperations.create_or_update'
 
     supported_records = ['a', 'aaaa', 'ds', 'mx', 'naptr', 'ns', 'ptr', 'srv', 'tlsa', 'txt', 'caa']
+    experimental_records = ['ds', 'naptr', 'tlsa']
     for record in supported_records:
-        with self.command_group('network dns record-set {}'.format(record), network_dns_record_set_sdk, resource_type=ResourceType.MGMT_NETWORK_DNS) as g:
+        is_experimental = True if record in experimental_records else False
+        with self.command_group('network dns record-set {}'.format(record), network_dns_record_set_sdk, resource_type=ResourceType.MGMT_NETWORK_DNS, is_experimental=is_experimental) as g:
             g.custom_command('show', 'show_dns_record_set', transform=transform_dns_record_set_output)
             g.custom_command('delete', 'delete_dns_record_set', confirmation=True)
             g.custom_command('list', 'list_dns_record_set', transform=transform_dns_record_set_output, table_transformer=transform_dns_record_set_table_output)
