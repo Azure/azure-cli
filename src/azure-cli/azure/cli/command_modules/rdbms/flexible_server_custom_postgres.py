@@ -46,7 +46,7 @@ def flexible_server_create(cmd, client,
                            subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zone=None, standby_availability_zone=None,
-                           geo_redundant_backup=None, byok_identity=None, byok_key=None,
+                           geo_redundant_backup=None, byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            active_directory_auth=None, password_auth=None, yes=False):
 
     # Generate missing parameters
@@ -76,7 +76,9 @@ def flexible_server_create(cmd, client,
                            version=version,
                            geo_redundant_backup=geo_redundant_backup,
                            byok_identity=byok_identity,
-                           byok_key=byok_key)
+                           byok_key=byok_key,
+                           backup_byok_identity=backup_byok_identity,
+                           backup_byok_key=backup_byok_key)
 
     server_result = firewall_id = None
 
@@ -107,7 +109,9 @@ def flexible_server_create(cmd, client,
 
     identity, data_encryption = build_identity_and_data_encryption(db_engine='postgres',
                                                                    byok_identity=byok_identity,
-                                                                   byok_key=byok_key)
+                                                                   byok_key=byok_key,
+                                                                   backup_byok_identity=backup_byok_identity,
+                                                                   backup_byok_key=backup_byok_key)
 
     auth_config = postgresql_flexibleservers.models.AuthConfig(active_directory_auth=active_directory_auth,
                                                                password_auth=password_auth)
@@ -164,8 +168,8 @@ def flexible_server_restore(cmd, client,
                             resource_group_name, server_name,
                             source_server, restore_point_in_time=None, zone=None, no_wait=False,
                             subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
-                            private_dns_zone_arguments=None, geo_redundant_backup=None, byok_identity=None,
-                            byok_key=None, yes=False):
+                            private_dns_zone_arguments=None, geo_redundant_backup=None,
+                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None, yes=False):
 
     server_name = server_name.lower()
 
@@ -198,7 +202,7 @@ def flexible_server_restore(cmd, client,
             logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
         validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
-        pg_byok_validator(byok_identity, byok_key)
+        pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup)
 
         parameters = postgresql_flexibleservers.models.Server(
             location=location,
@@ -228,7 +232,9 @@ def flexible_server_restore(cmd, client,
 
         parameters.identity, parameters.data_encryption = build_identity_and_data_encryption(db_engine='postgres',
                                                                                              byok_identity=byok_identity,
-                                                                                             byok_key=byok_key)
+                                                                                             byok_key=byok_key,
+                                                                                             backup_byok_identity=backup_byok_identity,
+                                                                                             backup_byok_key=backup_byok_key)
 
     except Exception as e:
         raise ResourceNotFoundError(e)
@@ -246,6 +252,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        standby_availability_zone=None,
                                        maintenance_window=None,
                                        byok_identity=None, byok_key=None,
+                                       backup_byok_identity=None, backup_byok_key=None,
                                        active_directory_auth=None, password_auth=None,
                                        private_dns_zone_arguments=None,
                                        tags=None,
@@ -269,6 +276,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
                            standby_availability_zone=standby_availability_zone,
                            byok_identity=byok_identity,
                            byok_key=byok_key,
+                           backup_byok_identity=backup_byok_identity,
+                           backup_byok_key=backup_byok_key,
                            instance=instance)
 
     server_module_path = instance.__module__

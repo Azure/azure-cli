@@ -475,6 +475,8 @@ def build_identity_and_data_encryption(db_engine, byok_identity=None, backup_byo
             data_encryption = postgresql_flexibleservers.models.DataEncryption(
                 primary_user_assigned_identity_id=byok_identity,
                 primary_key_uri=byok_key,
+                geo_backup_user_assigned_identity_id=backup_byok_identity,
+                geo_backup_key_uri=backup_byok_key,
                 type="AzureKeyVault")
 
     return identity, data_encryption

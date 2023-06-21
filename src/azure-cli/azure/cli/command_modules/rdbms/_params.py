@@ -556,6 +556,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('byok_key', arg_type=key_arg_type)
                 c.argument('byok_identity', arg_type=identity_arg_type)
                 c.argument('geo_redundant_backup', default='Disabled', arg_type=geo_redundant_backup_arg_type)
+                c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
+                c.argument('backup_byok_key', arg_type=backup_key_arg_type)
 
         with self.argument_context('{} flexible-server geo-restore'. format(command_group)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=True)
@@ -579,6 +581,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                            help='Determines the public access. ')
             elif command_group == 'postgres':
                 c.argument('geo_redundant_backup', default='Disabled', arg_type=geo_redundant_backup_arg_type)
+                c.argument('byok_key', arg_type=key_arg_type)
+                c.argument('byok_identity', arg_type=identity_arg_type)
+                c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
+                c.argument('backup_byok_key', arg_type=backup_key_arg_type)
 
         with self.argument_context('{} flexible-server update'.format(command_group)) as c:
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
@@ -592,6 +598,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('high_availability', arg_type=high_availability_arg_type)
             c.argument('byok_key', arg_type=key_arg_type)
             c.argument('byok_identity', arg_type=identity_arg_type)
+            c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
+            c.argument('backup_byok_key', arg_type=backup_key_arg_type)
             if command_group == 'mysql':
                 c.argument('auto_grow', arg_type=auto_grow_arg_type)
                 c.argument('auto_scale_iops', arg_type=auto_scale_iops_arg_type)
@@ -600,14 +608,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('iops', arg_type=iops_arg_type)
                 c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)
                 c.argument('geo_redundant_backup', arg_type=geo_redundant_backup_arg_type)
-                c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
-                c.argument('backup_byok_key', arg_type=backup_key_arg_type)
                 c.argument('disable_data_encryption', arg_type=disable_data_encryption_arg_type)
                 c.argument('public_access', arg_type=public_access_update_arg_type)
             elif command_group == 'postgres':
                 c.argument('backup_retention', arg_type=pg_backup_retention_arg_type)
                 c.argument('active_directory_auth', arg_type=active_directory_auth_arg_type)
                 c.argument('password_auth', arg_type=password_auth_arg_type)
+                c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
 
         with self.argument_context('{} flexible-server upgrade'.format(command_group)) as c:
             c.argument('version', arg_type=mysql_version_upgrade_arg_type if command_group == 'mysql' else pg_version_upgrade_arg_type)

@@ -91,7 +91,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='vault_name', location=postgres_location, additional_params='--enable-purge-protection true --retention-days 90')
     @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='backup_vault_name', location=postgres_location, additional_params='--enable-purge-protection true --retention-days 90')
     def test_postgres_flexible_server_byok_mgmt(self, resource_group, vault_name, backup_vault_name):
-        self._test_flexible_server_byok_mgmt('postgres', resource_group, vault_name, backup_vault_name)
+        self._test_flexible_server_byok_mgmt(resource_group, vault_name, backup_vault_name)
 
     def _test_flexible_server_mgmt(self, database_engine, resource_group):
 
@@ -344,7 +344,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
                  database_engine, resource_group, target_server_config), checks=NoneCheck())
 
-    def _test_flexible_server_byok_mgmt(self, database_engine, resource_group, vault_name, backup_vault_name=None):
+    def _test_flexible_server_byok_mgmt(self, resource_group, vault_name, backup_vault_name=None):
         key_name = self.create_random_name('rdbmskey', 32)
         identity_name = self.create_random_name('identity', 32)
         backup_key_name = self.create_random_name('rdbmskey', 32)
@@ -353,20 +353,15 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         replica_1_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         replica_2_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         backup_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        geo_backup_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         key_2_name = self.create_random_name('rdbmskey', 32)
         identity_2_name = self.create_random_name('identity', 32)
         server_2_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         tier = 'GeneralPurpose'
-        if database_engine == 'mysql':
-            sku_name = 'Standard_D2s_v3'
-            location = 'centraluseuap'
-            backup_location = 'eastus2euap'
-            replication_role = 'Replica'
-        elif database_engine == 'postgres':
-            sku_name = 'Standard_D2s_v3'
-            location = self.postgres_location
-            backup_location = 'westus'
-            replication_role = 'AsyncReplica'
+        sku_name = 'Standard_D2s_v3'
+        location = self.postgres_location
+        backup_location = 'westus'
+        replication_role = 'AsyncReplica'
 
         key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                        .format(key_name, vault_name)).get_output_in_json()
@@ -376,27 +371,25 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
                  .format(resource_group, vault_name, identity['principalId']))
 
-        if database_engine == 'mysql':
-            backup_key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
+        backup_key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                                   .format(backup_key_name, backup_vault_name)).get_output_in_json()
 
-            backup_identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, backup_identity_name, backup_location)).get_output_in_json()
+        backup_identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, backup_identity_name, backup_location)).get_output_in_json()
 
-            self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                     .format(resource_group, backup_vault_name, backup_identity['principalId']))
-        elif database_engine == 'postgres':
-            key_2 = self.cmd('keyvault key create --name {} -p software --vault-name {}'
-                             .format(key_2_name, vault_name)).get_output_in_json()
+        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
+                    .format(resource_group, backup_vault_name, backup_identity['principalId']))
+        
+        key_2 = self.cmd('keyvault key create --name {} -p software --vault-name {}'
+                            .format(key_2_name, vault_name)).get_output_in_json()
 
-            identity_2 = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, identity_2_name, location)).get_output_in_json()
+        identity_2 = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, identity_2_name, location)).get_output_in_json()
 
-            self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                     .format(resource_group, vault_name, identity_2['principalId']))
+        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
+                    .format(resource_group, vault_name, identity_2['principalId']))
 
         def invalid_input_tests():
             # key or identity only
-            self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {}'.format(
-                database_engine,
+            self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {}'.format(
                 resource_group,
                 server_name,
                 tier,
@@ -404,8 +397,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                 key['key']['kid']
             ), expect_failure=True)
 
-            self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --identity {}'.format(
-                database_engine,
+            self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --identity {}'.format(
                 resource_group,
                 server_name,
                 tier,
@@ -414,8 +406,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             ), expect_failure=True)
 
             # geo-redundant server with data encryption needs backup_key and backup_identity
-            self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --geo-redundant-backup Enabled'.format(
-                database_engine,
+            self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --geo-redundant-backup Enabled'.format(
                 resource_group,
                 server_name,
                 tier,
@@ -427,11 +418,9 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         def main_tests(geo_redundant_backup):
             geo_redundant_backup_enabled = 'Enabled' if geo_redundant_backup else 'Disabled'
             backup_key_id_flags = '--backup-key {} --backup-identity {}'.format(backup_key['key']['kid'], backup_identity['id']) if geo_redundant_backup else ''
-            restore_type = 'geo-restore --location {}'.format(backup_location) if geo_redundant_backup else 'restore'
-
+            
             # create primary flexible server with data encryption
-            self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} {} --location {} --geo-redundant-backup {}'.format(
-                        database_engine,
+            self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} {} --location {} --geo-redundant-backup {}'.format(
                         resource_group,
                         server_name,
                         tier,
@@ -444,8 +433,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                     ))
 
             # should fail because we can't remove identity used for data encryption
-            self.cmd('{} flexible-server identity remove -g {} -s {} -n {} --yes'
-                     .format(database_engine, resource_group, server_name, identity['id']),
+            self.cmd('postgres flexible-server identity remove -g {} -s {} -n {} --yes'
+                     .format(resource_group, server_name, identity['id']),
                      expect_failure=True)
 
             main_checks = [
@@ -461,12 +450,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                     JMESPathCheck('dataEncryption.geoBackupUserAssignedIdentityId', backup_identity['id'])
                 ]
 
-            result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
+            result = self.cmd('postgres flexible-server show -g {} -n {}'.format(resource_group, server_name),
                     checks=main_checks).get_output_in_json()
 
             # create replica 1 with data encryption
-            self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --key {} --identity {}'.format(
-                        database_engine,
+            self.cmd('postgres flexible-server replica create -g {} --replica-name {} --source-server {} --key {} --identity {}'.format(
                         resource_group,
                         replica_1_name,
                         server_name,
@@ -475,8 +463,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             ), checks=main_checks + [JMESPathCheck('replicationRole', replication_role)])
 
             # update different key and identity in primary server
-            self.cmd('{} flexible-server update -g {} -n {} --key {} --identity {}'.format(
-                        database_engine,
+            self.cmd('postgres flexible-server update -g {} -n {} --key {} --identity {}'.format(
                         resource_group,
                         server_name,
                         key_2['key']['kid'],
@@ -487,38 +474,15 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                 JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', identity_2['id'])
             ])
 
-            # try to update key and identity in a server without data encryption
-            self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --location {}'.format(
-                    database_engine,
-                    resource_group,
-                    server_2_name,
-                    tier,
-                    sku_name,
-                    location
-                ))
-            
-            self.cmd('{} flexible-server update -g {} -n {} --key {} --identity {}'
-                    .format(database_engine,
-                    resource_group,
-                    server_2_name,
-                    key['key']['kid'],
-                    identity['id']),
-                expect_failure=True)
-
-            self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_2_name))
-
             # restore backup
             current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
             earliest_restore_time = result['backup']['earliestRestoreDate']
             seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
             sleep(max(0, seconds_to_wait))
 
-            data_encryption_key_id_flag = ''
-            if database_engine == 'postgres':
-                data_encryption_key_id_flag = '--key {} --identity {} {}'.format(key['key']['kid'], identity['id'], backup_key_id_flags)
+            data_encryption_key_id_flag = '--key {} --identity {} {}'.format(key['key']['kid'], identity['id'], backup_key_id_flags)
 
-            restore_result = self.cmd('{} flexible-server {} -g {} --name {} --source-server {} {}'.format(
-                     database_engine,
+            restore_result = self.cmd('postgres flexible-server {} -g {} --name {} --source-server {} {}'.format(
                      'restore',
                      resource_group,
                      backup_name,
@@ -533,29 +497,54 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                 seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
                 sleep(max(0, seconds_to_wait))
 
-                data_encryption_key_id_flag = ''
-                if database_engine == 'postgres':
-                    data_encryption_key_id_flag = '--key {} --identity {} --backup-key {} --backup-identity {}'.format(backup_key['key']['kid'], backup_identity['id'], key['key']['kid'], identity['id'])
+                data_encryption_key_id_flag = '--key {} --identity {} --backup-key {} --backup-identity {}'.format(backup_key['key']['kid'], backup_identity['id'], key['key']['kid'], identity['id'])
 
-                restore_result = self.cmd('{} flexible-server {} -g {} --name {} --source-server {} {}'.format(
-                        database_engine,
+                restore_result = self.cmd('postgres flexible-server {} -g {} --name {} --source-server {} {}'.format(
                         'geo-restore --location {}'.format(backup_location),
                         resource_group,
-                        backup_name,
+                        geo_backup_name,
                         server_name,
                         data_encryption_key_id_flag
-                ), checks=main_checks).get_output_in_json()
+                ), checks=[
+                    JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(backup_identity['id'])),
+                    JMESPathCheck('dataEncryption.primaryKeyUri', backup_key['key']['kid']),
+                    JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', backup_identity['id']),
+                    JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
+                    JMESPathCheck('dataEncryption.geoBackupKeyUri', key['key']['kid']),
+                    JMESPathCheck('dataEncryption.geoBackupUserAssignedIdentityId', identity['id'])
+                ]).get_output_in_json()
                 self.assertEqual(str(restore_result['location']).replace(' ', '').lower(), backup_location)
 
+                self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, geo_backup_name))
+
             # delete all servers
-            self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, replica_1_name))
-            self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, replica_2_name))
-            self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, backup_name))
-            self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
+            self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, replica_1_name))
+            self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, replica_2_name))
+            self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, server_name))
+            self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, backup_name))
 
         invalid_input_tests()
         main_tests(False)
         main_tests(True)
+
+        # try to update key and identity in a server without data encryption
+        self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --location {}'.format(
+                resource_group,
+                server_2_name,
+                tier,
+                sku_name,
+                location
+            ))
+        
+        self.cmd('postgres flexible-server update -g {} -n {} --key {} --identity {}'
+                .format(
+                resource_group,
+                server_2_name,
+                key['key']['kid'],
+                identity['id']),
+            expect_failure=True)
+
+        self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, server_2_name))
 
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
