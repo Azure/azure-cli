@@ -2455,8 +2455,8 @@ def create_dns_zone(cmd, resource_group_name, zone_name, parent_zone_name=None, 
         "location": 'global',
         "tags": tags,
         "zone_type": zone_type,
-        "resolution_virtual_networks": resolution_vnets_dict,
-        "registration_virtual_networks": registration_vnets_dict
+        "resolution_virtual_networks": resolution_vnets_dict if resolution_vnets else None,
+        "registration_virtual_networks": registration_vnets_dict if registration_vnets else None
     })
 
     if cmd.supported_api_version(min_api='2016-04-01', resource_type=ResourceType.MGMT_NETWORK_DNS) and parent_zone_name is not None:
@@ -2709,7 +2709,7 @@ def _build_record(cmd, data):
             return {"key_tag": int(data["key_tag"]), "algorithm": int(data["algorithm"]),
                     "digest": {"algorithm_type": int(data["digest_type"]), "value": data["digest"]}}
         if record_type == 'mx':
-            return {"preference": data["preference"], "exchange": data["host"]}
+            return {"preference": int(data["preference"]), "exchange": data["host"]}
         if record_type == 'naptr':
             return {"order": int(data["order"]), "preference": int(data["preference"]), "flags": data["flags"],
                     "services": data["services"], "regexp": data["regexp"], "replacement": data["replacement"]}
@@ -3129,7 +3129,7 @@ def _check_cname_record_exist(record, exist_list):
 
 def _check_ds_record_exist(record, exist_list):
     for r in exist_list:
-        if (r["algorithm"], r["key_tag"], r["digest_algorithm_type"], r["digest_value"]) == (record["algorithm"], record["key_tag"], record["digest_algorithm_type"], record["digest_value"]):
+        if (r["algorithm"], r["key_tag"], r["digest"]["algorithm_type"], r["digest"]["value"]) == (record["algorithm"], record["key_tag"], record["digest"]["algorithm_type"], record["digest"]["value"]):
             return True
     return False
 
@@ -3267,7 +3267,7 @@ def _remove_record(cli_ctx, record, record_type, record_set_name, resource_group
         record_set[record_snake] = None
 
     if is_list:
-        records_remaining = len(record_set[record_snake])
+        records_remaining = len(record_set[record_snake]) if record_set[record_snake] is not None else 0
     else:
         records_remaining = 1 if record_set[record_snake] is not None else 0
 

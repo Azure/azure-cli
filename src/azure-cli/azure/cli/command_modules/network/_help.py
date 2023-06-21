@@ -2258,7 +2258,7 @@ examples:
   - name: Add a NAPTR record.
     text: |
         az network dns record-set naptr add-record -g MyResourceGroup -z www.mysite.com \\
-            -n MyRecordSet --flags U --order 10 --preference 20 --services "SIPS+E2U" --regexp "!^.*$!sip:
+            -n MyRecordSet --flags "U" --order 10 --preference 20 --services "E2U+sip" --regexp "!^.*$!sip:customer-service@example.com!" --replacement .
 """
 
 helps['network dns record-set naptr create'] = """
@@ -2299,7 +2299,7 @@ examples:
   - name: Remove an NAPTR record from its record set.
     text: |
         az network dns record-set naptr remove-record -g MyResourceGroup -z www.mysite.com \\
-            -n MyRecordSet --flags U --order 10 --preference 20 --services "SIPS+E2U" --regexp "!^.*$!sip:
+            -n MyRecordSet --flags "U" --order 10 --preference 20 --services "E2U+sip" --regexp "!^.*$!sip:customer-service@example.com!" --replacement .
 """
 
 helps['network dns record-set naptr show'] = """
