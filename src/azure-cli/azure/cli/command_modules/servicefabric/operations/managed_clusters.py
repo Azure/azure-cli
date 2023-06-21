@@ -208,6 +208,7 @@ def _get_resource_group_location(cli_ctx, resource_group_name):
     rg = resource_client.get(resource_group_name)
     return rg.location
 
+
 def add_network_security_rule(cmd,
                               client,
                               resource_group_name,
@@ -228,18 +229,18 @@ def add_network_security_rule(cmd,
         if cluster.network_security_rules is None:
             cluster.network_security_rules = []
 
-        newNetworkSecurityRule = NetworkSecurityRule(name=name,
-                                     access=access,
-                                     description=description,
-                                     direction=direction,
-                                     protocol= '*' if protocol == 'any' else protocol,
-                                     priority=priority,
-                                     source_port_ranges=source_port_ranges,
-                                     destination_port_ranges=destination_port_ranges,
-                                     destination_address_prefixes=destination_address_prefixes,
-                                     source_address_prefixes=source_address_prefixes)
+        new_network_securityRule = NetworkSecurityRule(name=name,
+                                                     access=access,
+                                                     description=description,
+                                                     direction=direction,
+                                                     protocol= '*' if protocol == 'any' else protocol,
+                                                     priority=priority,
+                                                     source_port_ranges=source_port_ranges,
+                                                     destination_port_ranges=destination_port_ranges,
+                                                     destination_address_prefixes=destination_address_prefixes,
+                                                     source_address_prefixes=source_address_prefixes)
 
-        cluster.network_security_rules.append(newNetworkSecurityRule)
+        cluster.network_security_rules.append(new_network_securityRule)
 
         poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
         return LongRunningOperation(cmd.cli_ctx)(poller)
