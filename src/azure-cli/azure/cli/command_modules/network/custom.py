@@ -2387,9 +2387,9 @@ def _convert_to_snake_case(element):
     return element
 
 
-def get_by_target_resources(cmd, target_resources):
+def get_by_target_resources(cmd, parameters):
     target_resources_dict = []
-    for target_resource in target_resources:
+    for target_resource in parameters:
         target_resources_dict.append({"id": target_resource.id})
 
     return _DNSListReferences(cli_ctx=cmd.cli_ctx)(command_args={
@@ -2507,12 +2507,11 @@ def list_dns_zones(cmd, resource_group_name=None):
     return _DNSZoneListBySub(cli_ctx=cmd.cli_ctx)(command_args={})
 
 
-def delete_dns_zone(cmd, resource_group_name, zone_name, if_match=None, no_wait=False):
+def delete_dns_zone(cmd, resource_group_name, zone_name, if_match=None):
     return _DNSZoneDelete(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "zone_name": zone_name,
-        "if_match": if_match,
-        "no_wait": no_wait
+        "if_match": if_match
     })
 
 
@@ -2552,12 +2551,13 @@ def show_dns_record_set(cmd, resource_group_name, zone_name, record_set_name, re
     })
 
 
-def delete_dns_record_set(cmd, resource_group_name, zone_name, record_set_name, record_type):
+def delete_dns_record_set(cmd, resource_group_name, zone_name, record_set_name, record_type, if_match=None):
     return _DNSRecordSetDelete(cli_ctx=cmd.cli_ctx)(command_args={
         "name": record_set_name,
         "record_type": record_type,
         "resource_group": resource_group_name,
-        "zone_name": zone_name
+        "zone_name": zone_name,
+        "if_match": if_match
     })
 
 

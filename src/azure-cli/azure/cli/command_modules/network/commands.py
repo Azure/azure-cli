@@ -221,7 +221,7 @@ def load_command_table(self, _):
         g.custom_command('list-references', 'get_by_target_resources')
 
     with self.command_group('network dns zone', network_dns_zone_sdk) as g:
-        g.custom_command('delete', 'delete_dns_zone', confirmation=True, supports_no_wait=True)
+        g.custom_command('delete', 'delete_dns_zone', confirmation=True)
         g.custom_command('show', 'show_dns_zone', table_transformer=transform_dns_zone_table_output)
         g.custom_command('list', 'list_dns_zones', table_transformer=transform_dns_zone_table_output)
         g.custom_command('import', 'import_zone')
