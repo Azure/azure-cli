@@ -11,7 +11,8 @@ def load_arguments(self, _):
 
     from azure.mgmt.resource.locks.models import LockLevel
     from azure.mgmt.resource.managedapplications.models import ApplicationLockLevel
-    from azure.mgmt.resource.policy.models import (ExemptionCategory, EnforcementMode)
+    from azure.mgmt.resource.policy.v2020_07_01_preview.models import ExemptionCategory
+    from azure.mgmt.resource.policy.models import EnforcementMode
     from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
     from azure.cli.core.api import get_subscription_id_list
