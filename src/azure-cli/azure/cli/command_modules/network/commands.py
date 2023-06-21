@@ -222,7 +222,7 @@ def load_command_table(self, _):
 
     with self.command_group('network dns zone', network_dns_zone_sdk) as g:
         g.custom_command('delete', 'delete_dns_zone', confirmation=True)
-        g.custom_command('show', 'show_dns_zone', table_transformer=transform_dns_zone_table_output)
+        g.custom_show_command('show', 'show_dns_zone', table_transformer=transform_dns_zone_table_output)
         g.custom_command('list', 'list_dns_zones', table_transformer=transform_dns_zone_table_output)
         g.custom_command('import', 'import_zone')
         g.custom_command('export', 'export_zone')
@@ -237,7 +237,7 @@ def load_command_table(self, _):
     for record in supported_records:
         is_experimental = record in experimental_records
         with self.command_group('network dns record-set {}'.format(record), network_dns_record_set_sdk, resource_type=ResourceType.MGMT_NETWORK_DNS, is_experimental=is_experimental) as g:
-            g.custom_command('show', 'show_dns_record_set', transform=transform_dns_record_set_output)
+            g.custom_show_command('show', 'show_dns_record_set', transform=transform_dns_record_set_output)
             g.custom_command('delete', 'delete_dns_record_set', confirmation=True)
             g.custom_command('list', 'list_dns_record_set', transform=transform_dns_record_set_output, table_transformer=transform_dns_record_set_table_output)
             g.custom_command('create', 'create_dns_record_set', transform=transform_dns_record_set_output, doc_string_source=dns_doc_string)
@@ -261,11 +261,11 @@ def load_command_table(self, _):
     self.command_table["network dns record-set caa update"] = DNSRecordSetCAAUpdate(loader=self)
 
     with self.command_group('network dns record-set soa', network_dns_record_set_sdk) as g:
-        g.custom_command('show', 'show_dns_soa_record_set', transform=transform_dns_record_set_output)
+        g.custom_show_command('show', 'show_dns_soa_record_set', transform=transform_dns_record_set_output)
         g.custom_command('update', 'update_dns_soa_record', transform=transform_dns_record_set_output)
 
     with self.command_group('network dns record-set cname', network_dns_record_set_sdk) as g:
-        g.custom_command('show', 'show_dns_record_set', transform=transform_dns_record_set_output)
+        g.custom_show_command('show', 'show_dns_record_set', transform=transform_dns_record_set_output)
         g.custom_command('delete', 'delete_dns_record_set', confirmation=True)
         g.custom_command('list', 'list_dns_record_set', client_factory=cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output, table_transformer=transform_dns_record_set_table_output)
         g.custom_command('create', 'create_dns_record_set', transform=transform_dns_record_set_output, doc_string_source=dns_doc_string)
