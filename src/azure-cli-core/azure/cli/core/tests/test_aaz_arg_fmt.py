@@ -825,7 +825,7 @@ class TestAAZArgBaseFmt(unittest.TestCase):
             self.format_arg(schema, {"token": data})
         self.assertEqual(str(e.exception), "InvalidArgumentValue: --next-token: Invalid JSON object.")
 
-        # {"next_link", null, "offset", 0}
+        # ["next_link", null, "offset", 0]
         data = "WyJuZXh0X2xpbmsiLCBudWxsLCAib2Zmc2V0IiwgMF0="
         with self.assertRaises(azclierror.InvalidArgumentValueError) as e:
             self.format_arg(schema, {"token": data})
