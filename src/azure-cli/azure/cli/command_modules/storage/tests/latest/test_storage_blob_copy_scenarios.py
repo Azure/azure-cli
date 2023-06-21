@@ -228,7 +228,7 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
 
         # tier
         # specify dst-blob-type BlockBlob
-        tiers = ['Cool', 'Hot', 'Archive']
+        tiers = ['Cold', 'Cool', 'Hot', 'Archive']
         for tier in tiers:
             self.storage_cmd('storage blob copy start --destination-blob dsttier{} --destination-container {} '
                              '--source-account-name {} --source-container {} --source-blob srcBlockBlob '
@@ -306,7 +306,7 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
 
         # tier
         # specify dst-blob-type BlockBlob
-        tiers = ['Cool', 'Hot', 'Archive']
+        tiers = ['Cold', 'Cool', 'Hot', 'Archive']
         for tier in tiers:
             self.storage_cmd('storage blob copy start --destination-blob dsttier3{} --destination-container {} '
                              '--source-account-name {} --source-container {} --source-blob srcBlockBlob '
@@ -441,7 +441,7 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
 
         # tier
         # specify dst-blob-type BlockBlob
-        tiers = ['Cool', 'Hot', 'Archive']
+        tiers = ['Cold', 'Cool', 'Hot', 'Archive']
         blob_names = ['srcBlockBlob', 'srcAppendBlob', 'srcPageBlob']
         for tier in tiers:
             dst_container = self.create_container(account1_info)

@@ -3588,6 +3588,35 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         self.cmd('role assignment delete --assignee {upn} --role contributor ')
         self.cmd('ad user delete --id {upn}')
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer()
+    def test_managed_app_def_deployment_mode(self):
+        self.kwargs.update({
+            'upn': self.create_random_name('testuser', 15) + '@azuresdkteam.onmicrosoft.com',
+            'sub': self.get_subscription_id()
+        })
+        user_principal = self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}').get_output_in_json()
+        time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+        principal_id = user_principal['id']
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            role_assignment = self.cmd(
+                'role assignment create --assignee {upn} --role contributor --scope "/subscriptions/{sub}" ').get_output_in_json()
+        from msrestazure.tools import parse_resource_id
+        role_definition_id = parse_resource_id(role_assignment['roleDefinitionId'])['name']
+        self.kwargs.update({
+            'app_def': self.create_random_name('def', 10),
+            'auth': principal_id + ':' + role_definition_id,
+            'addn': self.create_random_name('test_appdef', 20),
+            'uri': 'https://raw.githubusercontent.com/Azure/azure-managedapp-samples/master/Managed%20Application%20Sample%20Packages/201-managed-storage-account/managedstorage.zip',
+        })
+        self.cmd('managedapp definition create -n {app_def} -g {rg} --display-name {addn} --description test -a {auth} --package-file-uri {uri} --lock-level None --deployment-mode Incremental', checks=[
+            self.check('deploymentPolicy.deploymentMode', 'Incremental')
+        ])
+        self.cmd('managedapp definition update -n {app_def} -g {rg} --display-name {addn} --description test -a {auth} --package-file-uri {uri} --lock-level None --deployment-mode Complete', checks=[
+            self.check('deploymentPolicy.deploymentMode', 'Complete')
+        ])
+        self.cmd('role assignment delete --assignee {upn} --role contributor ')
+        self.cmd('ad user delete --id {upn}')
 
 class ManagedAppScenarioTest(ScenarioTest):
 
@@ -4016,7 +4045,15 @@ class BicepScenarioTest(ScenarioTest):
 
 # Because don't want to record bicep cli binary
 class BicepBuildTest(LiveScenarioTest):
-    
+
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
     def test_bicep_build_decompile(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         tf = os.path.join(curr_dir, 'storage_account_deploy.bicep').replace('\\', '\\\\')
@@ -4038,6 +4075,14 @@ class BicepBuildTest(LiveScenarioTest):
             os.remove(decompile_path)
 
 class BicepGenerateParamsTest(LiveScenarioTest):
+
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
 
     def test_bicep_generate_params(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -4085,6 +4130,15 @@ class BicepInstallationTest(LiveScenarioTest):
 
 
 class BicepRestoreTest(LiveScenarioTest):
+
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
     def test_restore(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         bf = os.path.join(curr_dir, 'data', 'external_modules.bicep').replace('\\', '\\\\')
@@ -4102,7 +4156,33 @@ class BicepRestoreTest(LiveScenarioTest):
             os.remove(out_path)
 
 
+class BicepFormatTest(LiveScenarioTest):
+
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
+    def test_format(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        bf = os.path.join(curr_dir, 'storage_account_deploy.bicep').replace('\\', '\\\\')
+        out_file = os.path.join(curr_dir, 'storage_account_deploy.formatted.bicep').replace('\\', '\\\\')
+        self.kwargs.update({
+            'bf': bf,
+            'out_file': out_file,
+        })
+
+        self.cmd('az bicep format --file {bf} --outfile {out_file} --newline lf --indent-kind space --indent-size 2 --insert-final-newline')
+
+        if os.path.exists(out_file):
+            os.remove(out_file)
+
+
 class DeploymentWithBicepScenarioTest(LiveScenarioTest):
+
     def setup(self):
         super.setup()
         self.cmd('az bicep uninstall')

@@ -106,7 +106,7 @@ def load_arguments(self, _):
     bicep_indentkind_type = CLIArgumentType(options_list=['--indent-kind'], help="Set indentation kind. Valid values are ( Space | Tab ).")
     bicep_indentsize_type = CLIArgumentType(options_list=['--indent-size'], help="Number of spaces to indent with (Only valid with --indent-kind set to Space).")
     bicep_insertfinalnewline_type = CLIArgumentType(options_list=['--insert-final-newline'], action='store_true', help="Insert a final newline.")
-    bicep_newline_type = CLIArgumentType(options_list=['--newline'], action='store_true', help="Set newline char. Valid values are ( Auto | LF | CRLF | CR ).")
+    bicep_newline_type = CLIArgumentType(options_list=['--newline'], help="Set newline char. Valid values are ( Auto | LF | CRLF | CR ).")
     bicep_target_platform_type = CLIArgumentType(options_list=['--target-platform', '-t'],
                                                  arg_type=get_enum_type(
                                                      ["win-x64", "linux-musl-x64", "linux-x64", "osx-x64", "linux-arm64", "osx-arm64"]),
@@ -596,6 +596,7 @@ def load_arguments(self, _):
             c.argument('authorizations', options_list=['--authorizations', '-a'], nargs='+', help="space-separated authorization pairs in a format of `<principalId>:<roleDefinitionId>`")
             c.argument('create_ui_definition', options_list=['--create-ui-definition', '-c'], help='JSON formatted string or a path to a file with such content', type=file_type)
             c.argument('main_template', options_list=['--main-template', '-t'], help='JSON formatted string or a path to a file with such content', type=file_type)
+            c.argument('deployment_mode', arg_type=get_enum_type(self.get_models('DeploymentMode')), help='The managed application deployment mode.')
 
     with self.argument_context('account') as c:
         c.argument('subscription', options_list=['--subscription', '-s'], help='Name or ID of subscription.', completer=get_subscription_id_list)
@@ -695,6 +696,7 @@ def load_arguments(self, _):
                                                       help="The target location where the Bicep module will be published."))
         c.argument('documentationUri', arg_type=CLIArgumentType(options_list=['--documentationUri', '-d'],
                                                                 help="The documentation uri of the Bicep module."))
+        c.argument('force', arg_type=bicep_force_type, help="Allow overwriting an existing Bicep module version.")
 
     with self.argument_context('bicep install') as c:
         c.argument('version', options_list=['--version', '-v'], help='The version of Bicep CLI to be installed. Default to the latest if not specified.')

@@ -1470,7 +1470,7 @@ def create_or_update_applicationdefinition(cmd, resource_group_name,
                                            lock_level, authorizations,
                                            description, display_name,
                                            package_file_uri=None, create_ui_definition=None,
-                                           main_template=None, location=None, tags=None):
+                                           main_template=None, location=None, deployment_mode=None, tags=None):
     """ Create or update a new managed application definition.
     :param str resource_group_name:the desired resource group name
     :param str application_definition_name:the managed application definition name
@@ -1481,8 +1481,10 @@ def create_or_update_applicationdefinition(cmd, resource_group_name,
     :param str main_template:the managed application definition main template
     :param str tags:tags in 'a=b c' format
     """
-    ApplicationDefinition, ApplicationProviderAuthorization = cmd.get_models('ApplicationDefinition',
-                                                                             'ApplicationProviderAuthorization')
+    ApplicationDefinition, ApplicationAuthorization, ApplicationDeploymentPolicy = \
+        cmd.get_models('ApplicationDefinition',
+                       'ApplicationAuthorization',
+                       'ApplicationDeploymentPolicy')
     if not package_file_uri and not create_ui_definition and not main_template:
         raise CLIError('usage error: --package-file-uri <url> | --create-ui-definition --main-template')
     if package_file_uri:
@@ -1501,11 +1503,12 @@ def create_or_update_applicationdefinition(cmd, resource_group_name,
     for name_value in authorizations:
         # split at the first ':', neither principalId nor roldeDefinitionId should have a ':'
         principalId, roleDefinitionId = name_value.split(':', 1)
-        applicationAuth = ApplicationProviderAuthorization(
+        applicationAuth = ApplicationAuthorization(
             principal_id=principalId,
             role_definition_id=roleDefinitionId)
         applicationAuthList.append(applicationAuth)
 
+    deployment_policy = ApplicationDeploymentPolicy(deployment_mode=deployment_mode) if deployment_mode is not None else None
     applicationDef = ApplicationDefinition(lock_level=lock_level,
                                            authorizations=applicationAuthList,
                                            package_file_uri=package_file_uri)
@@ -1516,6 +1519,7 @@ def create_or_update_applicationdefinition(cmd, resource_group_name,
     applicationDef.create_ui_definition = create_ui_definition
     applicationDef.main_template = main_template
     applicationDef.tags = tags
+    applicationDef.deployment_policy = deployment_policy
 
     return racf.application_definitions.begin_create_or_update(resource_group_name,
                                                                application_definition_name, applicationDef)
@@ -3764,7 +3768,7 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
         if indent_size:
             args += ["--indentSize", indent_size]
         if insert_final_newline:
-            args += ["--insertFinalNewline", insert_final_newline]
+            args += ["--insertFinalNewline"]
 
         output = run_bicep_command(cmd.cli_ctx, args)
 
@@ -3774,7 +3778,9 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
         logger.error("az bicep format could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
 
-def publish_bicep_file(cmd, file, target, documentationUri=None):
+def publish_bicep_file(cmd, file, target, documentationUri=None, force=None):
+    ensure_bicep_installation(cmd.cli_ctx)
+
     minimum_supported_version = "0.4.1008"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["publish", file, "--target", target]
@@ -3784,12 +3790,20 @@ def publish_bicep_file(cmd, file, target, documentationUri=None):
                 args += ["--documentationUri", documentationUri]
             else:
                 logger.error("az bicep publish with --documentationUri/-d parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_documentationUri_parameter)
+        if force:
+            minimum_supported_version_for_publish_force = "0.17.1"
+            if bicep_version_greater_than_or_equal_to(minimum_supported_version_for_publish_force):
+                args += ["--force"]
+            else:
+                logger.error("az bicep publish with --force parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_publish_force)
         run_bicep_command(cmd.cli_ctx, args)
     else:
         logger.error("az bicep publish could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
 
 def restore_bicep_file(cmd, file, force=None):
+    ensure_bicep_installation(cmd.cli_ctx)
+
     minimum_supported_version = "0.4.1008"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["restore", file]
@@ -3816,6 +3830,8 @@ def list_bicep_cli_versions(cmd):
 
 
 def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, stdout=None):
+    ensure_bicep_installation(cmd.cli_ctx)
+
     minimum_supported_version = "0.7.4"
     if bicep_version_greater_than_or_equal_to(minimum_supported_version):
         args = ["generate-params", file]
