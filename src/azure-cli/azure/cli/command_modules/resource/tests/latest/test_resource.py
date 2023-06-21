@@ -2539,7 +2539,7 @@ class DeploymentStacksTest(ScenarioTest):
         # cleanup
         self.cmd('stack group delete --name {name} --resource-group {resource-group} --yes')
 
-        #create deployment stack with template spec and parameter file
+        # create deployment stack with template spec and parameter file
         self.cmd('stack group create --name {name} --resource-group {resource-group}  --template-spec "{template-spec-id}" --deny-settings-mode "none" --parameters "{parameter-file}" --yes', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup
@@ -2570,11 +2570,8 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('resource show -n {resource-three} -g {resource-group} --resource-type {resource-type-specs}')
 
         # check resource2 does not exist in Azure - should have been purged
-        #find a way to check that resource2 does not exist in Azure
-        #self.cmd('resource list -g {resource-group-two}', self.check('length([])', 4))
         self.cmd('stack group delete --name {name} --resource-group {resource-group} --yes')
 
-        #new code - not tested yet
         # create new resource group - testing delete-all flag
         self.cmd('group create --location {location} --name {resource-group-two}')
 
@@ -2602,7 +2599,6 @@ class DeploymentStacksTest(ScenarioTest):
         # cleanup - delete resource group two
         self.cmd('group delete --name {resource-group-two} --yes')
 
-        #new code #2
         # create new resource group - testing delete-all flag
         self.cmd('group create --location {location} --name {resource-group-two}')
 
@@ -2713,7 +2709,7 @@ class DeploymentStacksTest(ScenarioTest):
         # delete stack
         self.cmd('stack group delete --name {name} --resource-group {resource-group} --yes')
 
-        #confirm stack is deleted
+        # confirm stack is deleted
         self.cmd('stack group list --resource-group {resource-group}', checks=self.check("length([?name=='{name}'])", 0))
 
         # create stack
@@ -2727,7 +2723,7 @@ class DeploymentStacksTest(ScenarioTest):
         # delete stack with stack id
         self.cmd('stack group delete --id {id} --resource-group {resource-group} --yes')
 
-        #confirm stack is deleted
+        # confirm stack is deleted
         self.cmd('stack group list --resource-group {resource-group}', checks=self.check("length([?name=='{name}'])", 0))
 
          # create new resource group - delete flag --delete-resources
@@ -2748,7 +2744,7 @@ class DeploymentStacksTest(ScenarioTest):
         # delete stack with resource2 set to delete
         self.cmd('stack group delete -g {resource-group-two} --name {name} --delete-resources --yes')
 
-        #confirm resource2 has been removed from Azure
+        # confirm resource2 has been removed from Azure
         self.cmd('resource list', checks=self.check("length([?name=='{resource-two}'])", 0))
 
         # cleanup - delete resource group two
@@ -2778,7 +2774,6 @@ class DeploymentStacksTest(ScenarioTest):
         # cleanup - delete resource group two
         self.cmd('group delete --name {resource-group-two} --yes')
 
-        # new #2
         # create new resource group - testing delete-all flag
         self.cmd('group create --location {location} --name {resource-group-two}')
 
@@ -2791,7 +2786,7 @@ class DeploymentStacksTest(ScenarioTest):
         # delete stack with delete-all set
         self.cmd('stack group delete --name {name} -g {resource-group-two} --delete-all --yes')
 
-        #confirm rg resource1 has been removed from azure
+        # confirm rg resource1 has been removed from azure
         self.cmd('group list', checks=self.check("length([?name=='{resource-one}'])", 0))
 
         # cleanup - delete resource group two
@@ -2859,26 +2854,12 @@ class DeploymentStacksTest(ScenarioTest):
             'actual-mg': self.create_random_name('azure-cli-management', 30),
             'mg': "AzBlueprintAssignTest"
         })
-        # create mg
-        #self.cmd('account management-group create --name {mg}', checks=[])
-
-        # create template spec
-        #basic_template_spec = self.cmd('ts create --name {template-spec-name} --version {template-spec-version} --location "westus2" --template-file {template-file} --resource-group {resource-group}').get_output_in_json()
-        #template_spec_id = basic_template_spec['id']
-
-        #self.kwargs.update({'template-spec-id': template_spec_id})
 
         # create deployment stack with template file and parameter file
         self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup
         self.cmd('stack mg delete --name {name} --management-group-id {mg} --yes')
-
-        #create deployment stack with template spec and parameter file
-        #self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-spec "{template-spec-id}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
-
-        # cleanup
-        #self.cmd('stack mg delete --name {name} --management-group-id {mg} --yes')
 
         # test delete flag --delete-resource-groups - create stack  with resource1
         self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-file "{template-file-rg}" --deny-settings-mode "none" --parameters "name={resource-one}"', checks=self.check('provisioningState', 'succeeded'))
@@ -2919,7 +2900,6 @@ class DeploymentStacksTest(ScenarioTest):
             'actual-mg':self.create_random_name('azure-cli-management', 30)
         })
 
-        #self.cmd('account management-group create --name {mg}', checks=[])
 
         created_deployment_stack = self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-file "{template-file}" --deny-settings-mode "none"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
         deployment_stack_id = created_deployment_stack['id']
@@ -2965,8 +2945,6 @@ class DeploymentStacksTest(ScenarioTest):
             'actual-mg':self.create_random_name('azure-cli-management', 30)
         })
 
-        #self.cmd('account management-group create --name {mg}', checks=[])
-
         # create stack
         self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --yes', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
 
@@ -2976,7 +2954,7 @@ class DeploymentStacksTest(ScenarioTest):
         # delete stack with stack name
         self.cmd('stack mg delete --name {name} --management-group-id {mg} --yes')
 
-        #add delete with stack id
+        # add delete with stack id
         created_stack = self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --yes', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
         stack_id = created_stack['id']
 
@@ -3020,8 +2998,6 @@ class DeploymentStacksTest(ScenarioTest):
             'mg': "AzBlueprintAssignTest",
             'actual-mg':self.create_random_name('azure-cli-management', 30)
         })
-
-        #self.cmd('account management-group create --name {mg}', checks=[])
 
         created_deployment_stack = self.cmd('stack mg create --name {name} --management-group-id {mg} --location {location} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --yes', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
         deployment_stack_id = created_deployment_stack['id']
