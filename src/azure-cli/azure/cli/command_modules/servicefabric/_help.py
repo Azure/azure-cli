@@ -468,9 +468,9 @@ helps['sf managed-cluster network-security-rule add'] = """
 type: command
 short-summary: Add a network security rule to a manged cluster.
 examples:
-  - Add network security rule.
-  - text: >
-        az sf managed-cluster network-security-rule add -g testRG -c testCluster --name 'network security rule name' --access allow --description 'network security rule description' --direction inbound --protocol tcp --priority 1200 --source_port_ranges ''1-1000' --destination_port_anges '1-65535' --source_address_prefixes '167.220.242.0/27 --source_address_prefixes 167.220.0.0/23 --source_address_prefixes 131.107.132.16/28' --destination_address_prefixes '194.69.104.0/25 --destination_address_prefixes 194.69.119.64/26'
+  - name: Add network security rule.
+    text: >
+        az sf managed-cluster network-security-rule add -g testRG -c testCluster --name 'network security rule name' --access allow --description 'network security rule description' --direction inbound --protocol tcp --priority 1200 --source_port_ranges 1-1000 --source_port_ranges 1122-65535 --destination_port_anges 1-65535 --destination_port_anges 1-1900 --source_address_prefixes 167.220.242.0/27 --source_address_prefixes 167.220.0.0/23 --source_address_prefixes 131.107.132.16/28 --destination_address_prefixes 194.69.104.0/25 --destination_address_prefixes 194.69.119.64/26'
 """
 
 helps['sf managed-node-type'] = """
