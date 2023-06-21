@@ -427,6 +427,9 @@ parameters:
   - name: --node-resource-group
     type: string
     short-summary: The node resource group is the resource group where all customer's resources will be created in, such as virtual machines.
+  - name: --kubernetes-support-plan
+    type: string
+    short-summary: Your choice of "KubernetesOfficial" or "AKSLongTermSupport", with "AKSLongTermSupport" you get 1 extra year of CVE patchs.
   - name: --enable-defender
     type: bool
     short-summary: Enable Microsoft Defender security profile.
