@@ -228,9 +228,6 @@ def load_command_table(self, _):
         g.custom_command('export', 'export_zone')
         g.custom_command('create', 'create_dns_zone', table_transformer=transform_dns_zone_table_output)
 
-    from .operations.dns import ZoneUpdate as DNSZoneUpdate
-    self.command_table["network dns zone update"] = DNSZoneUpdate(loader=self)
-
     api_version = str(get_api_version(self.cli_ctx, ResourceType.MGMT_NETWORK_DNS))
     api_version = api_version.replace('-', '_')
     dns_doc_string = 'azure.mgmt.dns.v' + api_version + '.operations#RecordSetsOperations.create_or_update'

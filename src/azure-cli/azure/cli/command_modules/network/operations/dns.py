@@ -8,20 +8,8 @@ from knack.log import get_logger
 
 from azure.cli.core.aaz import has_value, register_command, AAZResourceIdArgFormat
 from ..aaz.latest.network.dns.record_set import Update as _RecordSetUpdate
-from ..aaz.latest.network.dns.zone import Update as _ZoneUpdate
 
 logger = get_logger(__name__)
-
-
-@register_command("network dns zone update")
-class ZoneUpdate(_ZoneUpdate):
-    """ Update DNS zone.
-
-    :example: Update DNS zone.
-        az network dns zone update -g MyResourceGroup -n MyRecordSet -z www.mysite.com --tags owner=WebTeam
-    """
-    def pre_operations(self):
-        args = self.ctx.args
 
 
 class RecordSetUpdate(_RecordSetUpdate):

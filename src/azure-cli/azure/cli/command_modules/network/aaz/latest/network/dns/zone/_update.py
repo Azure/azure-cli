@@ -11,6 +11,9 @@
 from azure.cli.core.aaz import *
 
 
+@register_command(
+    "network dns zone update",
+)
 class Update(AAZCommand):
     """Update a DNS zone. Does not modify DNS records within the zone.
     """
@@ -82,14 +85,14 @@ class Update(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.registration_virtual_networks = AAZListArg(
-            options=["--registration-virtual-networks"],
+        _args_schema.registration_vnets = AAZListArg(
+            options=["--registration-vnets"],
             arg_group="Properties",
             help="A list of references to virtual networks that register hostnames in this DNS zone. This is a only when ZoneType is Private.",
             nullable=True,
         )
-        _args_schema.resolution_virtual_networks = AAZListArg(
-            options=["--resolution-virtual-networks"],
+        _args_schema.resolution_vnets = AAZListArg(
+            options=["--resolution-vnets"],
             arg_group="Properties",
             help="A list of references to virtual networks that resolve records in this DNS zone. This is a only when ZoneType is Private.",
             nullable=True,
@@ -102,17 +105,17 @@ class Update(AAZCommand):
             enum={"Private": "Private", "Public": "Public"},
         )
 
-        registration_virtual_networks = cls._args_schema.registration_virtual_networks
-        registration_virtual_networks.Element = AAZObjectArg(
+        registration_vnets = cls._args_schema.registration_vnets
+        registration_vnets.Element = AAZObjectArg(
             nullable=True,
         )
-        cls._build_args_sub_resource_update(registration_virtual_networks.Element)
+        cls._build_args_sub_resource_update(registration_vnets.Element)
 
-        resolution_virtual_networks = cls._args_schema.resolution_virtual_networks
-        resolution_virtual_networks.Element = AAZObjectArg(
+        resolution_vnets = cls._args_schema.resolution_vnets
+        resolution_vnets.Element = AAZObjectArg(
             nullable=True,
         )
-        cls._build_args_sub_resource_update(resolution_virtual_networks.Element)
+        cls._build_args_sub_resource_update(resolution_vnets.Element)
         return cls._args_schema
 
     _args_sub_resource_update = None
@@ -367,8 +370,8 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("registrationVirtualNetworks", AAZListType, ".registration_virtual_networks")
-                properties.set_prop("resolutionVirtualNetworks", AAZListType, ".resolution_virtual_networks")
+                properties.set_prop("registrationVirtualNetworks", AAZListType, ".registration_vnets")
+                properties.set_prop("resolutionVirtualNetworks", AAZListType, ".resolution_vnets")
                 properties.set_prop("zoneType", AAZStrType, ".zone_type")
 
             registration_virtual_networks = _builder.get(".properties.registrationVirtualNetworks")
