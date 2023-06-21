@@ -361,6 +361,10 @@ def cf_postgres_flexible_adadmin(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).administrators
 
 
+def cf_postgres_flexible_migrations(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).migrations
+
+
 def cf_postgres_check_resource_availability(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).check_name_availability
 

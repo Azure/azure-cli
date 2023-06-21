@@ -4,7 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
+import os
+import json
 from importlib import import_module
+import uuid
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
@@ -12,14 +15,15 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.core.exceptions import ResourceNotFoundError
-from azure.cli.core.azclierror import RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError
+from azure.cli.core.azclierror import BadRequestError, FileOperationError, MutuallyExclusiveArgumentError, RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError
 from azure.mgmt.rdbms import postgresql_flexibleservers
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, \
     cf_postgres_flexible_db, cf_postgres_check_resource_availability, cf_postgres_flexible_servers, \
-    cf_postgres_check_resource_availability_with_location, cf_postgres_flexible_private_dns_zone_suffix_operations
+    cf_postgres_check_resource_availability_with_location, \
+    cf_postgres_flexible_private_dns_zone_suffix_operations
 from ._flexible_server_util import generate_missing_parameters, resolve_poller,\
     generate_password, parse_maintenance_window, get_current_time, build_identity_and_data_encryption, \
-    _is_resource_name, get_tenant_id
+    _is_resource_name, get_tenant_id, get_case_insensitive_key_value, get_enum_value_true_false
 from ._flexible_server_location_capabilities_util import get_postgres_location_capability_info
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
@@ -162,7 +166,7 @@ def flexible_server_create(cmd, client,
                           administrator_login_password if administrator_login_password is not None else '*****',
                           _create_postgresql_connection_string(host, user, administrator_login_password), database_name, firewall_id,
                           subnet_id)
-
+# endregion create without args
 
 def flexible_server_restore(cmd, client,
                             resource_group_name, server_name,
@@ -824,6 +828,98 @@ def flexible_server_provision_network_resource(cmd, resource_group_name, server_
     return network, start_ip, end_ip
 
 
+def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_mode="offline", migration_name=None, tags=None, location=None):
+    logging_name='PostgreSQL'
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    properties_filepath = os.path.join(os.path.abspath(os.getcwd()), properties)
+    # Generate missing parameters
+    location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
+                                                                             server_name, 'postgres')
+    
+    if not os.path.exists(properties_filepath):
+        raise FileOperationError("Properties file does not exist in the given location")
+    with open(properties_filepath, "r") as f:
+        try:
+            request_payload = json.load(f)
+            if migration_mode == "online":
+                request_payload.get("properties")['MigrationMode'] = "Online"
+            else:
+                request_payload.get("properties")['MigrationMode'] = "Offline"
+        except ValueError as err:
+            logger.error(err)
+            raise BadRequestError("Invalid json file. Make sure that the json file content is properly formatted.")
+
+    if migration_name is None:
+        # Convert a UUID to a string of hex digits in standard form
+        migration_name = str(uuid.uuid4())
+        
+    migration_parameters = request_payload.get("properties")
+    
+    return _create_migration(logging_name, client, subscription_id, resource_group_name, server_name, migration_name, migration_mode, migration_parameters, tags, location)
+
+
+def migration_show_func(cmd, client, resource_group_name, server_name, migration_name):
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    return client.get(subscription_id, resource_group_name, server_name, migration_name)
+
+
+def migration_list_func(cmd, client, resource_group_name, server_name, migration_filter="Active"):
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    return client.list_by_target_server(subscription_id, resource_group_name, server_name, migration_filter)
+
+
+def migration_update_func(cmd, client, resource_group_name, server_name, migration_name, setup_logical_replication=None, db_names=None, overwrite_dbs=None, cutover=None, cancel=None):
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+
+    operationSpecified = False
+    if setup_logical_replication is True:
+        operationSpecified = True
+        migration_parameters_for_patch = postgresql_flexibleservers.models.MigrationResourceForPatch(setup_logical_replication_on_source_db_if_needed=True)
+        
+    if db_names is not None:
+        if operationSpecified is True:
+            raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
+        operationSpecified = True
+        migration_parameters_for_patch = postgresql_flexibleservers.models.MigrationResourceForPatch(dbs_to_migrate=db_names)
+
+    if overwrite_dbs is True:
+        if operationSpecified is True:
+            raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
+        operationSpecified = True
+        migration_parameters_for_patch = postgresql_flexibleservers.models.MigrationResourceForPatch(overwrite_dbs_in_target="True")
+
+    if cutover is not None:
+        if operationSpecified is True:
+            raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
+        operationSpecified = True
+        migration_resource = migration_show_func(cmd, client, resource_group_name, server_name, migration_name)
+        if migration_resource.migration_mode == "Offline":
+            raise BadRequestError("Cutover is not possible for migration {} if the migration_mode set to offline. The migration will cutover automatically".format(migration_name))
+        migration_parameters_for_patch = postgresql_flexibleservers.models.MigrationResourceForPatch(trigger_cutover="True", dbs_to_trigger_cutover_migration_on=migration_resource.dbs_to_migrate)
+
+    if cancel is not None:
+        if operationSpecified is True:
+            raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
+        operationSpecified = True
+        migration_resource = migration_show_func(cmd, client, resource_group_name, server_name, migration_name)
+        migration_parameters_for_patch = postgresql_flexibleservers.models.MigrationResourceForPatch(cancel="True", dbs_to_cancel_migration_on=migration_resource.dbs_to_migrate)
+
+    if operationSpecified is False:
+        raise RequiredArgumentMissingError("Incorrect Usage: At least one update operation needs to be specified.")
+
+    return client.update(subscription_id, resource_group_name, server_name, migration_name, migration_parameters_for_patch)
+
+
+def migration_check_name_availability(cmd, client, resource_group_name, server_name, migration_name):
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    migration_name_availability_parammeters = {"name": "%s" % migration_name, "type": "Microsoft.DBforPostgreSQL/flexibleServers/migrations"}
+    return get_postgresql_flexible_management_client(cmd.cli_ctx).check_migration_name_availability(subscription_id, resource_group_name, server_name, migration_name_availability_parammeters)
+
+
 def _create_postgresql_connection_strings(host, user, password, database, port):
     result = {
         'psql_cmd': "postgresql://{user}:{password}@{host}/{database}?sslmode=require",
@@ -929,6 +1025,35 @@ def _get_pg_replica_zone(availabilityZones, sourceServerZone, replicaZone):
             pg_replica_zone = None
 
     return pg_replica_zone
+
+
+def _create_migration(logging_name, client, subscription_id, resource_group_name, target_db_server_name, migration_name, migration_mode, parameters, tags, location):
+    logger.warning('Creating %s Migration for server \'%s\' in group \'%s\' and subscription \'%s\'...', logging_name, target_db_server_name, resource_group_name, subscription_id)
+
+    parameter_keys = list(parameters.keys())
+    secret_parameter_dictionary = get_case_insensitive_key_value("SecretParameters", parameter_keys, parameters)
+    secret_parameter_keys = list(secret_parameter_dictionary.keys())
+    admin_credentials_dictionary = get_case_insensitive_key_value("AdminCredentials", secret_parameter_keys, secret_parameter_dictionary)
+    admin_credentials_keys = list(admin_credentials_dictionary.keys())
+
+    admin_credentials = postgresql_flexibleservers.models.AdminCredentials(
+        source_server_password=get_case_insensitive_key_value("SourceServerPassword", admin_credentials_keys, admin_credentials_dictionary),
+        target_server_password=get_case_insensitive_key_value("TargetServerPassword", admin_credentials_keys, admin_credentials_dictionary))
+    secret_parameters = postgresql_flexibleservers.models.MigrationSecretParameters(
+        admin_credentials=admin_credentials,
+        source_server_username=get_case_insensitive_key_value("SourceServerUsername", secret_parameter_keys, secret_parameter_dictionary),
+        target_server_username=get_case_insensitive_key_value("TargetServerUsername", secret_parameter_keys, secret_parameter_dictionary))
+    migration_parameters = postgresql_flexibleservers.models.MigrationResource(
+        tags=tags,
+        location=location,
+        migration_mode=migration_mode,
+        source_db_server_resource_id=get_case_insensitive_key_value("SourceDbServerResourceId", parameter_keys, parameters),
+        secret_parameters=secret_parameters,
+        dbs_to_migrate=get_case_insensitive_key_value("DbsToMigrate", parameter_keys, parameters),
+        setup_logical_replication_on_source_db_if_needed=get_enum_value_true_false(get_case_insensitive_key_value("SetupLogicalReplicationOnSourceDbIfNeeded", parameter_keys, parameters), "SetupLogicalReplicationOnSourceDbIfNeeded"),
+        overwrite_dbs_in_target=get_enum_value_true_false(get_case_insensitive_key_value("OverwriteDbsInTarget", parameter_keys, parameters), "OverwriteDbsInTarget"))
+
+    return client.create(subscription_id, resource_group_name, target_db_server_name, migration_name, migration_parameters)
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance
