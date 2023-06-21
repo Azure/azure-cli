@@ -69,8 +69,6 @@ class Update(AAZCommand):
         tags.Element = AAZStrArg(
             nullable=True,
         )
-
-        # define Arg Group "Parameters"
         return cls._args_schema
 
     def _execute_operations(self):

@@ -61,13 +61,8 @@ class Update(AAZCommand):
             help="Disable routes learned by BGP.  Allowed values: false, true.",
             nullable=True,
         )
-
-        # define Arg Group "Parameters"
-
-        _args_schema = cls._args_schema
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
-            arg_group="Parameters",
             help="Space-separated tags: key[=value] [key[=value] ...].",
             nullable=True,
         )
@@ -76,6 +71,8 @@ class Update(AAZCommand):
         tags.Element = AAZStrArg(
             nullable=True,
         )
+
+        # define Arg Group "Parameters"
 
         # define Arg Group "Properties"
         return cls._args_schema
