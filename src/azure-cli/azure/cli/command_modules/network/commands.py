@@ -227,7 +227,9 @@ def load_command_table(self, _):
         g.custom_command('import', 'import_zone')
         g.custom_command('export', 'export_zone')
         g.custom_command('create', 'create_dns_zone', table_transformer=transform_dns_zone_table_output)
-        g.custom_command('update', 'update_dns_zone', table_transformer=transform_dns_zone_table_output)
+
+    from .operations.dns import ZoneUpdate as DNSZoneUpdate
+    self.command_table["network dns zone update"] = DNSZoneUpdate(loader=self)
 
     api_version = str(get_api_version(self.cli_ctx, ResourceType.MGMT_NETWORK_DNS))
     api_version = api_version.replace('-', '_')
@@ -262,7 +264,7 @@ def load_command_table(self, _):
     self.command_table["network dns record-set caa update"] = DNSRecordSetCAAUpdate(loader=self)
 
     with self.command_group('network dns record-set soa', network_dns_record_set_sdk) as g:
-        g.custom_command('show', 'show_dns_record_set', transform=transform_dns_record_set_output)
+        g.custom_command('show', 'show_dns_soa_record_set', transform=transform_dns_record_set_output)
         g.custom_command('update', 'update_dns_soa_record', transform=transform_dns_record_set_output)
 
     with self.command_group('network dns record-set cname', network_dns_record_set_sdk) as g:

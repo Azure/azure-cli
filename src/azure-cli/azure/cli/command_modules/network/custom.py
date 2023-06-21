@@ -2551,6 +2551,15 @@ def show_dns_record_set(cmd, resource_group_name, zone_name, record_set_name, re
     })
 
 
+def show_dns_soa_record_set(cmd, resource_group_name, zone_name, record_type):
+    return _DNSRecordSetShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": "@",
+        "record_type": record_type,
+        "resource_group": resource_group_name,
+        "zone_name": zone_name
+    })
+
+
 def delete_dns_record_set(cmd, resource_group_name, zone_name, record_set_name, record_type, if_match=None):
     return _DNSRecordSetDelete(cli_ctx=cmd.cli_ctx)(command_args={
         "name": record_set_name,
