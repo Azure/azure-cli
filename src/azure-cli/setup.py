@@ -93,7 +93,7 @@ DEPENDENCIES = [
     'azure-mgmt-imagebuilder~=1.1.0',
     'azure-mgmt-iotcentral~=10.0.0b1',
     'azure-mgmt-iothub==2.3.0',
-    'azure-mgmt-iothubprovisioningservices==1.1.0',
+    'azure-mgmt-iothubprovisioningservices==1.2.0b2',
     'azure-mgmt-keyvault==10.2.0',
     'azure-mgmt-kusto~=0.3.0',
     'azure-mgmt-loganalytics==13.0.0b4',
