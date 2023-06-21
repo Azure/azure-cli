@@ -774,9 +774,16 @@ class AAZPaginationTokenArgFormat(AAZBaseArgFormat):
         def validate_json(s):
             try:
                 obj = json.loads(s)
-                assert isinstance(obj, dict)
             except json.JSONDecodeError:
-                raise AAZInvalidArgValueError(f"Invalid Token: {data}")
+                raise AAZInvalidArgValueError(f"Invalid JSON object.")
+
+            if not isinstance(obj, dict):
+                raise AAZInvalidArgValueError(f"Decoded object is not a dictionary.")
+
+            try:
+                _, _ = obj["next_link"], obj["offset"]
+            except KeyError:
+                raise AAZInvalidArgValueError(f"`next_link` or `offset` doesn't exist.")
 
         assert isinstance(value, AAZSimpleValue)
         data = value._data
@@ -786,9 +793,13 @@ class AAZPaginationTokenArgFormat(AAZBaseArgFormat):
         assert isinstance(data, str)
         try:
             decoded_bytes = base64.b64decode(data)
+        except base64.binascii.Error:
+            raise AAZInvalidArgValueError(f"Invalid Base64 string.")
+
+        try:
             decoded_string = decoded_bytes.decode("utf-8")
-        except (base64.binascii.Error, UnicodeDecodeError):
-            raise AAZInvalidArgValueError(f"Invalid Token: {data}")
+        except UnicodeDecodeError:
+            raise AAZInvalidArgValueError(f"Error decoding UTF-8.")
 
         validate_json(decoded_string)
         value._data = decoded_string
