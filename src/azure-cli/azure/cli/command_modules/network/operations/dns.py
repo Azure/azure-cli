@@ -28,7 +28,6 @@ class RecordSetUpdate(_RecordSetUpdate):
         args_schema.cname_record._registered = False
         args_schema.ds_records._registered = False
         args_schema.mx_records._registered = False
-        args_schema.naptr_records._registered = False
         args_schema.ns_records._registered = False
         args_schema.ptr_records._registered = False
         args_schema.soa_record._registered = False
@@ -88,18 +87,6 @@ class RecordSetMXUpdate(RecordSetUpdate):
     def pre_operations(self):
         args = self.ctx.args
         args.record_type = "MX"
-
-
-@register_command("network dns record-set naptr update")
-class RecordSetNAPTRUpdate(RecordSetUpdate):
-    """ Update an NAPTR record set.
-
-    :example: Update an NAPTR record set.
-        az network dns record-set naptr update -g MyResourceGroup -z www.mysite.com -n MyRecordSet --metadata owner=WebTeam
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "NAPTR"
 
 
 @register_command("network dns record-set ns update")

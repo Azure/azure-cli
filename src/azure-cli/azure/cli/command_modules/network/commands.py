@@ -233,10 +233,10 @@ def load_command_table(self, _):
     api_version = api_version.replace('-', '_')
     dns_doc_string = 'azure.mgmt.dns.v' + api_version + '.operations#RecordSetsOperations.create_or_update'
 
-    supported_records = ['a', 'aaaa', 'ds', 'mx', 'naptr', 'ns', 'ptr', 'srv', 'tlsa', 'txt', 'caa']
-    experimental_records = ['ds', 'naptr', 'tlsa']
+    supported_records = ['a', 'aaaa', 'ds', 'mx', 'ns', 'ptr', 'srv', 'tlsa', 'txt', 'caa']
+    experimental_records = ['ds', 'tlsa']
     for record in supported_records:
-        is_experimental = True if record in experimental_records else False
+        is_experimental = record in experimental_records
         with self.command_group('network dns record-set {}'.format(record), network_dns_record_set_sdk, resource_type=ResourceType.MGMT_NETWORK_DNS, is_experimental=is_experimental) as g:
             g.custom_command('show', 'show_dns_record_set', transform=transform_dns_record_set_output)
             g.custom_command('delete', 'delete_dns_record_set', confirmation=True)
@@ -246,16 +246,14 @@ def load_command_table(self, _):
             g.custom_command('remove-record', 'remove_dns_{}_record'.format(record), transform=transform_dns_record_set_output)
 
     from .operations.dns import RecordSetAUpdate as DNSRecordSetAUpdate, RecordSetAAAAUpdate as DNSRecordSetAAAAUpdate, \
-        RecordSetDSUpdate as DNSRecordSetDSUpdate, RecordSetNAPTRUpdate as DNSRecordSetNAPTRUpdate, \
-        RecordSetMXUpdate as DNSRecordSetMXUpdate, RecordSetNSUpdate as DNSRecordSetNSUpdate, \
-        RecordSetPTRUpdate as DNSRecordSetPTRUpdate, RecordSetSRVUpdate as DNSRecordSetSRVUpdate, \
-        RecordSetTLSAUpdate as DNSRecordSetTLSAUpdate, RecordSetTXTUpdate as DNSRecordSetTXTUpdate, \
-        RecordSetCAAUpdate as DNSRecordSetCAAUpdate
+        RecordSetDSUpdate as DNSRecordSetDSUpdate, RecordSetMXUpdate as DNSRecordSetMXUpdate, \
+        RecordSetNSUpdate as DNSRecordSetNSUpdate, RecordSetPTRUpdate as DNSRecordSetPTRUpdate, \
+        RecordSetSRVUpdate as DNSRecordSetSRVUpdate, RecordSetTLSAUpdate as DNSRecordSetTLSAUpdate, \
+        RecordSetTXTUpdate as DNSRecordSetTXTUpdate, RecordSetCAAUpdate as DNSRecordSetCAAUpdate
     self.command_table["network dns record-set a update"] = DNSRecordSetAUpdate(loader=self)
     self.command_table["network dns record-set aaaa update"] = DNSRecordSetAAAAUpdate(loader=self)
     self.command_table["network dns record-set ds update"] = DNSRecordSetDSUpdate(loader=self)
     self.command_table["network dns record-set mx update"] = DNSRecordSetMXUpdate(loader=self)
-    self.command_table["network dns record-set naptr update"] = DNSRecordSetNAPTRUpdate(loader=self)
     self.command_table["network dns record-set ns update"] = DNSRecordSetNSUpdate(loader=self)
     self.command_table["network dns record-set ptr update"] = DNSRecordSetPTRUpdate(loader=self)
     self.command_table["network dns record-set srv update"] = DNSRecordSetSRVUpdate(loader=self)
