@@ -2400,7 +2400,7 @@ def get_by_target_resources(cmd, target_resources):
 def show_dns_zone(cmd, resource_group_name, zone_name):
     return _DNSZoneShow(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
-        "zone_name": zone_name        
+        "zone_name": zone_name
     })
 
 
@@ -2437,12 +2437,12 @@ def add_dns_delegation(cmd, child_zone, parent_zone, child_rg, child_zone_name):
 
 def create_dns_zone(cmd, resource_group_name, zone_name, parent_zone_name=None, tags=None,
                     if_none_match=False, zone_type='Public', resolution_vnets=None, registration_vnets=None):
-        
+
     resolution_vnets_dict = []
     if resolution_vnets:
         for resolution_vnet in resolution_vnets:
             resolution_vnets_dict.append({"id": resolution_vnet.id})
-    
+
     registration_vnets_dict = []
     if registration_vnets:
         for registration_vnet in registration_vnets:
@@ -2503,7 +2503,7 @@ def list_dns_zones(cmd, resource_group_name=None):
         return _DNSZoneListByRg(cli_ctx=cmd.cli_ctx)(command_args={
             "resource_group": resource_group_name
         })
-    
+
     return _DNSZoneListBySub(cli_ctx=cmd.cli_ctx)(command_args={})
 
 
@@ -2784,9 +2784,9 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
                 if not record:
                     logger.warning('Cannot import %s. RecordType is not found. Skipping...', entry['delim'].lower())
                     continue
-                
+
                 record_set = record_sets.get(record_set_key, None)
-                
+
                 if not record_set:
 
                     # Workaround for issue #2824
@@ -2829,7 +2829,7 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
     for key, rs in record_sets.items():
         rs_name, rs_type = key.lower().rsplit('.', 1)
         rs_name = '@' if rs_name == origin else rs_name
-        
+
         if rs_name.endswith(origin):
             rs_name = rs_name[:-(len(origin) + 1)]
 
@@ -2865,7 +2865,7 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
                 'name': rs_name,
                 **rs
             })
-            
+
             cum_records += record_count
             print("({}/{}) Imported {} records of type '{}' and name '{}'"
                   .format(cum_records, total_records, record_count, rs_type, rs_name), file=sys.stderr)
@@ -2907,8 +2907,8 @@ def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, c
 
 
 def add_dns_ds_record(cmd, resource_group_name, zone_name, record_set_name, key_tag, algorithm, digest_type, digest,
-                       ttl=3600, if_none_match=None):
-    record = {"algorithm": algorithm, "key_tag": key_tag, "digest": { "algorithm_type": digest_type, "value": digest}}
+                      ttl=3600, if_none_match=None):
+    record = {"algorithm": algorithm, "key_tag": key_tag, "digest": {"algorithm_type": digest_type, "value": digest}}
     record_type = 'ds'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             ttl=ttl, if_none_match=if_none_match)
@@ -2923,7 +2923,7 @@ def add_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, pref
 
 
 def add_dns_naptr_record(cmd, resource_group_name, zone_name, record_set_name, order, preference, flags, services, regexp, replacement,
-                       ttl=3600, if_none_match=None):
+                         ttl=3600, if_none_match=None):
     record = {"flags": flags, "order": order, "preference": preference, "regexp": regexp, "replacement": replacement, "services": services}
     record_type = 'naptr'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
@@ -2981,9 +2981,9 @@ def add_dns_srv_record(cmd, resource_group_name, zone_name, record_set_name, pri
                             if_none_match=if_none_match)
 
 
-def add_dns_tlsa_record(cmd, resource_group_name, zone_name, record_set_name, certificate_usage, selector,  matching_type, certificate_association_data,
-                       ttl=3600, if_none_match=None):
-    record = {"cert_association_data": certificate_association_data, "matching_type": matching_type, "selector": selector, "usage": certificate_usage}
+def add_dns_tlsa_record(cmd, resource_group_name, zone_name, record_set_name, certificate_usage, selector, matching_type, certificate_data,
+                        ttl=3600, if_none_match=None):
+    record = {"cert_association_data": certificate_data, "matching_type": matching_type, "selector": selector, "usage": certificate_usage}
     record_type = 'tlsa'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             ttl=ttl, if_none_match=if_none_match)
@@ -3039,7 +3039,7 @@ def remove_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name
 
 
 def remove_dns_ds_record(cmd, resource_group_name, zone_name, record_set_name, key_tag, algorithm, digest_type, digest, keep_empty_record_set=False):
-    record = {"algorithm": algorithm, "key_tag": key_tag, "digest": { "algorithm_type": digest_type, "value": digest}}
+    record = {"algorithm": algorithm, "key_tag": key_tag, "digest": {"algorithm_type": digest_type, "value": digest}}
     record_type = 'ds'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
@@ -3084,8 +3084,8 @@ def remove_dns_srv_record(cmd, resource_group_name, zone_name, record_set_name, 
                           keep_empty_record_set=keep_empty_record_set)
 
 
-def remove_dns_tlsa_record(cmd, resource_group_name, zone_name, record_set_name, certificate_usage, selector,  matching_type, certificate_association_data, keep_empty_record_set=False):
-    record = {"cert_association_data": certificate_association_data, "matching_type": matching_type, "selector": selector, "usage": certificate_usage}
+def remove_dns_tlsa_record(cmd, resource_group_name, zone_name, record_set_name, certificate_usage, selector, matching_type, certificate_data, keep_empty_record_set=False):
+    record = {"cert_association_data": certificate_data, "matching_type": matching_type, "selector": selector, "usage": certificate_usage}
     record_type = 'tlsa'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                           keep_empty_record_set=keep_empty_record_set)
@@ -4158,6 +4158,7 @@ def _process_subnet_name_and_id(subnet, vnet, cmd, resource_group_name):
         subnet = vnet + f'/subnets/{subnet}'
     return subnet
 # endregion
+
 
 # region cross-region lb
 def create_cross_region_load_balancer(cmd, load_balancer_name, resource_group_name, location=None, tags=None,

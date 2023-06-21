@@ -303,7 +303,7 @@ def load_arguments(self, _):
         c.argument('zone_name', name_arg_type)
         c.ignore('location')
 
-        c.argument('zone_type', help='Type of DNS zone to create.', deprecate_info=c.deprecate(), arg_type=get_enum_type(ZoneType))
+        c.argument('zone_type', help='Type of DNS zone to create.', deprecate_info=c.deprecate(hide=True), arg_type=get_enum_type(ZoneType))
 
         c.argument('registration_vnets',
                    arg_group='Private Zone',
@@ -312,13 +312,13 @@ def load_arguments(self, _):
                         'Number of private DNS zones with virtual network auto-registration enabled is 1. '
                         'If you need to increase this limit, please contact Azure Support: '
                         'https://docs.microsoft.com/en-us/azure/azure-subscription-service-limits',
-                    deprecate_info=c.deprecate(),
+                   deprecate_info=c.deprecate(hide=True),
                    validator=get_vnet_validator('registration_vnets'))
         c.argument('resolution_vnets',
                    arg_group='Private Zone',
                    nargs='+',
                    help='Space-separated names or IDs of virtual networks that resolve records in this DNS zone.',
-                   deprecate_info=c.deprecate(),
+                   deprecate_info=c.deprecate(hide=True),
                    validator=get_vnet_validator('resolution_vnets'))
 
     with self.argument_context('network dns zone import') as c:
@@ -399,7 +399,7 @@ def load_arguments(self, _):
         c.argument('services', help='The services specific to DDDS applications. Enclose Services in quotation marks.')
         c.argument('regexp', help='The regular expression that the DDDS application uses to convert an input value into an output value. For example: an IP phone system might use a regular expression to convert a phone number that is entered by a user into a SIP URI. Enclose the regular expression in quotation marks. Specify either a value for "regexp" or a value for "replacement".')
         c.argument('replacement', help='The replacement is a fully qualified domain name (FQDN) of the next domain name that you want the DDDS application to submit a DNS query for. The DDDS application replaces the input value with the value specified for replacement. Specify either a value for "regexp" or a value for "replacement". If you specify a value for "regexp", specify a dot (.) for "replacement".')
-        
+
     with self.argument_context('network dns record-set ns') as c:
         c.argument('dname', options_list=['--nsdname', '-d'], help='Name server domain name.')
 
@@ -429,7 +429,7 @@ def load_arguments(self, _):
         c.argument('certificate_usage', help='The usage specifies the provided association that will be used to match the certificate presented in the TLS handshake.', type=int)
         c.argument('selector', help='The selector specifies which part of the TLS certificate presented by the server will be matched against the association data.', type=int)
         c.argument('matching_type', help='The matching type specifies how the certificate association is presented.', type=int)
-        c.argument('certificate_association_data', help='This specifies the certificate association data to be matched.')
+        c.argument('certificate_data', help='This specifies the certificate association data to be matched.')
 
     with self.argument_context('network dns record-set txt') as c:
         c.argument('value', options_list=['--value', '-v'], nargs='+', help='Space-separated list of text values which will be concatenated together.')
