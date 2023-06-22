@@ -38,7 +38,7 @@ def _postgres_parse_list_capability(result):
 
         skus = set()
         zones = set()
-    
+
         for sku in tier_info.supported_server_skus:
             skus.add(sku.name)
             for zone in sku.supported_zones:
@@ -49,7 +49,7 @@ def _postgres_parse_list_capability(result):
             for storage_info in storage_edition.supported_storage_mb:
                 storage_sizes.add(int(storage_info.storage_size_mb // 1024))
 
-        tier_dict["skus"] = skus        
+        tier_dict["skus"] = skus
         tier_dict["storage_sizes"] = storage_sizes
 
         tiers_dict[tier_name] = tier_dict

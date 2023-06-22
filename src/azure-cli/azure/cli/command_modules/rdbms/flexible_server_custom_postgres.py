@@ -168,6 +168,7 @@ def flexible_server_create(cmd, client,
                           subnet_id)
 # endregion create without args
 
+
 def flexible_server_restore(cmd, client,
                             resource_group_name, server_name,
                             source_server, restore_point_in_time=None, zone=None, no_wait=False,
@@ -288,19 +289,18 @@ def flexible_server_update_custom_func(cmd, client, instance,
     module = import_module(server_module_path)
     ServerForUpdate = getattr(module, 'ServerForUpdate')
 
-    
     server_id_parts = parse_resource_id(instance.id)
     resource_group_name = server_id_parts['resource_group']
     server_name = server_id_parts['name']
 
     if private_dns_zone_arguments:
         private_dns_zone_id = prepare_private_dns_zone(db_context,
-                                                    resource_group_name,
-                                                    server_name,
-                                                    private_dns_zone=private_dns_zone_arguments,
-                                                    subnet_id=instance.network.delegated_subnet_resource_id,
-                                                    location=location,
-                                                    yes=yes)
+                                                        resource_group_name,
+                                                        server_name,
+                                                        private_dns_zone=private_dns_zone_arguments,
+                                                        subnet_id=instance.network.delegated_subnet_resource_id,
+                                                        location=location,
+                                                        yes=yes)
         instance.network.private_dns_zone_arm_resource_id = private_dns_zone_id
 
     if sku_name:
@@ -670,8 +670,9 @@ def flexible_server_connection_string(
         show_pg_bouncer=False):
     host = '{}.postgres.database.azure.com'.format(server_name)
     port = 5432
-    if (show_pg_bouncer is True):
+    if show_pg_bouncer is True:
         port = 6432
+
     return {
         'connectionStrings': _create_postgresql_connection_strings(host, administrator_login,
                                                                    administrator_login_password, database_name, port)
@@ -828,14 +829,17 @@ def flexible_server_provision_network_resource(cmd, resource_group_name, server_
     return network, start_ip, end_ip
 
 
-def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_mode="offline", migration_name=None, tags=None, location=None):
+def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_mode="offline",
+                          migration_name=None, tags=None, location=None):
+
     logging_name='PostgreSQL'
     subscription_id = get_subscription_id(cmd.cli_ctx)
     properties_filepath = os.path.join(os.path.abspath(os.getcwd()), properties)
     # Generate missing parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
                                                                              server_name, 'postgres')
-    
+
+    # Get the properties for migration from the json file at the specific properties file path
     if not os.path.exists(properties_filepath):
         raise FileOperationError("Properties file does not exist in the given location")
     with open(properties_filepath, "r") as f:
@@ -852,9 +856,9 @@ def migration_create_func(cmd, client, resource_group_name, server_name, propert
     if migration_name is None:
         # Convert a UUID to a string of hex digits in standard form
         migration_name = str(uuid.uuid4())
-        
+
     migration_parameters = request_payload.get("properties")
-    
+
     return _create_migration(logging_name, client, subscription_id, resource_group_name, server_name, migration_name, migration_mode, migration_parameters, tags, location)
 
 
@@ -878,7 +882,7 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
     if setup_logical_replication is True:
         operationSpecified = True
         migration_parameters_for_patch = postgresql_flexibleservers.models.MigrationResourceForPatch(setup_logical_replication_on_source_db_if_needed=True)
-        
+
     if db_names is not None:
         if operationSpecified is True:
             raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
@@ -921,6 +925,7 @@ def migration_check_name_availability(cmd, client, resource_group_name, server_n
 
 
 def _create_postgresql_connection_strings(host, user, password, database, port):
+
     result = {
         'psql_cmd': "postgresql://{user}:{password}@{host}/{database}?sslmode=require",
         'ado.net': "Server={host};Database={database};Port={port};User Id={user};Password={password};Ssl Mode=Require;",
@@ -942,8 +947,8 @@ def _create_postgresql_connection_strings(host, user, password, database, port):
         'password': password if password is not None else '{password}',
         'database': database,
         'port': port,
-        'open_brace':'{',
-        'close_brace':'}',
+        'open_brace': '{',
+        'close_brace': '}',
         'ca-cert filename': '{ca-cert filename}'
     }
 

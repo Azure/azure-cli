@@ -5,23 +5,18 @@
 
 # pylint: disable=unused-argument, line-too-long
 
-import os
 import re
-import json
-import uuid
 from datetime import datetime, timedelta
 from dateutil.tz import tzutc
 from knack.log import get_logger
 from knack.util import CLIError
 from urllib.request import urlretrieve
-from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
-from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import sdk_no_wait
-from azure.cli.core.util import send_raw_request
 from azure.cli.core.util import user_confirmation
-from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, FileOperationError, BadRequestError
+from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError
 from ._client_factory import cf_postgres_flexible_replica
-from ._flexible_server_util import run_subprocess, run_subprocess_get_output, fill_action_template, get_git_root_dir, resolve_poller, GITHUB_ACTION_PATH
+from ._flexible_server_util import run_subprocess, run_subprocess_get_output, \
+    fill_action_template, get_git_root_dir, resolve_poller, GITHUB_ACTION_PATH
 from .validators import validate_public_access_server
 
 logger = get_logger(__name__)

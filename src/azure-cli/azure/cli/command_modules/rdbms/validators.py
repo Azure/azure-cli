@@ -20,10 +20,10 @@ from azure.mgmt.rdbms.mysql_flexibleservers.operations._firewall_rules_operation
 from ._client_factory import cf_mysql_flexible_servers, cf_postgres_flexible_servers
 from ._flexible_server_util import (get_mysql_versions, get_mysql_skus, get_mysql_storage_size,
                                     get_mysql_backup_retention, get_mysql_tiers, get_mysql_list_skus_info,
-                                    get_postgres_versions,
                                     get_postgres_skus, get_postgres_storage_sizes, get_postgres_tiers,
                                     _is_resource_name)
-from ._flexible_server_location_capabilities_util import (get_postgres_location_capability_info, get_postgres_server_capability_info)
+from ._flexible_server_location_capabilities_util import (get_postgres_location_capability_info, 
+                                                          get_postgres_server_capability_info)
 
 logger = get_logger(__name__)
 
@@ -305,7 +305,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     else:
         list_location_capability_info = get_postgres_server_capability_info(
             db_context.cmd,
-            resource_group = parse_resource_id(instance.id)["resource_group"],
+            resource_group=parse_resource_id(instance.id)["resource_group"],
             server_name=instance.name)
     sku_info = list_location_capability_info['sku_info']
     single_az = list_location_capability_info['single_az']
@@ -389,11 +389,12 @@ def _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported
         raise ArgumentUsageError("The region of the server does not support geo-restore feature.")
 
 
-def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup_byok_key=None, geo_redundant_backup=None, instance=None):
+def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup_byok_key=None,
+                      geo_redundant_backup=None, instance=None):
     if bool(byok_identity is None) ^ bool(byok_key is None):
         raise ArgumentUsageError("User assigned identity and keyvault key need to be provided together. "
                                  "Please provide --identity and --key together.")
-    
+
     if bool(backup_byok_identity is None) ^ bool(backup_byok_key is None):
         raise ArgumentUsageError("User assigned identity and keyvault key need to be provided together. "
                                  "Please provide --backup-identity and --backup-key together.")
@@ -404,7 +405,8 @@ def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup
                                  "that was not created with data encryption.")
 
     if backup_byok_key and (geo_redundant_backup and geo_redundant_backup.lower() == 'enabled'):
-        raise ArgumentUsageError("Please provide Geo-location user assigned identioty and keyvault key to enable Data encryption for geo-redundant backup.")
+        raise ArgumentUsageError("Please provide Geo-location user assigned identity and keyvault key "
+                                 "to enable Data encryption for geo-redundant backup.")
 
 
 def _network_arg_validator(subnet, public_access):

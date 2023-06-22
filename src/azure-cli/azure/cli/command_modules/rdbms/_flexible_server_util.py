@@ -503,16 +503,18 @@ def get_tenant_id():
     sub = profile.get_subscription()
     return sub['tenantId']
 
+
 def get_case_insensitive_key_value(case_insensitive_key, list_of_keys, dictionary):
     for key in list_of_keys:
         if key.lower() == case_insensitive_key.lower():
             return dictionary[key]
     return None
 
+
 def get_enum_value_true_false(value, key):
     if value is None:
         return "False"
-    if value.lower() == 'true':
+    elif value.lower() == 'true':
         return "True"
     elif value.lower() == 'false':
         return "False"
