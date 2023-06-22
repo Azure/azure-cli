@@ -1055,24 +1055,6 @@ def _get_deployment_management_client(cli_ctx, aux_subscriptions=None, aux_tenan
     return deployment_client
 
 
-def _prepare_stacks_delete_detach_models(rcf, delete_all, delete_resource_groups, delete_resources):
-    detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
-    delete_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
-
-    delete_resources_enum = detach_model
-    delete_resource_groups_enum = detach_model
-
-    if delete_all:
-        delete_resources_enum = delete_model
-        delete_resource_groups_enum = delete_model
-    if delete_resource_groups:
-        delete_resource_groups_enum = delete_model
-    if delete_resources:
-        delete_resources_enum = delete_model
-
-    return delete_resources_enum, delete_resource_groups_enum
-
-
 def _prepare_stacks_deny_settings(rcf, deny_settings_mode):
     deny_settings_mode = None if deny_settings_mode.lower() == "none" else deny_settings_mode
     deny_settings_enum = None
@@ -1098,17 +1080,6 @@ def _prepare_stacks_excluded_principals(deny_settings_excluded_principals):
     return excluded_principals_array
 
 
-def _prepare_stacks_excluded_actions(deny_settings_excluded_actions):
-    excluded_actions_array = []
-    if deny_settings_excluded_actions:
-        for action in deny_settings_excluded_actions.split(" "):
-            excluded_actions_array.append(str(action))
-    else:
-        excluded_actions_array = None
-
-    return excluded_actions_array
-
-
 def _prepare_stacks_delete_detach_models(rcf, delete_all, delete_resource_groups, delete_resources):
     detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
     delete_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Delete
@@ -1125,31 +1096,6 @@ def _prepare_stacks_delete_detach_models(rcf, delete_all, delete_resource_groups
         delete_resources_enum = delete_model
 
     return delete_resources_enum, delete_resource_groups_enum
-
-
-def _prepare_stacks_deny_settings(rcf, deny_settings_mode):
-    deny_settings_mode = None if deny_settings_mode.lower() == "none" else deny_settings_mode
-    deny_settings_enum = None
-    if deny_settings_mode:
-        if deny_settings_mode.lower().replace(' ', '') == "denydelete":
-            deny_settings_enum = rcf.deployment_stacks.models.DenySettingsMode.deny_delete
-        elif deny_settings_mode.lower().replace(' ', '') == "denywriteanddelete":
-            deny_settings_enum = rcf.deployment_stacks.models.DenySettingsMode.deny_write_and_delete
-        else:
-            raise InvalidArgumentValueError("Please enter only one of the following: denyDelete, or denyWriteAndDelete")
-
-    return deny_settings_enum
-
-
-def _prepare_stacks_excluded_principals(deny_settings_excluded_principals):
-    excluded_principals_array = []
-    if deny_settings_excluded_principals:
-        for principal in deny_settings_excluded_principals.split(" "):
-            excluded_principals_array.append(str(principal))
-    else:
-        excluded_principals_array = None
-
-    return excluded_principals_array
 
 
 def _prepare_stacks_excluded_actions(deny_settings_excluded_actions):
