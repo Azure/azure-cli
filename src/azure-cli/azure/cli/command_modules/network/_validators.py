@@ -480,12 +480,12 @@ def get_servers_validator(camel_case=False):
 
 
 def validate_subresource_list(cmd, namespace):
-    if namespace.target_resources:
+    if namespace.parameters:
         SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_NETWORK_DNS)
         subresources = []
-        for item in namespace.target_resources:
+        for item in namespace.parameters:
             subresources.append(SubResource(id=item))
-        namespace.target_resources = subresources
+        namespace.parameters = subresources
 
 
 def validate_private_dns_zone(cmd, namespace):

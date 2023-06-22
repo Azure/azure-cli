@@ -342,8 +342,14 @@ class DnsScenarioTest(ScenarioTest):
 
         self.kwargs['tm_id'] = tm['TrafficManagerProfile']['id']
 
-        self.cmd('network dns record-set a create -g {rg} -z {zone} -n a1 --target-resource {tm_id}',
-                 checks=self.check("targetResource.id.contains(@, '{tm}')", True))
+        record = self.cmd('network dns record-set a create -g {rg} -z {zone} -n a1 --target-resource {tm_id}',
+                 checks=self.check("targetResource.id.contains(@, '{tm}')", True)).get_output_in_json()
+        
+        references = self.cmd('az network dns list-references --parameters {tm_id}',
+                 checks=self.check('length(dnsResourceReferences)', 1)).get_output_in_json()
+
+        self.assertEqual(references['dnsResourceReferences'][0]['dnsResources'][0]['id'].lower(), record['id'].lower())
+
         self.cmd('network dns record-set a update -g {rg} -z {zone} -n a1 --remove targetResource',
                  checks=self.check('targetResource.id', None))
 
