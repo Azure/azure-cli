@@ -3734,7 +3734,8 @@ def get_app_insights_key(cli_ctx, resource_group, name):
 def create_flex_app_service_plan(cmd, resource_group_name, name, location):
     SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
     client = web_client_factory(cmd.cli_ctx)
-    sku_def = SkuDescription(tier="FlexConsumption", name="FC1", size="FC", family="FC")
+    # sku_def = SkuDescription(tier="FlexConsumption", name="FC1", size="FC", family="FC")
+    sku_def = SkuDescription(tier="FlexConsumption", name="FL1", size="FL", family="FL")
     plan_def = AppServicePlan(
         location=location,
         sku=sku_def,
@@ -3742,9 +3743,9 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location):
         kind="functionapp",
         name=name
     )
-    params = {}
-    params['stamp'] = STAMP_NAME
-    poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def, api_version='2022-03-01-privatepreview', params=params)
+    # params = {}
+    # params['stamp'] = STAMP_NAME
+    poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
 
@@ -3753,8 +3754,9 @@ def create_flex_functionapp(cmd, resource_group_name, name, functionapp_def):
     functionapp_json = functionapp_def.serialize()
     body = json.dumps(functionapp_json)
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    site_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?stamp={}&api-version={}'
-    site_url = site_url_base.format(subscription_id, resource_group_name, name, STAMP_NAME, '2022-03-01-privatepreview')
+    # site_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?stamp={}&api-version={}'
+    site_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'
+    site_url = site_url_base.format(subscription_id, resource_group_name, name, '2022-03-01')
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + site_url
     response = send_raw_request(cmd.cli_ctx, "PUT", request_url, body=body)
     return response.json()
@@ -3964,9 +3966,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         # Following the same plan name format as the backend
         plan_name = "{}FlexPlan".format(name)
         plan_info = create_flex_app_service_plan(
-            cmd, resource_group_name, plan_name, flexconsumption_location)
+            cmd, resource_group_name, plan_name, 'northcentralus(stage)')
         functionapp_def.server_farm_id = plan_info.id
-        functionapp_def.location = flexconsumption_location
+        functionapp_def.location = 'northcentralus(stage)'
 
     if environment is not None:
         if consumption_plan_location is not None:
