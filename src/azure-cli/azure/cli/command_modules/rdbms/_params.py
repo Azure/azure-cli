@@ -837,6 +837,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                                help='Cut-over the data migration for all the databases in the migration. After this is complete, subsequent updates to all databases will not be migrated to the target.')
                     c.argument('cancel', options_list=['--cancel'], required=False, action='store_true',
                                help='Cancel the data migration for all the databases.')
+                elif scope == "delete":
+                    c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
+                               help='Name of the migration.')
                 elif scope == "check-name-availability":
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')

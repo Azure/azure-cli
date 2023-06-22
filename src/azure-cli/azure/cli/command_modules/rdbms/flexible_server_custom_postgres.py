@@ -874,6 +874,12 @@ def migration_list_func(cmd, client, resource_group_name, server_name, migration
     return client.list_by_target_server(subscription_id, resource_group_name, server_name, migration_filter)
 
 
+def migration_delete_func(cmd, client, resource_group_name, server_name, migration_name):
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    return client.delete(subscription_id, resource_group_name, server_name, migration_name)
+
+
 def migration_update_func(cmd, client, resource_group_name, server_name, migration_name, setup_logical_replication=None, db_names=None, overwrite_dbs=None, cutover=None, cancel=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)

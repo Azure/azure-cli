@@ -125,6 +125,7 @@ def load_flexibleserver_command_table(self, _):
         g.custom_show_command('show', 'migration_show_func', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('list', 'migration_list_func', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('update', 'migration_update_func', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_show_command('delete', 'migration_delete_func', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('check-name-availability', 'migration_check_name_availability', custom_command_type=flexible_servers_custom_postgres)
 
     with self.command_group('postgres flexible-server parameter', postgres_flexible_config_sdk,
