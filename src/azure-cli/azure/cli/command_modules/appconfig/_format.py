@@ -192,7 +192,11 @@ def _get_value_by_names(item, property_names):
         In that case, field names are not converted to camelCase. We need to check for both content_type and contentType
         We iterate through given names and return the first value that is found
     """
+
+    # This is the value that will be returned if no value is found or the value is None. This maintains consistency with the default table transformer logic
+    # https://github.com/Azure/azure-cli/blob/fdb9aa742b404a433f207b573eea37341769020c/src/azure-cli-core/azure/cli/core/commands/transform.py#L91C1-L98C30
     empty_value = ' '
+
     property_value = empty_value
 
     for property_name in property_names:
