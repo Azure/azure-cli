@@ -2973,36 +2973,40 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
         })
 
 
-        self.cmd('appconfig snapshot create --connection-string {connection_string} -s {snapshot_name} --filters {filter} --retention-period {retention_period}',
+        self.cmd('appconfig snapshot create --connection-string {connection_string} --snapshot-name {snapshot_name} --filters {filter} --retention-period {retention_period} --composition-type key_label --tags tag1=value1',
                  checks=[self.check('itemsCount', 2),
                          self.check('status', 'ready')])
 
         
         # Test showing created snapshot
-        created_snapshot = self.cmd('appconfig snapshot show --connection-string {connection_string} -s {snapshot_name}').get_output_in_json()
+        created_snapshot = self.cmd('appconfig snapshot show --connection-string {connection_string} --snapshot-name {snapshot_name} --fields name status items_count filters').get_output_in_json()
         
-        self.assertEqual(created_snapshot['itemsCount'], 2)
+        self.assertEqual(created_snapshot['items_count'], 2)
         self.check(created_snapshot['status'], 'ready')
         self.assertDictEqual(created_snapshot['filters'][0], filter_dict)
+        self.assertRaises(KeyError, lambda: created_snapshot['created'])
         
         # Test listing snapshots
-        created_snapshots = self.cmd('appconfig snapshot list --connection-string {connection_string}').get_output_in_json()
-        self.assertEqual(created_snapshots[0]['itemsCount'], 2)
+        created_snapshots = self.cmd('appconfig snapshot list --connection-string {connection_string} --fields name status items_count filters').get_output_in_json()
+        self.assertEqual(created_snapshots[0]['items_count'], 2)
         self.assertEqual(created_snapshots[0]['status'], 'ready')
         self.assertDictEqual(created_snapshots[0]['filters'][0], filter_dict)
 
         # Test snapshot archive
-        archived_snapshot = self.cmd('appconfig snapshot archive --connection-string {connection_string} -s {snapshot_name}').get_output_in_json()
+        archived_snapshot = self.cmd('appconfig snapshot archive --connection-string {connection_string} --snapshot-name {snapshot_name}').get_output_in_json()
         self.assertIsNotNone(archived_snapshot['expires'])        
         self.assertEqual(archived_snapshot['status'], 'archived')
-        
+        active_snapshots = self.cmd('appconfig snapshot list --connection-string {connection_string} --status ready').get_output_in_json()
+        self.assertEqual(len(active_snapshots), 0)
         
         # Test snapshot recovery
         self.cmd('appconfig snapshot recover --connection-string {connection_string} -s {snapshot_name}',
                                      checks=[self.check('itemsCount', 2),
                                              self.check('status', 'ready'),
-                                             self.check('expires', None)])
-        
+                                             self.check('expires', None),])
+        archived_snapshots = self.cmd('appconfig snapshot list --connection-string {connection_string} --status archived').get_output_in_json()
+        self.assertEqual(len(archived_snapshots), 0)
+
         # Test listing snapshot kvs
         kvs = self.cmd('appconfig kv list --connection-string {connection_string} --snapshot {snapshot_name}').get_output_in_json()
         assert len(kvs) == 2
