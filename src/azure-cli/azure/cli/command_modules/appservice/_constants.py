@@ -100,14 +100,14 @@ ACR_IMAGE_SUFFIX = ".azurecr.io"
 
 FLEX_RUNTIMES = [
     {
-        'runtime': 'dotnet',
+        'runtime': 'dotnet-isolated',
         'version': '6',
         'site_config': {
             'use32_bit_worker_process': True,
-            'linux_fx_version': 'DOTNET|6.0',
+            'linux_fx_version': 'DOTNET-ISOLATED|6.0',
         },
         'app_settings': {
-            'FUNCTIONS_WORKER_RUNTIME': 'dotnet'
+            'FUNCTIONS_WORKER_RUNTIME': 'dotnet-isolated'
         }
     },
     {
