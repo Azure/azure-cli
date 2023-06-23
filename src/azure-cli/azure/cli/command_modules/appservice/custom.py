@@ -1333,7 +1333,8 @@ def get_app_settings(cmd, resource_group_name, name, slot=None):
     result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory(cmd.cli_ctx)
     is_centauri = is_centauri_functionapp(cmd, resource_group_name, name)
-    slot_app_setting_names = [] if is_centauri \
+    is_flex = is_flex_functionapp(cmd, resource_group_name, name)
+    slot_app_setting_names = [] if (is_centauri or is_flex) \
         else client.web_apps.list_slot_configuration_names(resource_group_name, name) \
         .app_setting_names
     return _build_app_settings_output(result.properties, slot_app_setting_names)
@@ -1600,8 +1601,9 @@ def update_configuration_polling(cmd, resource_group_name, name, slot, configs):
 def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None):
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory(cmd.cli_ctx)
-    centauri_functionapp = is_centauri_functionapp(cmd, resource_group_name, name)
-    slot_cfg_names = {} if centauri_functionapp \
+    is_centauri = is_centauri_functionapp(cmd, resource_group_name, name)
+    is_flex = is_flex_functionapp(cmd, resource_group_name, name)
+    slot_cfg_names = {} if (is_centauri or is_flex) \
         else client.web_apps.list_slot_configuration_names(resource_group_name, name)
     is_slot_settings = False
 
@@ -1615,7 +1617,7 @@ def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
 # TODO: Centauri currently return wrong payload for update appsettings, remove this once backend has the fix.
-    if centauri_functionapp:
+    if is_centauri:
         update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client)
         result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     else:
