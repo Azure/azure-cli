@@ -845,10 +845,7 @@ def migration_create_func(cmd, client, resource_group_name, server_name, propert
     with open(properties_filepath, "r") as f:
         try:
             request_payload = json.load(f)
-            if migration_mode == "online":
-                request_payload.get("properties")['MigrationMode'] = "Online"
-            else:
-                request_payload.get("properties")['MigrationMode'] = "Offline"
+            migration_parameters = request_payload.get("properties")
         except ValueError as err:
             logger.error(err)
             raise BadRequestError("Invalid json file. Make sure that the json file content is properly formatted.")
@@ -856,8 +853,6 @@ def migration_create_func(cmd, client, resource_group_name, server_name, propert
     if migration_name is None:
         # Convert a UUID to a string of hex digits in standard form
         migration_name = str(uuid.uuid4())
-
-    migration_parameters = request_payload.get("properties")
 
     return _create_migration(logging_name, client, subscription_id, resource_group_name, server_name, migration_name, migration_mode, migration_parameters, tags, location)
 

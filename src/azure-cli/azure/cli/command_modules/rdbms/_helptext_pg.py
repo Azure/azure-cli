@@ -447,9 +447,9 @@ short-summary: Update a specific migration.
 examples:
   - name: Allow the migration workflow to setup logical replication on the source. Note that this command will restart the source server.
     text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name testmigration --setup-replication
-  - name: Cut-over the data migration for all the databases involved in the migration. After this is complete, subsequent updates to all databases in the migration will not be migrated to the target.
+  - name: Cut-over the data migration for all the databases involved in the migration. After this is complete, subsequent updates to all databases in the migration will not be migrated to the target. Cutover migration can only be triggered for migration_mode=Online.
     text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name testmigration --cutover
-  - name: Cancels the data migration for all the databases involved in the migration.
+  - name: Cancels the data migration for all the databases involved in the migration. Only 'InProgress' migration can be cancelled
     text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name testmigration --cancel
 """
 
