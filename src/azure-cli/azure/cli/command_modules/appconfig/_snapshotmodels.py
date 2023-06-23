@@ -86,7 +86,7 @@ class Snapshot:
         self.retention_period = retention_period
 
     def __str__(self):
-        return "\netag: " + self.etag + \
+        return "\nEtag: " + self.etag + \
             "\nName: " + self.name + \
             "\nStatus: " + self.status + \
             "\nFilters: " + (str(self.filters) if self.filters else '') + \

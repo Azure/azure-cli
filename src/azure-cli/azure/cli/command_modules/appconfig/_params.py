@@ -47,7 +47,7 @@ def load_arguments(self, _):
         nargs='+',
         help='Customize output fields for Snapshots',
         validator=validate_snapshot_query_fields,
-        arg_type=get_enum_type(['name', 'etag', 'status_code', 'retention_period', 'filters', 'status', 'created', 'expires', 'size', 'items_count', 'size', 'tags'])
+        arg_type=get_enum_type(['name', 'etag', 'status_code', 'retention_period', 'filters', 'status', 'created', 'expires', 'size', 'items_count', 'composition_type', 'tags'])
     )
     filter_parameters_arg_type = CLIArgumentType(
         validator=validate_filter_parameters,
@@ -362,26 +362,19 @@ def load_arguments(self, _):
     with self.argument_context('appconfig replica create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help='Location at which to create the replica.')
 
-    with self.argument_context('appconfig snapshot create') as c:
+    with self.argument_context('appconfig snapshot') as c:
         c.argument('snapshot_name', arg_type=snapshot_name_arg_type)
+
+    with self.argument_context('appconfig snapshot create') as c:
         c.argument('filters', arg_type=snapshot_filter_arg_type)
         c.argument('composition_type', arg_type=get_enum_type(["key", "key_label"]), help='Composition type used in building app configuration snapshots. If not specified, defaults to key.')
         c.argument('retention_period', type=int, help='Duration in seconds for which a snapshot can remain archived before expiry. A snapshot can be archived for a maximum of 7 days (604,800s) for free tier stores and 90 days (7,776,000s) for standard tier stores. If specified, retention period must be at least 1 hour (3600s)')
         c.argument('tags', arg_type=tags_type, help="Space-separated tags: key[=value] [key[=value] ...].")
 
     with self.argument_context('appconfig snapshot show') as c:
-        c.argument('snapshot_name', arg_type=snapshot_name_arg_type)
         c.argument('fields', arg_type=snapshot_fields_arg_type)
 
     with self.argument_context('appconfig snapshot list') as c:
         c.argument('snapshot_name', options_list=['--snapshot-name', '-s'], help='If no name specified, return all snapshots by default. Support star sign as filters, for instance abc* means snapshots with abc as prefix to the name.')
         c.argument('status', help='Value used to filter snapshots by their status.')
-        c.argument('top', arg_type=top_arg_type)
-        c.argument('all_', options_list=['--all'], action='store_true', help="List all snapshots.")
         c.argument('fields', arg_type=snapshot_fields_arg_type)
-
-    with self.argument_context('appconfig snapshot archive') as c:
-        c.argument('snapshot_name', arg_type=snapshot_name_arg_type)
-
-    with self.argument_context('appconfig snapshot recover') as c:
-        c.argument('snapshot_name', arg_type=snapshot_name_arg_type)
