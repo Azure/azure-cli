@@ -164,7 +164,7 @@ def flexible_server_create(cmd, client,
 
     return _form_response(user, sku, loc, server_id, host, version,
                           administrator_login_password if administrator_login_password is not None else '*****',
-                          _create_postgresql_connection_string(host, user, administrator_login_password), database_name, firewall_id,
+                          _create_postgresql_connection_string(host, user, administrator_login_password, database_name), database_name, firewall_id,
                           subnet_id)
 # endregion create without args
 
@@ -880,7 +880,7 @@ def migration_delete_func(cmd, client, resource_group_name, server_name, migrati
     return client.delete(subscription_id, resource_group_name, server_name, migration_name)
 
 
-def migration_update_func(cmd, client, resource_group_name, server_name, migration_name, setup_logical_replication=None, db_names=None, overwrite_dbs=None, cutover=None, cancel=None):
+def migration_update_func(cmd, client, resource_group_name, server_name, migration_name, setup_logical_replication=None, cutover=None, cancel=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
@@ -888,18 +888,6 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
     if setup_logical_replication is True:
         operationSpecified = True
         migration_parameters_for_patch = postgresql_flexibleservers.models.MigrationResourceForPatch(setup_logical_replication_on_source_db_if_needed=True)
-
-    if db_names is not None:
-        if operationSpecified is True:
-            raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
-        operationSpecified = True
-        migration_parameters_for_patch = postgresql_flexibleservers.models.MigrationResourceForPatch(dbs_to_migrate=db_names)
-
-    if overwrite_dbs is True:
-        if operationSpecified is True:
-            raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
-        operationSpecified = True
-        migration_parameters_for_patch = postgresql_flexibleservers.models.MigrationResourceForPatch(overwrite_dbs_in_target="True")
 
     if cutover is not None:
         if operationSpecified is True:
@@ -963,11 +951,12 @@ def _create_postgresql_connection_strings(host, user, password, database, port):
     return result
 
 
-def _create_postgresql_connection_string(host, user, password):
+def _create_postgresql_connection_string(host, user, password, database):
     connection_kwargs = {
         'user': user,
         'host': host,
-        'password': password if password is not None else '{password}'
+        'password': password if password is not None else '{password}',
+        'database': database,
     }
     return 'postgresql://{user}:{password}@{host}/{database}?sslmode=require'.format(**connection_kwargs)
 

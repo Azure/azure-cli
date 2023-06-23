@@ -801,7 +801,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type)
 
     def handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type):
-        for scope in ['create', 'show', 'list', 'update', 'delete', 'check-name-availability']:
+        for scope in ['create', 'show', 'list', 'update', 'check-name-availability']:
             argument_context_string = '{} flexible-server migration {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('resource_group_name', arg_type=resource_group_name_type,
@@ -810,7 +810,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                            help='Migration target server name.')
                 if scope == "create":
                     c.argument('properties', type=file_type, completer=FilesCompleter(), options_list=['--properties', '-b'],
-                               help='Request properties. Use double or no quotes to pass in filepath as argument.')
+                               help='Request properties. Use double or no quotes to pass in json filepath as argument.')
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')
                     c.argument('migration_mode', arg_type=migration_id_arg_type, options_list=['--migration-mode'], required=False,
@@ -829,17 +829,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                                help='Name of the migration.')
                     c.argument('setup_logical_replication', options_list=['--setup-replication'], action='store_true', required=False,
                                help='Allow the migration workflow to setup logical replication on the source. Note that this command will restart the source server.')
-                    c.argument('db_names', nargs='+', options_list=['--db-names', '--dbs'], required=False,
-                               help='Space-separated list of DBs to migrate. Note that each additional DB affects the performance of the source server.')
-                    c.argument('overwrite_dbs', options_list=['--overwrite-dbs'], action='store_true', required=False,
-                               help='Allow the migration workflow to overwrite the DB on the target.')
                     c.argument('cutover', options_list=['--cutover'], required=False, action='store_true',
                                help='Cut-over the data migration for all the databases in the migration. After this is complete, subsequent updates to all databases will not be migrated to the target.')
                     c.argument('cancel', options_list=['--cancel'], required=False, action='store_true',
                                help='Cancel the data migration for all the databases.')
-                elif scope == "delete":
-                    c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
-                               help='Name of the migration.')
                 elif scope == "check-name-availability":
                     c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
                                help='Name of the migration.')
