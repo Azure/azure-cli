@@ -68,7 +68,7 @@ from .utils import (_normalize_sku,
                     _normalize_location,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
                     get_resource_if_exists, repo_url_to_name, get_token,
-                    app_service_plan_exists, is_centauri_functionapp)
+                    app_service_plan_exists, is_centauri_functionapp, is_flex_functionapp)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -571,6 +571,9 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
     if is_consumption and app.reserved:
         validate_zip_deploy_app_setting_exists(cmd, resource_group_name, name, slot)
 
+    if is_flex_functionapp(cmd, resource_group_name, name):
+        return enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout, slot, build_remote)
+
     if (not build_remote) and is_consumption and app.reserved:
         return upload_zip_to_storage(cmd, resource_group_name, name, src, slot)
     if build_remote and app.reserved:
@@ -583,6 +586,49 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
 
 def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, slot=None):
     return enable_zip_deploy(cmd, resource_group_name, name, src, timeout=timeout, slot=slot)
+
+
+def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, slot=None, build_remote=False):
+    logger.warning("Getting scm site credentials for zip deployment")
+
+    try:
+        scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
+    except ValueError:
+        raise ResourceNotFoundError('Failed to fetch scm url for function app')
+
+    zip_url = scm_url + '/api/Deploy/Zip?RemoteBuild={}&Deployer=az_cli'.format(build_remote)
+    deployment_status_url = scm_url + '/api/deployments/latest'
+
+    additional_headers = {"Content-Type": "application/zip", "Cache-Control": "no-cache"}
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group_name, slot,
+                                   additional_headers=additional_headers)
+
+    import os
+    import requests
+    from azure.cli.core.util import should_disable_connection_verify
+    # Read file content
+
+    with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
+        zip_content = fs.read()
+        logger.warning("Starting zip deployment. This operation can take a while to complete ...")
+        res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
+        logger.warning("Deployment endpoint responded with status code %d", res.status_code)
+
+    # check the status of async deployment
+    if res.status_code == 202:
+        response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
+                                                headers, timeout)
+        return response
+
+    # check if there's an ongoing process
+    if res.status_code == 409:
+        raise UnclassifiedUserFault("There may be an ongoing deployment. Please track your deployment in {}"
+                                    .format(deployment_status_url))
+
+    # check if an error occured during deployment
+    if res.status_code:
+        raise AzureInternalError("An error occured during deployment. Status Code: {}, Details: {}"
+                                 .format(res.status_code, res.text))
 
 
 def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None):
@@ -4280,7 +4326,8 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, slot
             num_trials = num_trials + 1
 
         if res_dict.get('status', 0) == 3:
-            _configure_default_logging(cmd, rg_name, name)
+            if not is_flex_functionapp(cmd, rg_name, name):
+                _configure_default_logging(cmd, rg_name, name)
             raise CLIError("Zip deployment failed. {}. Please run the command az webapp log deployment show "
                            "-n {} -g {}".format(res_dict, name, rg_name))
         if res_dict.get('status', 0) == 4:
@@ -4289,7 +4336,8 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, slot
             logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
     # if the deployment is taking longer than expected
     if res_dict.get('status', 0) != 4:
-        _configure_default_logging(cmd, rg_name, name)
+        if not is_flex_functionapp(cmd, rg_name, name):
+            _configure_default_logging(cmd, rg_name, name)
         raise CLIError("""Timeout reached by the command, however, the deployment operation
                        is still on-going. Navigate to your scm site to check the deployment status""")
     return res_dict
