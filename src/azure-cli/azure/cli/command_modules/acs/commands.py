@@ -141,6 +141,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'aks_nodepool_snapshot_show',
                               table_transformer=aks_show_nodepool_snapshot_table_format)
         g.custom_command('create', 'aks_nodepool_snapshot_create', supports_no_wait=True)
+        g.custom_command('update', 'aks_nodepool_snapshot_update')
         g.custom_command('delete', 'aks_nodepool_snapshot_delete', supports_no_wait=True)
         g.wait_command('wait')
 

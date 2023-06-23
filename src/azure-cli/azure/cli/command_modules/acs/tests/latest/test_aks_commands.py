@@ -7106,6 +7106,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         })
         print("The snapshot resource id %s " % snapshot_resource_id)
 
+        # update tags on nodepool snapshot
+        update_snapshot_cmd = 'aks nodepool snapshot update --resource-group {resource_group} --name {snapshot_name} --tags {tags} -o json'
+        response = self.cmd(update_snapshot_cmd, checks=[
+            self.check('creationData.sourceResourceId', nodepool_resource_id)
+        ]).get_output_in_json()
+
         # delete the original AKS cluster
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
