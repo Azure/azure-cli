@@ -2987,7 +2987,7 @@ class AppConfigSnapshotLiveScenarioTest(ScenarioTest):
         self.assertRaises(KeyError, lambda: created_snapshot['created'])
         
         # Test listing snapshots
-        created_snapshots = self.cmd('appconfig snapshot list --connection-string {connection_string} --fields name status items_count filters').get_output_in_json()
+        created_snapshots = self.cmd('appconfig snapshot list --snapshot-name * --connection-string {connection_string} --fields name status items_count filters').get_output_in_json()
         self.assertEqual(created_snapshots[0]['items_count'], 2)
         self.assertEqual(created_snapshots[0]['status'], 'ready')
         self.assertDictEqual(created_snapshots[0]['filters'][0], filter_dict)
