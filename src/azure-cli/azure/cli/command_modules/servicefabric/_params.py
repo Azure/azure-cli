@@ -285,12 +285,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('direction', help='possible values are <inbound> or <outbound>')
         c.argument('description', help='network security rule description')
         c.argument('priority', help='integer that shows priority for rule')
-        c.argument('protocol',  help='enter one of the following: tcp, htpps, http, udp, icmp, ah, esp, any')
-        c.argument('source_port_ranges', options_list=['--source_port_ranges'], nargs='+', help='A single or space separated list of source port ranges')
-        c.argument('destination_port_ranges', options_list=['--destination_port_ranges'], nargs='+', help='A single or space separated list of destination port ranges')
-        c.argument('source_address_prefixes', options_list=['--source_address_prefixes'], nargs='+', help='A single or space separated list of source address prefixes')
-        c.argument('destination_address_prefixes', options_list=['--destination_address_prefixes'], nargs='+', help='A single or space separated list of destination address prefixes')
-
+        c.argument('protocol', help='enter one of the following: tcp, htpps, http, udp, icmp, ah, esp, any')
+        c.argument('source_port_ranges', options_list=['--source-port-ranges'], nargs='+', help='A single or space separated list of source port ranges')
+        c.argument('dest_port_ranges', options_list=['--dest-port-ranges'], nargs='+', help='A single or space separated list of destination port ranges')
+        c.argument('source_addr_prefixes', options_list=['--source-addr-prefixes'], nargs='+', help='A single or space separated list of source address prefixes')
+        c.argument('dest_addr_prefixes', options_list=['--dest-addr-prefixes'], nargs='+', help='A single or space separated list of destination address prefixes')
     # managed node type
     capacity = CLIArgumentType(
         options_list=['--capacity'],

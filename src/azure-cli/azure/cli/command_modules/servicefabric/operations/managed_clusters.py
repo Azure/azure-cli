@@ -220,9 +220,9 @@ def add_network_security_rule(cmd,
                               protocol=None,
                               priority=None,
                               source_port_ranges=None,
-                              destination_port_ranges=None,
-                              destination_address_prefixes=None,
-                              source_address_prefixes=None):
+                              dest_port_ranges=None,
+                              dest_addr_prefixes=None,
+                              source_addr_prefixes=None):
     try:
         cluster = client.managed_clusters.get(resource_group_name, cluster_name)
 
@@ -230,15 +230,15 @@ def add_network_security_rule(cmd,
             cluster.network_security_rules = []
 
         new_network_securityRule = NetworkSecurityRule(name=name,
-                                                     access=access,
-                                                     description=description,
-                                                     direction=direction,
-                                                     protocol= '*' if protocol == 'any' else protocol,
-                                                     priority=priority,
-                                                     source_port_ranges=source_port_ranges,
-                                                     destination_port_ranges=destination_port_ranges,
-                                                     destination_address_prefixes=destination_address_prefixes,
-                                                     source_address_prefixes=source_address_prefixes)
+                                                       access=access,
+                                                       description=description,
+                                                       direction=direction,
+                                                       protocol='*' if protocol == 'any' else protocol,
+                                                       priority=priority,
+                                                       source_port_ranges=source_port_ranges,
+                                                       destination_port_ranges=dest_port_ranges,
+                                                       destination_address_prefixes=dest_addr_prefixes,
+                                                       source_address_prefixes=source_addr_prefixes)
 
         cluster.network_security_rules.append(new_network_securityRule)
 
