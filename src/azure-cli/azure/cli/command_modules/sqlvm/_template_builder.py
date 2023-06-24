@@ -56,7 +56,13 @@ def build_ama_install_resource(vmname, vm_location):
     return ama_install_resource
 
 
-def build_dcr_resource(dcr_name, location, workspace_name, workspace_res_id, dce_resource_id, dce_name):
+def build_dcr_resource(
+        dcr_name,
+        location,
+        workspace_name,
+        workspace_res_id,
+        dce_resource_id,
+        dce_name):
 
     dcr = {
         "type": "Microsoft.Insights/dataCollectionRules",
@@ -90,7 +96,7 @@ def build_dcr_resource(dcr_name, location, workspace_name, workspace_res_id, dce
                         ],
                         "filePatterns": [
                             "C:\\Windows\\System32\\config\\systemprofile\\AppData\\"
-                                "Local\\Microsoft SQL Server IaaS Agent\\Assessment\\*.csv"
+                            "Local\\Microsoft SQL Server IaaS Agent\\Assessment\\*.csv"
                         ],
                         "format": "text",
                         "settings": {
@@ -128,46 +134,26 @@ def build_dcr_resource(dcr_name, location, workspace_name, workspace_res_id, dce
     return dcr
 
 
-def build_dcr_vm_linkage_resource(vmname, association_name, dcr_resource_id, dcr_name):
+def build_dcr_vm_linkage_resource(
+        vmname,
+        association_name,
+        dcr_resource_id,
+        dcr_name):
 
     scope = "Microsoft.Compute/virtualMachines/" + vmname
     link_resources = {
         "type": "Microsoft.Insights/dataCollectionRuleAssociations",
-        "apiVersion": "2021-09-01-preview",
+        "apiVersion": "2022-06-01",
         "scope": scope,
         "name": association_name,
         "dependsOn": [
                 f"[resourceId('Microsoft.Insights/dataCollectionRules', '{dcr_name}')]"
         ],
         "properties": {
-            "description": "Association of data collection rule. Deleting this"
-            " association will break the data collection for this virtual machine.",
+            "description": "Association of data collection rule."
+            "Deleting this association will break the data collection for this virtual machine.",
             "dataCollectionRuleId": dcr_resource_id
         }
     }
 
-    return link_resources
-
-def build_custom_table_resource():
-
-    link_resources = {
-        "type": "Microsoft.OperationalInsights/workspaces/tables",
-        "apiVersion": "2022-10-01",
-        "name": "[concat(parameters('workspaceName'), '/SqlAssessment_CL')]",
-        "properties": {
-            "schema": {
-                "name": "SqlAssessment_CL",
-                "columns": [
-                    {
-                        "name": "TimeGenerated",
-                        "type": "DateTime"
-                    },
-                    {
-                        "name": "RawData",
-                        "type": "String"
-                    }
-                ]
-            }
-        }
-    }
     return link_resources
