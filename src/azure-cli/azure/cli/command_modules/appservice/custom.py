@@ -68,7 +68,7 @@ from .utils import (_normalize_sku,
                     _normalize_location,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
                     get_resource_if_exists, repo_url_to_name, get_token,
-                    app_service_plan_exists, is_centauri_functionapp)
+                    app_service_plan_exists, is_centauri_functionapp, _remove_list_duplicates)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -993,6 +993,7 @@ def show_app(cmd, resource_group_name, name, slot=None):
     if not is_centauri_functionapp(cmd, resource_group_name, name):
         _rename_server_farm_props(app)
         _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
+        _remove_list_duplicates(app)
     return app
 
 
