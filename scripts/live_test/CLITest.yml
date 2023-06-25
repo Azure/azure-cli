@@ -908,20 +908,20 @@ stages:
     displayName: Send Email job
     timeoutInMinutes: 360
     pool:
-      name: ${{ variables.ubuntu_pool }}
+      name: 'pool-ubuntu-2004'
     steps:
       - task: UsePythonVersion@0
         inputs:
           versionSpec: '3.8'
           addToPath: true
           architecture: 'x64'
-#      - task: DownloadBuildArtifacts@0
-#        inputs:
-#          buildType: 'current'
-#          downloadType: 'specific'
-#          downloadPath: '$(System.ArtifactsDirectory)'
-#      - bash: |
-#          set -o errexit
-#          echo "ArtifastsDirectory: $(System.ArtifactsDirectory)"
-#          echo "Send Email"
-#          ls $(System.ArtifactsDirectory)
+      - task: DownloadBuildArtifacts@0
+        inputs:
+          buildType: 'current'
+          downloadType: 'specific'
+          downloadPath: '$(System.ArtifactsDirectory)'
+      - bash: |
+          set -o errexit
+          echo "ArtifastsDirectory: $(System.ArtifactsDirectory)"
+          echo "Send Email"
+          ls $(System.ArtifactsDirectory)
