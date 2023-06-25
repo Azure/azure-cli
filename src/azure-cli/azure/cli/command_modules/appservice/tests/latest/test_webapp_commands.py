@@ -2588,7 +2588,7 @@ class WebappOneDeployScenarioTest(ScenarioTest):
     def test_one_deploy_scm(self, resource_group):
         webapp_name = self.create_random_name('webapp-oneDeploy-test', 40)
         plan_name = self.create_random_name('webapp-oneDeploy-plan', 40)
-        war_file = os.path.join(TEST_DIR, 'sample.war')
+        war_file = os.path.join(TEST_DIR, 'data', 'sample.war')
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
