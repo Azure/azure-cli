@@ -25,9 +25,9 @@ class Delete(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-11-01",
+        "version": "2017-03-30",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachines/{}/extensions/{}", "2022-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachines/{}/extensions/{}", "2017-03-30"],
         ]
     }
 
@@ -35,7 +35,7 @@ class Delete(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_lro_poller(self._execute_operations, None)
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -77,6 +77,10 @@ class Delete(AAZCommand):
     @register_callback
     def post_operations(self):
         pass
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
     class VirtualMachineExtensionsDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -127,7 +131,7 @@ class Delete(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -155,14 +159,75 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2017-03-30",
                     required=True,
                 ),
             }
             return parameters
 
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
+
         def on_200(self, session):
-            pass
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200
+            )
+
+        _schema_on_200 = None
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
+
+            cls._schema_on_200 = AAZObjectType()
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.end_time = AAZStrType(
+                serialized_name="endTime",
+                flags={"read_only": True},
+            )
+            _schema_on_200.error = AAZObjectType()
+            _schema_on_200.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _schema_on_200.start_time = AAZStrType(
+                serialized_name="startTime",
+                flags={"read_only": True},
+            )
+            _schema_on_200.status = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            error = cls._schema_on_200.error
+            error.code = AAZStrType()
+            error.details = AAZListType()
+            error.innererror = AAZObjectType()
+            error.message = AAZStrType()
+            error.target = AAZStrType()
+
+            details = cls._schema_on_200.error.details
+            details.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.error.details.Element
+            _element.code = AAZStrType()
+            _element.message = AAZStrType()
+            _element.target = AAZStrType()
+
+            innererror = cls._schema_on_200.error.innererror
+            innererror.errordetail = AAZStrType()
+            innererror.exceptiontype = AAZStrType()
+
+            return cls._schema_on_200
 
         def on_204(self, session):
             pass

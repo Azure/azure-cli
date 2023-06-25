@@ -1978,27 +1978,6 @@ examples:
     crafted: true
 """
 
-helps['vm extension'] = """
-type: group
-short-summary: Manage extensions on VMs.
-long-summary: >
-    Extensions are small applications that provide post-deployment configuration and automation tasks on Azure virtual machines.
-    For example, if a virtual machine requires software installation, anti-virus protection, or Docker configuration, a VM extension
-    can be used to complete these tasks. Extensions can be bundled with a new virtual machine deployment or run against any existing system.
-"""
-
-helps['vm extension delete'] = """
-type: command
-short-summary: Remove an extension attached to a VM.
-examples:
-  - name: Use a VM name and extension to delete an extension from a VM.
-    text: az vm extension delete -g MyResourceGroup --vm-name MyVm -n extension_name
-  - name: Delete extensions with IDs containing the string "MyExtension" from a VM.
-    text: >
-        az vm extension delete --ids \\
-            $(az resource list --query "[?contains(name, 'MyExtension')].id" -o tsv)
-"""
-
 helps['vm extension image list'] = """
 type: command
 short-summary: List the information on available extensions.
