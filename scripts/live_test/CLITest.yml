@@ -31,7 +31,7 @@ stages:
     # Sometimes the live test will be stuck forever, so the timeout cannot be set to 0, it is recommended to set it to twice the maximum time
     timeoutInMinutes: 600
     strategy:
-      maxParallel: 20
+      maxParallel: 30
       matrix:
         acr:
           Target: acr
@@ -459,7 +459,7 @@ stages:
         condition: and(succeededOrFailed(), eq(variables.Match, '1'))
         inputs:
           PathtoPublish: '/mnt/vss/_work/1/$(Target).windows2019.report.sequential.json'
-          ArtifactName: '$(Target).windows2019.report.sequential.json'
+          ArtifactName: 'livetest'
           publishLocation: 'Container'
 
 - stage: TestMacos
@@ -470,7 +470,7 @@ stages:
     # Sometimes the live test will be stuck forever, so the timeout cannot be set to 0, it is recommended to set it to twice the maximum time
     timeoutInMinutes: 600
     strategy:
-      maxParallel: 20
+      maxParallel: 30
       matrix:
         acr:
           Target: acr
@@ -897,8 +897,8 @@ stages:
       - task: PublishBuildArtifacts@1
         condition: and(succeededOrFailed(), eq(variables.Match, '1'))
         inputs:
-          PathtoPublish: '/mnt/vss/_work/1/$(Target).macos12.report.sequential.json'
-          ArtifactName: '$(Target).macos12.report.sequential.json'
+          PathtoPublish: '/Users/runner/work/1/$(Target).macos12.report.sequential.json'
+          ArtifactName: 'livetest'
           publishLocation: 'Container'
 
 - stage: SendEmail
