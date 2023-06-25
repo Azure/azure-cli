@@ -901,27 +901,27 @@ stages:
           ArtifactName: '$(Target).macos12.report.sequential.json'
           publishLocation: 'Container'
 
-- stage: SendEmail
-  displayName: Send Email
-  jobs:
-  -job: SendEmail
-    displayName: Send email
-    timeoutInMinutes: 360
-    pool:
-      name: ${{ variables.ubuntu_pool }}
-    steps:
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: '3.8'
-          addToPath: true
-          architecture: 'x64'
-      - task: DownloadBuildArtifacts@0
-        inputs:
-          buildType: 'current'
-          downloadType: 'specific'
-          downloadPath: '$(System.ArtifactsDirectory)'
-      - bash: |
-          set -o errexit
-          echo "ArtifastsDirectory: $(System.ArtifactsDirectory)"
-          echo "Send Email"
-          ls $(System.ArtifactsDirectory)
+#- stage: SendEmail
+#  displayName: Send Email
+#  jobs:
+#  -job: SendEmail
+#    displayName: Send email
+#    timeoutInMinutes: 360
+#    pool:
+#      name: ${{ variables.ubuntu_pool }}
+#    steps:
+#      - task: UsePythonVersion@0
+#        inputs:
+#          versionSpec: '3.8'
+#          addToPath: true
+#          architecture: 'x64'
+#      - task: DownloadBuildArtifacts@0
+#        inputs:
+#          buildType: 'current'
+#          downloadType: 'specific'
+#          downloadPath: '$(System.ArtifactsDirectory)'
+#      - bash: |
+#          set -o errexit
+#          echo "ArtifastsDirectory: $(System.ArtifactsDirectory)"
+#          echo "Send Email"
+#          ls $(System.ArtifactsDirectory)
