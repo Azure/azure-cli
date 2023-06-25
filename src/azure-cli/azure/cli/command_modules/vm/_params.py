@@ -1179,10 +1179,9 @@ def load_arguments(self, _):
         c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], help='gallery image definition')
         c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'], help='gallery image version')
 
-    for scope in ['sig show', 'sig image-definition show']:
-        with self.argument_context(scope) as c:
-            c.argument('gallery_name', options_list=['--gallery-name', '-r'], id_part='name', help='gallery name')
-            c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], id_part='child_name_1', help='gallery image definition')
+    with self.argument_context('sig show') as c:
+        c.argument('gallery_name', options_list=['--gallery-name', '-r'], id_part='name', help='gallery name')
+        c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], id_part='child_name_1', help='gallery image definition')
 
     with self.argument_context('sig show') as c:
         c.argument('select', help='The select expression to apply on the operation.')
