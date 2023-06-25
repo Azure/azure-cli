@@ -24,6 +24,7 @@ variables:
 
 stages:
 - stage: Test
+  displayName: Live Test on Windows 2019
   jobs:
   - job: LiveTestPython38
     displayName: Live Test Python 3.8
@@ -462,6 +463,7 @@ stages:
           publishLocation: 'Container'
 
 - stage: Test
+  displayName: Live Test on Macos 12
   jobs:
   - job: LiveTestPython38
     displayName: Live Test Python 3.8
@@ -904,7 +906,6 @@ stages:
   -job: SendEmail
     displayName: Send email
     timeoutInMinutes: 360
-    dependsOn: LiveTestPython38
     condition: succeededOrFailed()
     pool:
       name: ${{ variables.ubuntu_pool }}
