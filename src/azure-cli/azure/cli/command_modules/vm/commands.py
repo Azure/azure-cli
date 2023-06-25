@@ -592,7 +592,6 @@ def load_command_table(self, _):
     with self.command_group('sig image-definition', vm_shared_gallery_image, min_api='2020-09-30', operation_group='shared_galleries',
                             client_factory=cf_shared_gallery_image) as g:
         g.custom_command('list-shared', 'sig_shared_image_definition_list')
-        g.command('show-shared', 'get')
 
     vm_shared_gallery_image_version = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations._shared_gallery_image_versions_operations#SharedGalleryImageVers'

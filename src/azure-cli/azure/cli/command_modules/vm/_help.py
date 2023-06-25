@@ -796,11 +796,6 @@ examples:
             --intent-vm-sizes Standard_E64s_v4 Standard_M416ms_v2
 """
 
-helps['sig'] = """
-type: group
-short-summary: manage shared image gallery
-"""
-
 helps['sig create'] = """
 type: command
 short-summary: Create a shared image gallery.
@@ -813,11 +808,6 @@ examples:
 helps['sig show'] = """
 type: command
 short-summary: Retrieve information about a Shared Image Gallery.
-"""
-
-helps['sig image-definition'] = """
-type: group
-short-summary: Manage shared gallery image with VM
 """
 
 helps['sig image-definition create'] = """
@@ -949,17 +939,6 @@ examples:
     text: |
         az sig image-definition list-shared --gallery-unique-name galleryUniqueName \\
         --location myLocation --shared-to tenant
-"""
-
-helps['sig image-definition show-shared'] = """
-type: command
-short-summary: Get a shared gallery image
-long-summary: Get a shared gallery image that has been shared directly to your subscription or tenant
-examples:
-  - name: Get an image definition in a gallery shared directly to your subscription or tenant in the given location.
-    text: |
-        az sig image-definition show-shared --gallery-unique-name galleryUniqueName \\
-        --gallery-image-definition myGalleryImageName --location myLocation
 """
 
 helps['sig image-definition update'] = """
