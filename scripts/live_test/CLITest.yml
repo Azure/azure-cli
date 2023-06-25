@@ -904,7 +904,7 @@ stages:
 - stage: SendEmail
   displayName: Send Email
   jobs:
-  -job: SendEmail
+  - job: SendEmail
     displayName: Send Email job
     timeoutInMinutes: 360
     pool:
@@ -915,13 +915,13 @@ stages:
           versionSpec: '3.8'
           addToPath: true
           architecture: 'x64'
-#      - task: DownloadBuildArtifacts@0
-#        inputs:
-#          buildType: 'current'
-#          downloadType: 'specific'
-#          downloadPath: '$(System.ArtifactsDirectory)'
-#      - bash: |
-#          set -o errexit
-#          echo "ArtifastsDirectory: $(System.ArtifactsDirectory)"
-#          echo "Send Email"
-#          ls $(System.ArtifactsDirectory)
+      - task: DownloadBuildArtifacts@0
+        inputs:
+          buildType: 'current'
+          downloadType: 'specific'
+          downloadPath: '$(System.ArtifactsDirectory)'
+      - bash: |
+          set -o errexit
+          echo "ArtifastsDirectory: $(System.ArtifactsDirectory)"
+          echo "Send Email"
+          ls $(System.ArtifactsDirectory)
