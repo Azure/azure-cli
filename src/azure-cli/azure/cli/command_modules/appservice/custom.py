@@ -3688,7 +3688,7 @@ def get_app_insights_key(cli_ctx, resource_group, name):
 def create_flex_app_service_plan(cmd, resource_group_name, name, location):
     SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
     client = web_client_factory(cmd.cli_ctx)
-    sku_def = SkuDescription(tier="FlexConsumption", name="FC1", size="FC", family="FC")
+    sku_def = SkuDescription(tier="FlexConsumption", name="FL1", size="FL", family="FL")
     plan_def = AppServicePlan(
         location=location,
         sku=sku_def,
