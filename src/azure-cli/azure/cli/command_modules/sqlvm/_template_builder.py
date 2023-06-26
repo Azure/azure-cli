@@ -36,7 +36,7 @@ def build_dce_resource(name, location):
     return dce_resource
 
 
-def build_ama_install_resource(vmname, vm_location, resource_group, curr_sub):
+def build_ama_install_resource(vmname, vm_location):
 
     name = vmname + "/AzureMonitorWindowsAgent"
     ama_install_resource = {

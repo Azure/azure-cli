@@ -40,10 +40,13 @@ from ._util import (
     create_custom_table,
     validate_dcr,
     does_name_exist,
-    create_dcra
+    create_ama_and_dcra
 )
 
-from azure.cli.command_modules.sqlvm._template_builder import *
+from azure.cli.command_modules.sqlvm._template_builder import (
+    build_dcr_resource,
+    build_dce_resource
+)
 import re
 
 # from azure.mgmt.resource import ResourceManagementClient
@@ -598,10 +601,6 @@ def validate_azure_ad_auth(cmd, sql_virtual_machine_name, resource_group_name, m
 
     return passing_validation_message
 
-
-def sqlvm_add_to_group(client, cmd, sql_virtual_machine_name, resource_group_name,
-                       sql_virtual_machine_group_resource_id, sql_service_account_password=None,
-                       cluster_operator_account_password=None, cluster_bootstrap_account_password=None):
 def sqlvm_add_to_group(
         client,
         cmd,
@@ -1018,7 +1017,9 @@ def set_assessment_properties(
             #amainstall = build_ama_install_resource(sql_virtual_machine_name, vm.location, resource_group_name, curr_subscription)
             #master_template.add_resource(amainstall)
 
-            vm_resource_uri = f"subscriptions/{curr_subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute/virtualMachines/{sql_virtual_machine_name}"
+            create_ama_and_dcra(cmd, curr_subscription, resource_group_name, sql_virtual_machine_name, workspace_id, workspace_loc, dcr_resource_id)
+
+            """vm_resource_uri = f"subscriptions/{curr_subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute/virtualMachines/{sql_virtual_machine_name}"
             base_url = f"https://management.azure.com/{vm_resource_uri}/providers/Microsoft.Insights/dataCollectionRuleAssociations/"
             api_version = "?api-version=2022-06-01"
             for index in count(start=1):
@@ -1038,14 +1039,14 @@ def set_assessment_properties(
                     body=body)
             except Exception as e:
                 raise AzureResponseError(
-                    f"Creating new DCRA for DCR {dcr_name} failed with error {e}")
+                    f"Creating new DCRA for DCR {dcr_name} failed with error {e}")"""
 
         else:
 
             # DCR and DCE were validated
             # build ARM template for linkage resource and AMA installation
-            print("DCR DCE VAlidated. Reusing and building only partial template")
-            master_template = ArmTemplateBuilder20190401()
+            create_ama_and_dcra(cmd, curr_subscription, resource_group_name, sql_virtual_machine_name, workspace_id, workspace_loc, validated_dcr_res_id)
+            """master_template = ArmTemplateBuilder20190401()
             vm_resource_uri = f"subscriptions/{curr_subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute/virtualMachines/{sql_virtual_machine_name}"
             base_url = f"https://management.azure.com/{vm_resource_uri}/providers/Microsoft.Insights/dataCollectionRuleAssociations/"
             api_version = "?api-version=2022-06-01"
@@ -1089,7 +1090,7 @@ def set_assessment_properties(
             LongRunningOperation(cmd.cli_ctx)(client.begin_create_or_update(resource_group_name, deployment_name, deployment))
             # url = f"https://management.azure.com/subscriptions/{curr_subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute/virtualMachines/{sql_virtual_machine_name}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{dcra_name}?api-version=2022-06-01"
             # Define the request headers
-            print("success")
+              print("success")
 
             headers = [
                 'Content-Type=application/json'
@@ -1107,7 +1108,7 @@ def set_assessment_properties(
                 print(
                     f"Creating new DCRA for DCR {dcr_name} failed with error {e}")
 
-                # raise AzureResponseError(f"Creating new DCRA for DCR {dcr_name} failed with error {e}")
+                # raise AzureResponseError(f"Creating new DCRA for DCR {dcr_name} failed with error {e}")"""
             return
 
     elif enable_assessment is False:

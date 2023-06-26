@@ -14,6 +14,11 @@ from azure.cli.command_modules.vm.custom import (
 from ._assessment_data_source import data_source_name
 from ._assessment_data_source import custom_log_name, dcr_source_pattern
 from azure.cli.core.util import send_raw_request
+from ._template_builder import build_ama_install_resource, build_dcr_vm_linkage_resource
+from azure.cli.command_modules.vm._vm_utils import ArmTemplateBuilder20190401
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
+from azure.cli.core.commands import LongRunningOperation
 
 WINDOWS_LA_EXT_NAME = 'MicrosoftMonitoringAgent'
 WINDOWS_LA_EXT_PUBLISHER = 'Microsoft.EnterpriseCloud.Monitoring'
@@ -230,23 +235,34 @@ def create_dcra(dcr_res_id):
 
     return body
 
-def create_and_send_dcra(cmd, curr_subscription, resource_group_name, sql_virtual_machine_name, workspace_id, workspace_loc, dcr_id, validated_dcr_res_id):
+def create_ama_and_dcra(cmd, curr_subscription, resource_group_name,
+                        sql_virtual_machine_name, workspace_id, workspace_loc, dcr_id):
     master_template = ArmTemplateBuilder20190401()
-    vm_resource_uri = f"subscriptions/{curr_subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute/virtualMachines/{sql_virtual_machine_name}"
-    base_url = f"https://management.azure.com/{vm_resource_uri}/providers/Microsoft.Insights/dataCollectionRuleAssociations/"
+
+    vm_resource_uri = (f"subscriptions/{curr_subscription}/"
+            f"resourceGroups/{resource_group_name}/"
+            f"providers/Microsoft.Compute/virtualMachines/{sql_virtual_machine_name}/")
+
+    base_url = (f"https://management.azure.com/{vm_resource_uri}/"
+                f"providers/Microsoft.Insights/dataCollectionRuleAssociations/")
     api_version = "?api-version=2022-06-01"
+    from itertools import count
+    from azure.cli.core.profiles import ResourceType
+    from azure.cli.core.util import random_string
     for index in count(start=1):
         dcra_name = f"{workspace_id}_{workspace_loc}_DCRA_{index}"
         dcra_url = f"{base_url}{dcra_name}{api_version}"
         if not does_name_exist(cmd, dcra_url):
             break
+    from azure.cli.command_modules.vm.custom import get_vm
+
     vm = get_vm(
         cmd,
         resource_group_name,
         sql_virtual_machine_name,
         'instanceView')
     amainstall = build_ama_install_resource(
-        sql_virtual_machine_name, vm.location, resource_group_name, curr_subscription)
+        sql_virtual_machine_name, vm.location)
 
     master_template.add_resource(amainstall)
 
@@ -272,26 +288,10 @@ def create_and_send_dcra(cmd, curr_subscription, resource_group_name, sql_virtua
 
     # creates the AMA DEPLOYMENT
 
-    LongRunningOperation(cmd.cli_ctx)(client.begin_create_or_update(resource_group_name, deployment_name, deployment))
-    # url = f"https://management.azure.com/subscriptions/{curr_subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute/virtualMachines/{sql_virtual_machine_name}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{dcra_name}?api-version=2022-06-01"
-    # Define the request headers
-    print("success")
-
-    headers = [
-        'Content-Type=application/json'
-    ]
-    body = create_dcra(validated_dcr_res_id)
-
-    try:
-        send_raw_request(
-            cmd.cli_ctx,
-            method='PUT',
-            url=dcra_url,
-            headers=headers,
-            body=body)
-    except Exception as e:
-        print(
-            f"Creating new DCRA for DCR {dcr_name} failed with error {e}")
-
-        # raise AzureResponseError(f"Creating new DCRA for DCR {dcr_name} failed with error {e}")
-    return
+    LongRunningOperation(cmd.cli_ctx)(client.begin_create_or_update(
+        resource_group_name, deployment_name, deployment))
+    """# url = f"https://management.azure.com/subscriptions/
+    {curr_subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute/
+    virtualMachines/{sql_virtual_machine_name}/providers/Microsoft.Insights/dataCollectionRuleAssociations/
+    {dcra_name}?api-version=2022-06-01"
+    # Define the request headers"""
