@@ -11,14 +11,24 @@
 from azure.cli.core.aaz import *
 
 
-class ListBySub(AAZCommand):
-    """List the DNS zones in all resource groups in a subscription.
+@register_command(
+    "network dns zone list",
+)
+class List(AAZCommand):
+    """List the DNS zones.
+
+    :example: List DNS zones in a resource group.
+        az network dns zone list -g MyResourceGroup
+
+    :example: List DNS zones in all resource groups in the subscription.
+        az network dns zone list
     """
 
     _aaz_info = {
         "version": "2023-07-01-preview",
         "resources": [
             ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/dnszones", "2023-07-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/dnszones", "2023-07-01-preview"],
         ]
     }
 
@@ -37,15 +47,21 @@ class ListBySub(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
+        _args_schema.resource_group = AAZResourceGroupNameArg()
         _args_schema.top = AAZIntArg(
             options=["--top"],
-            help="The maximum number of DNS zones to return. If not specified, returns up to 100 zones.",
+            help="The maximum number of record sets to return. If not specified, returns up to 100 record sets.",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.ZonesList(ctx=self.ctx)()
+        condition_0 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_1 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
+        if condition_0:
+            self.ZonesList(ctx=self.ctx)()
+        if condition_1:
+            self.ZonesListByResourceGroup(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -75,7 +91,7 @@ class ListBySub(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/dnszones",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/dnsZones",
                 **self.url_parameters
             )
 
@@ -205,11 +221,231 @@ class ListBySub(AAZCommand):
 
             registration_virtual_networks = cls._schema_on_200.value.Element.properties.registration_virtual_networks
             registration_virtual_networks.Element = AAZObjectType()
-            _ListBySubHelper._build_schema_sub_resource_read(registration_virtual_networks.Element)
+            _ListHelper._build_schema_sub_resource_read(registration_virtual_networks.Element)
 
             resolution_virtual_networks = cls._schema_on_200.value.Element.properties.resolution_virtual_networks
             resolution_virtual_networks.Element = AAZObjectType()
-            _ListBySubHelper._build_schema_sub_resource_read(resolution_virtual_networks.Element)
+            _ListHelper._build_schema_sub_resource_read(resolution_virtual_networks.Element)
+
+            signing_keys = cls._schema_on_200.value.Element.properties.signing_keys
+            signing_keys.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.signing_keys.Element
+            _element.delegation_signer_info = AAZListType(
+                serialized_name="delegationSignerInfo",
+                flags={"read_only": True},
+            )
+            _element.flags = AAZIntType(
+                flags={"read_only": True},
+            )
+            _element.key_tag = AAZIntType(
+                serialized_name="keyTag",
+                flags={"read_only": True},
+            )
+            _element.protocol = AAZIntType(
+                flags={"read_only": True},
+            )
+            _element.public_key = AAZStrType(
+                serialized_name="publicKey",
+                flags={"read_only": True},
+            )
+            _element.security_algorithm_type = AAZIntType(
+                serialized_name="securityAlgorithmType",
+            )
+
+            delegation_signer_info = cls._schema_on_200.value.Element.properties.signing_keys.Element.delegation_signer_info
+            delegation_signer_info.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.signing_keys.Element.delegation_signer_info.Element
+            _element.digest_algorithm_type = AAZIntType(
+                serialized_name="digestAlgorithmType",
+            )
+            _element.digest_value = AAZStrType(
+                serialized_name="digestValue",
+                flags={"read_only": True},
+            )
+            _element.record = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            system_data = cls._schema_on_200.value.Element.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
+            )
+
+            tags = cls._schema_on_200.value.Element.tags
+            tags.Element = AAZStrType()
+
+            return cls._schema_on_200
+
+    class ZonesListByResourceGroup(AAZHttpOperation):
+        CLIENT_TYPE = "MgmtClient"
+
+        def __call__(self, *args, **kwargs):
+            request = self.make_request()
+            session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [200]:
+                return self.on_200(session)
+
+            return self.on_error(session.http_response)
+
+        @property
+        def url(self):
+            return self.client.format_url(
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsZones",
+                **self.url_parameters
+            )
+
+        @property
+        def method(self):
+            return "GET"
+
+        @property
+        def error_format(self):
+            return "ODataV4Format"
+
+        @property
+        def url_parameters(self):
+            parameters = {
+                **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def query_parameters(self):
+            parameters = {
+                **self.serialize_query_param(
+                    "$top", self.ctx.args.top,
+                ),
+                **self.serialize_query_param(
+                    "api-version", "2023-07-01-preview",
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
+
+        def on_200(self, session):
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200
+            )
+
+        _schema_on_200 = None
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
+
+            cls._schema_on_200 = AAZObjectType()
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.next_link = AAZStrType(
+                serialized_name="nextLink",
+                flags={"read_only": True},
+            )
+            _schema_on_200.value = AAZListType()
+
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element
+            _element.etag = AAZStrType()
+            _element.id = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.location = AAZStrType(
+                flags={"required": True},
+            )
+            _element.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
+            _element.tags = AAZDictType()
+            _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.value.Element.properties
+            properties.max_number_of_record_sets = AAZIntType(
+                serialized_name="maxNumberOfRecordSets",
+                flags={"read_only": True},
+            )
+            properties.max_number_of_records_per_record_set = AAZIntType(
+                serialized_name="maxNumberOfRecordsPerRecordSet",
+                flags={"read_only": True},
+            )
+            properties.name_servers = AAZListType(
+                serialized_name="nameServers",
+                flags={"read_only": True},
+            )
+            properties.number_of_record_sets = AAZIntType(
+                serialized_name="numberOfRecordSets",
+                flags={"read_only": True},
+            )
+            properties.registration_virtual_networks = AAZListType(
+                serialized_name="registrationVirtualNetworks",
+            )
+            properties.resolution_virtual_networks = AAZListType(
+                serialized_name="resolutionVirtualNetworks",
+            )
+            properties.signing_keys = AAZListType(
+                serialized_name="signingKeys",
+                flags={"read_only": True},
+            )
+            properties.zone_type = AAZStrType(
+                serialized_name="zoneType",
+            )
+
+            name_servers = cls._schema_on_200.value.Element.properties.name_servers
+            name_servers.Element = AAZStrType()
+
+            registration_virtual_networks = cls._schema_on_200.value.Element.properties.registration_virtual_networks
+            registration_virtual_networks.Element = AAZObjectType()
+            _ListHelper._build_schema_sub_resource_read(registration_virtual_networks.Element)
+
+            resolution_virtual_networks = cls._schema_on_200.value.Element.properties.resolution_virtual_networks
+            resolution_virtual_networks.Element = AAZObjectType()
+            _ListHelper._build_schema_sub_resource_read(resolution_virtual_networks.Element)
 
             signing_keys = cls._schema_on_200.value.Element.properties.signing_keys
             signing_keys.Element = AAZObjectType()
@@ -278,8 +514,8 @@ class ListBySub(AAZCommand):
             return cls._schema_on_200
 
 
-class _ListBySubHelper:
-    """Helper class for ListBySub"""
+class _ListHelper:
+    """Helper class for List"""
 
     _schema_sub_resource_read = None
 
@@ -297,4 +533,4 @@ class _ListBySubHelper:
         _schema.id = cls._schema_sub_resource_read.id
 
 
-__all__ = ["ListBySub"]
+__all__ = ["List"]

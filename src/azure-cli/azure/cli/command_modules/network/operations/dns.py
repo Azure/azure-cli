@@ -6,10 +6,42 @@
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
 from knack.log import get_logger
 
-from azure.cli.core.aaz import has_value, register_command, AAZResourceIdArgFormat
+from azure.cli.core.aaz import has_value, register_command, AAZResourceIdArgFormat, AAZListArg, AAZResourceIdArg
 from ..aaz.latest.network.dns.record_set import Update as _RecordSetUpdate
+from ..aaz.latest.network.dns._list_references import ListReferences as _DNSListReferences
 
 logger = get_logger(__name__)
+
+
+@register_command("network dns list-references")
+class DNSListReferences(_DNSListReferences):
+    """ Returns the DNS records specified by the referencing targetResourceIds.
+
+    :example: Returns the DNS records specified by the referencing targetResourceIds.
+        az network dns list-references --parameters "/subscriptions/**921/resourceGroups/MyResourceGroup/providers/Microsoft.Network/trafficManagerProfiles/MyTrafficManager"
+    """
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.target_resources._registered = False
+
+        args_schema.parameters = AAZListArg(
+            options=["--parameters"],
+            help="A space-separated list of resource IDs for which referencing dns records need to be queried.",
+        )
+
+        parameters = args_schema.parameters
+        parameters.Element = AAZResourceIdArg()
+
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        parameters = args.parameters
+        if parameters is not None:
+            args.target_resources = []
+            for parameter in parameters:
+                args.target_resources.append({"id": parameter})
 
 
 class RecordSetUpdate(_RecordSetUpdate):

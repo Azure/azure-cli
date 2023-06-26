@@ -11,8 +11,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import get_api_version, ResourceType
 
 from azure.cli.command_modules.network._client_factory import (
-    cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
-    cf_dns_references)
+    cf_dns_mgmt_record_sets, cf_dns_mgmt_zones)
 from azure.cli.command_modules.network._format import (
     transform_local_gateway_table_output, transform_dns_record_set_output,
     transform_dns_record_set_table_output, transform_dns_zone_table_output,
@@ -49,13 +48,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.dns.operations#RecordSetsOperations.{}',
         client_factory=cf_dns_mgmt_record_sets,
         resource_type=ResourceType.MGMT_NETWORK_DNS
-    )
-
-    network_dns_reference_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.dns.operations#DnsResourceReferenceOperations.{}',
-        client_factory=cf_dns_references,
-        resource_type=ResourceType.MGMT_NETWORK_DNS,
-        min_api='2018-05-01'
     )
     # endregion
 
@@ -217,16 +209,15 @@ def load_command_table(self, _):
     # endregion
 
     # region DNS
-    with self.command_group('network dns', network_dns_reference_sdk, resource_type=ResourceType.MGMT_NETWORK_DNS) as g:
-        g.custom_command('list-references', 'get_by_target_resources')
+    from .operations.dns import DNSListReferences
+    self.command_table["network dns list-references"] = DNSListReferences(loader=self)
 
     with self.command_group('network dns zone', network_dns_zone_sdk) as g:
-        g.custom_command('delete', 'delete_dns_zone', confirmation=True)
-        g.custom_show_command('show', 'show_dns_zone', table_transformer=transform_dns_zone_table_output)
-        g.custom_command('list', 'list_dns_zones', table_transformer=transform_dns_zone_table_output)
         g.custom_command('import', 'import_zone')
         g.custom_command('export', 'export_zone')
         g.custom_command('create', 'create_dns_zone', table_transformer=transform_dns_zone_table_output)
+        g.custom_command('update', 'update_dns_zone', table_transformer=transform_dns_zone_table_output)
+        g.custom_command('delete', 'delete_dns_zone', confirmation=True)
 
     api_version = str(get_api_version(self.cli_ctx, ResourceType.MGMT_NETWORK_DNS))
     api_version = api_version.replace('-', '_')

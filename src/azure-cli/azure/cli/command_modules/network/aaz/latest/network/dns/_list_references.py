@@ -13,6 +13,9 @@ from azure.cli.core.aaz import *
 
 class ListReferences(AAZCommand):
     """Returns the DNS records specified by the referencing targetResourceIds.
+
+    :example: List DNS records referencing the target resource IDs.
+        az network dns list-references --parameters /subscriptions/**921/resourceGroups/MyRg/providers/Microsoft.Network/trafficManagerProfiles/MyTm
     """
 
     _aaz_info = {

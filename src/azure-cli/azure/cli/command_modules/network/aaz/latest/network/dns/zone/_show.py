@@ -11,8 +11,14 @@
 from azure.cli.core.aaz import *
 
 
+@register_command(
+    "network dns zone show",
+)
 class Show(AAZCommand):
     """Get a DNS zone. Retrieves the zone properties, but not the record sets within the zone.
+
+    :example: Get a DNS zone.
+        az network dns zone show -g MyResourceGroup -n www.mysite.com
     """
 
     _aaz_info = {

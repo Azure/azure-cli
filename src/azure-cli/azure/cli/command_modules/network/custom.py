@@ -63,9 +63,7 @@ from .aaz.latest.network.custom_ip.prefix import Update as _CustomIpPrefixUpdate
 from .aaz.latest.network.dns.record_set import Create as _DNSRecordSetCreate, Delete as _DNSRecordSetDelete, \
     ListByType as _DNSRecordSetListByType, Show as _DNSRecordSetShow, Update as _DNSRecordSetUpdate, \
     List as _DNSRecordSetListByZone
-from .aaz.latest.network.dns.zone import Create as _DNSZoneCreate, Delete as _DNSZoneDelete, \
-    ListByRg as _DNSZoneListByRg, Show as _DNSZoneShow, Update as _DNSZoneUpdate, ListBySub as _DNSZoneListBySub
-from .aaz.latest.network.dns import ListReferences as _DNSListReferences
+from .aaz.latest.network.dns.zone import Create as _DNSZoneCreate, Delete as _DNSZoneDelete, Update as _DNSZoneUpdate
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
 from .aaz.latest.network.express_route.gateway import Create as _ExpressRouteGatewayCreate, \
     Update as _ExpressRouteGatewayUpdate
@@ -2387,23 +2385,6 @@ def _convert_to_snake_case(element):
     return element
 
 
-def get_by_target_resources(cmd, parameters):
-    target_resources_dict = []
-    for target_resource in parameters:
-        target_resources_dict.append({"id": target_resource.id})
-
-    return _DNSListReferences(cli_ctx=cmd.cli_ctx)(command_args={
-        "target_resources": target_resources_dict,
-    })
-
-
-def show_dns_zone(cmd, resource_group_name, zone_name):
-    return _DNSZoneShow(cli_ctx=cmd.cli_ctx)(command_args={
-        "resource_group": resource_group_name,
-        "zone_name": zone_name
-    })
-
-
 def add_dns_delegation(cmd, child_zone, parent_zone, child_rg, child_zone_name):
     """
      :param child_zone: the zone object corresponding to the child that is created.
@@ -2496,15 +2477,6 @@ def update_dns_zone(cmd, resource_group_name, zone_name, tags=None, zone_type=No
         zone["registration_virtual_networks"] = registration_vnets_dict
 
     return _DNSZoneUpdate(cli_ctx=cmd.cli_ctx)(command_args=zone)
-
-
-def list_dns_zones(cmd, resource_group_name=None):
-    if resource_group_name:
-        return _DNSZoneListByRg(cli_ctx=cmd.cli_ctx)(command_args={
-            "resource_group": resource_group_name
-        })
-
-    return _DNSZoneListBySub(cli_ctx=cmd.cli_ctx)(command_args={})
 
 
 def delete_dns_zone(cmd, resource_group_name, zone_name, if_match=None):
