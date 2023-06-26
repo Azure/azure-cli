@@ -1025,7 +1025,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
         data_encryption=data_encryption,
         create_mode="Replica")
 
-    if location != source_server_object.location and any((vnet, subnet, private_dns_zone_arguments)):
+    if any((vnet, subnet, private_dns_zone_arguments)):
         parameters.network = flexible_server_exist_network_resource(cmd,
                                                                     resource_group_name,
                                                                     replica_name,
@@ -1033,9 +1033,8 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
                                                                     private_dns_zone_arguments,
                                                                     vnet,
                                                                     subnet)
-    resolve_poller(
-        client.begin_create(resource_group_name, replica_name, parameters), cmd.cli_ctx,
-        'Create Replica')
+
+    resolve_poller(client.begin_create(resource_group_name, replica_name, parameters), cmd.cli_ctx,'Create Replica')
 
     replica_server_object = client.get(resource_group_name, replica_name)
     replica_server_network = replica_server_object.network
