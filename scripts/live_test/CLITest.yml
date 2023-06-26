@@ -467,6 +467,8 @@ stages:
           cd ..
           pwd
           workDir=$(pwd)
+          echo "##vso[task.setvariable variable=workDir]$workDir"
+          echo "##vso[task.setvariable variable=platform]ubuntu2004"
           ls
           # ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
           git config --global user.email "AzurePipelines"
@@ -492,7 +494,6 @@ stages:
   
           python -m venv env
           source env/bin/activate
-          echo "##vso[task.setvariable variable=workDir]$workDir"
   
           pip install azdev pytest-json-report pytest-html pytest-rerunfailures
   
@@ -997,7 +998,7 @@ stages:
         ext-webpubsub:
           Target: ext-webpubsub
     pool:
-      vmImage: 'macOS-12'
+      vmImage: ${{ variables.macos_pool }}
     steps:
       - bash: |
           if [[ "$(USER_TARGET)" =~ "$(Target)" || ("$(USER_TARGET)" == "main" && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "ALL" || "$(USER_TARGET)" == "all" || "$(USER_TARGET)" == "") ]]; then
@@ -1017,6 +1018,8 @@ stages:
           cd ..
           pwd
           workDir=$(pwd)
+          echo "##vso[task.setvariable variable=workDir]$workDir"
+          echo "##vso[task.setvariable variable=platform]macos12"
           ls
           # ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
           git config --global user.email "AzurePipelines"
@@ -1043,7 +1046,6 @@ stages:
           python -m venv env
           source env/bin/activate
           export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
-          echo "##vso[task.setvariable variable=workDir]$workDir"
   
           pip install azdev pytest-json-report pytest-html pytest-rerunfailures
   
@@ -1548,7 +1550,7 @@ stages:
         ext-webpubsub:
           Target: ext-webpubsub
     pool:
-      vmImage: 'macOS-12'
+      name: ${{ variables.windows_pool }}
     steps:
       - bash: |
           if [[ "$(USER_TARGET)" =~ "$(Target)" || ("$(USER_TARGET)" == "main" && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "ALL" || "$(USER_TARGET)" == "all" || "$(USER_TARGET)" == "") ]]; then
@@ -1568,6 +1570,8 @@ stages:
           cd ..
           pwd
           workDir=$(pwd)
+          echo "##vso[task.setvariable variable=workDir]$(Agent.BuildDirectory)"
+          echo "##vso[task.setvariable variable=platform]windows2019"
           ls
           # ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
           git config --global user.email "AzurePipelines"
@@ -1593,7 +1597,6 @@ stages:
   
           python -m venv env
           source env/Scripts/activate
-          echo "##vso[task.setvariable variable=workDir]$(Agent.BuildDirectory)"
   
           pip install azdev pytest-json-report pytest-html pytest-rerunfailures
   
@@ -1682,7 +1685,7 @@ stages:
     timeoutInMinutes: 120
     condition: succeededOrFailed()
     pool:
-      name: 'pool-ubuntu-2004'
+      name: ${{ variables.ubuntu_pool }}
     steps:
       - task: UsePythonVersion@0
         inputs:
