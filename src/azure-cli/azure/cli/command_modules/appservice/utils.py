@@ -223,6 +223,15 @@ def _normalize_location(cmd, location):
     return location
 
 
+def _remove_list_duplicates(webapp):
+    outbound_ips = webapp.possible_outbound_ip_addresses.split(',')
+    outbound_ips_list = list(dict.fromkeys(outbound_ips))
+    outbound_ips_list.sort()
+    outbound_ips = ','.join(outbound_ips_list)
+    del webapp.possible_outbound_ip_addresses
+    setattr(webapp, 'possible_outbound_ip_addresses', outbound_ips)
+
+
 def get_pool_manager(url):
     proxies = urllib.request.getproxies()
     bypass_proxy = urllib.request.proxy_bypass(urllib.parse.urlparse(url).hostname)

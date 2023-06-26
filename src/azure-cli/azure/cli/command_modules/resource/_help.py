@@ -2521,6 +2521,15 @@ examples:
     crafted: true
 """
 
+helps['resource move'] = """
+type: command
+short-summary: Move resources from one resource group to another (can be under different subscription).
+examples:
+  - name: Move multiple resources to the destination resource group under the destination subscription
+    text: >
+        az resource move --destination-group ResourceGroup --destination-subscription-id SubscriptionId --ids "ResourceId1" "ResourceId2" "ResourceId3"
+"""
+
 helps['tag'] = """
 type: group
 short-summary: Tag Management on a resource.
