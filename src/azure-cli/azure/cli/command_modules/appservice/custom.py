@@ -5101,14 +5101,14 @@ def _get_onedeploy_request_body(params):
 
 
 def _update_artifact_type(params):
-    import ntpath
+    import os
 
     if params.artifact_type is not None:
         return
 
     # Interpret deployment type from the file extension if the type parameter is not passed
-    file_name = ntpath.basename(params.src_path)
-    file_extension = file_name.split(".", 1)[1]
+    _, file_extension = os.path.splitext(params.src_path)
+    file_extension = file_extension[1:]
     if file_extension in ('war', 'jar', 'ear', 'zip'):
         params.artifact_type = file_extension
     elif file_extension in ('sh', 'bat'):
