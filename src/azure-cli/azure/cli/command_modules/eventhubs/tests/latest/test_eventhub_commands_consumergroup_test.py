@@ -56,7 +56,7 @@ class EHConsumerGroupCURDScenarioTest(ScenarioTest):
         self.cmd('eventhubs eventhub consumer-group show --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {consumergroupname}', checks=[self.check('name', self.kwargs['consumergroupname'])])
 
         # Update ConsumerGroup
-        self.cmd('eventhubs eventhub consumer-group update --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {consumergroupname} --user-metadata {usermetadata2}', checks=[self.check('userMetadata', self.kwargs['usermetadata2'])])
+        consumer_group = self.cmd('eventhubs eventhub consumer-group update --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {consumergroupname} --user-metadata {usermetadata2}', checks=[self.check('userMetadata', self.kwargs['usermetadata2'])]).get_output_in_json()
         self.assertEqual(consumer_group['name'], self.kwargs['consumergroupname'])
         self.assertEqual(consumer_group['userMetadata'], self.kwargs['usermetadata2'])
         self.assertEqual(consumer_group['location'], self.kwargs['loc'])

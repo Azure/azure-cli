@@ -148,28 +148,30 @@ class EHNamespaceEntityCURDScenarioTest(ScenarioTest):
         self.assertEqual(eh5['captureDescription']['destination']['name'], self.kwargs['destinationname'])
         self.assertEqual(eh5['captureDescription']['destination']['storageAccountResourceId'], self.kwargs['storageid1'])
 
-        identity1 = self.cmd('identity create --name {identity1} --resource-group {rg}').get_output_in_json()
-        self.kwargs.update({'id1': identity1['id']})
-
         identity2 = self.cmd('identity create --name {identity2} --resource-group {rg}').get_output_in_json()
         self.kwargs.update({'id2': identity2['id']})
+        self.kwargs.update({'id3': identity2['principalId']})
 
         storage_account2 = self.cmd(
-            'storage account create -n {storageaccount2} -g {rg} -l westus --sku Standard_RAGRS --identity-type UserAssigned '
-            '--user-identity-id {id2}').get_output_in_json()
+            'storage account create -n {storageaccount2} -g {rg} -l westus --sku Standard_RAGRS ').get_output_in_json()
 
         self.kwargs.update({'storageid2': storage_account2['id']})
 
         container = self.cmd(
             'storage container create -n {containername2} -g {rg} --account-name {storageaccount2}').get_output_in_json()
 
+        '''self.cmd(
+            'az role assignment create --assignee {id3} --role "Storage Blob Data Contributor" --scope {storageid2}')'''
+
         self.cmd(
-            'eventhubs namespace create --resource-group {rg} --name {namespacename2} --location {loc} --tags {tags} --sku Premium ')
+            'eventhubs namespace create --resource-group {rg} --name {namespacename2} --location {loc} --tags {tags} --sku Premium '
+            '--mi-user-assigned {id2}').get_output_in_json()
+        time.sleep(120)
 
         eh6 = self.cmd(
             'eventhubs eventhub create -g {rg} -n {eventhubname6} --namespace-name {namespacename2} --partition-count 15 --enable-capture true --capture-interval 100 --capture-size-limit 314572799 '
             '--destination-name {destinationname} --storage-account {storageid2} --blob-container {containername2} --archive-name-format {archinvenameformat} '
-            '--mi-user-assigned {id1} --identity-type UserAssigned').get_output_in_json()
+            '--mi-user-assigned {id2}').get_output_in_json()
 
         self.cmd('eventhubs eventhub delete --resource-group {rg} --namespace-name {namespacename1} --name {eventhubname4}')
         self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename}')
