@@ -13,7 +13,7 @@ from azure.cli.core.azclierror import (
     MutuallyExclusiveArgumentError,
 )
 
-from azext_aks_preview._consts import (
+from acs._consts import (
     CONST_DAILY_MAINTENANCE_SCHEDULE,
     CONST_WEEKLY_MAINTENANCE_SCHEDULE,
     CONST_ABSOLUTEMONTHLY_MAINTENANCE_SCHEDULE,
@@ -23,7 +23,7 @@ from azext_aks_preview._consts import (
     CONST_NODEOSUPGRADE_CONFIGURATION_NAME,
 )
 
-from azext_aks_preview._client_factory import CUSTOM_MGMT_AKS_PREVIEW
+from acs._client_factory import CUSTOM_MGMT_AKS_PREVIEW
 
 logger = get_logger(__name__)
 
