@@ -25,7 +25,7 @@ import zipfile
 from distutils.version import StrictVersion
 from urllib.error import URLError
 from urllib.request import urlopen
-from acs.maintenanceconfiguration import aks_maintenanceconfiguration_update_internal
+from azure.cli.command_modules.acs.maintenanceconfiguration import aks_maintenanceconfiguration_update_internal
 
 import colorama
 import requests
