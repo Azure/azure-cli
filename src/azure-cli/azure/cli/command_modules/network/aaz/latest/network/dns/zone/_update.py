@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "network dns zone update",
-)
 class Update(AAZCommand):
     """Update a DNS zone. Does not modify DNS records within the zone.
     """

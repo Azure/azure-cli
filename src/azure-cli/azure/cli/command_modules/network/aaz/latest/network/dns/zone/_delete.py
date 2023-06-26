@@ -11,8 +11,15 @@
 from azure.cli.core.aaz import *
 
 
+@register_command(
+    "network dns zone delete",
+    confirmation="Are you sure you want to perform this operation?",
+)
 class Delete(AAZCommand):
     """Delete a DNS zone. WARNING: All DNS records in the zone will also be deleted. This operation cannot be undone.
+
+    :example: Delete a DNS zone using a fully qualified domain name.
+        az network dns zone delete -g MyResourceGroup -n www.mysite.com
     """
 
     _aaz_info = {

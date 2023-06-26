@@ -61,8 +61,7 @@ from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condit
 from .aaz.latest.network.application_gateway.waf_policy.policy_setting import Update as _WAFPolicySettingUpdate
 from .aaz.latest.network.custom_ip.prefix import Update as _CustomIpPrefixUpdate
 from .aaz.latest.network.dns.record_set import Create as _DNSRecordSetCreate, Delete as _DNSRecordSetDelete, \
-    ListByType as _DNSRecordSetListByType, Show as _DNSRecordSetShow, Update as _DNSRecordSetUpdate, \
-    List as _DNSRecordSetListByZone
+    Show as _DNSRecordSetShow, Update as _DNSRecordSetUpdate, List as _DNSRecordSetListByZone
 from .aaz.latest.network.dns.zone import Create as _DNSZoneCreate, Delete as _DNSZoneDelete
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
 from .aaz.latest.network.express_route.gateway import Create as _ExpressRouteGatewayCreate, \
@@ -2466,50 +2465,6 @@ def update_dns_zone(instance, tags=None, zone_type=None, resolution_vnets=None, 
     return instance
 
 
-def delete_dns_zone(cmd, resource_group_name, zone_name, if_match=None):
-    return _DNSZoneDelete(cli_ctx=cmd.cli_ctx)(command_args={
-        "resource_group": resource_group_name,
-        "zone_name": zone_name,
-        "if_match": if_match
-    })
-
-
-def create_dns_record_set(cmd, resource_group_name, zone_name, record_set_name, record_set_type,
-                          metadata=None, if_match=None, if_none_match=None, ttl=3600, target_resource=None):
-    record_set = {
-        "ttl": ttl,
-        "metadata": metadata,
-        "target_resource": {"id": target_resource} if target_resource else None
-    }
-
-    return _DNSRecordSetCreate(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": record_set_name,
-        "zone_name": zone_name,
-        "resource_group": resource_group_name,
-        "record_type": record_set_type,
-        "if_match": if_match,
-        "if_none_match": "*" if if_none_match else None,
-        **record_set
-    })
-
-
-def list_dns_record_set(cmd, resource_group_name, zone_name, record_type):
-    return _DNSRecordSetListByType(cli_ctx=cmd.cli_ctx)(command_args={
-        "record_type": record_type,
-        "resource_group": resource_group_name,
-        "zone_name": zone_name
-    })
-
-
-def show_dns_record_set(cmd, resource_group_name, zone_name, record_set_name, record_type):
-    return _DNSRecordSetShow(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": record_set_name,
-        "record_type": record_type,
-        "resource_group": resource_group_name,
-        "zone_name": zone_name
-    })
-
-
 def show_dns_soa_record_set(cmd, resource_group_name, zone_name, record_type):
     return _DNSRecordSetShow(cli_ctx=cmd.cli_ctx)(command_args={
         "name": "@",
@@ -2519,25 +2474,32 @@ def show_dns_soa_record_set(cmd, resource_group_name, zone_name, record_type):
     })
 
 
-def delete_dns_record_set(cmd, resource_group_name, zone_name, record_set_name, record_type, if_match=None):
-    return _DNSRecordSetDelete(cli_ctx=cmd.cli_ctx)(command_args={
+def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=None,
+                          serial_number=None, refresh_time=None, retry_time=None, expire_time=None,
+                          minimum_ttl=3600, if_none_match=None):
+    record_set_name = '@'
+    record_type = 'soa'
+
+    from .aaz.latest.network.dns.record_set import Show
+    record_set = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "name": record_set_name,
-        "record_type": record_type,
-        "resource_group": resource_group_name,
         "zone_name": zone_name,
-        "if_match": if_match
+        "resource_group": resource_group_name,
+        "record_type": record_type
     })
 
+    record_camal = record_set["SOARecord"]
+    record = dict()
+    record["host"] = host or record_camal.get("host", None)
+    record["email"] = email or record_camal.get("email", None)
+    record["serial_number"] = serial_number or record_camal.get("serialNumber", None)
+    record["refresh_time"] = refresh_time or record_camal.get("refreshTime", None)
+    record["retry_time"] = retry_time or record_camal.get("retryTime", None)
+    record["expire_time"] = expire_time or record_camal.get("expireTime", None)
+    record["minimum_ttl"] = minimum_ttl or record_camal.get("minimumTTL", None)
 
-def update_dns_record_set(instance, cmd, metadata=None, target_resource=None):
-    if metadata is not None:
-        instance.metadata = metadata
-    if target_resource == '':
-        instance.target_resource = None
-    elif target_resource is not None:
-        SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_NETWORK_DNS)
-        instance.target_resource = SubResource(id=target_resource)
-    return instance
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            is_list=False, if_none_match=if_none_match)
 
 
 def _type_to_property_name(key):
@@ -2820,6 +2782,7 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
             root_ns["ttl"] = rs["ttl"]
             rs = _convert_to_snake_case(root_ns)
         try:
+            rs["target_resource"] = rs.get("target_resource").get("id") if rs.get("target_resource") else None
             _DNSRecordSetCreate(cli_ctx=cmd.cli_ctx)(command_args={
                 'resource_group': resource_group_name,
                 'zone_name': zone_name,
@@ -2897,34 +2860,6 @@ def add_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dna
     record_type = 'ptr'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                             ttl=ttl, if_none_match=if_none_match)
-
-
-def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=None,
-                          serial_number=None, refresh_time=None, retry_time=None, expire_time=None,
-                          minimum_ttl=3600, if_none_match=None):
-    record_set_name = '@'
-    record_type = 'soa'
-
-    from .aaz.latest.network.dns.record_set import Show
-    record_set = Show(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": record_set_name,
-        "zone_name": zone_name,
-        "resource_group": resource_group_name,
-        "record_type": record_type
-    })
-
-    record_camal = record_set["SOARecord"]
-    record = dict()
-    record["host"] = host or record_camal.get("host", None)
-    record["email"] = email or record_camal.get("email", None)
-    record["serial_number"] = serial_number or record_camal.get("serialNumber", None)
-    record["refresh_time"] = refresh_time or record_camal.get("refreshTime", None)
-    record["retry_time"] = retry_time or record_camal.get("retryTime", None)
-    record["expire_time"] = expire_time or record_camal.get("expireTime", None)
-    record["minimum_ttl"] = minimum_ttl or record_camal.get("minimumTTL", None)
-
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            is_list=False, if_none_match=if_none_match)
 
 
 def add_dns_srv_record(cmd, resource_group_name, zone_name, record_set_name, priority, weight,
@@ -3168,6 +3103,7 @@ def _add_save_record(cmd, record, record_type, record_set_name, resource_group_n
 
     _add_record(record_set, record, record_type, is_list)
 
+    record_set["target_resource"] = record_set.get("target_resource").get("id") if record_set.get("target_resource") else None
     return _DNSRecordSetCreate(cli_ctx=cmd.cli_ctx)(command_args={
         "name": record_set_name,
         "zone_name": zone_name,

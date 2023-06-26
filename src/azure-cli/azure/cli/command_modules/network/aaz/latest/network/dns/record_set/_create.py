@@ -65,6 +65,10 @@ class Create(AAZCommand):
             help="The name of the DNS zone (without a terminating dot).",
             required=True,
         )
+        _args_schema.target_resource = AAZStrArg(
+            options=["--target-resource"],
+            help="ID of an Azure resource from which the DNS resource value is taken.",
+        )
 
         # define Arg Group "Parameters"
 
@@ -133,6 +137,7 @@ class Create(AAZCommand):
             options=["--ttl"],
             arg_group="Properties",
             help="The TTL (time-to-live) of the records in the record set.",
+            default=3600,
         )
         _args_schema.txt_records = AAZListArg(
             options=["--txt-records"],
@@ -148,11 +153,6 @@ class Create(AAZCommand):
             options=["--metadata"],
             arg_group="Properties",
             help="The metadata attached to the record set.",
-        )
-        _args_schema.target_resource = AAZObjectArg(
-            options=["--target-resource"],
-            arg_group="Properties",
-            help="A reference to an azure resource from where the dns resource value is taken.",
         )
 
         aaaa_records = cls._args_schema.aaaa_records
@@ -369,12 +369,6 @@ class Create(AAZCommand):
 
         metadata = cls._args_schema.metadata
         metadata.Element = AAZStrArg()
-
-        target_resource = cls._args_schema.target_resource
-        target_resource.id = AAZStrArg(
-            options=["id"],
-            help="Resource Id.",
-        )
         return cls._args_schema
 
     def _execute_operations(self):
@@ -501,7 +495,7 @@ class Create(AAZCommand):
                 properties.set_prop("TXTRecords", AAZListType, ".txt_records")
                 properties.set_prop("caaRecords", AAZListType, ".caa_records")
                 properties.set_prop("metadata", AAZDictType, ".metadata")
-                properties.set_prop("targetResource", AAZObjectType, ".target_resource")
+                properties.set_prop("targetResource", AAZObjectType)
 
             aaaa_records = _builder.get(".properties.AAAARecords")
             if aaaa_records is not None:
@@ -636,7 +630,7 @@ class Create(AAZCommand):
 
             target_resource = _builder.get(".properties.targetResource")
             if target_resource is not None:
-                target_resource.set_prop("id", AAZStrType, ".id")
+                target_resource.set_prop("id", AAZStrType, ".target_resource")
 
             return self.serialize_content(_content_value)
 
