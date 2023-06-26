@@ -346,8 +346,30 @@ def __read_kv_from_config_store(azconfig_client,
                 break
             query_fields.append(field.name.lower())
 
+    if snapshot:
+        try:
+            configsetting_iterable = AppConfigSnapshotClient(azconfig_client).list_snapshot_kv(name=snapshot,
+                                                                                               fields=query_fields)
+
+        except HttpResponseError as exception:
+            raise AzureResponseError('Failed to read key-values(s) from snapshot {}. '.format(snapshot) + str(exception))
+
+    else:
+        try:
+            configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key,
+                                                                                 label_filter=label,
+                                                                                 accept_datetime=datetime,
+                                                                                 fields=query_fields)
+        except HttpResponseError as exception:
+            raise AzureResponseError('Failed to read key-value(s) that match the specified key and label. ' + str(exception))
+
     retrieved_kvs = []
     count = 0
+
+    if all_:
+        top = float('inf')
+    elif top is None:
+        top = 100
 
     if cli_ctx:
         from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
@@ -355,9 +377,7 @@ def __read_kv_from_config_store(azconfig_client,
     else:
         keyvault_client = None
 
-    def add_setting(setting):
-        nonlocal count
-
+    for setting in configsetting_iterable:
         kv = convert_configurationsetting_to_keyvalue(setting)
 
         if kv.key:
@@ -382,47 +402,18 @@ def __read_kv_from_config_store(azconfig_client,
         else:
             retrieved_kvs.append(kv)
         count += 1
-
-    if snapshot:
-        try:
-            configsetting_iterable = AppConfigSnapshotClient(azconfig_client).list_snapshot_kv(name=snapshot,
-                                                                                               fields=query_fields)
-            # A request to list kvs of a non-existent snapshot returns an empty result.
-            # We attempt to add the first key-value to check if the iterator is empty.
-            add_setting(next(configsetting_iterable))
-
-        except HttpResponseError as exception:
-            raise AzureResponseError(
-                'Failed to read key-values(s) from snapshot {}. '.format(snapshot) + str(exception))
-
-        except StopIteration:
-            # We check if the snapshot exists if the iterator is empty.
-            try:
-                _ = AppConfigSnapshotClient(azconfig_client).get_snapshot(name=snapshot)
-
-            except HttpResponseError as exception:
-                if exception.status_code == StatusCodes.NOT_FOUND:
-                    raise ResourceNotFoundError("No snapshot with name '{}' was found.".format(snapshot))
-
-    else:
-        try:
-            configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key,
-                                                                                 label_filter=label,
-                                                                                 accept_datetime=datetime,
-                                                                                 fields=query_fields)
-        except HttpResponseError as exception:
-            raise AzureResponseError('Failed to read key-value(s) that match the specified key and label. ' + str(exception))
-
-    if all_:
-        top = float('inf')
-    elif top is None:
-        top = 100
-
-    for setting in configsetting_iterable:
         if count >= top:
-            break
+            return retrieved_kvs
 
-        add_setting(setting)
+    # A request to list kvs of a non-existent snapshot returns an empty result.
+    # We first check if the snapshot exists before returning an empty result.
+    if snapshot and len(retrieved_kvs) == 0:
+        try:
+            _ = AppConfigSnapshotClient(azconfig_client).get_snapshot(name=snapshot)
+
+        except HttpResponseError as exception:
+            if exception.status_code == StatusCodes.NOT_FOUND:
+                raise ResourceNotFoundError("No snapshot with name '{}' was found.".format(snapshot))
 
     return retrieved_kvs
 
