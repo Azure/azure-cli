@@ -129,8 +129,7 @@ def does_custom_log_exist(cmd, workspace_name, workspace_rg, workspace_sub):
         # Required custom log definition does not exist so deploy it
         if err.status_code == 404:
             return False
-        else:
-            raise err
+        raise err
     return True
 
 
@@ -186,7 +185,15 @@ def validate_dcr(cmd, dcr_location, workspace_loc, dcr_source_filePattern,
         dce_rg = dce_match.group(2)
         dce_name = dce_match.group(3)
 
-    dce_url = f"https://management.azure.com/subscriptions/{dce_sub}/resourceGroups/{dce_rg}/providers/Microsoft.Insights/dataCollectionEndpoints/{dce_name}?api-version=2022-06-01"
+    # dce_url = f"https://management.azure.com/subscriptions/{dce_sub}"
+    # /resourceGroups/{dce_rg}/providers/Microsoft.Insights/dataCollectionEndpoints/
+    # {dce_name}?api-version=2022-06-01"
+    dce_url = (
+        f"https://management.azure.com/subscriptions/{dce_sub}"
+        f"/resourceGroups/{dce_rg}"
+        f"/providers/Microsoft.Insights/dataCollectionEndpoints/{dce_name}"
+        f"?api-version=2022-06-01"
+    )
     try:
         # Does a GET on the dce to ensure no http errors - suffices
         send_raw_request(cmd.cli_ctx, method="GET", url=dce_url)
@@ -222,3 +229,69 @@ def create_dcra(dcr_res_id):
     body = json.dumps(body)
 
     return body
+
+def create_and_send_dcra(cmd, curr_subscription, resource_group_name, sql_virtual_machine_name, workspace_id, workspace_loc, dcr_id, validated_dcr_res_id):
+    master_template = ArmTemplateBuilder20190401()
+    vm_resource_uri = f"subscriptions/{curr_subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute/virtualMachines/{sql_virtual_machine_name}"
+    base_url = f"https://management.azure.com/{vm_resource_uri}/providers/Microsoft.Insights/dataCollectionRuleAssociations/"
+    api_version = "?api-version=2022-06-01"
+    for index in count(start=1):
+        dcra_name = f"{workspace_id}_{workspace_loc}_DCRA_{index}"
+        dcra_url = f"{base_url}{dcra_name}{api_version}"
+        if not does_name_exist(cmd, dcra_url):
+            break
+    vm = get_vm(
+        cmd,
+        resource_group_name,
+        sql_virtual_machine_name,
+        'instanceView')
+    amainstall = build_ama_install_resource(
+        sql_virtual_machine_name, vm.location, resource_group_name, curr_subscription)
+
+    master_template.add_resource(amainstall)
+
+    dcrlinkage = build_dcr_vm_linkage_resource(sql_virtual_machine_name, dcra_name, dcr_id)
+    master_template.add_resource(dcrlinkage)
+
+    template = master_template.build()
+    print(template)
+    # deploy ARM template
+    deployment_name = 'vm_deploy_' + random_string(32)
+    client = get_mgmt_service_client(
+        cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+    DeploymentProperties = cmd.get_models(
+        'DeploymentProperties',
+        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+
+    properties = DeploymentProperties(
+        template=template, parameters={}, mode='incremental')
+
+    Deployment = cmd.get_models(
+        'Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    deployment = Deployment(properties=properties)
+
+    # creates the AMA DEPLOYMENT
+
+    LongRunningOperation(cmd.cli_ctx)(client.begin_create_or_update(resource_group_name, deployment_name, deployment))
+    # url = f"https://management.azure.com/subscriptions/{curr_subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute/virtualMachines/{sql_virtual_machine_name}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{dcra_name}?api-version=2022-06-01"
+    # Define the request headers
+    print("success")
+
+    headers = [
+        'Content-Type=application/json'
+    ]
+    body = create_dcra(validated_dcr_res_id)
+
+    try:
+        send_raw_request(
+            cmd.cli_ctx,
+            method='PUT',
+            url=dcra_url,
+            headers=headers,
+            body=body)
+    except Exception as e:
+        print(
+            f"Creating new DCRA for DCR {dcr_name} failed with error {e}")
+
+        # raise AzureResponseError(f"Creating new DCRA for DCR {dcr_name} failed with error {e}")
+    return

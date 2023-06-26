@@ -36,7 +36,7 @@ def build_dce_resource(name, location):
     return dce_resource
 
 
-def build_ama_install_resource(vmname, vm_location):
+def build_ama_install_resource(vmname, vm_location, resource_group, curr_sub):
 
     name = vmname + "/AzureMonitorWindowsAgent"
     ama_install_resource = {
@@ -137,8 +137,7 @@ def build_dcr_resource(
 def build_dcr_vm_linkage_resource(
         vmname,
         association_name,
-        dcr_resource_id,
-        dcr_name):
+        dcr_resource_id):
 
     scope = "Microsoft.Compute/virtualMachines/" + vmname
     link_resources = {
@@ -146,9 +145,6 @@ def build_dcr_vm_linkage_resource(
         "apiVersion": "2022-06-01",
         "scope": scope,
         "name": association_name,
-        "dependsOn": [
-                f"[resourceId('Microsoft.Insights/dataCollectionRules', '{dcr_name}')]"
-        ],
         "properties": {
             "description": "Association of data collection rule."
             "Deleting this association will break the data collection for this virtual machine.",

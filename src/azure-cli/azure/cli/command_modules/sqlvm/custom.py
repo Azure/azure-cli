@@ -6,9 +6,9 @@
 from msrestazure.tools import is_valid_resource_id, resource_id
 from knack.prompting import prompt_pass
 from azure.cli.core.azclierror import (
-    InvalidArgumentValueError,
     RequiredArgumentMissingError,
-    AzureResponseError
+    AzureResponseError,
+    HTTPError
 )
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import (
@@ -678,10 +678,10 @@ def set_assessment_properties(
                 'Assessment requires a Log Analytics workspace and Log Analytics extension on VM - '
                 'workspace name and workspace resource group must be specified to deploy pre-requisites.')
         if agent_rg is None:
-            raise RequiredArgumentMissingError(
-                'Assessment requires a Resource Group to deploy the AMA Agent resources- '
-                'Use the --agent-rg paramater to specify a resource group in this subscription. '
-                'It is recommended to reuse this resource group for other Assessment deployments using this Log Analytics workspace')
+            agent_rg = resource_group_name
+            # raise Warning -
+            # raise RequiredArgumentMissingError(
+            # 'Assessment requires a Resource Group to deploy the AMA Agent resources- '
 
         if workspace_sub is None:
             # raise warning => --workspace-sub not provided. Using current
@@ -707,15 +707,18 @@ def set_assessment_properties(
         # Validate the agent_rg -> Check if DCR + DCE exist already
         ama_sub = curr_subscription
         url = f"https://management.azure.com/subscriptions/{ama_sub}/resourceGroups/{agent_rg}/providers/Microsoft.Insights/dataCollectionRules?api-version=2022-06-01"
-
+        print(ama_sub, agent_rg)
+        print(url)
         try:
             dcr_response = send_raw_request(cmd.cli_ctx, method="GET", url=url)
-        except BaseException:
+        except HTTPError as e:
             raise AzureResponseError(
+                f'An Http Error occured: {e}'
                 'could not connect to the provided agent resource group {agent_rg}. Ensure the resource in the same subscription as {ama_sub}')
 
         # response contains list of dcr's
         dcr_response = dcr_response.json()
+        print(dcr_response)
         dcr_list = dcr_response['value']
         dcr_found = False
 
@@ -785,8 +788,6 @@ def set_assessment_properties(
             if dcr_found:
                 validated_dcr_res_id = dcr_id
                 break
-            else:
-                continue
 
             # Match all the stuff
             # collect a list of all dcr names found in this rg and ensure no
@@ -796,7 +797,6 @@ def set_assessment_properties(
             # dcr follows naming convention
             # Sample DCR NAME => 0009fc4d-e310-4e40-8e63-c48a23e9cdc1_eastus_DCR_1
             # dcr location = la workspace location as they must be in same
-            # region
 
         # New Custom table deployment workflow:
         # Check if old table exists - if yes - run POST command.
@@ -907,9 +907,8 @@ def set_assessment_properties(
                 sql_virtual_machine_name,
                 'instanceView')
 
-            amainstall = build_ama_install_resource(
-                sql_virtual_machine_name, vm.location)
-            master_template.add_resource(amainstall)
+            #amainstall = build_ama_install_resource(sql_virtual_machine_name, vm.location, resource_group_name, curr_subscription)
+            #master_template.add_resource(amainstall)
 
             # /subscriptions/0009fc4d-e310-4e40-8e63-c48a23e9cdc1/resourceGroups/abhaga-iaasrg/providers/Microsoft.Insights/dataCollectionRules/0009fc4d-e310-4e40-8e63-c48a23e9cdc1_eastus_DCR_1
             dcr_resource_id = f"/subscriptions/{curr_subscription}/resourceGroups/{agent_rg}/providers/Microsoft.Insights/dataCollectionRules/{dcr_name}"
@@ -954,6 +953,9 @@ def set_assessment_properties(
                     deployment_name,
                     deployment))
 
+            #amainstall = build_ama_install_resource(sql_virtual_machine_name, vm.location, resource_group_name, curr_subscription)
+            #master_template.add_resource(amainstall)
+
             vm_resource_uri = f"subscriptions/{curr_subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute/virtualMachines/{sql_virtual_machine_name}"
             base_url = f"https://management.azure.com/{vm_resource_uri}/providers/Microsoft.Insights/dataCollectionRuleAssociations/"
             api_version = "?api-version=2022-06-01"
@@ -982,19 +984,26 @@ def set_assessment_properties(
             # build ARM template for linkage resource and AMA installation
             print("DCR DCE VAlidated. Reusing and building only partial template")
             master_template = ArmTemplateBuilder20190401()
-
+            vm_resource_uri = f"subscriptions/{curr_subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute/virtualMachines/{sql_virtual_machine_name}"
+            base_url = f"https://management.azure.com/{vm_resource_uri}/providers/Microsoft.Insights/dataCollectionRuleAssociations/"
+            api_version = "?api-version=2022-06-01"
+            for index in count(start=1):
+                dcra_name = f"{workspace_id}_{workspace_loc}_DCRA_{index}"
+                dcra_url = f"{base_url}{dcra_name}{api_version}"
+                if not does_name_exist(cmd, dcra_url):
+                    break
             vm = get_vm(
                 cmd,
                 resource_group_name,
                 sql_virtual_machine_name,
                 'instanceView')
             amainstall = build_ama_install_resource(
-                sql_virtual_machine_name, vm.location)
+                sql_virtual_machine_name, vm.location, resource_group_name, curr_subscription)
 
             master_template.add_resource(amainstall)
 
-            # dcrlinkage = build_dcr_vm_linkage_resource_no_dependency(sql_virtual_machine_name, dcra_name, dcr_id)
-            # master_template.add_resource(dcrlinkage)
+            dcrlinkage = build_dcr_vm_linkage_resource(sql_virtual_machine_name, dcra_name, dcr_id)
+            master_template.add_resource(dcrlinkage)
 
             template = master_template.build()
             print(template)
@@ -1015,17 +1024,11 @@ def set_assessment_properties(
 
             # creates the AMA DEPLOYMENT
 
-            # LongRunningOperation(cmd.cli_ctx)(client.begin_create_or_update(agent_rg, deployment_name, deployment))
+            LongRunningOperation(cmd.cli_ctx)(client.begin_create_or_update(resource_group_name, deployment_name, deployment))
             # url = f"https://management.azure.com/subscriptions/{curr_subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute/virtualMachines/{sql_virtual_machine_name}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{dcra_name}?api-version=2022-06-01"
             # Define the request headers
-            vm_resource_uri = f"subscriptions/{curr_subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute/virtualMachines/{sql_virtual_machine_name}"
-            base_url = f"https://management.azure.com/{vm_resource_uri}/providers/Microsoft.Insights/dataCollectionRuleAssociations/"
-            api_version = "?api-version=2022-06-01"
-            for index in count(start=1):
-                dcra_name = f"{workspace_id}_{workspace_loc}_DCRA_{index}"
-                dcra_url = f"{base_url}{dcra_name}{api_version}"
-                if not does_name_exist(cmd, dcra_url):
-                    break
+            print("success")
+
             headers = [
                 'Content-Type=application/json'
             ]
@@ -1046,6 +1049,7 @@ def set_assessment_properties(
             return
 
     elif enable_assessment is False:
+        print("DELETEING DCRA and disabling assessment")
         # Delete DCRA
         # Otherwise AssessmentSetting payload is set above
         # GET DCRA ATTACHED TO VM: Validate for Assessment and delete
@@ -1070,37 +1074,36 @@ def set_assessment_properties(
         if 'value' in dcra_list and not dcra_list['value']:
             # Raise warning or message saying no DCRA found
             return
-        else:
-            for dcra in dcra_list['value']:
+        for dcra in dcra_list['value']:
 
-                dcra_name = dcra['name']
+            dcra_name = dcra['name']
+            #print(dcra_name)
+            pattern = re.compile(
+                r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_[a-z0-9]+_DCRA_\d+$",
+                re.IGNORECASE)
+            if pattern.match(dcra_name):
 
-                pattern = re.compile(
-                    r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_[a-z0-9]+_DCRA_\d+$",
-                    re.IGNORECASE)
-                if pattern.match(dcra_name):
+                # Match from response the values and add to url then delete
 
-                    # Match from response the values and add to url then delete
+                curr_subscription = get_subscription_id(cmd.cli_ctx)
+                resourceUri = f"subscriptions/{curr_subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute/virtualMachines/{sql_virtual_machine_name}"
+                # DELETE
+                # https://management.azure.com/{resourceUri}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{associationName}?api-version=2022-06-01
+                dcra_url = f"https://management.azure.com/{resourceUri}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{dcra_name}?api-version=2022-06-01"
+                print(dcra_name)
+                send_raw_request(
+                    cmd.cli_ctx, method="DELETE", url=dcra_url)
+                return
+            else:
+                continue
+            # Raise message DCRA deleted. Assessment disabled succesfully.
 
-                    curr_subscription = get_subscription_id(cmd.cli_ctx)
-                    resourceUri = f"subscriptions/{curr_subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute/virtualMachines/{sql_virtual_machine_name}"
-                    # DELETE
-                    # https://management.azure.com/{resourceUri}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{associationName}?api-version=2022-06-01
-                    dcra_url = f"https://management.azure.com/{resourceUri}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{dcra_name}?api-version=2022-06-01"
-                    print(dcra_name)
-                    send_raw_request(
-                        cmd.cli_ctx, method="DELETE", url=dcra_url)
-                    return
-                else:
-                    continue
-                # Raise message DCRA deleted. Assessment disabled succesfully.
-
-            # Can also delete based on this simply as customer should not be creating this dcra..
-            # Find DCRA matching naming convention
-            # If 1 found - delete and check deleted
-            # If multiple found - validate each and delete all that pass validation?
-            # Check DCR resource ID
-            # Run through validation of DCR
-            # Basic validation: Custom Log, file pattern and dcr name
-            # advanced - dce endpoint valid, la workspace valid and location same
+        # Can also delete based on this simply as customer should not be creating this dcra..
+        # Find DCRA matching naming convention
+        # If 1 found - delete and check deleted
+        # If multiple found - validate each and delete all that pass validation?
+        # Check DCR resource ID
+        # Run through validation of DCR
+        # Basic validation: Custom Log, file pattern and dcr name
+        # advanced - dce endpoint valid, la workspace valid and location same
 # endregion Helpers for custom commands

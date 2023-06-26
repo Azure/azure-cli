@@ -114,7 +114,7 @@ class SqlVmScenarioTest(ScenarioTest):
     @SqlVirtualMachinePreparer()
     @LogAnalyticsWorkspacePreparer(location="westus")
     def test_sqlvm_mgmt_assessment(self, resource_group, resource_group_location, sqlvm, laworkspace):
-        
+
         # create sqlvm1 with minimal required parameters
         self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --sql-mgmt-type {}'
                  .format(sqlvm, resource_group, resource_group_location, 'PAYG', 'Full'),
