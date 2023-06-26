@@ -600,8 +600,7 @@ def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, sl
     deployment_status_url = scm_url + '/api/deployments/latest'
 
     additional_headers = {"Content-Type": "application/zip", "Cache-Control": "no-cache"}
-    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group_name, slot,
-                                   additional_headers=additional_headers)
+    headers = get_scm_site_headers_flex(cmd.cli_ctx, additional_headers=additional_headers)
 
     import os
     import requests
@@ -617,7 +616,7 @@ def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, sl
     # check the status of async deployment
     if res.status_code == 202:
         response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
-                                                headers, timeout)
+                                                slot, timeout)
         return response
 
     # check if there's an ongoing process
@@ -2849,6 +2848,22 @@ def get_scm_site_headers(cli_ctx, name, resource_group_name, slot=None, addition
         logger.info("[AUTH]: AAD")
         headers = urllib3.util.make_headers()
         headers["Authorization"] = f"Bearer {get_bearer_token(cli_ctx)}"
+    headers['User-Agent'] = get_az_user_agent()
+    headers['x-ms-client-request-id'] = cli_ctx.data['headers']['x-ms-client-request-id']
+    # allow setting Content-Type, Cache-Control, etc. headers
+    if additional_headers:
+        for k, v in additional_headers.items():
+            headers[k] = v
+
+    return headers
+
+
+def get_scm_site_headers_flex(cli_ctx, additional_headers=None):
+    import urllib3
+
+    logger.info("[AUTH]: AAD")
+    headers = urllib3.util.make_headers()
+    headers["Authorization"] = f"Bearer {get_bearer_token(cli_ctx)}"
     headers['User-Agent'] = get_az_user_agent()
     headers['x-ms-client-request-id'] = cli_ctx.data['headers']['x-ms-client-request-id']
     # allow setting Content-Type, Cache-Control, etc. headers
