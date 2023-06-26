@@ -76,7 +76,15 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
         self.cmd('az sf managed-cluster network-security-rule add -g {rg} -c {cluster_name} '
                 '--name {name} --access {access} --description {description} --direction {direction} --protocol {protocol} --priority {priority} --source-port-ranges {source_port_ranges} --dest-port-ranges {dest_port_ranges}'
                 ' --source-addr-prefixes {source_addr_prefixes} --dest-addr-prefixes {dest_addr_prefixes}',
-                checks=[self.check('provisioningState', 'Succeeded')])
+                checks=[self.check('provisioningState', 'Succeeded'),
+                        self.check('networkSecurityRules[0].destinationAddressPrefixes[0]', '194.69.104.0/25'),
+                        self.check('networkSecurityRules[0].sourceAddressPrefixes[1]', '167.220.0.0/23'),
+                        self.check('networkSecurityRules[0].protocol', '*'),
+                        self.check('networkSecurityRules[0].direction', 'inbound'),
+                        self.check('networkSecurityRules[0].access', 'allow'),
+                        self.check('networkSecurityRules[0].priority', 1200),
+                        self.check('networkSecurityRules[0].sourcePortRanges[0]', '1-1000'),
+                        self.check('networkSecurityRules[0].destinationPortRanges[1]', '2200-65535')])
 
     @ResourceGroupPreparer()
     def test_node_type_operation(self):
