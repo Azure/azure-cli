@@ -580,6 +580,7 @@ stages:
   - job: LiveTest
     displayName: Live Test
     # Sometimes the live test will be stuck forever, so the timeout cannot be set to 0, it is recommended to set it to twice the maximum time
+    # For 360 minutes (6 hours) on Microsoft-hosted agents with a public project and public repository
     timeoutInMinutes: 600
     strategy:
       # If the maxParallel is too large, the resource group will reach the limit of 980, so it is recommended that the maxParallel should not exceed 30.
