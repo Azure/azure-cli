@@ -13,7 +13,7 @@ if "%CLI_VERSION%"=="" (
     echo Please set the CLI_VERSION environment variable, e.g. 2.0.13
     goto ERROR
 )
-set PYTHON_VERSION=3.10.8
+set PYTHON_VERSION=3.10.10
 
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
 set PYTHON_DOWNLOAD_URL="https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-embed-win32.zip"
@@ -121,9 +121,13 @@ REM Check azure.cli can be executed. This also prints the Python version.
 if %errorlevel% neq 0 goto ERROR
 
 pushd %BUILDING_DIR%
+%BUILDING_DIR%\python.exe %REPO_ROOT%\scripts\compact_aaz.py
 %BUILDING_DIR%\python.exe %~dp0\patch_models_v2.py
 %BUILDING_DIR%\python.exe %REPO_ROOT%\scripts\trim_sdk.py
 popd
+
+REM Remove pywin32 help file to reduce size.
+del %BUILDING_DIR%\Lib\site-packages\PyWin32.chm
 
 echo Creating the wbin (Windows binaries) folder that will be added to the path...
 mkdir %BUILDING_DIR%\wbin

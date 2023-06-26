@@ -44,7 +44,9 @@ from ._client_factory import (
     cf_acr_private_endpoint_connections,
     cf_acr_agentpool,
     cf_acr_connected_registries,
-    cf_acr_network_rules
+    cf_acr_network_rules,
+    cf_acr_cache,
+    cf_acr_cred_sets
 )
 
 
@@ -176,6 +178,16 @@ def load_command_table(self, _):
         client_factory=cf_acr_private_endpoint_connections
     )
 
+    acr_cache_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.cache#{}',
+        client_factory=cf_acr_cache
+    )
+
+    acr_cred_set_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.credential_set#{}',
+        client_factory=cf_acr_cred_sets
+    )
+
     with self.command_group('acr', acr_custom_util) as g:
         g.command('check-name', 'acr_check_name', table_transformer=None)
         g.command('list', 'acr_list')
@@ -223,6 +235,30 @@ def load_command_table(self, _):
         g.command('list-deleted', 'acr_manifest_deleted_list')
         g.command('list-deleted-tags', 'acr_manifest_deleted_tags_list')
         g.command('restore', 'acr_manifest_deleted_restore')
+
+    with self.command_group('acr cache', acr_cache_util) as g:
+        g.show_command('show', 'acr_cache_show')
+        g.command('create', 'acr_cache_create')
+        g.command('list', 'acr_cache_list')
+        g.command('delete', 'acr_cache_delete', confirmation=True)
+        g.generic_update_command('update',
+                                 getter_name='acr_cache_update_get',
+                                 setter_name='acr_cache_update_set',
+                                 custom_func_name='acr_cache_update_custom',
+                                 custom_func_type=acr_cache_util,
+                                 client_factory=cf_acr_cache)
+
+    with self.command_group('acr credential-set', acr_cred_set_util) as g:
+        g.show_command('show', 'acr_cred_set_show')
+        g.command('create', 'acr_cred_set_create')
+        g.command('list', 'acr_cred_set_list')
+        g.command('delete', 'acr_cred_set_delete', confirmation=True)
+        g.generic_update_command('update',
+                                 getter_name='acr_cred_set_update_get',
+                                 setter_name='acr_cred_set_update_set',
+                                 custom_func_name='acr_cred_set_update_custom',
+                                 custom_func_type=acr_cred_set_util,
+                                 client_factory=cf_acr_cred_sets)
 
     with self.command_group('acr webhook', acr_webhook_util) as g:
         g.command('list', 'acr_webhook_list')
@@ -338,14 +374,14 @@ def load_command_table(self, _):
     with self.command_group('acr', acr_check_health_util) as g:
         g.command('check-health', 'acr_check_health')
 
-    with self.command_group('acr scope-map', acr_scope_map_util, is_preview=True) as g:
+    with self.command_group('acr scope-map', acr_scope_map_util) as g:
         g.command('create', 'acr_scope_map_create')
         g.command('delete', 'acr_scope_map_delete')
         g.command('update', 'acr_scope_map_update')
         g.show_command('show', 'acr_scope_map_show')
         g.command('list', 'acr_scope_map_list')
 
-    with self.command_group('acr token', acr_token_util, is_preview=True) as g:
+    with self.command_group('acr token', acr_token_util) as g:
         g.command('create', 'acr_token_create')
         g.command('delete', 'acr_token_delete')
         g.command('update', 'acr_token_update')

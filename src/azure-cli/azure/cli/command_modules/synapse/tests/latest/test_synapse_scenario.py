@@ -1176,7 +1176,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # create spark pool
         spark_pool = self.cmd('az synapse spark pool create --name {spark-pool} --spark-version {spark-version}'
-                              ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size Medium'
+                              ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size XLarge'
                               ' --spark-config-file-path "{file}"',
                               checks=[
                                   self.check('name', self.kwargs['spark-pool']),
@@ -1212,6 +1212,12 @@ class SynapseScenarioTests(ScenarioTest):
                     self.check('sparkConfigProperties.filename','sparkconfigfile'),
                     self.check('dynamicExecutorAllocation.maxExecutors',2)
                  ])
+        
+        # create a existing spark pool
+        spark_pool = self.cmd('az synapse spark pool create --name {spark-pool} --spark-version {spark-version}'
+                              ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size Medium'
+                              ' --spark-config-file-path "{file}"',
+                              expect_failure=True)
 
         # delete spark pool with spark pool name
         self.cmd(
@@ -2833,7 +2839,7 @@ class SynapseScenarioTests(ScenarioTest):
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_managed_private_endpoints(self):
         self.kwargs.update({
-            'name': 'AzureDataLakeStoragePE',
+            'name': 'myPrivateLinkService',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'managedprivateendpoints.json')})
 
         # create a workspace
@@ -2859,7 +2865,7 @@ class SynapseScenarioTests(ScenarioTest):
         # wait some time to improve robustness
         if self.is_live or self.in_recording:
             import time
-            time.sleep(90)
+            time.sleep(240)
         # get managed private endpoint
         self.cmd(
             'az synapse  managed-private-endpoints show --workspace-name {workspace} --pe-name {name}',
@@ -2879,7 +2885,7 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse  managed-private-endpoints delete --workspace-name {workspace} --pe-name {name} -y')
         if self.is_live or self.in_recording:
             import time
-            time.sleep(60)    
+            time.sleep(120)
         self.cmd(
             'az synapse managed-private-endpoints show --workspace-name {workspace} --pe-name {name}',
             expect_failure=True)

@@ -56,7 +56,17 @@ class Wait(AAZWaitCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        self.pre_operations()
         self.NetworkVirtualAppliancesGet(ctx=self.ctx)()
+        self.post_operations()
+
+    @register_callback
+    def pre_operations(self):
+        pass
+
+    @register_callback
+    def post_operations(self):
+        pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
@@ -232,7 +242,7 @@ class Wait(AAZWaitCommand):
             properties.virtual_hub = AAZObjectType(
                 serialized_name="virtualHub",
             )
-            _build_schema_sub_resource_read(properties.virtual_hub)
+            _WaitHelper._build_schema_sub_resource_read(properties.virtual_hub)
 
             boot_strap_configuration_blobs = cls._schema_on_200.properties.boot_strap_configuration_blobs
             boot_strap_configuration_blobs.Element = AAZStrType()
@@ -242,7 +252,7 @@ class Wait(AAZWaitCommand):
 
             inbound_security_rules = cls._schema_on_200.properties.inbound_security_rules
             inbound_security_rules.Element = AAZObjectType()
-            _build_schema_sub_resource_read(inbound_security_rules.Element)
+            _WaitHelper._build_schema_sub_resource_read(inbound_security_rules.Element)
 
             nva_sku = cls._schema_on_200.properties.nva_sku
             nva_sku.bundled_scale_unit = AAZStrType(
@@ -273,7 +283,7 @@ class Wait(AAZWaitCommand):
 
             virtual_appliance_sites = cls._schema_on_200.properties.virtual_appliance_sites
             virtual_appliance_sites.Element = AAZObjectType()
-            _build_schema_sub_resource_read(virtual_appliance_sites.Element)
+            _WaitHelper._build_schema_sub_resource_read(virtual_appliance_sites.Element)
 
             tags = cls._schema_on_200.tags
             tags.Element = AAZStrType()
@@ -281,21 +291,23 @@ class Wait(AAZWaitCommand):
             return cls._schema_on_200
 
 
-_schema_sub_resource_read = None
+class _WaitHelper:
+    """Helper class for Wait"""
 
+    _schema_sub_resource_read = None
 
-def _build_schema_sub_resource_read(_schema):
-    global _schema_sub_resource_read
-    if _schema_sub_resource_read is not None:
-        _schema.id = _schema_sub_resource_read.id
-        return
+    @classmethod
+    def _build_schema_sub_resource_read(cls, _schema):
+        if cls._schema_sub_resource_read is not None:
+            _schema.id = cls._schema_sub_resource_read.id
+            return
 
-    _schema_sub_resource_read = AAZObjectType()
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
 
-    sub_resource_read = _schema_sub_resource_read
-    sub_resource_read.id = AAZStrType()
+        sub_resource_read = _schema_sub_resource_read
+        sub_resource_read.id = AAZStrType()
 
-    _schema.id = _schema_sub_resource_read.id
+        _schema.id = cls._schema_sub_resource_read.id
 
 
 __all__ = ["Wait"]

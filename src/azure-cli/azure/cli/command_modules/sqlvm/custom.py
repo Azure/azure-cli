@@ -31,7 +31,8 @@ from azure.mgmt.sqlvirtualmachine.models import (
     ServerConfigurationsManagementSettings,
     Schedule,
     AssessmentSettings,
-    SqlVirtualMachine
+    SqlVirtualMachine,
+    AADAuthenticationSettings
 )
 
 from ._util import (
@@ -540,6 +541,67 @@ def sqlvm_update(
     return instance
 
 
+# pylint: disable=unused-argument
+def sqlvm_enable_azure_ad_auth(client, cmd, sql_virtual_machine_name, resource_group_name, msi_client_id=None, skip_client_validation=None):
+    ''' Enable Azure AD authentication on a SQL virtual machine.
+
+        :param cmd: The CLI command.
+        :type cmd: AzCliCommand.
+        :param instance: The Sql Virtual Machine instance.
+        :type instance: SqlVirtualMachine.
+        :param resource_group_name: The resource group name
+        :type resource_group_name: str.
+        :param msi_client_id: The clientId of the managed identity used in Azure AD authentication.
+                              None means system-assigned managed identity
+        :type: str.
+        :param skip_client_validation: Whether to skip the client side validation. The server side validation always happens.
+                                       This parameter is used in the validation and ignored here.
+        :type: bool.
+
+        :return: The updated Sql Virtual Machine instance.
+        :rtype: SqlVirtualMachine.
+    '''
+
+    sqlvm_object = client.get(resource_group_name, sql_virtual_machine_name)
+
+    if sqlvm_object.server_configurations_management_settings is None:
+        sqlvm_object.server_configurations_management_settings = ServerConfigurationsManagementSettings()
+
+    sqlvm_object.server_configurations_management_settings.azure_ad_authentication_settings = AADAuthenticationSettings(client_id=msi_client_id if msi_client_id else '')
+
+    # Since it's a running operation, we will do the put and then the get to display the instance.
+    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(False, client.begin_create_or_update,
+                                                  resource_group_name, sql_virtual_machine_name, sqlvm_object))
+
+    return client.get(resource_group_name, sql_virtual_machine_name)
+
+
+# pylint: disable=unused-argument
+def validate_azure_ad_auth(cmd, sql_virtual_machine_name, resource_group_name, msi_client_id=None):
+    ''' Valida if Azure AD authentication is ready on a SQL virtual machine.
+        The logic of validation is in the validator method. If the SQL virtual machine passes the validator,
+        it means this SQL virtual machine is valid for Azure AD authentication
+
+        :param cmd: The CLI command.
+        :type cmd: AzCliCommand.
+        :param resource_group_name: The resource group name
+        :type resource_group_name: str.
+        :param msi_client_id: The clientId of the managed identity used in Azure AD authentication.
+                              None means system-assigned managed identity
+        :type: str.
+
+        :return: The updated Sql Virtual Machine instance.
+        :rtype: SqlVirtualMachine.
+    '''
+
+    passing_validation_message = "Sql virtual machine {} is valid for Azure AD authentication.".format(sql_virtual_machine_name)
+
+    return passing_validation_message
+
+
+def sqlvm_add_to_group(client, cmd, sql_virtual_machine_name, resource_group_name,
+                       sql_virtual_machine_group_resource_id, sql_service_account_password=None,
+                       cluster_operator_account_password=None, cluster_bootstrap_account_password=None):
 def sqlvm_add_to_group(
         client,
         cmd,

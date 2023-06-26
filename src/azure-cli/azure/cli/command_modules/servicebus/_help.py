@@ -245,49 +245,69 @@ short-summary: List the Service Bus Namespaces
 examples:
   - name: Get the Service Bus Namespaces by resource group
     text: az servicebus namespace list --resource-group myresourcegroup
-  - name: Get the Service Bus Namespaces by Subscription.
-    text: az servicebus namespace list
 """
 
-helps['servicebus namespace network-rule'] = """
+helps['servicebus namespace network-rule-set'] = """
 type: group
 short-summary: Manage Azure ServiceBus networkruleSet for namespace
 """
 
-helps['servicebus namespace network-rule add'] = """
-type: command
-short-summary: Add a network rule for a namespace.
-examples:
-  - name: add a VirtualNetwork rule in NetworkruleSet for a namespace
-    text: az servicebus namespace network-rule add --resource-group myresourcegroup --namespace-name mynamespace --subnet {subnetId} --ignore-missing-endpoint True
-  - name: add a IP rule in NetworkruleSet for a namespace
-    text: az servicebus namespace network-rule add --resource-group myresourcegroup --namespace-name mynamespace --ip-address 10.0.0.0/24 --action Allow
+helps['servicebus namespace network-rule-set ip-rule'] = """
+type: group
+short-summary: Manage Azure ServiceBus ip-rules in networkruleSet for namespace
 """
 
-helps['servicebus namespace network-rule list'] = """
+helps['servicebus namespace network-rule-set virtual-network-rule'] = """
+type: group
+short-summary: Manage Azure ServiceBus subnet-rule in networkruleSet for namespace
+"""
+
+helps['servicebus namespace network-rule-set ip-rule add'] = """
+type: command
+short-summary: Add a IP-Rule for network rule of namespace.
+examples:
+  - name: add a IP rule in NetworkruleSet for a namespace
+    text: az servicebus namespace network-rule-set ip-rule add --resource-group myresourcegroup --namespace-name mynamespace --ip-rule ip-address=10.0.0.0/24 action=Allow
+"""
+
+helps['servicebus namespace network-rule-set virtual-network-rule add'] = """
+type: command
+short-summary: Add a Virtual-Network-Rule for network rule of namespace.
+examples:
+  - name: add a VirtualNetwork rule in NetworkruleSet for a namespace
+    text: az servicebus namespace network-rule-set virtual-network-rule add --resource-group myresourcegroup --namespace-name mynamespace --subnet id={subnetId} ignore-missing-endpoint=True
+"""
+
+helps['servicebus namespace network-rule-set list'] = """
 type: command
 short-summary: Show properties of Network rule of the given Namespace.
 examples:
   - name: Show properties of Network rule of the given Namespace
-    text: az servicebus namespace network-rule list --resource-group myresourcegroup --namespace-name mynamespace
+    text: az servicebus namespace network-rule-set list --resource-group myresourcegroup --namespace-name mynamespace
 """
 
-helps['servicebus namespace network-rule update'] = """
+helps['servicebus namespace network-rule-set update'] = """
 type: command
 short-summary: Update network rule properties of the given Namespace.
 examples:
   - name: Update network rule properties of the given Namespace, can be used to update public network access, trusted service and default action.
-    text: az servicebus namespace network-rule update --resource-group myresourcegroup --namespace-name mynamespace --public-network-access Enabled
+    text: az servicebus namespace network-rule-set update --resource-group myresourcegroup --namespace-name mynamespace --public-network-access Enabled
 """
 
-helps['servicebus namespace network-rule remove'] = """
+helps['servicebus namespace network-rule-set ip-rule remove'] = """
+type: command
+short-summary: Remove Ip-Rule from network rule of namespace
+examples:
+  - name: remove IP rule from NetworkruleSet for a namespace
+    text: az servicebus namespace network-rule-set ip-rule remove --resource-group myresourcegroup --namespace-name mynamespace --ip-rule ip-address=10.0.0.0/24
+"""
+
+helps['servicebus namespace network-rule-set virtual-network-rule remove'] = """
 type: command
 short-summary: Remove network rule for a namespace
 examples:
-  - name: remove VirtualNetwork rule from NetworkruleSet for a namespace
-    text: az servicebus namespace network-rule remove --resource-group myresourcegroup --namespace-name mynamespace --subnet {subnetId}
-  - name: remove IP rule from NetworkruleSet for a namespace
-    text: az servicebus namespace network-rule remove --resource-group myresourcegroup --namespace-name mynamespace --ip-address 10.0.0.0/24
+  - name: remove VirtualNetwork rule from NetworkruleSet of namespace
+    text: az servicebus namespace network-rule-set virtual-network-rule remove --resource-group myresourcegroup --namespace-name mynamespace --subnet id=/subscriptions/{subscriptionId}/resourceGroups/{resourcegroup}/providers/Microsoft.Network/virtualNetworks/{vnetname}/subnets/{subnetname}
 """
 
 helps['servicebus namespace show'] = """
@@ -312,72 +332,6 @@ examples:
 helps['servicebus queue'] = """
 type: group
 short-summary: Manage Azure Service Bus Queue and Authorization Rule
-"""
-
-helps['servicebus queue authorization-rule'] = """
-type: group
-short-summary: Manage Azure Service Bus Queue Authorization Rule
-"""
-
-helps['servicebus queue authorization-rule create'] = """
-type: command
-short-summary: Create Authorization Rule for the given Service Bus Queue.
-examples:
-  - name: Create Authorization Rule for Queue
-    text: az servicebus queue authorization-rule create --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule --rights Listen
-"""
-
-helps['servicebus queue authorization-rule delete'] = """
-type: command
-short-summary: Delete the Authorization Rule of Service Bus Queue
-examples:
-  - name: Delete the Authorization Rule of Service Bus Queue
-    text: az servicebus queue authorization-rule delete --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule
-"""
-
-helps['servicebus queue authorization-rule keys'] = """
-type: group
-short-summary: Manage Azure Authorization Rule keys for Service Bus Queue
-"""
-
-helps['servicebus queue authorization-rule keys list'] = """
-type: command
-short-summary: List the keys and connection strings of Authorization Rule for the given Service Bus Queue
-examples:
-  - name: List the keys and connection strings of Authorization Rule for the given Service Bus Queue
-    text: az servicebus queue authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule
-"""
-
-helps['servicebus queue authorization-rule keys renew'] = """
-type: command
-short-summary: Regenerate keys of Authorization Rule for Service Bus Queue
-examples:
-  - name: Regenerate keys of Authorization Rule for Service Bus Queue
-    text: az servicebus queue authorization-rule keys renew --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule --key PrimaryKey
-"""
-
-helps['servicebus queue authorization-rule list'] = """
-type: command
-short-summary: List of Authorization Rule by Service Bus Queue.
-examples:
-  - name: List of Authorization Rule by Queue
-    text: az servicebus queue authorization-rule list --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue
-"""
-
-helps['servicebus queue authorization-rule show'] = """
-type: command
-short-summary: show properties of Authorization Rule for the given Service Bus Queue.
-examples:
-  - name: show properties of Authorization Rule
-    text: az servicebus queue authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule
-"""
-
-helps['servicebus queue authorization-rule update'] = """
-type: command
-short-summary: Update Authorization Rule for the given Service Bus Queue.
-examples:
-  - name: Update Authorization Rule for Queue
-    text: az servicebus queue authorization-rule update --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule --rights Send
 """
 
 helps['servicebus queue create'] = """
@@ -425,72 +379,6 @@ type: group
 short-summary: Manage Azure Service Bus Topic and Authorization Rule
 """
 
-helps['servicebus topic authorization-rule'] = """
-type: group
-short-summary: Manage Azure Service Bus Topic Authorization Rule
-"""
-
-helps['servicebus topic authorization-rule create'] = """
-type: command
-short-summary: Create Authorization Rule for given Service Bus Topic
-examples:
-  - name: Create Authorization Rule for given Service Bus Topic
-    text: az servicebus topic authorization-rule create --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule --rights Send Listen
-"""
-
-helps['servicebus topic authorization-rule delete'] = """
-type: command
-short-summary: Deletes the Authorization Rule of the given Service Bus Topic.
-examples:
-  - name: Deletes the Authorization Rule of Service Bus Topic.
-    text: az servicebus topic authorization-rule delete --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule
-"""
-
-helps['servicebus topic authorization-rule keys'] = """
-type: group
-short-summary: Manage Azure Authorization Rule keys for Service Bus Topic
-"""
-
-helps['servicebus topic authorization-rule keys list'] = """
-type: command
-short-summary: List the keys and connection strings of Authorization Rule for Service Bus Topic.
-examples:
-  - name: List the keys and connection strings of Authorization Rule for Service Bus Topic.
-    text: az servicebus topic authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule
-"""
-
-helps['servicebus topic authorization-rule keys renew'] = """
-type: command
-short-summary: Regenerate keys of Authorization Rule for Service Bus Topic.
-examples:
-  - name: Regenerate key of Service Bus Topic.
-    text: az servicebus topic authorization-rule keys renew --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule --key PrimaryKey
-"""
-
-helps['servicebus topic authorization-rule list'] = """
-type: command
-short-summary: shows list of Authorization Rule by Service Bus Topic
-examples:
-  - name: shows list of Authorization Rule by Service Bus Topic
-    text: az servicebus topic authorization-rule list --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic
-"""
-
-helps['servicebus topic authorization-rule show'] = """
-type: command
-short-summary: Shows the details of Authorization Rule for given Service Bus Topic
-examples:
-  - name: Shows the details of Authorization Rule for given Service Bus Topic
-    text: az servicebus topic authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule
-"""
-
-helps['servicebus topic authorization-rule update'] = """
-type: command
-short-summary: Create Authorization Rule for given Service Bus Topic
-examples:
-  - name: Create Authorization Rule for given Service Bus Topic
-    text: az servicebus topic authorization-rule update --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule --rights Send
-"""
-
 helps['servicebus topic create'] = """
 type: command
 short-summary: Create the Service Bus Topic
@@ -534,7 +422,6 @@ short-summary: Create the ServiceBus Subscription
 examples:
   - name: Create a new Subscription.
     text: az servicebus topic subscription create --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name mysubscription
-
 """
 
 helps['servicebus topic subscription delete'] = """

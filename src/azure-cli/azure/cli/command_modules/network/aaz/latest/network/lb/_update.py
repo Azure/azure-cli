@@ -72,6 +72,56 @@ class Update(AAZCommand):
         # define Arg Group "Parameters"
 
         # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.probes = AAZListArg(
+            options=["--probes"],
+            arg_group="Properties",
+            help="Collection of probe objects used in the load balancer.",
+            nullable=True,
+        )
+
+        probes = cls._args_schema.probes
+        probes.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.probes.Element
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="The name of the resource that is unique within the set of probes used by the load balancer. This name can be used to access the resource.",
+            nullable=True,
+        )
+        _element.interval_in_seconds = AAZIntArg(
+            options=["interval", "interval-in-seconds"],
+            help={"short-summary": "The interval, in seconds, for how frequently to probe the endpoint for health status.", "long-summary": "Typically, the interval is slightly less than half the allocated timeout period (in seconds) which allows two full probes before taking the instance out of rotation. The default value is 15, the minimum value is 5."},
+            nullable=True,
+        )
+        _element.number_of_probes = AAZIntArg(
+            options=["threshold", "number-of-probes"],
+            help={"short-summary": "The number of consecutive probe failures before an instance is deemed unhealthy.", "long-summary": "This values allows endpoints to be taken out of rotation faster or slower than the typical times used in Azure."},
+            nullable=True,
+        )
+        _element.port = AAZIntArg(
+            options=["port"],
+            help="The port for communicating the probe. Possible values range from 1 to 65535, inclusive.",
+        )
+        _element.probe_threshold = AAZIntArg(
+            options=["probe-threshold"],
+            help={"short-summary": "The number of consecutive successful or failed probes in order to allow or deny traffic from being delivered to this endpoint. It is currently in preview and is not recommended for production workloads. For most scenarios, we recommend maintaining the default value of 1 by not specifying the value of the property.", "long-summary": "After failing the number of consecutive probes equal to this value, the endpoint will be taken out of rotation and require the same number of successful consecutive probes to be placed back in rotation."},
+            is_preview=True,
+            nullable=True,
+        )
+        _element.protocol = AAZStrArg(
+            options=["protocol"],
+            help={"short-summary": "The protocol of the end point.", "long-summary": "If 'Tcp' is specified, a received ACK is required for the probe to be successful. If 'Http' or 'Https' is specified, a 200 OK response from the specifies URI is required for the probe to be successful."},
+            enum={"Http": "Http", "Https": "Https", "Tcp": "Tcp"},
+        )
+        _element.request_path = AAZStrArg(
+            options=["path", "request-path"],
+            help="The URI used for requesting health status from the VM. Path is required if a protocol is set to http. Otherwise, it is not allowed.",
+            nullable=True,
+        )
         return cls._args_schema
 
     _args_application_security_group_update = None
@@ -699,6 +749,28 @@ class Update(AAZCommand):
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
 
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("probes", AAZListType, ".probes")
+
+            probes = _builder.get(".properties.probes")
+            if probes is not None:
+                probes.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.probes[]")
+            if _elements is not None:
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            properties = _builder.get(".properties.probes[].properties")
+            if properties is not None:
+                properties.set_prop("intervalInSeconds", AAZIntType, ".interval_in_seconds")
+                properties.set_prop("numberOfProbes", AAZIntType, ".number_of_probes")
+                properties.set_prop("port", AAZIntType, ".port", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("probeThreshold", AAZIntType, ".probe_threshold")
+                properties.set_prop("protocol", AAZStrType, ".protocol", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("requestPath", AAZStrType, ".request_path")
+
             tags = _builder.get(".tags")
             if tags is not None:
                 tags.set_elements(AAZStrType, ".")
@@ -779,8 +851,8 @@ class _UpdateHelper:
 
         _elements = _builder.get(".properties.ipTags[]")
         if _elements is not None:
-            _elements.set_prop("ipTagType", AAZStrType, "@PublicIPAddress_update.ip_tags.[].ip_tag_type")
-            _elements.set_prop("tag", AAZStrType, "@PublicIPAddress_update.ip_tags.[].tag")
+            _elements.set_prop("ipTagType", AAZStrType, ".ip_tag_type")
+            _elements.set_prop("tag", AAZStrType, ".tag")
 
         nat_gateway = _builder.get(".properties.natGateway")
         if nat_gateway is not None:

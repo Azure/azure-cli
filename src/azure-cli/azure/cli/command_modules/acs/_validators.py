@@ -10,6 +10,13 @@ import re
 from ipaddress import ip_network
 from math import isclose, isnan
 
+from azure.cli.command_modules.acs._consts import (
+    CONST_MANAGED_CLUSTER_SKU_TIER_FREE,
+    CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD,
+    CONST_OS_SKU_AZURELINUX,
+    CONST_OS_SKU_CBLMARINER,
+    CONST_OS_SKU_MARINER,
+)
 from azure.cli.core import keys
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
@@ -17,9 +24,11 @@ from azure.cli.core.azclierror import (
     MutuallyExclusiveArgumentError,
     RequiredArgumentMissingError,
 )
+
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
 from knack.log import get_logger
+
 
 logger = get_logger(__name__)
 
@@ -185,6 +194,15 @@ def validate_load_balancer_sku(namespace):
             return
         if namespace.load_balancer_sku.lower() != "basic" and namespace.load_balancer_sku.lower() != "standard":
             raise CLIError("--load-balancer-sku can only be standard or basic")
+
+
+def validate_sku_tier(namespace):
+    """Validates the sku tier string."""
+    if namespace.tier is not None:
+        if namespace.tier == '':
+            return
+        if namespace.tier.lower() not in (CONST_MANAGED_CLUSTER_SKU_TIER_FREE, CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD):
+            raise InvalidArgumentValueError("--tier can only be free or standard")
 
 
 def validate_load_balancer_outbound_ips(namespace):
@@ -574,6 +592,16 @@ def validate_azure_keyvault_kms_key_vault_resource_id(namespace):
         raise InvalidArgumentValueError("--azure-keyvault-kms-key-vault-resource-id is not a valid Azure resource ID.")
 
 
+def validate_image_cleaner_enable_disable_mutually_exclusive(namespace):
+    enable_image_cleaner = namespace.enable_image_cleaner
+    disable_image_cleaner = namespace.disable_image_cleaner
+
+    if enable_image_cleaner and disable_image_cleaner:
+        raise MutuallyExclusiveArgumentError(
+            "Cannot specify --enable-image-cleaner and --disable-image-cleaner at the same time."
+        )
+
+
 def validate_registry_name(cmd, namespace):
     """Append login server endpoint suffix."""
     registry = namespace.acr
@@ -589,3 +617,46 @@ def validate_registry_name(cmd, namespace):
         if pos == -1:
             logger.warning("The login server endpoint suffix '%s' is automatically appended.", acr_suffix)
             namespace.acr = registry + acr_suffix
+
+
+def sanitize_resource_id(resource_id):
+    resource_id = resource_id.strip()
+    if not resource_id.startswith("/"):
+        resource_id = "/" + resource_id
+    if resource_id.endswith("/"):
+        resource_id = resource_id.rstrip("/")
+    return resource_id.lower()
+
+
+# pylint:disable=line-too-long
+def validate_azuremonitorworkspaceresourceid(namespace):
+    resource_id = namespace.azure_monitor_workspace_resource_id
+    if resource_id is None:
+        return
+    resource_id = sanitize_resource_id(resource_id)
+    if (bool(re.match(r'/subscriptions/.*/resourcegroups/.*/providers/microsoft.monitor/accounts/.*', resource_id))) is False:
+        raise InvalidArgumentValueError("--azure-monitor-workspace-resource-id not in the correct format. It should match `/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/microsoft.monitor/accounts/<resourceName>`")
+
+
+# pylint:disable=line-too-long
+def validate_grafanaresourceid(namespace):
+    resource_id = namespace.grafana_resource_id
+    if resource_id is None:
+        return
+    resource_id = sanitize_resource_id(resource_id)
+    if (bool(re.match(r'/subscriptions/.*/resourcegroups/.*/providers/microsoft.dashboard/grafana/.*', resource_id))) is False:
+        raise InvalidArgumentValueError("--grafana-resource-id not in the correct format. It should match `/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/microsoft.dashboard/grafana/<resourceName>`")
+
+
+def validate_os_sku(namespace):
+    os_sku = namespace.os_sku
+    if os_sku in [CONST_OS_SKU_MARINER, CONST_OS_SKU_CBLMARINER]:
+        logger.warning(
+            'The osSKU "%s" should be used going forward instead of "%s" or "%s". '
+            'The osSKUs "%s" and "%s" will eventually be deprecated.',
+            CONST_OS_SKU_AZURELINUX,
+            CONST_OS_SKU_CBLMARINER,
+            CONST_OS_SKU_MARINER,
+            CONST_OS_SKU_CBLMARINER,
+            CONST_OS_SKU_MARINER,
+        )

@@ -232,7 +232,7 @@ class Wait(AAZWaitCommand):
             routing_configuration.associated_route_table = AAZObjectType(
                 serialized_name="associatedRouteTable",
             )
-            _build_schema_sub_resource_read(routing_configuration.associated_route_table)
+            _WaitHelper._build_schema_sub_resource_read(routing_configuration.associated_route_table)
             routing_configuration.propagated_route_tables = AAZObjectType(
                 serialized_name="propagatedRouteTables",
             )
@@ -246,7 +246,7 @@ class Wait(AAZWaitCommand):
 
             ids = cls._schema_on_200.properties.express_route_connections.Element.properties.routing_configuration.propagated_route_tables.ids
             ids.Element = AAZObjectType()
-            _build_schema_sub_resource_read(ids.Element)
+            _WaitHelper._build_schema_sub_resource_read(ids.Element)
 
             labels = cls._schema_on_200.properties.express_route_connections.Element.properties.routing_configuration.propagated_route_tables.labels
             labels.Element = AAZStrType()
@@ -262,7 +262,7 @@ class Wait(AAZWaitCommand):
 
             bgp_connections = cls._schema_on_200.properties.express_route_connections.Element.properties.routing_configuration.vnet_routes.bgp_connections
             bgp_connections.Element = AAZObjectType()
-            _build_schema_sub_resource_read(bgp_connections.Element)
+            _WaitHelper._build_schema_sub_resource_read(bgp_connections.Element)
 
             static_routes = cls._schema_on_200.properties.express_route_connections.Element.properties.routing_configuration.vnet_routes.static_routes
             static_routes.Element = AAZObjectType()
@@ -288,21 +288,23 @@ class Wait(AAZWaitCommand):
             return cls._schema_on_200
 
 
-_schema_sub_resource_read = None
+class _WaitHelper:
+    """Helper class for Wait"""
 
+    _schema_sub_resource_read = None
 
-def _build_schema_sub_resource_read(_schema):
-    global _schema_sub_resource_read
-    if _schema_sub_resource_read is not None:
-        _schema.id = _schema_sub_resource_read.id
-        return
+    @classmethod
+    def _build_schema_sub_resource_read(cls, _schema):
+        if cls._schema_sub_resource_read is not None:
+            _schema.id = cls._schema_sub_resource_read.id
+            return
 
-    _schema_sub_resource_read = AAZObjectType()
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
 
-    sub_resource_read = _schema_sub_resource_read
-    sub_resource_read.id = AAZStrType()
+        sub_resource_read = _schema_sub_resource_read
+        sub_resource_read.id = AAZStrType()
 
-    _schema.id = _schema_sub_resource_read.id
+        _schema.id = cls._schema_sub_resource_read.id
 
 
 __all__ = ["Wait"]

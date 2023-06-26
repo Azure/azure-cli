@@ -844,6 +844,21 @@ examples:
         az iot hub update -n MyIoTHub --disable-local-auth --disable-device-sas false --disable-module-sas true
 """
 
+helps['iot hub wait'] = """
+type: command
+short-summary: Wait until an operation on an IoT Hub instance is complete.
+examples:
+  - name: Wait until an existing IoT Hub instance is created
+    text: >
+        az iot hub wait -n MyIoTHub --created
+  - name: Wait until an IoT Hub instance is deleted
+    text: >
+        az iot hub wait -n MyIoTHub --deleted
+  - name: Wait until an existing IoT Hub instance has an Active state
+    text: >
+        az iot hub wait -n MyIoTHub --custom "properties.state=='Active'"
+"""
+
 helps['iot central'] = """
 type: group
 short-summary: Manage IoT Central resources.

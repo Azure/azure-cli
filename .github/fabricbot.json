@@ -1486,8 +1486,7 @@
               "ARM - Templates"
             ],
             "mentionees": [
-              "satyavel",
-              "apclouds"
+              "Azure/deployments-owners"
             ]
           },
           {
@@ -1593,7 +1592,7 @@
               "App Configuration"
             ],
             "mentionees": [
-              "shenmuxiaosen",
+              "albertofori",
               "avanigupta"
             ]
           },
@@ -1893,9 +1892,13 @@
             ],
             "mentionees": [
               "Drewm3",
-              "avirishuv",
-              "vaibhav-agar",
-              "amjads1"
+              "TravisCragg-MSFT",
+              "nikhilpatel909",
+              "sandeepraichura",
+              "hilaryw29",
+              "GabstaMSFT",
+              "ramankumarlive",
+              "ushnaarshadkhan"
             ]
           },
           {
@@ -1904,8 +1907,8 @@
               "Compute - Extensions"
             ],
             "mentionees": [
-              "Drewm3",
-              "amjads1"
+              "TravisCragg-MSFT",
+              "GabstaMSFT"
             ]
           },
           {
@@ -1914,8 +1917,8 @@
               "Compute - Images"
             ],
             "mentionees": [
-              "Drewm3",
-              "vaibhav-agar"
+              "TravisCragg-MSFT",
+              "nikhilpatel909"
             ]
           },
           {
@@ -1924,8 +1927,9 @@
               "Compute - Managed Disks"
             ],
             "mentionees": [
-              "Drewm3",
-              "vaibhav-agar"
+              "TravisCragg-MSFT",
+              "ramankumarlive",
+              "ushnaarshadkhan"
             ]
           },
           {
@@ -1935,7 +1939,7 @@
             ],
             "mentionees": [
               "Drewm3",
-              "avirishuv"
+              "TravisCragg-MSFT"
             ]
           },
           {
@@ -1945,7 +1949,11 @@
             ],
             "mentionees": [
               "Drewm3",
-              "avirishuv"
+              "TravisCragg-MSFT",
+              "nikhilpatel909",
+              "sandeepraichura",
+              "hilaryw29",
+              "GabstaMSFT"
             ]
           },
           {
@@ -1954,8 +1962,8 @@
               "Compute - VMSS"
             ],
             "mentionees": [
-              "Drewm3",
-              "avirishuv"
+              "TravisCragg-MSFT",
+              "hilaryw29"
             ]
           },
           {
@@ -2232,8 +2240,11 @@
               "Functions"
             ],
             "mentionees": [
-              "Stefanus Hinardi",
-              "Francisco-Gamino"
+              "amamounelsayed",
+              "kaibocai",
+              "shreyas-gopalakrishna",
+              "kamperiadis",
+              "apawast"
             ]
           },
           {
@@ -3331,7 +3342,7 @@
               "Serial Console"
             ],
             "mentionees": [
-              "CraigWiand"
+              "microsoft/azserialconsole"
             ]
           },
           {
@@ -3557,6 +3568,83 @@
                 {
                   "name": "titleContains",
                   "parameters": {
+                    "titlePattern": "[Aa]z network dns",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "[Aa]z network dns",
+                    "isRegex": true
+                  }
+                }
+              ]
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "isAction",
+                  "parameters": {
+                    "action": "opened"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Network - DNS"
+            }
+          },
+          {
+            "name": "addMilestone",
+            "parameters": {
+              "groupId": "",
+              "milestoneName": "Backlog"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Service Attention"
+            }
+          }
+        ],
+        "taskName": "[Network DNS] auto assign labels and users based on issue description."
+      },
+      "disabled": false
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
                     "titlePattern": "[Aa]z network",
                     "isRegex": true
                   }
@@ -3578,6 +3666,35 @@
                   "parameters": {
                     "action": "opened"
                   }
+                }
+              ]
+            },
+            {
+              "operator": "and",
+              "operands": [
+                {
+                  "operator": "not",
+                  "operands": [
+                    {
+                      "name": "titleContains",
+                      "parameters": {
+                        "isRegex": true,
+                        "titlePattern": "az network dns"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "operator": "not",
+                  "operands": [
+                    {
+                      "name": "bodyContains",
+                      "parameters": {
+                        "isRegex": true,
+                        "bodyPattern": "az network dns"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -3613,9 +3730,21 @@
             "parameters": {
               "label": "Auto-Assign"
             }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Azure CLI Team"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "question"
+            }
           }
         ],
-        "taskName": "[Network] auto assign labels and users based on issue description. Please do not delete"
+        "taskName": "[Network] auto assign labels and users based on issue description."
       },
       "disabled": false
     },
@@ -3732,14 +3861,14 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "[Aa]z \\b(vm|vmss|image|disk|snapshot)\\b",
+                    "titlePattern": "[Aa]z \\b(vm|vmss|image|disk|snapshot|disk-encryption-set|disk-access|sig|ppg|capacity|restore-point)\\b",
                     "isRegex": true
                   }
                 },
                 {
                   "name": "bodyContains",
                   "parameters": {
-                    "bodyPattern": "[Aa]z \\b(vm|vmss|image|disk|snapshot)\\b",
+                    "bodyPattern": "[Aa]z \\b(vm|vmss|image|disk|snapshot|disk-encryption-set|disk-access|sig|ppg|capacity|restore-point)\\b",
                     "isRegex": true
                   }
                 }
@@ -3763,7 +3892,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[Compute] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[Compute] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -3787,6 +3916,18 @@
             "name": "addLabel",
             "parameters": {
               "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Azure CLI Team"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "question"
             }
           }
         ]
@@ -3839,7 +3980,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[Storage] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[Storage] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -3863,6 +4004,18 @@
             "name": "addLabel",
             "parameters": {
               "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Azure CLI Team"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "question"
             }
           }
         ],
@@ -3894,7 +4047,7 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "\\b(network|Network|NETWORK|monitor|Monitor|MONITOR|bastion|Bastion|BASTION)\\b",
+                    "titlePattern": "\\b(network|Network|NETWORK|bastion|Bastion|BASTION)\\b",
                     "isRegex": true
                   }
                 }
@@ -3953,12 +4106,6 @@
             }
           },
           {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
-            }
-          },
-          {
             "name": "addLabel",
             "parameters": {
               "label": "Network"
@@ -3988,7 +4135,14 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "\\b(Compute|compute|COMPUTE|VM)\\b",
+                    "titlePattern": "[Aa]z \\b(vm|vmss|image|disk|snapshot|disk-encryption-set|disk-access|sig|ppg|capacity|restore-point)\\b",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "[Aa]z \\b(vm|vmss|image|disk|snapshot|disk-encryption-set|disk-access|sig|ppg|capacity|restore-point)\\b",
                     "isRegex": true
                   }
                 }
@@ -4002,7 +4156,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[Compute] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[Compute] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "requestReviewer",
@@ -4032,12 +4186,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "zhoxing-ms"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -4084,7 +4232,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[Storage] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[Storage] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "addLabel",
@@ -4114,12 +4262,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "evelyn-ys"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -4177,7 +4319,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[AKS] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[AKS] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -4215,14 +4357,14 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "[Aa]z \\b(appservice|logicapp)\\b",
+                    "titlePattern": "[Aa]z \\b(logicapp)\\b",
                     "isRegex": true
                   }
                 },
                 {
                   "name": "bodyContains",
                   "parameters": {
-                    "bodyPattern": "[Aa]z \\b(appservice|logicapp)\\b",
+                    "bodyPattern": "[Aa]z \\b(logicapp)\\b",
                     "isRegex": true
                   }
                 }
@@ -4246,7 +4388,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[appservice] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[logicapp] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -4255,9 +4397,9 @@
             }
           },
           {
-            "name": "addLabel",
+            "name": "assignToUser",
             "parameters": {
-              "label": "CXP Attention"
+              "user": "archidda"
             }
           },
           {
@@ -4315,7 +4457,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[webapp] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[webapp] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -4353,14 +4495,14 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "[Aa]z iot",
+                    "titlePattern": "\\b([Ii][Oo][Tt])\\b",
                     "isRegex": true
                   }
                 },
                 {
                   "name": "bodyContains",
                   "parameters": {
-                    "bodyPattern": "[Aa]z iot",
+                    "bodyPattern": "\\b([Ii][Oo][Tt])\\b",
                     "isRegex": true
                   }
                 }
@@ -4384,7 +4526,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[iot] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[iot] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -4459,7 +4601,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[spring-cloud] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[spring-cloud] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -4528,7 +4670,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[keyvault] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[keyvault] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -4552,6 +4694,18 @@
             "name": "addMilestone",
             "parameters": {
               "milestoneName": "Backlog"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Azure CLI Team"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "question"
             }
           }
         ]
@@ -4603,7 +4757,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[monitor] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[monitor] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -4627,6 +4781,107 @@
             "name": "addMilestone",
             "parameters": {
               "milestoneName": "Backlog"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Azure CLI Team"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "question"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "PullRequestResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isAction",
+              "parameters": {
+                "action": "opened"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "[Aa]z [Mm]onitor",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "[Aa]z [Mm]onitor",
+                    "isRegex": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "pull_request",
+        "eventNames": [
+          "pull_request",
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[Monitor] Auto assign labels and reviewers based on PR title/description.",
+        "actions": [
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "yonzhan"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "AllyW"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "kairu-ms"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "necusjz"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "AllyW"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Monitor"
             }
           }
         ]
@@ -4676,7 +4931,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[role] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[role] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -4701,6 +4956,18 @@
             "parameters": {
               "milestoneName": "Backlog"
             }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Azure CLI Team"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "question"
+            }
           }
         ]
       }
@@ -4718,16 +4985,16 @@
               "operator": "or",
               "operands": [
                 {
-                  "name": "bodyContains",
+                  "name": "titleContains",
                   "parameters": {
-                    "bodyPattern": "[Aa]z \\b(resource|group|lock|tag|deployment|policy|managementapp|account management-group)\\b",
+                    "titlePattern": "[Aa]z \\b(account|group|resource|provider|feature|tag|deployment|policy|lock|managedapp|resourcemanagement)\\b",
                     "isRegex": true
                   }
                 },
                 {
                   "name": "bodyContains",
                   "parameters": {
-                    "bodyPattern": "[Aa]z \\b(resource|group|lock|tag|deployment|policy|managementapp|account management-group)\\b",
+                    "bodyPattern": "[Aa]z \\b(account|group|resource|provider|feature|tag|deployment|policy|lock|managedapp|resourcemanagement)\\b",
                     "isRegex": true
                   }
                 }
@@ -4751,7 +5018,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[arm] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[arm] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -4769,6 +5036,93 @@
             "name": "assignToUser",
             "parameters": {
               "user": "zhoxing-ms"
+            }
+          },
+          {
+            "name": "addMilestone",
+            "parameters": {
+              "milestoneName": "Backlog"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Azure CLI Team"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "question"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "[Aa]z \\b(ts|bicep|private-link)\\b",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "[Aa]z \\b(ts|bicep|private-link)\\b",
+                    "isRegex": true
+                  }
+                }
+              ]
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "isAction",
+                  "parameters": {
+                    "action": "opened"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[arm-cxp] auto assign labels and users based on issue description.",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "ARM"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
             }
           },
           {
@@ -4826,7 +5180,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[sql] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[sql] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -4895,7 +5249,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[acr] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[acr] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -4933,14 +5287,14 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "az \\b(login|account)\\b",
+                    "titlePattern": "az login",
                     "isRegex": true
                   }
                 },
                 {
                   "name": "bodyContains",
                   "parameters": {
-                    "bodyPattern": "az \\b(login|account)\\b",
+                    "bodyPattern": "az login",
                     "isRegex": true
                   }
                 }
@@ -4964,7 +5318,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[account] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[account] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -4990,6 +5344,18 @@
             "parameters": {
               "milestoneName": "Backlog"
             }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Azure CLI Team"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "question"
+            }
           }
         ]
       }
@@ -5009,13 +5375,15 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "az container"
+                    "titlePattern": "az \\b(container)\\b",
+                    "isRegex": true
                   }
                 },
                 {
                   "name": "bodyContains",
                   "parameters": {
-                    "bodyPattern": "az container"
+                    "bodyPattern": "az \\b(container)\\b",
+                    "isRegex": true
                   }
                 }
               ]
@@ -5038,7 +5406,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[container] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[container] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -5056,6 +5424,77 @@
             "name": "addLabel",
             "parameters": {
               "label": "CXP Attention"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "PullRequestResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isAction",
+              "parameters": {
+                "action": "opened"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "az \\b(container)\\b",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "az \\b(container)\\b",
+                    "isRegex": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "pull_request",
+        "eventNames": [
+          "pull_request",
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[container] Auto assign labels and reviewers based on PR title/description.",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "zhoxing-ms"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "yanzhudd"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "zhoxing-ms"
             }
           }
         ]
@@ -5107,7 +5546,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[functionapp] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[functionapp] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -5116,15 +5555,127 @@
             }
           },
           {
-            "name": "addLabel",
+            "name": "assignToUser",
             "parameters": {
-              "label": "CXP Attention"
+              "groupId": "",
+              "user": "amamounelsayed"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "groupId": "",
+              "user": "kaibocai"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "groupId": "",
+              "user": "shreyas-gopalakrishna"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "groupId": "",
+              "user": "kamperiadis"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "groupId": "",
+              "user": "apawast"
             }
           },
           {
             "name": "addLabel",
             "parameters": {
               "label": "Functions"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+            "label": "CXP Attention"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "PullRequestResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isAction",
+              "parameters": {
+                "action": "opened"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "az functionapp",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "az functionapp",
+                    "isRegex": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "pull_request",
+        "eventNames": [
+          "pull_request",
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[functionapp] Auto assign labels and reviewers based on PR title/description.",
+        "actions": [
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "yonzhan"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "zhoxing-ms"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Functions"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "zhoxing-ms"
             }
           }
         ]
@@ -5176,7 +5727,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[apim] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[apim] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -5245,7 +5796,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[devops] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[devops] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -5283,29 +5834,15 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "az ad",
+                    "titlePattern": "az \\b(ad)\\b",
                     "isRegex": true
                   }
                 },
                 {
                   "name": "bodyContains",
                   "parameters": {
-                    "bodyPattern": "az ad",
+                    "bodyPattern": "az \\b(ad)\\b",
                     "isRegex": true
-                  }
-                },
-                {
-                  "name": "titleContains",
-                  "parameters": {
-                    "isRegex": true,
-                    "titlePattern": "\\b([Gg][Rr][Aa][Pp][Hh])\\b"
-                  }
-                },
-                {
-                  "name": "bodyContains",
-                  "parameters": {
-                    "isRegex": true,
-                    "bodyPattern": "\\b([Gg][Rr][Aa][Pp][Hh])\\b"
                   }
                 }
               ]
@@ -5328,7 +5865,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[graph] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[graph] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -5352,6 +5889,18 @@
             "name": "addMilestone",
             "parameters": {
               "milestoneName": "Backlog"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Azure CLI Team"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "question"
             }
           }
         ]
@@ -5401,7 +5950,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[interactive] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[interactive] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -5426,6 +5975,18 @@
             "name": "addMilestone",
             "parameters": {
               "milestoneName": "Backlog"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Azure CLI Team"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "question"
             }
           }
         ]
@@ -5475,7 +6036,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[upgrade] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[upgrade] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -5499,6 +6060,18 @@
             "name": "addMilestone",
             "parameters": {
               "milestoneName": "Backlog"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Azure CLI Team"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "question"
             }
           }
         ]
@@ -5550,7 +6123,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[servicebus] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[servicebus] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -5619,7 +6192,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[machine learning] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[machine learning] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -5686,7 +6259,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[devtestlab] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[devtestlab] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -5753,7 +6326,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[config] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[config] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -5777,6 +6350,18 @@
             "name": "addMilestone",
             "parameters": {
               "milestoneName": "Backlog"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Azure CLI Team"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "question"
             }
           }
         ]
@@ -5826,7 +6411,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[rest] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[rest] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -5901,7 +6486,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[netappfiles] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[netappfiles] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -5970,7 +6555,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[cosmosdb] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[cosmosdb] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -6039,7 +6624,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[staticwebapp] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[staticwebapp] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -6048,9 +6633,27 @@
             }
           },
           {
-            "name": "addLabel",
+            "name": "assignToUser",
             "parameters": {
-              "label": "CXP Attention"
+              "user": "sulabh-msft"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "vivekjilla"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "joslinmicrosoft"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "mkarmark"
             }
           },
           {
@@ -6083,7 +6686,14 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "\\b(arm|Arm|ARM|resource|Resource|RESOURCE)\\b",
+                    "titlePattern": "[Aa]z \\b(account|group|resource|provider|feature|tag|deployment|ts|policy|lock|managedapp|bicep|resourcemanagement|private-link)\\b",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "[Aa]z \\b(account|group|resource|provider|feature|tag|deployment|ts|policy|lock|managedapp|bicep|resourcemanagement|private-link)\\b",
                     "isRegex": true
                   }
                 }
@@ -6124,12 +6734,6 @@
             }
           },
           {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
-            }
-          },
-          {
             "name": "addLabel",
             "parameters": {
               "label": "ARM"
@@ -6159,14 +6763,13 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "\\b(account|Account|ACCOUNT)\\b",
-                    "isRegex": true
+                    "titlePattern": "az login"
                   }
                 },
                 {
-                  "name": "titleContains",
+                  "name": "bodyContains",
                   "parameters": {
-                    "titlePattern": "az login"
+                    "bodyPattern": "az login"
                   }
                 }
               ]
@@ -6203,12 +6806,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "jiasli"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -6282,12 +6879,6 @@
             }
           },
           {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
-            }
-          },
-          {
             "name": "addLabel",
             "parameters": {
               "label": "KeyVault"
@@ -6318,6 +6909,13 @@
                   "name": "titleContains",
                   "parameters": {
                     "titlePattern": "\\b(aks|Aks|AKS|acs|Acs|ACS|openshift|Openshift|OPENSHIFT)\\b",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "[Aa]z \\b(aks|acs|openshift)\\b",
                     "isRegex": true
                   }
                 }
@@ -6352,12 +6950,6 @@
             }
           },
           {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
-            }
-          },
-          {
             "name": "addLabel",
             "parameters": {
               "label": "Auto-Assign"
@@ -6367,6 +6959,12 @@
             "name": "requestReviewer",
             "parameters": {
               "reviewer": "yonzhan"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "FumingZhang"
             }
           },
           {
@@ -6437,12 +7035,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "jiasli"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -6529,12 +7121,6 @@
             }
           },
           {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
-            }
-          },
-          {
             "name": "addLabel",
             "parameters": {
               "label": "App Services"
@@ -6601,7 +7187,7 @@
           {
             "name": "requestReviewer",
             "parameters": {
-              "reviewer": "kairu-ms"
+              "reviewer": "bebound"
             }
           },
           {
@@ -6613,13 +7199,7 @@
           {
             "name": "assignToUser",
             "parameters": {
-              "user": "jiasli"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
+              "user": "bebound"
             }
           },
           {
@@ -6724,6 +7304,13 @@
                     "titlePattern": "\\b([Ii][Oo][Tt])\\b",
                     "isRegex": true
                   }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "\\b([Ii][Oo][Tt])\\b",
+                    "isRegex": true
+                  }
                 }
               ]
             }
@@ -6752,7 +7339,7 @@
           {
             "name": "requestReviewer",
             "parameters": {
-              "reviewer": "wangzelin007"
+              "reviewer": "yanzhudd"
             }
           },
           {
@@ -6765,12 +7352,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "zhoxing-ms"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -6876,7 +7457,14 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "\\b(appconfig|Appconfig|APPCONFIG|AppConfig)\\b",
+                    "titlePattern": "az appconfig",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "az appconfig",
                     "isRegex": true
                   }
                 }
@@ -6895,7 +7483,7 @@
           {
             "name": "requestReviewer",
             "parameters": {
-              "reviewer": "wangzelin007"
+              "reviewer": "yanzhudd"
             }
           },
           {
@@ -6917,15 +7505,15 @@
             }
           },
           {
-            "name": "addMilestone",
+            "name": "requestReviewer",
             "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
+              "reviewer": "jsntcy"
             }
           },
           {
             "name": "requestReviewer",
             "parameters": {
-              "reviewer": "jsntcy"
+              "reviewer": "avanigupta"
             }
           },
           {
@@ -7010,12 +7598,6 @@
             "parameters": {
               "label": "Container Registry"
             }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
-            }
           }
         ]
       }
@@ -7086,12 +7668,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "evelyn-ys"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           }
         ]
@@ -7182,12 +7758,6 @@
             "parameters": {
               "user": "wangzelin007"
             }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
-            }
           }
         ]
       }
@@ -7253,12 +7823,6 @@
             "parameters": {
               "user": "jiasli"
             }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
-            }
           }
         ]
       }
@@ -7279,18 +7843,30 @@
               }
             },
             {
-              "name": "titleContains",
-              "parameters": {
-                "titlePattern": "\\b(rdbms|Rdbms|RDBMS)\\b",
-                "isRegex": true
-              }
-            },
-            {
-              "name": "titleContains",
-              "parameters": {
-                "titlePattern": "az mysql",
-                "isRegex": true
-              }
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "\\b(rdbms|Rdbms|RDBMS)\\b",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "[Aa]z mysql",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "[Aa]z mysql",
+                    "isRegex": true
+                  }
+                }
+              ]
             }
           ]
         },
@@ -7336,12 +7912,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "evelyn-ys"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           }
         ]
@@ -7413,12 +7983,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "evelyn-ys"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           }
         ]
@@ -7497,12 +8061,6 @@
             "parameters": {
               "user": "kairu-ms"
             }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
-            }
           }
         ]
       }
@@ -7567,12 +8125,6 @@
             "name": "addLabel",
             "parameters": {
               "label": "Auto-Assign"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           }
         ]
@@ -7732,12 +8284,6 @@
             "parameters": {
               "user": "evelyn-ys"
             }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
-            }
           }
         ]
       }
@@ -7788,7 +8334,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[redis] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[redis] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -7892,12 +8438,6 @@
             }
           },
           {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
-            }
-          },
-          {
             "name": "requestReviewer",
             "parameters": {
               "reviewer": "zhoxing-ms"
@@ -7958,7 +8498,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[Service Fabric] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[Service Fabric] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -8059,12 +8599,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "zhoxing-ms"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           }
         ]
@@ -8243,7 +8777,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[postgres] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[postgres] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -8312,7 +8846,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[synapse] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[synapse] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -8386,6 +8920,12 @@
             }
           },
           {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Event Hubs"
+            }
+          },
+          {
             "name": "requestReviewer",
             "parameters": {
               "reviewer": "evelyn-ys"
@@ -8401,12 +8941,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "evelyn-ys"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -8464,7 +8998,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[portal] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[portal] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -8489,6 +9023,18 @@
             "name": "addLabel",
             "parameters": {
               "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Azure CLI Team"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "question"
             }
           }
         ]
@@ -8536,7 +9082,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[portal] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[portal] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "requestReviewer",
@@ -8566,12 +9112,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "jsntcy"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -8652,12 +9192,6 @@
             }
           },
           {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
-            }
-          },
-          {
             "name": "requestReviewer",
             "parameters": {
               "reviewer": "yonzhan"
@@ -8699,28 +9233,14 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "\\b([Gg][Rr][Aa][Pp][Hh])\\b",
+                    "titlePattern": "az \\b(ad)\\b",
                     "isRegex": true
                   }
                 },
                 {
                   "name": "bodyContains",
                   "parameters": {
-                    "bodyPattern": "\\b([Gg][Rr][Aa][Pp][Hh])\\b",
-                    "isRegex": true
-                  }
-                },
-                {
-                  "name": "titleContains",
-                  "parameters": {
-                    "titlePattern": "az ad",
-                    "isRegex": true
-                  }
-                },
-                {
-                  "name": "bodyContains",
-                  "parameters": {
-                    "bodyPattern": "az ad",
+                    "bodyPattern": "az \\b(ad)\\b",
                     "isRegex": true
                   }
                 }
@@ -8734,7 +9254,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[graph] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[graph] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "requestReviewer",
@@ -8755,21 +9275,9 @@
             }
           },
           {
-            "name": "requestReviewer",
-            "parameters": {
-              "reviewer": "wangzelin007"
-            }
-          },
-          {
             "name": "assignToUser",
             "parameters": {
               "user": "jiasli"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -8839,7 +9347,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[install] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[install] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -8912,7 +9420,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[install] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[install] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "requestReviewer",
@@ -8936,12 +9444,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "jiasli"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -9017,7 +9519,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[pipelines] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[pipelines] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -9089,7 +9591,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[apim] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[apim] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "requestReviewer",
@@ -9106,19 +9608,13 @@
           {
             "name": "requestReviewer",
             "parameters": {
-              "reviewer": "wangzelin007"
+              "reviewer": "yanzhudd"
             }
           },
           {
             "name": "assignToUser",
             "parameters": {
               "user": "zhoxing-ms"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -9182,7 +9678,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[managed identity] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[managed identity] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -9199,7 +9695,6 @@
           {
             "name": "assignToUser",
             "parameters": {
-              "label": "Functions",
               "user": "zhoxing-ms"
             }
           },
@@ -9207,6 +9702,18 @@
             "name": "addMilestone",
             "parameters": {
               "milestoneName": "Backlog"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Azure CLI Team"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "question"
             }
           }
         ]
@@ -9254,7 +9761,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[managed identity] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[managed identity] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "requestReviewer",
@@ -9278,12 +9785,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "zhoxing-ms"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -9361,7 +9862,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[AAD] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[AAD] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -9447,7 +9948,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[AAD] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[AAD] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "requestReviewer",
@@ -9471,12 +9972,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "jiasli"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -9540,7 +10035,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[network bastion] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[network bastion] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -9605,7 +10100,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[eventgrid] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[eventgrid] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "requestReviewer",
@@ -9623,12 +10118,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "evelyn-ys"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -9698,7 +10187,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[desktopvirtualization] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[desktopvirtualization] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -9715,7 +10204,6 @@
           {
             "name": "assignToUser",
             "parameters": {
-              "label": "Functions",
               "user": "wangzelin007"
             }
           },
@@ -9770,7 +10258,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[desktopvirtualization] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[desktopvirtualization] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "requestReviewer",
@@ -9794,12 +10282,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "wangzelin007"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -9869,7 +10351,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[Backup] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[Backup] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -9886,7 +10368,6 @@
           {
             "name": "assignToUser",
             "parameters": {
-              "label": "Functions",
               "user": "zhoxing-ms"
             }
           },
@@ -9894,6 +10375,18 @@
             "name": "addMilestone",
             "parameters": {
               "milestoneName": "Backlog"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Azure CLI Team"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "question"
             }
           }
         ]
@@ -9941,7 +10434,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[backup] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[backup] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "requestReviewer",
@@ -9965,12 +10458,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "zhoxing-ms"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -10040,7 +10527,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[container app] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[container app] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -10106,7 +10593,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[container app] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[container app] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "addLabel",
@@ -10124,12 +10611,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "jsntcy"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -10199,7 +10680,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[batch] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[batch] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -10216,8 +10697,7 @@
           {
             "name": "addLabel",
             "parameters": {
-              "label": "CXP Attention",
-              "user": "zhoxing-ms"
+              "label": "CXP Attention"
             }
           }
         ]
@@ -10265,7 +10745,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[batch] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[batch] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "requestReviewer",
@@ -10289,12 +10769,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "zhoxing-ms"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -10360,7 +10834,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[netappfiles] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[netappfiles] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "requestReviewer",
@@ -10384,12 +10858,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "kairu-ms"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -10459,7 +10927,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[SqlVirtualMachine] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[SqlVirtualMachine] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -10476,8 +10944,7 @@
           {
             "name": "addLabel",
             "parameters": {
-              "label": "CXP Attention",
-              "user": "zhoxing-ms"
+              "label": "CXP Attention"
             }
           }
         ]
@@ -10525,7 +10992,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[SqlVirtualMachine] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[SqlVirtualMachine] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "requestReviewer",
@@ -10549,12 +11016,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "evelyn-ys"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -10618,7 +11079,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[Azure Front Door] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[Azure Front Door] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -10635,8 +11096,7 @@
           {
             "name": "addLabel",
             "parameters": {
-              "label": "CXP Attention",
-              "user": "zhoxing-ms"
+              "label": "CXP Attention"
             }
           }
         ]
@@ -10698,7 +11158,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[Azure Front Door] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[Azure Front Door] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "requestReviewer",
@@ -10722,12 +11182,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "necusjz"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -10799,7 +11253,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[cdn] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[cdn] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "requestReviewer",
@@ -10823,12 +11277,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "necusjz"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -10904,7 +11352,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[ams] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[ams] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -10921,8 +11369,7 @@
           {
             "name": "addLabel",
             "parameters": {
-              "label": "CXP Attention",
-              "user": "zhoxing-ms"
+              "label": "CXP Attention"
             }
           }
         ]
@@ -10970,7 +11417,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[ams] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[ams] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "requestReviewer",
@@ -10994,12 +11441,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "kairu-ms"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -11069,7 +11510,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[eventhub] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[eventhub] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -11086,8 +11527,7 @@
           {
             "name": "addLabel",
             "parameters": {
-              "label": "CXP Attention",
-              "user": "zhoxing-ms"
+              "label": "CXP Attention"
             }
           }
         ]
@@ -11139,7 +11579,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[Cognitive Services] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[Cognitive Services] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -11156,8 +11596,7 @@
           {
             "name": "addLabel",
             "parameters": {
-              "label": "CXP Attention",
-              "user": "zhoxing-ms"
+              "label": "CXP Attention"
             }
           }
         ]
@@ -11205,7 +11644,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[Cognitive Services] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[Cognitive Services] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "requestReviewer",
@@ -11229,12 +11668,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "kairu-ms"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -11310,7 +11743,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[appconfig] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[appconfig] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -11327,8 +11760,7 @@
           {
             "name": "addLabel",
             "parameters": {
-              "label": "CXP Attention",
-              "user": "zhoxing-ms"
+              "label": "CXP Attention"
             }
           }
         ]
@@ -11376,7 +11808,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[synapse] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[synapse] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "requestReviewer",
@@ -11400,12 +11832,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "jsntcy"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -11469,7 +11895,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[mysql] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[mysql] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -11486,8 +11912,7 @@
           {
             "name": "addLabel",
             "parameters": {
-              "label": "CXP Attention",
-              "user": "zhoxing-ms"
+              "label": "CXP Attention"
             }
           }
         ]
@@ -11539,7 +11964,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[logic app] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[logic app] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -11556,8 +11981,7 @@
           {
             "name": "addLabel",
             "parameters": {
-              "label": "CXP Attention",
-              "user": "zhoxing-ms"
+              "label": "CXP Attention"
             }
           }
         ]
@@ -11605,7 +12029,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[logic app] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[logic app] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "requestReviewer",
@@ -11629,12 +12053,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "jsntcy"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -11694,7 +12112,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[rdbms] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[rdbms] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "requestReviewer",
@@ -11718,12 +12136,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "evelyn-ys"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -11781,7 +12193,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[Data Factory] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[Data Factory] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -11798,7 +12210,6 @@
           {
             "name": "assignToUser",
             "parameters": {
-              "label": "CXP Attention",
               "user": "evelyn-ys"
             }
           }
@@ -11847,7 +12258,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[Data Factory] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[Data Factory] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "requestReviewer",
@@ -11871,12 +12282,6 @@
             "name": "assignToUser",
             "parameters": {
               "user": "evelyn-ys"
-            }
-          },
-          {
-            "name": "addMilestone",
-            "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
             }
           },
           {
@@ -11940,7 +12345,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[acrdata] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[acrdata] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -11957,8 +12362,7 @@
           {
             "name": "addLabel",
             "parameters": {
-              "label": "CXP Attention",
-              "user": "zhoxing-ms"
+              "label": "CXP Attention"
             }
           }
         ]
@@ -12006,7 +12410,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[Reservations] Auto assign labels and reviewers based on PR title/description. Please do not delete",
+        "taskName": "[Reservations] Auto assign labels and reviewers based on PR title/description.",
         "actions": [
           {
             "name": "requestReviewer",
@@ -12033,9 +12437,9 @@
             }
           },
           {
-            "name": "addMilestone",
+            "name": "addLabel",
             "parameters": {
-              "milestoneName": "Jan 2023 (2023-02-07)"
+              "label": "Reservations"
             }
           }
         ]
@@ -12087,7 +12491,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[backup restore] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[backup restore] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -12104,8 +12508,7 @@
           {
             "name": "addLabel",
             "parameters": {
-              "label": "CXP Attention",
-              "user": "zhoxing-ms"
+              "label": "CXP Attention"
             }
           }
         ]
@@ -12157,7 +12560,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[botservice] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[botservice] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -12174,8 +12577,7 @@
           {
             "name": "addLabel",
             "parameters": {
-              "label": "CXP Attention",
-              "user": "jsntcy"
+              "label": "CXP Attention"
             }
           }
         ]
@@ -12227,7 +12629,7 @@
           "issues",
           "project_card"
         ],
-        "taskName": "[Advisor] auto assign labels and users based on issue description. Please do not delete",
+        "taskName": "[Advisor] auto assign labels and users based on issue description.",
         "actions": [
           {
             "name": "addLabel",
@@ -12244,8 +12646,983 @@
           {
             "name": "addLabel",
             "parameters": {
-              "label": "CXP Attention",
-              "user": "wangzelin007"
+              "label": "CXP Attention"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isAction",
+              "parameters": {
+                "action": "opened"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "az appservice ase"
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "az appservice ase"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[appservice-ase] auto assign labels and users based on issue description.",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "app-service-ase"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "madsd"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isAction",
+              "parameters": {
+                "action": "opened"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "az webapp auth"
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "az webapp auth"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[appservice-authentication] auto assign labels and users based on issue description.",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "app-service-authentication"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "Hamster-Huey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isAction",
+              "parameters": {
+                "action": "opened"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "(az webapp config backup|az webapp config snapshot)",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "(az webapp config backup|az webapp config snapshot)",
+                    "isRegex": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[appservice-backup-restore] auto assign labels and users based on issue description.",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "app-service-backup-restore"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "gsethdev"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isAction",
+              "parameters": {
+                "action": "opened"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "(az appservice domain|az webapp config ssl)",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "(az appservice domain|az webapp config ssl)",
+                    "isRegex": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[appservice-certs-domains] auto assign labels and users based on issue description.",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "app-service-certs-domains"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "yutanglin16"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isAction",
+              "parameters": {
+                "action": "opened"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "az webapp deploy"
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "az webapp deploy"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[appservice-deployment]",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "app-service-deployment"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "btardif"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isAction",
+              "parameters": {
+                "action": "opened"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "(az appservice list-locations|az appservice plan|az webapp browse|az webapp config|az webapp connection|az webapp cors|az webapp create|az webapp delete|az webapp deleted|az webapp identity|az webapp list|az webapp list-instances|az webapp list-runtimes|az webapp restart|az webapp scale|az webapp show|az webapp start|az webapp stop|az webapp up|az webapp update|az webapp webjob)",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "(az appservice list-locations|az appservice plan|az webapp browse|az webapp config|az webapp connection|az webapp cors|az webapp create|az webapp delete|az webapp deleted|az webapp identity|az webapp list|az webapp list-instances|az webapp list-runtimes|az webapp restart|az webapp scale|az webapp show|az webapp start|az webapp stop|az webapp up|az webapp update|az webapp webjob)",
+                    "isRegex": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[appservice-general]",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "app-service-general"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "seligj95"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isAction",
+              "parameters": {
+                "action": "opened"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "az appservice kube"
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "az appservice kube"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[appservice-kube]",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "app-service-kube"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "apwestgarth"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isAction",
+              "parameters": {
+                "action": "opened"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "(az webapp log|az webapp scan)",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "(az webapp log|az webapp scan)",
+                    "isRegex": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[appservice-logging-monitoring]",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "app-service-logging-monitoring"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "yutanglin16"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isAction",
+              "parameters": {
+                "action": "opened"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "(az appservice vnet-integration|az webapp config access-restriction|az webapp vnet-integration)",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "(az appservice vnet-integration|az webapp config access-restriction|az webapp vnet-integration)",
+                    "isRegex": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[appservice-networking (madsd)]",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "app-service-networking"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "madsd"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isAction",
+              "parameters": {
+                "action": "opened"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "(az appservice hybrid-connection|az webapp config hostname|az webapp create-remote-connection|az webapp hybrid-connection|az webapp ssh|az webapp traffic-routing)",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "(az appservice hybrid-connection|az webapp config hostname|az webapp create-remote-connection|az webapp hybrid-connection|az webapp ssh|az webapp traffic-routing)",
+                    "isRegex": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[appservice-networking (seligj95)]",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "app-service-networking"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "madsd"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "az artifacts",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "az artifacts",
+                    "isRegex": true
+                  }
+                }
+              ]
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "isAction",
+                  "parameters": {
+                    "action": "opened"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[Artifacts] auto assign labels and users based on issue description.",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Artifacts"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "az k8s-configuration",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "az k8s-configuration",
+                    "isRegex": true
+                  }
+                }
+              ]
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "isAction",
+                  "parameters": {
+                    "action": "opened"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[Kubernetes Configuration] auto assign labels and users based on issue description.",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Kubernetes Configuration"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "PullRequestResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isAction",
+              "parameters": {
+                "action": "opened"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "az eventhubs",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "az eventhubs",
+                    "isRegex": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "pull_request",
+        "eventNames": [
+          "pull_request",
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[EventHub] Auto assign labels and reviewers based on PR title/description.",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "evelyn-ys"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "yonzhan"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "evelyn-ys"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Event Hubs"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "az reservations",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "az reservations",
+                    "isRegex": true
+                  }
+                }
+              ]
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "isAction",
+                  "parameters": {
+                    "action": "opened"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[Reservations] auto assign labels and users based on issue description.",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Reservations"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
             }
           }
         ]

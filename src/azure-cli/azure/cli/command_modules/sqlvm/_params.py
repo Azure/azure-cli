@@ -215,10 +215,15 @@ def load_arguments(self, _):
         c.argument('sql_management_mode',
                    help='SQL Server management type. Updates from LightWeight to Full.',
                    options_list=['--sql-mgmt-type'],
-                   arg_type=get_enum_type(['Full']))
+                   deprecate_info=c.deprecate())
         c.argument('prompt',
                    options_list=['--yes', '-y'],
                    help="Do not prompt for confirmation. Requires --sql-mgmt-type.",
+                   deprecate_info=c.deprecate())
+
+    with self.argument_context('sql vm create') as c:
+        c.argument('sql_management_mode',
+                   options_list=['--sql-mgmt-type'],
                    deprecate_info=c.deprecate())
 
     with self.argument_context('sql vm add-to-group', arg_group='WSFC Domain Credentials') as c:
@@ -363,7 +368,14 @@ def load_arguments(self, _):
                    help='Name of the Log Analytics workspace to associate with VM.')
         c.argument('workspace_rg',
                    help='Resource group containing the Log Analytics workspace.')
-        c.argument('workspace_sub',
-                   help='Subscription containing the Log Analytics workspace.')
-        c.argument('agent_rg',
-                   help='Resource group where we provision the AMA Agent resources.')
+
+    with self.argument_context('sql vm enable-azure-ad-auth') as c:
+        c.argument('msi_client_id',
+                   help='Virutal Machine Managed Identity Client ID.')
+        c.argument('skip_client_validation',
+                   help='Skip client side Azure AD authentication validation, the server side validation will still happen.',
+                   action='store_true')
+
+    with self.argument_context('sql vm validate-azure-ad-auth') as c:
+        c.argument('msi_client_id',
+                   help='Virutal Machine Managed Identity Client ID.')

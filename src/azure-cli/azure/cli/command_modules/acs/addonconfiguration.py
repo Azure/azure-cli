@@ -278,38 +278,6 @@ def get_existing_container_insights_extension_dcr_tags(cmd, dcr_url):
     return tags
 
 
-def getRegionCodeForAzureRegion(cmd, cluster_region):
-    region_code = "EUS"
-    cloud_name = cmd.cli_ctx.cloud.name
-    if cloud_name.lower() == "azurecloud":
-        region_code = AzureCloudLocationToOmsRegionCodeMap.get(
-            cluster_region, "EUS"
-        )
-    elif cloud_name.lower() == "azurechinacloud":
-        region_code = AzureChinaLocationToOmsRegionCodeMap.get(
-            cluster_region, "EAST2"
-        )
-    elif cloud_name.lower() == "azureusgovernment":
-        region_code = AzureFairfaxLocationToOmsRegionCodeMap.get(
-            cluster_region, "USGV"
-        )
-    else:
-        logger.error(
-            "AKS Monitoring addon not supported in cloud : %s", cloud_name
-        )
-    return region_code
-
-
-def sanitize_dcr_name(name):
-    name = name[0:43]
-    lastIndexAlphaNumeric = len(name) - 1
-    while ((name[lastIndexAlphaNumeric].isalnum() is False) and lastIndexAlphaNumeric > -1):
-        lastIndexAlphaNumeric = lastIndexAlphaNumeric - 1
-    if lastIndexAlphaNumeric < 0:
-        return ""
-    return name[0:lastIndexAlphaNumeric + 1]
-
-
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements,line-too-long
 def ensure_container_insights_for_monitoring(
     cmd,
@@ -365,6 +333,7 @@ def ensure_container_insights_for_monitoring(
             "Could not locate resource group in workspace-resource-id URL."
         )
 
+    location = ""
     # region of workspace can be different from region of RG so find the location of the workspace_resource_id
     if not remove_monitoring:
         resources = get_resources_client(cmd.cli_ctx, subscription_id)
@@ -383,8 +352,9 @@ def ensure_container_insights_for_monitoring(
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
             f"providers/Microsoft.ContainerService/managedClusters/{cluster_name}"
         )
-        region_code = getRegionCodeForAzureRegion(cmd, cluster_region)
-        dataCollectionRuleName = sanitize_dcr_name(f"MSCI-{region_code}-{cluster_name}")
+        dataCollectionRuleName = f"MSCI-{location}-{cluster_name}"
+        # Max length of the DCR name is 64 chars
+        dataCollectionRuleName = dataCollectionRuleName[0:64]
         dcr_resource_id = (
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
             f"providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
@@ -441,16 +411,18 @@ def ensure_container_insights_for_monitoring(
                         raise ClientRequestError(
                             f"Data Collection Rule Associations are not supported for cluster region {cluster_region}")
             dcr_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                f"{dcr_resource_id}?api-version=2021-04-01"
+                f"{dcr_resource_id}?api-version=2022-06-01"
             # get existing tags on the container insights extension DCR if the customer added any
             existing_tags = get_existing_container_insights_extension_dcr_tags(
                 cmd, dcr_url)
             # get data collection settings
             extensionSettings = {}
+            cistreams = ["Microsoft-ContainerInsights-Group-Default"]
             if data_collection_settings is not None:
                 dataCollectionSettings = _get_data_collection_settings(data_collection_settings)
                 validate_data_collection_settings(dataCollectionSettings)
                 extensionSettings["dataCollectionSettings"] = dataCollectionSettings
+                cistreams = dataCollectionSettings["streams"]
             # create the DCR
             dcr_creation_body_without_syslog = json.dumps(
                 {
@@ -461,9 +433,7 @@ def ensure_container_insights_for_monitoring(
                             "extensions": [
                                 {
                                     "name": "ContainerInsightsExtension",
-                                    "streams": [
-                                        "Microsoft-ContainerInsights-Group-Default"
-                                    ],
+                                    "streams": cistreams,
                                     "extensionName": "ContainerInsights",
                                     "extensionSettings": extensionSettings,
                                 }
@@ -471,9 +441,7 @@ def ensure_container_insights_for_monitoring(
                         },
                         "dataFlows": [
                             {
-                                "streams": [
-                                    "Microsoft-ContainerInsights-Group-Default"
-                                ],
+                                "streams": cistreams,
                                 "destinations": ["la-workspace"],
                             }
                         ],
@@ -538,9 +506,7 @@ def ensure_container_insights_for_monitoring(
                             "extensions": [
                                 {
                                     "name": "ContainerInsightsExtension",
-                                    "streams": [
-                                        "Microsoft-ContainerInsights-Group-Default"
-                                    ],
+                                    "streams": cistreams,
                                     "extensionName": "ContainerInsights",
                                     "extensionSettings": extensionSettings,
                                 }
@@ -548,8 +514,11 @@ def ensure_container_insights_for_monitoring(
                         },
                         "dataFlows": [
                             {
+                                "streams": cistreams,
+                                "destinations": ["la-workspace"],
+                            },
+                            {
                                 "streams": [
-                                    "Microsoft-ContainerInsights-Group-Default",
                                     "Microsoft-Syslog"
                                 ],
                                 "destinations": ["la-workspace"],
@@ -596,7 +565,7 @@ def ensure_container_insights_for_monitoring(
                 }
             )
             association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-                f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2021-04-01"
+                f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2022-06-01"
             for _ in range(3):
                 try:
                     send_raw_request(
@@ -629,6 +598,14 @@ def validate_data_collection_settings(dataCollectionSettings):
         namspaces = dataCollectionSettings["namespaces"]
         if isinstance(namspaces, list) is False:
             raise InvalidArgumentValueError('namespaces must be an array type')
+    if 'enableContainerLogV2' in dataCollectionSettings.keys():
+        enableContainerLogV2Value = dataCollectionSettings["enableContainerLogV2"].lower()
+        if enableContainerLogV2Value not in ["true", "false"]:
+            raise InvalidArgumentValueError('enableContainerLogV2Value value MUST be either true or false')
+    if 'streams' in dataCollectionSettings.keys():
+        streams = dataCollectionSettings["streams"]
+        if isinstance(streams, list) is False:
+            raise InvalidArgumentValueError('streams must be an array type')
 
 
 def add_monitoring_role_assignment(result, cluster_resource_id, cmd):

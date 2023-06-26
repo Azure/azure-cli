@@ -10,6 +10,8 @@ from azure.cli.command_modules.iot._client_factory import (iot_hub_service_facto
 from azure.cli.command_modules.iot._utils import _dps_certificate_response_transform
 
 CS_DEPRECATION_INFO = 'IoT Extension (azure-iot) connection-string command (az iot hub connection-string show)'
+ROUTE_DEPRECATION_INFO = 'IoT Extension (azure-iot) message-route command group (az iot hub message-route)'
+ENDPOINT_DEPRECATION_INFO = 'IoT Extension (azure-iot) message-endpoint command group (az iot hub message-endpoint)'
 
 
 class PolicyUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
@@ -36,6 +38,9 @@ class RouteUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-f
 class HubDeleteResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
     def __call__(self, poller):
         from azure.cli.core.util import CLIError
+        # if no wait, return right away
+        if not poller:
+            return poller
         try:
             super(HubDeleteResultTransform, self).__call__(poller)
         except CLIError as e:
@@ -125,12 +130,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('create', 'iot_hub_create', supports_no_wait=True)
         g.custom_command('list', 'iot_hub_list')
         g.custom_command('show-connection-string', 'iot_hub_show_connection_string',
-                         deprecate_info=self.deprecate(redirect=CS_DEPRECATION_INFO))
+                         deprecate_info=self.deprecate(redirect=CS_DEPRECATION_INFO, hide=True))
         g.custom_show_command('show', 'iot_hub_get')
         g.generic_update_command('update', getter_name='iot_hub_get', setter_name='iot_hub_update',
                                  command_type=update_custom_util, custom_func_name='update_iot_hub_custom')
         g.custom_command('delete', 'iot_hub_delete', transform=HubDeleteResultTransform(self.cli_ctx),
                          supports_no_wait=True)
+        g.custom_wait_command('wait', 'iot_hub_get')
         g.custom_command('list-skus', 'iot_hub_sku_list')
         g.custom_command('show-quota-metrics', 'iot_hub_get_quota_metrics')
         g.custom_command('show-stats', 'iot_hub_get_stats')
@@ -158,7 +164,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('renew-key', 'iot_hub_policy_key_renew', supports_no_wait=True)
 
     # iot hub routing endpoint commands
-    with self.command_group('iot hub routing-endpoint', client_factory=iot_hub_service_factory) as g:
+    with self.command_group('iot hub routing-endpoint', client_factory=iot_hub_service_factory,
+                            deprecate_info=self.deprecate(redirect=ENDPOINT_DEPRECATION_INFO, hide=True)) as g:
         g.custom_command('create', 'iot_hub_routing_endpoint_create',
                          transform=EndpointUpdateResultTransform(self.cli_ctx))
         g.custom_show_command('show', 'iot_hub_routing_endpoint_show')
@@ -175,7 +182,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('update', 'iot_message_enrichment_update')
 
     # iot hub route commands
-    with self.command_group('iot hub route', client_factory=iot_hub_service_factory) as g:
+    with self.command_group('iot hub route', client_factory=iot_hub_service_factory,
+                            deprecate_info=self.deprecate(redirect=ROUTE_DEPRECATION_INFO, hide=True)) as g:
         g.custom_command('create', 'iot_hub_route_create', transform=RouteUpdateResultTransform(self.cli_ctx))
         g.custom_show_command('show', 'iot_hub_route_show')
         g.custom_command('list', 'iot_hub_route_list')

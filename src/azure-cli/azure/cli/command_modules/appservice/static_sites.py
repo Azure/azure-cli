@@ -272,15 +272,18 @@ def list_staticsite_functions(cmd, name, resource_group_name=None, environment_n
     return client.list_static_site_build_functions(resource_group_name, name, environment_name)
 
 
-def list_staticsite_app_settings(cmd, name, resource_group_name=None):
+def list_staticsite_app_settings(cmd, name, resource_group_name=None, environment_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    return client.list_static_site_app_settings(resource_group_name, name)
+    if not environment_name:
+        return client.list_static_site_app_settings(resource_group_name, name)
+
+    return client.list_static_site_build_app_settings(resource_group_name, name, environment_name)
 
 
-def set_staticsite_app_settings(cmd, name, setting_pairs, resource_group_name=None):
+def set_staticsite_app_settings(cmd, name, setting_pairs, resource_group_name=None, environment_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
@@ -291,20 +294,24 @@ def set_staticsite_app_settings(cmd, name, setting_pairs, resource_group_name=No
         setting_dict[key] = value
 
     # fetch current settings to prevent deleting existing app settings
-    settings = list_staticsite_app_settings(cmd, name, resource_group_name)
+    app_settings = list_staticsite_app_settings(cmd, name, resource_group_name, environment_name)
     for k, v in setting_dict.items():
-        settings.properties[k] = v
+        app_settings.properties[k] = v
 
-    return client.create_or_update_static_site_app_settings(
-        resource_group_name, name, app_settings=settings)
+    if not environment_name:
+        return client.create_or_update_static_site_app_settings(
+            resource_group_name, name, app_settings=app_settings)
+
+    return client.create_or_update_static_site_build_app_settings(
+        resource_group_name, name, environment_name, app_settings=app_settings)
 
 
-def delete_staticsite_app_settings(cmd, name, setting_names, resource_group_name=None):
+def delete_staticsite_app_settings(cmd, name, setting_names, resource_group_name=None, environment_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    app_settings = client.list_static_site_app_settings(resource_group_name, name)
+    app_settings = list_staticsite_app_settings(cmd, name, resource_group_name, environment_name)
 
     for key in setting_names:
         if key in app_settings.properties:
@@ -312,8 +319,12 @@ def delete_staticsite_app_settings(cmd, name, setting_names, resource_group_name
         else:
             logger.warning("key '%s' not found in app settings", key)
 
-    return client.create_or_update_static_site_app_settings(
-        resource_group_name, name, app_settings=app_settings)
+    if not environment_name:
+        return client.create_or_update_static_site_app_settings(
+            resource_group_name, name, app_settings=app_settings)
+
+    return client.create_or_update_static_site_build_app_settings(
+        resource_group_name, name, environment_name, app_settings=app_settings)
 
 
 def list_staticsite_users(cmd, name, resource_group_name=None, authentication_provider='all'):
@@ -607,7 +618,14 @@ def reset_staticsite_api_key(cmd, name, resource_group_name=None):
                                             reset_properties_envelope=reset_envelope)
 
 
-def link_user_function(cmd, name, resource_group_name, function_resource_id, force=False):
+def link_user_function(
+    cmd,
+    name,
+    resource_group_name,
+    function_resource_id,
+    environment_name=None,
+    force=False,
+):
     from azure.mgmt.web.models import StaticSiteUserProvidedFunctionAppARMResource
 
     if force:
@@ -622,10 +640,20 @@ def link_user_function(cmd, name, resource_group_name, function_resource_id, for
     function = StaticSiteUserProvidedFunctionAppARMResource(function_app_resource_id=function_resource_id,
                                                             function_app_region=function_location)
 
-    return client.begin_register_user_provided_function_app_with_static_site(
+    if environment_name is None:
+        # Special casing since the type of the created resource differ
+        return client.begin_register_user_provided_function_app_with_static_site(
+            name=name,
+            resource_group_name=resource_group_name,
+            function_app_name=function_name,
+            static_site_user_provided_function_envelope=function,
+            is_forced=force)
+
+    return client.begin_register_user_provided_function_app_with_static_site_build(
         name=name,
         resource_group_name=resource_group_name,
         function_app_name=function_name,
+        environment_name=environment_name,
         static_site_user_provided_function_envelope=function,
         is_forced=force)
 

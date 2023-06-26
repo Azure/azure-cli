@@ -10,15 +10,11 @@ ARM telemetry tracks all HTTP requests and responses through ARM endpoint. As fa
 - Network is inaccessible.
 - No request is needed during execution.
 
-Kusto Cluster and Database: https://dataexplorer.azure.com/clusters/armprod/databases/ARMProd
-
 
 ## CLI Client Telemetry
 
 Client side telemetry is sent at the end of Azure CLI command execution. It covers all commands, no matter if it has http requests or just has local operations.
 Sanitized data is stored in Kusto cluster which is managed by DevDiv Data team.
-
-Kusto Cluster and Database: https://dataexplorer.azure.com/clusters/ddazureclients/databases/AzureCli
 
 All Azure CLI data is stored in a large json named `Properties` in table `RawEventsAzCli`. Some properties are flatten, some are not. Here are some useful fields:
 > The telemetry has different schema pre Azure CLI 2.0.28. All the fields explained below are for new schema, in other words, CLI version > 2.0.28.
@@ -69,13 +65,6 @@ All Azure CLI data is stored in a large json named `Properties` in table `RawEve
     - `context.default.azurecli.installer`: value of os environment variable `AZ_INSTALLER`
     - `context.default.azurecli.error_type`: It logs the exception class name.
     - `context.default.azurecli.exception_name`: A supplementation for `context.default.azurecli.error_type`
-
-## Accessing Client Telemetry
-
-Kusto Cluster and Database: https://dataexplorer.azure.com/clusters/ddazureclients/databases/AzureCli
-
-To ensure you have a smooth experience using our Data Tools and Data, you have to take the required trainings and join a security group.
-Please follow instruction [Accessing DevDiv Data](https://devdiv.visualstudio.com/DevDiv/_wiki/wikis/DevDiv.wiki/9768/Accessing-DevDiv-Data) to get access permission.
 
 
 ## Doc Sections
