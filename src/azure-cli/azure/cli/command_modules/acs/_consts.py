@@ -156,6 +156,21 @@ ADDONS = {
 # consts for check-acr command
 CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:v0.1.0"
 
+# consts for maintenance configuration schedule type
+CONST_DAILY_MAINTENANCE_SCHEDULE = "Daily"
+CONST_WEEKLY_MAINTENANCE_SCHEDULE = "Weekly"
+CONST_ABSOLUTEMONTHLY_MAINTENANCE_SCHEDULE = "AbsoluteMonthly"
+CONST_RELATIVEMONTHLY_MAINTENANCE_SCHEDULE = "RelativeMonthly"
+
+CONST_WEEKINDEX_FIRST = "First"
+CONST_WEEKINDEX_SECOND = "Second"
+CONST_WEEKINDEX_THIRD = "Third"
+CONST_WEEKINDEX_FOURTH = "Fourth"
+CONST_WEEKINDEX_LAST = "Last"
+
+CONST_DEFAULT_CONFIGURATION_NAME = "default"
+CONST_AUTOUPGRADE_CONFIGURATION_NAME = "aksManagedAutoUpgradeSchedule"
+CONST_NODEOSUPGRADE_CONFIGURATION_NAME = "aksManagedNodeOSUpgradeSchedule"
 
 # consts for decorator pattern
 class DecoratorMode(Enum):
