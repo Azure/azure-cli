@@ -3782,7 +3782,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
                        environment=None, min_replicas=None, max_replicas=None,
                        always_ready_instances=None, maximum_instances=None, instance_size=None,
-                       flexconsumption_location=None):
+                       flexconsumption_location="northcentralus(stage)"):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
@@ -4303,6 +4303,9 @@ def list_flexconsumption_locations(cmd):
         },
         {
             "name": "northeurope"
+        },
+        {
+            "name": "northcentralus(stage)"
         }
     ]
 
