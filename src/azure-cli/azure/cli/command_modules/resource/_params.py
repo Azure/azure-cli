@@ -11,7 +11,6 @@ def load_arguments(self, _):
 
     from azure.mgmt.resource.locks.models import LockLevel
     from azure.mgmt.resource.managedapplications.models import ApplicationLockLevel
-    from azure.mgmt.resource.policy.v2022_07_01_preview.models import ExemptionCategory
     from azure.mgmt.resource.policy.models import EnforcementMode
     from azure.mgmt.resource.deploymentstacks.models import DenySettingsMode
     from azure.cli.core.commands.validators import get_default_location_from_resource_group
@@ -290,7 +289,7 @@ def load_arguments(self, _):
         c.argument('disable_scope_strict_match', options_list=['--disable-scope-strict-match', '-i'], action='store_true', help='Include policy exemptions either inherited from parent scope or at child scope.')
         c.argument('display_name', help='Display name of the policy exemption.')
         c.argument('description', help='Description of policy exemption.')
-        c.argument('exemption_category', options_list=['--exemption-category', '-e'], help='The policy exemption category of the policy exemption', arg_type=get_enum_type(ExemptionCategory))
+        c.argument('exemption_category', options_list=['--exemption-category', '-e'], help='The policy exemption category of the policy exemption', arg_type=get_enum_type(['ExemptionCategory']))
         c.argument('policy_definition_reference_ids', nargs='+', options_list=['--policy-definition-reference-ids', '-r'], help='The policy definition reference ids to exempt in the initiative (policy set).')
         c.argument('expires_on', help='The expiration date and time (in UTC ISO 8601 format yyyy-MM-ddTHH:mm:ssZ) of the policy exemption.')
         c.argument('metadata', nargs='+', validator=validate_metadata, help='Metadata in space-separated key=value pairs.')
