@@ -63,7 +63,7 @@ from .aaz.latest.network.custom_ip.prefix import Update as _CustomIpPrefixUpdate
 from .aaz.latest.network.dns.record_set import Create as _DNSRecordSetCreate, Delete as _DNSRecordSetDelete, \
     ListByType as _DNSRecordSetListByType, Show as _DNSRecordSetShow, Update as _DNSRecordSetUpdate, \
     List as _DNSRecordSetListByZone
-from .aaz.latest.network.dns.zone import Create as _DNSZoneCreate, Delete as _DNSZoneDelete, Update as _DNSZoneUpdate
+from .aaz.latest.network.dns.zone import Create as _DNSZoneCreate, Delete as _DNSZoneDelete
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
 from .aaz.latest.network.express_route.gateway import Create as _ExpressRouteGatewayCreate, \
     Update as _ExpressRouteGatewayUpdate
@@ -2446,37 +2446,24 @@ def create_dns_zone(cmd, resource_group_name, zone_name, parent_zone_name=None, 
     return created_zone
 
 
-def update_dns_zone(cmd, resource_group_name, zone_name, tags=None, zone_type=None, resolution_vnets=None, registration_vnets=None, if_match=None):
-
-    zone = {
-        "resource_group": resource_group_name,
-        "zone_name": zone_name,
-        "if_match": if_match,
-    }
+def update_dns_zone(instance, tags=None, zone_type=None, resolution_vnets=None, registration_vnets=None):
 
     if tags is not None:
-        zone["tags"] = tags
+        instance.tags = tags
 
     if zone_type:
-        zone["zone_type"] = zone_type
+        instance.zone_type = zone_type
 
     if resolution_vnets == ['']:
-        zone["resolution_virtual_networks"] = None
+        instance.resolution_virtual_networks = None
     elif resolution_vnets:
-        resolution_vnets_dict = []
-        for resolution_vnet in resolution_vnets:
-            resolution_vnets_dict.append({"id": resolution_vnet.id})
-        zone["resolution_virtual_networks"] = resolution_vnets_dict
+        instance.resolution_virtual_networks = resolution_vnets
 
     if registration_vnets == ['']:
-        zone["registration_virtual_networks"] = None
+        instance.registration_virtual_networks = None
     elif registration_vnets:
-        registration_vnets_dict = []
-        for registration_vnet in registration_vnets:
-            registration_vnets_dict.append({"id": registration_vnet.id})
-        zone["registration_virtual_networks"] = registration_vnets_dict
-
-    return _DNSZoneUpdate(cli_ctx=cmd.cli_ctx)(command_args=zone)
+        instance.registration_virtual_networks = registration_vnets
+    return instance
 
 
 def delete_dns_zone(cmd, resource_group_name, zone_name, if_match=None):

@@ -216,8 +216,8 @@ def load_command_table(self, _):
         g.custom_command('import', 'import_zone')
         g.custom_command('export', 'export_zone')
         g.custom_command('create', 'create_dns_zone', table_transformer=transform_dns_zone_table_output)
-        g.custom_command('update', 'update_dns_zone', table_transformer=transform_dns_zone_table_output)
         g.custom_command('delete', 'delete_dns_zone', confirmation=True)
+        g.generic_update_command('update', custom_func_name='update_dns_zone')
 
     api_version = str(get_api_version(self.cli_ctx, ResourceType.MGMT_NETWORK_DNS))
     api_version = api_version.replace('-', '_')
