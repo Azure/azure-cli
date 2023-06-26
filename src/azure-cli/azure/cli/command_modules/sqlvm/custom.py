@@ -1161,12 +1161,12 @@ def set_assessment_properties(
                 continue
             # Raise message DCRA deleted. Assessment disabled succesfully.
 
-        # Can also delete based on this simply as customer should not be creating this dcra..
+        """# Can also delete based on this simply as customer should not be creating this dcra..
         # Find DCRA matching naming convention
         # If 1 found - delete and check deleted
         # If multiple found - validate each and delete all that pass validation?
         # Check DCR resource ID
         # Run through validation of DCR
         # Basic validation: Custom Log, file pattern and dcr name
-        # advanced - dce endpoint valid, la workspace valid and location same
+        # advanced - dce endpoint valid, la workspace valid and location same"""
 # endregion Helpers for custom commands
