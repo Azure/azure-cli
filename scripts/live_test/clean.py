@@ -157,7 +157,7 @@ def clean_storage():
         cmd = ['az', 'storage', 'container', 'list', '--account-name', account, '--account-key', account_key, '--query',
                '[].name']
         out = subprocess.run(cmd, capture_output=True)
-        containers = json.loads(out.stdout)
+        containers = json.loads(out.stdout) if out.stdout else []
         print(containers)
         if not containers:
             continue
