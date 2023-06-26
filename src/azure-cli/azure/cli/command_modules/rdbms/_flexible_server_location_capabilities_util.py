@@ -27,6 +27,12 @@ def _postgres_parse_list_capability(result):
     if not result:
         raise InvalidArgumentValueError("No available SKUs in this location")
 
+    if result[0].restricted == "Enabled":
+        raise InvalidArgumentValueError("The location is restricted for provisioning of flexible servers. Please try using another region.")
+
+    if result[0].restricted != "Disabled":
+        raise InvalidArgumentValueError("No available SKUs in this location.")
+
     single_az = result[0].zone_redundant_ha_supported != "Enabled"
     geo_backup_supported = result[0].geo_backup_supported == "Enabled"
 

@@ -404,7 +404,8 @@ def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup
         raise ArgumentUsageError("You cannot enable data encryption on a server "
                                  "that was not created with data encryption.")
 
-    if backup_byok_key and (geo_redundant_backup and geo_redundant_backup.lower() == 'enabled'):
+    if byok_key and (geo_redundant_backup and geo_redundant_backup.lower() == 'enabled') and \
+        bool(backup_byok_key is None):
         raise ArgumentUsageError("Please provide Geo-location user assigned identity and keyvault key "
                                  "to enable Data encryption for geo-redundant backup.")
 

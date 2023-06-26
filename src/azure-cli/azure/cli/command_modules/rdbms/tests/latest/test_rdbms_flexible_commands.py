@@ -70,6 +70,7 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
 class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
     postgres_location = 'eastus'
+    postgres_backup_location = 'westus'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -89,7 +90,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
     @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='vault_name', location=postgres_location, additional_params='--enable-purge-protection true --retention-days 90')
-    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='backup_vault_name', location=postgres_location, additional_params='--enable-purge-protection true --retention-days 90')
+    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='backup_vault_name', location=postgres_backup_location, additional_params='--enable-purge-protection true --retention-days 90')
     def test_postgres_flexible_server_byok_mgmt(self, resource_group, vault_name, backup_vault_name):
         self._test_flexible_server_byok_mgmt(resource_group, vault_name, backup_vault_name)
 
@@ -264,7 +265,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         private_dns_param = 'privateDnsZoneArmResourceId'
         location = self.postgres_location
-        target_location = 'westus'
+        target_location = self.postgres_backup_location
 
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         source_server_2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -350,8 +351,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         backup_key_name = self.create_random_name('rdbmskey', 32)
         backup_identity_name = self.create_random_name('identity', 32)
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        replica_1_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        replica_2_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        server_with_geo_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         backup_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         geo_backup_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         key_2_name = self.create_random_name('rdbmskey', 32)
@@ -360,7 +360,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         tier = 'GeneralPurpose'
         sku_name = 'Standard_D2s_v3'
         location = self.postgres_location
-        backup_location = 'westus'
+        backup_location = self.postgres_backup_location
         replication_role = 'AsyncReplica'
 
         key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
@@ -418,11 +418,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         def main_tests(geo_redundant_backup):
             geo_redundant_backup_enabled = 'Enabled' if geo_redundant_backup else 'Disabled'
             backup_key_id_flags = '--backup-key {} --backup-identity {}'.format(backup_key['key']['kid'], backup_identity['id']) if geo_redundant_backup else ''
-            
+            primary_server_name = server_with_geo_name if geo_redundant_backup else server_name
             # create primary flexible server with data encryption
             self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} {} --location {} --geo-redundant-backup {}'.format(
                         resource_group,
-                        server_name,
+                        primary_server_name,
                         tier,
                         sku_name,
                         key['key']['kid'],
@@ -434,7 +434,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
             # should fail because we can't remove identity used for data encryption
             self.cmd('postgres flexible-server identity remove -g {} -s {} -n {} --yes'
-                     .format(resource_group, server_name, identity['id']),
+                     .format(resource_group, primary_server_name, identity['id']),
                      expect_failure=True)
 
             main_checks = [
@@ -450,14 +450,16 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                     JMESPathCheck('dataEncryption.geoBackupUserAssignedIdentityId', backup_identity['id'])
                 ]
 
-            result = self.cmd('postgres flexible-server show -g {} -n {}'.format(resource_group, server_name),
+            result = self.cmd('postgres flexible-server show -g {} -n {}'.format(resource_group, primary_server_name),
                     checks=main_checks).get_output_in_json()
 
-            # create replica 1 with data encryption
+            # create replica 1 with data encryption            
+            replica_1_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+
             self.cmd('postgres flexible-server replica create -g {} --replica-name {} --source-server {} --key {} --identity {}'.format(
                         resource_group,
                         replica_1_name,
-                        server_name,
+                        primary_server_name,
                         key['key']['kid'],
                         identity['id']
             ), checks=main_checks + [JMESPathCheck('replicationRole', replication_role)])
@@ -465,7 +467,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             # update different key and identity in primary server
             self.cmd('postgres flexible-server update -g {} -n {} --key {} --identity {}'.format(
                         resource_group,
-                        server_name,
+                        primary_server_name,
                         key_2['key']['kid'],
                         identity_2['id']
             ), checks=[
@@ -486,7 +488,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                      'restore',
                      resource_group,
                      backup_name,
-                     server_name,
+                     primary_server_name,
                      data_encryption_key_id_flag
             ), checks=main_checks).get_output_in_json()
 
@@ -503,7 +505,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                         'geo-restore --location {}'.format(backup_location),
                         resource_group,
                         geo_backup_name,
-                        server_name,
+                        primary_server_name,
                         data_encryption_key_id_flag
                 ), checks=[
                     JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(backup_identity['id'])),
@@ -519,9 +521,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
             # delete all servers
             self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, replica_1_name))
-            self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, replica_2_name))
-            self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, server_name))
             self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, backup_name))
+            self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, primary_server_name))
 
         invalid_input_tests()
         main_tests(False)
@@ -649,7 +650,7 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
+    postgres_location = 'northeurope'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -895,7 +896,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
 
 class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
+    postgres_location = 'northeurope'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1301,7 +1302,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
+    postgres_location = 'northeurope'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
@@ -1658,7 +1659,7 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
     def test_postgresql_flexible_server_identity_aad_admin_only_mgmt(self, resource_group):
         self._test_identity_aad_admin_mgmt('postgres', resource_group, 'disabled')
 
-    def _test_identity_aad_admin_mgmt(self, database_engine, resource_group, password_auth):
+    def _test_identity_aad_admin_mgmt(self, database_engine, resource_group, password_auth, location=postgres_location):
         login = 'alanenriqueo@microsoft.com'
         sid = '894ef8da-7971-4f68-972c-f561441eb329'
         auth_args = '--password-auth {} --active-directory-auth enabled'.format(password_auth)
@@ -1667,8 +1668,8 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
         replica = [self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH) for _ in range(2)]
 
         # create server
-        self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} {}'
-                 .format(database_engine, resource_group, server, 'GeneralPurpose', 'Standard_D2s_v3', auth_args))
+        self.cmd('{} flexible-server create --location {} -g {} -n {} --public-access none --tier {} --sku-name {} {}'
+                 .format(database_engine, location, resource_group, server, 'GeneralPurpose', 'Standard_D2s_v3', auth_args))
 
         # create 3 identities
         identity = []
