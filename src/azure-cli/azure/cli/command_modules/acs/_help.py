@@ -1558,10 +1558,12 @@ helps['aks nodepool snapshot list'] = """
 
 helps['aks nodepool snapshot update'] = """
     type: command
-    short-summary: update tags on a snapshot of a cluster.
+    short-summary: update tags on a snapshot of a nodepool.
     examples:
-        - name: Update tags on a cluster snapshot.
+        - name: Update tags on a nodepool snapshot.
           text: az aks nodepool snapshot update -g MyResourceGroup -n snapshot1 --tags "foo=bar" "key1=val1"
+        - name: Clear tags on a nodepool snapshot.
+          text: az aks nodepool snapshot update -g MyResourceGroup -n snapshot1 --tags ""
 """
 
 helps['aks nodepool snapshot create'] = """
