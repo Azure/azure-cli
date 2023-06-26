@@ -453,6 +453,7 @@ stages:
           if [[ "$(USER_TARGET)" =~ "$(Target)" || ("$(USER_TARGET)" == "main" && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "ALL" || "$(USER_TARGET)" == "all" || "$(USER_TARGET)" == "") ]]; then
             echo "Match!"
             echo "##vso[task.setvariable variable=Match]1"
+            echo "##vso[task.setvariable variable=platform]ubuntu2004"
           else
             echo "Not match!"
             echo "##vso[task.setvariable variable=Match]0"
@@ -468,7 +469,6 @@ stages:
           pwd
           workDir=$(pwd)
           echo "##vso[task.setvariable variable=workDir]$workDir"
-          echo "##vso[task.setvariable variable=platform]ubuntu2004"
           ls
           # ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
           git config --global user.email "AzurePipelines"
@@ -498,6 +498,16 @@ stages:
           pip install azdev pytest-json-report pytest-html pytest-rerunfailures
   
           azdev setup -c azure-cli -r azure-cli-extensions
+          
+          # Remove ext- prefix
+          FinalTarget="$(Target)"
+          if [[ "${FinalTarget}" =~ ^ext-.* ]]; then
+            echo "It is an extention"
+            echo $(Target)
+            FinalTarget=${FinalTarget:4}
+            azdev extension add ${FinalTarget}
+          fi
+          echo ${FinalTarget}
   
           # This helps detect issues in CI if a used SDK API version is deleted by the below script.
           python $workDir/s/scripts/trim_sdk.py
@@ -1005,6 +1015,7 @@ stages:
           if [[ "$(USER_TARGET)" =~ "$(Target)" || ("$(USER_TARGET)" == "main" && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "ALL" || "$(USER_TARGET)" == "all" || "$(USER_TARGET)" == "") ]]; then
             echo "Match!"
             echo "##vso[task.setvariable variable=Match]1"
+            echo "##vso[task.setvariable variable=platform]macos12"
           else
             echo "Not match!"
             echo "##vso[task.setvariable variable=Match]0"
@@ -1020,7 +1031,6 @@ stages:
           pwd
           workDir=$(pwd)
           echo "##vso[task.setvariable variable=workDir]$workDir"
-          echo "##vso[task.setvariable variable=platform]macos12"
           ls
           # ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
           git config --global user.email "AzurePipelines"
@@ -1051,6 +1061,16 @@ stages:
           pip install azdev pytest-json-report pytest-html pytest-rerunfailures
   
           azdev setup -c azure-cli -r azure-cli-extensions
+          
+          # Remove ext- prefix
+          FinalTarget="$(Target)"
+          if [[ "${FinalTarget}" =~ ^ext-.* ]]; then
+            echo "It is an extention"
+            echo $(Target)
+            FinalTarget=${FinalTarget:4}
+            azdev extension add ${FinalTarget}
+          fi
+          echo ${FinalTarget}
   
           # This helps detect issues in CI if a used SDK API version is deleted by the below script.
           python $workDir/s/scripts/trim_sdk.py
@@ -1557,6 +1577,7 @@ stages:
           if [[ "$(USER_TARGET)" =~ "$(Target)" || ("$(USER_TARGET)" == "main" && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "ALL" || "$(USER_TARGET)" == "all" || "$(USER_TARGET)" == "") ]]; then
             echo "Match!"
             echo "##vso[task.setvariable variable=Match]1"
+            echo "##vso[task.setvariable variable=platform]windows2019"
           else
             echo "Not match!"
             echo "##vso[task.setvariable variable=Match]0"
@@ -1572,7 +1593,6 @@ stages:
           pwd
           workDir=$(pwd)
           echo "##vso[task.setvariable variable=workDir]$(Agent.BuildDirectory)"
-          echo "##vso[task.setvariable variable=platform]windows2019"
           ls
           # ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
           git config --global user.email "AzurePipelines"
