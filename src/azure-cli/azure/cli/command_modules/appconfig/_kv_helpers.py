@@ -656,7 +656,7 @@ def __print_features_preview(old_json, new_json, strict=False, yes=False):
 
     diff_output = __find_ff_diff(old_json=old_json, new_json=new_json, strict=strict)
 
-    if diff_output == {}:
+    if not diff_output:
         logger.warning('\nThe target configuration already contains all feature flags in source. No changes will be made.')
         return False
 
@@ -675,7 +675,7 @@ def __print_kv_preview(old_json, new_json, strict=False, yes=False):
 
     diff_output = __find_kv_diff(old_json=old_json, new_json=new_json, strict=strict)
 
-    if diff_output == {}:
+    if not diff_output:
         logger.warning('\nTarget configuration already contains all key-values in source. No changes will be made.')
         return False
 
