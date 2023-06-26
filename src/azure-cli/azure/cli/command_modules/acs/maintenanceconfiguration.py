@@ -4,7 +4,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.util import get_file_json
 from azure.cli.core.azclierror import (

@@ -34,9 +34,9 @@ from azure.cli.command_modules.acs._consts import (
     CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
     CONST_SPOT_EVICTION_POLICY_DELETE, CONST_STABLE_UPGRADE_CHANNEL,
     CONST_DAILY_MAINTENANCE_SCHEDULE, CONST_WEEKLY_MAINTENANCE_SCHEDULE,
-    CONST_ABSOLUTEMONTHLY_MAINTENANCE_SCHEDULE,CONST_RELATIVEMONTHLY_MAINTENANCE_SCHEDULE,
-    CONST_WEEKINDEX_FIRST,CONST_WEEKINDEX_SECOND,
-    CONST_WEEKINDEX_THIRD,CONST_WEEKINDEX_FOURTH,
+    CONST_ABSOLUTEMONTHLY_MAINTENANCE_SCHEDULE, CONST_RELATIVEMONTHLY_MAINTENANCE_SCHEDULE,
+    CONST_WEEKINDEX_FIRST, CONST_WEEKINDEX_SECOND,
+    CONST_WEEKINDEX_THIRD, CONST_WEEKINDEX_FOURTH,
     CONST_WEEKINDEX_LAST)
 from azure.cli.command_modules.acs._validators import (
     validate_acr, validate_agent_pool_name, validate_assign_identity,
@@ -158,6 +158,7 @@ week_indexes = [
     CONST_WEEKINDEX_FOURTH,
     CONST_WEEKINDEX_LAST,
 ]
+
 
 def load_arguments(self, _):
 
@@ -488,7 +489,7 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('config_name', options_list=[
                        '--name', '-n'], help='The config name.')
-            
+      
     with self.argument_context('aks nodepool', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
         c.argument('cluster_name', help='The cluster name.')
         c.argument('nodepool_name', options_list=['--nodepool-name', '--name', '-n'], validator=validate_nodepool_name, help='The node pool name.')

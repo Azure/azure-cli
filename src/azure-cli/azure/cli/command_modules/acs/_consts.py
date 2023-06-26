@@ -172,6 +172,7 @@ CONST_DEFAULT_CONFIGURATION_NAME = "default"
 CONST_AUTOUPGRADE_CONFIGURATION_NAME = "aksManagedAutoUpgradeSchedule"
 CONST_NODEOSUPGRADE_CONFIGURATION_NAME = "aksManagedNodeOSUpgradeSchedule"
 
+
 # consts for decorator pattern
 class DecoratorMode(Enum):
     """Enumerations used to distinguish whether to handle creation or update.
