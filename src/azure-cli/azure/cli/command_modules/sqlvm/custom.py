@@ -51,8 +51,6 @@ import re
 
 # from azure.mgmt.resource import ResourceManagementClient
 
-from azure.cli.command_modules.vm.custom import get_vm
-
 
 def sqlvm_list(
         client,
@@ -601,6 +599,7 @@ def validate_azure_ad_auth(cmd, sql_virtual_machine_name, resource_group_name, m
 
     return passing_validation_message
 
+
 def sqlvm_add_to_group(
         client,
         cmd,
@@ -816,7 +815,7 @@ def set_assessment_properties(
                 try:
                     dcr_response = send_raw_request(
                         cmd.cli_ctx, method="GET", url=url)
-                except BaseException:
+                except HTTPError:
                     # continue as we couldn't connect to DCR. If all
                     # connections fail we create new anyway
                     continue
@@ -880,7 +879,7 @@ def set_assessment_properties(
             else:
                 print(f"Unexpected response code: {response.status_code}")
                 return False
-        except Exception as e:
+        except HTTPError:
             log_exists = log_exists or False
 
         if log_exists:
@@ -962,14 +961,8 @@ def set_assessment_properties(
                 dce_name)
             master_template.add_resource(dcr)
 
-            vm = get_vm(
-                cmd,
-                resource_group_name,
-                sql_virtual_machine_name,
-                'instanceView')
-
-            #amainstall = build_ama_install_resource(sql_virtual_machine_name, vm.location, resource_group_name, curr_subscription)
-            #master_template.add_resource(amainstall)
+            # amainstall = build_ama_install_resource(sql_virtual_machine_name, vm.location, resource_group_name, curr_subscription)
+            # master_template.add_resource(amainstall)
 
             # /subscriptions/0009fc4d-e310-4e40-8e63-c48a23e9cdc1/resourceGroups/abhaga-iaasrg/providers/Microsoft.Insights/dataCollectionRules/0009fc4d-e310-4e40-8e63-c48a23e9cdc1_eastus_DCR_1
             dcr_resource_id = f"/subscriptions/{curr_subscription}/resourceGroups/{agent_rg}/providers/Microsoft.Insights/dataCollectionRules/{dcr_name}"
@@ -1014,8 +1007,8 @@ def set_assessment_properties(
                     deployment_name,
                     deployment))
 
-            #amainstall = build_ama_install_resource(sql_virtual_machine_name, vm.location, resource_group_name, curr_subscription)
-            #master_template.add_resource(amainstall)
+            # amainstall = build_ama_install_resource(sql_virtual_machine_name, vm.location, resource_group_name, curr_subscription)
+            # master_template.add_resource(amainstall)
 
             create_ama_and_dcra(cmd, curr_subscription, resource_group_name, sql_virtual_machine_name, workspace_id, workspace_loc, dcr_resource_id)
 
@@ -1140,7 +1133,7 @@ def set_assessment_properties(
         for dcra in dcra_list['value']:
 
             dcra_name = dcra['name']
-            #print(dcra_name)
+            # print(dcra_name)
             pattern = re.compile(
                 r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_[a-z0-9]+_DCRA_\d+$",
                 re.IGNORECASE)

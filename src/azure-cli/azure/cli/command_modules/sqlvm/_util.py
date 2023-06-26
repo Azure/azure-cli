@@ -235,13 +235,14 @@ def create_dcra(dcr_res_id):
 
     return body
 
+
 def create_ama_and_dcra(cmd, curr_subscription, resource_group_name,
                         sql_virtual_machine_name, workspace_id, workspace_loc, dcr_id):
     master_template = ArmTemplateBuilder20190401()
 
     vm_resource_uri = (f"subscriptions/{curr_subscription}/"
-            f"resourceGroups/{resource_group_name}/"
-            f"providers/Microsoft.Compute/virtualMachines/{sql_virtual_machine_name}/")
+                       f"resourceGroups/{resource_group_name}/"
+                       f"providers/Microsoft.Compute/virtualMachines/{sql_virtual_machine_name}/")
 
     base_url = (f"https://management.azure.com/{vm_resource_uri}/"
                 f"providers/Microsoft.Insights/dataCollectionRuleAssociations/")
