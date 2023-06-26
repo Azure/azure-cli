@@ -489,7 +489,7 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('config_name', options_list=[
                        '--name', '-n'], help='The config name.')
-      
+
     with self.argument_context('aks nodepool', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
         c.argument('cluster_name', help='The cluster name.')
         c.argument('nodepool_name', options_list=['--nodepool-name', '--name', '-n'], validator=validate_nodepool_name, help='The node pool name.')

@@ -690,4 +690,3 @@ def validate_start_time(namespace):
     found = start_time_regex.findall(namespace.start_time)
     if not found:
         raise InvalidArgumentValueError('--start-time must be in format "HH:mm". For example, "09:30" and "17:00".')
-    
