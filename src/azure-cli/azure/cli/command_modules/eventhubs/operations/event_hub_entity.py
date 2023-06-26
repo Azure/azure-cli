@@ -6,6 +6,9 @@
 # pylint: disable=line-too-long
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-locals
+from azure.cli.command_modules.eventhubs.constants import SYSTEM
+from azure.cli.command_modules.eventhubs.constants import SYSTEMUSER
+from azure.cli.command_modules.eventhubs.constants import USER
 from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.eventhub import Update as _EventHubEntityUpdate
 
 
@@ -41,8 +44,8 @@ def cli_eventhub_create(cmd, resource_group_name, namespace_name, event_hub_name
         command_arg_dict.update({
             "archive_name_format": archive_name_format,
             "blob_container": blob_container,
-            "capture_interval": int(capture_interval),
-            "capture_size_limit": int(capture_size_limit),
+            "capture_interval": capture_interval,
+            "capture_size_limit": capture_size_limit,
             "destination_name": destination_name,
             "enable_capture": bool(enable_capture),
             "encoding": 'Avro',
@@ -58,25 +61,17 @@ def cli_eventhub_create(cmd, resource_group_name, namespace_name, event_hub_name
                 identity_type = SYSTEMUSER
             else:
                 identity_type = USER
-            for val in mi_user_assigned:
-                user_assigned_identity[val] = {}
             command_arg_dict.update({
                 "identity": {
                     "type": identity_type,
-                    "user_assigned_identity": user_assigned_identity
+                    "user_assigned_identity": mi_user_assigned
                 }})
-        else:
-            command_arg_dict.update({
-                "identity": {
-                    "type": identity_type,
-                    "user_assigned_identity": None
-                }
-            })
     command_arg_dict.update({
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
         "event_hub_name": event_hub_name
     })
+    print(command_arg_dict)
     return Create(cli_ctx=cmd.cli_ctx)(command_args=command_arg_dict)
 
 

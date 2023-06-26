@@ -57,6 +57,7 @@ class Show(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -219,7 +220,6 @@ class Show(AAZCommand):
             capture_description.destination = AAZObjectType()
             capture_description.enabled = AAZBoolType()
             capture_description.encoding = AAZStrType()
-            capture_description.identity = AAZObjectType()
             capture_description.interval_in_seconds = AAZIntType(
                 serialized_name="intervalInSeconds",
             )
@@ -231,9 +231,16 @@ class Show(AAZCommand):
             )
 
             destination = cls._schema_on_200.properties.capture_description.destination
+            destination.identity = AAZObjectType()
             destination.name = AAZStrType()
             destination.properties = AAZObjectType(
                 flags={"client_flatten": True},
+            )
+
+            identity = cls._schema_on_200.properties.capture_description.destination.identity
+            identity.type = AAZStrType()
+            identity.user_assigned_identity = AAZStrType(
+                serialized_name="userAssignedIdentity",
             )
 
             properties = cls._schema_on_200.properties.capture_description.destination.properties
@@ -254,12 +261,6 @@ class Show(AAZCommand):
             )
             properties.storage_account_resource_id = AAZStrType(
                 serialized_name="storageAccountResourceId",
-            )
-
-            identity = cls._schema_on_200.properties.capture_description.identity
-            identity.type = AAZStrType()
-            identity.user_assigned_identity = AAZStrType(
-                serialized_name="userAssignedIdentity",
             )
 
             partition_ids = cls._schema_on_200.properties.partition_ids

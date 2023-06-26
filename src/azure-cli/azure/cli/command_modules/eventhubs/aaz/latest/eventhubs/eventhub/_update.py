@@ -59,6 +59,7 @@ class Update(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -70,30 +71,6 @@ class Update(AAZCommand):
         # define Arg Group "CaptureDescription"
 
         _args_schema = cls._args_schema
-        _args_schema.destination_name = AAZStrArg(
-            options=["--destination-name"],
-            arg_group="CaptureDescription",
-            help="Name for capture destination",
-            nullable=True,
-        )
-        _args_schema.archive_name_format = AAZStrArg(
-            options=["--archive-name-format"],
-            arg_group="CaptureDescription",
-            help="Blob naming convention for archive, e.g. {Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}. Here all the parameters (Namespace,EventHub .. etc) are mandatory irrespective of order",
-            nullable=True,
-        )
-        _args_schema.blob_container = AAZStrArg(
-            options=["--blob-container"],
-            arg_group="CaptureDescription",
-            help="Blob container Name",
-            nullable=True,
-        )
-        _args_schema.storage_account = AAZStrArg(
-            options=["--storage-account"],
-            arg_group="CaptureDescription",
-            help="Resource id of the storage account to be used to create the blobs",
-            nullable=True,
-        )
         _args_schema.enable_capture = AAZBoolArg(
             options=["--enable-capture"],
             arg_group="CaptureDescription",
@@ -106,12 +83,6 @@ class Update(AAZCommand):
             help="Enumerates the possible values for the encoding format of capture description. Note: 'AvroDeflate' will be deprecated in New API Version",
             nullable=True,
             enum={"Avro": "Avro", "AvroDeflate": "AvroDeflate"},
-        )
-        _args_schema.identity = AAZObjectArg(
-            options=["--identity"],
-            arg_group="CaptureDescription",
-            help="Properties describing the Azure Active Directory Identity to be used to to be used to capture events to Storage Accounts or Azure Data Lake. ",
-            nullable=True,
         )
         _args_schema.capture_interval = AAZIntArg(
             options=["--capture-interval"],
@@ -132,6 +103,40 @@ class Update(AAZCommand):
             nullable=True,
         )
 
+        # define Arg Group "Destination"
+
+        _args_schema = cls._args_schema
+        _args_schema.identity = AAZObjectArg(
+            options=["--identity"],
+            arg_group="Destination",
+            help="A value that indicates whether capture description is enabled. ",
+            nullable=True,
+        )
+        _args_schema.destination_name = AAZStrArg(
+            options=["--destination-name"],
+            arg_group="Destination",
+            help="Name for capture destination",
+            nullable=True,
+        )
+        _args_schema.archive_name_format = AAZStrArg(
+            options=["--archive-name-format"],
+            arg_group="Destination",
+            help="Blob naming convention for archive, e.g. {Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}. Here all the parameters (Namespace,EventHub .. etc) are mandatory irrespective of order",
+            nullable=True,
+        )
+        _args_schema.blob_container = AAZStrArg(
+            options=["--blob-container"],
+            arg_group="Destination",
+            help="Blob container Name",
+            nullable=True,
+        )
+        _args_schema.storage_account = AAZStrArg(
+            options=["--storage-account"],
+            arg_group="Destination",
+            help="Resource id of the storage account to be used to create the blobs",
+            nullable=True,
+        )
+
         identity = cls._args_schema.identity
         identity.type = AAZStrArg(
             options=["type"],
@@ -148,6 +153,15 @@ class Update(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.message_retention_in_days = AAZIntArg(
+            options=["--message-retention-in-days"],
+            arg_group="Properties",
+            help="Number of days to retain the events for this Event Hub, value should be 1 to 7 days",
+            nullable=True,
+            fmt=AAZIntArgFormat(
+                minimum=1,
+            ),
+        )
         _args_schema.partition_count = AAZIntArg(
             options=["--partition-count"],
             arg_group="Properties",
@@ -178,13 +192,13 @@ class Update(AAZCommand):
         _args_schema.retention_time_in_hours = AAZIntArg(
             options=["--retention-time", "--retention-time-in-hours"],
             arg_group="RetentionDescription",
-            help="Number of hours to retain the events for this Event Hub. This value is only used when cleanupPolicy is Delete. If cleanupPolicy is Compaction the returned value of this property is Long.MaxValue",
+            help="Number of hours to retain the events for this Event Hub. This value is only used when cleanupPolicy is Delete. If cleanupPolicy is Compact the returned value of this property is Long.MaxValue",
             nullable=True,
         )
         _args_schema.tombstone_retention_time_in_hours = AAZIntArg(
             options=["-t", "--tombstone-retention-time-in-hours"],
             arg_group="RetentionDescription",
-            help="Number of hours to retain the tombstone markers of a compacted Event Hub. This value is only used when cleanupPolicy is Compaction. Consumer must complete reading the tombstone marker within this specified amount of time if consumer begins from starting offset to ensure they get a valid snapshot for the specific key described by the tombstone marker within the compacted Event Hub",
+            help="Number of hours to retain the tombstone markers of a compacted Event Hub. This value is only used when cleanupPolicy is Compact. Consumer must complete reading the tombstone marker within this specified amount of time if consumer begins from starting offset to ensure they get a valid snapshot for the specific key described by the tombstone marker within the compacted Event Hub",
             nullable=True,
         )
         return cls._args_schema
@@ -421,6 +435,7 @@ class Update(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("captureDescription", AAZObjectType)
+                properties.set_prop("messageRetentionInDays", AAZIntType, ".message_retention_in_days")
                 properties.set_prop("partitionCount", AAZIntType, ".partition_count")
                 properties.set_prop("retentionDescription", AAZObjectType)
                 properties.set_prop("status", AAZStrType, ".status")
@@ -430,26 +445,26 @@ class Update(AAZCommand):
                 capture_description.set_prop("destination", AAZObjectType)
                 capture_description.set_prop("enabled", AAZBoolType, ".enable_capture")
                 capture_description.set_prop("encoding", AAZStrType, ".encoding")
-                capture_description.set_prop("identity", AAZObjectType, ".identity")
                 capture_description.set_prop("intervalInSeconds", AAZIntType, ".capture_interval")
                 capture_description.set_prop("sizeLimitInBytes", AAZIntType, ".capture_size_limit")
                 capture_description.set_prop("skipEmptyArchives", AAZBoolType, ".skip_empty_archives")
 
             destination = _builder.get(".properties.captureDescription.destination")
             if destination is not None:
+                destination.set_prop("identity", AAZObjectType, ".identity")
                 destination.set_prop("name", AAZStrType, ".destination_name")
                 destination.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            identity = _builder.get(".properties.captureDescription.destination.identity")
+            if identity is not None:
+                identity.set_prop("type", AAZStrType, ".type")
+                identity.set_prop("userAssignedIdentity", AAZStrType, ".user_assigned_identity")
 
             properties = _builder.get(".properties.captureDescription.destination.properties")
             if properties is not None:
                 properties.set_prop("archiveNameFormat", AAZStrType, ".archive_name_format")
                 properties.set_prop("blobContainer", AAZStrType, ".blob_container")
                 properties.set_prop("storageAccountResourceId", AAZStrType, ".storage_account")
-
-            identity = _builder.get(".properties.captureDescription.identity")
-            if identity is not None:
-                identity.set_prop("type", AAZStrType, ".type")
-                identity.set_prop("userAssignedIdentity", AAZStrType, ".user_assigned_identity")
 
             retention_description = _builder.get(".properties.retentionDescription")
             if retention_description is not None:
@@ -538,7 +553,6 @@ class _UpdateHelper:
         capture_description.destination = AAZObjectType()
         capture_description.enabled = AAZBoolType()
         capture_description.encoding = AAZStrType()
-        capture_description.identity = AAZObjectType()
         capture_description.interval_in_seconds = AAZIntType(
             serialized_name="intervalInSeconds",
         )
@@ -550,9 +564,16 @@ class _UpdateHelper:
         )
 
         destination = _schema_eventhub_read.properties.capture_description.destination
+        destination.identity = AAZObjectType()
         destination.name = AAZStrType()
         destination.properties = AAZObjectType(
             flags={"client_flatten": True},
+        )
+
+        identity = _schema_eventhub_read.properties.capture_description.destination.identity
+        identity.type = AAZStrType()
+        identity.user_assigned_identity = AAZStrType(
+            serialized_name="userAssignedIdentity",
         )
 
         properties = _schema_eventhub_read.properties.capture_description.destination.properties
@@ -573,12 +594,6 @@ class _UpdateHelper:
         )
         properties.storage_account_resource_id = AAZStrType(
             serialized_name="storageAccountResourceId",
-        )
-
-        identity = _schema_eventhub_read.properties.capture_description.identity
-        identity.type = AAZStrType()
-        identity.user_assigned_identity = AAZStrType(
-            serialized_name="userAssignedIdentity",
         )
 
         partition_ids = _schema_eventhub_read.properties.partition_ids
