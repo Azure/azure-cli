@@ -1,6 +1,6 @@
-# Some content of this file is generated.
 # USER_Target
-#   "": CLI modules
+#   "" / all / ALL: main repo and all extensions
+#   main: main repo
 #   extensions: ALL extensions
 #   vm ext-account: certain targets
 
@@ -23,14 +23,15 @@ variables:
 #  always: true
 
 stages:
-- stage: TestWindows
-  displayName: Live Test on Windows 2019
+- stage: TestUbuntu
+  displayName: Live Test on Ubuntu 2004
   jobs:
-  - job: LiveTestPython38
-    displayName: Live Test Python 3.8
+  - job: LiveTest
+    displayName: Live Test
     # Sometimes the live test will be stuck forever, so the timeout cannot be set to 0, it is recommended to set it to twice the maximum time
     timeoutInMinutes: 600
     strategy:
+      # If the maxParallel is too large, the resource group will reach the limit of 980, so it is recommended that the maxParallel should not exceed 30.
       maxParallel: 30
       matrix:
         acr:
@@ -97,6 +98,8 @@ stages:
           Target: find
         hdinsight:
           Target: hdinsight
+        identity：
+          Target: identity
         iot:
           Target: iot
         keyvault:
@@ -109,8 +112,12 @@ stages:
           Target: managedservices
         maps:
           Target: maps
+        marketplaceordering:
+          Target: marketplaceordering
         monitor:
           Target: monitor
+        mysql:
+          Target: mysql
         natgateway:
           Target: natgateway
         netappfiles:
@@ -159,10 +166,14 @@ stages:
           Target: vm
         ext-account:
           Target: ext-account
+        ext-acrquery：
+          Target: ext-acrquery
         ext-acrtransfer:
           Target: ext-acrtransfer
         ext-ad:
           Target: ext-ad
+	    ext-adp:
+          Target: ext-adp
         ext-aem:
           Target: ext-aem
         ext-ai-examples:
@@ -183,16 +194,16 @@ stages:
           Target: ext-attestation
         ext-authV2:
           Target: ext-authV2
-        ext-azure-batch-cli-extensions:
-          Target: ext-azure-batch-cli-extensions
-        ext-azure-cli-ml:
-          Target: ext-azure-cli-ml
-        ext-azure-devops:
-          Target: ext-azure-devops
+        ext-automanage:
+          Target: ext-automanage
+        ext-automation:
+          Target: ext-automation
         ext-azure-firewall:
           Target: ext-azure-firewall
-        ext-azure-iot:
-          Target: ext-azure-iot
+        ext-bastion:
+	      Target: ext-bastion
+        ext-billing-benefits:
+          Target: ext-billing-benefits
         ext-blockchain:
           Target: ext-blockchain
         ext-blueprint:
@@ -205,6 +216,8 @@ stages:
           Target: ext-cloudservice
         ext-communication:
           Target: ext-communication
+        ext-confcom:
+          Target: ext-confcom
         ext-confidentialledger:
           Target: ext-confidentialledger
         ext-confluent:
@@ -225,8 +238,6 @@ stages:
           Target: ext-cosmosdb-preview
         ext-costmanagement:
           Target: ext-costmanagement
-        ext-csvmware:
-          Target: ext-csvmware
         ext-custom-providers:
           Target: ext-custom-providers
         ext-databox:
@@ -245,12 +256,12 @@ stages:
           Target: ext-datashare
         ext-db-up:
           Target: ext-db-up
-        ext-deploy-to-azure:
-          Target: ext-deploy-to-azure
         ext-desktopvirtualization:
           Target: ext-desktopvirtualization
         ext-dev-spaces:
           Target: ext-dev-spaces
+        ext-devcenter:
+          Target: ext-devcenter
         ext-diskpool:
           Target: ext-diskpool
         ext-dms-preview:
@@ -279,8 +290,6 @@ stages:
           Target: ext-footprint
         ext-front-door:
           Target: ext-front-door
-        ext-fzf:
-          Target: ext-fzf
         ext-functionapp:
           Target: ext-functionapp
         ext-guestconfig:
@@ -315,6 +324,8 @@ stages:
           Target: ext-k8s-extension
         ext-kusto:
           Target: ext-kusto
+        ext-load:
+          Target: ext-load
         ext-log-analytics:
           Target: ext-log-analytics
         ext-log-analytics-solution:
@@ -325,12 +336,16 @@ stages:
           Target: ext-logz
         ext-maintenance:
           Target: ext-maintenance
+        ext-managedccfs:
+          Target: ext-managedccfs
         ext-managementpartner:
           Target: ext-managementpartner
         ext-mesh:
           Target: ext-mesh
         ext-mixed-reality:
           Target: ext-mixed-reality
+        ext-mobile-network:
+	      Target: ext-mobile-network
         ext-monitor-control-service:
           Target: ext-monitor-control-service
         ext-netappfiles-preview:
@@ -343,6 +358,8 @@ stages:
           Target: ext-nginx
         ext-notification-hub:
           Target: ext-notification-hub
+        ext-nsp:
+          Target: ext-nsp
         ext-offazure:
           Target: ext-offazure
         ext-orbital:
@@ -371,8 +388,6 @@ stages:
           Target: ext-resource-graph
         ext-resource-mover:
           Target: ext-resource-mover
-        ext-sap-hana:
-          Target: ext-sap-hana
         ext-scenario-guide:
           Target: ext-scenario-guide
         ext-scheduled-query:
@@ -381,8 +396,12 @@ stages:
           Target: ext-scvmm
         ext-securityinsight:
           Target: ext-securityinsight
+        ext-self-help:
+          Target: ext-self-help
         ext-serial-console:
           Target: ext-serial-console
+        ext-serviceconnector-passwordless:
+          Target: ext-serviceconnector-passwordless
         ext-spring:
           Target: ext-spring
         ext-spring-cloud:
@@ -391,8 +410,12 @@ stages:
           Target: ext-ssh
         ext-stack-hci:
           Target: ext-stack-hci
+        ext-staticwebapp:
+          Target: ext-staticwebapp
         ext-storage-blob-preview:
           Target: ext-storage-blob-preview
+        ext-storage-mover:
+          Target: ext-storage-mover
         ext-storage-preview:
           Target: ext-storage-preview
         ext-storagesync:
@@ -417,6 +440,8 @@ stages:
           Target: ext-vm-repair
         ext-vmware:
           Target: ext-vmware
+        ext-voice-service:
+          Target: ext-voice-service
         ext-webapp:
           Target: ext-webapp
         ext-webpubsub:
@@ -435,41 +460,129 @@ stages:
       - task: UsePythonVersion@0
         condition: and(succeededOrFailed(), eq(variables.Match, '1'))
         inputs:
-          versionSpec: '3.8'
+          versionSpec: '$(PYTHON_VERSION)'
           addToPath: true
           architecture: 'x64'
       - bash: |
           cd ..
           pwd
+          workDir=$(pwd)
           ls
           # ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
           git config --global user.email "AzurePipelines"
           git config --global user.name "AzurePipelines"
   
           # print variables
+          echo "blacklist: ${{ convertToJson(parameters.blacklist) }}"
           echo "USER_TARGET: $(USER_TARGET)"
           echo "USER_REPO: $(USER_REPO)"
           echo "USER_REPO_EXT: $(USER_REPO_EXT)"
           echo "USER_BRANCH: $(USER_BRANCH)"
           echo "USER_BRANCH_EXT: $(USER_BRANCH_EXT)"
-          echo "TARGET: $(Target)"
-          echo "$(Target)" > $(Target).windows2019.report.sequential.json
+          # Whether commit changes
+          if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
+            REPO="$(USER_REPO)"
+            EXT_REPO="$(USER_REPO_EXT)"
+            # Pass username and token so that we can commit changes
+            git clone -b $(USER_BRANCH) ${REPO:0:8}$(USER_USERNAME):$(USER_TOKEN)@${REPO:8}
+            git clone -b $(USER_BRANCH_EXT) ${EXT_REPO:0:8}$(USER_USERNAME):$(USER_TOKEN)@${EXT_REPO:8}
+          else
+            git clone -b $(USER_BRANCH) $(USER_REPO)
+            git clone -b $(USER_BRANCH_EXT) $(USER_REPO_EXT)
+          fi
+  
+          python -m venv env
+          source env/bin/activate
+          echo "##vso[task.setvariable variable=workDir]$workDir"
+  
+          pip install azdev pytest-json-report pytest-html pytest-rerunfailures
+  
+          azdev setup -c azure-cli -r azure-cli-extensions
+  
+          # This helps detect issues in CI if a used SDK API version is deleted by the below script.
+          python $workDir/s/scripts/trim_sdk.py
+  
+          # Compact aaz folders of modules
+          python $workDir/s/scripts/compact_aaz.py
+  
+          az -v
+          az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTTENANTID)
+          az account set -s $(AZURECLITESTSUBSCRIPTIONID)
+  
+          # Clean policy
+          python $workDir/s/scripts/live_test/clean_policy.py
+          
+          echo "Run tests"
+          # Whether commit changes
+          if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
+            echo "Commit mode"
+            azdev test ${FinalTarget} --no-exitfirst -a "-n auto"
+            azdev test ${FinalTarget} --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n auto --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
+          else
+            echo "Normal mode"
+            # Sequential
+            azdev test ${FinalTarget} $(USER_LIVE) --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
+            # Parallel
+            azdev test ${FinalTarget} $(USER_LIVE) --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n auto --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
+          fi
+  
+          pwd
+          ls
+          # Whether commit changes
+          if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" && ! "$(USER_TARGET)" =~ ^ext-.* && "$(USER_TARGET)" != "extensions" && "$(USER_TARGET)" != ""  && "$(USER_TARGET)" != "all" && "$(USER_TARGET)" != "ALL" ]]; then
+            cd azure-cli
+            git status
+            git add .
+            git commit -m "Upload recording files"
+            git push origin $(USER_BRANCH)
+          elif [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" && "$(USER_TARGET)" =~ ^ext-.* ]]; then
+            cd azure-cli-extensions
+            git status
+            git add .
+            git commit -m "Upload recording files"
+            git push origin $(USER_BRANCH_EXT)
+          fi
         condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+      - task: PublishTestResults@2
+        condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+        inputs:
+          testResultsFiles: '$(workDir)/test_results.*.xml'
+          testRunTitle: 'Azure CLI live test results of $(Target)'
+          mergeTestResults: true
       - task: PublishBuildArtifacts@1
         condition: and(succeededOrFailed(), eq(variables.Match, '1'))
         inputs:
-          PathtoPublish: '/mnt/vss/_work/1/$(Target).windows2019.report.sequential.json'
+          PathtoPublish: '$(workDir)/$(Target).$(platform).report.sequential.json'
+          ArtifactName: 'livetest'
+          publishLocation: 'Container'
+      - task: PublishBuildArtifacts@1
+        condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+        inputs:
+          PathtoPublish: '$(workDir)/$(Target).$(platform).report.sequential.html'
+          ArtifactName: 'livetest'
+          publishLocation: 'Container'
+      - task: PublishBuildArtifacts@1
+        condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+        inputs:
+          PathtoPublish: '$(workDir)/$(Target).$(platform).report.parallel.json'
+          ArtifactName: 'livetest'
+          publishLocation: 'Container'
+      - task: PublishBuildArtifacts@1
+        condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+        inputs:
+          PathtoPublish: '$(workDir)/$(Target).$(platform).report.parallel.html'
           ArtifactName: 'livetest'
           publishLocation: 'Container'
 
 - stage: TestMacos
   displayName: Live Test on Macos 12
   jobs:
-  - job: LiveTestPython38
-    displayName: Live Test Python 3.8
+  - job: LiveTest
+    displayName: Live Test
     # Sometimes the live test will be stuck forever, so the timeout cannot be set to 0, it is recommended to set it to twice the maximum time
     timeoutInMinutes: 600
     strategy:
+      # If the maxParallel is too large, the resource group will reach the limit of 980, so it is recommended that the maxParallel should not exceed 30.
       maxParallel: 30
       matrix:
         acr:
@@ -536,6 +649,8 @@ stages:
           Target: find
         hdinsight:
           Target: hdinsight
+        identity：
+          Target: identity
         iot:
           Target: iot
         keyvault:
@@ -548,8 +663,12 @@ stages:
           Target: managedservices
         maps:
           Target: maps
+        marketplaceordering:
+          Target: marketplaceordering
         monitor:
           Target: monitor
+        mysql:
+          Target: mysql
         natgateway:
           Target: natgateway
         netappfiles:
@@ -598,10 +717,14 @@ stages:
           Target: vm
         ext-account:
           Target: ext-account
+        ext-acrquery：
+          Target: ext-acrquery
         ext-acrtransfer:
           Target: ext-acrtransfer
         ext-ad:
           Target: ext-ad
+	    ext-adp:
+          Target: ext-adp
         ext-aem:
           Target: ext-aem
         ext-ai-examples:
@@ -622,16 +745,16 @@ stages:
           Target: ext-attestation
         ext-authV2:
           Target: ext-authV2
-        ext-azure-batch-cli-extensions:
-          Target: ext-azure-batch-cli-extensions
-        ext-azure-cli-ml:
-          Target: ext-azure-cli-ml
-        ext-azure-devops:
-          Target: ext-azure-devops
+        ext-automanage:
+          Target: ext-automanage
+        ext-automation:
+          Target: ext-automation
         ext-azure-firewall:
           Target: ext-azure-firewall
-        ext-azure-iot:
-          Target: ext-azure-iot
+        ext-bastion:
+	      Target: ext-bastion
+        ext-billing-benefits:
+          Target: ext-billing-benefits
         ext-blockchain:
           Target: ext-blockchain
         ext-blueprint:
@@ -644,6 +767,8 @@ stages:
           Target: ext-cloudservice
         ext-communication:
           Target: ext-communication
+        ext-confcom:
+          Target: ext-confcom
         ext-confidentialledger:
           Target: ext-confidentialledger
         ext-confluent:
@@ -664,8 +789,6 @@ stages:
           Target: ext-cosmosdb-preview
         ext-costmanagement:
           Target: ext-costmanagement
-        ext-csvmware:
-          Target: ext-csvmware
         ext-custom-providers:
           Target: ext-custom-providers
         ext-databox:
@@ -684,12 +807,12 @@ stages:
           Target: ext-datashare
         ext-db-up:
           Target: ext-db-up
-        ext-deploy-to-azure:
-          Target: ext-deploy-to-azure
         ext-desktopvirtualization:
           Target: ext-desktopvirtualization
         ext-dev-spaces:
           Target: ext-dev-spaces
+        ext-devcenter:
+          Target: ext-devcenter
         ext-diskpool:
           Target: ext-diskpool
         ext-dms-preview:
@@ -718,8 +841,6 @@ stages:
           Target: ext-footprint
         ext-front-door:
           Target: ext-front-door
-        ext-fzf:
-          Target: ext-fzf
         ext-functionapp:
           Target: ext-functionapp
         ext-guestconfig:
@@ -754,6 +875,8 @@ stages:
           Target: ext-k8s-extension
         ext-kusto:
           Target: ext-kusto
+        ext-load:
+          Target: ext-load
         ext-log-analytics:
           Target: ext-log-analytics
         ext-log-analytics-solution:
@@ -764,12 +887,16 @@ stages:
           Target: ext-logz
         ext-maintenance:
           Target: ext-maintenance
+        ext-managedccfs:
+          Target: ext-managedccfs
         ext-managementpartner:
           Target: ext-managementpartner
         ext-mesh:
           Target: ext-mesh
         ext-mixed-reality:
           Target: ext-mixed-reality
+        ext-mobile-network:
+	      Target: ext-mobile-network
         ext-monitor-control-service:
           Target: ext-monitor-control-service
         ext-netappfiles-preview:
@@ -782,6 +909,8 @@ stages:
           Target: ext-nginx
         ext-notification-hub:
           Target: ext-notification-hub
+        ext-nsp:
+          Target: ext-nsp
         ext-offazure:
           Target: ext-offazure
         ext-orbital:
@@ -810,8 +939,6 @@ stages:
           Target: ext-resource-graph
         ext-resource-mover:
           Target: ext-resource-mover
-        ext-sap-hana:
-          Target: ext-sap-hana
         ext-scenario-guide:
           Target: ext-scenario-guide
         ext-scheduled-query:
@@ -820,8 +947,12 @@ stages:
           Target: ext-scvmm
         ext-securityinsight:
           Target: ext-securityinsight
+        ext-self-help:
+          Target: ext-self-help
         ext-serial-console:
           Target: ext-serial-console
+        ext-serviceconnector-passwordless:
+          Target: ext-serviceconnector-passwordless
         ext-spring:
           Target: ext-spring
         ext-spring-cloud:
@@ -830,8 +961,12 @@ stages:
           Target: ext-ssh
         ext-stack-hci:
           Target: ext-stack-hci
+        ext-staticwebapp:
+          Target: ext-staticwebapp
         ext-storage-blob-preview:
           Target: ext-storage-blob-preview
+        ext-storage-mover:
+          Target: ext-storage-mover
         ext-storage-preview:
           Target: ext-storage-preview
         ext-storagesync:
@@ -856,6 +991,8 @@ stages:
           Target: ext-vm-repair
         ext-vmware:
           Target: ext-vmware
+        ext-voice-service:
+          Target: ext-voice-service
         ext-webapp:
           Target: ext-webapp
         ext-webpubsub:
@@ -874,30 +1011,669 @@ stages:
       - task: UsePythonVersion@0
         condition: and(succeededOrFailed(), eq(variables.Match, '1'))
         inputs:
-          versionSpec: '3.8'
+          versionSpec: '$(PYTHON_VERSION)'
           addToPath: true
           architecture: 'x64'
       - bash: |
           cd ..
           pwd
+          workDir=$(pwd)
           ls
           # ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
           git config --global user.email "AzurePipelines"
           git config --global user.name "AzurePipelines"
   
           # print variables
+          echo "blacklist: ${{ convertToJson(parameters.blacklist) }}"
           echo "USER_TARGET: $(USER_TARGET)"
           echo "USER_REPO: $(USER_REPO)"
           echo "USER_REPO_EXT: $(USER_REPO_EXT)"
           echo "USER_BRANCH: $(USER_BRANCH)"
           echo "USER_BRANCH_EXT: $(USER_BRANCH_EXT)"
-          echo "TARGET: $(Target)"
-          echo "$(Target)" > $(Target).macos12.report.sequential.json
+          # Whether commit changes
+          if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
+            REPO="$(USER_REPO)"
+            EXT_REPO="$(USER_REPO_EXT)"
+            # Pass username and token so that we can commit changes
+            git clone -b $(USER_BRANCH) ${REPO:0:8}$(USER_USERNAME):$(USER_TOKEN)@${REPO:8}
+            git clone -b $(USER_BRANCH_EXT) ${EXT_REPO:0:8}$(USER_USERNAME):$(USER_TOKEN)@${EXT_REPO:8}
+          else
+            git clone -b $(USER_BRANCH) $(USER_REPO)
+            git clone -b $(USER_BRANCH_EXT) $(USER_REPO_EXT)
+          fi
+  
+          python -m venv env
+          source env/bin/activate
+          export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+          echo "##vso[task.setvariable variable=workDir]$workDir"
+  
+          pip install azdev pytest-json-report pytest-html pytest-rerunfailures
+  
+          azdev setup -c azure-cli -r azure-cli-extensions
+  
+          # This helps detect issues in CI if a used SDK API version is deleted by the below script.
+          python $workDir/s/scripts/trim_sdk.py
+  
+          # Compact aaz folders of modules
+          python $workDir/s/scripts/compact_aaz.py
+  
+          az -v
+          az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTTENANTID)
+          az account set -s $(AZURECLITESTSUBSCRIPTIONID)
+  
+          # Clean policy
+          python $workDir/s/scripts/live_test/clean_policy.py
+          
+          echo "Run tests"
+          # Whether commit changes
+          if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
+            echo "Commit mode"
+            azdev test ${FinalTarget} --no-exitfirst -a "-n auto"
+            azdev test ${FinalTarget} --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n auto --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
+          else
+            echo "Normal mode"
+            # Sequential
+            azdev test ${FinalTarget} $(USER_LIVE) --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
+            # Parallel
+            azdev test ${FinalTarget} $(USER_LIVE) --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n auto --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
+          fi
+  
+          pwd
+          ls
+          # Whether commit changes
+          if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" && ! "$(USER_TARGET)" =~ ^ext-.* && "$(USER_TARGET)" != "extensions" && "$(USER_TARGET)" != ""  && "$(USER_TARGET)" != "all" && "$(USER_TARGET)" != "ALL" ]]; then
+            cd azure-cli
+            git status
+            git add .
+            git commit -m "Upload recording files"
+            git push origin $(USER_BRANCH)
+          elif [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" && "$(USER_TARGET)" =~ ^ext-.* ]]; then
+            cd azure-cli-extensions
+            git status
+            git add .
+            git commit -m "Upload recording files"
+            git push origin $(USER_BRANCH_EXT)
+          fi
         condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+      - task: PublishTestResults@2
+        condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+        inputs:
+          testResultsFiles: '$(workDir)/test_results.*.xml'
+          testRunTitle: 'Azure CLI live test results of $(Target)'
+          mergeTestResults: true
       - task: PublishBuildArtifacts@1
         condition: and(succeededOrFailed(), eq(variables.Match, '1'))
         inputs:
-          PathtoPublish: '/Users/runner/work/1/$(Target).macos12.report.sequential.json'
+          PathtoPublish: '$(workDir)/$(Target).$(platform).report.sequential.json'
+          ArtifactName: 'livetest'
+          publishLocation: 'Container'
+      - task: PublishBuildArtifacts@1
+        condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+        inputs:
+          PathtoPublish: '$(workDir)/$(Target).$(platform).report.sequential.html'
+          ArtifactName: 'livetest'
+          publishLocation: 'Container'
+      - task: PublishBuildArtifacts@1
+        condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+        inputs:
+          PathtoPublish: '$(workDir)/$(Target).$(platform).report.parallel.json'
+          ArtifactName: 'livetest'
+          publishLocation: 'Container'
+      - task: PublishBuildArtifacts@1
+        condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+        inputs:
+          PathtoPublish: '$(workDir)/$(Target).$(platform).report.parallel.html'
+          ArtifactName: 'livetest'
+          publishLocation: 'Container'
+
+- stage: TestWindows
+  displayName: Live Test on Windows 2019
+  jobs:
+  - job: LiveTest
+    displayName: Live Test
+    # Sometimes the live test will be stuck forever, so the timeout cannot be set to 0, it is recommended to set it to twice the maximum time
+    timeoutInMinutes: 600
+    strategy:
+      # If the maxParallel is too large, the resource group will reach the limit of 980, so it is recommended that the maxParallel should not exceed 30.
+      maxParallel: 30
+      matrix:
+        acr:
+          Target: acr
+        acs:
+          Target: acs
+        advisor:
+          Target: advisor
+        ams:
+          Target: ams
+        apim:
+          Target: apim
+        appconfig:
+          Target: appconfig
+        appservice:
+          Target: appservice
+        aro:
+          Target: aro
+        backup:
+          Target: backup
+        batch:
+          Target: batch
+        batchai:
+          Target: batchai
+        billing:
+          Target: billing
+        botservice:
+          Target: botservice
+        cdn:
+          Target: cdn
+        cloud:
+          Target: cloud
+        cognitiveservices:
+          Target: cognitiveservices
+        config:
+          Target: config
+        configure:
+          Target: configure
+        consumption:
+          Target: consumption
+        container:
+          Target: container
+        cosmosdb:
+          Target: cosmosdb
+        databoxedge:
+          Target: databoxedge
+        deploymentmanager:
+          Target: deploymentmanager
+        dla:
+          Target: dla
+        dls:
+          Target: dls
+        dms:
+          Target: dms
+        eventgrid:
+          Target: eventgrid
+        eventhubs:
+          Target: eventhubs
+        extension:
+          Target: extension
+        feedback:
+          Target: feedback
+        find:
+          Target: find
+        hdinsight:
+          Target: hdinsight
+        identity：
+          Target: identity
+        iot:
+          Target: iot
+        keyvault:
+          Target: keyvault
+        kusto:
+          Target: kusto
+        lab:
+          Target: lab
+        managedservices:
+          Target: managedservices
+        maps:
+          Target: maps
+        marketplaceordering:
+          Target: marketplaceordering
+        monitor:
+          Target: monitor
+        mysql:
+          Target: mysql
+        natgateway:
+          Target: natgateway
+        netappfiles:
+          Target: netappfiles
+        network:
+          Target: network
+        policyinsights:
+          Target: policyinsights
+        privatedns:
+          Target: privatedns
+        profile:
+          Target: profile
+        rdbms:
+          Target: rdbms
+        redis:
+          Target: redis
+        relay:
+          Target: relay
+        resource:
+          Target: resource
+        role:
+          Target: role
+        search:
+          Target: search
+        security:
+          Target: security
+        servicebus:
+          Target: servicebus
+        serviceconnector:
+          Target: serviceconnector
+        servicefabric:
+          Target: servicefabric
+        signalr:
+          Target: signalr
+        sql:
+          Target: sql
+        sqlvm:
+          Target: sqlvm
+        storage:
+          Target: storage
+        synapse:
+          Target: synapse
+        util:
+          Target: util
+        vm:
+          Target: vm
+        ext-account:
+          Target: ext-account
+        ext-acrquery：
+          Target: ext-acrquery
+        ext-acrtransfer:
+          Target: ext-acrtransfer
+        ext-ad:
+          Target: ext-ad
+	    ext-adp:
+          Target: ext-adp
+        ext-aem:
+          Target: ext-aem
+        ext-ai-examples:
+          Target: ext-ai-examples
+        ext-aks-preview:
+          Target: ext-aks-preview
+        ext-alertsmanagement:
+          Target: ext-alertsmanagement
+        ext-alias:
+          Target: ext-alias
+        ext-amg:
+          Target: ext-amg
+        ext-application-insights:
+          Target: ext-application-insights
+        ext-appservice-kube:
+          Target: ext-appservice-kube
+        ext-attestation:
+          Target: ext-attestation
+        ext-authV2:
+          Target: ext-authV2
+        ext-automanage:
+          Target: ext-automanage
+        ext-automation:
+          Target: ext-automation
+        ext-azure-firewall:
+          Target: ext-azure-firewall
+        ext-bastion:
+	      Target: ext-bastion
+        ext-billing-benefits:
+          Target: ext-billing-benefits
+        ext-blockchain:
+          Target: ext-blockchain
+        ext-blueprint:
+          Target: ext-blueprint
+        ext-change-analysis:
+          Target: ext-change-analysis
+        ext-cli-translator:
+          Target: ext-cli-translator
+        ext-cloudservice:
+          Target: ext-cloudservice
+        ext-communication:
+          Target: ext-communication
+        ext-confcom:
+          Target: ext-confcom
+        ext-confidentialledger:
+          Target: ext-confidentialledger
+        ext-confluent:
+          Target: ext-confluent
+        ext-connectedk8s:
+          Target: ext-connectedk8s
+        ext-connectedmachine:
+          Target: ext-connectedmachine
+        ext-connectedvmware:
+          Target: ext-connectedvmware
+        ext-connection-monitor-preview:
+          Target: ext-connection-monitor-preview
+        ext-containerapp:
+          Target: ext-containerapp
+        ext-containerapp-preview:
+          Target: ext-containerapp-preview
+        ext-cosmosdb-preview:
+          Target: ext-cosmosdb-preview
+        ext-costmanagement:
+          Target: ext-costmanagement
+        ext-custom-providers:
+          Target: ext-custom-providers
+        ext-databox:
+          Target: ext-databox
+        ext-databricks:
+          Target: ext-databricks
+        ext-datadog:
+          Target: ext-datadog
+        ext-datafactory:
+          Target: ext-datafactory
+        ext-datamigration:
+          Target: ext-datamigration
+        ext-dataprotection:
+          Target: ext-dataprotection
+        ext-datashare:
+          Target: ext-datashare
+        ext-db-up:
+          Target: ext-db-up
+        ext-desktopvirtualization:
+          Target: ext-desktopvirtualization
+        ext-dev-spaces:
+          Target: ext-dev-spaces
+        ext-devcenter:
+          Target: ext-devcenter
+        ext-diskpool:
+          Target: ext-diskpool
+        ext-dms-preview:
+          Target: ext-dms-preview
+        ext-dnc:
+          Target: ext-dnc
+        ext-dns-resolver:
+          Target: ext-dns-resolver
+        ext-dynatrace:
+          Target: ext-dynatrace
+        ext-edgeorder:
+          Target: ext-edgeorder
+        ext-elastic:
+          Target: ext-elastic
+        ext-elastic-san:
+          Target: ext-elastic-san
+        ext-eventgrid:
+          Target: ext-eventgrid
+        ext-express-route-cross-connection:
+          Target: ext-express-route-cross-connection
+        ext-fleet:
+          Target: ext-fleet
+        ext-fluid-relay:
+          Target: ext-fluid-relay
+        ext-footprint:
+          Target: ext-footprint
+        ext-front-door:
+          Target: ext-front-door
+        ext-functionapp:
+          Target: ext-functionapp
+        ext-guestconfig:
+          Target: ext-guestconfig
+        ext-hack:
+          Target: ext-hack
+        ext-hardware-security-modules:
+          Target: ext-hardware-security-modules
+        ext-healthbot:
+          Target: ext-healthbot
+        ext-healthcareapis:
+          Target: ext-healthcareapis
+        ext-hpc-cache:
+          Target: ext-hpc-cache
+        ext-image-copy-extension:
+          Target: ext-image-copy-extension
+        ext-image-gallery:
+          Target: ext-image-gallery
+        ext-import-export:
+          Target: ext-import-export
+        ext-init:
+          Target: ext-init
+        ext-interactive:
+          Target: ext-interactive
+        ext-internet-analyzer:
+          Target: ext-internet-analyzer
+        ext-ip-group:
+          Target: ext-ip-group
+        ext-k8s-configuration:
+          Target: ext-k8s-configuration
+        ext-k8s-extension:
+          Target: ext-k8s-extension
+        ext-kusto:
+          Target: ext-kusto
+        ext-load:
+          Target: ext-load
+        ext-log-analytics:
+          Target: ext-log-analytics
+        ext-log-analytics-solution:
+          Target: ext-log-analytics-solution
+        ext-logic:
+          Target: ext-logic
+        ext-logz:
+          Target: ext-logz
+        ext-maintenance:
+          Target: ext-maintenance
+        ext-managedccfs:
+          Target: ext-managedccfs
+        ext-managementpartner:
+          Target: ext-managementpartner
+        ext-mesh:
+          Target: ext-mesh
+        ext-mixed-reality:
+          Target: ext-mixed-reality
+        ext-mobile-network:
+	      Target: ext-mobile-network
+        ext-monitor-control-service:
+          Target: ext-monitor-control-service
+        ext-netappfiles-preview:
+          Target: ext-netappfiles-preview
+        ext-network-manager:
+          Target: ext-network-manager
+        ext-next:
+          Target: ext-next
+        ext-nginx:
+          Target: ext-nginx
+        ext-notification-hub:
+          Target: ext-notification-hub
+        ext-nsp:
+          Target: ext-nsp
+        ext-offazure:
+          Target: ext-offazure
+        ext-orbital:
+          Target: ext-orbital
+        ext-peering:
+          Target: ext-peering
+        ext-portal:
+          Target: ext-portal
+        ext-powerbidedicated:
+          Target: ext-powerbidedicated
+        ext-providerhub:
+          Target: ext-providerhub
+        ext-purview:
+          Target: ext-purview
+        ext-quantum:
+          Target: ext-quantum
+        ext-quota:
+          Target: ext-quota
+        ext-rdbms-connect:
+          Target: ext-rdbms-connect
+        ext-redisenterprise:
+          Target: ext-redisenterprise
+        ext-reservation:
+          Target: ext-reservation
+        ext-resource-graph:
+          Target: ext-resource-graph
+        ext-resource-mover:
+          Target: ext-resource-mover
+        ext-scenario-guide:
+          Target: ext-scenario-guide
+        ext-scheduled-query:
+          Target: ext-scheduled-query
+        ext-scvmm:
+          Target: ext-scvmm
+        ext-securityinsight:
+          Target: ext-securityinsight
+        ext-self-help:
+          Target: ext-self-help
+        ext-serial-console:
+          Target: ext-serial-console
+        ext-serviceconnector-passwordless:
+          Target: ext-serviceconnector-passwordless
+        ext-spring:
+          Target: ext-spring
+        ext-spring-cloud:
+          Target: ext-spring-cloud
+        ext-ssh:
+          Target: ext-ssh
+        ext-stack-hci:
+          Target: ext-stack-hci
+        ext-staticwebapp:
+          Target: ext-staticwebapp
+        ext-storage-blob-preview:
+          Target: ext-storage-blob-preview
+        ext-storage-mover:
+          Target: ext-storage-mover
+        ext-storage-preview:
+          Target: ext-storage-preview
+        ext-storagesync:
+          Target: ext-storagesync
+        ext-stream-analytics:
+          Target: ext-stream-analytics
+        ext-subscription:
+          Target: ext-subscription
+        ext-support:
+          Target: ext-support
+        ext-swiftlet:
+          Target: ext-swiftlet
+        ext-timeseriesinsights:
+          Target: ext-timeseriesinsights
+        ext-traffic-collector:
+          Target: ext-traffic-collector
+        ext-virtual-network-tap:
+          Target: ext-virtual-network-tap
+        ext-virtual-wan:
+          Target: ext-virtual-wan
+        ext-vm-repair:
+          Target: ext-vm-repair
+        ext-vmware:
+          Target: ext-vmware
+        ext-voice-service:
+          Target: ext-voice-service
+        ext-webapp:
+          Target: ext-webapp
+        ext-webpubsub:
+          Target: ext-webpubsub
+    pool:
+      vmImage: 'macOS-12'
+    steps:
+      - bash: |
+          if [[ "$(USER_TARGET)" =~ "$(Target)" || ("$(USER_TARGET)" == "main" && ! "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "extensions" && "$(Target)" =~ ^ext-.*) || ("$(USER_TARGET)" == "ALL" || "$(USER_TARGET)" == "all" || "$(USER_TARGET)" == "") ]]; then
+            echo "Match!"
+            echo "##vso[task.setvariable variable=Match]1"
+          else
+            echo "Not match!"
+            echo "##vso[task.setvariable variable=Match]0"
+          fi
+      - task: UsePythonVersion@0
+        condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+        inputs:
+          versionSpec: '$(PYTHON_VERSION)'
+          addToPath: true
+          architecture: 'x64'
+      - bash: |
+          cd ..
+          pwd
+          workDir=$(pwd)
+          ls
+          # ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
+          git config --global user.email "AzurePipelines"
+          git config --global user.name "AzurePipelines"
+  
+          # print variables
+          echo "blacklist: ${{ convertToJson(parameters.blacklist) }}"
+          echo "USER_TARGET: $(USER_TARGET)"
+          echo "USER_REPO: $(USER_REPO)"
+          echo "USER_REPO_EXT: $(USER_REPO_EXT)"
+          echo "USER_BRANCH: $(USER_BRANCH)"
+          echo "USER_BRANCH_EXT: $(USER_BRANCH_EXT)"
+          # Whether commit changes
+          if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
+            REPO="$(USER_REPO)"
+            EXT_REPO="$(USER_REPO_EXT)"
+            # Pass username and token so that we can commit changes
+            git clone -b $(USER_BRANCH) ${REPO:0:8}$(USER_USERNAME):$(USER_TOKEN)@${REPO:8}
+            git clone -b $(USER_BRANCH_EXT) ${EXT_REPO:0:8}$(USER_USERNAME):$(USER_TOKEN)@${EXT_REPO:8}
+          else
+            git clone -b $(USER_BRANCH) $(USER_REPO)
+            git clone -b $(USER_BRANCH_EXT) $(USER_REPO_EXT)
+          fi
+  
+          python -m venv env
+          source env/Scripts/activate
+          echo "##vso[task.setvariable variable=workDir]$(Agent.BuildDirectory)"
+  
+          pip install azdev pytest-json-report pytest-html pytest-rerunfailures
+  
+          azdev setup -c azure-cli -r azure-cli-extensions
+  
+          # This helps detect issues in CI if a used SDK API version is deleted by the below script.
+          python $workDir/s/scripts/trim_sdk.py
+  
+          # Compact aaz folders of modules
+          python $workDir/s/scripts/compact_aaz.py
+  
+          az -v
+          az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTTENANTID)
+          az account set -s $(AZURECLITESTSUBSCRIPTIONID)
+  
+          # Clean policy
+          python $workDir/s/scripts/live_test/clean_policy.py
+          
+          echo "Run tests"
+          # Whether commit changes
+          if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
+            echo "Commit mode"
+            azdev test ${FinalTarget} --no-exitfirst -a "-n auto"
+            azdev test ${FinalTarget} --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n auto --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
+          else
+            echo "Normal mode"
+            # Sequential
+            azdev test ${FinalTarget} $(USER_LIVE) --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.sequential.json --html=$(Target).$(platform).report.sequential.html --self-contained-html --capture=sys"
+            # Parallel
+            azdev test ${FinalTarget} $(USER_LIVE) --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n auto --json-report --json-report-summary --json-report-file=$(Target).$(platform).report.parallel.json --html=$(Target).$(platform).report.parallel.html --self-contained-html --capture=sys"
+          fi
+  
+          pwd
+          ls
+          # Whether commit changes
+          if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" && ! "$(USER_TARGET)" =~ ^ext-.* && "$(USER_TARGET)" != "extensions" && "$(USER_TARGET)" != ""  && "$(USER_TARGET)" != "all" && "$(USER_TARGET)" != "ALL" ]]; then
+            cd azure-cli
+            git status
+            git add .
+            git commit -m "Upload recording files"
+            git push origin $(USER_BRANCH)
+          elif [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" && "$(USER_TARGET)" =~ ^ext-.* ]]; then
+            cd azure-cli-extensions
+            git status
+            git add .
+            git commit -m "Upload recording files"
+            git push origin $(USER_BRANCH_EXT)
+          fi
+        condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+      - task: PublishTestResults@2
+        condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+        inputs:
+          testResultsFiles: '$(workDir)/test_results.*.xml'
+          testRunTitle: 'Azure CLI live test results of $(Target)'
+          mergeTestResults: true
+      - task: PublishBuildArtifacts@1
+        condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+        inputs:
+          PathtoPublish: '$(workDir)/$(Target).$(platform).report.sequential.json'
+          ArtifactName: 'livetest'
+          publishLocation: 'Container'
+      - task: PublishBuildArtifacts@1
+        condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+        inputs:
+          PathtoPublish: '$(workDir)/$(Target).$(platform).report.sequential.html'
+          ArtifactName: 'livetest'
+          publishLocation: 'Container'
+      - task: PublishBuildArtifacts@1
+        condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+        inputs:
+          PathtoPublish: '$(workDir)/$(Target).$(platform).report.parallel.json'
+          ArtifactName: 'livetest'
+          publishLocation: 'Container'
+      - task: PublishBuildArtifacts@1
+        condition: and(succeededOrFailed(), eq(variables.Match, '1'))
+        inputs:
+          PathtoPublish: '$(workDir)/$(Target).$(platform).report.parallel.html'
           ArtifactName: 'livetest'
           publishLocation: 'Container'
 
@@ -905,14 +1681,15 @@ stages:
   displayName: Send Email
   jobs:
   - job: SendEmail
-    displayName: Send Email job
-    timeoutInMinutes: 360
+    displayName: Send Email Job
+    timeoutInMinutes: 120
+    condition: succeededOrFailed()
     pool:
       name: 'pool-ubuntu-2004'
     steps:
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: '3.8'
+          versionSpec: '$(PYTHON_VERSION)'
           addToPath: true
           architecture: 'x64'
       - task: DownloadBuildArtifacts@0
@@ -923,5 +1700,65 @@ stages:
       - bash: |
           set -o errexit
           echo "ArtifastsDirectory: $(System.ArtifactsDirectory)"
-          echo "Send Email"
           ls $(System.ArtifactsDirectory)
+          pwd
+          workDir=$(pwd)
+          commit_id=`git ls-remote https://github.com/Azure/azure-cli.git HEAD`
+          pip install azure-communication-email
+          pip install mysql-connector-python
+          pip install requests
+          pip install tqdm
+          pip install azure-kusto-data azure-kusto-ingest bs4
+          # Send notification
+          az -v
+          echo "login to user azureclilivetest"
+          az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTTENANTID)
+          az account set -s $(AZURECLITESTSUBSCRIPTIONID)
+          echo "set account"
+          echo "send email to grid"
+          python $workDir/scripts/live_test/sendemail.py "$commit_id"
+        env:
+          ACCOUNT_KEY: $(ACCOUNT_KEY)
+          ARTIFACTS_DIR: $(System.ArtifactsDirectory)
+          BUILD_ID: $(Build.BuildId)
+          EMAIL_ADDRESS: $(Build.RequestedForEmail)
+          EMAIL_KEY: $(SENDGRID_KEY)
+          KUSTO_CLIENT_ID: $(KUSTO_CLIENT_ID)
+          KUSTO_CLIENT_SECRET: $(KUSTO_CLIENT_SECRET)
+          KUSTO_CLUSTER: $(KUSTO_CLUSTER)
+          KUSTO_DATABASE: $(KUSTO_DATABASE)
+          KUSTO_TABLE: $(KUSTO_TABLE)
+          KUSTO_TENANT_ID: $(KUSTO_TENANT_ID)
+          PYTHON_VERSION: $(PYTHON_VERSION)
+          USER_BRANCH: $(USER_BRANCH)
+          USER_BRANCH_EXT: $(USER_BRANCH_EXT)
+          USER_LIVE: $(USER_LIVE)
+          USER_REPO: $(USER_REPO)
+          USER_REPO_EXT: $(USER_REPO_EXT)
+          USER_TARGET: $(USER_TARGET)
+
+  - job: CleanResource
+    displayName: Clean Resource Job
+    timeoutInMinutes: 360
+    dependsOn: LiveTest
+    condition: succeededOrFailed()
+    continueOnError: true
+    pool:
+      name: ${{ variables.ubuntu_pool }}
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(PYTHON_VERSION)'
+          addToPath: true
+          architecture: 'x64'
+      - bash: |
+          set -o errexit
+          workDir=$(pwd)
+          pip install tqdm
+          az -v
+          echo "login to user azureclilivetest"
+          az login --service-principal --username $(AZURECLITESTUSER) --password $(AZURECLITESTPASSWORD) --tenant $(AZURECLITESTTENANTID)
+          az account set -s $(AZURECLITESTSUBSCRIPTIONID)
+          echo "set account"
+          echo "clean resource"
+          python $workDir/scripts/live_test/clean.py

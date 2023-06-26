@@ -22,8 +22,6 @@ def main():
     clean_servicebus()
     clean_backup()
     clean_deleted_keyvault()
-    # clean_resource_group()
-    get_remaining_tests()
 
 
 def clean_lock():
@@ -321,17 +319,6 @@ def clean_resource_group():
         print(cmd)
         out = subprocess.run(cmd, capture_output=True)
         print(out.stdout)
-
-
-def get_remaining_tests():
-    cmd = ['az', 'group', 'list', '--tag', 'module', '--query', '[][name, tags]']
-    print(cmd)
-    out = subprocess.run(cmd, capture_output=True)
-    remaing_tests = json.loads(out.stdout) if out.stdout else []
-    if remaing_tests:
-        # sorted remaing tests by module name and test name
-        sorted_tests = sorted(remaing_tests, key=lambda x: (x[1]['module'], x[1]['test']))
-        print(sorted_tests)
 
 
 if __name__ == '__main__':
