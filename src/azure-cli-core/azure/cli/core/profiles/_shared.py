@@ -181,7 +181,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2020-10-01',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2021-05-01',
         ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
-        ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2018-06-01',
+        ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2019-07-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
         ResourceType.MGMT_NETWORK_PRIVATEDNS: None,
         ResourceType.MGMT_KEYVAULT: '2023-02-01',
@@ -210,7 +210,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.4',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL: '7.4',
         ResourceType.DATA_STORAGE: '2018-11-09',
-        ResourceType.DATA_STORAGE_BLOB: '2021-06-08',
+        ResourceType.DATA_STORAGE_BLOB: '2022-11-02',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2021-08-06',
         ResourceType.DATA_STORAGE_FILESHARE: '2022-11-02',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
@@ -258,7 +258,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2022-09-04',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2023-04-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2023-05-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
         }),
@@ -288,7 +288,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2015-01-01',
         ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
-        ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2018-06-01',
+        ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2019-07-01',
         ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
             'classic_administrators': '2015-06-01',
@@ -334,7 +334,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2015-01-01',
         ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
-        ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2018-06-01',
+        ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2019-07-01',
         ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
         ResourceType.MGMT_KEYVAULT: '2016-10-01',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
@@ -375,7 +375,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2015-01-01',
         ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
-        ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2018-06-01',
+        ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2019-07-01',
         ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
         ResourceType.MGMT_KEYVAULT: '2016-10-01',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {
@@ -406,7 +406,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
         ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2015-01-01',
-        ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2018-06-01',
+        ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2019-07-01',
         ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
         ResourceType.MGMT_KEYVAULT: '2016-10-01',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2015-07-01', {

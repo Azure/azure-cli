@@ -30,7 +30,7 @@ long-summary: >4
     The operating system disk is created from an image, and both the operating system disk and the image are actually virtual hard disks (VHDs)
     stored in an Azure storage account. Virtual machines also can have one or more data disks, that are also stored as VHDs.
 
-    Azure Unmanaged Data Disks have a maximum size of 4095 GB. To use didks larger than 4095 GB use [Azure Managed Disks](https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview)
+    Azure Unmanaged Data Disks have a maximum size of 4095 GB. To use disks larger than 4095 GB use [Azure Managed Disks](https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview)
 
 """
 
@@ -474,6 +474,51 @@ examples:
         az image builder validator show -n myTemplate -g myGroup --defer
 """
 
+helps['image builder optimizer'] = """
+type: group
+short-summary: Manage image builder template optimizer.
+"""
+
+helps['image builder optimizer add'] = """
+type: command
+short-summary: Add optimizer to an existing image builder template.
+long-summary: Must be used with --defer
+examples:
+  - name: Add optimizer for improving VM boot time by optimizing the final customized image output.
+    text: |
+        az image builder optimizer add -n myTemplate -g myGroup --enable-vm-boot true --defer
+"""
+
+helps['image builder optimizer update'] = """
+type: command
+short-summary: Update an optimizer from an existing image builder template.
+long-summary: Must be used with --defer
+examples:
+  - name: Update an optimizer from an existing image builder template.
+    text: |
+        az image builder optimizer update -n myTemplate -g myGroup --enable-vm-boot true --defer
+"""
+
+helps['image builder optimizer remove'] = """
+type: command
+short-summary: Remove optimizer from an existing image builder template.
+long-summary: Must be used with --defer
+examples:
+  - name: Remove optimizer from an existing image builder template.
+    text: |
+        az image builder optimizer remove -n myTemplate -g myGroup --defer
+"""
+
+helps['image builder optimizer show'] = """
+type: command
+short-summary: Show optimizer of an existing image builder template.
+long-summary: Must be used with --defer
+examples:
+  - name: Show optimizer of an existing image builder template.
+    text: |
+        az image builder optimizer show -n myTemplate -g myGroup --defer
+"""
+
 helps['image builder identity'] = """
 type: group
 short-summary: Manage identities of an image builder template.
@@ -845,6 +890,20 @@ examples:
         --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
         --os-type linux --os-state Specialized \\
         --features SecurityType=ConfidentialVM
+  - name: Create an image definition for images that can be used to create Gen2 or TrustedLaunchSupported VMs.
+    text: |
+        az sig image-definition create --resource-group MyResourceGroup \\
+        --gallery-name MyGallery --gallery-image-definition MyImage \\
+        --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
+        --os-type linux --os-state Specialized \\
+        --features SecurityType=TrustedLaunchSupported
+  - name: Create an image definition for images that can be used to create Gen2, TrustedLaunch, or Confidential VMs.
+    text: |
+        az sig image-definition create --resource-group MyResourceGroup \\
+        --gallery-name MyGallery --gallery-image-definition MyImage \\
+        --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
+        --os-type linux --os-state Specialized \\
+        --features SecurityType=TrustedLaunchAndConfidentialVmSupported
   - name: Create an image definition and indicate end of life date
     text: |
         az sig image-definition create --resource-group MyResourceGroup \\
@@ -3660,11 +3719,6 @@ type: group
 short-summary: Manage capacity.
 """
 
-helps['capacity reservation group'] = """
-type: group
-short-summary: Manage capacity reservation group.
-"""
-
 helps['capacity reservation group create'] = """
 type: command
 short-summary: Create capacity reservation group.
@@ -3703,16 +3757,6 @@ examples:
     text: az capacity reservation group list -g MyResourceGroup
   - name: List the capacity reservation groups containing VM instances and VMSS instance which are associated to capacity reservation group
     text: az capacity reservation group list -g MyResourceGroup --vm-instance --vmss-instance
-"""
-
-helps['capacity'] = """
-type: group
-short-summary: Manage capacity.
-"""
-
-helps['capacity reservation'] = """
-type: group
-short-summary: Manage capacity reservation.
 """
 
 helps['capacity reservation create'] = """

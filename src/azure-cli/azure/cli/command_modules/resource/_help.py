@@ -2521,6 +2521,15 @@ examples:
     crafted: true
 """
 
+helps['resource move'] = """
+type: command
+short-summary: Move resources from one resource group to another (can be under different subscription).
+examples:
+  - name: Move multiple resources to the destination resource group under the destination subscription
+    text: >
+        az resource move --destination-group ResourceGroup --destination-subscription-id SubscriptionId --ids "ResourceId1" "ResourceId2" "ResourceId3"
+"""
+
 helps['tag'] = """
 type: group
 short-summary: Tag Management on a resource.
@@ -2728,7 +2737,7 @@ short-summary: Bicep CLI command group.
 long-summary: |
   Bicep CLI command group. There are two configurations that can be set for the command group, including bicep.check_version and bicep.use_binary_from_path:
 
-  [1] az config set bicep.version_check=True/False
+  [1] az config set bicep.check_version=True/False
       Turn on/off Bicep CLI version check when executing az bicep commands.
 
   [2] az config set bicep.use_binary_from_path=True/False/if_found_in_ci

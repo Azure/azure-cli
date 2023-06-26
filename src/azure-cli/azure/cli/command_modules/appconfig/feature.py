@@ -264,6 +264,8 @@ def show_feature(cmd,
         raise CLIErrors.ResourceNotFoundError("Feature '{}' with label '{}' does not exist.".format(feature, label))
     except HttpResponseError as exception:
         raise CLIErrors.AzureResponseError(str(exception))
+    except Exception as exception:
+        raise CLIError(str(exception))
 
 
 def list_feature(cmd,
@@ -293,10 +295,21 @@ def list_feature(cmd,
                                                    key_filter=key_filter,
                                                    label=label if label else SearchFilterOptions.ANY_LABEL)
         retrieved_featureflags = []
+
+        invalid_ffs = 0
         for kv in retrieved_keyvalues:
-            retrieved_featureflags.append(
-                map_keyvalue_to_featureflag(
-                    keyvalue=kv, show_conditions=True))
+            try:
+                retrieved_featureflags.append(
+                    map_keyvalue_to_featureflag(
+                        keyvalue=kv, show_conditions=True))
+            except (ValueError) as exception:
+                logger.warning("%s\n", exception)
+                invalid_ffs += 1
+                continue
+
+        if invalid_ffs > 0:
+            logger.warning("Found %s invalid feature flags. These feature flags will be skipped.", invalid_ffs)
+
         filtered_featureflags = []
         count = 0
 

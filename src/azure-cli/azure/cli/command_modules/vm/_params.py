@@ -368,6 +368,10 @@ def load_arguments(self, _):
     with self.argument_context('image builder validator add', min_api='2022-02-14') as c:
         c.argument('dis_on_failure', options_list=['--continue-distribute-on-failure', '--dis-on-failure'], arg_type=get_three_state_flag(), help="If validation fails and this parameter is set to false, output image(s) will not be distributed.")
         c.argument('source_validation_only', arg_type=get_three_state_flag(), help="If this parameter is set to true, the image specified in the 'source' section will directly be validated. No separate build will be run to generate and then validate a customized image.")
+
+    for scope in ['image builder optimizer add', 'image builder optimizer update']:
+        with self.argument_context(scope, min_api='2022-07-01') as c:
+            c.argument('enable_vm_boot', arg_type=get_three_state_flag(), help='If this parameter is set to true, VM boot time will be improved by optimizing the final customized image output.')
     # endregion
 
     # region AvailabilitySets
@@ -413,6 +417,7 @@ def load_arguments(self, _):
         c.argument('ephemeral_os_disk_placement', arg_type=ephemeral_placement_type,
                    help='Only applicable when used with `--size`. Allows you to choose the Ephemeral OS disk provisioning location.')
         c.argument('enable_hibernation', arg_type=get_three_state_flag(), min_api='2021-03-01', help='The flag that enable or disable hibernation capability on the VM.')
+        c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch"], default=None), min_api='2022-11-01', help='Specify the security type of the virtual machine.')
 
     with self.argument_context('vm create') as c:
         c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
@@ -773,6 +778,7 @@ def load_arguments(self, _):
                    help='Only applicable when used with `--vm-sku`. Allows you to choose the Ephemeral OS disk provisioning location.')
         c.argument('enable_secure_boot', enable_secure_boot_type)
         c.argument('enable_vtpm', enable_vtpm_type)
+        c.argument('custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
 
     with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
 
@@ -1053,7 +1059,7 @@ def load_arguments(self, _):
             c.argument('subnet_address_prefix', help='The subnet IP address prefix to use when creating a new VNet in CIDR format.')
             c.argument('nics', nargs='+', help='Names or IDs of existing NICs to attach to the VM. The first NIC will be designated as primary. If omitted, a new NIC will be created. If an existing NIC is specified, do not specify subnet, VNet, public IP or NSG.')
             c.argument('private_ip_address', help='Static private IP address (e.g. 10.0.0.5).')
-            c.argument('public_ip_address', help='Name of the public IP address when creating one (default) or referencing an existing one. Can also reference an existing public IP by ID or specify "" for None (\'""\' in Azure CLI using PowerShell or --% operator).')
+            c.argument('public_ip_address', help='Name of the public IP address when creating one (default) or referencing an existing one. Can also reference an existing public IP by ID or specify "" for None (\'""\' in Azure CLI using PowerShell or --% operator). For Azure CLI using powershell core edition 7.3.4, specify '' or "" (--public-ip-address '' or --public-ip-address "")')
             c.argument('public_ip_address_allocation', help=None, default=None, arg_type=get_enum_type(['dynamic', 'static']))
             c.argument('public_ip_address_dns_name', help='Globally unique DNS name for a newly created public IP.')
             if self.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK):
