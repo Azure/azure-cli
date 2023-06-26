@@ -2523,7 +2523,7 @@ examples:
 
 helps['resource move'] = """
 type: command
-short-summary: Moves resources from one resource group to another (can be under different subscription).
+short-summary: Move resources from one resource group to another (can be under different subscription).
 examples:
   - name: Move multiple resources to the destination resource group under the destination subscription
     text: >
