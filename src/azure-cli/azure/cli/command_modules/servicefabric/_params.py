@@ -285,7 +285,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('direction', help='possible values are <inbound> or <outbound>')
         c.argument('description', help='network security rule description')
         c.argument('priority', help='integer that shows priority for rule')
-        c.argument('protocol', help='enter one of the following: tcp, htpps, http, udp, icmp, ah, esp, any')
+        c.argument('protocol', help='enter one of the following: tcp, https, http, udp, icmp, ah, esp, any')
         c.argument('source_port_ranges', nargs='+', help='A single or space separated list of source port ranges')
         c.argument('dest_port_ranges', nargs='+', help='A single or space separated list of destination port ranges')
         c.argument('source_addr_prefixes', nargs='+', help='A single or space separated list of source address prefixes')
