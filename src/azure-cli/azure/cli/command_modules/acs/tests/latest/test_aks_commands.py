@@ -9,28 +9,24 @@ import subprocess
 import tempfile
 import time
 import unittest
-import datetime
 
-from azure.cli.command_modules.acs._consts import CONST_KUBE_DASHBOARD_ADDON_NAME
+from azure.cli.command_modules.acs._consts import \
+    CONST_KUBE_DASHBOARD_ADDON_NAME
 from azure.cli.command_modules.acs._format import version_to_tuple
 from azure.cli.command_modules.acs.tests.latest.custom_preparers import (
-    AKSCustomResourceGroupPreparer,
-    AKSCustomRoleBasedServicePrincipalPreparer,
-    AKSCustomVirtualNetworkPreparer,
-)
-from azure.cli.command_modules.acs.tests.latest.recording_processors import KeyReplacer
+    AKSCustomResourceGroupPreparer, AKSCustomRoleBasedServicePrincipalPreparer,
+    AKSCustomVirtualNetworkPreparer)
+from azure.cli.command_modules.acs.tests.latest.recording_processors import \
+    KeyReplacer
+from azure.cli.command_modules.acs.tests.latest.utils import get_test_data_file_path
 from azure.cli.core.azclierror import ClientRequestError, CLIInternalError
 from azure.cli.testsdk import ScenarioTest, live_only
-from azure.cli.testsdk.checkers import StringCheck, StringContainCheck, StringContainCheckIgnoreCase
+from azure.cli.testsdk.checkers import (StringCheck, StringContainCheck,
+                                        StringContainCheckIgnoreCase)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.acs.tests.latest.utils import get_test_data_file_path
 from knack.util import CLIError
 
 # flake8: noqa
-
-def _get_test_data_file(filename):
-    curr_dir = os.path.dirname(os.path.realpath(__file__))
-    return os.path.join(curr_dir, 'data', filename)
 
 class AzureKubernetesServiceScenarioTest(ScenarioTest):
     def __init__(self, method_name):
@@ -8739,7 +8735,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
-            'mc_path': _get_test_data_file('maintenancewindow.json'),
+            'mc_path': get_test_data_file_path('maintenancewindow.json'),
             'auto_upgrade_config_name': 'aksManagedAutoUpgradeSchedule',
             'node_os_upgrade_config_name': 'aksManagedNodeOSUpgradeSchedule',
             'ssh_key_value': self.generate_ssh_keys(),
@@ -8855,7 +8851,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
-            'mc_path': _get_test_data_file('maintenanceconfig.json'),
+            'mc_path': get_test_data_file_path('maintenanceconfig.json'),
             'ssh_key_value': self.generate_ssh_keys()
         })
 

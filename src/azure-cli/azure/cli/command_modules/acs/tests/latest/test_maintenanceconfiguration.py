@@ -11,10 +11,10 @@ from azure.cli.core.azclierror import (
     RequiredArgumentMissingError,
     MutuallyExclusiveArgumentError,
 )
-from acs.__init__ import register_aks_preview_resource_type
-import acs.maintenanceconfiguration as mc
+# from azure.cli.command_modules.acs.__init__ import register_aks_preview_resource_type
+import azure.cli.command_modules.acs.maintenanceconfiguration as mc
 from azure.cli.command_modules.acs.tests.latest.mocks import MockCLI, MockCmd
-
+from azure.cli.core.profiles import ResourceType, register_resource_type
 class TestAddMaintenanceConfiguration(unittest.TestCase):
     def test_add_maintenance_configuration_with_invalid_name(self):
         cmd = SimpleNamespace()
@@ -60,7 +60,7 @@ class TestAddMaintenanceConfiguration(unittest.TestCase):
         self.assertEqual(str(cm.exception), err)
     
     def test_add_daily_schedule_with_missing_options(self):
-        register_aks_preview_resource_type()
+        register_resource_type('latest', ResourceType.MGMT_CONTAINERSERVICE,"2023-05-01")
         cli_ctx = MockCLI()
         cmd = MockCmd(cli_ctx)
         raw_parameters = {
@@ -76,7 +76,7 @@ class TestAddMaintenanceConfiguration(unittest.TestCase):
         self.assertEqual(str(cm.exception), err)
     
     def test_add_daily_schedule_with_invalid_options(self):
-        register_aks_preview_resource_type()
+        register_resource_type('latest', ResourceType.MGMT_CONTAINERSERVICE,"2023-05-01")
         cli_ctx = MockCLI()
         cmd = MockCmd(cli_ctx)
         raw_parameters = {
@@ -94,7 +94,7 @@ class TestAddMaintenanceConfiguration(unittest.TestCase):
         self.assertEqual(str(cm.exception), err)
 
     def test_add_weekly_schedule_with_invalid_options(self):
-        register_aks_preview_resource_type()
+        register_resource_type('latest', ResourceType.MGMT_CONTAINERSERVICE,"2023-05-01")
         cli_ctx = MockCLI()
         cmd = MockCmd(cli_ctx)
         raw_parameters = {
@@ -113,7 +113,7 @@ class TestAddMaintenanceConfiguration(unittest.TestCase):
         self.assertEqual(str(cm.exception), err)
     
     def test_add_absolute_monthly_schedule_with_missing_options(self):
-        register_aks_preview_resource_type()
+        register_resource_type('latest', ResourceType.MGMT_CONTAINERSERVICE,"2023-05-01")
         cli_ctx = MockCLI()
         cmd = MockCmd(cli_ctx)
         raw_parameters = {
@@ -131,7 +131,7 @@ class TestAddMaintenanceConfiguration(unittest.TestCase):
         self.assertEqual(str(cm.exception), err)
 
     def test_add_absolute_monthly_schedule_with_invalid_options(self):
-        register_aks_preview_resource_type()
+        register_resource_type('latest', ResourceType.MGMT_CONTAINERSERVICE,"2023-05-01")
         cli_ctx = MockCLI()
         cmd = MockCmd(cli_ctx)
         raw_parameters = {
@@ -150,7 +150,7 @@ class TestAddMaintenanceConfiguration(unittest.TestCase):
         self.assertEqual(str(cm.exception), err)
     
     def test_add_relative_monthly_schedule_with_missing_options(self):
-        register_aks_preview_resource_type()
+        register_resource_type('latest', ResourceType.MGMT_CONTAINERSERVICE,"2023-05-01")
         cli_ctx = MockCLI()
         cmd = MockCmd(cli_ctx)
         raw_parameters = {
@@ -168,7 +168,7 @@ class TestAddMaintenanceConfiguration(unittest.TestCase):
         self.assertEqual(str(cm.exception), err)
     
     def test_add_dedicated_schedule_with_missing_options(self):
-        register_aks_preview_resource_type()
+        register_resource_type('latest', ResourceType.MGMT_CONTAINERSERVICE,"2023-05-01")
         cli_ctx = MockCLI()
         cmd = MockCmd(cli_ctx)
         raw_parameters = {
