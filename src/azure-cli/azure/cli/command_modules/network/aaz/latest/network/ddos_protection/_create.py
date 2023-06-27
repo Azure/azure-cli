@@ -64,7 +64,7 @@ class Create(AAZCommand):
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
-            help="Space-separated tags: key[=value] [key[=value] ...]. Use \"\" to clear existing tags.",
+            help="Space-separated tags: key[=value] [key[=value] ...].",
         )
 
         tags = cls._args_schema.tags
