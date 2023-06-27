@@ -512,11 +512,7 @@ def get_case_insensitive_key_value(case_insensitive_key, list_of_keys, dictionar
 
 
 def get_enum_value_true_false(value, key):
-    if value is None:
-        return "False"
-    elif value.lower() == 'true':
-        return "True"
-    elif value.lower() == 'false':
-        return "False"
-    else:
+    if value is not None and value.lower() != 'true' and value.lower() != 'false':
         raise CLIError("Value of Key {} must be either 'True' or 'False'".format(key))
+    else:
+        return "False" if value is None or value.lower() == 'false' else "True"
