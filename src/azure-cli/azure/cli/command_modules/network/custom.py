@@ -60,9 +60,8 @@ from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condit
     Add as _WAFCustomRuleMatchConditionAdd
 from .aaz.latest.network.application_gateway.waf_policy.policy_setting import Update as _WAFPolicySettingUpdate
 from .aaz.latest.network.custom_ip.prefix import Update as _CustomIpPrefixUpdate
-from .aaz.latest.network.dns.record_set import Create as _DNSRecordSetCreate, Delete as _DNSRecordSetDelete, \
-    Show as _DNSRecordSetShow, Update as _DNSRecordSetUpdate, List as _DNSRecordSetListByZone
-from .aaz.latest.network.dns.zone import Create as _DNSZoneCreate, Delete as _DNSZoneDelete
+from .aaz.latest.network.dns.record_set import List as _DNSRecordSetListByZone
+from .aaz.latest.network.dns.zone import Create as _DNSZoneCreate
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
 from .aaz.latest.network.express_route.gateway import Create as _ExpressRouteGatewayCreate, \
     Update as _ExpressRouteGatewayUpdate
@@ -111,6 +110,30 @@ from .aaz.latest.network.vpn_connection import Update as _VpnConnectionUpdate, \
 from .aaz.latest.network.vpn_connection.ipsec_policy import Add as _VpnConnIpsecPolicyAdd
 from .aaz.latest.network.vpn_connection.packet_capture import Stop as _VpnConnPackageCaptureStop
 from .aaz.latest.network.vpn_connection.shared_key import Update as _VpnConnSharedKeyUpdate
+from .operations.dns import RecordSetAShow as DNSRecordSetAShow, RecordSetAAAAShow as DNSRecordSetAAAAShow, \
+    RecordSetDSShow as DNSRecordSetDSShow, RecordSetMXShow as DNSRecordSetMXShow, \
+    RecordSetNSShow as DNSRecordSetNSShow, RecordSetPTRShow as DNSRecordSetPTRShow, \
+    RecordSetSRVShow as DNSRecordSetSRVShow, RecordSetTLSAShow as DNSRecordSetTLSAShow, \
+    RecordSetTXTShow as DNSRecordSetTXTShow, RecordSetCAAShow as DNSRecordSetCAAShow, \
+    RecordSetCNAMEShow as DNSRecordSetCNAMEShow, RecordSetSOAShow as DNSRecordSetSOAShow
+from .operations.dns import RecordSetACreate as DNSRecordSetACreate, RecordSetAAAACreate as DNSRecordSetAAAACreate, \
+    RecordSetDSCreate as DNSRecordSetDSCreate, RecordSetMXCreate as DNSRecordSetMXCreate, \
+    RecordSetNSCreate as DNSRecordSetNSCreate, RecordSetPTRCreate as DNSRecordSetPTRCreate, \
+    RecordSetSRVCreate as DNSRecordSetSRVCreate, RecordSetTLSACreate as DNSRecordSetTLSACreate, \
+    RecordSetTXTCreate as DNSRecordSetTXTCreate, RecordSetCAACreate as DNSRecordSetCAACreate, \
+    RecordSetCNAMECreate as DNSRecordSetCNAMECreate, RecordSetSOACreate as DNSRecordSetSOACreate
+from .operations.dns import RecordSetAUpdate as DNSRecordSetAUpdate, RecordSetAAAAUpdate as DNSRecordSetAAAAUpdate, \
+    RecordSetDSUpdate as DNSRecordSetDSUpdate, RecordSetMXUpdate as DNSRecordSetMXUpdate, \
+    RecordSetNSUpdate as DNSRecordSetNSUpdate, RecordSetPTRUpdate as DNSRecordSetPTRUpdate, \
+    RecordSetSRVUpdate as DNSRecordSetSRVUpdate, RecordSetTLSAUpdate as DNSRecordSetTLSAUpdate, \
+    RecordSetTXTUpdate as DNSRecordSetTXTUpdate, RecordSetCAAUpdate as DNSRecordSetCAAUpdate, \
+    RecordSetCNAMEUpdate as DNSRecordSetCNAMEUpdate
+from .operations.dns import RecordSetADelete as DNSRecordSetADelete, RecordSetAAAADelete as DNSRecordSetAAAADelete, \
+    RecordSetDSDelete as DNSRecordSetDSDelete, RecordSetMXDelete as DNSRecordSetMXDelete, \
+    RecordSetNSDelete as DNSRecordSetNSDelete, RecordSetPTRDelete as DNSRecordSetPTRDelete, \
+    RecordSetSRVDelete as DNSRecordSetSRVDelete, RecordSetTLSADelete as DNSRecordSetTLSADelete, \
+    RecordSetTXTDelete as DNSRecordSetTXTDelete, RecordSetCAADelete as DNSRecordSetCAADelete, \
+    RecordSetCNAMEDelete as DNSRecordSetCNAMEDelete
 
 logger = get_logger(__name__)
 
@@ -2466,9 +2489,7 @@ def update_dns_zone(instance, tags=None, zone_type=None, resolution_vnets=None, 
 
 
 def show_dns_soa_record_set(cmd, resource_group_name, zone_name, record_type):
-    return _DNSRecordSetShow(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": "@",
-        "record_type": record_type,
+    return DNSRecordSetSOAShow(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "zone_name": zone_name
     })
@@ -2480,12 +2501,9 @@ def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=
     record_set_name = '@'
     record_type = 'soa'
 
-    from .aaz.latest.network.dns.record_set import Show
-    record_set = Show(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": record_set_name,
+    record_set = DNSRecordSetSOAShow(cli_ctx=cmd.cli_ctx)(command_args={
         "zone_name": zone_name,
-        "resource_group": resource_group_name,
-        "record_type": record_type
+        "resource_group": resource_group_name
     })
 
     record_camal = record_set["SOARecord"]
@@ -2764,29 +2782,27 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
             record_count = 1
 
         if rs_name == '@' and rs_type == 'soa':
-            root_soa = _DNSRecordSetShow(cli_ctx=cmd.cli_ctx)(command_args={
+            root_soa = DNSRecordSetSOAShow(cli_ctx=cmd.cli_ctx)(command_args={
                 'resource_group': resource_group_name,
                 'zone_name': zone_name,
-                'record_type': 'SOA',
-                'name': '@'
             })
             rs["soa_record"]["host"] = root_soa["SOARecord"]["host"]
             rs_name = '@'
         elif rs_name == '@' and rs_type == 'ns':
-            root_ns = _DNSRecordSetShow(cli_ctx=cmd.cli_ctx)(command_args={
+            root_ns = DNSRecordSetNSShow(cli_ctx=cmd.cli_ctx)(command_args={
                 'resource_group': resource_group_name,
                 'zone_name': zone_name,
-                'record_type': 'NS',
                 'name': '@'
             })
             root_ns["ttl"] = rs["ttl"]
             rs = _convert_to_snake_case(root_ns)
         try:
             rs["target_resource"] = rs.get("target_resource").get("id") if rs.get("target_resource") else None
-            _DNSRecordSetCreate(cli_ctx=cmd.cli_ctx)(command_args={
+
+            _record_create = _record_create_func(rs_type)
+            _record_create(cli_ctx=cmd.cli_ctx)(command_args={
                 'resource_group': resource_group_name,
                 'zone_name': zone_name,
-                'record_type': rs_type,
                 'name': rs_name,
                 **rs
             })
@@ -3078,18 +3094,34 @@ def _add_record(record_set, record, record_type, is_list=False):
         record_set[record_property] = record
 
 
+def _record_show_func(record_type):
+    return globals()["DNSRecordSet{}Show".format(record_type.upper())]
+
+
+def _record_create_func(record_type):
+    return globals()["DNSRecordSet{}Create".format(record_type.upper())]
+
+
+def _record_delete_func(record_type):
+    return globals()["DNSRecordSet{}Delete".format(record_type.upper())]
+
+
+def _record_update_func(record_type):
+    return globals()["DNSRecordSet{}Update".format(record_type.upper())]
+
+
 def _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
                      is_list=True, subscription_id=None, ttl=None, if_none_match=None):
     from azure.core.exceptions import HttpResponseError
 
     record_snake, record_camel = _type_to_property_name(record_type)
     try:
-        ret = _DNSRecordSetShow(cli_ctx=cmd.cli_ctx)(command_args={
+        _record_show = _record_show_func(record_type)
+        ret = _record_show(cli_ctx=cmd.cli_ctx)(command_args={
             "name": record_set_name,
             "zone_name": zone_name,
             "subscription": subscription_id,
-            "resource_group": resource_group_name,
-            "record_type": record_type
+            "resource_group": resource_group_name
         })
         record_set = dict()
         record_set["ttl"] = ret.get("TTL", None)
@@ -3104,12 +3136,12 @@ def _add_save_record(cmd, record, record_type, record_set_name, resource_group_n
     _add_record(record_set, record, record_type, is_list)
 
     record_set["target_resource"] = record_set.get("target_resource").get("id") if record_set.get("target_resource") else None
-    return _DNSRecordSetCreate(cli_ctx=cmd.cli_ctx)(command_args={
+    _record_create = _record_create_func(record_type)
+    return _record_create(cli_ctx=cmd.cli_ctx)(command_args={
         "name": record_set_name,
         "zone_name": zone_name,
         "subscription": subscription_id,
         "resource_group": resource_group_name,
-        "record_type": record_type,
         "if_none_match": "*" if if_none_match else None,
         **record_set
     })
@@ -3118,7 +3150,9 @@ def _add_save_record(cmd, record, record_type, record_set_name, resource_group_n
 def _remove_record(cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                    keep_empty_record_set, is_list=True):
     record_snake, record_camel = _type_to_property_name(record_type)
-    ret = _DNSRecordSetShow(cli_ctx=cli_ctx)(command_args={
+    
+    _record_show = _record_show_func(record_type)
+    ret = _record_show(cli_ctx=cli_ctx)(command_args={
         "name": record_set_name,
         "zone_name": zone_name,
         "resource_group": resource_group_name,
@@ -3149,18 +3183,19 @@ def _remove_record(cli_ctx, record, record_type, record_set_name, resource_group
 
     if not records_remaining and not keep_empty_record_set:
         logger.info('Removing empty %s record set: %s', record_type, record_set_name)
-        return _DNSRecordSetDelete(cli_ctx=cli_ctx)(command_args={
+
+        _record_delete = _record_delete_func(record_type)
+        return _record_delete(cli_ctx=cli_ctx)(command_args={
             "name": record_set_name,
             "zone_name": zone_name,
-            "resource_group": resource_group_name,
-            "record_type": record_type
+            "resource_group": resource_group_name
         })
 
-    return _DNSRecordSetUpdate(cli_ctx=cli_ctx)(command_args={
+    _record_update = _record_update_func(record_type)
+    return _record_update(cli_ctx=cli_ctx)(command_args={
         "name": record_set_name,
         "zone_name": zone_name,
         "resource_group": resource_group_name,
-        "record_type": record_type,
         **record_set
     })
 

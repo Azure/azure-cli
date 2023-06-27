@@ -227,7 +227,6 @@ def load_command_table(self, _):
             g.custom_command('remove-record', 'remove_dns_{}_record'.format(record), transform=transform_dns_record_set_output)
 
     with self.command_group('network dns record-set soa', network_dns_record_set_sdk) as g:
-        g.custom_show_command('show', 'show_dns_soa_record_set', transform=transform_dns_record_set_output)
         g.custom_command('update', 'update_dns_soa_record', transform=transform_dns_record_set_output)
 
     with self.command_group('network dns record-set cname', network_dns_record_set_sdk) as g:
@@ -239,7 +238,7 @@ def load_command_table(self, _):
         RecordSetNSShow as DNSRecordSetNSShow, RecordSetPTRShow as DNSRecordSetPTRShow, \
         RecordSetSRVShow as DNSRecordSetSRVShow, RecordSetTLSAShow as DNSRecordSetTLSAShow, \
         RecordSetTXTShow as DNSRecordSetTXTShow, RecordSetCAAShow as DNSRecordSetCAAShow, \
-        RecordSetCNAMEShow as DNSRecordSetCNAMEShow
+        RecordSetCNAMEShow as DNSRecordSetCNAMEShow, RecordSetSOAShow as DNSRecordSetSOAShow
     self.command_table["network dns record-set a show"] = DNSRecordSetAShow(loader=self)
     self.command_table["network dns record-set aaaa show"] = DNSRecordSetAAAAShow(loader=self)
     self.command_table["network dns record-set ds show"] = DNSRecordSetDSShow(loader=self)
@@ -251,6 +250,7 @@ def load_command_table(self, _):
     self.command_table["network dns record-set txt show"] = DNSRecordSetTXTShow(loader=self)
     self.command_table["network dns record-set caa show"] = DNSRecordSetCAAShow(loader=self)
     self.command_table["network dns record-set cname show"] = DNSRecordSetCNAMEShow(loader=self)
+    self.command_table["network dns record-set soa show"] = DNSRecordSetSOAShow(loader=self)
 
     from .operations.dns import RecordSetAList as DNSRecordSetAList, RecordSetAAAAList as DNSRecordSetAAAAList, \
         RecordSetDSList as DNSRecordSetDSList, RecordSetMXList as DNSRecordSetMXList, \

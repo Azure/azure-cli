@@ -182,7 +182,7 @@ class DnsScenarioTest(ScenarioTest):
 
         self.cmd('network dns record-set a add-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11')
         self.cmd('network dns record-set soa update -g {{rg}} --zone-name {{zone}} {0}'.format(args['soa']))
-        self.cmd('network dns record-set soa show -g {{rg}} --zone-name {{zone}}')
+        self.cmd('network dns record-set soa show -g {rg} --zone-name {zone}')
 
         long_value = '0123456789' * 50
         self.cmd('network dns record-set txt add-record -g {{rg}} -z {{zone}} -n longtxt -v {0}'.format(long_value))

@@ -352,6 +352,28 @@ class RecordSetCNAMEShow(RecordSetShow):
     def pre_operations(self):
         args = self.ctx.args
         args.record_type = "CNAME"
+
+
+@register_command("network dns record-set soa show")
+class RecordSetSOAShow(RecordSetShow):
+    """ Get a SOA record set.
+
+    :example: Get a SOA record set.
+        az network dns record-set soa show -g MyResourceGroup -z www.mysite.com -n MyRecordSet
+    """
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.name._required = False
+        args_schema.name._registered = False
+
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.record_type = "SOA"
+        args.name = "@"
 # endregion RecordSetShow
 
 
@@ -802,4 +824,10 @@ class RecordSetCNAMECreate(RecordSetCreate):
     def pre_operations(self):
         args = self.ctx.args
         args.record_type = "CNAME"
+
+
+class RecordSetSOACreate(RecordSetCreate):
+    def pre_operations(self):
+        args = self.ctx.args
+        args.record_type = "SOA"
 # endregion RecordSetCreate
