@@ -243,6 +243,8 @@ def load_arguments(self, _):
         c.argument('target_node_communication_mode', options_list=['--target-communication'],
                    help="The desired node communication mode for the pool. If this element is present, it replaces the existing targetNodeCommunicationMode configured on the Pool. If omitted, any existing metadata is left unchanged.",
                    arg_type=get_enum_type(NodeCommunicationMode))
+        c.extra('enable_accelerated_networking', arg_group="Pool: Network Configuration",
+                help='Whether this pool should enable accelerated networking. Accelerated networking enables single root I/O virtualization (SR-IOV) to a VM, which may lead to improved networking performance. For more details, see: https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview. One example as \'''az batch pool create --id pool1 --image "MicrosoftWindowsServer:WindowsServer:2016-datacenter-smalldisk"  --target-dedicated-nodes 2 --vm-size "standard_d2_v2" --node-agent-sku-id "batch.node.windows amd64"  --enable-accelerated-networking true\'')
 
     with self.argument_context('batch pool set') as c:
         c.argument('target_node_communication_mode', options_list=['--target-communication'],
