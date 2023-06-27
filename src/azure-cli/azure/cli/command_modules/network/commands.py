@@ -8,14 +8,13 @@ from azure.cli.core.commands import DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.arm import (
     deployment_validate_table_format, handle_template_based_exception)
 from azure.cli.core.commands import CliCommandType
-from azure.cli.core.profiles import get_api_version, ResourceType
+from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.network._client_factory import (
     cf_dns_mgmt_record_sets, cf_dns_mgmt_zones)
 from azure.cli.command_modules.network._format import (
     transform_local_gateway_table_output, transform_dns_record_set_output,
-    transform_dns_record_set_table_output, transform_dns_zone_table_output,
-    transform_public_ip_create_output,
+    transform_dns_zone_table_output, transform_public_ip_create_output,
     transform_traffic_manager_create_output,
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,

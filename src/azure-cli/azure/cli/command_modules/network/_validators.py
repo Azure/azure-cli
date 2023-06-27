@@ -479,15 +479,6 @@ def get_servers_validator(camel_case=False):
     return validate_servers
 
 
-def validate_subresource_list(cmd, namespace):
-    if namespace.parameters:
-        SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_NETWORK_DNS)
-        subresources = []
-        for item in namespace.parameters:
-            subresources.append(SubResource(id=item))
-        namespace.parameters = subresources
-
-
 def validate_private_dns_zone(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     if namespace.private_dns_zone and not is_valid_resource_id(namespace.private_dns_zone):

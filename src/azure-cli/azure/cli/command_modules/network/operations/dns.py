@@ -7,6 +7,7 @@
 from knack.log import get_logger
 
 from azure.cli.core.aaz import has_value, register_command, AAZResourceIdArgFormat, AAZListArg, AAZResourceIdArg
+from azure.cli.core.aaz.utils import assign_aaz_list_arg
 from ..aaz.latest.network.dns.record_set import Update as _RecordSetUpdate, Show as _RecordSetShow, \
     ListByType as _RecordSetListByType, Delete as _RecordSetDelete, Create as _RecordSetCreate
 from ..aaz.latest.network.dns._list_references import ListReferences as _DNSListReferences
@@ -38,11 +39,10 @@ class DNSListReferences(_DNSListReferences):
 
     def pre_operations(self):
         args = self.ctx.args
-        parameters = args.parameters
-        if parameters is not None:
-            args.target_resources = []
-            for parameter in parameters:
-                args.target_resources.append({"id": parameter})
+        args.target_resources = assign_aaz_list_arg(
+            args.target_resources,
+            args.parameters,
+            element_transformer=lambda _, x: {"id": x})
 
 
 # region RecordSetUpdate

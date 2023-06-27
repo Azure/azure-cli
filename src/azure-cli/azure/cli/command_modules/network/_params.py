@@ -20,7 +20,7 @@ from azure.cli.command_modules.network._validators import (
     validate_dns_record_type, validate_private_ip_address,
     get_servers_validator, get_public_ip_validator, get_nsg_validator,
     get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
-    validate_service_endpoint_policy, validate_subresource_list,
+    validate_service_endpoint_policy,
     validate_custom_error_pages,
     validate_custom_headers, validate_status_code_ranges, validate_subnet_ranges,
     WafConfigExclusionAction,
@@ -295,9 +295,6 @@ def load_arguments(self, _):
         c.argument('relative_record_set_name', name_arg_type, help='The name of the record set, relative to the name of the zone.')
         c.argument('zone_name', options_list=['--zone-name', '-z'], help='The name of the zone.', type=dns_zone_name_type)
         c.argument('metadata', nargs='+', help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.', validator=validate_metadata)
-
-    with self.argument_context('network dns list-references') as c:
-        c.argument('parameters', nargs='+', help='Space-separated list of resource IDs you wish to query.', validator=validate_subresource_list)
 
     with self.argument_context('network dns zone') as c:
         c.argument('zone_name', name_arg_type)

@@ -3150,7 +3150,7 @@ def _add_save_record(cmd, record, record_type, record_set_name, resource_group_n
 def _remove_record(cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
                    keep_empty_record_set, is_list=True):
     record_snake, record_camel = _type_to_property_name(record_type)
-    
+
     _record_show = _record_show_func(record_type)
     ret = _record_show(cli_ctx=cli_ctx)(command_args={
         "name": record_set_name,

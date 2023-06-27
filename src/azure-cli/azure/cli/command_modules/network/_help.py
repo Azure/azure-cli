@@ -1779,15 +1779,6 @@ type: group
 short-summary: Manage DNS domains in Azure.
 """
 
-helps['network dns list-references'] = """
-type: command
-short-summary: Returns the DNS records referencing the target resource IDs.
-examples:
-  - name: List DNS records referencing the target resource IDs.
-    text: >
-        az network dns list-references --parameters /subscriptions/**921/resourceGroups/MyRg/providers/Microsoft.Network/trafficManagerProfiles/MyTm
-"""
-
 helps['network dns record-set'] = """
 type: group
 short-summary: Manage DNS records and record sets.
