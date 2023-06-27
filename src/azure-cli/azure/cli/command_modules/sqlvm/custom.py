@@ -768,8 +768,6 @@ def set_assessment_properties(
         # Validate the agent_rg -> Check if DCR + DCE exist already
         ama_sub = curr_subscription
         url = f"https://management.azure.com/subscriptions/{ama_sub}/resourceGroups/{agent_rg}/providers/Microsoft.Insights/dataCollectionRules?api-version=2022-06-01"
-        print(ama_sub, agent_rg)
-        print(url)
         try:
             dcr_response = send_raw_request(cmd.cli_ctx, method="GET", url=url)
         except HTTPError as e:
@@ -779,7 +777,6 @@ def set_assessment_properties(
 
         # response contains list of dcr's
         dcr_response = dcr_response.json()
-        print(dcr_response)
         dcr_list = dcr_response['value']
         dcr_found = False
 
@@ -832,7 +829,6 @@ def set_assessment_properties(
             dcr_custom_log = dcr_response['properties']['dataFlows'][0]['outputStream']
             # Custom-SqlAssessment_CL
             dcr_la_id = dcr_response['properties']['destinations']['logAnalytics'][0]['workspaceId']
-            print(dcr_la_id)
             # CustomerId is the workspace Id GUID. ResourceId is full qualified resource path
             # dcr_la_name = dcr_response['properties']['destinations']['logAnalytics'][0]['name']
             # workspace name is arbitrary name given by DCR resource metadata
@@ -878,7 +874,6 @@ def set_assessment_properties(
             elif response.status_code == 404:
                 log_exists = log_exists or False
             else:
-                print(f"Unexpected response code: {response.status_code}")
                 return False
         except HTTPError:
             log_exists = log_exists or False
@@ -927,7 +922,6 @@ def set_assessment_properties(
             # These resources must be deployed to a Resource Group in the same
             # region as the LA workspace
 
-            print("DCR DCE not found. Building full tempalte")
             # we must do get req and loop on dce till we get an http error so we know it does not exist
             # else increase x and try again
 
@@ -983,7 +977,6 @@ def set_assessment_properties(
             # master_template.add_resource(dcrlinkage)
 
             template = master_template.build()
-            print(template)
 
             # deploy ARM template
             deployment_name = 'vm_deploy_' + random_string(32)
@@ -1021,7 +1014,6 @@ def set_assessment_properties(
             return
 
     elif enable_assessment is False:
-        print("DELETEING DCRA and disabling assessment")
         # Delete DCRA
         # Otherwise AssessmentSetting payload is set above
         # GET DCRA ATTACHED TO VM: Validate for Assessment and delete
@@ -1049,7 +1041,6 @@ def set_assessment_properties(
         for dcra in dcra_list['value']:
 
             dcra_name = dcra['name']
-            # print(dcra_name)
             pattern = re.compile(
                 r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_[a-z0-9]+_DCRA_\d+$",
                 re.IGNORECASE)
@@ -1062,7 +1053,6 @@ def set_assessment_properties(
                 # DELETE
                 # https://management.azure.com/{resourceUri}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{associationName}?api-version=2022-06-01
                 dcra_url = f"https://management.azure.com/{resourceUri}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{dcra_name}?api-version=2022-06-01"
-                print(dcra_name)
                 send_raw_request(
                     cmd.cli_ctx, method="DELETE", url=dcra_url)
                 return
