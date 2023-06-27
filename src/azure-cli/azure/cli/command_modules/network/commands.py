@@ -292,7 +292,8 @@ def load_command_table(self, _):
         RecordSetDSUpdate as DNSRecordSetDSUpdate, RecordSetMXUpdate as DNSRecordSetMXUpdate, \
         RecordSetNSUpdate as DNSRecordSetNSUpdate, RecordSetPTRUpdate as DNSRecordSetPTRUpdate, \
         RecordSetSRVUpdate as DNSRecordSetSRVUpdate, RecordSetTLSAUpdate as DNSRecordSetTLSAUpdate, \
-        RecordSetTXTUpdate as DNSRecordSetTXTUpdate, RecordSetCAAUpdate as DNSRecordSetCAAUpdate
+        RecordSetTXTUpdate as DNSRecordSetTXTUpdate, RecordSetCAAUpdate as DNSRecordSetCAAUpdate, \
+        RecordSetCNAMEUpdate as DNSRecordSetCNAMEUpdate
     self.command_table["network dns record-set a update"] = DNSRecordSetAUpdate(loader=self)
     self.command_table["network dns record-set aaaa update"] = DNSRecordSetAAAAUpdate(loader=self)
     self.command_table["network dns record-set ds update"] = DNSRecordSetDSUpdate(loader=self)
@@ -303,6 +304,7 @@ def load_command_table(self, _):
     self.command_table["network dns record-set tlsa update"] = DNSRecordSetTLSAUpdate(loader=self)
     self.command_table["network dns record-set txt update"] = DNSRecordSetTXTUpdate(loader=self)
     self.command_table["network dns record-set caa update"] = DNSRecordSetCAAUpdate(loader=self)
+    self.command_table["network dns record-set cname update"] = DNSRecordSetCNAMEUpdate(loader=self)
 
     from .operations.dns import RecordSetADelete as DNSRecordSetADelete, RecordSetAAAADelete as DNSRecordSetAAAADelete, \
         RecordSetDSDelete as DNSRecordSetDSDelete, RecordSetMXDelete as DNSRecordSetMXDelete, \

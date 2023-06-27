@@ -195,6 +195,18 @@ class RecordSetCAAUpdate(RecordSetUpdate):
     def pre_operations(self):
         args = self.ctx.args
         args.record_type = "CAA"
+
+
+@register_command("network dns record-set cname update")
+class RecordSetCNAMEUpdate(RecordSetUpdate):
+    """ Update a CNAME record set.
+
+    :example: Update a CNAME record set.
+        az network dns record-set cname update -g MyResourceGroup -z www.mysite.com -n MyRecordSet --metadata owner=WebTeam
+    """
+    def pre_operations(self):
+        args = self.ctx.args
+        args.record_type = "CNAME"
 # endregion RecordSetUpdate
 
 
