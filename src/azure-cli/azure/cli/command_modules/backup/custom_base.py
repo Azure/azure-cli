@@ -542,7 +542,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
                                                            subscription_id=target_subscription).backup_protectable_items
         target_item = show_protectable_instance(
             cmd, protectable_items_client, target_resource_group, target_vault_name,
-            target_server_name, target_server_type, workload_type, target_container_name, 
+            target_server_name, target_server_type, workload_type, target_container_name,
             target_subscription, target_instance_name, "AzureWorkload")
 
     target_container = None
