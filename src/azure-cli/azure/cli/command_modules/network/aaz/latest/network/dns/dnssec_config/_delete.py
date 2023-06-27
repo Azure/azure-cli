@@ -11,21 +11,30 @@
 from azure.cli.core.aaz import *
 
 
+@register_command(
+    "network dns dnssec-config delete",
+    is_experimental=True,
+    confirmation="Are you sure you want to perform this operation?",
+)
 class Delete(AAZCommand):
-    """Delete a record set from a DNS zone. This operation cannot be undone.
+    """Delete the DNSSEC configuration on a DNS zone. This operation cannot be undone.
+
+    :example: Disable DNSSEC on a zone.
+        az network dns dnssec-config delete -g MyResourceGroup -z www.mysite.com
     """
 
     _aaz_info = {
         "version": "2023-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/dnszones/{}/{}/{}", "2023-07-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/dnszones/{}/dnssecconfigs/default", "2023-07-01-preview"],
         ]
     }
 
+    AZ_SUPPORT_NO_WAIT = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
-        self._execute_operations()
-        return None
+        return self.build_lro_poller(self._execute_operations, None)
 
     _args_schema = None
 
@@ -40,20 +49,7 @@ class Delete(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.if_match = AAZStrArg(
             options=["--if-match"],
-            help="Etag of the record set. Omit this value to always delete the current record set. Specify the last-seen etag value to prevent accidentally deleting any concurrent changes.",
-        )
-        _args_schema.record_type = AAZStrArg(
-            options=["--record-type"],
-            help="The type of DNS record in this record set. Record sets of type SOA cannot be deleted (they are deleted when the DNS zone is deleted).",
-            required=True,
-            id_part="child_type_1",
-            enum={"A": "A", "AAAA": "AAAA", "CAA": "CAA", "CNAME": "CNAME", "DS": "DS", "MX": "MX", "NAPTR": "NAPTR", "NS": "NS", "PTR": "PTR", "SOA": "SOA", "SRV": "SRV", "TLSA": "TLSA", "TXT": "TXT"},
-        )
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
-            help="Name of the record set, relative to the name of the zone.",
-            required=True,
-            id_part="child_name_1",
+            help="The etag of this DNSSEC configuration. Omit this value to always delete the DNSSEC configuration. Specify the last-seen etag value to prevent accidentally deleting any concurrent changes.",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -68,7 +64,7 @@ class Delete(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.RecordSetsDelete(ctx=self.ctx)()
+        yield self.DnssecConfigsDelete(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -79,23 +75,46 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class RecordSetsDelete(AAZHttpOperation):
+    class DnssecConfigsDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [202]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
             if session.http_response.status_code in [200]:
-                return self.on_200(session)
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
             if session.http_response.status_code in [204]:
-                return self.on_204(session)
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_204,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsZones/{zoneName}/{recordType}/{relativeRecordSetName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/dnsZones/{zoneName}/dnssecConfigs/default",
                 **self.url_parameters
             )
 
@@ -110,15 +129,6 @@ class Delete(AAZCommand):
         @property
         def url_parameters(self):
             parameters = {
-                **self.serialize_url_param(
-                    "recordType", self.ctx.args.record_type,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "relativeRecordSetName", self.ctx.args.name,
-                    skip_quote=True,
-                    required=True,
-                ),
                 **self.serialize_url_param(
                     "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
