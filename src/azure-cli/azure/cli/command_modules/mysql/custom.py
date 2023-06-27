@@ -1034,7 +1034,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
                                                                     vnet,
                                                                     subnet)
 
-    resolve_poller(client.begin_create(resource_group_name, replica_name, parameters), cmd.cli_ctx,'Create Replica')
+    resolve_poller(client.begin_create(resource_group_name, replica_name, parameters), cmd.cli_ctx, 'Create Replica')
 
     replica_server_object = client.get(resource_group_name, replica_name)
     replica_server_network = replica_server_object.network
