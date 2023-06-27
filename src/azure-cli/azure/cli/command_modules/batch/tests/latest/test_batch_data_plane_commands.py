@@ -233,7 +233,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                            self.check('commandLine', 'ping 127.0.0.1 -n 30')])
 
         if self.is_live or self.in_recording:
-            time.sleep(10)
+            time.sleep(120)
         task_result = self.batch_cmd('batch job task-counts show --job-id {j_id}').get_output_in_json()
 
         self.assertEqual(task_result["taskCounts"]["completed"], 0)
