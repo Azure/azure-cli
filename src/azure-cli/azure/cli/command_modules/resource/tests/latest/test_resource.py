@@ -2202,7 +2202,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack sub delete --name {name} --yes')
 
         # create new resource group - test delete flag --delete-resources
-        self.cmd('az group create --location {location} --name {resource-group-two}')
+        self.cmd('group create --location {location} --name {resource-group-two}')
 
         # create stack  with resource1
         self.cmd('stack sub create --name {name} --location {location} --deployment-resource-group {resource-group-two} --deny-settings-mode "none" --template-file "{template-file-spec}" --parameters "name={resource-one}" --yes', checks=self.check('provisioningState', 'succeeded'))
@@ -2229,7 +2229,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('resource list -g {resource-group-two}', checks=self.check("length([?name=='{resource-two}'])", 0))
 
         # delete resource group two
-        self.cmd('az group delete --name {resource-group-two} --yes')
+        self.cmd('group delete --name {resource-group-two} --yes')
 
         # cleanup
         self.cmd('stack sub delete --name {name} --yes')
@@ -2415,7 +2415,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('resource list', checks=self.check("length([?name=='{resource-two}'])", 0))
 
         # cleanup - delete resource group two
-        self.cmd('az group delete --name {resource-group-two} --yes')
+        self.cmd('group delete --name {resource-group-two} --yes')
 
         # test delete flag --delete-resource-groups - create stack  with resource1
         self.cmd('stack sub create --name {name} --location {location} --template-file "{template-file-rg}" --parameters "name={resource-one}" --deny-settings-mode "none" --yes', checks=self.check('provisioningState', 'succeeded'))
@@ -2552,7 +2552,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack group delete --name {name} --resource-group {resource-group} --yes')
 
         # test flag: delete--resources, create deployment stack
-        self.cmd('stack group create --name {name} --resource-group {resource-group}  --template-file "{template-file-spec}" --deny-settings-mode "none" --parameters "name={resource-one}" --yes --delete-resource-groups', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack group create --name {name} --resource-group {resource-group}  --template-file "{template-file-spec}" --deny-settings-mode "none" --parameters "name={resource-one}" --yes --delete-resources --delete-resource-groups', checks=self.check('provisioningState', 'succeeded'))
 
         # update stack, default actionOnUnmanage settings should be detached
         self.cmd('stack group create --name {name} --resource-group {resource-group}  --template-file "{template-file-spec}" --deny-settings-mode "none" --parameters "name={resource-two}" --yes', checks=self.check('provisioningState', 'succeeded'))
@@ -2702,7 +2702,7 @@ class DeploymentStacksTest(ScenarioTest):
         })
 
         # create stack
-        self.cmd('stack group create --name {name} --resource-group {resource-group} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --delete-resource-groups --yes', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        self.cmd('stack group create --name {name} --resource-group {resource-group} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --delete-resources --delete-resource-groups --yes', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
 
         self.cmd('stack group show --name {name} --resource-group {resource-group}', checks=self.check('name', '{name}'))
 
@@ -2748,7 +2748,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('resource list', checks=self.check("length([?name=='{resource-two}'])", 0))
 
         # cleanup - delete resource group two
-        self.cmd('az group delete --name {resource-group-two} --yes')
+        self.cmd('group delete --name {resource-group-two} --yes')
 
         # create new resource group - testing delete-all flag
         self.cmd('group create --location {location} --name {resource-group-two}')
