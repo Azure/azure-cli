@@ -180,7 +180,7 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
         source_container = self.create_container(account1_info)
         target_container = self.create_container(account1_info)
         target_container_different_account = self.create_container(account2_info)
-        target_container_premium =  self.create_container(accountpremium_info)
+        target_container_premium = self.create_container(accountpremium_info)
 
         self.storage_cmd('storage blob upload -c {} -f "{}" -n srcBlockBlob', account1_info,
                          source_container, source_file)
@@ -228,7 +228,7 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
 
         # tier
         # specify dst-blob-type BlockBlob
-        tiers = ['Cool', 'Hot', 'Archive']
+        tiers = ['Cold', 'Cool', 'Hot', 'Archive']
         for tier in tiers:
             self.storage_cmd('storage blob copy start --destination-blob dsttier{} --destination-container {} '
                              '--source-account-name {} --source-container {} --source-blob srcBlockBlob '
@@ -306,7 +306,7 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
 
         # tier
         # specify dst-blob-type BlockBlob
-        tiers = ['Cool', 'Hot', 'Archive']
+        tiers = ['Cold', 'Cool', 'Hot', 'Archive']
         for tier in tiers:
             self.storage_cmd('storage blob copy start --destination-blob dsttier3{} --destination-container {} '
                              '--source-account-name {} --source-container {} --source-blob srcBlockBlob '
@@ -333,7 +333,6 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
                              target_container, tier)
             self.storage_cmd('storage blob show -c {} -n {}', accountpremium_info, target_container_premium,
                              'dstpremiumtier' + tier).assert_with_checks([JMESPathCheck('properties.blobTier', tier)])
-
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='account1', kind='StorageV2', hns=True)
@@ -380,3 +379,116 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
                              dst_account_info, dst_container, src_share, src_account_info[0],
                              src_account_info[1]).assert_with_checks(
                 JMESPathCheck('length(@)', 2))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='account1', kind='StorageV2')
+    @StorageAccountPreparer(parameter_name='account2', kind='StorageV2')
+    @StorageAccountPreparer(parameter_name='accountpremium', sku='Premium_LRS', kind='StorageV2')
+    def test_storage_blob_copy_batch_destination_blob_type(self, resource_group, account1, account2, accountpremium):
+        source_file = self.create_temp_file(16, full_random=False)
+        account1_info = self.get_account_info(resource_group, account1)
+        account2_info = self.get_account_info(resource_group, account2)
+        accountpremium_info = self.get_account_info(resource_group, accountpremium)
+
+        src_container = self.create_container(account1_info)
+        src_container_premium = self.create_container(accountpremium_info)
+        src_container_block = self.create_container(account1_info)
+        src_container_page = self.create_container(account1_info)
+
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n srcBlockBlob -t block', account1_info,
+                         src_container, source_file)
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n srcAppendBlob -t append', account1_info,
+                         src_container, source_file)
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n srcPageBlob -t page', account1_info,
+                         src_container, source_file)
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n srcPrePageBlob -t page', account1_info,
+                         src_container_page, source_file)
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n srcPrePageBlob -t page', accountpremium_info,
+                         src_container_premium, source_file)
+
+        # same account
+        dst_types = ['', 'Detect', 'BlockBlob', 'AppendBlob', 'PageBlob']
+        src_types = ['BlockBlob', 'AppendBlob', 'PageBlob']
+        for dst_type in dst_types:
+            if dst_type == 'BlockBlob':
+                dst_container = src_container_block
+            else:
+                dst_container = self.create_container(account1_info)
+            dst_container_different_account = self.create_container(account2_info)
+            self.storage_cmd('storage blob copy start-batch --destination-container {} --source-container {} '
+                             '--source-account-name {} --source-account-key {} '
+                             '{}',
+                             account1_info, dst_container, src_container,
+                             account1_info[0], account1_info[1],
+                             '--destination-blob-type ' + dst_type if dst_type != '' else '')
+            self.storage_cmd('storage blob copy start-batch --destination-container {} --source-container {} '
+                             '--source-account-name {} --source-account-key {} '
+                             '{}',
+                             account2_info, dst_container_different_account, src_container,
+                             account1_info[0], account1_info[1],
+                             '--destination-blob-type ' + dst_type if dst_type != '' else '')
+            for src_type in src_types:
+                blob_name = 'src' + src_type
+                self.storage_cmd('storage blob show -c {} -n {}', account1_info, dst_container, blob_name). \
+                    assert_with_checks([JMESPathCheck('properties.blobType',
+                                                      dst_type if (dst_type != '' and dst_type != 'Detect')
+                                                      else src_type)])
+                self.storage_cmd('storage blob show -c {} -n {}', account2_info, dst_container_different_account,
+                                 blob_name). \
+                    assert_with_checks([JMESPathCheck('properties.blobType',
+                                                      dst_type if (dst_type != '' and dst_type != 'Detect')
+                                                      else src_type)])
+
+        # tier
+        # specify dst-blob-type BlockBlob
+        tiers = ['Cold', 'Cool', 'Hot', 'Archive']
+        blob_names = ['srcBlockBlob', 'srcAppendBlob', 'srcPageBlob']
+        for tier in tiers:
+            dst_container = self.create_container(account1_info)
+            dst_container_different_account = self.create_container(account2_info)
+            self.storage_cmd('storage blob copy start-batch --destination-container {} --source-container {} '
+                             '--source-account-name {} --destination-blob-type BlockBlob --tier {}',
+                             account1_info, dst_container, src_container_block, account1, tier)
+            self.storage_cmd('storage blob copy start-batch --destination-container {} --source-container {} '
+                             '--source-account-name {} --source-account-key {} --destination-blob-type BlockBlob'
+                             ' --tier {}',
+                             account2_info, dst_container_different_account, src_container_block,
+                             account1_info[0], account1_info[1], tier)
+            for blob_name in blob_names:
+                self.storage_cmd('storage blob show -c {} -n {}', account1_info, dst_container, blob_name). \
+                    assert_with_checks([JMESPathCheck('properties.blobTier', tier)])
+                self.storage_cmd('storage blob show -c {} -n {}', account2_info, dst_container_different_account,
+                                 blob_name). assert_with_checks([JMESPathCheck('properties.blobTier', tier)])
+
+        # does not specify dst-blob-type BlockBlob
+        for tier in tiers:
+            dst_container = self.create_container(account1_info)
+            dst_container_different_account = self.create_container(account2_info)
+            self.storage_cmd('storage blob copy start-batch --destination-container {} --source-container {} '
+                             '--source-account-name {} --tier {}',
+                             account1_info, dst_container, src_container_block, account1, tier)
+            self.storage_cmd('storage blob copy start-batch --destination-container {} --source-container {} '
+                             '--source-account-name {} --source-account-key {} --tier {}',
+                             account2_info, dst_container_different_account, src_container_block,
+                             account1_info[0], account1_info[1], tier)
+            for blob_name in blob_names:
+                self.storage_cmd('storage blob show -c {} -n {}', account1_info, dst_container, blob_name). \
+                    assert_with_checks([JMESPathCheck('properties.blobTier', tier)])
+                self.storage_cmd('storage blob show -c {} -n {}', account2_info, dst_container_different_account,
+                                 blob_name).assert_with_checks([JMESPathCheck('properties.blobTier', tier)])
+
+        # does not specify dst-blob-type PageBlob Premium
+        tiers = ['P10', 'P20', 'P30', 'P40', 'P50', 'P60', 'P4', 'P6']
+        for tier in tiers:
+            dst_container = self.create_container(accountpremium_info)
+            self.storage_cmd('storage blob copy start-batch --destination-container {} --source-container {} '
+                             '--source-account-name {} --tier {}',
+                             accountpremium_info, dst_container, src_container_premium, accountpremium, tier)
+            self.storage_cmd('storage blob copy start-batch --destination-container {} --source-container {} '
+                             '--source-account-name {} --source-account-key {} --tier {}',
+                             accountpremium_info, dst_container, src_container_page,
+                             account1_info[0], account1_info[1], tier)
+            self.storage_cmd('storage blob show -c {} -n srcPrePageBlob', accountpremium_info, dst_container). \
+                assert_with_checks([JMESPathCheck('properties.blobTier', tier)])
+            self.storage_cmd('storage blob show -c {} -n srcPrePageBlob', accountpremium_info, dst_container). \
+                assert_with_checks([JMESPathCheck('properties.blobTier', tier)])

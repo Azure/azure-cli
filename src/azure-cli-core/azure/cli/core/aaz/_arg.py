@@ -21,6 +21,7 @@ from ._arg_fmt import AAZObjectArgFormat, AAZListArgFormat, AAZDictArgFormat, AA
     AAZSubscriptionIdArgFormat, AAZResourceLocationArgFormat, AAZResourceIdArgFormat, AAZUuidFormat, AAZDateFormat, \
     AAZTimeFormat, AAZDateTimeFormat, AAZDurationFormat, AAZFileArgTextFormat
 from .exceptions import AAZUnregisteredArg
+from ._prompt import AAZPromptInput
 
 # pylint: disable=redefined-builtin, protected-access, too-few-public-methods
 
@@ -134,6 +135,12 @@ class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
 
         if self._blank != AAZUndefined:
             arg.nargs = '?'
+            if isinstance(self._blank, AAZPromptInput):
+                short_summary = arg.type.settings.get('help', None) or ''
+                if short_summary:
+                    short_summary += '  '
+                short_summary += self._blank.help_message
+                arg.help = short_summary
 
         cli_ctx = kwargs.get('cli_ctx', None)
         if cli_ctx is None:
@@ -268,6 +275,13 @@ class AAZUuidArg(AAZStrArg):
     @property
     def _type_in_help(self):
         return "GUID/UUID"
+
+
+class AAZPasswordArg(AAZStrArg):
+
+    @property
+    def _type_in_help(self):
+        return "Password"
 
 
 class AAZIntArg(AAZSimpleTypeArg, AAZIntType):
@@ -480,6 +494,11 @@ class AAZResourceLocationArg(AAZStrArg):
                 isinstance(self._fmt, AAZResourceLocationArgFormat) and self._fmt._resource_group_arg is not None:
             # when location is required and it will be retrived from resource group by default, arg is not required.
             arg.required = False
+            short_summary = arg.type.settings.get('help', None) or ''
+            if short_summary:
+                short_summary += '  '
+            short_summary += "When not specified, the location of the resource group will be used."
+            arg.help = short_summary
 
         arg.completer = get_location_completion_list
         arg.configured_default = 'location'

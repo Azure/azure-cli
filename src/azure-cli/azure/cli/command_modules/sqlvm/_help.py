@@ -176,10 +176,43 @@ examples:
   - name: Update a SQL virtual machine to enable schedule with weekly interval for SQL best practice assessment when VM is already associated with a Log Analytics workspace.
     text: >
         az sql vm update -n sqlvm -g myresourcegroup --assessment-weekly-interval 1 --assessment-day-of-week monday --assessment-start-time-local '19:30'
-  - name: Update a SQL virtual machine to enable schedule with monthly occurrence for SQL best practice assessment while associating with a Log Analytics workspace.
+  - name: Update a SQL virtual machine to enable schedule with monthly occurrence for SQL best practice assessment while associating with a Log Analytics workspace and assigning a Resource group for the Agent resources.
     text: >
-        az sql vm update -n sqlvm -g myresourcegroup --workspace-name myLogAnalyticsWorkspace --workspace-rg myRg --assessment-monthly-occurrence 1 --assessment-day-of-week monday --assessment-start-time-local '19:30'
-  - name: Update a SQL virtual machine to enable SQL best practices assessment without setting a schedule for running assessment on-demand
+        az sql vm update -n sqlvm -g myresourcegroup --workspace-name myLogAnalyticsWorkspace --workspace-rg myRg --agent-rg myRg2 --assessment-monthly-occurrence 1 --assessment-day-of-week monday --assessment-start-time-local '19:30'
+  - name: Update a SQL virtual machine to enable SQL best practices assessment without setting a schedule for running assessment on-demand. Must provide Log Analytics workspace and a Resource group for deploying the Agent resources.
     text: >
-        az sql vm update -n sqlvm -g myresourcegroup --enable-assessment true
+        az sql vm update -n sqlvm -g myresourcegroup --enable-assessment true --workspace-name myLogAnalyticsWorkspace --workspace-rg myRg --agent-rg myRg2
+  - name: Update a SQL virtual machine to enable SQL best practices assessment while associating with a Log Analytics Workspace in a different subscription
+    text: >
+        az sql vm update -n sqlvm -g myresourcegroup --enable-assessment true --workspace-name myLogAnalyticsWorkspace --workspace-rg myRg --workspace-sub myLogAnalyticsWorkspaceSubName --agent-rg myRg2
+"""
+
+helps['sql vm enable-azure-ad-auth'] = """
+type: command
+short-summary: Enable Azure AD authentication of a SQL virtual machine.
+examples:
+  - name: Enable Azure AD authentication with system-assigned managed identity with client side validation.
+    text: >
+        az sql vm enable-azure-ad-auth -n sqlvm -g myresourcegroup
+  - name: Enable Azure AD authentication with user-assigned managed identity with client side validation.
+    text: >
+        az sql vm enable-azure-ad-auth -n sqlvm -g myresourcegroup --msi-client-id 12345678
+  - name: Enable Azure AD authentication with system-assigned managed identity skipping client side validation. The server side validation always happens.
+    text: >
+        az sql vm enable-azure-ad-auth -n sqlvm -g myresourcegroup --skip-client-validation
+  - name: Enable Azure AD authentication with user-assigned managed identity skipping client side validation. The server side validation always happens.
+    text: >
+        az sql vm enable-azure-ad-auth -n sqlvm -g myresourcegroup --msi-client-id 12345678 --skip-client-validation
+"""
+
+helps['sql vm validate-azure-ad-auth'] = """
+type: command
+short-summary: Validate Azure AD authentication of a SQL virtual machine at the client side without enabling it.
+examples:
+  - name: Validate Azure AD authentication with system-assigned managed identity at the client side.
+    text: >
+        az sql vm validate-azure-ad-auth -n sqlvm -g myresourcegroup
+  - name: Validate Azure AD authentication with user-assigned managed identity at the client side.
+    text: >
+        az sql vm validate-azure-ad-auth -n sqlvm -g myresourcegroup --msi-client-id 12345678
 """

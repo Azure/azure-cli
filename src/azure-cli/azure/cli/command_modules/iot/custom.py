@@ -585,7 +585,7 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
         except CloudError as e:
             raise e
 
-    create = client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub_description, polling=True)
+    create = client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub_description)
     if identity_role and identity_scopes:
         create.add_done_callback(identity_assignment)
     return create
@@ -704,12 +704,12 @@ def update_iot_hub_custom(instance,
 
 def iot_hub_update(client, hub_name, parameters, resource_group_name=None):
     resource_group_name = _ensure_hub_resource_group_name(client, resource_group_name, hub_name)
-    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, parameters, {'IF-MATCH': parameters.etag}, polling=True)
+    return client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, parameters, {'IF-MATCH': parameters.etag})
 
 
 def iot_hub_delete(client, hub_name, resource_group_name=None):
     resource_group_name = _ensure_hub_resource_group_name(client, resource_group_name, hub_name)
-    return client.iot_hub_resource.begin_delete(resource_group_name, hub_name, polling=True)
+    return client.iot_hub_resource.begin_delete(resource_group_name, hub_name)
 
 
 # pylint: disable=inconsistent-return-statements

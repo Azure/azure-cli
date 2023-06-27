@@ -21,130 +21,100 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
     def test_sb_namespace(self, resource_group):
         self.kwargs.update({
             'namespacename': self.create_random_name(prefix='sb-nscli', length=20),
-            'namespacename1': self.create_random_name(prefix='sb-nscli', length=20),
+            'namespacename1': self.create_random_name(prefix='sb-nscli1', length=20),
             'namespacename2': self.create_random_name(prefix='sb-nscli2', length=20),
-            'tags': {'tag1=value1'},
-            'tags2': {'tag2=value2'},
-            'sku': 'Standard',
-            'skupremium': 'Premium',
-            'authoname': self.create_random_name(prefix='cliAutho', length=20),
-            'defaultauthorizationrule': 'RootManageSharedAccessKey',
-            'accessrights': 'Send',
-            'accessrights1': 'Listen',
-            'primary': 'PrimaryKey',
-            'secondary': 'SecondaryKey',
-            'istrue': 'True',
-            'location': 'eastus2'
+            'identity1': self.create_random_name(prefix='sb-identity1', length=20),
+            'identity2': self.create_random_name(prefix='sb-identity2', length=20),
+            'tags': 'tag1=value1',
+            'tags2': 'tag2=value2',
+            'loc': 'East US'
         })
 
-        # Create Namespace
-        getresponse = self.cmd(
-            'servicebus namespace create --resource-group {rg} --name {namespacename1} --location {location}  '
-            '--tags {tags} --sku {skupremium} --zone-redundant {istrue} --minimum-tls-version 1.1').get_output_in_json()
-        self.assertEqual(getresponse['sku']['name'], self.kwargs['skupremium'])
-        self.assertTrue(getresponse['zoneRedundant'])
-        self.assertTrue('1.1', getresponse['minimumTlsVersion'])
+        identity1 = self.cmd('identity create --name {identity1} --resource-group {rg}').get_output_in_json()
+        self.assertEqual(identity1['name'], self.kwargs['identity1'])
+        self.kwargs.update({'id1': identity1['id']})
 
-        # Check for the NameSpace name Availability
-        self.cmd('servicebus namespace exists --name {namespacename}',
-                 checks=[self.check('nameAvailable', True)])
+        identity2 = self.cmd('identity create --name {identity2} --resource-group {rg}').get_output_in_json()
+        self.assertEqual(identity2['name'], self.kwargs['identity2'])
+        self.kwargs.update({'id2': identity2['id']})
 
-        # Check for the NameSpace name Availability
-        self.cmd('servicebus namespace exists --name {namespacename2}',
-                 checks=[self.check('nameAvailable', True)])
+        # Create standard namespace with disableLocalAuth enabled
+        namespace = self.cmd('servicebus namespace create --name {namespacename} --resource-group {rg} '
+                             '--sku Standard --location eastus --tags tag1=value1 tag2=value2 '
+                             '--disable-local-auth --minimum-tls-version 1.1').get_output_in_json()
 
-        # Create Namespace
-        namespace = self.cmd(
-            'servicebus namespace create --resource-group {rg} --name {namespacename2} --tags {tags} --sku Premium --location eastus2 --zone-redundant',
-            checks=[self.check('sku.name', 'Premium')]).get_output_in_json()
+        self.assertEqual('Standard', namespace['sku']['name'])
+        self.assertEqual('1.1', namespace['minimumTlsVersion'])
+        self.assertEqual(self.kwargs['loc'], namespace['location'])
+        self.assertTrue(namespace['disableLocalAuth'])
+        self.assertFalse(namespace['zoneRedundant'])
+        self.assertEqual(2, len(namespace['tags']))
 
-        self.assertEqual(namespace['zoneRedundant'], True)
+        # Set minimumTlsVersion using update command
+        namespace = self.cmd('servicebus namespace update --name {namespacename} --resource-group {rg} --minimum-tls-version 1.0').get_output_in_json()
 
-        # Create Namespace
-        self.cmd(
-            'servicebus namespace create --resource-group {rg} --name {namespacename} --tags {tags} --sku {sku}',
-            checks=[self.check('sku.name', '{sku}')])
+        self.assertEqual('Standard', namespace['sku']['name'])
+        self.assertEqual('1.0', namespace['minimumTlsVersion'])
+        self.assertEqual(self.kwargs['loc'], namespace['location'])
+        self.assertTrue(namespace['disableLocalAuth'])
+        self.assertFalse(namespace['zoneRedundant'])
+        self.assertEqual(2, len(namespace['tags']))
 
-        # Get Created Namespace
-        self.cmd('servicebus namespace show --resource-group {rg} --name {namespacename}',
-                 checks=[self.check('sku.name', '{sku}')])
+        # Create Premium namespace with Sku Capacity 2
+        namespace = self.cmd('servicebus namespace create --name {namespacename1} --resource-group {rg} '
+                             '--sku Premium --location eastus').get_output_in_json()
+        self.assertEqual(1, namespace['sku']['capacity'])
+        self.assertEqual('Premium', namespace['sku']['name'])
+        self.assertEqual('1.2', namespace['minimumTlsVersion'])
+        self.assertEqual(self.kwargs['loc'], namespace['location'])
+        self.assertFalse(namespace['disableLocalAuth'])
+        self.assertFalse(namespace['zoneRedundant'])
+        self.assertEqual(0, len(namespace['tags']))
 
-        # Update Namespace
-        self.cmd(
-            'servicebus namespace update --resource-group {rg} --name {namespacename} --tags {tags}',
-            checks=[self.check('sku.name', '{sku}')])
+        # Update Capacity of Premium namespace
+        namespace = self.cmd('servicebus namespace update --name {namespacename1} --resource-group {rg} '
+                             '--capacity 4 --tags {tags} {tags2}').get_output_in_json()
 
-        # Get Created Namespace list by subscription
-        listnamespaceresult = self.cmd('servicebus namespace list').output
-        self.assertGreater(len(listnamespaceresult), 0)
+        self.assertEqual(4, namespace['sku']['capacity'])
+        self.assertEqual('Premium', namespace['sku']['name'])
+        self.assertEqual('1.2', namespace['minimumTlsVersion'])
+        self.assertEqual(self.kwargs['loc'], namespace['location'])
+        self.assertFalse(namespace['disableLocalAuth'])
+        self.assertFalse(namespace['zoneRedundant'])
+        self.assertEqual(2, len(namespace['tags']))
 
-        # Get Created Namespace list by ResourceGroup
-        listnamespacebyresourcegroupresult = self.cmd('servicebus namespace list --resource-group {rg}').output
-        self.assertGreater(len(listnamespacebyresourcegroupresult), 0)
+        # Set disableLocalAuth to False using update command
+        namespace = self.cmd('servicebus namespace update --name {namespacename1} --resource-group {rg} '
+                             '--disable-local-auth').get_output_in_json()
 
-        # Create Authoriazation Rule
-        self.cmd(
-            'servicebus namespace authorization-rule create --resource-group {rg} --namespace-name {namespacename} --name {authoname} --rights {accessrights}',
-            checks=[self.check('name', '{authoname}')])
+        self.assertEqual('Premium', namespace['sku']['name'])
+        self.assertEqual('1.2', namespace['minimumTlsVersion'])
+        self.assertEqual(self.kwargs['loc'], namespace['location'])
+        self.assertTrue(namespace['disableLocalAuth'])
+        self.assertFalse(namespace['zoneRedundant'])
+        self.assertEqual(2, len(namespace['tags']))
 
-        # Get Authorization Rule
-        self.cmd(
-            'servicebus namespace authorization-rule show --resource-group {rg} --namespace-name {namespacename} --name {authoname}',
-            checks=[self.check('name', '{authoname}')])
+        # Create premium namespace with SystemAssigned and UserAssigned Identity
+        namespace = self.cmd('servicebus namespace create --resource-group {rg} --name {namespacename2} ' 
+                             '--location eastus --sku Premium --mi-system-assigned --mi-user-assigned {id1} {id2} '
+                             '--capacity 2 --zone-redundant --premium-messaging-partitions 2 ').get_output_in_json()
 
-        # Update Authoriazation Rule
-        self.cmd(
-            'servicebus namespace authorization-rule create --resource-group {rg} --namespace-name {namespacename} --name {authoname} --rights {accessrights1}',
-            checks=[self.check('name', '{authoname}')])
+        self.assertEqual(2, namespace['sku']['capacity'])
+        self.assertEqual('Premium', namespace['sku']['name'])
+        self.assertEqual('1.2', namespace['minimumTlsVersion'])
+        self.assertEqual(self.kwargs['loc'], namespace['location'])
+        self.assertFalse(namespace['disableLocalAuth'])
+        self.assertTrue(namespace['zoneRedundant'])
+        self.assertEqual(2, namespace['premiumMessagingPartitions'])
+        self.assertEqual(0, len(namespace['tags']))
 
-        # Get Default Authorization Rule
-        self.cmd(
-            'servicebus namespace authorization-rule show --resource-group {rg} --namespace-name {namespacename} --name {defaultauthorizationrule}',
-            checks=[self.check('name', self.kwargs['defaultauthorizationrule'])])
+        # List Namespace within ResourceGroup
+        self.cmd('servicebus namespace list --resource-group {rg}')
 
-        # Get Authorization Rule Listkeys
-        old_keys = self.cmd(
-            'servicebus namespace authorization-rule keys list --resource-group {rg} --namespace-name {namespacename} --name {authoname}').get_output_in_json()
-
-        new_keys = self.cmd(
-            'servicebus namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key {primary}').get_output_in_json()
-
-        self.assertNotEqual(old_keys['primaryKey'], new_keys['primaryKey'])
-        self.assertEqual(old_keys['secondaryKey'], new_keys['secondaryKey'])
-
-        original_keys = old_keys
-        self.kwargs.update({'pkvalue':original_keys['primaryKey'], 'skvalue':original_keys['secondaryKey']})
-        old_keys = new_keys
-
-        new_keys = self.cmd(
-            'servicebus namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key {secondary}').get_output_in_json()
-
-        self.assertEqual(old_keys['primaryKey'], new_keys['primaryKey'])
-        self.assertNotEqual(old_keys['secondaryKey'], new_keys['secondaryKey'])
-
-        new_keys2 = self.cmd(
-            'servicebus namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key {primary} --key-value {pkvalue}').get_output_in_json()
-
-        self.assertEqual(new_keys2['primaryKey'], original_keys['primaryKey'])
-        self.assertEqual(new_keys2['secondaryKey'], new_keys['secondaryKey'])
-
-        new_keys3 = self.cmd(
-            'servicebus namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key {secondary} --key-value {skvalue}').get_output_in_json()
-
-        self.assertEqual(new_keys3['primaryKey'], original_keys['primaryKey'])
-        self.assertEqual(new_keys3['secondaryKey'], original_keys['secondaryKey'])
-
-        # Regeneratekeys - Primary
-        self.cmd(
-            'servicebus namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key {primary}')
-
-        # Regeneratekeys - Secondary
-        self.cmd(
-            'servicebus namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key {secondary}')
-
-        # Delete Authorization Rule
-        self.cmd(
-            'servicebus namespace authorization-rule delete --resource-group {rg} --namespace-name {namespacename} --name {authoname}')
+        # List all Namespace within subscription
+        self.cmd('servicebus namespace list')
 
         # Delete Namespace list by ResourceGroup
-        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename}')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename} ')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename1} ')
+        self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename2} ')

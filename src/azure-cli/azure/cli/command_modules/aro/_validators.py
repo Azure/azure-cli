@@ -158,11 +158,14 @@ def validate_subnet(key):
         if parts['child_type_1'].lower() != 'subnets':
             raise InvalidArgumentValueError(f"--{key.replace('_', '-')} child type '{subnet}' must equal subnets.")
 
-        client = get_mgmt_service_client(
-            cmd.cli_ctx, ResourceType.MGMT_NETWORK)
+        from .aaz.latest.network.vnet.subnet import Show
+
         try:
-            client.subnets.get(parts['resource_group'],
-                               parts['name'], parts['child_name_1'])
+            Show(cli_ctx=cmd.cli_ctx)(command_args={
+                "name": parts['child_name_1'],
+                "vnet_name": parts['name'],
+                "resource_group": parts['resource_group']
+            })
         except Exception as err:
             if isinstance(err, ResourceNotFoundError):
                 raise InvalidArgumentValueError(
@@ -252,8 +255,6 @@ def validate_refresh_cluster_credentials(namespace):
         raise RequiredArgumentMissingError('--client-id and --client-secret must be not set with --refresh-credentials.')  # pylint: disable=line-too-long
 
 
-def validate_install_version_format(namespace):
-    if namespace.install_version is not None and not re.match(r'^' +
-                                                              r'[4-9]{1}\.[0-9]{1,2}\.[0-9]{1,2}' +
-                                                              r'$', namespace.install_version):
-        raise InvalidArgumentValueError('--install-version is invalid')
+def validate_version_format(namespace):
+    if namespace.version is not None and not re.match(r'^[4-9]{1}\.[0-9]{1,2}\.[0-9]{1,2}$', namespace.version):
+        raise InvalidArgumentValueError('--version is invalid')

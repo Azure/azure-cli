@@ -402,14 +402,14 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
         source=None, scripts=None, checksum=None, managed_image_destinations=None,
         shared_image_destinations=None, no_wait=False, image_template=None, identity=None,
         vm_size=None, os_disk_size=None, vnet=None, subnet=None, proxy_vm_size=None, build_vm_identities=None,
-        staging_resource_group=None):
+        staging_resource_group=None, validator=None):
     from azure.mgmt.imagebuilder.models import (ImageTemplate, ImageTemplateSharedImageVersionSource,
                                                 ImageTemplatePlatformImageSource, ImageTemplateManagedImageSource,
                                                 ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
                                                 ImageTemplateManagedImageDistributor,
                                                 ImageTemplateSharedImageDistributor, ImageTemplateIdentity,
-                                                ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties,  # pylint: disable=line-too-long
-                                                ImageTemplateVmProfile, VirtualNetworkConfig)
+                                                UserAssignedIdentity, ImageTemplateVmProfile, VirtualNetworkConfig,
+                                                ImageTemplatePropertiesValidate, ImageTemplateInVMValidator)
 
     if image_template is not None:
         logger.warning('You are using --image-template. All other parameters will be ignored.')
@@ -444,6 +444,8 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
             content['identity'] = obj['identity']
         if 'staging_resource_group' in obj:
             content['staging_resource_group'] = obj['staging_resource_group']
+        if 'validate' in obj:
+            content['validate'] = obj['validate']
         return client.virtual_machine_image_templates.begin_create_or_update(
             parameters=content, resource_group_name=resource_group_name, image_template_name=image_template_name)
 
@@ -495,7 +497,7 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
             if not is_valid_resource_id(ide):
                 ide = resource_id(subscription=subscription_id, resource_group=resource_group_name,
                                   namespace='Microsoft.ManagedIdentity', type='userAssignedIdentities', name=ide)
-            user_assigned_identities[ide] = ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties()  # pylint: disable=line-too-long
+            user_assigned_identities[ide] = UserAssignedIdentity()  # pylint: disable=line-too-long
         identity_body = ImageTemplateIdentity(type='UserAssigned', user_assigned_identities=user_assigned_identities)
 
     # VM profile
@@ -511,12 +513,22 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
         if subnet is not None:
             vnet_config = VirtualNetworkConfig(subnet_id=subnet, proxy_vm_size=proxy_vm_size)
         else:
-            raise RequiredArgumentMissingError('Usage error: --proxy-vm-size is only configurable when --subnet is specified.')
+            raise RequiredArgumentMissingError(
+                'Usage error: --proxy-vm-size is only configurable when --subnet is specified.')
     vm_profile = ImageTemplateVmProfile(vm_size=vm_size, os_disk_size_gb=os_disk_size, user_assigned_identities=build_vm_identities, vnet_config=vnet_config)  # pylint: disable=line-too-long
+
+    validate = None
+    if validator:
+        in_vm_validations = []
+        for item in validator:
+            validator_item = ImageTemplateInVMValidator()
+            validator_item.type = item
+            in_vm_validations.append(validator_item)
+        validate = ImageTemplatePropertiesValidate(in_vm_validations=in_vm_validations)
 
     image_template = ImageTemplate(source=template_source, distribute=template_destinations,
                                    location=location, build_timeout_in_minutes=build_timeout, tags=(tags or {}),
-                                   identity=identity_body, vm_profile=vm_profile,
+                                   identity=identity_body, vm_profile=vm_profile, validate=validate,
                                    staging_resource_group=staging_resource_group)
 
     if len(template_scripts) > 0:
@@ -528,7 +540,7 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
 
 def assign_template_identity(cmd, client, resource_group_name, image_template_name, user_assigned=None):
     from azure.mgmt.imagebuilder.models import (ImageTemplateIdentity, ImageTemplateUpdateParameters,
-                                                ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties)  # pylint: disable=line-too-long
+                                                UserAssignedIdentity)
 
     from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
 
@@ -551,7 +563,7 @@ def assign_template_identity(cmd, client, resource_group_name, image_template_na
 
         updated_user_assigned = list(existing_user_identities.union(add_user_assigned))
 
-        default_user_identity = ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties()  # pylint: disable=line-too-long
+        default_user_identity = UserAssignedIdentity()  # pylint: disable=line-too-long
         user_assigned_identities = dict.fromkeys(updated_user_assigned, default_user_identity)
 
         image_template_identity = ImageTemplateIdentity(type='UserAssigned',
@@ -632,14 +644,14 @@ def show_build_output(client, resource_group_name, image_template_name, output_n
 
 
 def add_template_output(cmd, client, resource_group_name, image_template_name, gallery_name=None, location=None,  # pylint: disable=line-too-long, unused-argument
-                        output_name=None, is_vhd=None, tags=None,
+                        output_name=None, is_vhd=None, vhd_uri=None, tags=None,
                         gallery_image_definition=None, gallery_replication_regions=None,
-                        managed_image=None, managed_image_location=None):  # pylint: disable=line-too-long, unused-argument
+                        managed_image=None, managed_image_location=None, versioning=None):  # pylint: disable=line-too-long, unused-argument
 
     _require_defer(cmd)
 
     from azure.mgmt.imagebuilder.models import (ImageTemplateManagedImageDistributor, ImageTemplateVhdDistributor,
-                                                ImageTemplateSharedImageDistributor)
+                                                ImageTemplateSharedImageDistributor, DistributeVersioner)
     existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
                                          resource_group_name=resource_group_name,
                                          image_template_name=image_template_name)
@@ -656,8 +668,12 @@ def add_template_output(cmd, client, resource_group_name, image_template_name, g
         distributor = ImageTemplateSharedImageDistributor(
             run_output_name=output_name or parsed['child_name_1'], gallery_image_id=gallery_image_definition,
             replication_regions=gallery_replication_regions or [location])
+        if versioning:
+            versioner = DistributeVersioner()
+            versioner.scheme = versioning
+            distributor.versioning = versioner
     elif is_vhd:
-        distributor = ImageTemplateVhdDistributor(run_output_name=output_name)
+        distributor = ImageTemplateVhdDistributor(run_output_name=output_name, uri=vhd_uri)
 
     if distributor:
         distributor.artifact_tags = tags or {}
@@ -713,6 +729,67 @@ def clear_template_output(cmd, client, resource_group_name, image_template_name)
 
     return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
+
+
+def set_template_output_versioning(cmd, client, resource_group_name, image_template_name, output_name, scheme, major=None):  # pylint: disable=line-too-long, unused-argument
+
+    _require_defer(cmd)
+
+    from azure.mgmt.imagebuilder.models import DistributeVersionerLatest, DistributeVersionerSource
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
+
+    distribute = [distribute for distribute in existing_image_template.distribute
+                  if distribute.run_output_name.lower() == output_name.lower()] \
+        if existing_image_template.distribute else []
+
+    if not distribute:
+        raise CLIError("Output with output name {} not in image template distribute list.".format(output_name))
+
+    if scheme == 'Latest':
+        distribute[0].versioning = DistributeVersionerLatest(scheme=scheme, major=major)
+    else:
+        distribute[0].versioning = DistributeVersionerSource(scheme=scheme)
+
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
+                      resource_group_name=resource_group_name, image_template_name=image_template_name)
+
+
+def remove_template_output_versioning(cmd, client, resource_group_name, image_template_name, output_name):
+    _require_defer(cmd)
+
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
+
+    distribute = [distribute for distribute in existing_image_template.distribute
+                  if distribute.run_output_name.lower() == output_name.lower()] \
+        if existing_image_template.distribute else []
+
+    if not distribute:
+        raise CLIError("Output with output name {} not in image template distribute list.".format(output_name))
+
+    distribute[0].versioning = None
+
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
+                      resource_group_name=resource_group_name, image_template_name=image_template_name)
+
+
+def show_template_output_versioning(cmd, client, resource_group_name, image_template_name, output_name):
+    _require_defer(cmd)
+
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
+    distribute = [distribute for distribute in existing_image_template.distribute
+                  if distribute.run_output_name.lower() == output_name.lower()] \
+        if existing_image_template.distribute else []
+
+    if not distribute:
+        raise CLIError("Output with output name {} not in image template distribute list.".format(output_name))
+
+    return distribute[0].versioning
 
 
 def add_template_customizer(cmd, client, resource_group_name, image_template_name, customizer_name, customizer_type,
@@ -812,9 +889,12 @@ def add_template_validator(cmd, client, resource_group_name, image_template_name
     existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
                                          resource_group_name=resource_group_name,
                                          image_template_name=image_template_name)
-    image_template_properties_validate = ImageTemplatePropertiesValidate(
-        continue_distribute_on_failure=dis_on_failure, source_validation_only=source_validation_only)
-    existing_image_template.validate = image_template_properties_validate
+    if not existing_image_template.validate:
+        existing_image_template.validate = ImageTemplatePropertiesValidate(
+            continue_distribute_on_failure=dis_on_failure, source_validation_only=source_validation_only)
+    else:
+        existing_image_template.validate.continue_distribute_on_failure = dis_on_failure
+        existing_image_template.validate.source_validation_only = source_validation_only
 
     return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update,
                       parameters=existing_image_template, resource_group_name=resource_group_name,
@@ -844,4 +924,47 @@ def show_template_validator(cmd, client, resource_group_name, image_template_nam
                                          image_template_name=image_template_name)
     return existing_image_template.validate
 
+
+def add_or_update_template_optimizer(cmd, client, resource_group_name, image_template_name, enable_vm_boot=None):
+    _require_defer(cmd)
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
+
+    from azure.mgmt.imagebuilder.models import ImageTemplatePropertiesOptimize, ImageTemplatePropertiesOptimizeVmBoot
+    image_template_properties_optimize = existing_image_template.optimize or ImageTemplatePropertiesOptimize()
+
+    if enable_vm_boot is not None:
+        state = "Enabled" if enable_vm_boot else "Disabled"
+        vm_boot = ImageTemplatePropertiesOptimizeVmBoot(state=state)
+        image_template_properties_optimize.vm_boot = vm_boot
+        existing_image_template.optimize = image_template_properties_optimize
+
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update,
+                      parameters=existing_image_template, resource_group_name=resource_group_name,
+                      image_template_name=image_template_name)
+
+
+def remove_template_optimizer(cmd, client, resource_group_name, image_template_name):
+    _require_defer(cmd)
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
+
+    if not existing_image_template.optimize:
+        raise ResourceNotFoundError("No optimize existing in this image template, no need to clear.")
+
+    existing_image_template.optimize = None
+
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
+                      resource_group_name=resource_group_name, image_template_name=image_template_name)
+
+
+def show_template_optimizer(cmd, client, resource_group_name, image_template_name):
+    _require_defer(cmd)
+
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
+    return existing_image_template.optimize
 # endregion

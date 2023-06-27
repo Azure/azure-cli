@@ -711,6 +711,11 @@ appconfig kv import:
     src_connection_string:
       rule_exclusions:
       - option_length_too_long
+appconfig snapshot list:
+  parameters:
+    snapshot_name:
+      rule_exclusions:
+      - missing_parameter_test_coverage
 appconfig update:
   parameters:
     encryption_key_version:
@@ -925,6 +930,11 @@ backup restore restore-disks:
       rule_exclusions:
       - option_length_too_long
     storage_account_resource_group:
+      rule_exclusions:
+      - option_length_too_long
+backup vault create:
+  parameters:
+    cross_subscription_restore_state:
       rule_exclusions:
       - option_length_too_long
 backup vault backup-properties set:
@@ -1431,6 +1441,14 @@ cosmosdb create:
     virtual_network_rules:
       rule_exclusions:
       - option_length_too_long
+    gremlin_databases_to_restore:
+      rule_exclusions:
+      - option_length_too_long
+cosmosdb restore:
+  parameters:
+    gremlin_databases_to_restore:
+      rule_exclusions:
+      - option_length_too_long
 cosmosdb mongodb collection create:
   parameters:
     analytical_storage_ttl:
@@ -1484,71 +1502,6 @@ cosmosdb collection:
     db_resource_group_name:
       rule_exclusions:
         - parameter_should_not_end_in_resource_group
-deploymentmanager service create:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-    target_subscription_id:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service delete:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service list:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service show:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service update:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-    target_subscription_id:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service-unit create:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-    target_resource_group:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service-unit delete:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service-unit list:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service-unit show:
-  parameters:
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-deploymentmanager service-unit update:
-  parameters:
-    deployment_mode:
-      rule_exclusions:
-      - no_parameter_defaults_for_update_commands
-    service_topology_name:
-      rule_exclusions:
-      - option_length_too_long
-    target_resource_group:
-      rule_exclusions:
-      - option_length_too_long
 disk create:
   parameters:
     gallery_image_reference:
@@ -3501,6 +3454,9 @@ sql vm update:
     prompt:
       rule_exclusions:
       - no_parameter_defaults_for_update_commands
+    workspace_sub:
+      rule_exclusions:
+      - missing_parameter_test_coverage
 staticwebapp create:
   parameters:
     app_artifact_location:

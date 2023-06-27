@@ -31,8 +31,8 @@ def register_providers():
     _register_one_provider('Microsoft.DBforMySQL/servers', '2018-06-01', False, '2017-12-01-preview')
     _register_one_provider('Microsoft.DBforMariaDB/servers', '2018-06-01', False)
     _register_one_provider('Microsoft.DBforPostgreSQL/servers', '2018-06-01', False, '2017-12-01-preview')
-    _register_one_provider("Microsoft.DesktopVirtualization/hostpools", '2021-04-01-preview', True)
-    _register_one_provider("Microsoft.DesktopVirtualization/workspaces", '2021-04-01-preview', True)
+    _register_one_provider("Microsoft.DesktopVirtualization/hostpools", '2022-10-14-preview', True)
+    _register_one_provider("Microsoft.DesktopVirtualization/workspaces", '2022-10-14-preview', True)
     _register_one_provider('Microsoft.Devices/IotHubs', '2020-03-01', True)
     _register_one_provider('Microsoft.DeviceUpdate/accounts', '2020-03-01-preview', True)
     _register_one_provider('Microsoft.DocumentDB/databaseAccounts', '2019-08-01-preview', False, '2020-03-01')
@@ -40,6 +40,7 @@ def register_providers():
     _register_one_provider('Microsoft.EventGrid/topics', '2020-04-01-preview', True)
     _register_one_provider('Microsoft.EventGrid/domains', '2020-04-01-preview', True)
     _register_one_provider("Microsoft.EventHub/namespaces", "2021-06-01-preview", True)
+    _register_one_provider('Microsoft.HardwareSecurityModules/cloudHsmClusters', '2022-08-31-preview', True)
     _register_one_provider("Microsoft.HDInsight/clusters", '2018-06-01-preview', True)
     _register_one_provider("Microsoft.HybridCompute/privateLinkScopes", '2021-05-20', True)
     _register_one_provider("Microsoft.HealthcareApis/services", "2020-03-30", True)
@@ -51,6 +52,7 @@ def register_providers():
     # _register_one_provider("Microsoft.Media/videoanalyzers", "2021-11-01-preview", True)
     # "Microsoft.Migrate/assessmentProjects", "2020-05-01-preview", False
     # "Microsoft.Migrate/migrateProjects", "2020-06-01-preview", False
+    _register_one_provider("Microsoft.Monitor/accounts", "2021-06-03-preview", True)
     _register_one_provider('Microsoft.Network/applicationGateways', '2020-05-01', True)
     _register_one_provider('Microsoft.Network/privateLinkServices', '2021-05-01', True)
     # "Microsoft.OffAzure/masterSites", "2020-07-07", False
@@ -73,6 +75,7 @@ def register_providers():
     _register_one_provider("Microsoft.KubernetesConfiguration/privateLinkScopes", '2022-04-02-preview', True)
     _register_one_provider("Microsoft.OpenEnergyPlatform/energyServices", '2022-04-04-preview', True)
     _register_one_provider("Microsoft.MachineLearningServices/registries", '2022-10-01-preview', True)
+    _register_one_provider('Microsoft.DBforMySQL/flexibleServers', '2022-09-30-privatepreview', False)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None, support_connection_operation=True):  # pylint: disable=line-too-long

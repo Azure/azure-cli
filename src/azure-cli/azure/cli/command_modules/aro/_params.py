@@ -17,7 +17,7 @@ from azure.cli.command_modules.aro._validators import validate_vnet_resource_gro
 from azure.cli.command_modules.aro._validators import validate_worker_count
 from azure.cli.command_modules.aro._validators import validate_worker_vm_disk_size_gb
 from azure.cli.command_modules.aro._validators import validate_refresh_cluster_credentials
-from azure.cli.command_modules.aro._validators import validate_install_version_format
+from azure.cli.command_modules.aro._validators import validate_version_format
 from azure.cli.core.commands.parameters import name_type
 from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag
 from azure.cli.core.commands.parameters import resource_group_name_type
@@ -55,9 +55,10 @@ def load_arguments(self, _):
                    help='Client secret of cluster service principal.',
                    validator=validate_client_secret(isCreate=True))
 
-        c.argument('install_version',
+        c.argument('version',
+                   options_list=['--version', c.deprecate(target='--install-version', redirect='--version', hide=True)],
                    help='OpenShift version to use for cluster creation.',
-                   validator=validate_install_version_format)
+                   validator=validate_version_format)
 
         c.argument('pod_cidr',
                    help='CIDR of pod network. Must be a minimum of /18 or larger.',
@@ -120,3 +121,7 @@ def load_arguments(self, _):
                    help='Refresh cluster application credentials.',
                    options_list=['--refresh-credentials'],
                    validator=validate_refresh_cluster_credentials)
+    with self.argument_context('aro get-admin-kubeconfig') as c:
+        c.argument('file',
+                   help='Path to the file where kubeconfig should be saved. Default: kubeconfig in local directory',
+                   options_list=['--file', '-f'])

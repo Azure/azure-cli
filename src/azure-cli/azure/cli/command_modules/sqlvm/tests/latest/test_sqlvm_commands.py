@@ -5,7 +5,8 @@
 
 import string
 from azure.cli.core.azclierror import (
-    RequiredArgumentMissingError
+    RequiredArgumentMissingError,
+    InvalidArgumentValueError
 )
 from azure.cli.core.mock import DummyCli
 from azure.cli.testsdk.base import execute
@@ -33,7 +34,8 @@ sqlvm_max_length = 15
 class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=sqlvm_name_prefix, location='westus',
                  vm_user='admin123', vm_password='SecretPassword123', parameter_name='sqlvm',
-                 resource_group_parameter_name='resource_group', skip_delete=True):
+                 resource_group_parameter_name='resource_group', skip_delete=True,
+                 image='microsoftsqlserver:sql2019-ws2022:enterprise:latest'):
         super(SqlVirtualMachinePreparer, self).__init__(name_prefix, sqlvm_max_length)
         self.location = location
         self.parameter_name = parameter_name
@@ -41,12 +43,13 @@ class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
         self.vm_password = vm_password
         self.resource_group_parameter_name = resource_group_parameter_name
         self.skip_delete = skip_delete
+        self.image = image
 
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
-        template = ('az vm create -l {} -g {} -n {} --admin-username {} --admin-password {} --image microsoftsqlserver:sql2019-ws2022:enterprise:latest'
+        template = ('az vm create -l {} -g {} -n {} --admin-username {} --admin-password {} --image {}'
                     ' --size Standard_DS2_v2 --nsg-rule NONE')
-        execute(DummyCli(), template.format(self.location, group, name, self.vm_user, self.vm_password))
+        execute(DummyCli(), template.format(self.location, group, name, self.vm_user, self.vm_password, self.image))
         return {self.parameter_name: name}
 
     def remove_resource(self, name, **kwargs):
@@ -110,11 +113,12 @@ class DomainPreparer(AbstractPreparer, SingleValueReplacer):
 
 class SqlVmScenarioTest(ScenarioTest):
     @AllowLargeResponse()
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(parameter_name='resource_group')
+    @ResourceGroupPreparer(parameter_name='resource_group2')
     @SqlVirtualMachinePreparer()
     @LogAnalyticsWorkspacePreparer(location="westus")
-    def test_sqlvm_mgmt_assessment(self, resource_group, resource_group_location, sqlvm, laworkspace):
-        
+    def test_sqlvm_mgmt_assessment(self, resource_group, resource_group2, resource_group_location, sqlvm, laworkspace):
+
         # create sqlvm1 with minimal required parameters
         self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --sql-mgmt-type {}'
                  .format(sqlvm, resource_group, resource_group_location, 'PAYG', 'Full'),
@@ -130,10 +134,10 @@ class SqlVmScenarioTest(ScenarioTest):
             self.cmd('sql vm update -n {} -g {} --assessment-weekly-interval {} --assessment-day-of-week {} --assessment-start-time-local {} '
                  .format(sqlvm, resource_group, 1, 'Monday', '20:30'))
 
-        # test assessment schedule enabling succeeds
+        # test assessment schedule enabling succeeds with agent rg set to another rg
         self.cmd('sql vm update -n {} -g {} --assessment-weekly-interval {} --assessment-day-of-week {} --assessment-start-time-local {} '
-                 '--workspace-rg {} --workspace-name {}'
-                 .format(sqlvm, resource_group, 1, 'Monday', '20:30', resource_group, laworkspace),
+                 '--workspace-rg {} --workspace-name {} --agent-rg {}'
+                 .format(sqlvm, resource_group, 1, 'Monday', '20:30', resource_group, laworkspace, resource_group2),
                  checks=[
                      JMESPathCheck('name', sqlvm),
                      JMESPathCheck('location', resource_group_location),
@@ -715,3 +719,84 @@ class SqlVmAndGroupScenarioTest(ScenarioTest):
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('provisioningState', "Succeeded")
                  ])
+
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='sqlvm_cli_test_aad')
+    @SqlVirtualMachinePreparer(parameter_name='sqlvm2019', image='microsoftsqlserver:sql2019-ws2022:enterprise:latest')
+    @SqlVirtualMachinePreparer(parameter_name='sqlvm2022', image='microsoftsqlserver:sql2022-ws2022:enterprise-gen2:latest')
+    def test_sqlvm_aad_auth_negative(self, resource_group, resource_group_location, sqlvm2019, sqlvm2022):
+        """
+        Due to the requirement of Azure AD Global Administrator or Privileged Role Administrator role to grant the
+        necessary permissions for the positive test cases. This automatic test case concentrates on negative test cases
+        covering the validation of Azure AD authentication
+        """
+
+        # Test create sqlvm2019
+        self.cmd('sql vm create -n {} -g {} -l {} --license-type {}'
+                 .format(sqlvm2019, resource_group, resource_group_location, 'PAYG'),
+                    checks=[
+                        JMESPathCheck('name', sqlvm2019),
+                        JMESPathCheck('location', resource_group_location),
+                        JMESPathCheck('sqlServerLicenseType', 'PAYG'),
+                        JMESPathCheck('sqlManagement', 'LightWeight')
+                    ]).get_output_in_json()
+
+        # Test create sqlvm2022
+        self.cmd('sql vm create -n {} -g {} -l {} --license-type {}'
+                 .format(sqlvm2022, resource_group, resource_group_location, 'PAYG'),
+                    checks=[
+                        JMESPathCheck('name', sqlvm2022),
+                        JMESPathCheck('location', resource_group_location),
+                        JMESPathCheck('sqlServerLicenseType', 'PAYG'),
+                        JMESPathCheck('sqlManagement', 'LightWeight')
+                    ]).get_output_in_json()
+
+        # Create user-assigned managed identity to attach to the virtual machine
+        attached_identity = self.cmd('identity create -n {} -g {}'.format('attached_msi', resource_group)).get_output_in_json()
+        self.cmd('vm identity assign -n {} -g {} --identities {}'.format(sqlvm2022, resource_group, attached_identity['name']))
+
+        # Create user-assigned managed identity not attached to any virtual machine
+        unattached_identity = self.cmd('identity create -n {} -g {}'.format('other_msi', resource_group)).get_output_in_json()
+
+        # Test both enable and validate commands
+        commands = ["enable-azure-ad-auth", "validate-azure-ad-auth"]
+
+        for command in commands:
+            validate_sql2019 = 'sql vm {} -n {} -g {}'.format(command, sqlvm2019, resource_group)
+
+            # Assert customer cannot enable Azure AD authentication on SQL Server 2019
+            with self.assertRaisesRegex(InvalidArgumentValueError, "Azure AD authentication requires SQL Server 2022 on Windows platform"):
+                self.cmd(validate_sql2019)
+
+            validate_system_msi = 'sql vm {} -n {} -g {}'.format(command, sqlvm2022, resource_group)
+            validate_attached_msi = 'sql vm {} -n {} -g {} --msi-client-id {}'.format(command, sqlvm2022, resource_group, attached_identity['clientId'])
+            validate_unattached_msi = 'sql vm {} -n {} -g {} --msi-client-id {}'.format(command, sqlvm2022, resource_group, unattached_identity['clientId'])
+
+            # Assert customer cannot enable Azure AD authentication with system-assigned MSI but the system-asigned MSI is not enabled on the VM
+            with self.assertRaisesRegex(InvalidArgumentValueError, "Enable Azure AD authentication with system-assigned managed identity "\
+                                        "but the system-assigned managed identity is not enabled on this Azure virtual machine."):
+                self.cmd(validate_system_msi)
+
+            # Assert customer cannot enable Azure AD authentication with user-assigned MSI but the user-asigned MSI is not attached on the VM
+            with self.assertRaisesRegex(InvalidArgumentValueError, "Enable Azure AD authentication with user-assigned managed identity {}, "\
+                                        "but the managed identity is not attached to this Azure virtual machine.".format(unattached_identity['clientId'])):
+                self.cmd(validate_unattached_msi)
+
+            # Enable the system-assigned managed identity on the VM
+            self.cmd('vm identity assign -n {} -g {} --identities [system]'.format(sqlvm2022, resource_group))
+
+            # Assert customer cannot enable Azure AD authentication with system-assigned MSI
+            # if the system-assigned managed identity does not have enough permission
+            with self.assertRaisesRegex(InvalidArgumentValueError, "The managed identity is lack of the following roles for Azure AD authentication: "\
+                                        "User.Read.All, Application.Read.All, GroupMember.Read.All."):
+                self.cmd(validate_system_msi)
+
+            # Disable the system-assigned managed identity on the VM
+            self.cmd('vm identity remove -n {} -g {} --identities [system]'.format(sqlvm2022, resource_group))
+
+            # Assert customer cannot enable Azure AD authentication with user-assigned MSI
+            # if the user-assigned managed identity does not have enough permission
+            with self.assertRaisesRegex(InvalidArgumentValueError, "The managed identity is lack of the following roles for Azure AD authentication: "\
+                                        "User.Read.All, Application.Read.All, GroupMember.Read.All."):
+                self.cmd(validate_attached_msi)
