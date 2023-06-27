@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"location": "northeurope", "properties": {"addressSpace": {"addressPrefixes":
+    body: '{"location": "eastus", "properties": {"addressSpace": {"addressPrefixes":
       ["10.10.0.0/16"]}, "enableDdosProtection": false, "enableVmProtection": false,
       "subnets": [{"name": "clitestsubnet5", "properties": {"addressPrefix": "10.10.0.0/24"}}]}}'
     headers:
@@ -13,7 +13,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '248'
+      - '243'
       Content-Type:
       - application/json
       ParameterSetName:
@@ -25,13 +25,13 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"clitestvnet5\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5\",\r\n
-        \ \"etag\": \"W/\\\"d7d49f9e-cce8-4fde-81dd-1731b36b8c52\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"northeurope\",\r\n
+        \ \"etag\": \"W/\\\"ef68ed35-a507-472d-8123-e75794ef1a7c\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"a3ec10bf-ad08-4c2e-b48f-0ec36eae31b8\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        \"dab13b77-2759-49f2-b7bc-1f057c557c28\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
         [\r\n        \"10.10.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
         \     {\r\n        \"name\": \"clitestsubnet5\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5\",\r\n
-        \       \"etag\": \"W/\\\"d7d49f9e-cce8-4fde-81dd-1731b36b8c52\\\"\",\r\n
+        \       \"etag\": \"W/\\\"ef68ed35-a507-472d-8123-e75794ef1a7c\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.10.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -42,15 +42,15 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/northeurope/operations/fada63fb-7a70-4334-8c74-8d95dea024da?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/95f2778d-c9be-4fae-b830-371bc8636da4?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '1259'
+      - '1254'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:11 GMT
+      - Mon, 26 Jun 2023 17:37:11 GMT
       expires:
       - '-1'
       pragma:
@@ -63,9 +63,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 889b0f91-15bd-4c3d-be9f-b8702e4a08b1
+      - be88b636-1cbe-4af2-a400-0d0d9e539d0b
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -85,19 +85,19 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/northeurope/operations/fada63fb-7a70-4334-8c74-8d95dea024da?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/95f2778d-c9be-4fae-b830-371bc8636da4?api-version=2022-01-01
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '30'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:11 GMT
+      - Mon, 26 Jun 2023 17:37:12 GMT
       expires:
       - '-1'
       pragma:
@@ -114,7 +114,56 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 09524957-23f8-4019-ac99-3752b407917b
+      - 8ea63140-a34f-4616-a71d-29cf5b2940d0
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --address-prefix --subnet-name --subnet-prefix
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/95f2778d-c9be-4fae-b830-371bc8636da4?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jun 2023 17:37:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 5a45822c-4e65-40c5-b843-0976b60a1470
     status:
       code: 200
       message: OK
@@ -138,13 +187,13 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"clitestvnet5\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5\",\r\n
-        \ \"etag\": \"W/\\\"20bbe44f-62ec-4acd-865d-cac93ba32e70\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"northeurope\",\r\n
+        \ \"etag\": \"W/\\\"0d738968-3c55-4ab2-bb8e-6747eacaa315\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"a3ec10bf-ad08-4c2e-b48f-0ec36eae31b8\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        \"dab13b77-2759-49f2-b7bc-1f057c557c28\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
         [\r\n        \"10.10.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
         \     {\r\n        \"name\": \"clitestsubnet5\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5\",\r\n
-        \       \"etag\": \"W/\\\"20bbe44f-62ec-4acd-865d-cac93ba32e70\\\"\",\r\n
+        \       \"etag\": \"W/\\\"0d738968-3c55-4ab2-bb8e-6747eacaa315\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.10.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -155,13 +204,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1261'
+      - '1256'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:11 GMT
+      - Mon, 26 Jun 2023 17:37:22 GMT
       etag:
-      - W/"20bbe44f-62ec-4acd-865d-cac93ba32e70"
+      - W/"0d738968-3c55-4ab2-bb8e-6747eacaa315"
       expires:
       - '-1'
       pragma:
@@ -178,7 +227,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7382020e-dfea-47ca-b838-ba0cbdfe836f
+      - f332be8f-6e2c-4498-b023-696ce440c2d1
     status:
       code: 200
       message: OK
@@ -208,7 +257,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 22 Jun 2023 07:02:11 GMT
+      - Mon, 26 Jun 2023 17:37:22 GMT
       expires:
       - '-1'
       pragma:
@@ -239,16 +288,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000002?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002","name":"clitest.rg000002","type":"Microsoft.Resources/resourceGroups","location":"northeurope","tags":{"product":"azurecli","cause":"automation","test":"test_postgres_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg","date":"2023-06-22T07:01:59Z","module":"rdbms"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002","name":"clitest.rg000002","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","test":"test_postgres_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg","date":"2023-06-26T17:37:03Z","module":"rdbms"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '416'
+      - '411'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:11 GMT
+      - Mon, 26 Jun 2023 17:37:23 GMT
       expires:
       - '-1'
       pragma:
@@ -282,7 +331,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/northeurope/checkNameAvailability?api-version=2023-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/checkNameAvailability?api-version=2023-03-01-preview
   response:
     body:
       string: '{"name":"azuredbclitest-000003","type":"Microsoft.DBforPostgreSQL/flexibleServers","nameAvailable":true,"message":""}'
@@ -294,7 +343,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:14 GMT
+      - Mon, 26 Jun 2023 17:37:25 GMT
       expires:
       - '-1'
       pragma:
@@ -330,19 +379,19 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/northeurope/capabilities?api-version=2023-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/capabilities?api-version=2023-03-01-preview
   response:
     body:
-      string: '{"value":[{"name":"FlexibleServerCapabilities","supportedServerEditions":[{"name":"Burstable","defaultSkuName":"Standard_B1ms","supportedStorageEditions":[{"name":"ManagedDisk","defaultStorageSizeMb":32768,"supportedStorageMb":[{"supportedIops":120,"storageSizeMb":32768,"defaultIopsTier":"P4","supportedIopsTiers":[{"name":"P4","iops":120},{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":240,"storageSizeMb":65536,"defaultIopsTier":"P6","supportedIopsTiers":[{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":500,"storageSizeMb":131072,"defaultIopsTier":"P10","supportedIopsTiers":[{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":1100,"storageSizeMb":262144,"defaultIopsTier":"P15","supportedIopsTiers":[{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":2300,"storageSizeMb":524288,"defaultIopsTier":"P20","supportedIopsTiers":[{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":5000,"storageSizeMb":1048576,"defaultIopsTier":"P30","supportedIopsTiers":[{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":2097152,"defaultIopsTier":"P40","supportedIopsTiers":[{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4193280,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4194304,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":16000,"storageSizeMb":8388608,"defaultIopsTier":"P60","supportedIopsTiers":[{"name":"P60","iops":16000},{"name":"P70","iops":18000},{"name":"P80","iops":20000}]},{"supportedIops":18000,"storageSizeMb":16777216,"defaultIopsTier":"P70","supportedIopsTiers":[{"name":"P70","iops":18000},{"name":"P80","iops":20000}]}]}],"supportedServerSkus":[{"name":"Standard_B1ms","vCores":1,"supportedIops":640,"supportedMemoryPerVcoreMb":2048,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_B2s","vCores":2,"supportedIops":1280,"supportedMemoryPerVcoreMb":2048,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_B2ms","vCores":2,"supportedIops":1920,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_B4ms","vCores":4,"supportedIops":2880,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_B8ms","vCores":8,"supportedIops":4320,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_B12ms","vCores":12,"supportedIops":4320,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_B16ms","vCores":16,"supportedIops":4320,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_B20ms","vCores":20,"supportedIops":4320,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]}]},{"name":"GeneralPurpose","defaultSkuName":"Standard_D2ds_v4","supportedStorageEditions":[{"name":"ManagedDisk","defaultStorageSizeMb":65536,"supportedStorageMb":[{"supportedIops":120,"storageSizeMb":32768,"defaultIopsTier":"P4","supportedIopsTiers":[{"name":"P4","iops":120},{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":240,"storageSizeMb":65536,"defaultIopsTier":"P6","supportedIopsTiers":[{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":500,"storageSizeMb":131072,"defaultIopsTier":"P10","supportedIopsTiers":[{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":1100,"storageSizeMb":262144,"defaultIopsTier":"P15","supportedIopsTiers":[{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":2300,"storageSizeMb":524288,"defaultIopsTier":"P20","supportedIopsTiers":[{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":5000,"storageSizeMb":1048576,"defaultIopsTier":"P30","supportedIopsTiers":[{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":2097152,"defaultIopsTier":"P40","supportedIopsTiers":[{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4193280,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4194304,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":16000,"storageSizeMb":8388608,"defaultIopsTier":"P60","supportedIopsTiers":[{"name":"P60","iops":16000},{"name":"P70","iops":18000},{"name":"P80","iops":20000}]},{"supportedIops":18000,"storageSizeMb":16777216,"defaultIopsTier":"P70","supportedIopsTiers":[{"name":"P70","iops":18000},{"name":"P80","iops":20000}]}]}],"supportedServerSkus":[{"name":"Standard_D2s_v3","vCores":2,"supportedIops":3200,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D4s_v3","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D8s_v3","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D16s_v3","vCores":16,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D32s_v3","vCores":32,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D48s_v3","vCores":48,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D64s_v3","vCores":64,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D2ds_v4","vCores":2,"supportedIops":3200,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D4ds_v4","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D8ds_v4","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D16ds_v4","vCores":16,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D32ds_v4","vCores":32,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D48ds_v4","vCores":48,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D64ds_v4","vCores":64,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D2ds_v5","vCores":2,"supportedIops":3750,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D4ds_v5","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D8ds_v5","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D16ds_v5","vCores":16,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D32ds_v5","vCores":32,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D48ds_v5","vCores":48,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D64ds_v5","vCores":64,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D96ds_v5","vCores":96,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]}]},{"name":"MemoryOptimized","defaultSkuName":"Standard_E2ds_v4","supportedStorageEditions":[{"name":"ManagedDisk","defaultStorageSizeMb":131072,"supportedStorageMb":[{"supportedIops":120,"storageSizeMb":32768,"defaultIopsTier":"P4","supportedIopsTiers":[{"name":"P4","iops":120},{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":240,"storageSizeMb":65536,"defaultIopsTier":"P6","supportedIopsTiers":[{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":500,"storageSizeMb":131072,"defaultIopsTier":"P10","supportedIopsTiers":[{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":1100,"storageSizeMb":262144,"defaultIopsTier":"P15","supportedIopsTiers":[{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":2300,"storageSizeMb":524288,"defaultIopsTier":"P20","supportedIopsTiers":[{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":5000,"storageSizeMb":1048576,"defaultIopsTier":"P30","supportedIopsTiers":[{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":2097152,"defaultIopsTier":"P40","supportedIopsTiers":[{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4193280,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4194304,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":16000,"storageSizeMb":8388608,"defaultIopsTier":"P60","supportedIopsTiers":[{"name":"P60","iops":16000},{"name":"P70","iops":18000},{"name":"P80","iops":20000}]},{"supportedIops":18000,"storageSizeMb":16777216,"defaultIopsTier":"P70","supportedIopsTiers":[{"name":"P70","iops":18000},{"name":"P80","iops":20000}]}]}],"supportedServerSkus":[{"name":"Standard_E2s_v3","vCores":2,"supportedIops":3200,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E4s_v3","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E8s_v3","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E16s_v3","vCores":16,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E32s_v3","vCores":32,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E48s_v3","vCores":48,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E64s_v3","vCores":64,"supportedIops":20000,"supportedMemoryPerVcoreMb":6912,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E2ds_v4","vCores":2,"supportedIops":3200,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E4ds_v4","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E8ds_v4","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E16ds_v4","vCores":16,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E20ds_v4","vCores":20,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E32ds_v4","vCores":32,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E48ds_v4","vCores":48,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E64ds_v4","vCores":64,"supportedIops":20000,"supportedMemoryPerVcoreMb":6912,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E2ds_v5","vCores":2,"supportedIops":3750,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E4ds_v5","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E8ds_v5","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E16ds_v5","vCores":16,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E20ds_v5","vCores":20,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E32ds_v5","vCores":32,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E48ds_v5","vCores":48,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E64ds_v5","vCores":64,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]}]}],"supportedServerVersions":[{"name":"11","supportedVersionsToUpgrade":["12","13","14"]},{"name":"12","supportedVersionsToUpgrade":["13","14"]},{"name":"13","supportedVersionsToUpgrade":["14"]},{"name":"14","supportedVersionsToUpgrade":[]},{"name":"15","supportedVersionsToUpgrade":[]}],"fastProvisioningSupported":"Disabled","supportedFastProvisioningEditions":[],"geoBackupSupported":"Enabled","zoneRedundantHaSupported":"Enabled","zoneRedundantHaAndGeoBackupSupported":"Enabled","storageAutoGrowthSupported":"Disabled","onlineResizeSupported":"Disabled","restricted":"Disabled"}]}'
+      string: '{"value":[{"name":"FlexibleServerCapabilities","supportedServerEditions":[{"name":"Burstable","defaultSkuName":"Standard_B1ms","supportedStorageEditions":[{"name":"ManagedDisk","defaultStorageSizeMb":32768,"supportedStorageMb":[{"supportedIops":120,"storageSizeMb":32768,"defaultIopsTier":"P4","supportedIopsTiers":[{"name":"P4","iops":120},{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":240,"storageSizeMb":65536,"defaultIopsTier":"P6","supportedIopsTiers":[{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":500,"storageSizeMb":131072,"defaultIopsTier":"P10","supportedIopsTiers":[{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":1100,"storageSizeMb":262144,"defaultIopsTier":"P15","supportedIopsTiers":[{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":2300,"storageSizeMb":524288,"defaultIopsTier":"P20","supportedIopsTiers":[{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":5000,"storageSizeMb":1048576,"defaultIopsTier":"P30","supportedIopsTiers":[{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":2097152,"defaultIopsTier":"P40","supportedIopsTiers":[{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4193280,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4194304,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":16000,"storageSizeMb":8388608,"defaultIopsTier":"P60","supportedIopsTiers":[{"name":"P60","iops":16000},{"name":"P70","iops":18000},{"name":"P80","iops":20000}]},{"supportedIops":18000,"storageSizeMb":16777216,"defaultIopsTier":"P70","supportedIopsTiers":[{"name":"P70","iops":18000},{"name":"P80","iops":20000}]},{"supportedIops":20000,"storageSizeMb":33553408,"defaultIopsTier":"P80","supportedIopsTiers":[{"name":"P80","iops":20000}]}]}],"supportedServerSkus":[{"name":"Standard_B1ms","vCores":1,"supportedIops":640,"supportedMemoryPerVcoreMb":2048,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_B2s","vCores":2,"supportedIops":1280,"supportedMemoryPerVcoreMb":2048,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_B2ms","vCores":2,"supportedIops":1920,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_B4ms","vCores":4,"supportedIops":2880,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_B8ms","vCores":8,"supportedIops":4320,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_B12ms","vCores":12,"supportedIops":4320,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_B16ms","vCores":16,"supportedIops":4320,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_B20ms","vCores":20,"supportedIops":4320,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]}]},{"name":"GeneralPurpose","defaultSkuName":"Standard_D2ds_v4","supportedStorageEditions":[{"name":"ManagedDisk","defaultStorageSizeMb":65536,"supportedStorageMb":[{"supportedIops":120,"storageSizeMb":32768,"defaultIopsTier":"P4","supportedIopsTiers":[{"name":"P4","iops":120},{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":240,"storageSizeMb":65536,"defaultIopsTier":"P6","supportedIopsTiers":[{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":500,"storageSizeMb":131072,"defaultIopsTier":"P10","supportedIopsTiers":[{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":1100,"storageSizeMb":262144,"defaultIopsTier":"P15","supportedIopsTiers":[{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":2300,"storageSizeMb":524288,"defaultIopsTier":"P20","supportedIopsTiers":[{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":5000,"storageSizeMb":1048576,"defaultIopsTier":"P30","supportedIopsTiers":[{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":2097152,"defaultIopsTier":"P40","supportedIopsTiers":[{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4193280,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4194304,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":16000,"storageSizeMb":8388608,"defaultIopsTier":"P60","supportedIopsTiers":[{"name":"P60","iops":16000},{"name":"P70","iops":18000},{"name":"P80","iops":20000}]},{"supportedIops":18000,"storageSizeMb":16777216,"defaultIopsTier":"P70","supportedIopsTiers":[{"name":"P70","iops":18000},{"name":"P80","iops":20000}]},{"supportedIops":20000,"storageSizeMb":33553408,"defaultIopsTier":"P80","supportedIopsTiers":[{"name":"P80","iops":20000}]}]}],"supportedServerSkus":[{"name":"Standard_D2s_v3","vCores":2,"supportedIops":3200,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D4s_v3","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D8s_v3","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D16s_v3","vCores":16,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D32s_v3","vCores":32,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D48s_v3","vCores":48,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D64s_v3","vCores":64,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D2ds_v4","vCores":2,"supportedIops":3200,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D4ds_v4","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D8ds_v4","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D16ds_v4","vCores":16,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D32ds_v4","vCores":32,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D48ds_v4","vCores":48,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D64ds_v4","vCores":64,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D2ads_v5","vCores":2,"supportedIops":3200,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D4ads_v5","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D8ads_v5","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D16ads_v5","vCores":16,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D32ads_v5","vCores":32,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D48ads_v5","vCores":48,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D64ads_v5","vCores":64,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D96ads_v5","vCores":96,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D2ds_v5","vCores":2,"supportedIops":3750,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D4ds_v5","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D8ds_v5","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D16ds_v5","vCores":16,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D32ds_v5","vCores":32,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D48ds_v5","vCores":48,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D64ds_v5","vCores":64,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_D96ds_v5","vCores":96,"supportedIops":20000,"supportedMemoryPerVcoreMb":4096,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]}]},{"name":"MemoryOptimized","defaultSkuName":"Standard_E2ds_v4","supportedStorageEditions":[{"name":"ManagedDisk","defaultStorageSizeMb":131072,"supportedStorageMb":[{"supportedIops":120,"storageSizeMb":32768,"defaultIopsTier":"P4","supportedIopsTiers":[{"name":"P4","iops":120},{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":240,"storageSizeMb":65536,"defaultIopsTier":"P6","supportedIopsTiers":[{"name":"P6","iops":240},{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":500,"storageSizeMb":131072,"defaultIopsTier":"P10","supportedIopsTiers":[{"name":"P10","iops":500},{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":1100,"storageSizeMb":262144,"defaultIopsTier":"P15","supportedIopsTiers":[{"name":"P15","iops":1100},{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":2300,"storageSizeMb":524288,"defaultIopsTier":"P20","supportedIopsTiers":[{"name":"P20","iops":2300},{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":5000,"storageSizeMb":1048576,"defaultIopsTier":"P30","supportedIopsTiers":[{"name":"P30","iops":5000},{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":2097152,"defaultIopsTier":"P40","supportedIopsTiers":[{"name":"P40","iops":7500},{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4193280,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":7500,"storageSizeMb":4194304,"defaultIopsTier":"P50","supportedIopsTiers":[{"name":"P50","iops":7500}]},{"supportedIops":16000,"storageSizeMb":8388608,"defaultIopsTier":"P60","supportedIopsTiers":[{"name":"P60","iops":16000},{"name":"P70","iops":18000},{"name":"P80","iops":20000}]},{"supportedIops":18000,"storageSizeMb":16777216,"defaultIopsTier":"P70","supportedIopsTiers":[{"name":"P70","iops":18000},{"name":"P80","iops":20000}]},{"supportedIops":20000,"storageSizeMb":33553408,"defaultIopsTier":"P80","supportedIopsTiers":[{"name":"P80","iops":20000}]}]}],"supportedServerSkus":[{"name":"Standard_E2s_v3","vCores":2,"supportedIops":3200,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E4s_v3","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E8s_v3","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E16s_v3","vCores":16,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E32s_v3","vCores":32,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E48s_v3","vCores":48,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E64s_v3","vCores":64,"supportedIops":20000,"supportedMemoryPerVcoreMb":6912,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E2ds_v4","vCores":2,"supportedIops":3200,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E4ds_v4","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E8ds_v4","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E16ds_v4","vCores":16,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E20ds_v4","vCores":20,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E32ds_v4","vCores":32,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E48ds_v4","vCores":48,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E64ds_v4","vCores":64,"supportedIops":20000,"supportedMemoryPerVcoreMb":6912,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E2ads_v5","vCores":2,"supportedIops":3750,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E4ads_v5","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E8ads_v5","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E16ads_v5","vCores":16,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E20ads_v5","vCores":20,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E32ads_v5","vCores":32,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E48ads_v5","vCores":48,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E64ads_v5","vCores":64,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E96ads_v5","vCores":96,"supportedIops":20000,"supportedMemoryPerVcoreMb":7168,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E2ds_v5","vCores":2,"supportedIops":3750,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E4ds_v5","vCores":4,"supportedIops":6400,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E8ds_v5","vCores":8,"supportedIops":12800,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E16ds_v5","vCores":16,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E20ds_v5","vCores":20,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E32ds_v5","vCores":32,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E48ds_v5","vCores":48,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]},{"name":"Standard_E64ds_v5","vCores":64,"supportedIops":20000,"supportedMemoryPerVcoreMb":8192,"supportedZones":["1","2","3"],"supportedHaMode":["SameZone","ZoneRedundant"]}]}],"supportedServerVersions":[{"name":"11","supportedVersionsToUpgrade":["12","13","14","15"]},{"name":"12","supportedVersionsToUpgrade":["13","14","15"]},{"name":"13","supportedVersionsToUpgrade":["14","15"]},{"name":"14","supportedVersionsToUpgrade":["15"]},{"name":"15","supportedVersionsToUpgrade":[]}],"fastProvisioningSupported":"Enabled","supportedFastProvisioningEditions":[{"supportedTier":"Burstable","supportedSku":"standard_b1ms","supportedStorageGb":32,"supportedServerVersions":"12","serverCount":0},{"supportedTier":"Burstable","supportedSku":"standard_b2s","supportedStorageGb":32,"supportedServerVersions":"12","serverCount":0},{"supportedTier":"GeneralPurpose","supportedSku":"standard_d2s_v3","supportedStorageGb":128,"supportedServerVersions":"12","serverCount":0},{"supportedTier":"GeneralPurpose","supportedSku":"standard_d2ds_v4","supportedStorageGb":128,"supportedServerVersions":"12","serverCount":0},{"supportedTier":"MemoryOptimized","supportedSku":"standard_e2ds_v4","supportedStorageGb":512,"supportedServerVersions":"12","serverCount":0},{"supportedTier":"Burstable","supportedSku":"standard_b1ms","supportedStorageGb":32,"supportedServerVersions":"13","serverCount":0},{"supportedTier":"Burstable","supportedSku":"standard_b2s","supportedStorageGb":32,"supportedServerVersions":"13","serverCount":0},{"supportedTier":"GeneralPurpose","supportedSku":"standard_d2s_v3","supportedStorageGb":128,"supportedServerVersions":"13","serverCount":0},{"supportedTier":"GeneralPurpose","supportedSku":"standard_d2ds_v4","supportedStorageGb":128,"supportedServerVersions":"13","serverCount":0},{"supportedTier":"MemoryOptimized","supportedSku":"standard_e2ds_v4","supportedStorageGb":512,"supportedServerVersions":"13","serverCount":0},{"supportedTier":"Burstable","supportedSku":"standard_b1ms","supportedStorageGb":32,"supportedServerVersions":"14","serverCount":4},{"supportedTier":"Burstable","supportedSku":"standard_b2s","supportedStorageGb":32,"supportedServerVersions":"14","serverCount":0},{"supportedTier":"GeneralPurpose","supportedSku":"standard_d2s_v3","supportedStorageGb":128,"supportedServerVersions":"14","serverCount":0},{"supportedTier":"GeneralPurpose","supportedSku":"standard_d2ds_v4","supportedStorageGb":128,"supportedServerVersions":"14","serverCount":0},{"supportedTier":"MemoryOptimized","supportedSku":"standard_e2ds_v4","supportedStorageGb":512,"supportedServerVersions":"14","serverCount":0},{"supportedTier":"Burstable","supportedSku":"standard_b1ms","supportedStorageGb":32,"supportedServerVersions":"15","serverCount":0},{"supportedTier":"Burstable","supportedSku":"standard_b2s","supportedStorageGb":32,"supportedServerVersions":"15","serverCount":0},{"supportedTier":"GeneralPurpose","supportedSku":"standard_d2s_v3","supportedStorageGb":128,"supportedServerVersions":"15","serverCount":0},{"supportedTier":"GeneralPurpose","supportedSku":"standard_d2ds_v4","supportedStorageGb":128,"supportedServerVersions":"15","serverCount":0},{"supportedTier":"MemoryOptimized","supportedSku":"standard_e2ds_v4","supportedStorageGb":512,"supportedServerVersions":"15","serverCount":0}],"geoBackupSupported":"Enabled","zoneRedundantHaSupported":"Enabled","zoneRedundantHaAndGeoBackupSupported":"Enabled","storageAutoGrowthSupported":"Enabled","onlineResizeSupported":"Enabled","restricted":"Disabled"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '16801'
+      - '22891'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:15 GMT
+      - Mon, 26 Jun 2023 17:37:26 GMT
       expires:
       - '-1'
       pragma:
@@ -386,7 +435,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 22 Jun 2023 07:02:16 GMT
+      - Mon, 26 Jun 2023 17:37:27 GMT
       expires:
       - '-1'
       pragma:
@@ -1439,7 +1488,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:17 GMT
+      - Mon, 26 Jun 2023 17:37:27 GMT
       expires:
       - '-1'
       pragma:
@@ -1472,18 +1521,18 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5?api-version=2023-04-01
   response:
     body:
-      string: '{"name":"clitestvnet5","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5","etag":"W/\"20bbe44f-62ec-4acd-865d-cac93ba32e70\"","type":"Microsoft.Network/virtualNetworks","location":"northeurope","properties":{"provisioningState":"Succeeded","resourceGuid":"a3ec10bf-ad08-4c2e-b48f-0ec36eae31b8","addressSpace":{"addressPrefixes":["10.10.0.0/16"]},"subnets":[{"name":"clitestsubnet5","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5","etag":"W/\"20bbe44f-62ec-4acd-865d-cac93ba32e70\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.10.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false}}'
+      string: '{"name":"clitestvnet5","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5","etag":"W/\"0d738968-3c55-4ab2-bb8e-6747eacaa315\"","type":"Microsoft.Network/virtualNetworks","location":"eastus","properties":{"provisioningState":"Succeeded","resourceGuid":"dab13b77-2759-49f2-b7bc-1f057c557c28","addressSpace":{"addressPrefixes":["10.10.0.0/16"]},"subnets":[{"name":"clitestsubnet5","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5","etag":"W/\"0d738968-3c55-4ab2-bb8e-6747eacaa315\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.10.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '998'
+      - '993'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:19 GMT
+      - Mon, 26 Jun 2023 17:37:29 GMT
       etag:
-      - W/"20bbe44f-62ec-4acd-865d-cac93ba32e70"
+      - W/"0d738968-3c55-4ab2-bb8e-6747eacaa315"
       expires:
       - '-1'
       pragma:
@@ -1500,10 +1549,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8d89f8b6-a90f-4817-9cc9-eb5b8600f693
+      - 088577a2-60f1-4fac-9d07-87b3e79124fc
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -1524,13 +1573,13 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"clitestvnet5\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5\",\r\n
-        \ \"etag\": \"W/\\\"20bbe44f-62ec-4acd-865d-cac93ba32e70\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"northeurope\",\r\n
+        \ \"etag\": \"W/\\\"0d738968-3c55-4ab2-bb8e-6747eacaa315\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"a3ec10bf-ad08-4c2e-b48f-0ec36eae31b8\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        \"dab13b77-2759-49f2-b7bc-1f057c557c28\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
         [\r\n        \"10.10.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
         \     {\r\n        \"name\": \"clitestsubnet5\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5\",\r\n
-        \       \"etag\": \"W/\\\"20bbe44f-62ec-4acd-865d-cac93ba32e70\\\"\",\r\n
+        \       \"etag\": \"W/\\\"0d738968-3c55-4ab2-bb8e-6747eacaa315\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.10.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -1541,13 +1590,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1261'
+      - '1256'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:24 GMT
+      - Mon, 26 Jun 2023 17:37:31 GMT
       etag:
-      - W/"20bbe44f-62ec-4acd-865d-cac93ba32e70"
+      - W/"0d738968-3c55-4ab2-bb8e-6747eacaa315"
       expires:
       - '-1'
       pragma:
@@ -1564,10 +1613,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8e7ab082-d233-4faa-a2a1-c47b7a91c66a
+      - af021428-d3b1-41e0-9801-7e99ceedd9ba
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -2609,7 +2658,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:24 GMT
+      - Mon, 26 Jun 2023 17:37:31 GMT
       expires:
       - '-1'
       pragma:
@@ -2642,7 +2691,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5?api-version=2023-04-01
   response:
     body:
-      string: '{"name":"clitestsubnet5","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5","etag":"W/\"20bbe44f-62ec-4acd-865d-cac93ba32e70\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.10.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
+      string: '{"name":"clitestsubnet5","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5","etag":"W/\"0d738968-3c55-4ab2-bb8e-6747eacaa315\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.10.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
     headers:
       cache-control:
       - no-cache
@@ -2651,9 +2700,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:25 GMT
+      - Mon, 26 Jun 2023 17:37:32 GMT
       etag:
-      - W/"20bbe44f-62ec-4acd-865d-cac93ba32e70"
+      - W/"0d738968-3c55-4ab2-bb8e-6747eacaa315"
       expires:
       - '-1'
       pragma:
@@ -2670,10 +2719,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f3c548b0-9693-4068-91b3-f54f404e3d5e
+      - 818187fd-cf7c-4408-a08e-6f92c2e81bcb
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -3715,7 +3764,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:25 GMT
+      - Mon, 26 Jun 2023 17:37:33 GMT
       expires:
       - '-1'
       pragma:
@@ -3748,7 +3797,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5?api-version=2023-04-01
   response:
     body:
-      string: '{"name":"clitestsubnet5","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5","etag":"W/\"20bbe44f-62ec-4acd-865d-cac93ba32e70\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.10.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
+      string: '{"name":"clitestsubnet5","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5","etag":"W/\"0d738968-3c55-4ab2-bb8e-6747eacaa315\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.10.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
     headers:
       cache-control:
       - no-cache
@@ -3757,9 +3806,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:26 GMT
+      - Mon, 26 Jun 2023 17:37:34 GMT
       etag:
-      - W/"20bbe44f-62ec-4acd-865d-cac93ba32e70"
+      - W/"0d738968-3c55-4ab2-bb8e-6747eacaa315"
       expires:
       - '-1'
       pragma:
@@ -3776,63 +3825,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0dc0049e-1bb1-489c-a466-22cf679909f3
-    status:
-      code: 200
-      message: ''
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - postgres flexible-server create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --subnet -l --private-dns-zone --yes
-      User-Agent:
-      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5?api-version=2022-01-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"clitestsubnet5\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5\",\r\n
-        \ \"etag\": \"W/\\\"20bbe44f-62ec-4acd-865d-cac93ba32e70\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.10.0.0/24\",\r\n
-        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
-        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '550'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 22 Jun 2023 07:02:28 GMT
-      etag:
-      - W/"20bbe44f-62ec-4acd-865d-cac93ba32e70"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 456db8aa-c2cd-4d56-92fe-6483ebb8ae06
+      - 296c086b-6d5f-4919-9d9d-a86bce13413e
     status:
       code: 200
       message: OK
@@ -3856,7 +3849,7 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"clitestsubnet5\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5\",\r\n
-        \ \"etag\": \"W/\\\"20bbe44f-62ec-4acd-865d-cac93ba32e70\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"0d738968-3c55-4ab2-bb8e-6747eacaa315\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.10.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
@@ -3869,9 +3862,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:29 GMT
+      - Mon, 26 Jun 2023 17:37:36 GMT
       etag:
-      - W/"20bbe44f-62ec-4acd-865d-cac93ba32e70"
+      - W/"0d738968-3c55-4ab2-bb8e-6747eacaa315"
       expires:
       - '-1'
       pragma:
@@ -3888,10 +3881,66 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 31a3d66c-75c5-4ea7-b9de-7a2ea7820d8e
+      - 6467d272-57b5-42ed-9d67-dc3b9fc617ab
     status:
       code: 200
-      message: ''
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet -l --private-dns-zone --yes
+      User-Agent:
+      - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5?api-version=2022-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"clitestsubnet5\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5\",\r\n
+        \ \"etag\": \"W/\\\"0d738968-3c55-4ab2-bb8e-6747eacaa315\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.10.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '550'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jun 2023 17:37:37 GMT
+      etag:
+      - W/"0d738968-3c55-4ab2-bb8e-6747eacaa315"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 4dff9420-c478-4ff7-b337-ad07c8e3ea75
+    status:
+      code: 200
+      message: OK
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5",
       "name": "clitestsubnet5", "properties": {"addressPrefix": "10.10.0.0/24", "delegations":
@@ -3920,11 +3969,11 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"clitestsubnet5\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5\",\r\n
-        \ \"etag\": \"W/\\\"626b6f75-3315-428b-ba02-ec8abb415d86\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"a7360669-1404-4342-bce8-3bda9992a1c0\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.10.0.0/24\",\r\n
         \   \"delegations\": [\r\n      {\r\n        \"name\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5/delegations/Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
-        \       \"etag\": \"W/\\\"626b6f75-3315-428b-ba02-ec8abb415d86\\\"\",\r\n
+        \       \"etag\": \"W/\\\"a7360669-1404-4342-bce8-3bda9992a1c0\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"serviceName\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
         \         \"actions\": [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
@@ -3936,7 +3985,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/northeurope/operations/d1421d9b-e247-4509-8d1e-8ff4949c658b?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/9bcd9b26-11d6-4c21-b06f-3c772c854767?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
@@ -3944,7 +3993,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:31 GMT
+      - Mon, 26 Jun 2023 17:37:38 GMT
       expires:
       - '-1'
       pragma:
@@ -3961,12 +4010,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7f028986-8839-48c6-9874-940b919b19bd
+      - 8975c582-74db-4c7a-bd6e-944e7c397428
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -3983,7 +4032,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/northeurope/operations/d1421d9b-e247-4509-8d1e-8ff4949c658b?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/9bcd9b26-11d6-4c21-b06f-3c772c854767?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -3995,7 +4044,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:31 GMT
+      - Mon, 26 Jun 2023 17:37:39 GMT
       expires:
       - '-1'
       pragma:
@@ -4012,10 +4061,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ff4329e5-3e05-46ce-b7aa-c7fc449d75b4
+      - 510b8b5f-f4e3-4642-9009-166c1a727b80
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -4036,11 +4085,11 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"clitestsubnet5\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5\",\r\n
-        \ \"etag\": \"W/\\\"7dc8c42d-eb3a-4c71-b49c-ed1937240d39\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"154d89c5-8c74-4ebf-92e0-4f762b3a3aef\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.10.0.0/24\",\r\n
         \   \"delegations\": [\r\n      {\r\n        \"name\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5/delegations/Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
-        \       \"etag\": \"W/\\\"7dc8c42d-eb3a-4c71-b49c-ed1937240d39\\\"\",\r\n
+        \       \"etag\": \"W/\\\"154d89c5-8c74-4ebf-92e0-4f762b3a3aef\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"serviceName\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
         \         \"actions\": [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
@@ -4056,9 +4105,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:31 GMT
+      - Mon, 26 Jun 2023 17:37:39 GMT
       etag:
-      - W/"7dc8c42d-eb3a-4c71-b49c-ed1937240d39"
+      - W/"154d89c5-8c74-4ebf-92e0-4f762b3a3aef"
       expires:
       - '-1'
       pragma:
@@ -4075,10 +4124,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e99188b2-9146-4876-b260-f9e6b670543c
+      - aae0d4f4-fa2c-4b61-ab9d-44b3b7bf0ec0
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -4109,7 +4158,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:33 GMT
+      - Mon, 26 Jun 2023 17:37:41 GMT
       expires:
       - '-1'
       pragma:
@@ -4149,18 +4198,18 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"clitestvnet5\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5\",\r\n
-        \ \"etag\": \"W/\\\"7dc8c42d-eb3a-4c71-b49c-ed1937240d39\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"northeurope\",\r\n
+        \ \"etag\": \"W/\\\"154d89c5-8c74-4ebf-92e0-4f762b3a3aef\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"a3ec10bf-ad08-4c2e-b48f-0ec36eae31b8\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        \"dab13b77-2759-49f2-b7bc-1f057c557c28\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
         [\r\n        \"10.10.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
         \     {\r\n        \"name\": \"clitestsubnet5\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5\",\r\n
-        \       \"etag\": \"W/\\\"7dc8c42d-eb3a-4c71-b49c-ed1937240d39\\\"\",\r\n
+        \       \"etag\": \"W/\\\"154d89c5-8c74-4ebf-92e0-4f762b3a3aef\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.10.0.0/24\",\r\n          \"delegations\":
         [\r\n            {\r\n              \"name\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
         \             \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5/delegations/Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
-        \             \"etag\": \"W/\\\"7dc8c42d-eb3a-4c71-b49c-ed1937240d39\\\"\",\r\n
+        \             \"etag\": \"W/\\\"154d89c5-8c74-4ebf-92e0-4f762b3a3aef\\\"\",\r\n
         \             \"properties\": {\r\n                \"provisioningState\":
         \"Succeeded\",\r\n                \"serviceName\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
         \               \"actions\": [\r\n                  \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
@@ -4174,13 +4223,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2062'
+      - '2057'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:35 GMT
+      - Mon, 26 Jun 2023 17:37:42 GMT
       etag:
-      - W/"7dc8c42d-eb3a-4c71-b49c-ed1937240d39"
+      - W/"154d89c5-8c74-4ebf-92e0-4f762b3a3aef"
       expires:
       - '-1'
       pragma:
@@ -4197,7 +4246,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5e169eff-9b56-46ba-bbbb-21c0c8b8a504
+      - 6f8bd458-f57e-49be-9856-054558023a08
     status:
       code: 200
       message: OK
@@ -5242,7 +5291,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:37 GMT
+      - Mon, 26 Jun 2023 17:37:42 GMT
       expires:
       - '-1'
       pragma:
@@ -5286,7 +5335,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:37 GMT
+      - Mon, 26 Jun 2023 17:37:43 GMT
       expires:
       - '-1'
       pragma:
@@ -6341,7 +6390,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:39 GMT
+      - Mon, 26 Jun 2023 17:37:45 GMT
       expires:
       - '-1'
       pragma:
@@ -6385,7 +6434,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:40 GMT
+      - Mon, 26 Jun 2023 17:37:45 GMT
       expires:
       - '-1'
       pragma:
@@ -6427,7 +6476,7 @@ interactions:
       string: '{}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs3Njc0MjY4My04YzgwLTQ5YjgtOWJjZi0zZDRhNTk1M2Q1YmNfNWM1MDM3ZTUtZDNmMS00ZTdiLWIzYTktZjZiZjk0OTAyYjMw?api-version=2018-09-01
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs2MjcyNzIzNS03NmMwLTQ0NTItYmNmNy04MDZlNTk4OWVhM2ZfNWM1MDM3ZTUtZDNmMS00ZTdiLWIzYTktZjZiZjk0OTAyYjMw?api-version=2018-09-01
       cache-control:
       - private
       content-length:
@@ -6435,9 +6484,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:45 GMT
+      - Mon, 26 Jun 2023 17:37:50 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs3Njc0MjY4My04YzgwLTQ5YjgtOWJjZi0zZDRhNTk1M2Q1YmNfNWM1MDM3ZTUtZDNmMS00ZTdiLWIzYTktZjZiZjk0OTAyYjMw?api-version=2018-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs2MjcyNzIzNS03NmMwLTQ0NTItYmNmNy04MDZlNTk4OWVhM2ZfNWM1MDM3ZTUtZDNmMS00ZTdiLWIzYTktZjZiZjk0OTAyYjMw?api-version=2018-09-01
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -6469,13 +6518,13 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 azsdk-python-mgmt-privatedns/1.0.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs3Njc0MjY4My04YzgwLTQ5YjgtOWJjZi0zZDRhNTk1M2Q1YmNfNWM1MDM3ZTUtZDNmMS00ZTdiLWIzYTktZjZiZjk0OTAyYjMw?api-version=2018-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs2MjcyNzIzNS03NmMwLTQ0NTItYmNmNy04MDZlNTk4OWVhM2ZfNWM1MDM3ZTUtZDNmMS00ZTdiLWIzYTktZjZiZjk0OTAyYjMw?api-version=2018-09-01
   response:
     body:
       string: '{"status":"InProgress"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs3Njc0MjY4My04YzgwLTQ5YjgtOWJjZi0zZDRhNTk1M2Q1YmNfNWM1MDM3ZTUtZDNmMS00ZTdiLWIzYTktZjZiZjk0OTAyYjMw?api-version=2018-09-01
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs2MjcyNzIzNS03NmMwLTQ0NTItYmNmNy04MDZlNTk4OWVhM2ZfNWM1MDM3ZTUtZDNmMS00ZTdiLWIzYTktZjZiZjk0OTAyYjMw?api-version=2018-09-01
       cache-control:
       - private
       content-length:
@@ -6483,9 +6532,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:02:45 GMT
+      - Mon, 26 Jun 2023 17:37:50 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs3Njc0MjY4My04YzgwLTQ5YjgtOWJjZi0zZDRhNTk1M2Q1YmNfNWM1MDM3ZTUtZDNmMS00ZTdiLWIzYTktZjZiZjk0OTAyYjMw?api-version=2018-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs2MjcyNzIzNS03NmMwLTQ0NTItYmNmNy04MDZlNTk4OWVhM2ZfNWM1MDM3ZTUtZDNmMS00ZTdiLWIzYTktZjZiZjk0OTAyYjMw?api-version=2018-09-01
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -6517,7 +6566,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 azsdk-python-mgmt-privatedns/1.0.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs3Njc0MjY4My04YzgwLTQ5YjgtOWJjZi0zZDRhNTk1M2Q1YmNfNWM1MDM3ZTUtZDNmMS00ZTdiLWIzYTktZjZiZjk0OTAyYjMw?api-version=2018-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs2MjcyNzIzNS03NmMwLTQ0NTItYmNmNy04MDZlNTk4OWVhM2ZfNWM1MDM3ZTUtZDNmMS00ZTdiLWIzYTktZjZiZjk0OTAyYjMw?api-version=2018-09-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -6529,7 +6578,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:03:16 GMT
+      - Mon, 26 Jun 2023 17:38:21 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -6568,7 +6617,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsZones/testdnszone5.private.postgres.database.azure.com?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest.rg000001\/providers\/Microsoft.Network\/privateDnsZones\/testdnszone5.private.postgres.database.azure.com","name":"testdnszone5.private.postgres.database.azure.com","type":"Microsoft.Network\/privateDnsZones","etag":"fbab1328-bc52-48e0-afbd-af0677b08963","location":"global","properties":{"maxNumberOfRecordSets":25000,"maxNumberOfVirtualNetworkLinks":1000,"maxNumberOfVirtualNetworkLinksWithRegistration":100,"numberOfRecordSets":1,"numberOfVirtualNetworkLinks":0,"numberOfVirtualNetworkLinksWithRegistration":0,"provisioningState":"Succeeded"}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest.rg000001\/providers\/Microsoft.Network\/privateDnsZones\/testdnszone5.private.postgres.database.azure.com","name":"testdnszone5.private.postgres.database.azure.com","type":"Microsoft.Network\/privateDnsZones","etag":"fe3b5b31-0907-4b71-9482-630b0aad8153","location":"global","properties":{"maxNumberOfRecordSets":25000,"maxNumberOfVirtualNetworkLinks":1000,"maxNumberOfVirtualNetworkLinksWithRegistration":100,"numberOfRecordSets":1,"numberOfVirtualNetworkLinks":0,"numberOfVirtualNetworkLinksWithRegistration":0,"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - private
@@ -6577,9 +6626,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:03:16 GMT
+      - Mon, 26 Jun 2023 17:38:21 GMT
       etag:
-      - fbab1328-bc52-48e0-afbd-af0677b08963
+      - fe3b5b31-0907-4b71-9482-630b0aad8153
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -6593,7 +6642,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '499'
+      - '498'
       x-powered-by:
       - ASP.NET
     status:
@@ -6628,7 +6677,7 @@ interactions:
       string: '{}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRWaXJ0dWFsTmV0d29ya0xpbms7MWQ2NzU4OGMtZDg1Ny00MWJkLTkyMWUtZDEwZmZmNTQxYjQzXzVjNTAzN2U1LWQzZjEtNGU3Yi1iM2E5LWY2YmY5NDkwMmIzMA==?api-version=2018-09-01
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRWaXJ0dWFsTmV0d29ya0xpbms7NGI4M2MzYzktN2E0Yy00Zjk3LWFkNGUtNzZmMmViOWExNjgzXzVjNTAzN2U1LWQzZjEtNGU3Yi1iM2E5LWY2YmY5NDkwMmIzMA==?api-version=2018-09-01
       cache-control:
       - private
       content-length:
@@ -6636,9 +6685,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:03:23 GMT
+      - Mon, 26 Jun 2023 17:38:27 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRWaXJ0dWFsTmV0d29ya0xpbms7MWQ2NzU4OGMtZDg1Ny00MWJkLTkyMWUtZDEwZmZmNTQxYjQzXzVjNTAzN2U1LWQzZjEtNGU3Yi1iM2E5LWY2YmY5NDkwMmIzMA==?api-version=2018-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRWaXJ0dWFsTmV0d29ya0xpbms7NGI4M2MzYzktN2E0Yy00Zjk3LWFkNGUtNzZmMmViOWExNjgzXzVjNTAzN2U1LWQzZjEtNGU3Yi1iM2E5LWY2YmY5NDkwMmIzMA==?api-version=2018-09-01
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -6670,13 +6719,13 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 azsdk-python-mgmt-privatedns/1.0.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRWaXJ0dWFsTmV0d29ya0xpbms7MWQ2NzU4OGMtZDg1Ny00MWJkLTkyMWUtZDEwZmZmNTQxYjQzXzVjNTAzN2U1LWQzZjEtNGU3Yi1iM2E5LWY2YmY5NDkwMmIzMA==?api-version=2018-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRWaXJ0dWFsTmV0d29ya0xpbms7NGI4M2MzYzktN2E0Yy00Zjk3LWFkNGUtNzZmMmViOWExNjgzXzVjNTAzN2U1LWQzZjEtNGU3Yi1iM2E5LWY2YmY5NDkwMmIzMA==?api-version=2018-09-01
   response:
     body:
       string: '{"status":"InProgress"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRWaXJ0dWFsTmV0d29ya0xpbms7MWQ2NzU4OGMtZDg1Ny00MWJkLTkyMWUtZDEwZmZmNTQxYjQzXzVjNTAzN2U1LWQzZjEtNGU3Yi1iM2E5LWY2YmY5NDkwMmIzMA==?api-version=2018-09-01
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRWaXJ0dWFsTmV0d29ya0xpbms7NGI4M2MzYzktN2E0Yy00Zjk3LWFkNGUtNzZmMmViOWExNjgzXzVjNTAzN2U1LWQzZjEtNGU3Yi1iM2E5LWY2YmY5NDkwMmIzMA==?api-version=2018-09-01
       cache-control:
       - private
       content-length:
@@ -6684,9 +6733,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:03:23 GMT
+      - Mon, 26 Jun 2023 17:38:27 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRWaXJ0dWFsTmV0d29ya0xpbms7MWQ2NzU4OGMtZDg1Ny00MWJkLTkyMWUtZDEwZmZmNTQxYjQzXzVjNTAzN2U1LWQzZjEtNGU3Yi1iM2E5LWY2YmY5NDkwMmIzMA==?api-version=2018-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRWaXJ0dWFsTmV0d29ya0xpbms7NGI4M2MzYzktN2E0Yy00Zjk3LWFkNGUtNzZmMmViOWExNjgzXzVjNTAzN2U1LWQzZjEtNGU3Yi1iM2E5LWY2YmY5NDkwMmIzMA==?api-version=2018-09-01
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -6718,13 +6767,13 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 azsdk-python-mgmt-privatedns/1.0.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRWaXJ0dWFsTmV0d29ya0xpbms7MWQ2NzU4OGMtZDg1Ny00MWJkLTkyMWUtZDEwZmZmNTQxYjQzXzVjNTAzN2U1LWQzZjEtNGU3Yi1iM2E5LWY2YmY5NDkwMmIzMA==?api-version=2018-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRWaXJ0dWFsTmV0d29ya0xpbms7NGI4M2MzYzktN2E0Yy00Zjk3LWFkNGUtNzZmMmViOWExNjgzXzVjNTAzN2U1LWQzZjEtNGU3Yi1iM2E5LWY2YmY5NDkwMmIzMA==?api-version=2018-09-01
   response:
     body:
       string: '{"status":"InProgress"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRWaXJ0dWFsTmV0d29ya0xpbms7MWQ2NzU4OGMtZDg1Ny00MWJkLTkyMWUtZDEwZmZmNTQxYjQzXzVjNTAzN2U1LWQzZjEtNGU3Yi1iM2E5LWY2YmY5NDkwMmIzMA==?api-version=2018-09-01
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRWaXJ0dWFsTmV0d29ya0xpbms7NGI4M2MzYzktN2E0Yy00Zjk3LWFkNGUtNzZmMmViOWExNjgzXzVjNTAzN2U1LWQzZjEtNGU3Yi1iM2E5LWY2YmY5NDkwMmIzMA==?api-version=2018-09-01
       cache-control:
       - private
       content-length:
@@ -6732,9 +6781,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:03:53 GMT
+      - Mon, 26 Jun 2023 17:38:58 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRWaXJ0dWFsTmV0d29ya0xpbms7MWQ2NzU4OGMtZDg1Ny00MWJkLTkyMWUtZDEwZmZmNTQxYjQzXzVjNTAzN2U1LWQzZjEtNGU3Yi1iM2E5LWY2YmY5NDkwMmIzMA==?api-version=2018-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRWaXJ0dWFsTmV0d29ya0xpbms7NGI4M2MzYzktN2E0Yy00Zjk3LWFkNGUtNzZmMmViOWExNjgzXzVjNTAzN2U1LWQzZjEtNGU3Yi1iM2E5LWY2YmY5NDkwMmIzMA==?api-version=2018-09-01
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -6766,7 +6815,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 azsdk-python-mgmt-privatedns/1.0.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRWaXJ0dWFsTmV0d29ya0xpbms7MWQ2NzU4OGMtZDg1Ny00MWJkLTkyMWUtZDEwZmZmNTQxYjQzXzVjNTAzN2U1LWQzZjEtNGU3Yi1iM2E5LWY2YmY5NDkwMmIzMA==?api-version=2018-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRWaXJ0dWFsTmV0d29ya0xpbms7NGI4M2MzYzktN2E0Yy00Zjk3LWFkNGUtNzZmMmViOWExNjgzXzVjNTAzN2U1LWQzZjEtNGU3Yi1iM2E5LWY2YmY5NDkwMmIzMA==?api-version=2018-09-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -6778,7 +6827,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:04:24 GMT
+      - Mon, 26 Jun 2023 17:39:29 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -6817,7 +6866,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsZones/testdnszone5.private.postgres.database.azure.com/virtualNetworkLinks/clitestvnet5-link?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest.rg000001\/providers\/Microsoft.Network\/privateDnsZones\/testdnszone5.private.postgres.database.azure.com\/virtualNetworkLinks\/clitestvnet5-link","name":"clitestvnet5-link","type":"Microsoft.Network\/privateDnsZones\/virtualNetworkLinks","etag":"\"b70478ce-0000-0100-0000-6493f25d0000\"","location":"global","properties":{"provisioningState":"Succeeded","registrationEnabled":false,"virtualNetwork":{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest.rg000001\/providers\/Microsoft.Network\/virtualNetworks\/clitestvnet5"},"virtualNetworkLinkState":"Completed"}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest.rg000001\/providers\/Microsoft.Network\/privateDnsZones\/testdnszone5.private.postgres.database.azure.com\/virtualNetworkLinks\/clitestvnet5-link","name":"clitestvnet5-link","type":"Microsoft.Network\/privateDnsZones\/virtualNetworkLinks","etag":"\"51002987-0000-0100-0000-6499cd3b0000\"","location":"global","properties":{"provisioningState":"Succeeded","registrationEnabled":false,"virtualNetwork":{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/clitest.rg000001\/providers\/Microsoft.Network\/virtualNetworks\/clitestvnet5"},"virtualNetworkLinkState":"Completed"}}'
     headers:
       cache-control:
       - private
@@ -6826,9 +6875,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:04:25 GMT
+      - Mon, 26 Jun 2023 17:39:29 GMT
       etag:
-      - '"b70478ce-0000-0100-0000-6493f25d0000"'
+      - '"51002987-0000-0100-0000-6499cd3b0000"'
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -6849,9 +6898,9 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "northeurope", "sku": {"name": "Standard_D2s_v3", "tier":
-      "GeneralPurpose"}, "properties": {"administratorLogin": "bubblygiraffe4", "administratorLoginPassword":
-      "VrOPJbVtm7w0C90ccikulg", "version": "13", "storage": {"storageSizeGB": 128},
+    body: '{"location": "eastus", "sku": {"name": "Standard_D2s_v3", "tier": "GeneralPurpose"},
+      "properties": {"administratorLogin": "boredtacos7", "administratorLoginPassword":
+      "iyq6RaCqQgOjPLM9gTSGMA", "version": "13", "storage": {"storageSizeGB": 128},
       "authConfig": {"activeDirectoryAuth": "Disabled", "passwordAuth": "Enabled",
       "tenantId": ""}, "backup": {"backupRetentionDays": 7, "geoRedundantBackup":
       "Disabled"}, "network": {"delegatedSubnetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5",
@@ -6867,7 +6916,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '905'
+      - '897'
       Content-Type:
       - application/json
       ParameterSetName:
@@ -6878,10 +6927,10 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000003?api-version=2023-03-01-preview
   response:
     body:
-      string: '{"operation":"UpsertServerManagementOperationV2","startTime":"2023-06-22T07:04:30.347Z"}'
+      string: '{"operation":"UpsertServerManagementOperationV2","startTime":"2023-06-26T17:39:38.903Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/northeurope/azureAsyncOperation/9221e86d-e79e-4498-8555-73cf6198b904?api-version=2023-03-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/08fffd18-9f4d-4769-9a2e-50266508a414?api-version=2023-03-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -6889,11 +6938,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:04:29 GMT
+      - Mon, 26 Jun 2023 17:39:38 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/northeurope/operationResults/9221e86d-e79e-4498-8555-73cf6198b904?api-version=2023-03-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/operationResults/08fffd18-9f4d-4769-9a2e-50266508a414?api-version=2023-03-01-preview
       pragma:
       - no-cache
       server:
@@ -6903,7 +6952,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 202
       message: Accepted
@@ -6923,10 +6972,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/northeurope/azureAsyncOperation/9221e86d-e79e-4498-8555-73cf6198b904?api-version=2023-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/08fffd18-9f4d-4769-9a2e-50266508a414?api-version=2023-03-01-preview
   response:
     body:
-      string: '{"name":"9221e86d-e79e-4498-8555-73cf6198b904","status":"InProgress","startTime":"2023-06-22T07:04:30.347Z"}'
+      string: '{"name":"08fffd18-9f4d-4769-9a2e-50266508a414","status":"InProgress","startTime":"2023-06-26T17:39:38.903Z"}'
     headers:
       cache-control:
       - no-cache
@@ -6935,7 +6984,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:04:29 GMT
+      - Mon, 26 Jun 2023 17:39:38 GMT
       expires:
       - '-1'
       pragma:
@@ -6969,10 +7018,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/northeurope/azureAsyncOperation/9221e86d-e79e-4498-8555-73cf6198b904?api-version=2023-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/08fffd18-9f4d-4769-9a2e-50266508a414?api-version=2023-03-01-preview
   response:
     body:
-      string: '{"name":"9221e86d-e79e-4498-8555-73cf6198b904","status":"InProgress","startTime":"2023-06-22T07:04:30.347Z"}'
+      string: '{"name":"08fffd18-9f4d-4769-9a2e-50266508a414","status":"InProgress","startTime":"2023-06-26T17:39:38.903Z"}'
     headers:
       cache-control:
       - no-cache
@@ -6981,7 +7030,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:05:31 GMT
+      - Mon, 26 Jun 2023 17:40:39 GMT
       expires:
       - '-1'
       pragma:
@@ -7015,10 +7064,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/northeurope/azureAsyncOperation/9221e86d-e79e-4498-8555-73cf6198b904?api-version=2023-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/08fffd18-9f4d-4769-9a2e-50266508a414?api-version=2023-03-01-preview
   response:
     body:
-      string: '{"name":"9221e86d-e79e-4498-8555-73cf6198b904","status":"InProgress","startTime":"2023-06-22T07:04:30.347Z"}'
+      string: '{"name":"08fffd18-9f4d-4769-9a2e-50266508a414","status":"InProgress","startTime":"2023-06-26T17:39:38.903Z"}'
     headers:
       cache-control:
       - no-cache
@@ -7027,7 +7076,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:06:32 GMT
+      - Mon, 26 Jun 2023 17:41:45 GMT
       expires:
       - '-1'
       pragma:
@@ -7061,10 +7110,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/northeurope/azureAsyncOperation/9221e86d-e79e-4498-8555-73cf6198b904?api-version=2023-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/08fffd18-9f4d-4769-9a2e-50266508a414?api-version=2023-03-01-preview
   response:
     body:
-      string: '{"name":"9221e86d-e79e-4498-8555-73cf6198b904","status":"InProgress","startTime":"2023-06-22T07:04:30.347Z"}'
+      string: '{"name":"08fffd18-9f4d-4769-9a2e-50266508a414","status":"InProgress","startTime":"2023-06-26T17:39:38.903Z"}'
     headers:
       cache-control:
       - no-cache
@@ -7073,7 +7122,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:07:33 GMT
+      - Mon, 26 Jun 2023 17:42:46 GMT
       expires:
       - '-1'
       pragma:
@@ -7107,10 +7156,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/northeurope/azureAsyncOperation/9221e86d-e79e-4498-8555-73cf6198b904?api-version=2023-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/08fffd18-9f4d-4769-9a2e-50266508a414?api-version=2023-03-01-preview
   response:
     body:
-      string: '{"name":"9221e86d-e79e-4498-8555-73cf6198b904","status":"Succeeded","startTime":"2023-06-22T07:04:30.347Z"}'
+      string: '{"name":"08fffd18-9f4d-4769-9a2e-50266508a414","status":"Succeeded","startTime":"2023-06-26T17:39:38.903Z"}'
     headers:
       cache-control:
       - no-cache
@@ -7119,7 +7168,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:08:33 GMT
+      - Mon, 26 Jun 2023 17:43:47 GMT
       expires:
       - '-1'
       pragma:
@@ -7156,17 +7205,17 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000003?api-version=2023-03-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_D2s_v3","tier":"GeneralPurpose"},"systemData":{"createdAt":"2023-06-22T07:04:35.7856696Z"},"properties":{"dataEncryption":{"type":"SystemManaged"},"storage":{"storageSizeGB":128,"autoGrow":"Disabled"},"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"azuredbclitest-000003.postgres.database.azure.com","version":"13","minorVersion":"10","administratorLogin":"bubblygiraffe4","state":"Ready","availabilityZone":"2","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Disabled","earliestRestoreDate":"2023-06-22T07:04:35.7856696+00:00"},"network":{"publicNetworkAccess":"Disabled","delegatedSubnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5","privateDnsZoneArmResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsZones/testdnszone5.private.postgres.database.azure.com"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"North
-        Europe","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000003","name":"azuredbclitest-000003","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+      string: '{"sku":{"name":"Standard_D2s_v3","tier":"GeneralPurpose"},"systemData":{"createdAt":"2023-06-26T17:39:46.7195973Z"},"properties":{"dataEncryption":{"type":"SystemManaged"},"storage":{"storageSizeGB":128,"autoGrow":"Disabled"},"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"azuredbclitest-000003.postgres.database.azure.com","version":"13","minorVersion":"10","administratorLogin":"boredtacos7","state":"Ready","availabilityZone":"2","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Disabled","earliestRestoreDate":"2023-06-26T17:39:46.7195973+00:00"},"network":{"publicNetworkAccess":"Disabled","delegatedSubnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5","privateDnsZoneArmResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsZones/testdnszone5.private.postgres.database.azure.com"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"East
+        US","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000003","name":"azuredbclitest-000003","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1537'
+      - '1529'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:08:34 GMT
+      - Mon, 26 Jun 2023 17:43:47 GMT
       expires:
       - '-1'
       pragma:
@@ -7207,10 +7256,10 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000003/databases/flexibleserverdb?api-version=2023-03-01-preview
   response:
     body:
-      string: '{"operation":"UpsertServerDatabaseManagementOperation","startTime":"2023-06-22T07:08:36.433Z"}'
+      string: '{"operation":"UpsertServerDatabaseManagementOperation","startTime":"2023-06-26T17:43:49.547Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/northeurope/azureAsyncOperation/57a76a4b-57d1-4301-9598-0fe9fc55dea5?api-version=2023-03-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/f0865cb8-a61b-49be-bad9-466c6e1d6c9c?api-version=2023-03-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -7218,11 +7267,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:08:35 GMT
+      - Mon, 26 Jun 2023 17:43:49 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/northeurope/operationResults/57a76a4b-57d1-4301-9598-0fe9fc55dea5?api-version=2023-03-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/operationResults/f0865cb8-a61b-49be-bad9-466c6e1d6c9c?api-version=2023-03-01-preview
       pragma:
       - no-cache
       server:
@@ -7252,10 +7301,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/northeurope/azureAsyncOperation/57a76a4b-57d1-4301-9598-0fe9fc55dea5?api-version=2023-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/f0865cb8-a61b-49be-bad9-466c6e1d6c9c?api-version=2023-03-01-preview
   response:
     body:
-      string: '{"name":"57a76a4b-57d1-4301-9598-0fe9fc55dea5","status":"InProgress","startTime":"2023-06-22T07:08:36.433Z"}'
+      string: '{"name":"f0865cb8-a61b-49be-bad9-466c6e1d6c9c","status":"InProgress","startTime":"2023-06-26T17:43:49.547Z"}'
     headers:
       cache-control:
       - no-cache
@@ -7264,7 +7313,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:08:36 GMT
+      - Mon, 26 Jun 2023 17:43:49 GMT
       expires:
       - '-1'
       pragma:
@@ -7298,10 +7347,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/northeurope/azureAsyncOperation/57a76a4b-57d1-4301-9598-0fe9fc55dea5?api-version=2023-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/f0865cb8-a61b-49be-bad9-466c6e1d6c9c?api-version=2023-03-01-preview
   response:
     body:
-      string: '{"name":"57a76a4b-57d1-4301-9598-0fe9fc55dea5","status":"Succeeded","startTime":"2023-06-22T07:08:36.433Z"}'
+      string: '{"name":"f0865cb8-a61b-49be-bad9-466c6e1d6c9c","status":"Succeeded","startTime":"2023-06-26T17:43:49.547Z"}'
     headers:
       cache-control:
       - no-cache
@@ -7310,7 +7359,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:08:46 GMT
+      - Mon, 26 Jun 2023 17:43:59 GMT
       expires:
       - '-1'
       pragma:
@@ -7356,7 +7405,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:08:46 GMT
+      - Mon, 26 Jun 2023 17:44:00 GMT
       expires:
       - '-1'
       pragma:
@@ -7393,17 +7442,17 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000003?api-version=2023-03-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_D2s_v3","tier":"GeneralPurpose"},"systemData":{"createdAt":"2023-06-22T07:04:35.7856696Z"},"properties":{"dataEncryption":{"type":"SystemManaged"},"storage":{"storageSizeGB":128,"autoGrow":"Disabled"},"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"azuredbclitest-000003.postgres.database.azure.com","version":"13","minorVersion":"10","administratorLogin":"bubblygiraffe4","state":"Ready","availabilityZone":"2","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Disabled","earliestRestoreDate":"2023-06-22T07:08:47.0968231+00:00"},"network":{"publicNetworkAccess":"Disabled","delegatedSubnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5","privateDnsZoneArmResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsZones/testdnszone5.private.postgres.database.azure.com"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"North
-        Europe","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000003","name":"azuredbclitest-000003","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+      string: '{"sku":{"name":"Standard_D2s_v3","tier":"GeneralPurpose"},"systemData":{"createdAt":"2023-06-26T17:39:46.7195973Z"},"properties":{"dataEncryption":{"type":"SystemManaged"},"storage":{"storageSizeGB":128,"autoGrow":"Disabled"},"authConfig":{"activeDirectoryAuth":"Disabled","passwordAuth":"Enabled"},"fullyQualifiedDomainName":"azuredbclitest-000003.postgres.database.azure.com","version":"13","minorVersion":"10","administratorLogin":"boredtacos7","state":"Ready","availabilityZone":"2","backup":{"backupRetentionDays":7,"geoRedundantBackup":"Disabled","earliestRestoreDate":"2023-06-26T17:39:46.7195973+00:00"},"network":{"publicNetworkAccess":"Disabled","delegatedSubnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5","privateDnsZoneArmResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateDnsZones/testdnszone5.private.postgres.database.azure.com"},"highAvailability":{"mode":"Disabled","state":"NotEnabled"},"maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0},"replicationRole":"Primary","replicaCapacity":5},"location":"East
+        US","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000003","name":"azuredbclitest-000003","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1537'
+      - '1529'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:08:48 GMT
+      - Mon, 26 Jun 2023 17:44:02 GMT
       expires:
       - '-1'
       pragma:
@@ -7442,22 +7491,22 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000003?api-version=2023-03-01-preview
   response:
     body:
-      string: '{"operation":"DropServerManagementOperation","startTime":"2023-06-22T07:08:51.227Z"}'
+      string: '{"operation":"DropServerManagementOperation","startTime":"2023-06-26T17:44:04.88Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/North%20Europe/azureAsyncOperation/6411f7d8-feb5-4a02-a18b-8ab524c9c2a7?api-version=2023-03-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/714b7dfb-ea5d-448d-8068-33241a88fa34?api-version=2023-03-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '84'
+      - '83'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:08:50 GMT
+      - Mon, 26 Jun 2023 17:44:04 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/North%20Europe/operationResults/6411f7d8-feb5-4a02-a18b-8ab524c9c2a7?api-version=2023-03-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/operationResults/714b7dfb-ea5d-448d-8068-33241a88fa34?api-version=2023-03-01-preview
       pragma:
       - no-cache
       server:
@@ -7467,7 +7516,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14998'
     status:
       code: 202
       message: Accepted
@@ -7487,240 +7536,10 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/North%20Europe/azureAsyncOperation/6411f7d8-feb5-4a02-a18b-8ab524c9c2a7?api-version=2023-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/714b7dfb-ea5d-448d-8068-33241a88fa34?api-version=2023-03-01-preview
   response:
     body:
-      string: '{"name":"6411f7d8-feb5-4a02-a18b-8ab524c9c2a7","status":"InProgress","startTime":"2023-06-22T07:08:51.227Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 22 Jun 2023 07:08:51 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - postgres flexible-server delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --yes
-      User-Agent:
-      - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/North%20Europe/azureAsyncOperation/6411f7d8-feb5-4a02-a18b-8ab524c9c2a7?api-version=2023-03-01-preview
-  response:
-    body:
-      string: '{"name":"6411f7d8-feb5-4a02-a18b-8ab524c9c2a7","status":"InProgress","startTime":"2023-06-22T07:08:51.227Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 22 Jun 2023 07:09:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - postgres flexible-server delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --yes
-      User-Agent:
-      - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/North%20Europe/azureAsyncOperation/6411f7d8-feb5-4a02-a18b-8ab524c9c2a7?api-version=2023-03-01-preview
-  response:
-    body:
-      string: '{"name":"6411f7d8-feb5-4a02-a18b-8ab524c9c2a7","status":"InProgress","startTime":"2023-06-22T07:08:51.227Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 22 Jun 2023 07:09:21 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - postgres flexible-server delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --yes
-      User-Agent:
-      - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/North%20Europe/azureAsyncOperation/6411f7d8-feb5-4a02-a18b-8ab524c9c2a7?api-version=2023-03-01-preview
-  response:
-    body:
-      string: '{"name":"6411f7d8-feb5-4a02-a18b-8ab524c9c2a7","status":"InProgress","startTime":"2023-06-22T07:08:51.227Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 22 Jun 2023 07:09:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - postgres flexible-server delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --yes
-      User-Agent:
-      - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/North%20Europe/azureAsyncOperation/6411f7d8-feb5-4a02-a18b-8ab524c9c2a7?api-version=2023-03-01-preview
-  response:
-    body:
-      string: '{"name":"6411f7d8-feb5-4a02-a18b-8ab524c9c2a7","status":"InProgress","startTime":"2023-06-22T07:08:51.227Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 22 Jun 2023 07:09:52 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - postgres flexible-server delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --yes
-      User-Agent:
-      - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/North%20Europe/azureAsyncOperation/6411f7d8-feb5-4a02-a18b-8ab524c9c2a7?api-version=2023-03-01-preview
-  response:
-    body:
-      string: '{"name":"6411f7d8-feb5-4a02-a18b-8ab524c9c2a7","status":"Succeeded","startTime":"2023-06-22T07:08:51.227Z"}'
+      string: '{"name":"714b7dfb-ea5d-448d-8068-33241a88fa34","status":"InProgress","startTime":"2023-06-26T17:44:04.88Z"}'
     headers:
       cache-control:
       - no-cache
@@ -7729,7 +7548,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:10:08 GMT
+      - Mon, 26 Jun 2023 17:44:05 GMT
       expires:
       - '-1'
       pragma:
@@ -7763,7 +7582,237 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/North%20Europe/operationResults/6411f7d8-feb5-4a02-a18b-8ab524c9c2a7?api-version=2023-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/714b7dfb-ea5d-448d-8068-33241a88fa34?api-version=2023-03-01-preview
+  response:
+    body:
+      string: '{"name":"714b7dfb-ea5d-448d-8068-33241a88fa34","status":"InProgress","startTime":"2023-06-26T17:44:04.88Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jun 2023 17:44:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/714b7dfb-ea5d-448d-8068-33241a88fa34?api-version=2023-03-01-preview
+  response:
+    body:
+      string: '{"name":"714b7dfb-ea5d-448d-8068-33241a88fa34","status":"InProgress","startTime":"2023-06-26T17:44:04.88Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jun 2023 17:44:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/714b7dfb-ea5d-448d-8068-33241a88fa34?api-version=2023-03-01-preview
+  response:
+    body:
+      string: '{"name":"714b7dfb-ea5d-448d-8068-33241a88fa34","status":"InProgress","startTime":"2023-06-26T17:44:04.88Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jun 2023 17:44:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/714b7dfb-ea5d-448d-8068-33241a88fa34?api-version=2023-03-01-preview
+  response:
+    body:
+      string: '{"name":"714b7dfb-ea5d-448d-8068-33241a88fa34","status":"InProgress","startTime":"2023-06-26T17:44:04.88Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jun 2023 17:45:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/714b7dfb-ea5d-448d-8068-33241a88fa34?api-version=2023-03-01-preview
+  response:
+    body:
+      string: '{"name":"714b7dfb-ea5d-448d-8068-33241a88fa34","status":"Succeeded","startTime":"2023-06-26T17:44:04.88Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '106'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 26 Jun 2023 17:45:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/operationResults/714b7dfb-ea5d-448d-8068-33241a88fa34?api-version=2023-03-01-preview
   response:
     body:
       string: ''
@@ -7773,7 +7822,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 22 Jun 2023 07:10:08 GMT
+      - Mon, 26 Jun 2023 17:45:22 GMT
       expires:
       - '-1'
       pragma:
@@ -7807,14 +7856,14 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"clitestsubnet5\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5\",\r\n
-        \ \"etag\": \"W/\\\"acd10ee5-9e4c-42aa-aafc-adb602d8a13d\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"0a8e24eb-9afc-4238-afe9-0ec554f8e449\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.10.0.0/24\",\r\n
         \   \"serviceEndpoints\": [\r\n      {\r\n        \"provisioningState\": \"Succeeded\",\r\n
         \       \"service\": \"Microsoft.Storage\",\r\n        \"locations\": [\r\n
-        \         \"northeurope\",\r\n          \"westeurope\"\r\n        ]\r\n      }\r\n
-        \   ],\r\n    \"delegations\": [\r\n      {\r\n        \"name\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5/delegations/Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
-        \       \"etag\": \"W/\\\"acd10ee5-9e4c-42aa-aafc-adb602d8a13d\\\"\",\r\n
+        \         \"eastus\",\r\n          \"westus\",\r\n          \"westus3\"\r\n
+        \       ]\r\n      }\r\n    ],\r\n    \"delegations\": [\r\n      {\r\n        \"name\":
+        \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5/delegations/Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
+        \       \"etag\": \"W/\\\"0a8e24eb-9afc-4238-afe9-0ec554f8e449\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"serviceName\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
         \         \"actions\": [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
@@ -7826,13 +7875,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1489'
+      - '1502'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:10:08 GMT
+      - Mon, 26 Jun 2023 17:45:23 GMT
       etag:
-      - W/"acd10ee5-9e4c-42aa-aafc-adb602d8a13d"
+      - W/"0a8e24eb-9afc-4238-afe9-0ec554f8e449"
       expires:
       - '-1'
       pragma:
@@ -7849,15 +7898,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 72771e54-049c-4ba6-b00d-dfebb96ff8b5
+      - b80be696-3c78-46a2-af19-9b581344a980
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5",
       "name": "clitestsubnet5", "properties": {"addressPrefix": "10.10.0.0/24", "delegations":
       [], "privateEndpointNetworkPolicies": "Disabled", "privateLinkServiceNetworkPolicies":
-      "Enabled", "serviceEndpoints": [{"locations": ["northeurope", "westeurope"],
+      "Enabled", "serviceEndpoints": [{"locations": ["eastus", "westus", "westus3"],
       "service": "Microsoft.Storage"}]}, "type": "Microsoft.Network/virtualNetworks/subnets"}'
     headers:
       Accept:
@@ -7869,7 +7918,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '514'
+      - '516'
       Content-Type:
       - application/json
       ParameterSetName:
@@ -7881,27 +7930,27 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"clitestsubnet5\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5\",\r\n
-        \ \"etag\": \"W/\\\"18fdf180-afe9-438b-a52e-bfb8a4045ea9\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"0c146939-662b-4245-93ee-f2f9b13be585\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.10.0.0/24\",\r\n
         \   \"serviceEndpoints\": [\r\n      {\r\n        \"provisioningState\": \"Succeeded\",\r\n
         \       \"service\": \"Microsoft.Storage\",\r\n        \"locations\": [\r\n
-        \         \"northeurope\",\r\n          \"westeurope\"\r\n        ]\r\n      }\r\n
-        \   ],\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
+        \         \"eastus\",\r\n          \"westus\",\r\n          \"westus3\"\r\n
+        \       ]\r\n      }\r\n    ],\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
         \"Disabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
         \ },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/northeurope/operations/4f7b557f-d1b9-4d1b-8b3b-451ac6118665?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/7b493dfa-ccb0-4bcf-84f4-2d24667f014d?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
-      - '771'
+      - '784'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:10:09 GMT
+      - Mon, 26 Jun 2023 17:45:24 GMT
       expires:
       - '-1'
       pragma:
@@ -7918,12 +7967,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5e1ca24a-8f54-45cd-84d1-62b5b1e413b1
+      - e7dc9e05-8f80-4c2f-bf98-113aacd730c4
       x-ms-ratelimit-remaining-subscription-writes:
       - '1197'
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -7940,7 +7989,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/northeurope/operations/4f7b557f-d1b9-4d1b-8b3b-451ac6118665?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/7b493dfa-ccb0-4bcf-84f4-2d24667f014d?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -7952,7 +8001,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:10:10 GMT
+      - Mon, 26 Jun 2023 17:45:25 GMT
       expires:
       - '-1'
       pragma:
@@ -7969,10 +8018,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6a314414-3646-4025-9158-9bd2b683f298
+      - 9b0a4a91-5317-4042-90ef-ccec15aeb112
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -7993,25 +8042,25 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"clitestsubnet5\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5\",\r\n
-        \ \"etag\": \"W/\\\"1a9fc765-8c8e-4b9b-980d-9391cf7a1fdf\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"bf6d0525-ae92-4366-ac99-1c68292159fc\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.10.0.0/24\",\r\n
         \   \"serviceEndpoints\": [\r\n      {\r\n        \"provisioningState\": \"Succeeded\",\r\n
         \       \"service\": \"Microsoft.Storage\",\r\n        \"locations\": [\r\n
-        \         \"northeurope\",\r\n          \"westeurope\"\r\n        ]\r\n      }\r\n
-        \   ],\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
+        \         \"eastus\",\r\n          \"westus\",\r\n          \"westus3\"\r\n
+        \       ]\r\n      }\r\n    ],\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
         \"Disabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
         \ },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '772'
+      - '785'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:10:10 GMT
+      - Mon, 26 Jun 2023 17:45:25 GMT
       etag:
-      - W/"1a9fc765-8c8e-4b9b-980d-9391cf7a1fdf"
+      - W/"bf6d0525-ae92-4366-ac99-1c68292159fc"
       expires:
       - '-1'
       pragma:
@@ -8028,10 +8077,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - cd102383-75a8-45a8-b17d-72e12baa42aa
+      - f78efe17-1388-405f-bc3e-7ef15537243f
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -8058,17 +8107,17 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/northeurope/operations/3810a70b-840d-4a2b-8562-1b0c3cdbf141?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/d29cda7f-774f-4089-baef-13a4b23434d3?api-version=2022-01-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Thu, 22 Jun 2023 07:10:12 GMT
+      - Mon, 26 Jun 2023 17:45:28 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/northeurope/operationResults/3810a70b-840d-4a2b-8562-1b0c3cdbf141?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operationResults/d29cda7f-774f-4089-baef-13a4b23434d3?api-version=2022-01-01
       pragma:
       - no-cache
       server:
@@ -8079,12 +8128,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e858900d-8f93-43bd-a804-162fc7d618d3
+      - d034dde2-6a73-49f4-9164-e1ec82c3c670
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14998'
     status:
       code: 202
-      message: ''
+      message: Accepted
 - request:
     body: null
     headers:
@@ -8101,7 +8150,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/northeurope/operations/3810a70b-840d-4a2b-8562-1b0c3cdbf141?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/d29cda7f-774f-4089-baef-13a4b23434d3?api-version=2022-01-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -8113,7 +8162,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:10:13 GMT
+      - Mon, 26 Jun 2023 17:45:29 GMT
       expires:
       - '-1'
       pragma:
@@ -8130,10 +8179,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b1fcccea-4937-4b63-80d2-c6e9796e157c
+      - ebefdb81-1eea-4371-b3b7-6aa848b13289
     status:
       code: 200
-      message: ''
+      message: OK
 - request:
     body: null
     headers:
@@ -8150,7 +8199,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/northeurope/operationResults/3810a70b-840d-4a2b-8562-1b0c3cdbf141?api-version=2022-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operationResults/d29cda7f-774f-4089-baef-13a4b23434d3?api-version=2022-01-01
   response:
     body:
       string: ''
@@ -8158,17 +8207,17 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/northeurope/operations/3810a70b-840d-4a2b-8562-1b0c3cdbf141?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/d29cda7f-774f-4089-baef-13a4b23434d3?api-version=2022-01-01
       cache-control:
       - no-cache
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 22 Jun 2023 07:10:13 GMT
+      - Mon, 26 Jun 2023 17:45:29 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/northeurope/operationResults/3810a70b-840d-4a2b-8562-1b0c3cdbf141?api-version=2022-01-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operationResults/d29cda7f-774f-4089-baef-13a4b23434d3?api-version=2022-01-01
       pragma:
       - no-cache
       server:
@@ -8179,7 +8228,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e858900d-8f93-43bd-a804-162fc7d618d3
+      - d034dde2-6a73-49f4-9164-e1ec82c3c670
     status:
       code: 204
       message: No Content

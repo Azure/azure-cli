@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"name": "5cb4873d-9145-407e-b7f4-0f7961147550", "type": "Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
+    body: '{"name": "00000000-0000-0000-0000-000000000000", "type": "Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
     headers:
       Accept:
       - application/json
@@ -22,7 +22,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul/checkMigrationNameAvailability?api-version=2023-03-01-preview
   response:
     body:
-      string: '{"name":"5cb4873d-9145-407e-b7f4-0f7961147550","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations","nameAvailable":true}'
+      string: '{"name":"00000000-0000-0000-0000-000000000000","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations","nameAvailable":true}'
     headers:
       cache-control:
       - no-cache
@@ -31,7 +31,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Jun 2023 10:36:37 GMT
+      - Tue, 27 Jun 2023 06:33:01 GMT
       expires:
       - '-1'
       pragma:
@@ -77,7 +77,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 26 Jun 2023 10:36:38 GMT
+      - Tue, 27 Jun 2023 06:33:02 GMT
       expires:
       - '-1'
       pragma:
@@ -117,7 +117,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Jun 2023 10:36:38 GMT
+      - Tue, 27 Jun 2023 06:33:02 GMT
       expires:
       - '-1'
       pragma:
@@ -134,10 +134,10 @@ interactions:
 - request:
     body: '{"location": "northeurope", "properties": {"migrationMode": "offline",
       "sourceDbServerResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/servers/source-server-longhaul",
-      "secretParameters": {"adminCredentials": {"sourceServerPassword": "Mig2023!",
-      "targetServerPassword": "Mig2023!"}, "sourceServerUsername": "migration_user",
+      "secretParameters": {"adminCredentials": {"sourceServerPassword": "XXXXXXXX",
+      "targetServerPassword": "XXXXXXXX"}, "sourceServerUsername": "migration_user@source-server-longhaul",
       "targetServerUsername": "target_user"}, "dbsToMigrate": ["dvdrental"], "setupLogicalReplicationOnSourceDbIfNeeded":
-      "True", "overwriteDbsInTarget": "True"}}'
+      "False", "overwriteDbsInTarget": "True"}}'
     headers:
       Accept:
       - application/json
@@ -148,7 +148,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '565'
+      - '589'
       Content-Type:
       - application/json
       ParameterSetName:
@@ -156,19 +156,19 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul/migrations/5cb4873d-9145-407e-b7f4-0f7961147550?api-version=2023-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul/migrations/00000000-0000-0000-0000-000000000000?api-version=2023-03-01-preview
   response:
     body:
-      string: '{"properties":{"migrationId":"e9072ab2-4783-43a2-916d-b11643e5caf6","currentStatus":{"state":"InProgress"},"migrationMode":"Offline","sourceDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/servers/source-server-longhaul","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul","dbsToMigrate":["dvdrental"],"setupLogicalReplicationOnSourceDbIfNeeded":"True","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2023-06-26T10:36:40.5062597Z","triggerCutover":"True"},"location":"northeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul/migrations/5cb4873d-9145-407e-b7f4-0f7961147550","name":"5cb4873d-9145-407e-b7f4-0f7961147550","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
+      string: '{"properties":{"migrationId":"da995ddc-95b7-45fe-8795-1f47548c01fb","currentStatus":{"state":"InProgress"},"migrationMode":"Offline","sourceDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/servers/source-server-longhaul","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul","dbsToMigrate":["dvdrental"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2023-06-27T06:33:04.4356201Z","triggerCutover":"True"},"location":"northeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul/migrations/00000000-0000-0000-0000-000000000000","name":"00000000-0000-0000-0000-000000000000","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1043'
+      - '1044'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Jun 2023 10:36:40 GMT
+      - Tue, 27 Jun 2023 06:33:03 GMT
       expires:
       - '-1'
       pragma:
@@ -203,17 +203,18 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul/migrations?api-version=2023-03-01-preview&migrationListFilter=Active
   response:
     body:
-      string: '{"value":[{"properties":{"migrationId":"e9072ab2-4783-43a2-916d-b11643e5caf6","currentStatus":{"state":"InProgress","currentSubStateDetails":{"currentSubState":"PerformingPreRequisiteSteps"}},"migrationMode":"Offline","sourceDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/servers/source-server-longhaul","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul","dbsToMigrate":["dvdrental"],"setupLogicalReplicationOnSourceDbIfNeeded":"True","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2023-06-26T10:36:40.5062597Z","triggerCutover":"True"},"location":"East
-        US","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul/migrations/5cb4873d-9145-407e-b7f4-0f7961147550","name":"5cb4873d-9145-407e-b7f4-0f7961147550","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}]}'
+      string: '{"value":[{"properties":{"migrationId":"da995ddc-95b7-45fe-8795-1f47548c01fb","currentStatus":{"state":"InProgress","currentSubStateDetails":{"currentSubState":"PerformingPreRequisiteSteps"}},"migrationMode":"Offline","sourceDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/servers/source-server-longhaul","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul","dbsToMigrate":["dvdrental"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2023-06-27T06:33:04.4356201Z","triggerCutover":"True","sourceDbServerMetadata":{"location":"eastus","sku":{}},"targetDbServerMetadata":{"location":"East
+        US","sku":{"name":"Standard_D2ds_v4","tier":"Standard_D2ds_v4"}}},"location":"East
+        US","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul/migrations/00000000-0000-0000-0000-000000000000","name":"00000000-0000-0000-0000-000000000000","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1126'
+      - '1291'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Jun 2023 10:36:41 GMT
+      - Tue, 27 Jun 2023 06:33:05 GMT
       expires:
       - '-1'
       pragma:
@@ -250,18 +251,18 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul/migrations?api-version=2023-03-01-preview&migrationListFilter=Active
   response:
     body:
-      string: '{"value":[{"properties":{"migrationId":"e9072ab2-4783-43a2-916d-b11643e5caf6","currentStatus":{"state":"InProgress","currentSubStateDetails":{"currentSubState":"PerformingPreRequisiteSteps"}},"migrationMode":"Offline","sourceDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/servers/source-server-longhaul","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul","dbsToMigrate":["dvdrental"],"setupLogicalReplicationOnSourceDbIfNeeded":"True","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2023-06-26T10:36:40.5062597Z","triggerCutover":"True","sourceDbServerMetadata":{"location":"eastus","sku":{}},"targetDbServerMetadata":{"location":"East
+      string: '{"value":[{"properties":{"migrationId":"da995ddc-95b7-45fe-8795-1f47548c01fb","currentStatus":{"state":"InProgress","currentSubStateDetails":{"currentSubState":"PerformingPreRequisiteSteps"}},"migrationMode":"Offline","sourceDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/servers/source-server-longhaul","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul","dbsToMigrate":["dvdrental"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2023-06-27T06:33:04.4356201Z","triggerCutover":"True","sourceDbServerMetadata":{"location":"eastus","sku":{}},"targetDbServerMetadata":{"location":"East
         US","sku":{"name":"Standard_D2ds_v4","tier":"Standard_D2ds_v4"}}},"location":"East
-        US","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul/migrations/5cb4873d-9145-407e-b7f4-0f7961147550","name":"5cb4873d-9145-407e-b7f4-0f7961147550","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}]}'
+        US","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul/migrations/00000000-0000-0000-0000-000000000000","name":"00000000-0000-0000-0000-000000000000","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1290'
+      - '1291'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Jun 2023 10:36:42 GMT
+      - Tue, 27 Jun 2023 06:33:07 GMT
       expires:
       - '-1'
       pragma:
@@ -295,21 +296,21 @@ interactions:
       User-Agent:
       - AZURECLI/2.49.0 azsdk-python-mgmt-rdbms/10.2.0b10 Python/3.10.11 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul/migrations/5cb4873d-9145-407e-b7f4-0f7961147550?api-version=2023-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul/migrations/00000000-0000-0000-0000-000000000000?api-version=2023-03-01-preview
   response:
     body:
-      string: '{"properties":{"migrationId":"e9072ab2-4783-43a2-916d-b11643e5caf6","currentStatus":{"state":"InProgress","currentSubStateDetails":{"currentSubState":"PerformingPreRequisiteSteps"}},"migrationMode":"Offline","sourceDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/servers/source-server-longhaul","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul","dbsToMigrate":["dvdrental"],"setupLogicalReplicationOnSourceDbIfNeeded":"True","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2023-06-26T10:36:40.5062597Z","triggerCutover":"True","sourceDbServerMetadata":{"location":"eastus","sku":{}},"targetDbServerMetadata":{"location":"East
+      string: '{"properties":{"migrationId":"00000000-0000-0000-0000-000000000000","currentStatus":{"state":"InProgress","currentSubStateDetails":{"currentSubState":"PerformingPreRequisiteSteps"}},"migrationMode":"Offline","sourceDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/servers/source-server-longhaul","targetDbServerResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul","dbsToMigrate":["dvdrental"],"setupLogicalReplicationOnSourceDbIfNeeded":"False","overwriteDbsInTarget":"True","migrationWindowStartTimeInUtc":"2023-06-27T06:33:04.4356201Z","triggerCutover":"True","sourceDbServerMetadata":{"location":"eastus","sku":{}},"targetDbServerMetadata":{"location":"East
         US","sku":{"name":"Standard_D2ds_v4","tier":"Standard_D2ds_v4"}}},"location":"East
-        US","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul/migrations/5cb4873d-9145-407e-b7f4-0f7961147550","name":"5cb4873d-9145-407e-b7f4-0f7961147550","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
+        US","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/flexibleServers/target-server-longhaul/migrations/00000000-0000-0000-0000-000000000000","name":"00000000-0000-0000-0000-000000000000","type":"Microsoft.DBforPostgreSQL/flexibleServers/migrations"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1278'
+      - '1279'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 26 Jun 2023 10:36:44 GMT
+      - Tue, 27 Jun 2023 06:33:08 GMT
       expires:
       - '-1'
       pragma:

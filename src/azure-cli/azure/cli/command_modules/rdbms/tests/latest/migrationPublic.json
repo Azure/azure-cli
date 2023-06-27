@@ -1,20 +1,19 @@
 {
     "properties": {
-        "SourceDbServerResourceId": "/subscriptions/5c5037e5-d3f1-4e7b-b3a9-f6bf94902b30/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/servers/source-server-longhaul",
-        "SecretParameters": {
-            "AdminCredentials": {
-                "SourceServerPassword": "Mig2023!",
-                "TargetServerPassword": "Mig2023!"
+        "sourceDbServerResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/servers/source-server-longhaul",
+        "secretParameters": {
+            "adminCredentials": {
+                "sourceServerPassword": "XXXXXXXXX",
+                "targetServerPassword": "XXXXXXXXX"
             },
-            "sourceServerUsername": "migration_user",
+            "sourceServerUsername": "migration_user@source-server-longhaul",
             "targetServerUsername": "target_user"
         },
-        "DbsToMigrate": [
+        "dbsToMigrate": [
             "dvdrental"
         ],
-        "SetupLogicalReplicationOnSourceDbIfNeeded": "true",
-        "OverwriteDbsinTarget": "true",
-        "MigrationMode": "Offline"
+        "setupLogicalReplicationOnSourceDbIfNeeded": "false",
+        "overwriteDbsinTarget": "true"
     },
     "location": "eastus"
 }

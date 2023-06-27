@@ -443,15 +443,16 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                 JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', identity['id'])
             ]
 
+            geo_checks = []
             if geo_redundant_backup:
-                main_checks += [
+                geo_checks = [
                     JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(backup_identity['id'])),
                     JMESPathCheck('dataEncryption.geoBackupKeyUri', backup_key['key']['kid']),
                     JMESPathCheck('dataEncryption.geoBackupUserAssignedIdentityId', backup_identity['id'])
                 ]
 
             result = self.cmd('postgres flexible-server show -g {} -n {}'.format(resource_group, primary_server_name),
-                    checks=main_checks).get_output_in_json()
+                    checks=main_checks + geo_checks).get_output_in_json()
 
             # create replica 1 with data encryption            
             replica_1_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -490,7 +491,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                      backup_name,
                      primary_server_name,
                      data_encryption_key_id_flag
-            ), checks=main_checks).get_output_in_json()
+            ), checks=main_checks + geo_checks).get_output_in_json()
 
             # geo-restore backup
             if geo_redundant_backup:
@@ -650,7 +651,7 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
-    postgres_location = 'northeurope'
+    postgres_location = 'eastus'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -896,7 +897,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
 
 class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'northeurope'
+    postgres_location = 'eastus'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1302,7 +1303,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
-    postgres_location = 'northeurope'
+    postgres_location = 'eastus'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
