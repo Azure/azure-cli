@@ -578,18 +578,18 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
     parameters.backup = postgresql_flexibleservers.models.Backup(geo_redundant_backup=geo_redundant_backup)
 
     parameters.identity, parameters.data_encryption = build_identity_and_data_encryption(db_engine='postgres',
-                                                                                            byok_identity=byok_identity,
-                                                                                            byok_key=byok_key,
-                                                                                            backup_byok_identity=backup_byok_identity,
-                                                                                            backup_byok_key=backup_byok_key)
+                                                                                         byok_identity=byok_identity,
+                                                                                         byok_key=byok_key,
+                                                                                         backup_byok_identity=backup_byok_identity,
+                                                                                         backup_byok_key=backup_byok_key)
 
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
 
 
 def flexible_server_revivedropped(cmd, client, resource_group_name, server_name, source_server, location, zone=None,
-                                 vnet=None, vnet_address_prefix=None, subnet=None, subnet_address_prefix=None,
-                                 private_dns_zone_arguments=None, geo_redundant_backup=None, no_wait=False, yes=False,
-                                 byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None):
+                                  vnet=None, vnet_address_prefix=None, subnet=None, subnet_address_prefix=None,
+                                  private_dns_zone_arguments=None, geo_redundant_backup=None, no_wait=False, yes=False,
+                                  byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None):
     server_name = server_name.lower()
 
     if not is_valid_resource_id(source_server):
@@ -641,10 +641,10 @@ def flexible_server_revivedropped(cmd, client, resource_group_name, server_name,
     parameters.backup = postgresql_flexibleservers.models.Backup(geo_redundant_backup=geo_redundant_backup)
 
     parameters.identity, parameters.data_encryption = build_identity_and_data_encryption(db_engine='postgres',
-                                                                                            byok_identity=byok_identity,
-                                                                                            byok_key=byok_key,
-                                                                                            backup_byok_identity=backup_byok_identity,
-                                                                                            backup_byok_key=backup_byok_key)
+                                                                                         byok_identity=byok_identity,
+                                                                                         byok_key=byok_key,
+                                                                                         backup_byok_identity=backup_byok_identity,
+                                                                                         backup_byok_key=backup_byok_key)
 
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
 
