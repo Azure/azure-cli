@@ -281,15 +281,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('sf managed-cluster network-security-rule add', validator=validate_add_network_security_rule) as c:
         c.argument('name', help='Network security rule name')
-        c.argument('access', help='possible values are <allow> or <deny>')
-        c.argument('direction', help='possible values are <inbound> or <outbound>')
-        c.argument('description', help='network security rule description')
-        c.argument('priority', help='integer that shows priority for rule')
-        c.argument('protocol', help='enter one of the following: tcp, https, http, udp, icmp, ah, esp, any')
+        c.argument('access', arg_type=get_enum_type(['allow', 'deny']), help='Allows or denies network traffic')
+        c.argument('direction', arg_type=get_enum_type(['inbound', 'outbound']), help='Network security rule direction')
+        c.argument('description', help='Network security rule description')
+        c.argument('priority', type=int, help='Integer that shows priority for rule')
+        c.argument('protocol', arg_type=get_enum_type(['tcp', 'https', 'http', 'udp', 'icmp', 'ah', 'esp', 'any']), help='Network protocol')
         c.argument('source_port_ranges', nargs='+', help='A single or space separated list of source port ranges')
         c.argument('dest_port_ranges', nargs='+', help='A single or space separated list of destination port ranges')
-        c.argument('source_addr_prefixes', nargs='+', help='A single or space separated list of source address prefixes')
-        c.argument('dest_addr_prefixes', nargs='+', help='A single or space separated list of destination address prefixes')
+        c.argument('source_addr_prefixes', nargs='+', help='The CIDR or source IP ranges. A single or space separated list of source address prefixes')
+        c.argument('dest_addr_prefixes', nargs='+', help='CIDR or destination IP ranges. A single or space separated list of destination address prefixes')
+        
     # managed node type
     capacity = CLIArgumentType(
         options_list=['--capacity'],
