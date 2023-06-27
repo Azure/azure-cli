@@ -604,14 +604,6 @@ def flexible_server_revivedropped(cmd, client, resource_group_name, server_name,
     else:
         source_server_id = source_server
 
-    source_server_id_parts = parse_resource_id(source_server_id)
-    try:
-        _source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
-
-        raise InvalidArgumentValueError("SourceServerId: {} already exists. Please provide source server id of the tombstoned server".format(source_server_id))
-    except Exception as e:
-        logger.info("Source server id: {} does not exist.".format(source_server_id)) 
-
     db_context = DbContext(
         cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
         cf_db=cf_postgres_flexible_db, cf_availability=cf_postgres_check_resource_availability_with_location,

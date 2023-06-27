@@ -574,12 +574,10 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         geo_backup_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         key_2_name = self.create_random_name('rdbmskey', 32)
         identity_2_name = self.create_random_name('identity', 32)
-        server_2_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         tier = 'GeneralPurpose'
         sku_name = 'Standard_D2s_v3'
         location = self.postgres_location
         backup_location = self.postgres_backup_location
-        replication_role = 'AsyncReplica'
 
         key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                        .format(key_name, vault_name)).get_output_in_json()
@@ -651,11 +649,12 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             # By default, Geo-redundant backup is disabled for restore hence no need to pass backup-key and backup-identity
             data_encryption_key_id_flag = '--key {} --identity {}'.format(key['key']['kid'], identity['id'])
 
-            restore_result = self.cmd('postgres flexible-server {} -g {} --name {} --source-server {} {}'.format(
+            restore_result = self.cmd('postgres flexible-server {} -l {} -g {} --name {} --source-server {} {}'.format(
                      'revive-dropped',
+                     location,
                      resource_group,
                      backup_name,
-                     primary_server_name,
+                     result['id'],
                      data_encryption_key_id_flag
             ), checks=main_checks).get_output_in_json()
 
@@ -683,7 +682,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                                                                                         'revive-dropped --location {}'.format(backup_location),
                                                                                         resource_group,
                                                                                         geo_backup_name,
-                                                                                        primary_server_name,
+                                                                                        result['id'],
                                                                                         data_encryption_key_id_flag
                                                                                     ), checks=[
                                                                                         JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(backup_identity['id'])),

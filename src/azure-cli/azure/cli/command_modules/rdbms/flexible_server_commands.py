@@ -89,6 +89,7 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('create', 'flexible_server_create', table_transformer=table_transform_output)
         g.custom_command('restore', 'flexible_server_restore', supports_no_wait=True)
         g.custom_command('geo-restore', 'flexible_server_georestore', supports_no_wait=True)
+        g.custom_command('revive-dropped', 'flexible_server_revivedropped', supports_no_wait=True)
         g.command('start', 'begin_start', supports_no_wait=True)
         g.custom_command('stop', 'flexible_server_stop', custom_command_type=flexible_server_custom_common, supports_no_wait=True)
         g.custom_command('delete', 'flexible_server_delete')

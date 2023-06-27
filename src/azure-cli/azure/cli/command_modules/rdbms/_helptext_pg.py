@@ -614,6 +614,20 @@ examples:
         --private-dns-zone testDNS.postgres.database.azure.com --location newLocation
 """
 
+helps['postgres flexible-server revive-dropped'] = """
+type: command
+short-summary: Revive a dropped flexible server from backup.
+examples:
+  - name: >
+      Revive dropped public access server 'testserver' to a new server 'testserverNew' in location 'newLocation' with public access.
+    text: az postgres flexible-server revive-dropped --resource-group testGroup --name testserverNew --source-server /subscriptions/{SubId}/resourceGroups/{testGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/testserver --location newLocation
+  - name: >
+      Revive dropped public access server 'testserver' with data encryption enabled as a new server 'testserverNew' with data encryption.
+    text: >
+      az postgres flexible-server revive-dropped -l testLocation --resource-group testGroup --name testserverNew \\
+        --source-server testserver --key newKeyIdentifier --identity newIdentity
+"""
+
 helps['postgres flexible-server upgrade'] = """
 type: command
 short-summary: Upgrade the major version of a flexible server.
