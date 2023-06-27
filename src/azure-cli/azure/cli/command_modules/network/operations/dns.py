@@ -10,7 +10,7 @@ from azure.cli.core.aaz import has_value, register_command, AAZResourceIdArgForm
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
 from ..aaz.latest.network.dns.record_set import Update as _RecordSetUpdate, Show as _RecordSetShow, \
     ListByType as _RecordSetListByType, Delete as _RecordSetDelete, Create as _RecordSetCreate
-from ..aaz.latest.network.dns._list_references import ListReferences as _DNSListReferences
+from ..aaz.latest.network.dns import ListReferences as _DNSListReferences
 
 logger = get_logger(__name__)
 
