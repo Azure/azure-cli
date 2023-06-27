@@ -290,7 +290,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('dest_port_ranges', nargs='+', help='A single or space separated list of destination port ranges')
         c.argument('source_addr_prefixes', nargs='+', help='The CIDR or source IP ranges. A single or space separated list of source address prefixes')
         c.argument('dest_addr_prefixes', nargs='+', help='CIDR or destination IP ranges. A single or space separated list of destination address prefixes')
-        
+
     # managed node type
     capacity = CLIArgumentType(
         options_list=['--capacity'],
