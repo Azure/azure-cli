@@ -134,20 +134,10 @@ class SqlVmScenarioTest(ScenarioTest):
             self.cmd('sql vm update -n {} -g {} --assessment-weekly-interval {} --assessment-day-of-week {} --assessment-start-time-local {} '
                  .format(sqlvm, resource_group, 1, 'Monday', '20:30'))
 
-        # test assessment schedule enabling succeeds
+        # test assessment schedule enabling succeeds with agent rg set to another rg
         self.cmd('sql vm update -n {} -g {} --assessment-weekly-interval {} --assessment-day-of-week {} --assessment-start-time-local {} '
-                 '--workspace-rg {} --workspace-name {}'
-                 .format(sqlvm, resource_group, 1, 'Monday', '20:30', resource_group, laworkspace),
-                 checks=[
-                     JMESPathCheck('name', sqlvm),
-                     JMESPathCheck('location', resource_group_location),
-                     JMESPathCheck('provisioningState', "Succeeded")
-                 ])
-
-        # test new assessment commands succeed with --agent-rg
-        self.cmd('sql vm update -n {} -g {} --enable-assessment {} --agent-rg {}'
-                 '--workspace-rg {} --workspace-name {}'
-                 .format(sqlvm, resource_group, 'True', resource_group2, resource_group, laworkspace),
+                 '--workspace-rg {} --workspace-name {} --agent-rg {}'
+                 .format(sqlvm, resource_group, 1, 'Monday', '20:30', resource_group, laworkspace, resource_group2),
                  checks=[
                      JMESPathCheck('name', sqlvm),
                      JMESPathCheck('location', resource_group_location),
