@@ -71,7 +71,6 @@ def cli_eventhub_create(cmd, resource_group_name, namespace_name, event_hub_name
         "namespace_name": namespace_name,
         "event_hub_name": event_hub_name
     })
-    print(command_arg_dict)
     return Create(cli_ctx=cmd.cli_ctx)(command_args=command_arg_dict)
 
 
