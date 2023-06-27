@@ -26,7 +26,6 @@ WINDOWS_LA_EXT_VERSION = '1.0'
 
 
 def get_sqlvirtualmachine_management_client(cli_ctx):
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.sqlvirtualmachine import SqlVirtualMachineManagementClient
 
     # Normal production scenario.
@@ -165,6 +164,7 @@ def create_custom_table():
     return body
 
 
+# pylint: disable=broad-except
 def validate_dcr(cmd, dcr_location, workspace_loc, dcr_source_filePattern,
                  dcr_custom_log, dcr_la_id, workspace_id, dce_endpoint_id):
     import re
@@ -202,7 +202,7 @@ def validate_dcr(cmd, dcr_location, workspace_loc, dcr_source_filePattern,
     try:
         # Does a GET on the dce to ensure no http errors - suffices
         send_raw_request(cmd.cli_ctx, method="GET", url=dce_url)
-    except BaseException:
+    except Exception:
         # Validation on DCE Endpoint failed return False
         # We can consider not returning false - creating a DCE and patching the
         # DCR here
@@ -215,7 +215,7 @@ def does_name_exist(cmd, res_url):
     try:
         # Does a GET on the dce/dcr/dcra res to ensure no http errors
         send_raw_request(cmd.cli_ctx, method="GET", url=res_url)
-    except BaseException:
+    except Exception:
         # dce does not exist. so we do not need to bump name
         return False
     return True
@@ -236,6 +236,7 @@ def create_dcra(dcr_res_id):
     return body
 
 
+# pylint: disable=too-many-locals
 def create_ama_and_dcra(cmd, curr_subscription, resource_group_name,
                         sql_virtual_machine_name, workspace_id, workspace_loc, dcr_id):
     master_template = ArmTemplateBuilder20190401()
@@ -271,7 +272,6 @@ def create_ama_and_dcra(cmd, curr_subscription, resource_group_name,
     master_template.add_resource(dcrlinkage)
 
     template = master_template.build()
-    print(template)
     # deploy ARM template
     deployment_name = 'vm_deploy_' + random_string(32)
     client = get_mgmt_service_client(
@@ -291,8 +291,3 @@ def create_ama_and_dcra(cmd, curr_subscription, resource_group_name,
 
     LongRunningOperation(cmd.cli_ctx)(client.begin_create_or_update(
         resource_group_name, deployment_name, deployment))
-    """# url = f"https://management.azure.com/subscriptions/
-    {curr_subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute/
-    virtualMachines/{sql_virtual_machine_name}/providers/Microsoft.Insights/dataCollectionRuleAssociations/
-    {dcra_name}?api-version=2022-06-01"
-    # Define the request headers"""

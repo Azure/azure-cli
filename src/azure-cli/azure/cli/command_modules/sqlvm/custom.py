@@ -674,6 +674,7 @@ def sqlvm_remove_from_group(
 
 
 # region Helpers for custom commands
+# pylint: disable=too-many-branches
 def set_assessment_properties(
         cmd,
         instance,
@@ -1012,96 +1013,11 @@ def set_assessment_properties(
 
             create_ama_and_dcra(cmd, curr_subscription, resource_group_name, sql_virtual_machine_name, workspace_id, workspace_loc, dcr_resource_id)
 
-            """vm_resource_uri = f"subscriptions/{curr_subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute/virtualMachines/{sql_virtual_machine_name}"
-            base_url = f"https://management.azure.com/{vm_resource_uri}/providers/Microsoft.Insights/dataCollectionRuleAssociations/"
-            api_version = "?api-version=2022-06-01"
-            for index in count(start=1):
-                dcra_name = f"{workspace_id}_{workspace_loc}_DCRA_{index}"
-                dcra_url = f"{base_url}{dcra_name}{api_version}"
-                if not does_name_exist(cmd, dcra_url):
-                    break
-           # url = f" https://management.azure.com/subscriptions/{curr_subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute/virtualMachines/{sql_virtual_machine_name}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{dcra_name}?api-version=2022-06-01"
-            # Define the request header
-
-            body = create_dcra(dcr_resource_id)
-            try:
-                send_raw_request(
-                    cmd.cli_ctx,
-                    method='PUT',
-                    url=dcra_url,
-                    body=body)
-            except Exception as e:
-                raise AzureResponseError(
-                    f"Creating new DCRA for DCR {dcr_name} failed with error {e}")"""
-
         else:
 
             # DCR and DCE were validated
             # build ARM template for linkage resource and AMA installation
             create_ama_and_dcra(cmd, curr_subscription, resource_group_name, sql_virtual_machine_name, workspace_id, workspace_loc, validated_dcr_res_id)
-            """master_template = ArmTemplateBuilder20190401()
-            vm_resource_uri = f"subscriptions/{curr_subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute/virtualMachines/{sql_virtual_machine_name}"
-            base_url = f"https://management.azure.com/{vm_resource_uri}/providers/Microsoft.Insights/dataCollectionRuleAssociations/"
-            api_version = "?api-version=2022-06-01"
-            for index in count(start=1):
-                dcra_name = f"{workspace_id}_{workspace_loc}_DCRA_{index}"
-                dcra_url = f"{base_url}{dcra_name}{api_version}"
-                if not does_name_exist(cmd, dcra_url):
-                    break
-            vm = get_vm(
-                cmd,
-                resource_group_name,
-                sql_virtual_machine_name,
-                'instanceView')
-            amainstall = build_ama_install_resource(
-                sql_virtual_machine_name, vm.location, resource_group_name, curr_subscription)
-
-            master_template.add_resource(amainstall)
-
-            dcrlinkage = build_dcr_vm_linkage_resource(sql_virtual_machine_name, dcra_name, dcr_id)
-            master_template.add_resource(dcrlinkage)
-
-            template = master_template.build()
-            print(template)
-            # deploy ARM template
-            deployment_name = 'vm_deploy_' + random_string(32)
-            client = get_mgmt_service_client(
-                cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
-            DeploymentProperties = cmd.get_models(
-                'DeploymentProperties',
-                resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-
-            properties = DeploymentProperties(
-                template=template, parameters={}, mode='incremental')
-
-            Deployment = cmd.get_models(
-                'Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-            deployment = Deployment(properties=properties)
-
-            # creates the AMA DEPLOYMENT
-
-            LongRunningOperation(cmd.cli_ctx)(client.begin_create_or_update(resource_group_name, deployment_name, deployment))
-            # url = f"https://management.azure.com/subscriptions/{curr_subscription}/resourceGroups/{resource_group_name}/providers/Microsoft.Compute/virtualMachines/{sql_virtual_machine_name}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{dcra_name}?api-version=2022-06-01"
-            # Define the request headers
-              print("success")
-
-            headers = [
-                'Content-Type=application/json'
-            ]
-            body = create_dcra(validated_dcr_res_id)
-
-            try:
-                send_raw_request(
-                    cmd.cli_ctx,
-                    method='PUT',
-                    url=dcra_url,
-                    headers=headers,
-                    body=body)
-            except Exception as e:
-                print(
-                    f"Creating new DCRA for DCR {dcr_name} failed with error {e}")
-
-                # raise AzureResponseError(f"Creating new DCRA for DCR {dcr_name} failed with error {e}")"""
             return
 
     elif enable_assessment is False:
@@ -1123,7 +1039,7 @@ def set_assessment_properties(
             # GET on VM DCRA endpoint to list all DCRA attached to this VM
             dcra_list = send_raw_request(
                 cmd.cli_ctx, method="GET", url=dcra_get_url)
-        except BaseException:
+        except HTTPError:
             # No DCRA Found. Assessment is disabled through AMA.
             return
         dcra_list = dcra_list.json()
@@ -1150,16 +1066,6 @@ def set_assessment_properties(
                 send_raw_request(
                     cmd.cli_ctx, method="DELETE", url=dcra_url)
                 return
-            else:
-                continue
             # Raise message DCRA deleted. Assessment disabled succesfully.
 
-        """# Can also delete based on this simply as customer should not be creating this dcra..
-        # Find DCRA matching naming convention
-        # If 1 found - delete and check deleted
-        # If multiple found - validate each and delete all that pass validation?
-        # Check DCR resource ID
-        # Run through validation of DCR
-        # Basic validation: Custom Log, file pattern and dcr name
-        # advanced - dce endpoint valid, la workspace valid and location same"""
 # endregion Helpers for custom commands
