@@ -1177,7 +1177,7 @@ def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_stack_model, t
             minimum_supported_version = "0.14.85"
             if not bicep_version_greater_than_or_equal_to(minimum_supported_version):
                 raise ArgumentUsageError(
-                    f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to {minimum_supported_version} or later.")
+                    f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please use az bicep upgrade to upgrade Bicep CLI.")
             if len(parameters) > 1:
                 raise ArgumentUsageError(
                     "Can not use --parameters argument more than once when using a .bicepparam file")
