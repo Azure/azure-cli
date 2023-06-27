@@ -487,7 +487,7 @@ def iot_dps_identity_assign(cmd, client, dps_name, system_identity=None, user_id
     return result.identity
 
 
-def iot_dps_identity_show(cmd, client, dps_name, resource_group_name=None):
+def iot_dps_identity_show(client, dps_name, resource_group_name=None):
     resource_group_name = _ensure_dps_resource_group_name(client, resource_group_name, dps_name)
     dps = iot_dps_get(client, dps_name, resource_group_name)
     return dps.identity
