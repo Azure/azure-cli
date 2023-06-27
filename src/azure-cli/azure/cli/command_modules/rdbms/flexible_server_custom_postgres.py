@@ -295,12 +295,12 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     if private_dns_zone_arguments:
         private_dns_zone_id = prepare_private_dns_zone(db_context,
-                                                        resource_group_name,
-                                                        server_name,
-                                                        private_dns_zone=private_dns_zone_arguments,
-                                                        subnet_id=instance.network.delegated_subnet_resource_id,
-                                                        location=location,
-                                                        yes=yes)
+                                                       resource_group_name,
+                                                       server_name,
+                                                       private_dns_zone=private_dns_zone_arguments,
+                                                       subnet_id=instance.network.delegated_subnet_resource_id,
+                                                       location=location,
+                                                       yes=yes)
         instance.network.private_dns_zone_arm_resource_id = private_dns_zone_id
 
     if sku_name:
@@ -832,7 +832,7 @@ def flexible_server_provision_network_resource(cmd, resource_group_name, server_
 def migration_create_func(cmd, client, resource_group_name, server_name, properties, migration_mode="offline",
                           migration_name=None, tags=None, location=None):
 
-    logging_name='PostgreSQL'
+    logging_name = 'PostgreSQL'
     subscription_id = get_subscription_id(cmd.cli_ctx)
     properties_filepath = os.path.join(os.path.abspath(os.getcwd()), properties)
     # Generate missing parameters

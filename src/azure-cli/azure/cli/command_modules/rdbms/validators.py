@@ -22,7 +22,7 @@ from ._flexible_server_util import (get_mysql_versions, get_mysql_skus, get_mysq
                                     get_mysql_backup_retention, get_mysql_tiers, get_mysql_list_skus_info,
                                     get_postgres_skus, get_postgres_storage_sizes, get_postgres_tiers,
                                     _is_resource_name)
-from ._flexible_server_location_capabilities_util import (get_postgres_location_capability_info, 
+from ._flexible_server_location_capabilities_util import (get_postgres_location_capability_info,
                                                           get_postgres_server_capability_info)
 
 logger = get_logger(__name__)
@@ -405,7 +405,7 @@ def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup
                                  "that was not created with data encryption.")
 
     if byok_key and (geo_redundant_backup and geo_redundant_backup.lower() == 'enabled') and \
-        bool(backup_byok_key is None):
+       bool(backup_byok_key is None):
         raise ArgumentUsageError("Please provide Geo-location user assigned identity and keyvault key "
                                  "to enable Data encryption for geo-redundant backup.")
 
