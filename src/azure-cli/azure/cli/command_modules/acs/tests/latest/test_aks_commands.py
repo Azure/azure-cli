@@ -7061,7 +7061,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         nodepool_name = self.create_random_name('c', 6)
         nodepool_name2 = self.create_random_name('c', 6)
         snapshot_name = self.create_random_name('s', 16)
-        tags = "test=var"
+        tagVar = "test"
+        tagVal = "value"
+        tags = tagVar+"="+tagVal
 
         self.kwargs.update({
             'resource_group': resource_group,
@@ -7111,7 +7113,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # update tags on nodepool snapshot
         update_snapshot_cmd = 'aks nodepool snapshot update --resource-group {resource_group} --name {snapshot_name} --tags {tags} -o json'
         response = self.cmd(update_snapshot_cmd, checks=[
-            self.check('tags', tags)
+            self.check('tags', {tagVar: tagVal})
         ]).get_output_in_json()
 
         # delete the original AKS cluster
