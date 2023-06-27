@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+# pylint: disable=ungrouped-imports
 
 import base64
 import errno
@@ -32,9 +33,7 @@ from azure.cli.command_modules.acs.maintenanceconfiguration import aks_maintenan
 import colorama
 import requests
 import yaml
-from azure.cli.command_modules.acs._client_factory import (
-    cf_agent_pools,
-)
+from azure.cli.command_modules.acs._client_factory import cf_agent_pools
 from azure.cli.command_modules.acs._consts import (
     ADDONS,
     CONST_ACC_SGX_QUOTE_HELPER_ENABLED,

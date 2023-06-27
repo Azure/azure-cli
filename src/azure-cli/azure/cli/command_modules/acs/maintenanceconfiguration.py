@@ -48,7 +48,7 @@ def getMaintenanceConfiguration(cmd, raw_parameters):
     config_name = raw_parameters.get("config_name")
     if config_name == CONST_DEFAULT_CONFIGURATION_NAME:
         return constructDefaultMaintenanceConfiguration(cmd, raw_parameters)
-    elif config_name == CONST_AUTOUPGRADE_CONFIGURATION_NAME or config_name == CONST_NODEOSUPGRADE_CONFIGURATION_NAME:
+    if config_name == CONST_AUTOUPGRADE_CONFIGURATION_NAME or config_name == CONST_NODEOSUPGRADE_CONFIGURATION_NAME:
         return constructDedicatedMaintenanceConfiguration(cmd, raw_parameters)
 
     raise InvalidArgumentValueError('--config-name must be one of default, aksManagedAutoUpgradeSchedule or aksManagedNodeOSUpgradeSchedule, not {}'.format(config_name))
@@ -67,10 +67,10 @@ def constructDefaultMaintenanceConfiguration(cmd, raw_parameters):
     MaintenanceConfiguration = cmd.get_models('MaintenanceConfiguration', ResourceType.MGMT_CONTAINERSERVICE, operation_group='maintenance_configurations')
     TimeInWeek = cmd.get_models('TimeInWeek', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='maintenance_configurations')
 
-    dict = {}
-    dict["day"] = weekday
-    dict["hour_slots"] = [start_hour]
-    timeInWeek = TimeInWeek(**dict)
+    timeInWeek_dict = {}
+    timeInWeek_dict["day"] = weekday
+    timeInWeek_dict["hour_slots"] = [start_hour]
+    timeInWeek = TimeInWeek(**timeInWeek_dict)
     result = MaintenanceConfiguration()
     result.time_in_week = [timeInWeek]
     result.not_allowed_time = []
