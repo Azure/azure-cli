@@ -261,6 +261,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
                  database_engine, resource_group, target_server_config), checks=NoneCheck())
 
+
     def _test_flexible_server_georestore_mgmt(self, database_engine, resource_group):
 
         private_dns_param = 'privateDnsZoneArmResourceId'
@@ -344,6 +345,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
                  database_engine, resource_group, target_server_config), checks=NoneCheck())
+
 
     def _test_flexible_server_byok_mgmt(self, resource_group, vault_name, backup_vault_name=None):
         key_name = self.create_random_name('rdbmskey', 32)
@@ -483,7 +485,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
             sleep(max(0, seconds_to_wait))
 
-            data_encryption_key_id_flag = '--key {} --identity {} {}'.format(key['key']['kid'], identity['id'], backup_key_id_flags)
+            # By default, Geo-redundant backup is disabled for restore hence no need to pass backup-key and backup-identity
+            data_encryption_key_id_flag = '--key {} --identity {}'.format(key['key']['kid'], identity['id'])
 
             restore_result = self.cmd('postgres flexible-server {} -g {} --name {} --source-server {} {}'.format(
                      'restore',
@@ -491,7 +494,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                      backup_name,
                      primary_server_name,
                      data_encryption_key_id_flag
-            ), checks=main_checks + geo_checks).get_output_in_json()
+            ), checks=main_checks).get_output_in_json()
 
             # geo-restore backup
             if geo_redundant_backup:
@@ -502,20 +505,31 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
                 data_encryption_key_id_flag = '--key {} --identity {} --backup-key {} --backup-identity {}'.format(backup_key['key']['kid'], backup_identity['id'], key['key']['kid'], identity['id'])
 
-                restore_result = self.cmd('postgres flexible-server {} -g {} --name {} --source-server {} {}'.format(
-                        'geo-restore --location {}'.format(backup_location),
-                        resource_group,
-                        geo_backup_name,
-                        primary_server_name,
-                        data_encryption_key_id_flag
-                ), checks=[
-                    JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(backup_identity['id'])),
-                    JMESPathCheck('dataEncryption.primaryKeyUri', backup_key['key']['kid']),
-                    JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', backup_identity['id']),
-                    JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
-                    JMESPathCheck('dataEncryption.geoBackupKeyUri', key['key']['kid']),
-                    JMESPathCheck('dataEncryption.geoBackupUserAssignedIdentityId', identity['id'])
-                ]).get_output_in_json()
+                # By default, Geo-redundant backup is disabled for geo-restore hence explicitly need to set georedundant backup Enabled
+                restore_result = retryable_method(retries=10,
+                                                  interval_sec=360 if os.environ.get(ENV_LIVE_TEST, False) else 0,
+                                                  exception_type=HttpResponseError,
+                                                  condition=lambda ex: \
+                                                            'GeoBackupsNotAvailable' \
+                                                            in ex.message)(self.cmd)('postgres \
+                                                                                      flexible-server {} \
+                                                                                      -g {} --name {} \
+                                                                                      --source-server {} \
+                                                                                      --geo-redundant-backup Enabled \
+                                                                                      {}'.format(
+                                                                                        'geo-restore --location {}'.format(backup_location),
+                                                                                        resource_group,
+                                                                                        geo_backup_name,
+                                                                                        primary_server_name,
+                                                                                        data_encryption_key_id_flag
+                                                                                    ), checks=[
+                                                                                        JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(backup_identity['id'])),
+                                                                                        JMESPathCheck('dataEncryption.primaryKeyUri', backup_key['key']['kid']),
+                                                                                        JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', backup_identity['id']),
+                                                                                        JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
+                                                                                        JMESPathCheck('dataEncryption.geoBackupKeyUri', key['key']['kid']),
+                                                                                        JMESPathCheck('dataEncryption.geoBackupUserAssignedIdentityId', identity['id'])
+                                                                                    ]).get_output_in_json()
                 self.assertEqual(str(restore_result['location']).replace(' ', '').lower(), backup_location)
 
                 self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, geo_backup_name))
@@ -547,6 +561,149 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             expect_failure=True)
 
         self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, server_2_name))
+
+
+    def _test_flexible_server_revivedropped_mgmt(self, resource_group, vault_name, backup_vault_name=None):
+        key_name = self.create_random_name('rdbmskey', 32)
+        identity_name = self.create_random_name('identity', 32)
+        backup_key_name = self.create_random_name('rdbmskey', 32)
+        backup_identity_name = self.create_random_name('identity', 32)
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        server_with_geo_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        backup_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        geo_backup_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        key_2_name = self.create_random_name('rdbmskey', 32)
+        identity_2_name = self.create_random_name('identity', 32)
+        server_2_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        tier = 'GeneralPurpose'
+        sku_name = 'Standard_D2s_v3'
+        location = self.postgres_location
+        backup_location = self.postgres_backup_location
+        replication_role = 'AsyncReplica'
+
+        key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
+                       .format(key_name, vault_name)).get_output_in_json()
+
+        identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, identity_name, location)).get_output_in_json()
+
+        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
+                 .format(resource_group, vault_name, identity['principalId']))
+
+        backup_key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
+                                  .format(backup_key_name, backup_vault_name)).get_output_in_json()
+
+        backup_identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, backup_identity_name, backup_location)).get_output_in_json()
+
+        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
+                    .format(resource_group, backup_vault_name, backup_identity['principalId']))
+        
+        key_2 = self.cmd('keyvault key create --name {} -p software --vault-name {}'
+                            .format(key_2_name, vault_name)).get_output_in_json()
+
+        identity_2 = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, identity_2_name, location)).get_output_in_json()
+
+        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
+                    .format(resource_group, vault_name, identity_2['principalId']))
+
+        def main_tests(geo_redundant_backup):
+            geo_redundant_backup_enabled = 'Enabled' if geo_redundant_backup else 'Disabled'
+            backup_key_id_flags = '--backup-key {} --backup-identity {}'.format(backup_key['key']['kid'], backup_identity['id']) if geo_redundant_backup else ''
+            primary_server_name = server_with_geo_name if geo_redundant_backup else server_name
+            # create primary flexible server with data encryption
+            self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} {} --location {} --geo-redundant-backup {}'.format(
+                        resource_group,
+                        primary_server_name,
+                        tier,
+                        sku_name,
+                        key['key']['kid'],
+                        identity['id'],
+                        backup_key_id_flags,
+                        location,
+                        geo_redundant_backup_enabled
+                    ))
+
+            main_checks = [
+                JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
+                JMESPathCheck('dataEncryption.primaryKeyUri', key['key']['kid']),
+                JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', identity['id'])
+            ]
+
+            geo_checks = []
+            if geo_redundant_backup:
+                geo_checks = [
+                    JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(backup_identity['id'])),
+                    JMESPathCheck('dataEncryption.geoBackupKeyUri', backup_key['key']['kid']),
+                    JMESPathCheck('dataEncryption.geoBackupUserAssignedIdentityId', backup_identity['id'])
+                ]
+
+            result = self.cmd('postgres flexible-server show -g {} -n {}'.format(resource_group, primary_server_name),
+                    checks=main_checks + geo_checks).get_output_in_json()
+
+            # Delete the server
+            self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, primary_server_name))
+
+            # Revive Dropped server
+            current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
+            earliest_restore_time = result['backup']['earliestRestoreDate']
+            seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
+            sleep(max(0, seconds_to_wait))
+
+            # By default, Geo-redundant backup is disabled for restore hence no need to pass backup-key and backup-identity
+            data_encryption_key_id_flag = '--key {} --identity {}'.format(key['key']['kid'], identity['id'])
+
+            restore_result = self.cmd('postgres flexible-server {} -g {} --name {} --source-server {} {}'.format(
+                     'revive-dropped',
+                     resource_group,
+                     backup_name,
+                     primary_server_name,
+                     data_encryption_key_id_flag
+            ), checks=main_checks).get_output_in_json()
+
+            # Revive dropped server with geo-redundant backup enabled
+            if geo_redundant_backup:
+                current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
+                earliest_restore_time = result['backup']['earliestRestoreDate']
+                seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
+                sleep(max(0, seconds_to_wait))
+
+                data_encryption_key_id_flag = '--key {} --identity {} --backup-key {} --backup-identity {}'.format(backup_key['key']['kid'], backup_identity['id'], key['key']['kid'], identity['id'])
+
+                # By default, Geo-redundant backup is disabled for restore hence explicitly need to set geo-redundant backup Enabled
+                restore_result = retryable_method(retries=10,
+                                                  interval_sec=360 if os.environ.get(ENV_LIVE_TEST, False) else 0,
+                                                  exception_type=HttpResponseError,
+                                                  condition=lambda ex: \
+                                                            'GeoBackupsNotAvailable' \
+                                                            in ex.message)(self.cmd)('postgres \
+                                                                                      flexible-server {} \
+                                                                                      -g {} --name {} \
+                                                                                      --source-server {} \
+                                                                                      --geo-redundant-backup Enabled \
+                                                                                      {}'.format(
+                                                                                        'revive-dropped --location {}'.format(backup_location),
+                                                                                        resource_group,
+                                                                                        geo_backup_name,
+                                                                                        primary_server_name,
+                                                                                        data_encryption_key_id_flag
+                                                                                    ), checks=[
+                                                                                        JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(backup_identity['id'])),
+                                                                                        JMESPathCheck('dataEncryption.primaryKeyUri', backup_key['key']['kid']),
+                                                                                        JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', backup_identity['id']),
+                                                                                        JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
+                                                                                        JMESPathCheck('dataEncryption.geoBackupKeyUri', key['key']['kid']),
+                                                                                        JMESPathCheck('dataEncryption.geoBackupUserAssignedIdentityId', identity['id'])
+                                                                                    ]).get_output_in_json()
+                self.assertEqual(str(restore_result['location']).replace(' ', '').lower(), backup_location)
+
+                self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, geo_backup_name))
+
+            # delete all servers
+            self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, backup_name))
+            self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, primary_server_name))
+
+        main_tests(False)
+        main_tests(True)
+
 
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):

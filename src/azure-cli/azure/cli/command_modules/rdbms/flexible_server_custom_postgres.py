@@ -519,7 +519,8 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
 
 def flexible_server_georestore(cmd, client, resource_group_name, server_name, source_server, location, zone=None,
                                vnet=None, vnet_address_prefix=None, subnet=None, subnet_address_prefix=None,
-                               private_dns_zone_arguments=None, geo_redundant_backup=None, no_wait=False, yes=False):
+                               private_dns_zone_arguments=None, geo_redundant_backup=None, no_wait=False, yes=False,
+                               byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None):
     server_name = server_name.lower()
 
     if not is_valid_resource_id(source_server):
@@ -550,6 +551,8 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
     validate_georestore_network(source_server_object, None, vnet, subnet, 'postgres')
 
+    pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup)
+
     parameters = postgresql_flexibleservers.models.Server(
         point_in_time_utc=get_current_time(),
         location=location,
@@ -573,6 +576,83 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
                                                                               yes=yes)
 
     parameters.backup = postgresql_flexibleservers.models.Backup(geo_redundant_backup=geo_redundant_backup)
+
+    parameters.identity, parameters.data_encryption = build_identity_and_data_encryption(db_engine='postgres',
+                                                                                            byok_identity=byok_identity,
+                                                                                            byok_key=byok_key,
+                                                                                            backup_byok_identity=backup_byok_identity,
+                                                                                            backup_byok_key=backup_byok_key)
+
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
+
+
+def flexible_server_revivedropped(cmd, client, resource_group_name, server_name, source_server, location, zone=None,
+                                 vnet=None, vnet_address_prefix=None, subnet=None, subnet_address_prefix=None,
+                                 private_dns_zone_arguments=None, geo_redundant_backup=None, no_wait=False, yes=False,
+                                 byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None):
+    server_name = server_name.lower()
+
+    if not is_valid_resource_id(source_server):
+        if _is_resource_name(source_server):
+            source_server_id = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
+                                           resource_group=resource_group_name,
+                                           namespace='Microsoft.DBforPostgreSQL',
+                                           type='flexibleServers',
+                                           name=source_server)
+        else:
+            raise CLIError('The provided source-server {} is invalid.'.format(source_server))
+    else:
+        source_server_id = source_server
+
+    source_server_id_parts = parse_resource_id(source_server_id)
+    try:
+        _source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
+
+        raise InvalidArgumentValueError("SourceServerId: {} already exists. Please provide source server id of the tombstoned server".format(source_server_id))
+    except Exception as e:
+        logger.info("Source server id: {} does not exist.".format(source_server_id)) 
+
+    db_context = DbContext(
+        cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
+        cf_db=cf_postgres_flexible_db, cf_availability=cf_postgres_check_resource_availability_with_location,
+        cf_availability_without_location=cf_postgres_check_resource_availability,
+        cf_private_dns_zone_suffix=cf_postgres_flexible_private_dns_zone_suffix_operations,
+        logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
+
+    validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
+
+    pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup)
+
+    parameters = postgresql_flexibleservers.models.Server(
+        point_in_time_utc=get_current_time(),
+        location=location,
+        source_server_resource_id=source_server_id,
+        create_mode="ReviveDropped",
+        availability_zone=zone
+    )
+
+    if vnet is not None or vnet_address_prefix is not None or subnet is not None or \
+       subnet_address_prefix is not None or private_dns_zone_arguments is not None:
+        parameters.network, _, _ = flexible_server_provision_network_resource(cmd=cmd,
+                                                                              resource_group_name=resource_group_name,
+                                                                              server_name=server_name,
+                                                                              location=location,
+                                                                              db_context=db_context,
+                                                                              private_dns_zone_arguments=private_dns_zone_arguments,
+                                                                              public_access='Disabled',
+                                                                              vnet=vnet,
+                                                                              subnet=subnet,
+                                                                              vnet_address_prefix=vnet_address_prefix,
+                                                                              subnet_address_prefix=subnet_address_prefix,
+                                                                              yes=yes)
+
+    parameters.backup = postgresql_flexibleservers.models.Backup(geo_redundant_backup=geo_redundant_backup)
+
+    parameters.identity, parameters.data_encryption = build_identity_and_data_encryption(db_engine='postgres',
+                                                                                            byok_identity=byok_identity,
+                                                                                            byok_key=byok_key,
+                                                                                            backup_byok_identity=backup_byok_identity,
+                                                                                            backup_byok_key=backup_byok_key)
 
     return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
 

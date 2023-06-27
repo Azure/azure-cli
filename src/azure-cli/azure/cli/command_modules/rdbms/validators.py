@@ -399,15 +399,19 @@ def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup
         raise ArgumentUsageError("User assigned identity and keyvault key need to be provided together. "
                                  "Please provide --backup-identity and --backup-key together.")
 
-    if byok_key and \
-       not (instance is None or (instance.data_encryption and instance.data_encryption.type == 'AzureKeyVault')):
-        raise ArgumentUsageError("You cannot enable data encryption on a server "
-                                 "that was not created with data encryption.")
+    if  (instance is not None) and not (instance.data_encryption and instance.data_encryption.type == 'AzureKeyVault') and \
+        (byok_key or backup_byok_key):
+            raise ArgumentUsageError("You cannot enable data encryption on a server "
+                                     "that was not created with data encryption.")   
 
-    if byok_key and (geo_redundant_backup and geo_redundant_backup.lower() == 'enabled') and \
-       bool(backup_byok_key is None):
-        raise ArgumentUsageError("Please provide Geo-location user assigned identity and keyvault key "
-                                 "to enable Data encryption for geo-redundant backup.")
+    if geo_redundant_backup is None or geo_redundant_backup.lower() == 'disabled':
+        if backup_byok_identity or backup_byok_key:
+            raise ArgumentUsageError("Geo-redundant backup is not enabled. "
+                                     "You cannot provide Geo-location user assigned identity and keyvault key.")
+    else:
+        if instance is None and (bool(byok_key is not None) ^ bool( backup_byok_key is not None)):
+                raise ArgumentUsageError("Please provide both primary as well as geo-back user assigned identity and keyvault key "
+                                         "to enable Data encryption for geo-redundant backup.")
 
 
 def _network_arg_validator(subnet, public_access):
