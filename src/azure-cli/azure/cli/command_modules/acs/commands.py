@@ -7,6 +7,7 @@ from azure.cli.command_modules.acs._client_factory import (
     cf_agent_pools,
     cf_container_services,
     cf_managed_clusters,
+    cf_maintenance_configurations,
     cf_snapshots,
 )
 from azure.cli.command_modules.acs._format import (
@@ -25,6 +26,7 @@ from azure.cli.core.profiles import ResourceType
 
 
 # pylint: disable=too-many-statements
+# pylint: disable=line-too-long
 def load_command_table(self, _):
 
     container_services_sdk = CliCommandType(
@@ -49,6 +51,14 @@ def load_command_table(self, _):
         operation_group='agent_pools',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_managed_clusters
+    )
+
+    maintenance_configuration_sdk = CliCommandType(
+        operations_tmpl='aazure.mgmt.containerservice.operations.'
+                        '_maintenance_configurations_operations#MaintenanceConfigurationsOperations.{}',
+        operation_group='maintenance_configurations',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        client_factory=cf_maintenance_configurations
     )
 
     snapshot_sdk = CliCommandType(
@@ -90,6 +100,14 @@ def load_command_table(self, _):
     with self.command_group('aks', container_services_sdk, client_factory=cf_container_services) as g:
         g.custom_command('get-versions', 'aks_get_versions',
                          table_transformer=aks_versions_table_format)
+
+    # AKS maintenance configuration commands
+    with self.command_group('aks maintenanceconfiguration', maintenance_configuration_sdk, client_factory=cf_maintenance_configurations) as g:
+        g.custom_command('list', 'aks_maintenanceconfiguration_list')
+        g.custom_show_command('show', 'aks_maintenanceconfiguration_show')
+        g.custom_command('add', 'aks_maintenanceconfiguration_add')
+        g.custom_command('update', 'aks_maintenanceconfiguration_update')
+        g.custom_command('delete', 'aks_maintenanceconfiguration_delete')
 
     # AKS agent pool commands
     with self.command_group('aks nodepool',
