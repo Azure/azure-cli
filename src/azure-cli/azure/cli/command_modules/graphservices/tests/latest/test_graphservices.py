@@ -20,7 +20,7 @@ class GraphservicesScenario(ScenarioTest):
         result = self.cmd('ad app create --display-name {aad_app_display_name}').get_output_in_json() 
         self.kwargs['app_id'] = result['appId'] 
 
-        self.cmd('az graph-services account create --resource-group {rg} --name {accountName} --app-id "{app_id}"', checks=[
+        self.cmd('az graph-services account create --resource-group {rg} --name {accountName} --app-id {app_id}', checks=[
             self.check('name', '{accountName}'),
             self.check('properties.provisioningState', 'Succeeded')
         ])
