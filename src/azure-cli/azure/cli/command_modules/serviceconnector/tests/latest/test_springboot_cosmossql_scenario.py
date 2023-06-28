@@ -104,7 +104,7 @@ class SpringBootCosmosSqlScenarioTest(ScenarioTest):
             checks = [
                 self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'userAssignedIdentity'),
-                self.check('[0].clientType', 'java')
+                self.check('[0].clientType', 'springBoot')
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
@@ -149,7 +149,7 @@ class SpringBootCosmosSqlScenarioTest(ScenarioTest):
             checks = [
                 self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
-                self.check('[0].clientType', 'java')
+                self.check('[0].clientType', 'springBoot')
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
