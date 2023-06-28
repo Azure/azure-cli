@@ -445,7 +445,7 @@ Please refer to https://microsoft.github.io/spring-cloud-azure/current/reference
 
     update_message = "\nPlease update your connection to include the configurations for the newer version."
 
-    check_version_message = "\nManaged identity and service principal are only supported in Spring Azure Cloud Azure version 4.0 and above. Please check your Spring Cloud Azure version."
+    check_version_message = "\nManaged identity and service principal are only supported in Spring Cloud Azure version 4.0 and above. Please check your Spring Cloud Azure version."
     both_version_message = "\nTwo sets of configuration properties will be configured with regard to different Spring Cloud Azure versions."
 
     return warning_message + (update_message if require_update else "") + (check_version_message if check_version else "") + (both_version_message if both_version else "")
