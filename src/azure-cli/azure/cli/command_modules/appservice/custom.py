@@ -3911,7 +3911,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         lang = next((r for r in FLEX_RUNTIMES if r['runtime'] == runtime), None)
         if lang is None:
             raise ValidationError("Invalid runtime. Supported runtimes for function apps on Flex App "
-                                  "Service plans are 'dotnet', 'java', 'node', 'python' and 'powershell'.")
+                                  "Service plans are 'dotnet-isolated', 'java', 'node', 'python' and 'powershell'.")
         if runtime_version is None:
             runtime_version = lang['version']
         elif runtime_version != lang['version']:
