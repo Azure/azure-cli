@@ -441,14 +441,24 @@ def springboot_migration_warning(require_update=False, check_version=False, both
     warning_message = "It is recommended to use Spring Cloud Azure version 4.0 and above. \
 New configuration properties and more authentication options are included. \
 The configurations in the format of \"azure.cosmos.*\" will no longer be supported after 1st July, 2024. \
-Please refer to https://microsoft.github.io/spring-cloud-azure/current/reference/html/appendix.html#configuration-spring-cloud-azure-starter-data-cosmos for more details."
+Please refer to https://microsoft.github.io/spring-cloud-azure/current/reference/html/appendix.html\
+#configuration-spring-cloud-azure-starter-data-cosmos for more details."
 
     update_message = "\nPlease update your connection to include the configurations for the newer version."
 
-    check_version_message = "\nManaged identity and service principal are only supported in Spring Cloud Azure version 4.0 and above. Please check your Spring Cloud Azure version."
-    both_version_message = "\nTwo sets of configuration properties will be configured with regard to different Spring Cloud Azure versions."
+    check_version_message = "\nManaged identity and service principal are only supported \
+in Spring Cloud Azure version 4.0 and above. Please check your Spring Cloud Azure version."
+    both_version_message = "\nTwo sets of configuration properties will be configured \
+according to different Spring Cloud Azure versions."
 
-    return warning_message + (update_message if require_update else "") + (check_version_message if check_version else "") + (both_version_message if both_version else "")
+    if require_update:
+        warning_message += update_message
+    if check_version:
+        warning_message += check_version_message
+    if both_version:
+        warning_message += both_version_message
+
+    return warning_message
 
 
 def decorate_springboot_cosmossql_config(configs):
