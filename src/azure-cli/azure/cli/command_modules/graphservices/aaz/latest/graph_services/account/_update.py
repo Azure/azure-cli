@@ -66,7 +66,6 @@ class Update(AAZCommand):
         _args_schema.location = AAZResourceLocationArg(
             arg_group="AccountResource",
             help="Location of the resource.",
-            default="global",
             nullable=True,
             fmt=AAZResourceLocationArgFormat(
                 resource_group_arg="resource_group",
