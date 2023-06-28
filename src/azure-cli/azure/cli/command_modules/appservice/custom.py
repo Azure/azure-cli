@@ -3829,6 +3829,12 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 'Please try again without the --os-type parameter or set --os-type to be linux.'
             )
 
+        if instance_size is None:
+            raise RequiredArgumentMissingError(
+                '--instance-size must be used with parameter --flexconsumption-location. '
+                'Please try again with the --instance-size parameter.'
+            )
+
     if ((always_ready_instances is not None or maximum_instances is not None or instance_size is not None) and
             flexconsumption_location is None):
         raise RequiredArgumentMissingError("usage error: parameters --always-ready-instances, --maximum-instances "
