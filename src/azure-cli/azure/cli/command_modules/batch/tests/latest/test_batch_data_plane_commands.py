@@ -158,7 +158,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             'acc_k': key,
             'acc_u': endpoint
         })
-        self.batch_cmd('batch pool create --id {p_id} --image "MicrosoftWindowsServer:WindowsServer:2016-datacenter-smalldisk"  --target-dedicated-nodes 2 --vm-size "standard_d2_v2" --node-agent-sku-id "batch.node.windows amd64"  --enable-accelerated-networking true')
+        self.batch_cmd('batch pool create --id {p_id} --image "MicrosoftWindowsServer:WindowsServer:2016-datacenter-smalldisk"  --target-dedicated-nodes 2 --vm-size "standard_d2_v2" --node-agent-sku-id "batch.node.windows amd64"  --enable-accelerated-networking')
 
         retry = 0
         while self.batch_cmd('batch pool show --pool-id {p_id}').get_output_in_json()['allocationState']!='steady' and retry<10:
