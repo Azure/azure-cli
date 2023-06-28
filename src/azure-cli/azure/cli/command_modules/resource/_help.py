@@ -2870,7 +2870,7 @@ examples:
   - name: Create a deployment stack from a local template, using deny settings.
     text: az stack mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --location westus --deny-settings-mode None
   - name: Create a deployment stack from a local template, apply deny settings to child scope.
-    text: az stack mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --location westus --deny-settings-mode None
+    text: az stack mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --location westus
 """
 
 helps['stack mg list'] = """
@@ -3006,7 +3006,7 @@ examples:
   - name: Create a deployment stack from a local template, using deny settings.
     text: az stack group create --name StackName --resource-group ResourceGroup --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --deny-settings-mode None
   - name: Create a deployment stack from a local template, apply deny setting to child scopes.
-    text: az stack group create --name StackName --resource-group ResourceGroup --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --deny-settings-mode None
+    text: az stack group create --name StackName --resource-group ResourceGroup --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes
 """
 
 helps['stack group list'] = """
