@@ -116,7 +116,7 @@ def load_command_table(self, _):
     with self.command_group('batch pool node-counts', get_data_type('account')) as g:
         g.batch_command('list', 'list_pool_node_counts')
 
-    with self.command_group('batch certificate', get_data_type('certificate'), client_factory=get_data_factory('certificate')) as g:
+    with self.command_group('batch certificate', get_data_type('certificate'), client_factory=get_data_factory('certificate'), deprecate_info=self.deprecate()) as g:
         g.custom_command('create', 'create_certificate')
         g.custom_command('delete', 'delete_certificate', confirmation=True)
         g.batch_command('show', 'get', validator=validate_cert_settings)
