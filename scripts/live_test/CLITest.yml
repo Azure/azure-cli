@@ -25,6 +25,7 @@ variables:
 stages:
 - stage: TestUbuntu
   displayName: Live Test on Ubuntu 2004
+  condition: succeededOrFailed()
   jobs:
   - job: LiveTest
     displayName: Live Test
@@ -587,6 +588,7 @@ stages:
 
 - stage: TestMacos
   displayName: Live Test on Macos 12
+  condition: succeededOrFailed()
   jobs:
   - job: LiveTest
     displayName: Live Test
@@ -1151,6 +1153,7 @@ stages:
 
 - stage: TestWindows
   displayName: Live Test on Windows 2019
+  condition: succeededOrFailed()
   jobs:
   - job: LiveTest
     displayName: Live Test
@@ -1713,6 +1716,7 @@ stages:
 
 - stage: SendEmail
   displayName: Send Email
+  condition: succeededOrFailed()
   jobs:
   - job: SendEmail
     displayName: Send Email Job
