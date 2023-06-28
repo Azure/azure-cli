@@ -469,10 +469,10 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
 
     # migration warning for Spring Azure Cloud
     if client_type == CLIENT_TYPE.SpringBoot.value and target_type == RESOURCE.CosmosSql:
-        isSecretType = (auth_info['auth_type'] == AUTH_TYPE.SecretAuto.value or 
+        isSecretType = (auth_info['auth_type'] == AUTH_TYPE.SecretAuto.value or
                         auth_info['auth_type'] == AUTH_TYPE.Secret.value)
-        logger.warning(springboot_migration_warning(require_update=False, 
-                                                    check_version=(not isSecretType), 
+        logger.warning(springboot_migration_warning(require_update=False,
+                                                    check_version=(not isSecretType),
                                                     both_version=isSecretType))
 
     return auto_register(sdk_no_wait, no_wait,
@@ -702,10 +702,10 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
 
     # migration warning for Spring Azure Cloud
     if client_type == CLIENT_TYPE.SpringBoot.value and target_type == RESOURCE.CosmosSql:
-        isSecretType = (auth_info['auth_type'] == AUTH_TYPE.SecretAuto.value or 
+        isSecretType = (auth_info['auth_type'] == AUTH_TYPE.SecretAuto.value or
                         auth_info['auth_type'] == AUTH_TYPE.Secret.value)
-        logger.warning(springboot_migration_warning(require_update=False, 
-                                                    check_version=(not isSecretType), 
+        logger.warning(springboot_migration_warning(require_update=False,
+                                                    check_version=(not isSecretType),
                                                     both_version=isSecretType))
 
     return auto_register(sdk_no_wait, no_wait,

@@ -439,17 +439,18 @@ def _install_extension(cmd, extension_name):
 
 def springboot_migration_warning(require_update=False, check_version=False, both_version=False):
     warning_message = "It is recommended to use Spring Cloud Azure version 4.0 and above. \
-New configuration properties and more authentication options are included. \
-The configurations in the format of \"azure.cosmos.*\" will no longer be supported after 1st July, 2024. \
+The configurations in the format of \"azure.cosmos.*\" from Spring Cloud Azure 3.x will no longer be supported after 1st July, 2024. \
 Please refer to https://microsoft.github.io/spring-cloud-azure/current/reference/html/appendix.html\
 #configuration-spring-cloud-azure-starter-data-cosmos for more details."
 
     update_message = "\nPlease update your connection to include the configurations for the newer version."
 
     check_version_message = "\nManaged identity and service principal are only supported \
-in Spring Cloud Azure version 4.0 and above. Please check your Spring Cloud Azure version."
+in Spring Cloud Azure version 4.0 and above. Please check your Spring Cloud Azure version. \
+Learn more at https://spring.io/projects/spring-cloud-azure#overview"
     both_version_message = "\nTwo sets of configuration properties will be configured \
-according to different Spring Cloud Azure versions."
+according to Spring Cloud Azure version 3.x and 4.x. \
+Learn more at https://spring.io/projects/spring-cloud-azure#overview"
 
     if require_update:
         warning_message += update_message
