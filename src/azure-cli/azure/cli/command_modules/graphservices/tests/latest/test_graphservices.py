@@ -7,7 +7,21 @@
 
 from azure.cli.testsdk import *
 
-
 class GraphservicesScenario(ScenarioTest):
-    # TODO: add tests here
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_billing_flow(self, resource_group):
+
+        self.kwargs.update({
+            'accountName' : self.create_random_name(prefix="azcliacc", length=20),
+            'aad_app_display_name' : self.create_random_name(prefix="azcliapp", length=20)
+            })
+
+        result = self.cmd('ad app create --display-name {aad_app_display_name}').get_output_in_json() 
+        self.kwargs['app_id'] = result['appId'] 
+
+        self.cmd('az graph-services account create --resource-group {rg} --name {accountName} --app-id "{app_id}"', checks=[
+            self.check('name', '{accountName}'),
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
     pass
