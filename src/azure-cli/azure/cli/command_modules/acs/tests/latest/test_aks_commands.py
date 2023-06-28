@@ -7061,6 +7061,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         nodepool_name = self.create_random_name('c', 6)
         nodepool_name2 = self.create_random_name('c', 6)
         snapshot_name = self.create_random_name('s', 16)
+        tagVar = "test"
+        tagVal = "value"
+        tags = tagVar + "=" + tagVal
 
         self.kwargs.update({
             'resource_group': resource_group,
@@ -7072,7 +7075,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'snapshot_name': snapshot_name,
             'k8s_version': create_version,
             'upgrade_k8s_version': upgrade_version,
-            'ssh_key_value': self.generate_ssh_keys()
+            'ssh_key_value': self.generate_ssh_keys(),
+            'tags': tags
         })
 
         # create an aks cluster not using snapshot

@@ -2426,6 +2426,20 @@ def aks_nodepool_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-m
     return client.create_or_update(resource_group_name, snapshot_name, snapshot, headers=aks_custom_headers)
 
 
+def aks_nodepool_snapshot_update(cmd, client, resource_group_name, name, tags):   # pylint: disable=unused-argument
+    TagsObject = cmd.get_models(
+        "TagsObject",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="snapshots",
+    )
+    tagsObject = TagsObject(
+        tags=tags
+    )
+
+    snapshot = client.update_tags(resource_group_name, name, tagsObject)
+    return snapshot
+
+
 def aks_nodepool_snapshot_show(cmd, client, resource_group_name, snapshot_name):   # pylint: disable=unused-argument
     snapshot = client.get(resource_group_name, snapshot_name)
     return snapshot
