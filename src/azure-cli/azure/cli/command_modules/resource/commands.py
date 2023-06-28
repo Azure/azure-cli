@@ -483,38 +483,48 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_deployment_operations_at_tenant_scope')
         g.custom_show_command('show', 'get_deployment_operations_at_tenant_scope', client_factory=cf_deployment_operations)
 
-    with self.command_group('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
+    # Since "MGMT_RESOURCE_POLICY" is not the default resource type used by the __init__ method
+    # in ResourceCommandsLoader, so the default "operation_group" cannot be specified in the commandsLoader,
+    # the "operation_group" needs to be explicitly specified for "MGMT_RESOURCE_POLICY".
+
+    with self.command_group('policy assignment',
+                            operation_group='policy_assignments', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
         g.custom_command('create', 'create_policy_assignment', validator=process_assignment_create_namespace)
         g.custom_command('delete', 'delete_policy_assignment')
         g.custom_command('list', 'list_policy_assignment')
         g.custom_show_command('show', 'show_policy_assignment')
         g.custom_command('update', 'update_policy_assignment')
 
-    with self.command_group('policy assignment identity', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as g:
+    with self.command_group('policy assignment identity',
+                            operation_group='policy_assignments', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as g:
         g.custom_command('assign', 'set_identity', validator=process_assign_identity_namespace, min_api='2021-06-01')
         g.custom_show_command('show', 'show_identity')
         g.custom_command('remove', 'remove_identity')
 
-    with self.command_group('policy assignment non-compliance-message', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2020-09-01') as g:
+    with self.command_group('policy assignment non-compliance-message',
+                            operation_group='policy_assignments', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2020-09-01') as g:
         g.custom_command('create', 'create_policy_non_compliance_message')
         g.custom_command('list', 'list_policy_non_compliance_message')
         g.custom_command('delete', 'delete_policy_non_compliance_message')
 
-    with self.command_group('policy definition', resource_policy_definitions_sdk, resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
+    with self.command_group('policy definition', resource_policy_definitions_sdk,
+                            operation_group='policy_definitions', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
         g.custom_command('create', 'create_policy_definition')
         g.custom_command('delete', 'delete_policy_definition')
         g.custom_command('list', 'list_policy_definition')
         g.custom_show_command('show', 'get_policy_definition')
         g.custom_command('update', 'update_policy_definition')
 
-    with self.command_group('policy set-definition', resource_policy_set_definitions_sdk, resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as g:
+    with self.command_group('policy set-definition', resource_policy_set_definitions_sdk,
+                            operation_group='policy_set_definitions', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as g:
         g.custom_command('create', 'create_policy_setdefinition')
         g.custom_command('delete', 'delete_policy_setdefinition')
         g.custom_command('list', 'list_policy_setdefinition')
         g.custom_show_command('show', 'get_policy_setdefinition')
         g.custom_command('update', 'update_policy_setdefinition')
 
-    with self.command_group('policy exemption', resource_policy_exemptions_sdk, is_preview=True, resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2020-09-01') as g:
+    with self.command_group('policy exemption', resource_policy_exemptions_sdk, is_preview=True,
+                            operation_group='policy_exemptions', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2020-07-01-preview') as g:
         g.custom_command('create', 'create_policy_exemption')
         g.custom_command('delete', 'delete_policy_exemption')
         g.custom_command('list', 'list_policy_exemption')
