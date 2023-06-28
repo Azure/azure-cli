@@ -102,6 +102,9 @@ def load_arguments(self, _):
             c.argument('project_name', arg_group=repository_arg_group, help='The project name to which you are connecting.')
             c.argument('tenant_id', arg_group=repository_arg_group, help='The tenant id used to connect Azure devops')
             c.argument('last_commit_id', arg_group=repository_arg_group, help='The last commit ID.')
+            c.argument('user_assigned_identity_id', options_list=['--uami-id'], nargs='+', help='The list of User-assigned Managed Identity Id for workspace.')
+            c.argument('user_assigned_identity_in_encryption', options_list=['--uami-id-in-encrypt'], help='User assigned identity resource Id used in Workspace Encryption')
+            c.argument('use_system_assigned_identity_in_encryption', options_list=['--use-sami-in-encrypt'], help='Whether use System assigned identity in Workspace Encryption. If use uami, please set True.If not, set False')
 
     with self.argument_context('synapse workspace create') as c:
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
@@ -119,6 +122,9 @@ def load_arguments(self, _):
         c.argument('key_identifier', help='The customer-managed key used to encrypt all data at rest in the workspace. Key identifier should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.', options_list=['--key-identifier', '--cmk'])
         c.argument('managed_resource_group_name', options_list=['--managed-rg-name'],
                    help=' Workspace managed resource group. The resource group name uniquely identifies the resource group within the user subscriptionId.')
+
+    with self.argument_context('synapse workspace update') as c:
+        c.argument('user_assigned_identity_action', options_list=['--uami-action'], arg_type=get_enum_type(['Add', 'Remove', 'Set']), help='Action must be specified when you add/remove/set user assigned managed identities for workspace.The supported actions are:Add,Remove,Set.Add means to add user assigned managed identities for workspace, Remove means to remove user assigned managed identities from workspace, Set can be used when you want to add and remove user assigned managed identities at the same time, current identities will be coverd by specified ones.')
 
     with self.argument_context('synapse workspace check-name') as c:
         c.argument('name', arg_type=name_type, help='The name you wanted to check.')

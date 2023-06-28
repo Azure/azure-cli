@@ -5738,8 +5738,9 @@ class VMGalleryImage(ScenarioTest):
 
         self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
         self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version2}')
-        time.sleep(60)  # service end latency
+        time.sleep(60) # service end latency
         self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
+        time.sleep(30)  # service end latency
         self.cmd('sig delete -g {rg} --gallery-name {gallery}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_image_update_add_set_', location='westus')

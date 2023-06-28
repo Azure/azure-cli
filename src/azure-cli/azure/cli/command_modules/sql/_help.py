@@ -1901,3 +1901,101 @@ examples:
   - name: Show the settings for uploading ledger digests.
     text: az sql db ledger-digest-uploads show --name mydb --resource-group MyResourceGroup --server myserver
 """
+
+helps['sql midb move'] = """
+type: group
+short-summary: Start, complete, cancel and list managed database move operations.
+"""
+
+helps['sql midb move start'] = """
+type: command
+short-summary: Start managed database move operation.
+examples:
+  - name: Start cross resource group move operation.
+    text: az sql midb move start --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup
+  - name: Start move operation inside same resource group.
+    text: az sql midb move start --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance
+"""
+
+helps['sql midb move complete'] = """
+type: command
+short-summary: Complete managed database move operation.
+examples:
+  - name: Complete cross resource group move operation.
+    text: az sql midb move complete --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup
+  - name: Complete move operation inside same resource group.
+    text: az sql midb move complete --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance
+"""
+
+helps['sql midb move cancel'] = """
+type: command
+short-summary: Cancel managed database move operation.
+examples:
+  - name: Cancel cross resource group move operation.
+    text: az sql midb move cancel --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup
+  - name: Cancel move operation inside same resource group.
+    text: az sql midb move cancel --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance
+"""
+
+helps['sql midb move list'] = """
+type: command
+short-summary: List managed database move operations.
+examples:
+  - name: List all move operations from given resource group and managed instance.
+    text: az sql midb move list --resource-group MyResourceGroup --managed-instance MyInstance
+  - name: List all move operations for specific managed database from given resource group and managed instance.
+    text: az sql midb move list --name mydb --resource-group MyResourceGroup --managed-instance MyInstance
+  - name: List latest move operation for specific managed database from given resource group and managed instance.
+    text: az sql midb move list --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --latest
+  - name: List all move operation from given resource group and managed instance into specific destination managed instance.
+    text: az sql midb move list --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance
+"""
+
+helps['sql midb copy'] = """
+type: group
+short-summary: Start, complete, cancel and list managed database copy operations.
+"""
+
+helps['sql midb copy start'] = """
+type: command
+short-summary: Start managed database copy operation.
+examples:
+  - name: Start cross resource group copy operation.
+    text: az sql midb copy start --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup
+  - name: Start copy operation inside same resource group.
+    text: az sql midb copy start --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance
+"""
+
+helps['sql midb copy complete'] = """
+type: command
+short-summary: Complete managed database copy operation.
+examples:
+  - name: Complete cross resource group copy operation.
+    text: az sql midb copy complete --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup
+  - name: Complete copy operation inside same resource group.
+    text: az sql midb copy complete --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance
+"""
+
+helps['sql midb copy cancel'] = """
+type: command
+short-summary: Cancel managed database copy operation.
+examples:
+  - name: Cancel cross resource group copy operation.
+    text: az sql midb copy cancel --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance --dest-rg DestinationResourceGroup
+  - name: Cancel copy operation inside same resource group.
+    text: az sql midb copy cancel --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance
+"""
+
+helps['sql midb copy list'] = """
+type: command
+short-summary: List managed database copy operations.
+examples:
+  - name: List all copy operations from given resource group and managed instance.
+    text: az sql midb copy list --resource-group MyResourceGroup --managed-instance MyInstance
+  - name: List all copy operations for specific managed database from given resource group and managed instance.
+    text: az sql midb copy list --name mydb --resource-group MyResourceGroup --managed-instance MyInstance
+  - name: List latest copy operation for specific managed database from given resource group and managed instance.
+    text: az sql midb copy list --name mydb --resource-group MyResourceGroup --managed-instance MyInstance --latest
+  - name: List all copy operation from given resource group and managed instance into specific destination managed instance.
+    text: az sql midb copy list --resource-group MyResourceGroup --managed-instance MyInstance --dest-mi DestinationInstance
+"""

@@ -336,7 +336,7 @@ def prepare_mysql_exist_private_dns_zone(cmd, resource_group, private_dns_zone, 
     return private_zone.id
 
 
-def prepare_private_dns_zone(db_context, database_engine, resource_group, server_name, private_dns_zone, subnet_id, location, yes):
+def prepare_private_dns_zone(db_context, resource_group, server_name, private_dns_zone, subnet_id, location, yes):
     cmd = db_context.cmd
     dns_suffix_client = db_context.cf_private_dns_zone_suffix(cmd.cli_ctx, '_')
     private_dns_zone_suffix = dns_suffix_client.execute()

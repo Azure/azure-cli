@@ -1768,7 +1768,7 @@ def aks_rotate_certs(cmd, client, resource_group_name, name, no_wait=True):
 
 
 def aks_get_versions(cmd, client, location):
-    return client.list_orchestrators(location, resource_type='managedClusters')
+    return client.list_kubernetes_versions(location)
 
 
 def aks_runcommand(cmd, client, resource_group_name, name, command_string="", command_files=None, no_wait=False):
@@ -2424,6 +2424,20 @@ def aks_nodepool_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-m
         allow_appending_values_to_same_key=True,
     )
     return client.create_or_update(resource_group_name, snapshot_name, snapshot, headers=aks_custom_headers)
+
+
+def aks_nodepool_snapshot_update(cmd, client, resource_group_name, name, tags):   # pylint: disable=unused-argument
+    TagsObject = cmd.get_models(
+        "TagsObject",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="snapshots",
+    )
+    tagsObject = TagsObject(
+        tags=tags
+    )
+
+    snapshot = client.update_tags(resource_group_name, name, tagsObject)
+    return snapshot
 
 
 def aks_nodepool_snapshot_show(cmd, client, resource_group_name, snapshot_name):   # pylint: disable=unused-argument

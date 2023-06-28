@@ -2191,18 +2191,27 @@ class VMGalleryImage(ScenarioTest):
     @ResourceGroupPreparer(location='westus')
     def test_gallery_image(self, resource_group):
         self.kwargs.update({
-            'gallery_name': self.create_random_name('sig_', 10)
+            'gallery': self.create_random_name('sig_', 10),
+            'image': 'image1',
         })
 
-        self.cmd('sig create -g {rg} -r {gallery_name}', checks=[
+        self.cmd('sig create -g {rg} -r {gallery}', checks=[
             self.check('location', 'westus'),
-            self.check('name', '{gallery_name}'),
+            self.check('name', '{gallery}'),
             self.check('resourceGroup', '{rg}')
         ])
-
         self.cmd('sig list -g {rg}', checks=self.check('length(@)', 1))
 
-        self.cmd('sig delete -g {rg} -r {gallery_name}')
+        self.cmd(
+            'sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1',
+            checks=self.check('name', self.kwargs['image']))
+        self.cmd('sig image-definition list -g {rg} --gallery-name {gallery}', checks=self.check('length(@)', 1))
+        res = self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
+                       checks=self.check('name', self.kwargs['image'])).get_output_in_json()
+
+        self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
+        time.sleep(60)  # service end latency
+        self.cmd('sig delete -g {rg} --gallery-name {gallery}')
 # endregion
 
 

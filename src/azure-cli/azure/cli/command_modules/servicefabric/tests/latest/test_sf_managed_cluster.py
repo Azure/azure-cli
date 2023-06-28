@@ -47,6 +47,46 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}')
 
     @ResourceGroupPreparer()
+    def test_network_security_rule(self):
+        self.kwargs.update({
+            'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
+            'loc': 'eastasia',
+            'cluster_name': self.create_random_name('sfrp-cli-', 24),
+            'vm_password': self.create_random_name('Pass@', 9),
+            'tags': "key1=value1 key2=value2",
+            'name': self.create_random_name('NSR-', 10),
+            'access': 'allow',
+            'description': self.create_random_name('NSR-description', 30),
+            'direction': 'inbound',
+            'protocol': 'any',
+            'priority': 1200,
+            'source_port_ranges': '1-1000 1122-65535',
+            'dest_port_ranges': '1-1900 2200-65535',
+            'source_addr_prefixes': '167.220.242.0/27 167.220.0.0/23 131.107.132.16/28 167.220.81.128/26',
+            'dest_addr_prefixes': '194.69.104.0/25 194.69.119.64/26 167.220.249.128/26 255.255.255.255/32'
+        })
+        
+        cluster = self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --tags {tags}',
+                 checks=[self.check('provisioningState', 'Succeeded'),
+                         self.check('clusterState', 'WaitingForNodes')]).get_output_in_json()
+
+        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n pnt --instance-count 5 --primary',
+                 checks=[self.check('provisioningState', 'Succeeded')])
+
+        self.cmd('az sf managed-cluster network-security-rule add -g {rg} -c {cluster_name} '
+                '--name {name} --access {access} --description {description} --direction {direction} --protocol {protocol} --priority {priority} --source-port-ranges {source_port_ranges} --dest-port-ranges {dest_port_ranges}'
+                ' --source-addr-prefixes {source_addr_prefixes} --dest-addr-prefixes {dest_addr_prefixes}',
+                checks=[self.check('provisioningState', 'Succeeded'),
+                        self.check('networkSecurityRules[0].destinationAddressPrefixes[0]', '194.69.104.0/25'),
+                        self.check('networkSecurityRules[0].sourceAddressPrefixes[1]', '167.220.0.0/23'),
+                        self.check('networkSecurityRules[0].protocol', '*'),
+                        self.check('networkSecurityRules[0].direction', 'inbound'),
+                        self.check('networkSecurityRules[0].access', 'allow'),
+                        self.check('networkSecurityRules[0].priority', 1200),
+                        self.check('networkSecurityRules[0].sourcePortRanges[0]', '1-1000'),
+                        self.check('networkSecurityRules[0].destinationPortRanges[1]', '2200-65535')])
+
+    @ResourceGroupPreparer()
     def test_node_type_operation(self):
         self.kwargs.update({
             'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',

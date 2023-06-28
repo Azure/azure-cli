@@ -324,7 +324,7 @@ def transform_certificate_policy(policy, policy_id):
                     "daysBeforeExpiry": getattr(action, "days_before_expiry", None),
                     "lifetimePercentage": getattr(action, "lifetime_percentage", None)
                 }
-            } for action in getattr(policy, "lifetime_actions", None)],
+            } for action in (getattr(policy, "lifetime_actions", None) or [])],
             "secretProperties": {
                 "contentType": getattr(policy, "content_type", None)
             },

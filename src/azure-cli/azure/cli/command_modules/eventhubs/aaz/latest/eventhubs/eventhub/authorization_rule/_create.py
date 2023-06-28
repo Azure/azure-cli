@@ -18,7 +18,7 @@ class Create(AAZCommand):
     """Create an AuthorizationRule for the specified Event Hub. Creation/update of the AuthorizationRule will take a few seconds to take effect.
 
     :example: Creates Authorizationrule for the given Eventhub
-        az eventhub authorization-rule create --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myauthorule --rights Listen
+        az eventhubs eventhub authorization-rule create --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myauthorule --rights Listen
     """
 
     _aaz_info = {

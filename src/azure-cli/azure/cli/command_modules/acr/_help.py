@@ -201,7 +201,7 @@ examples:
         az acr credential show -n MyRegistry --query username
   - name: Get a password used to log in to an Azure Container Registry.
     text: >
-        az acr credential show -n MyRegistry --query passwords[0].value
+        az acr credential show -n MyRegistry --query 'passwords[0].value'
 """
 
 helps['acr delete'] = """

@@ -5920,6 +5920,74 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', database_name_two),
                      JMESPathCheck('isLedgerOn', True)])
+    
+    @ManagedInstancePreparer(parameter_name="mi1")
+    @ManagedInstancePreparer(parameter_name="mi2")
+    def test_sql_midb_move_copy(self, mi1, rg, mi2):
+        self.kwargs.update({
+            'loc': ManagedInstancePreparer.location,
+            'rg': rg,
+            'mi1': mi1,
+            'mi2': mi2,
+            'database_name': 'test-db'
+        })
+
+        # Create source and target instance
+        source_mi = self.cmd('sql mi show -g {rg} -n {mi1}').get_output_in_json()
+        target_mi = self.cmd('sql mi show -g {rg} -n {mi2}').get_output_in_json()
+
+        self.kwargs.update({
+            'source_mi_name': source_mi['name'],
+            'target_mi_name': target_mi['name']
+        })
+
+        # Create managed database to be moved and copied
+        mdb = self.cmd('sql midb create -g {rg} --mi {source_mi_name} -n {database_name}',
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('name', '{database_name}'),
+                     self.check('location', '{loc}'),
+                     self.check('status', 'Online')]).get_output_in_json()
+        
+        self.kwargs.update({
+            'database_id': mdb['id']
+        })
+        
+        # Start the copy operation from source to target instance
+        self.cmd('sql midb copy start -g {rg} --mi {source_mi_name} -n {database_name} --dest-mi {target_mi_name}')
+        
+        # Cancel the move operation from source to target instance
+        self.cmd('sql midb copy cancel -g {rg} --mi {source_mi_name} -n {database_name} --dest-mi {target_mi_name}')
+
+        # Start the move operation from source to target instance
+        self.cmd('sql midb move start -g {rg} --mi {source_mi_name} -n {database_name} --dest-mi {target_mi_name}')
+
+        # Complete the move operation from source to target instance
+        self.cmd('sql midb move complete --ids {database_id} --dest-mi {target_mi_name}')
+
+        # List the move operation
+        self.cmd('sql midb move list -g {rg} --mi {source_mi_name} -n {database_name} --dest-mi {target_mi_name}',
+                                checks=[
+                                    self.check('[0].state', 'Succeeded'),
+                                    self.check('[0].sourceManagedInstanceName', '{source_mi_name}'),
+                                    self.check('[0].targetManagedInstanceName', '{target_mi_name}'),
+                                    self.check('[0].resourceGroup', '{rg}'),
+                                    self.check('[0].operationMode', 'Move')])
+
+        # Copy the database back from target to source
+        self.cmd('sql midb copy start -g {rg} --mi {target_mi_name} -n {database_name} --dest-mi {source_mi_name}')
+
+        # Complete the copy operation
+        self.cmd('sql midb copy complete -g {rg} --mi {target_mi_name} -n {database_name} --dest-mi {source_mi_name}')
+
+        # List the copy operation
+        self.cmd('sql midb copy list -g {rg} --mi {target_mi_name} -n {database_name} --dest-mi {source_mi_name} --latest',
+                                checks=[
+                                    self.check('[0].state', 'Succeeded'),
+                                    self.check('[0].sourceManagedInstanceName', '{target_mi_name}'),
+                                    self.check('[0].targetManagedInstanceName', '{source_mi_name}'),
+                                    self.check('[0].resourceGroup', '{rg}'),
+                                    self.check('[0].operationMode', 'Copy')])
 
 
 class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):

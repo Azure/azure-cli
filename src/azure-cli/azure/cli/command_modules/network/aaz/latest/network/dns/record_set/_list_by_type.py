@@ -16,9 +16,9 @@ class ListByType(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2018-05-01",
+        "version": "2023-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/dnszones/{}/{}", "2018-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/dnszones/{}/{}", "2023-07-01-preview"],
         ]
     }
 
@@ -41,13 +41,13 @@ class ListByType(AAZCommand):
             options=["--record-type"],
             help="The type of record sets to enumerate.",
             required=True,
-            enum={"A": "A", "AAAA": "AAAA", "CAA": "CAA", "CNAME": "CNAME", "MX": "MX", "NS": "NS", "PTR": "PTR", "SOA": "SOA", "SRV": "SRV", "TXT": "TXT"},
+            enum={"A": "A", "AAAA": "AAAA", "CAA": "CAA", "CNAME": "CNAME", "DS": "DS", "MX": "MX", "NAPTR": "NAPTR", "NS": "NS", "PTR": "PTR", "SOA": "SOA", "SRV": "SRV", "TLSA": "TLSA", "TXT": "TXT"},
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
         _args_schema.zone_name = AAZStrArg(
-            options=["--zone-name"],
+            options=["-z", "--zone-name"],
             help="The name of the DNS zone (without a terminating dot).",
             required=True,
         )
@@ -137,7 +137,7 @@ class ListByType(AAZCommand):
                     "$top", self.ctx.args.top,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2018-05-01",
+                    "api-version", "2023-07-01-preview",
                     required=True,
                 ),
             }
@@ -204,8 +204,14 @@ class ListByType(AAZCommand):
             properties.cname_record = AAZObjectType(
                 serialized_name="CNAMERecord",
             )
+            properties.ds_records = AAZListType(
+                serialized_name="DSRecords",
+            )
             properties.mx_records = AAZListType(
                 serialized_name="MXRecords",
+            )
+            properties.naptr_records = AAZListType(
+                serialized_name="NAPTRRecords",
             )
             properties.ns_records = AAZListType(
                 serialized_name="NSRecords",
@@ -218,6 +224,9 @@ class ListByType(AAZCommand):
             )
             properties.srv_records = AAZListType(
                 serialized_name="SRVRecords",
+            )
+            properties.tlsa_records = AAZListType(
+                serialized_name="TLSARecords",
             )
             properties.ttl = AAZIntType(
                 serialized_name="TTL",
@@ -259,12 +268,39 @@ class ListByType(AAZCommand):
             cname_record = cls._schema_on_200.value.Element.properties.cname_record
             cname_record.cname = AAZStrType()
 
+            ds_records = cls._schema_on_200.value.Element.properties.ds_records
+            ds_records.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.ds_records.Element
+            _element.algorithm = AAZIntType()
+            _element.digest = AAZObjectType()
+            _element.key_tag = AAZIntType(
+                serialized_name="keyTag",
+            )
+
+            digest = cls._schema_on_200.value.Element.properties.ds_records.Element.digest
+            digest.algorithm_type = AAZIntType(
+                serialized_name="algorithmType",
+            )
+            digest.value = AAZStrType()
+
             mx_records = cls._schema_on_200.value.Element.properties.mx_records
             mx_records.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element.properties.mx_records.Element
             _element.exchange = AAZStrType()
             _element.preference = AAZIntType()
+
+            naptr_records = cls._schema_on_200.value.Element.properties.naptr_records
+            naptr_records.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.naptr_records.Element
+            _element.flags = AAZStrType()
+            _element.order = AAZIntType()
+            _element.preference = AAZIntType()
+            _element.regexp = AAZStrType()
+            _element.replacement = AAZStrType()
+            _element.services = AAZStrType()
 
             ns_records = cls._schema_on_200.value.Element.properties.ns_records
             ns_records.Element = AAZObjectType()
@@ -305,6 +341,19 @@ class ListByType(AAZCommand):
             _element.priority = AAZIntType()
             _element.target = AAZStrType()
             _element.weight = AAZIntType()
+
+            tlsa_records = cls._schema_on_200.value.Element.properties.tlsa_records
+            tlsa_records.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.tlsa_records.Element
+            _element.cert_association_data = AAZStrType(
+                serialized_name="certAssociationData",
+            )
+            _element.matching_type = AAZIntType(
+                serialized_name="matchingType",
+            )
+            _element.selector = AAZIntType()
+            _element.usage = AAZIntType()
 
             txt_records = cls._schema_on_200.value.Element.properties.txt_records
             txt_records.Element = AAZObjectType()

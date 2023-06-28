@@ -173,7 +173,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters'
         })
@@ -266,7 +266,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
             'location': resource_group_location,
-            'service_principal': _process_sp_name(sp_name),
+            'service_principal': sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters',
             'tags': tags,
@@ -477,7 +477,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     def _get_versions(self, location):
         """Return the previous and current Kubernetes minor release versions, such as ("1.11.6", "1.12.4")."""
         versions = self.cmd(
-            "az aks get-versions -l westus2 --query 'orchestrators[].orchestratorVersion'").get_output_in_json()
+            "az aks get-versions -l westus2 --query 'values[*].patchVersions.keys(@)[]'").get_output_in_json()
         # sort by semantic version, from newest to oldest
         versions = sorted(versions, key=version_to_tuple, reverse=True)
         upgrade_version = versions[0]

@@ -6,6 +6,11 @@
 # pylint: skip-file
 
 data_source_name = "DataSource_CustomLog_SQLAssessment_CL"
+dcr_source_pattern = "C:\\Windows\\System32\\config\\systemprofile\\AppData\\Local\\Microsoft SQL Server IaaS Agent\\Assessment\\*.csv"
+custom_log_name = "Custom-SqlAssessment_CL"
+table_name = "SqlAssessment_CL"
+
+# KEEP BELOW. LEGACY CODE. Keep for possible revert based on Custom Table deprecation.
 data_source_kind = "CustomLog"
 
 data_source_properties = {

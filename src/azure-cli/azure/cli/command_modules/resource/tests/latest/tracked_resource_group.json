@@ -1,0 +1,69 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.10.97.17786",
+      "templateHash": "66565252327750708"
+    }
+  },
+  "parameters": {
+    "rgname": {
+      "type": "string"
+    },
+    "tsname": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/templateSpecs",
+      "apiVersion": "2022-02-01",
+      "name": "[parameters('tsname')]",
+      "location": "[resourceGroup().location]"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "deploy-rg",
+      "subscriptionId": "[subscription().subscriptionId]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "rgname": {
+            "value": "[parameters('rgname')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.10.97.17786",
+              "templateHash": "16612974451088724402"
+            }
+          },
+          "parameters": {
+            "rgname": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Resources/resourceGroups",
+              "apiVersion": "2021-04-01",
+              "name": "[parameters('rgname')]",
+              "location": "[deployment().location]"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

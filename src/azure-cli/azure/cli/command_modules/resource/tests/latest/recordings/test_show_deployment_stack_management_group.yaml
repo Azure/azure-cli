@@ -1,0 +1,466 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --management-group-id --location --template-file --deny-settings-mode
+      User-Agent:
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001?api-version=2022-08-01-preview
+  response:
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The resource ''cli-test-get-deployment-stack-subscription000001''
+        was not found. For more details please go to https://aka.ms/ARMResourceNotFoundFix"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '196'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Apr 2023 17:36:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"location": "westus2", "properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {"foo": {"type": "string", "defaultValue":
+      "foo", "metadata": {"description": "description"}}, "bar": {"type": "string",
+      "defaultValue": "bar", "metadata": {"description": "description"}}}, "functions":
+      [], "variables": {}, "resources": [], "outputs": {"foo": {"type": "string",
+      "value": "[parameters(''foo'')]"}, "bar": {"type": "string", "value": "[parameters(''bar'')]"}}},
+      "parameters": {}, "actionOnUnmanage": {"resources": "detach", "resourceGroups":
+      "detach"}, "deploymentScope": "/subscriptions/00000000-0000-0000-0000-000000000000",
+      "denySettings": {"applyToChildScopes": false}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '774'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name --management-group-id --location --template-file --deny-settings-mode
+      User-Agent:
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus2\",\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
+        {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\": \"detach\",\r\n
+        \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentScope\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000\",\r\n    \"denySettings\":
+        {\r\n      \"mode\": \"none\",\r\n      \"applyToChildScopes\": false\r\n
+        \   },\r\n    \"parameters\": {},\r\n    \"resources\": [],\r\n    \"provisioningState\":
+        \"initializing\",\r\n    \"detachedResources\": [],\r\n    \"deletedResources\":
+        [],\r\n    \"failedResources\": []\r\n  },\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"harshpatel@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
+        \"2023-04-17T17:37:00.336275Z\",\r\n    \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2023-04-17T17:37:00.336275Z\"\r\n
+        \ },\r\n  \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-get-deployment-stack-subscription000001\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/76c38e9d-2955-442a-9a59-bd4afbb54220?api-version=2022-08-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Apr 2023 17:37:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --management-group-id --location --template-file --deny-settings-mode
+      User-Agent:
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/76c38e9d-2955-442a-9a59-bd4afbb54220?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/providers/Microsoft.Resources/locations/westus2/deploymentStackOperationStatus/76c38e9d-2955-442a-9a59-bd4afbb54220\",\r\n
+        \ \"name\": \"76c38e9d-2955-442a-9a59-bd4afbb54220\",\r\n  \"status\": \"succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '209'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Apr 2023 17:37:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --management-group-id --location --template-file --deny-settings-mode
+      User-Agent:
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus2\",\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
+        {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\": \"detach\",\r\n
+        \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-get-deployment-stack-subscrip-2023-04-17-17-37-00-8df1a\",\r\n
+        \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000\",\r\n
+        \   \"duration\": \"PT5.8868249S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
+        {\r\n      \"foo\": {\r\n        \"type\": \"String\",\r\n        \"value\":
+        \"foo\"\r\n      },\r\n      \"bar\": {\r\n        \"type\": \"String\",\r\n
+        \       \"value\": \"bar\"\r\n      }\r\n    },\r\n    \"parameters\": {},\r\n
+        \   \"resources\": [],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
+        [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
+        \ \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-04-17T17:37:00.336275Z\",\r\n
+        \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-04-17T17:37:00.336275Z\"\r\n  },\r\n
+        \ \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-get-deployment-stack-subscription000001\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1505'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Apr 2023 17:37:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --management-group-id
+      User-Agent:
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus2\",\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
+        {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\": \"detach\",\r\n
+        \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-get-deployment-stack-subscrip-2023-04-17-17-37-00-8df1a\",\r\n
+        \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000\",\r\n
+        \   \"duration\": \"PT5.8868249S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
+        {\r\n      \"foo\": {\r\n        \"type\": \"String\",\r\n        \"value\":
+        \"foo\"\r\n      },\r\n      \"bar\": {\r\n        \"type\": \"String\",\r\n
+        \       \"value\": \"bar\"\r\n      }\r\n    },\r\n    \"parameters\": {},\r\n
+        \   \"resources\": [],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
+        [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
+        \ \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-04-17T17:37:00.336275Z\",\r\n
+        \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-04-17T17:37:00.336275Z\"\r\n  },\r\n
+        \ \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-get-deployment-stack-subscription000001\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1505'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Apr 2023 17:37:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --management-group-id
+      User-Agent:
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus2\",\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
+        {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\": \"detach\",\r\n
+        \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-get-deployment-stack-subscrip-2023-04-17-17-37-00-8df1a\",\r\n
+        \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000\",\r\n
+        \   \"duration\": \"PT5.8868249S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
+        {\r\n      \"foo\": {\r\n        \"type\": \"String\",\r\n        \"value\":
+        \"foo\"\r\n      },\r\n      \"bar\": {\r\n        \"type\": \"String\",\r\n
+        \       \"value\": \"bar\"\r\n      }\r\n    },\r\n    \"parameters\": {},\r\n
+        \   \"resources\": [],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
+        [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
+        \ \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-04-17T17:37:00.336275Z\",\r\n
+        \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-04-17T17:37:00.336275Z\"\r\n  },\r\n
+        \ \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-get-deployment-stack-subscription000001\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1505'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Apr 2023 17:37:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --management-group-id --yes
+      User-Agent:
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001?api-version=2022-08-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus2\",\r\n  \"properties\": {\r\n    \"actionOnUnmanage\":
+        {\r\n      \"resources\": \"detach\",\r\n      \"resourceGroups\": \"detach\",\r\n
+        \     \"managementGroups\": \"detach\"\r\n    },\r\n    \"deploymentId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/cli-test-get-deployment-stack-subscrip-2023-04-17-17-37-00-8df1a\",\r\n
+        \   \"deploymentScope\": \"/subscriptions/00000000-0000-0000-0000-000000000000\",\r\n
+        \   \"duration\": \"PT5.8868249S\",\r\n    \"denySettings\": {\r\n      \"mode\":
+        \"none\",\r\n      \"applyToChildScopes\": false\r\n    },\r\n    \"outputs\":
+        {\r\n      \"foo\": {\r\n        \"type\": \"String\",\r\n        \"value\":
+        \"foo\"\r\n      },\r\n      \"bar\": {\r\n        \"type\": \"String\",\r\n
+        \       \"value\": \"bar\"\r\n      }\r\n    },\r\n    \"parameters\": {},\r\n
+        \   \"resources\": [],\r\n    \"provisioningState\": \"succeeded\",\r\n    \"detachedResources\":
+        [],\r\n    \"deletedResources\": [],\r\n    \"failedResources\": []\r\n  },\r\n
+        \ \"systemData\": {\r\n    \"createdBy\": \"harshpatel@microsoft.com\",\r\n
+        \   \"createdByType\": \"User\",\r\n    \"createdAt\": \"2023-04-17T17:37:00.336275Z\",\r\n
+        \   \"lastModifiedBy\": \"harshpatel@microsoft.com\",\r\n    \"lastModifiedByType\":
+        \"User\",\r\n    \"lastModifiedAt\": \"2023-04-17T17:37:00.336275Z\"\r\n  },\r\n
+        \ \"id\": \"/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001\",\r\n
+        \ \"type\": \"Microsoft.Resources/deploymentStacks\",\r\n  \"name\": \"cli-test-get-deployment-stack-subscription000001\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1505'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 17 Apr 2023 17:37:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - stack mg delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name --management-group-id --yes
+      User-Agent:
+      - AZURECLI/2.47.0 (PIP) azsdk-python-azure-mgmt-resource/0.1.0 Python/3.9.13
+        (Windows-10-10.0.19044-SP0)
+    method: DELETE
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/AzBlueprintAssignTest/providers/Microsoft.Resources/deploymentStacks/cli-test-get-deployment-stack-subscription000001?unmanageAction.Resources=detach&unmanageAction.ResourceGroups=detach&api-version=2022-08-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 17 Apr 2023 17:37:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -220,7 +220,7 @@ def validate_ssl_cert(namespace):
 
 def validate_dns_record_type(namespace):
     tokens = namespace.command.split(' ')
-    types = ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'soa', 'srv', 'txt']
+    types = ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'ns', 'ptr', 'soa', 'srv', 'tlsa', 'txt']
     for token in tokens:
         if token in types:
             if hasattr(namespace, 'record_type'):
@@ -477,15 +477,6 @@ def get_servers_validator(camel_case=False):
         namespace.servers = servers if servers else None
 
     return validate_servers
-
-
-def validate_subresource_list(cmd, namespace):
-    if namespace.target_resources:
-        SubResource = cmd.get_models('SubResource', resource_type=ResourceType.MGMT_NETWORK_DNS)
-        subresources = []
-        for item in namespace.target_resources:
-            subresources.append(SubResource(id=item))
-        namespace.target_resources = subresources
 
 
 def validate_private_dns_zone(cmd, namespace):

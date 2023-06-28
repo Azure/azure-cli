@@ -913,7 +913,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     # In the latest profile, the default public IP will be expected to be changed from Basic to Standard.
     # In order to avoid breaking change which has a big impact to users,
     # we use the hint to guide users to use Standard public IP to create VM in the first stage.
-    if public_ip_sku is None and cmd.cli_ctx.cloud.profile == 'latest':
+    if public_ip_sku is None and public_ip_address_type == 'new' and cmd.cli_ctx.cloud.profile == 'latest':
         logger.warning(
             'It is recommended to use parameter "--public-ip-sku Standard" to create new VM with Standard public IP. '
             'Please note that the default public IP used for VM creation will be changed from Basic to Standard '

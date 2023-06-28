@@ -1059,7 +1059,7 @@ def load_arguments(self, _):
             c.argument('subnet_address_prefix', help='The subnet IP address prefix to use when creating a new VNet in CIDR format.')
             c.argument('nics', nargs='+', help='Names or IDs of existing NICs to attach to the VM. The first NIC will be designated as primary. If omitted, a new NIC will be created. If an existing NIC is specified, do not specify subnet, VNet, public IP or NSG.')
             c.argument('private_ip_address', help='Static private IP address (e.g. 10.0.0.5).')
-            c.argument('public_ip_address', help='Name of the public IP address when creating one (default) or referencing an existing one. Can also reference an existing public IP by ID or specify "" for None (\'""\' in Azure CLI using PowerShell or --% operator).')
+            c.argument('public_ip_address', help='Name of the public IP address when creating one (default) or referencing an existing one. Can also reference an existing public IP by ID or specify "" for None (\'""\' in Azure CLI using PowerShell or --% operator). For Azure CLI using powershell core edition 7.3.4, specify '' or "" (--public-ip-address '' or --public-ip-address "")')
             c.argument('public_ip_address_allocation', help=None, default=None, arg_type=get_enum_type(['dynamic', 'static']))
             c.argument('public_ip_address_dns_name', help='Globally unique DNS name for a newly created public IP.')
             if self.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK):
@@ -1179,10 +1179,9 @@ def load_arguments(self, _):
         c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], help='gallery image definition')
         c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'], help='gallery image version')
 
-    for scope in ['sig show', 'sig image-definition show', 'sig image-definition delete']:
-        with self.argument_context(scope) as c:
-            c.argument('gallery_name', options_list=['--gallery-name', '-r'], id_part='name', help='gallery name')
-            c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], id_part='child_name_1', help='gallery image definition')
+    with self.argument_context('sig show') as c:
+        c.argument('gallery_name', options_list=['--gallery-name', '-r'], id_part='name', help='gallery name')
+        c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], id_part='child_name_1', help='gallery image definition')
 
     with self.argument_context('sig show') as c:
         c.argument('select', help='The select expression to apply on the operation.')
@@ -1240,14 +1239,6 @@ def load_arguments(self, _):
         c.argument('shared_to', shared_to_type)
         c.argument('marker', arg_type=marker_type)
         c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
-
-    with self.argument_context('sig image-definition show-shared') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
-        c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
-                   id_part='child_name_1')
-        c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], type=str, help='The name '
-                   'of the Shared Gallery Image Definition from which the Image Versions are to be listed.',
-                   id_part='child_name_2')
 
     with self.argument_context('sig create') as c:
         c.argument('description', help='the description of the gallery')

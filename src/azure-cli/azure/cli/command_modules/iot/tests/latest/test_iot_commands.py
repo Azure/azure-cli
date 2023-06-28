@@ -390,7 +390,7 @@ class IoTHubTest(ScenarioTest):
         self.cmd('iot hub devicestream show -n {0} -g {1}'.format(hub, rg), checks=self.is_empty())
 
         # Test 'az iot hub message-enrichment create'
-        real_endpoints = 'events'
+        real_endpoints = 'event'
         fake_endpoints = 'events fake_endpoint'
         key = 'key'
         fake_key = 'fake_key'
