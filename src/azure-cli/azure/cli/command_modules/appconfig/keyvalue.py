@@ -158,7 +158,9 @@ def import_config(cmd,
         content_type=content_type)
 
     kv_diff = kv_comparer.compare(dest_kvs=dest_kvs, strict=strict)
-    need_kv_change = print_preview(kv_diff, source, yes=yes, strict=strict, title="Key Values")
+    # Show indented key-value preview similar to kvset for appconfig source
+    indent = 2 if source == "appconfig" else None
+    need_kv_change = print_preview(kv_diff, source, yes=yes, strict=strict, title="Key Values", indent=indent)
 
     need_feature_change = False
     ff_diff = {}
@@ -326,7 +328,9 @@ def export_config(cmd,
 
     kv_diff = kv_comparer.compare(dest_kvs=dest_kvs)
 
-    need_kv_change = print_preview(kv_diff, destination, yes=yes, title="Key Values")
+    # Show indented key-value preview similar to kvset for appconfig destination
+    indent = 2 if destination == "appconfig" else None
+    need_kv_change = print_preview(kv_diff, destination, yes=yes, title="Key Values", indent=indent)
 
     need_feature_change = False
     ff_diff = {}

@@ -165,17 +165,19 @@ def get_serializer(level):
 
             return feature_json
 
-        res = {'key': obj.key, 'value': obj.value, "content_type": obj.content_type}
+        res = {'key': obj.key, 'value': obj.value}
 
-        # import/export key, value, content_type and tags (same level as key-value): {"key": <key>, "value": <value>, "content_type": <content_type>, "AppService:SlotSetting": <true/false>}
+        # import/export key, value, content_type and tags (same level as key-value): {"key": <key>, "value": <value>, "AppService:SlotSetting": <true/false>}
         if level == 'appservice':
 
             if obj.tags:
                 slot_setting = obj.tags.get(AppServiceConstants.APPSVC_SLOT_SETTING_KEY, 'false')
                 res[AppServiceConstants.APPSVC_SLOT_SETTING_KEY] = slot_setting
 
-        # import/export key, value, content-type, and tags (as a sub group): {"key": <key>, "value": <value>, "content_type": <content_type>, "tags": <tags_dict>}
+        # import/export key, value, content-type, and tags (as a sub group): {"key": <key>, "value": <value>, "label": <label> "content_type": <content_type>, "tags": <tags_dict>}
         elif level == 'appconfig':
+            res["label"] = obj.label
+            res["content_type"] = obj.content_type
             # tags
             tag_json = {}
             if obj.tags:
