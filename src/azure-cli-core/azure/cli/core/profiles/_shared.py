@@ -60,6 +60,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_RESOURCE_SUBSCRIPTIONS = ('azure.mgmt.resource.subscriptions', 'SubscriptionClient')
     MGMT_RESOURCE_DEPLOYMENTSCRIPTS = ('azure.mgmt.resource.deploymentscripts', 'DeploymentScriptsClient')
     MGMT_RESOURCE_TEMPLATESPECS = ('azure.mgmt.resource.templatespecs', 'TemplateSpecsClient')
+    MGMT_RESOURCE_DEPLOYMENTSTACKS = ('azure.mgmt.resource.deploymentstacks', 'DeploymentStacksClient')
     MGMT_RESOURCE_PRIVATELINKS = ('azure.mgmt.resource.privatelinks', 'ResourcePrivateLinkClient')
     MGMT_RESOURCE_MANAGEDAPPLICATIONS = ('azure.mgmt.resource.managedapplications', 'ApplicationClient')
     MGMT_MONITOR = ('azure.mgmt.monitor', 'MonitorManagementClient')
@@ -175,11 +176,14 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_POLICY: '2021-06-01',
+        ResourceType.MGMT_RESOURCE_POLICY: SDKProfile('2021-06-01', {
+            'policy_exemptions': '2020-07-01-preview'
+        }),
         ResourceType.MGMT_RESOURCE_RESOURCES: '2022-09-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2019-11-01',
         ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2020-10-01',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2021-05-01',
+        ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS: '2022-08-01-preview',
         ResourceType.MGMT_RESOURCE_PRIVATELINKS: '2020-05-01',
         ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2019-07-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
