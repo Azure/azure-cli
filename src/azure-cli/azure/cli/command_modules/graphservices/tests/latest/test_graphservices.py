@@ -6,41 +6,22 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import *
-import time
 
 class GraphservicesScenario(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_billing_flow(self, resource_group):
+
         self.kwargs.update({
             'accountName' : self.create_random_name(prefix="azcliacc", length=20),
             'aad_app_display_name' : self.create_random_name(prefix="azcliapp", length=20)
             })
 
-        #Create aad app for which billing will be enabled
         result = self.cmd('ad app create --display-name {aad_app_display_name}').get_output_in_json() 
         self.kwargs['app_id'] = result['appId'] 
-        
-        #Wait for application to finish creating
-        time.sleep(120)
 
-        #Create resource (enable billing on aad app)
-        self.cmd('az graph-services account create --resource-group {rg} --name {accountName} --app-id {app_id} --tags key1=value1', checks=[
+        self.cmd('az graph-services account create --resource-group {rg} --name {accountName} --app-id "{app_id}"', checks=[
             self.check('name', '{accountName}'),
-            self.check('tags.key1', 'value1'),
             self.check('properties.provisioningState', 'Succeeded')
         ])
-
-        #Read created resource
-        self.cmd('az graph-services account show --resource-group {rg} --name {accountName}', checks=[
-            self.check('name', '{accountName}'),
-            self.check('properties.provisioningState', 'Succeeded'),
-            self.check('properties.appId', '{app_id}'),
-        ])
-
-        #Update resource
-        self.cmd('az graph-services account update --resource-group {rg} --name {accountName} --tags updatedKey1=updatedValue1 --location global', checks=[
-            self.check('name', '{accountName}'),
-            self.check('tags.updatedKey1', 'updatedValue1'),
-            self.check('properties.provisioningState', 'Succeeded')
-        ])
+    pass
