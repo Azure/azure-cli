@@ -28,7 +28,7 @@ from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_s
 from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, \
     mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, validate_georestore_location, \
-    validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_replica_location, validate_public_access_server
+    validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_public_access_server
 
 logger = get_logger(__name__)
 DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
@@ -612,7 +612,7 @@ def flexible_server_import_create(cmd, client,
 def flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time=None, zone=None,
                             no_wait=False, subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                             private_dns_zone_arguments=None, public_access=None, yes=False, sku_name=None, tier=None,
-                            storage_gb=None, auto_grow=None, backup_retention=None, geo_redundant_backup=None):
+                            storage_gb=None, auto_grow=None, backup_retention=None, geo_redundant_backup=None, tags=None):
     provider = 'Microsoft.DBforMySQL'
     server_name = server_name.lower()
 
@@ -690,6 +690,7 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
         sku = mysql_flexibleservers.models.Sku(name=sku_name, tier=tier)
 
         parameters = mysql_flexibleservers.models.Server(
+            tags=tags,
             location=location,
             identity=identity,
             restore_point_in_time=restore_point_in_time,
@@ -741,10 +742,8 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
 
 
 # pylint: disable=too-many-locals, too-many-statements, raise-missing-from
-def flexible_server_georestore(cmd, client,
-                               resource_group_name, server_name,
-                               source_server, location, zone=None, no_wait=False,
-                               subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
+def flexible_server_georestore(cmd, client, resource_group_name, server_name, source_server, location, zone=None, no_wait=False,
+                               subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None, tags=None,
                                private_dns_zone_arguments=None, public_access=None, yes=False, sku_name=None, tier=None,
                                storage_gb=None, auto_grow=None, backup_retention=None, geo_redundant_backup=None):
     provider = 'Microsoft.DBforMySQL'
@@ -822,6 +821,7 @@ def flexible_server_georestore(cmd, client,
         sku = mysql_flexibleservers.models.Sku(name=sku_name, tier=tier)
 
         parameters = mysql_flexibleservers.models.Server(
+            tags=tags,
             location=location,
             source_server_resource_id=source_server_id,  # this should be the source server name, not id
             create_mode="GeoRestore",
@@ -1143,7 +1143,7 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
 
 # Replica commands
 # Custom functions for server replica, will add MySQL part after backend ready in future
-def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, location=None,
+def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, location=None, tags=None,
                             private_dns_zone_arguments=None, vnet=None, subnet=None, zone=None, public_access=None, no_wait=False):
     provider = 'Microsoft.DBforMySQL'
     replica_name = replica_name.lower()
@@ -1171,12 +1171,8 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     if not location:
         location = source_server_object.location
 
-    validate_replica_location(cmd, source_server_object.location, location)
-
     sku_name = source_server_object.sku.name
     tier = source_server_object.sku.tier
-    if not zone:
-        zone = source_server_object.availability_zone
 
     identity, data_encryption = get_identity_and_data_encryption(source_server_object)
 
@@ -1184,12 +1180,13 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
         sku=mysql_flexibleservers.models.Sku(name=sku_name, tier=tier),
         source_server_resource_id=source_server_id,
         location=location,
+        tags=tags,
         availability_zone=zone,
         identity=identity,
         data_encryption=data_encryption,
         create_mode="Replica")
 
-    if location != source_server_object.location and any((vnet, subnet, private_dns_zone_arguments)):
+    if any((vnet, subnet, private_dns_zone_arguments)):
         parameters.network = flexible_server_exist_network_resource(cmd,
                                                                     resource_group_name,
                                                                     replica_name,
@@ -1197,9 +1194,8 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
                                                                     private_dns_zone_arguments,
                                                                     vnet,
                                                                     subnet)
-    resolve_poller(
-        client.begin_create(resource_group_name, replica_name, parameters), cmd.cli_ctx,
-        'Create Replica')
+
+    resolve_poller(client.begin_create(resource_group_name, replica_name, parameters), cmd.cli_ctx, 'Create Replica')
 
     replica_server_object = client.get(resource_group_name, replica_name)
     replica_server_network = replica_server_object.network

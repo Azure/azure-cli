@@ -34,6 +34,11 @@ WINDOWS_ASP_LOCATION_WEBAPP = 'westeurope'
 WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
 LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
 LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
+# During the 'webapp vnet-integration remove' call
+# Will enter 20s wait for hit geo and 45s wait on app service side in order for NCs to be deleted successfully on machines.
+# So add time.sleep(65) for all az webapp vnet-integration related commands.
+# This can avoid resource residue caused by appservice related tests.
+TIME_SLEEP_FOR_VNET_INTEGRATION = 65
 
 
 class WebappBasicE2ETest(ScenarioTest):
@@ -2206,11 +2211,13 @@ class WebappNetworkConnectionTests(ScenarioTest):
         ])
         self.cmd(
             'webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
+        time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
         self.cmd(
             'webapp vnet-integration remove -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot_webapp_name))
+        time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         self.cmd('webapp vnet-integration list -g {} -n {} --slot {}'.format(resource_group, webapp_name, slot_webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
@@ -2237,6 +2244,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
         ])
         self.cmd(
             'webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
+        time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
@@ -2262,6 +2270,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
         ])
         self.cmd(
             'webapp vnet-integration remove -g {} -n {}'.format(webapp_rg, webapp_name))
+        time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(webapp_rg, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
@@ -2287,6 +2296,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
         ])
         self.cmd(
             'webapp vnet-integration remove -g {} -n {}'.format(webapp_rg, webapp_name))
+        time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(webapp_rg, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
@@ -2405,6 +2415,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
         ])
         self.cmd(
             'webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
+        time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
@@ -2432,14 +2443,14 @@ class WebappNetworkConnectionTests(ScenarioTest):
         # Add vnet integration where theres two vnets of the same name. Chosen vnet should default to the one in the same RG
         self.cmd('webapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
             resource_group, webapp_name, vnet_name, subnet_name))
-        time.sleep(5)
+        time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', subnet_name)
         ])
         self.cmd(
             'webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
-        time.sleep(5)
+        time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
@@ -2447,13 +2458,14 @@ class WebappNetworkConnectionTests(ScenarioTest):
         # Add vnet integration using vnet resource ID
         self.cmd('webapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
             resource_group, webapp_name, vnet['newVNet']['id'], subnet_name_2))
-        time.sleep(5)
+        time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', subnet_name_2)
         ])
         # self.cmd(
         #     'webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
+        # time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         # self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
         #     JMESPathCheck('length(@)', 0)
         # ])
@@ -2482,6 +2494,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
         ])
         self.cmd(
             'webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
+        time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
@@ -2507,7 +2520,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('[0].name', subnet_name)
         ])
         self.cmd('webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
-
+        time.sleep(TIME_SLEEP_FOR_VNET_INTEGRATION)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
@@ -2588,7 +2601,7 @@ class WebappOneDeployScenarioTest(ScenarioTest):
     def test_one_deploy_scm(self, resource_group):
         webapp_name = self.create_random_name('webapp-oneDeploy-test', 40)
         plan_name = self.create_random_name('webapp-oneDeploy-plan', 40)
-        war_file = os.path.join(TEST_DIR, 'sample.war')
+        war_file = os.path.join(TEST_DIR, 'data', 'sample.war')
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
