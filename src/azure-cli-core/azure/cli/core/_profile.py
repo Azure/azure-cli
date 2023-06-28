@@ -365,7 +365,7 @@ class Profile:
         if identity_type:
             # managed identity
             if tenant:
-                raise CLIError("Tenant shouldn't be specified for managed identity account")
+                tenant = False
             from .auth.util import scopes_to_resource
             msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id,
                                                          scopes_to_resource(scopes))
