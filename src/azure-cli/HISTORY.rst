@@ -8,7 +8,7 @@ Release History
 
 **AKS**
 
-* [BREAKING CHANGE] Both json payload and table format changed for `az aks get-versions` (#26702)
+* `az aks get-versions`: Both json payload and table format changed (#26702)
 * `aks create`: Add condition to disable `--enable-msi-auth-for-monitoring` for service principle (#26528)
 
 **APIM**
