@@ -2436,7 +2436,7 @@ def aks_nodepool_snapshot_update(cmd, client, resource_group_name, snapshot_name
         tags=tags
     )
 
-    snapshot = client.update_tags(resource_group_name, name, tagsObject)
+    snapshot = client.update_tags(resource_group_name, snapshot_name, tagsObject)
     return snapshot
 
 
