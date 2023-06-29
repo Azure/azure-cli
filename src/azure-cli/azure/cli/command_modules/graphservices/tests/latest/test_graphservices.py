@@ -39,7 +39,7 @@ class GraphservicesScenario(ScenarioTest):
         ])
 
         #Update resource
-        self.cmd('az graph-services account update --resource-group {rg} --name {accountName} --tags updatedKey1=updatedValue1', checks=[
+        self.cmd('az graph-services account update --resource-group {rg} --name {accountName} --tags updatedKey1=updatedValue1 --location global', checks=[
             self.check('name', '{accountName}'),
             self.check('tags.updatedKey1', 'updatedValue1'),
             self.check('properties.provisioningState', 'Succeeded')
