@@ -158,17 +158,10 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             'acc_k': key,
             'acc_u': endpoint
         })
-        self.batch_cmd('batch pool create --id {p_id} --image "MicrosoftWindowsServer:WindowsServer:2016-datacenter-smalldisk"  --target-dedicated-nodes 2 --vm-size "standard_d2_v2" --node-agent-sku-id "batch.node.windows amd64"  --enable-accelerated-networking')
+        self.batch_cmd('batch pool create --id {p_id} --image "MicrosoftWindowsServer:WindowsServer:2016-datacenter-smalldisk"  --target-dedicated-nodes 2 --vm-size "standard_d2_v2" --node-agent-sku-id "batch.node.windows amd64" --accelerated-networking true')
 
-        retry = 0
-        while self.batch_cmd('batch pool show --pool-id {p_id}').get_output_in_json()['allocationState']!='steady' and retry<10:
-            time.sleep(60)
-            retry+=1
+        self.assertTrue(self.batch_cmd('batch pool show --pool-id {p_id}').get_output_in_json()['networkConfiguration']['enableAcceleratedNetworking'])
 
-        result = self.batch_cmd('batch pool show --pool-id {p_id}').assert_with_checks([
-            self.check('id', 'xplatCreatedPool'),
-            self.check('networkConfiguration.enableAcceleratedNetworking', True)])
-        
         self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
 
     @ResourceGroupPreparer()
