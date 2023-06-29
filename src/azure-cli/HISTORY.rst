@@ -40,7 +40,6 @@ Release History
 **ARM**
 
 * `az managedapp definition create/update`: Add new parameter `--deployment-mode` to support setting deployment policy (#26604)
-* Bump up `managed applications` API version to `2019-07-01` (#26604)
 * `az resource move`: Add help example for moving multiple resources (#26756)
 * `az stack`: Add new command group to support deployment stacks (#24211)
 * `az stack mg`: Add new command group to manage deployment stack at management group scope (#24211)
