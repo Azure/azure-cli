@@ -460,17 +460,13 @@ def summary_data(testdata):
         with open(dst_html, 'w') as f:
             f.write(str(src_soup))
 
-    # TODO: delete the following code after testing
-    if data:
+    # send to kusto db
+    if USER_TARGET.lower() in ['all', ''] \
+            and USER_REPO == 'https://github.com/Azure/azure-cli.git' \
+            and USER_REPO_EXT == 'https://github.com/Azure/azure-cli-extensions.git' \
+            and USER_BRANCH == 'dev' and USER_BRANCH_EXT == 'main' \
+            and USER_LIVE == '--live' and data:
         send_to_kusto(data)
-
-    # # send to kusto db
-    # if USER_TARGET.lower() in ['all', ''] \
-    #         and USER_REPO == 'https://github.com/Azure/azure-cli.git' \
-    #         and USER_REPO_EXT == 'https://github.com/Azure/azure-cli-extensions.git' \
-    #         and USER_BRANCH == 'dev' and USER_BRANCH_EXT == 'main' \
-    #         and USER_LIVE == '--live' and data:
-    #     send_to_kusto(data)
 
     for root, dirs, files in os.walk(ARTIFACT_DIR):
         for file in files:
