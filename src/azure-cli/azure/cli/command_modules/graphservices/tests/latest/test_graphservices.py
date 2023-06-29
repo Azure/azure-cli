@@ -9,7 +9,6 @@ from azure.cli.testsdk import *
 import time
 
 class GraphservicesScenario(ScenarioTest):
-
     @ResourceGroupPreparer(random_name_length=20)
     def test_billing_flow(self, resource_group):
         self.kwargs.update({
