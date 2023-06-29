@@ -489,7 +489,7 @@ examples:
 
 helps['sf managed-node-type create'] = """
 type: command
-short-summary: Delete a managed cluster.
+short-summary: Create node type on a managed cluster.
 examples:
   - name: Create primary node type with 5 nodes.
     text: >
@@ -501,7 +501,7 @@ examples:
 
 helps['sf managed-node-type update'] = """
 type: command
-short-summary: Update a managed cluster.
+short-summary: Update node type on a managed cluster.
 examples:
   - name: Update the instance count of the node type.
     text: >
