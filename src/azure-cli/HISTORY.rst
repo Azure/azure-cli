@@ -81,7 +81,7 @@ Release History
 
 **Key Vault**
 
-* Fix `az keyvault certificate show`: Show policy.x509CertificateProperties.subjectAlternativeNames correctly (#26530)
+* Fix #26527: `az keyvault certificate show`: Show policy.x509CertificateProperties.subjectAlternativeNames correctly (#26530)
 
 **Monitor**
 
@@ -114,7 +114,7 @@ Release History
 
 **RDBMS**
 
-* [BREAKING CHANGE] `az postgres flexible-server migration update`: Remove unsupported update parameters `--db-names` and `--overwrite-dbs` (#26720)
+* `az postgres flexible-server migration update`: Remove unsupported update parameters `--db-names` and `--overwrite-dbs` (#26720)
 * `az postgres flexible-server migration create`: Add support for tags and location using `--tags` and `--location` (#26720)
 * `az postgres flexible-server revive-dropped`: Add support to revive a dropped PostgreSQL flexible server (#26720)
 * `az postgres flexible-server create`: Add support to create PostgreSQL flexible server with data encryption enabled for geo-backup enabled server by pasing parameters `--geo-redundant-backup`, `--backup-key` and `--backup-identity` (#26720)
@@ -146,7 +146,7 @@ Release History
 
 **Synapse**
 
-* [BREAKING CHANGE] `az command a`: Make some customer-facing breaking change (#26589)
+* `az synapse workspace create/update`: Support workspace encryption and user-assignment management identity (#26589)
 
 2.49.0
 ++++++
