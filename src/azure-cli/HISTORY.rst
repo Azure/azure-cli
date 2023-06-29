@@ -9,18 +9,18 @@ Release History
 **AKS**
 
 * `az aks get-versions`: Both json payload and table format changed (#26702)
-* `aks create`: Add condition to disable `--enable-msi-auth-for-monitoring` for service principle (#26528)
+* `az aks create`: Add condition to disable `--enable-msi-auth-for-monitoring` for service principle (#26528)
 
 **APIM**
 
-* `apim apim graphqlapi resolver create`: Add new command to create gql api resolver (#26144)
-* `apim apim graphqlapi resolver show`: Add new command to show gql api resolver (#26144)
-* `apim apim graphqlapi resolver list`: Add new command to show gql api resolver list (#26144)
-* `apim apim graphqlapi resolver delete`: Add new command to delete gql api resolver (#26144)
-* `apim apim graphqlapi resolver policy create`: Add new command to create resolver policy (#26144)
-* `apim apim graphqlapi resolver policy show`: Add new command to show resolver policy (#26144)
-* `apim apim graphqlapi resolver policy list`: Add new command to list resolver policies (#26144)
-* `apim apim graphqlapi resolver policy delete`: Add new command to delete a policy (#26144)
+* `az apim graphqlapi resolver create`: Add new command to create gql api resolver (#26144)
+* `az apim graphqlapi resolver show`: Add new command to show gql api resolver (#26144)
+* `az apim graphqlapi resolver list`: Add new command to show gql api resolver list (#26144)
+* `az apim graphqlapi resolver delete`: Add new command to delete gql api resolver (#26144)
+* `az apim graphqlapi resolver policy create`: Add new command to create resolver policy (#26144)
+* `az apim graphqlapi resolver policy show`: Add new command to show resolver policy (#26144)
+* `az apim graphqlapi resolver policy list`: Add new command to list resolver policies (#26144)
+* `az apim graphqlapi resolver policy delete`: Add new command to delete a policy (#26144)
 
 **App Config**
 
