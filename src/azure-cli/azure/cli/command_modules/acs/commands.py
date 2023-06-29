@@ -5,7 +5,6 @@
 
 from azure.cli.command_modules.acs._client_factory import (
     cf_agent_pools,
-    cf_container_services,
     cf_managed_clusters,
     cf_snapshots,
 )

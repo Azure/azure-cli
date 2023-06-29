@@ -31,7 +31,7 @@ def get_k8s_versions_completion_list(cmd, prefix, namespace, **kwargs):  # pylin
 
 def get_k8s_versions(cli_ctx, location):
     """Return a list of Kubernetes versions available for a new cluster."""
-    from azure.cli.command_modules.acs._client_factory import cf_container_services
+    from azure.cli.command_modules.acs._client_factory import cf_managed_clusters
     from jmespath import search
 
     results = cf_managed_clusters(cli_ctx).list_kubernetes_versions(location).as_dict()

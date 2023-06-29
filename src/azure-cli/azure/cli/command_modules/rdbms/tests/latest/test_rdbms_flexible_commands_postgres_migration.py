@@ -46,7 +46,7 @@ class MigrationScenarioTest(ScenarioTest):
 
         if livemode:
             # Live mode values
-            target_subscription_id = "bb5358e5-fa78-4717-87e1-e57f1b4da5d1"
+            target_subscription_id = "5c5037e5-d3f1-4e7b-b3a9-f6bf94902b30"
             migration_name = str(uuid.uuid4())
         else:
             # Mock test mode values

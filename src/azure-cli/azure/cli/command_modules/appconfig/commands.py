@@ -15,7 +15,8 @@ from ._format import (configstore_credential_format,
                       featureflag_entry_format,
                       featurefilter_entry_format,
                       deleted_configstore_output_format,
-                      configstore_replica_output_format)
+                      configstore_replica_output_format,
+                      configstore_snapshot_output_format)
 
 
 def load_command_table(self, _):
@@ -48,6 +49,11 @@ def load_command_table(self, _):
         operations_tmpl='azure.cli.command_modules.appconfig.custom#{}',
         table_transformer=configstore_replica_output_format,
         client_factory=cf_replicas
+    )
+
+    configstore_snapshot_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.appconfig.snapshot#{}',
+        table_transformer=configstore_snapshot_output_format
     )
 
     def get_custom_sdk(custom_module, client_factory, table_transformer):
@@ -126,3 +132,11 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_filter')
         g.custom_show_command('show', 'show_filter')
         g.custom_command('list', 'list_filter')
+
+    # Snapshot Commands
+    with self.command_group('appconfig snapshot', configstore_snapshot_util, is_preview=True) as g:
+        g.command('create', 'create_snapshot')
+        g.show_command('show', 'show_snapshot')
+        g.command('list', 'list_snapshots')
+        g.command('archive', 'archive_snapshot')
+        g.command('recover', 'recover_snapshot')
