@@ -4,7 +4,7 @@ There are two things you need to do.
 - Register your service into generic implementation
 - Add test case for new command
 
-#### Register the service into `az ntwork private-endpoint-connection`
+#### Register the service into `az network private-endpoint-connection`
 You need provide the service's namespace, type, api-version and 
 whether the service supports list private endpoint connection operation or not in to this [file](https://github.com/Azure/azure-cli/blob/49c0e1adc873581311406a11b04715af732cf4f8/src/azure-cli/azure/cli/command_modules/network/private_link_resource_and_endpoint_connections/custom.py#L14-L23).
 
