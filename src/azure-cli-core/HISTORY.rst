@@ -8,6 +8,7 @@ Release History
 * `aaz`: Add short summary for `--location` when its default value comes from resource group (#26584)
 * `aaz`: Handle null property in error response (#26605)
 * `aaz`: Explicitly raise TypeError exception during LRO (#26634)
+* `aaz`: Parse and re-serialize query parameters within next link (#26768)
 
 2.49.0
 ++++++
