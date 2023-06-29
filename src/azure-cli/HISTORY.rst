@@ -93,11 +93,10 @@ Release History
 
 **NetAppFiles**
 
-* Anf 25576 resource query info (#26519)
+* `az netappfiles volume replication resume`: Add warning on action to re-sync replication volumes that if destination volume has quota rules they will be overwritten by the source volumes quota rules. (#26519)
 
 **Network**
 
-* [BREAKING CHANGE] `az network application-gateway waf-policy`: Rename output property `applicationGatewayIpConfigurations` to `applicationGatewayIPConfigurations` to keep consistent with the name in API (#26602)
 * `az network dns zone import`: Fix alias records cannot be imported (#26507)
 * Fix #26438: `az network vnet peering sync`: Doesn't work in cross-tenant scenario (#26559)
 * `az network application-gateway waf-policy policy-setting update`: Add support for log scrubbing (#26602)
@@ -139,9 +138,9 @@ Release History
 
 **Storage**
 
-* `az storage blob upload(-batch)/set-tier/copy start(-batch)`: Cold Tier GA (#26585)
+* `az storage blob upload(-batch)/set-tier/copy start(-batch)`: Cold Tier GA, add new tier type `--tier cold` (#26585)
 * `az storage blob download-batch`: When matching pattern, list blobs with prefix to reduce the number of list calls (#26692)
-* Fix #26673: `az storage account or-policy create`: Now print out server error (#26706)
+* Fix #26673: `az storage account or-policy create`: Now throw server error that was previous silently ignored. (#26706)
 
 **Synapse**
 
