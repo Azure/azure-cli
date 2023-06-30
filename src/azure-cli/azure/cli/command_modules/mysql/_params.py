@@ -299,6 +299,20 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('standby_availability_zone', arg_type=standby_availability_zone_arg_type)
         c.argument('database_name', arg_type=database_name_arg_type)
         c.argument('yes', arg_type=yes_arg_type)
+    
+    with self.argument_context('mysql flexible-server threat-protection update') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+        c.argument('defender_state', options_list=['--defender-state'], arg_type=get_enum_type(['Enabled', 'Disabled']), help='Determines the state of defender. ')
+        c.argument('advanced_threat_protection_name',options_list=['--dname', '-dn'], help='The name of the advanced threat protection resource. The name is required when --defender-state is Enabled. ')
+ 
+    with self.argument_context('mysql flexible-server threat-protection list') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+
+    with self.argument_context('mysql flexible-server threat-protection show') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type) 
 
     with self.argument_context('mysql flexible-server import create') as c:
         c.argument('tier', default='Burstable', arg_type=tier_arg_type)

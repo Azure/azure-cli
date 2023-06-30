@@ -57,6 +57,65 @@ def server_list_custom_func(client, resource_group_name=None):
         return client.list_by_resource_group(resource_group_name)
     return client.list()
 
+def flexible_server_threat_model_update_func(cmd, client, resource_group_name=None,
+                                             server_name=None, #defender_protection_rule_name=None,
+                                             defender_state=None,
+                                            advanced_threat_protection_name="default"
+                                             ):
+    if not client:
+        raise ValueError("Invalid client provided.")
+
+    if not resource_group_name:
+        raise ValueError("Invalid resource group name provided.")
+
+    if not server_name:
+        raise ValueError("Invalid server name provided.")
+
+    if advanced_threat_protection_name is None:
+       raise ValueError("Invalid defender protection name provided.")
+    
+    if defender_state is None:
+       raise ValueError("Invalid defender state provided.")
+    
+    parameters = {
+        'state': defender_state     
+    }
+
+    return client.begin_update(resource_group_name,server_name,advanced_threat_protection_name,parameters)
+
+
+def flexible_server_threat_model_list_func(cmd, client, resource_group_name=None,
+                                            server_name=None,
+                                            
+                                             ):
+    if not client:
+        raise ValueError("Invalid client provided.")
+
+    if not resource_group_name:
+        raise ValueError("Invalid resource group name provided.")
+
+    if not server_name:
+        raise ValueError("Invalid server name provided.")
+
+
+    return client.list(resource_group_name,server_name)
+
+def flexible_server_threat_model_show_func(cmd, client, resource_group_name=None,
+                                            server_name=None,
+                                            advanced_threat_protection_name="default"
+                                            
+                                             ):
+    if not client:
+        raise ValueError("Invalid client provided.")
+
+    if not resource_group_name:
+        raise ValueError("Invalid resource group name provided.")
+
+    if not server_name:
+        raise ValueError("Invalid server name provided.")
+
+
+    return client.get(resource_group_name,server_name,advanced_threat_protection_name)
 
 def firewall_rule_delete_func(cmd, client, resource_group_name, server_name, firewall_rule_name, yes=None):
     validate_public_access_server(cmd, resource_group_name, server_name)
