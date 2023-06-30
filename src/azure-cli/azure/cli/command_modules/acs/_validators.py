@@ -212,7 +212,7 @@ def validate_k8s_support_plan(namespace):
         if namespace.kubernetes_support_plan == '':
             return
         if namespace.kubernetes_support_plan.lower() not in (KubernetesSupportPlan.KUBERNETES_OFFICIAL.lower(), KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT.lower()):
-            raise InvalidArgumentValueError("--kubernetes-support-plan can only be KubernetesOfficial or AKSLongTermSupport")
+            raise InvalidArgumentValueError("--k8s-support-plan can only be KubernetesOfficial or AKSLongTermSupport")
 
 
 def validate_load_balancer_outbound_ips(namespace):

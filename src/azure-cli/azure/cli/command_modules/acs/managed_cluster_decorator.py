@@ -4049,7 +4049,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         return self._get_cluster_autoscaler_profile()
 
     def _get_k8s_support_plan(self, enable_validation: bool = False) -> KubernetesSupportPlan :
-        support_plan = self.raw_param.get("kubernetes_support_plan")
+        support_plan = self.raw_param.get("k8s_support_plan")
         return support_plan
 
     def _get_uptime_sla(self, enable_validation: bool = False) -> bool:
@@ -4710,7 +4710,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             support_plan = self.mc.support_plan
 
         # if specified by customer, use the specified value
-        support_plan = self.raw_param.get("kubernetes_support_plan")
+        support_plan = self.raw_param.get("k8s_support_plan")
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
