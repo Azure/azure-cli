@@ -203,8 +203,8 @@ def validate_sku_tier(namespace):
     if namespace.tier is not None:
         if namespace.tier == '':
             return
-        if namespace.tier.lower() not in 
-            (CONST_MANAGED_CLUSTER_SKU_TIER_FREE, CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD, CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM):
+        if namespace.tier.lower() not in (
+            CONST_MANAGED_CLUSTER_SKU_TIER_FREE, CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD, CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM):
             raise InvalidArgumentValueError("--tier can only be free, standard and premium")
 
 
@@ -212,8 +212,8 @@ def validate_k8s_support_plan(namespace):
     if namespace.k8s_support_plan is not None:
         if namespace.k8s_support_plan == '':
             return
-        if namespace.k8s_support_plan.lower() not in 
-            (KubernetesSupportPlan.KUBERNETES_OFFICIAL.lower(), KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT.lower()):
+        if namespace.k8s_support_plan.lower() not in (
+            KubernetesSupportPlan.KUBERNETES_OFFICIAL.lower(), KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT.lower()):
             raise InvalidArgumentValueError("--k8s-support-plan can only be KubernetesOfficial or AKSLongTermSupport")
 
 
