@@ -209,6 +209,8 @@ def is_json_content_type(content_type):
         return True
 
     return False
+
+
 def validate_feature_flag_name(feature):
     if feature:
         INVALID_FEATURE_CHARACTERS = ("%", ":")
