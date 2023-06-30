@@ -7,6 +7,7 @@ from enum import Enum
 import json
 from knack.log import get_logger
 from azure.cli.core.util import shell_safe_json_parse
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from ._models import KeyValue
 from ._constants import FeatureFlagConstants
 
@@ -314,7 +315,7 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
                                               enabled=feature_flag_dict.get('enabled', False),
                                               conditions=conditions)
 
-    except ValueError as exception:
+    except (InvalidArgumentValueError, TypeError, ValueError) as exception:
         error_msg = "Invalid value. Unable to decode the following JSON value: \n" +\
                     "key:{0} value:{1}\nFull exception: \n{2}".format(keyvalue.key, keyvalue.value, str(exception))
         raise ValueError(error_msg)

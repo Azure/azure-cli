@@ -1592,7 +1592,7 @@
               "App Configuration"
             ],
             "mentionees": [
-              "shenmuxiaosen",
+              "albertofori",
               "avanigupta"
             ]
           },
@@ -3342,7 +3342,7 @@
               "Serial Console"
             ],
             "mentionees": [
-              "CraigWiand"
+              "microsoft/azserialconsole"
             ]
           },
           {
@@ -3568,6 +3568,83 @@
                 {
                   "name": "titleContains",
                   "parameters": {
+                    "titlePattern": "[Aa]z network dns",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "[Aa]z network dns",
+                    "isRegex": true
+                  }
+                }
+              ]
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "isAction",
+                  "parameters": {
+                    "action": "opened"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Network - DNS"
+            }
+          },
+          {
+            "name": "addMilestone",
+            "parameters": {
+              "groupId": "",
+              "milestoneName": "Backlog"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Service Attention"
+            }
+          }
+        ],
+        "taskName": "[Network DNS] auto assign labels and users based on issue description."
+      },
+      "disabled": false
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
                     "titlePattern": "[Aa]z network",
                     "isRegex": true
                   }
@@ -3589,6 +3666,35 @@
                   "parameters": {
                     "action": "opened"
                   }
+                }
+              ]
+            },
+            {
+              "operator": "and",
+              "operands": [
+                {
+                  "operator": "not",
+                  "operands": [
+                    {
+                      "name": "titleContains",
+                      "parameters": {
+                        "isRegex": true,
+                        "titlePattern": "az network dns"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "operator": "not",
+                  "operands": [
+                    {
+                      "name": "bodyContains",
+                      "parameters": {
+                        "isRegex": true,
+                        "bodyPattern": "az network dns"
+                      }
+                    }
+                  ]
                 }
               ]
             }
@@ -3895,6 +4001,12 @@
             }
           },
           {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "calvinhzy"
+            }
+          },
+          {
             "name": "addLabel",
             "parameters": {
               "label": "Auto-Assign"
@@ -3941,7 +4053,7 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "\\b(network|Network|NETWORK|monitor|Monitor|MONITOR|bastion|Bastion|BASTION)\\b",
+                    "titlePattern": "\\b(network|Network|NETWORK|bastion|Bastion|BASTION)\\b",
                     "isRegex": true
                   }
                 }
@@ -4389,14 +4501,14 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "[Aa]z iot",
+                    "titlePattern": "\\b([Ii][Oo][Tt])\\b",
                     "isRegex": true
                   }
                 },
                 {
                   "name": "bodyContains",
                   "parameters": {
-                    "bodyPattern": "[Aa]z iot",
+                    "bodyPattern": "\\b([Ii][Oo][Tt])\\b",
                     "isRegex": true
                   }
                 }
@@ -4687,6 +4799,95 @@
             "name": "addLabel",
             "parameters": {
               "label": "question"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "PullRequestResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isAction",
+              "parameters": {
+                "action": "opened"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "[Aa]z [Mm]onitor",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "[Aa]z [Mm]onitor",
+                    "isRegex": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "pull_request",
+        "eventNames": [
+          "pull_request",
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[Monitor] Auto assign labels and reviewers based on PR title/description.",
+        "actions": [
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "yonzhan"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "AllyW"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "kairu-ms"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "necusjz"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "AllyW"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Monitor"
             }
           }
         ]
@@ -5180,13 +5381,15 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "az container"
+                    "titlePattern": "az \\b(container)\\b",
+                    "isRegex": true
                   }
                 },
                 {
                   "name": "bodyContains",
                   "parameters": {
-                    "bodyPattern": "az container"
+                    "bodyPattern": "az \\b(container)\\b",
+                    "isRegex": true
                   }
                 }
               ]
@@ -5227,6 +5430,77 @@
             "name": "addLabel",
             "parameters": {
               "label": "CXP Attention"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "PullRequestResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "name": "isAction",
+              "parameters": {
+                "action": "opened"
+              }
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "az \\b(container)\\b",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "az \\b(container)\\b",
+                    "isRegex": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "pull_request",
+        "eventNames": [
+          "pull_request",
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[container] Auto assign labels and reviewers based on PR title/description.",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "zhoxing-ms"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "yanzhudd"
+            }
+          },
+          {
+            "name": "assignToUser",
+            "parameters": {
+              "user": "zhoxing-ms"
             }
           }
         ]
@@ -5325,6 +5599,12 @@
             "name": "addLabel",
             "parameters": {
               "label": "Functions"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+            "label": "CXP Attention"
             }
           }
         ]
@@ -5560,29 +5840,15 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "az ad",
+                    "titlePattern": "az \\b(ad)\\b",
                     "isRegex": true
                   }
                 },
                 {
                   "name": "bodyContains",
                   "parameters": {
-                    "bodyPattern": "az ad",
+                    "bodyPattern": "az \\b(ad)\\b",
                     "isRegex": true
-                  }
-                },
-                {
-                  "name": "titleContains",
-                  "parameters": {
-                    "isRegex": true,
-                    "titlePattern": "\\b([Gg][Rr][Aa][Pp][Hh])\\b"
-                  }
-                },
-                {
-                  "name": "bodyContains",
-                  "parameters": {
-                    "isRegex": true,
-                    "bodyPattern": "\\b([Gg][Rr][Aa][Pp][Hh])\\b"
                   }
                 }
               ]
@@ -5629,6 +5895,18 @@
             "name": "addMilestone",
             "parameters": {
               "milestoneName": "Backlog"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Azure CLI Team"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "question"
             }
           }
         ]
@@ -6639,6 +6917,13 @@
                     "titlePattern": "\\b(aks|Aks|AKS|acs|Acs|ACS|openshift|Openshift|OPENSHIFT)\\b",
                     "isRegex": true
                   }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "[Aa]z \\b(aks|acs|openshift)\\b",
+                    "isRegex": true
+                  }
                 }
               ]
             }
@@ -7025,6 +7310,13 @@
                     "titlePattern": "\\b([Ii][Oo][Tt])\\b",
                     "isRegex": true
                   }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "\\b([Ii][Oo][Tt])\\b",
+                    "isRegex": true
+                  }
                 }
               ]
             }
@@ -7053,7 +7345,7 @@
           {
             "name": "requestReviewer",
             "parameters": {
-              "reviewer": "wangzelin007"
+              "reviewer": "yanzhudd"
             }
           },
           {
@@ -7222,6 +7514,12 @@
             "name": "requestReviewer",
             "parameters": {
               "reviewer": "jsntcy"
+            }
+          },
+          {
+            "name": "requestReviewer",
+            "parameters": {
+              "reviewer": "avanigupta"
             }
           },
           {
@@ -7551,18 +7849,30 @@
               }
             },
             {
-              "name": "titleContains",
-              "parameters": {
-                "titlePattern": "\\b(rdbms|Rdbms|RDBMS)\\b",
-                "isRegex": true
-              }
-            },
-            {
-              "name": "titleContains",
-              "parameters": {
-                "titlePattern": "az mysql",
-                "isRegex": true
-              }
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "\\b(rdbms|Rdbms|RDBMS)\\b",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "[Aa]z mysql",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "[Aa]z mysql",
+                    "isRegex": true
+                  }
+                }
+              ]
             }
           ]
         },
@@ -8929,28 +9239,14 @@
                 {
                   "name": "titleContains",
                   "parameters": {
-                    "titlePattern": "\\b([Gg][Rr][Aa][Pp][Hh])\\b",
+                    "titlePattern": "az \\b(ad)\\b",
                     "isRegex": true
                   }
                 },
                 {
                   "name": "bodyContains",
                   "parameters": {
-                    "bodyPattern": "\\b([Gg][Rr][Aa][Pp][Hh])\\b",
-                    "isRegex": true
-                  }
-                },
-                {
-                  "name": "titleContains",
-                  "parameters": {
-                    "titlePattern": "az ad",
-                    "isRegex": true
-                  }
-                },
-                {
-                  "name": "bodyContains",
-                  "parameters": {
-                    "bodyPattern": "az ad",
+                    "bodyPattern": "az \\b(ad)\\b",
                     "isRegex": true
                   }
                 }
@@ -8982,12 +9278,6 @@
             "name": "addLabel",
             "parameters": {
               "label": "Auto-Assign"
-            }
-          },
-          {
-            "name": "requestReviewer",
-            "parameters": {
-              "reviewer": "wangzelin007"
             }
           },
           {
@@ -9324,7 +9614,7 @@
           {
             "name": "requestReviewer",
             "parameters": {
-              "reviewer": "wangzelin007"
+              "reviewer": "yanzhudd"
             }
           },
           {
@@ -12151,6 +12441,12 @@
             "parameters": {
               "user": "kairu-ms"
             }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Reservations"
+            }
           }
         ]
       }
@@ -13264,6 +13560,75 @@
             "name": "addLabel",
             "parameters": {
               "label": "Event Hubs"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "titleContains",
+                  "parameters": {
+                    "titlePattern": "az reservations",
+                    "isRegex": true
+                  }
+                },
+                {
+                  "name": "bodyContains",
+                  "parameters": {
+                    "bodyPattern": "az reservations",
+                    "isRegex": true
+                  }
+                }
+              ]
+            },
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "isAction",
+                  "parameters": {
+                    "action": "opened"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "taskName": "[Reservations] auto assign labels and users based on issue description.",
+        "actions": [
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Auto-Assign"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "Reservations"
+            }
+          },
+          {
+            "name": "addLabel",
+            "parameters": {
+              "label": "CXP Attention"
             }
           }
         ]

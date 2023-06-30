@@ -7,7 +7,7 @@ import json
 import os
 import subprocess
 import tempfile
-import time 
+import time
 import unittest
 
 from azure.cli.command_modules.acs._consts import CONST_KUBE_DASHBOARD_ADDON_NAME
@@ -93,7 +93,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     def _get_versions_by_location(self, location):
         versions = self.cmd(
-            "az aks get-versions -l {} --query 'orchestrators[].orchestratorVersion'".format(location)).get_output_in_json()
+            "az aks get-versions -l {} --query 'values[*].patchVersions.keys(@)[]'".format(location)).get_output_in_json()
         # sort by semantic version, from newest to oldest
         versions = sorted(versions, key=version_to_tuple, reverse=True)
         return versions
@@ -696,7 +696,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # show k8s versions
         self.cmd('aks get-versions -l {location}', checks=[
-            self.exists('orchestrators[*].orchestratorVersion')
+            self.exists('values[*].patchVersions.keys(@)[]')
         ])
 
         # show k8s versions in table format
@@ -1083,17 +1083,17 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # disable virtual-node add-on
-        self.cmd('aks disable-addons -a virtual-node -g {resource_group} -n {name}', checks=[
-            self.check('addonProfiles.aciConnectorLinux.enabled', False),
-            self.check('addonProfiles.aciConnectorLinux.config', None)
-        ])
+        disable_addon_output = self.cmd('aks disable-addons -a virtual-node -g {resource_group} -n {name}').get_output_in_json()
+        assert disable_addon_output["addonProfiles"]["aciConnectorLinux"]["enabled"] == False
+        # None for addon v1, {} for addon v2 
+        assert bool(disable_addon_output["addonProfiles"]["aciConnectorLinux"]["config"]) == False
+
 
         # show again
-        self.cmd('aks show -g {resource_group} -n {name}', checks=[
-            self.check('addonProfiles.aciConnectorLinux.enabled', False),
-            self.check('addonProfiles.aciConnectorLinux.config', None)
-
-        ])
+        show_output = self.cmd('aks show -g {resource_group} -n {name}').get_output_in_json()
+        assert show_output["addonProfiles"]["aciConnectorLinux"]["enabled"] == False
+        # None for addon v1, {} for addon v2 
+        assert bool(show_output["addonProfiles"]["aciConnectorLinux"]["config"]) == False
 
         # enable virtual node add-on
         self.cmd('aks enable-addons -a virtual-node -g {resource_group} -n {name} --subnet-name default', checks=[
@@ -2038,7 +2038,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
-            
+
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @AKSCustomRoleBasedServicePrincipalPreparer()
@@ -3030,13 +3030,16 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
-        # clean up nsg set by policy, otherwise would block creating appgw
-        update_subnet = 'network vnet subnet update -n appgw-subnet --resource-group={resource_group} --vnet-name {vnet_name} ' \
-                        '--nsg ""'
-        self.cmd(update_subnet, checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('networkSecurityGroup', None),
-        ])
+        show_subnet = 'network vnet subnet show -n appgw-subnet --resource-group={resource_group} --vnet-name {vnet_name} '
+        subnet_details = self.cmd(show_subnet).get_output_in_json()
+        if subnet_details.get("networkSecurityGroup"):
+            # clean up nsg set by policy, otherwise would block creating appgw
+            update_subnet = 'network vnet subnet update -n appgw-subnet --resource-group={resource_group} --vnet-name {vnet_name} ' \
+                            '--nsg ""'
+            self.cmd(update_subnet, checks=[
+                self.check('provisioningState', 'Succeeded'),
+                self.check('networkSecurityGroup', None),
+            ])
 
         vnet_id = vnet['newVNet']["id"]
         assert vnet_id is not None
@@ -3216,7 +3219,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # show k8s versions
         self.cmd('aks get-versions -l {location}', checks=[
-            self.exists('orchestrators[*].orchestratorVersion')
+            self.exists('values[*].patchVersions.keys(@)[]')
         ])
 
         # show k8s versions in table format
@@ -5803,11 +5806,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
                      '--ssh-key-value={ssh_key_value} --pod-cidr 10.244.0.0/16 --service-cidr 10.0.0.0/16 ' \
-                     '--docker-bridge-address 172.17.0.1/16 --dns-service-ip 10.0.2.10 ' \
-                     '--network-plugin kubenet --network-policy calico'
+                     '--dns-service-ip 10.0.2.10 --network-plugin kubenet --network-policy calico'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('networkProfile.dockerBridgeCidr', '172.17.0.1/16'),
             self.check('networkProfile.podCidr', '10.244.0.0/16'),
             self.check('networkProfile.serviceCidr', '10.0.0.0/16'),
             self.check('networkProfile.dnsServiceIp', '10.0.2.10'),
@@ -6012,7 +6013,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(deploy_azfw_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('name', fw_name),
-            self.check('"Network.DNS.EnableProxy"', 'true') # pending verification
+            self.check('additionalProperties.\"Network.DNS.EnableProxy\"', 'true')
         ])
 
         # configure Firewall IP Config
@@ -6027,7 +6028,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         get_fw_private_ip_cmd = 'network firewall show -g {resource_group} -n {fw_name}'
         fw_private_ip = self.cmd(get_fw_private_ip_cmd).get_output_in_json()
-        fw_private_ip_address = fw_private_ip.get("ipConfigurations")[0].get("privateIpAddress")
+        fw_private_ip_address = fw_private_ip.get("ipConfigurations")[0].get("privateIPAddress")
 
         self.kwargs.update({
             'fw_public_ip_address': fw_public_ip_address,
@@ -6323,44 +6324,97 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+    @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    def test_aks_create_with_custom_monitoring_workspace(self, resource_group, resource_group_location):
+    def test_aks_create_with_azuremonitormetrics(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
-        workspace_name = self.create_random_name('cliaksworkspace', 20)
+
+        node_vm_size = 'standard_d2s_v3'
         self.kwargs.update({
-            'name': aks_name,
             'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
             'ssh_key_value': self.generate_ssh_keys(),
-            'workspace_name': workspace_name
+            'node_vm_size': node_vm_size
         })
 
-        # create workspace
-        create_workspace_cmd = 'monitor log-analytics workspace create -g {resource_group} -n {workspace_name}'
-        self.cmd(create_workspace_cmd, checks=[
-            # self.check('provisioningState', 'Succeeded'),
-            self.check('name', workspace_name)
-        ])
-
-        # get workspace id
-        subscription_id = self.get_subscription_id()
-        workspace_id = "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}".format(subscription_id, resource_group, workspace_name)
-        self.kwargs.update({
-            'workspace_id': workspace_id
-        })
-
-        # create
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-                     '--ssh-key-value={ssh_key_value} -a monitoring --workspace-resource-id {workspace_id}'
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--ssh-key-value={ssh_key_value} --node-vm-size={node_vm_size} --enable-managed-identity ' \
+                     '--enable-azure-monitor-metrics --enable-windows-recording-rules --output=json'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('addonProfiles.omsagent.enabled', True),
-            self.check('addonProfiles.omsagent.config.logAnalyticsWorkspaceResourceID', workspace_id)
+        ])
+
+        # azuremonitor metrics will be set to false after initial creation command as its in the
+        # postprocessing step that we do an update to enable it. Adding a wait for the second put request
+        # in addonput.py which enables the Azure Monitor Metrics addon as all the DC* resources
+        # have now been created.
+        wait_cmd = ' '.join([
+            'aks', 'wait', '--resource-group={resource_group}', '--name={name}', '--updated',
+            '--interval 60', '--timeout 300',
+        ])
+        self.cmd(wait_cmd, checks=[
+            self.is_empty(),
+        ])
+
+        self.cmd('aks show -g {resource_group} -n {name} --output=json', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('azureMonitorProfile.metrics.enabled', True),
         ])
 
         # delete
-        self.cmd(
-            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_update_with_azuremonitormetrics(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        node_vm_size = 'standard_d2s_v3'
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'node_vm_size': node_vm_size,
+        })
+
+        # create: without enable-azure-monitor-metrics
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} --ssh-key-value={ssh_key_value} --node-vm-size={node_vm_size} --enable-managed-identity --output=json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.not_exists('azureMonitorProfile.metrics'),
+        ])
+
+        # update: enable-azure-monitor-metrics
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
+                     '--enable-azure-monitor-metrics --enable-managed-identity --enable-windows-recording-rules'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('azureMonitorProfile.metrics.enabled', True),
+        ])
+
+        # update: disable-azure-monitor-metrics
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
+                     '--disable-azure-monitor-metrics'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('azureMonitorProfile.metrics.enabled', False),
+        ])
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
 
     # live only due to dependency `_add_role_assignment` is not mocked
     @live_only()
@@ -7269,7 +7323,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_cmd = f'aks create --resource-group={resource_group} --name={aks_name} --location={resource_group_location} ' \
                      '--enable-managed-identity ' \
                      '--enable-addons monitoring ' \
-                     '--enable-msi-auth-for-monitoring ' \
                      '--node-count 1 ' \
                      '--ssh-key-value={ssh_key_value} '
         create_cmd += f'--assign-identity {identity_id} ' if user_assigned_identity else ''
@@ -7278,7 +7331,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         response = self.cmd(create_cmd, checks=[
             self.check('addonProfiles.omsagent.enabled', True),
-            self.check('addonProfiles.omsagent.config.useAADAuth', 'True')
+            self.check('addonProfiles.omsagent.config.useAADAuth', 'true')
         ]).get_output_in_json()
 
         cluster_resource_id = response["id"]
@@ -7290,7 +7343,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         dataCollectionRuleName = f"MSCI-{location}-{aks_name}"
         dataCollectionRuleName = dataCollectionRuleName[0:64]
         dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
-        get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2021-04-01'
+        get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2022-06-01'
         self.cmd(get_cmd, checks=[
             self.check('properties.destinations.logAnalytics[0].workspaceResourceId', f'{workspace_resource_id}')
         ])
@@ -7311,12 +7364,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 self.check('properties.dataSources.extensions[0].extensionSettings.dataCollectionSettings.namespaceFilteringMode', f'Include')
             ])
              self.cmd(get_cmd, checks=[
-                self.check('properties.dataSources.extensions[0].extensionSettings.dataCollectionSettings.namespaces[0]', f'kube-system')
+                self.check('properties.dataSources.extensions[0].extensionSettings.dataCollectionSettings.namespaces[0]', f'kube-system'),
+                self.check('properties.dataSources.extensions[0].extensionSettings.dataCollectionSettings.streams[0]', f'Microsoft-ContainerLogV2'),
+                self.check('properties.dataFlows[0].streams[0]', f'Microsoft-ContainerLogV2')
             ])
-
         # check that the DCR-A was created
         dcra_resource_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension"
-        get_cmd = f'rest --method get --url https://management.azure.com{dcra_resource_id}?api-version=2021-04-01'
+        get_cmd = f'rest --method get --url https://management.azure.com{dcra_resource_id}?api-version=2022-06-01'
         self.cmd(get_cmd, checks=[
             self.check('properties.dataCollectionRuleId', f'{dcr_resource_id}')
         ])
@@ -7379,14 +7433,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_cmd += f'--assign-identity {identity_id}' if user_assigned_identity else ''
         self.cmd(create_cmd)
 
-        enable_monitoring_cmd = f'aks enable-addons -a monitoring --resource-group={resource_group} --name={aks_name} ' \
-                                '--enable-msi-auth-for-monitoring '
+        enable_monitoring_cmd = f'aks enable-addons -a monitoring --resource-group={resource_group} --name={aks_name} '
         if syslog_enabled:
             enable_monitoring_cmd += f'--enable-syslog '
 
         response = self.cmd(enable_monitoring_cmd, checks=[
             self.check('addonProfiles.omsagent.enabled', True),
-            self.check('addonProfiles.omsagent.config.useAADAuth', 'True')
+            self.check('addonProfiles.omsagent.config.useAADAuth', 'true')
         ]).get_output_in_json()
 
         cluster_resource_id = response["id"]
@@ -7399,7 +7452,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         location = resource_group_location
         dataCollectionRuleName = f"MSCI-{location}-{aks_name}"
         dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
-        get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2021-04-01'
+        get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2022-06-01'
         self.cmd(get_cmd, checks=[
             self.check('properties.destinations.logAnalytics[0].workspaceResourceId', f'{workspace_resource_id}')
         ])
@@ -7411,7 +7464,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # check that the DCR-A was created
         dcra_resource_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension"
-        get_cmd = f'rest --method get --url https://management.azure.com{dcra_resource_id}?api-version=2021-04-01'
+        get_cmd = f'rest --method get --url https://management.azure.com{dcra_resource_id}?api-version=2022-06-01'
         self.cmd(get_cmd, checks=[
             self.check('properties.dataCollectionRuleId', f'{dcr_resource_id}')
         ])
@@ -7442,8 +7495,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--ssh-key-value={ssh_key_value} '
         response = self.cmd(create_cmd, checks=[
             self.check('addonProfiles.omsagent.enabled', True),
-            self.exists('addonProfiles.omsagent.config.logAnalyticsWorkspaceResourceID'),
-            self.check('addonProfiles.omsagent.config.useAADAuth', 'False')
+            self.exists('addonProfiles.omsagent.config.logAnalyticsWorkspaceResourceID')
         ]).get_output_in_json()
 
         # make sure a DCR was not created
@@ -7460,7 +7512,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             dataCollectionRuleName = f"MSCI-{location}-{aks_name}"
             dataCollectionRuleName = dataCollectionRuleName[0:64]
             dcr_resource_id = f"/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
-            get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2021-04-01'
+            get_cmd = f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2022-06-01'
             self.cmd(get_cmd, checks=[
                 self.check('properties.destinations.logAnalytics[0].workspaceResourceId', f'{workspace_resource_id}')
             ])
@@ -8468,7 +8520,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
-    
+
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2', preserve_default_location=True)
     def test_aks_create_and_update_ipv6_count(self, resource_group, resource_group_location):

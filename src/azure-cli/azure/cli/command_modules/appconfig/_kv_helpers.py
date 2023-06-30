@@ -10,6 +10,7 @@ import json
 from itertools import chain
 from json import JSONDecodeError
 from urllib.parse import urlparse
+from ._snapshot_custom_client import AppConfigSnapshotClient
 
 import chardet
 import javaproperties
@@ -23,13 +24,15 @@ from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import user_confirmation
 from azure.cli.core.azclierror import (FileOperationError,
                                        AzureInternalError,
+                                       InvalidArgumentValueError,
                                        ValidationError,
                                        AzureResponseError,
-                                       RequiredArgumentMissingError)
+                                       RequiredArgumentMissingError,
+                                       ResourceNotFoundError)
 
-from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles, AppServiceConstants, JsonDiff, CompareFieldsMap)
+from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles, AppServiceConstants, JsonDiff, CompareFieldsMap, StatusCodes)
 from ._diff_utils import get_serializer, KVComparer, print_preview, __print_diff
-from ._utils import prep_label_filter_for_url_encoding, is_json_content_type
+from ._utils import prep_label_filter_for_url_encoding, is_json_content_type, validate_feature_flag_name, validate_feature_flag_key
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
 from ._featuremodels import (map_featureflag_to_keyvalue, is_feature_flag, FeatureFlagValue)
@@ -94,12 +97,20 @@ def validate_import_key(key):
 
 
 def validate_import_feature(feature):
-    if feature:
-        if '%' in feature:
-            logger.warning("Ignoring invalid feature '%s'. Feature name cannot contain the '%%' character.", feature)
-            return False
-    else:
-        logger.warning("Ignoring invalid feature ''. Feature name cannot be empty.")
+    try:
+        validate_feature_flag_name(feature)
+    except InvalidArgumentValueError as exception:
+        logger.warning("Ignoring invalid feature '%s'. %s", feature, exception.error_msg)
+        return False
+
+    return True
+
+
+def validate_import_feature_key(key):
+    try:
+        validate_feature_flag_key(key)
+    except InvalidArgumentValueError as exception:
+        logger.warning("Ignoring invalid feature with key '%s'. %s", key, exception.error_msg)
         return False
 
     return True
@@ -284,6 +295,7 @@ def __map_to_appservice_config_reference(key_value, endpoint, prefix):
 def __read_kv_from_config_store(azconfig_client,
                                 key=None,
                                 label=None,
+                                snapshot=None,
                                 datetime=None,
                                 fields=None,
                                 top=None,
@@ -291,6 +303,7 @@ def __read_kv_from_config_store(azconfig_client,
                                 cli_ctx=None,
                                 prefix_to_remove="",
                                 prefix_to_add=""):
+    # pylint: disable=too-many-branches too-many-statements
 
     # list_configuration_settings returns kv with null label when:
     # label = ASCII null 0x00 (or URL encoded %00)
@@ -308,13 +321,22 @@ def __read_kv_from_config_store(azconfig_client,
                 break
             query_fields.append(field.name.lower())
 
-    try:
-        configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key,
-                                                                             label_filter=label,
-                                                                             accept_datetime=datetime,
-                                                                             fields=query_fields)
-    except HttpResponseError as exception:
-        raise AzureResponseError('Failed to read key-value(s) that match the specified key and label. ' + str(exception))
+    if snapshot:
+        try:
+            configsetting_iterable = AppConfigSnapshotClient(azconfig_client).list_snapshot_kv(name=snapshot,
+                                                                                               fields=query_fields)
+
+        except HttpResponseError as exception:
+            raise AzureResponseError('Failed to read key-values(s) from snapshot {}. '.format(snapshot) + str(exception))
+
+    else:
+        try:
+            configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key,
+                                                                                 label_filter=label,
+                                                                                 accept_datetime=datetime,
+                                                                                 fields=query_fields)
+        except HttpResponseError as exception:
+            raise AzureResponseError('Failed to read key-value(s) that match the specified key and label. ' + str(exception))
 
     retrieved_kvs = []
     count = 0
@@ -357,6 +379,17 @@ def __read_kv_from_config_store(azconfig_client,
         count += 1
         if count >= top:
             return retrieved_kvs
+
+    # A request to list kvs of a non-existent snapshot returns an empty result.
+    # We first check if the snapshot exists before returning an empty result.
+    if snapshot and len(retrieved_kvs) == 0:
+        try:
+            _ = AppConfigSnapshotClient(azconfig_client).get_snapshot(name=snapshot)
+
+        except HttpResponseError as exception:
+            if exception.status_code == StatusCodes.NOT_FOUND:
+                raise ResourceNotFoundError("No snapshot with name '{}' was found.".format(snapshot))
+
     return retrieved_kvs
 
 
@@ -876,11 +909,12 @@ def __validate_import_keyvault_ref(kv):
 
 
 def __validate_import_feature_flag(kv):
-    if kv and validate_import_feature(kv.key):
+    if kv and validate_import_feature_key(kv.key):
         try:
             ff = json.loads(kv.value)
             if FEATURE_FLAG_PROPERTIES == ff.keys():
-                return True
+                return validate_import_feature(ff["id"])
+
             logger.warning("The feature flag with key '{%s}' is not a valid feature flag. It will not be imported.", kv.key)
         except JSONDecodeError as exception:
             logger.warning("The feature flag with key '{%s}' is not in a valid JSON format. It will not be imported.\n{%s}", kv.id, str(exception))

@@ -68,7 +68,7 @@ from .utils import (_normalize_sku,
                     _normalize_location,
                     get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
                     get_resource_if_exists, repo_url_to_name, get_token,
-                    app_service_plan_exists, is_centauri_functionapp)
+                    app_service_plan_exists, is_centauri_functionapp, _remove_list_duplicates)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -613,7 +613,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     # check the status of async deployment
     if res.status_code == 202:
         response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
-                                                headers, timeout)
+                                                slot, timeout)
         return response
 
     # check if there's an ongoing process
@@ -990,8 +990,10 @@ def show_app(cmd, resource_group_name, name, slot=None):
                                                                                                  resource_group_name))
     app.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration',
                                               slot)
-    _rename_server_farm_props(app)
-    _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
+    if not is_centauri_functionapp(cmd, resource_group_name, name):
+        _rename_server_farm_props(app)
+        _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
+        _remove_list_duplicates(app)
     return app
 
 
@@ -1446,7 +1448,9 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
                         app_command_line=None,
                         ftps_state=None,
                         vnet_route_all_enabled=None,
-                        generic_configurations=None):
+                        generic_configurations=None,
+                        min_replicas=None,
+                        max_replicas=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_application_settings', slot)
@@ -1503,6 +1507,10 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
         setattr(configs, 'scm_ip_security_restrictions', None)
 
     if is_centauri_functionapp(cmd, resource_group_name, name):
+        if min_replicas is not None:
+            setattr(configs, 'minimum_elastic_instance_count', min_replicas)
+        if max_replicas is not None:
+            setattr(configs, 'function_app_scale_limit', max_replicas)
         return update_configuration_polling(cmd, resource_group_name, name, slot, configs)
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
 
@@ -1656,7 +1664,8 @@ APPSETTINGS_TO_MASK = ['DOCKER_REGISTRY_SERVER_PASSWORD']
 def update_container_settings(cmd, resource_group_name, name, docker_registry_server_url=None,
                               docker_custom_image_name=None, docker_registry_server_user=None,
                               websites_enable_app_service_storage=None, docker_registry_server_password=None,
-                              multicontainer_config_type=None, multicontainer_config_file=None, slot=None):
+                              multicontainer_config_type=None, multicontainer_config_file=None,
+                              slot=None, min_replicas=None, max_replicas=None):
     settings = []
     if docker_registry_server_url is not None:
         settings.append('DOCKER_REGISTRY_SERVER_URL=' + docker_registry_server_url)
@@ -1691,17 +1700,21 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
     elif multicontainer_config_file or multicontainer_config_type:
         logger.warning('Must change both settings --multicontainer-config-file FILE --multicontainer-config-type TYPE')
 
+    if min_replicas is not None or max_replicas is not None:
+        update_site_configs(cmd, resource_group_name, name, min_replicas=min_replicas, max_replicas=max_replicas)
+
     return _mask_creds_related_appsettings(_filter_for_container_settings(cmd, resource_group_name, name, settings,
                                                                           slot=slot))
 
 
 def update_container_settings_functionapp(cmd, resource_group_name, name, registry_server=None,
                                           image=None, registry_username=None,
-                                          registry_password=None, slot=None):
+                                          registry_password=None, slot=None, min_replicas=None, max_replicas=None):
     return update_container_settings(cmd, resource_group_name, name, registry_server,
                                      image, registry_username, None,
                                      registry_password, multicontainer_config_type=None,
-                                     multicontainer_config_file=None, slot=slot)
+                                     multicontainer_config_file=None, slot=slot,
+                                     min_replicas=min_replicas, max_replicas=max_replicas)
 
 
 def _get_acr_cred(cli_ctx, registry_name):
@@ -2782,13 +2795,6 @@ def get_scm_site_headers(cli_ctx, name, resource_group_name, slot=None, addition
 
 
 def _get_log(url, headers, log_file=None):
-    import urllib3
-    try:
-        import urllib3.contrib.pyopenssl
-        urllib3.contrib.pyopenssl.inject_into_urllib3()
-    except ImportError:
-        pass
-
     http = get_pool_manager(url)
     r = http.request(
         'GET',
@@ -3640,9 +3646,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        consumption_plan_location=None, app_insights=None, app_insights_key=None,
                        disable_app_insights=None, deployment_source_url=None,
                        deployment_source_branch='master', deployment_local_git=None,
-                       registry_password=None, registry_username=None,
+                       registry_server=None, registry_password=None, registry_username=None,
                        image=None, tags=None, assign_identities=None,
-                       role='Contributor', scope=None, vnet=None, subnet=None, https_only=False, environment=None):
+                       role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
+                       environment=None, min_replicas=None, max_replicas=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
@@ -3653,6 +3660,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     if environment is None and bool(plan) == bool(consumption_plan_location):
         raise MutuallyExclusiveArgumentError("usage error: You must specify one of these parameter "
                                              "--plan NAME_OR_ID | --consumption-plan-location LOCATION")
+    if ((min_replicas is not None or max_replicas is not None) and environment is None):
+        raise RequiredArgumentMissingError("usage error: parameters --min-replicas and --max-replicas must be "
+                                           "used with parameter --environment, please provide the name "
+                                           "of the container app environment using --environment.")
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair = cmd.get_models('SiteConfig', 'NameValuePair')
     disable_app_insights = (disable_app_insights == "true")
@@ -3741,7 +3752,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         if image is None:
             image = DEFAULT_CENTAURI_IMAGE
 
-    docker_registry_server_url = parse_docker_image_name(image, environment)
+    if registry_server:
+        docker_registry_server_url = registry_server
+    else:
+        docker_registry_server_url = parse_docker_image_name(image, environment)
 
     if functions_version == '2' and functionapp_def.location in FUNCTIONS_NO_V2_REGIONS:
         raise ValidationError("2.x functions are not supported in this region. To create a 3.x function, "
@@ -3841,6 +3855,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         site_config.linux_fx_version = _format_fx_version(image)
         site_config.http20_enabled = None
         site_config.local_my_sql_enabled = None
+        if min_replicas is not None:
+            site_config.minimum_elastic_instance_count = min_replicas
+        if max_replicas is not None:
+            site_config.function_app_scale_limit = max_replicas
 
         managed_environment = get_managed_environment(cmd, resource_group_name, environment)
         location = managed_environment.location
@@ -4073,10 +4091,11 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
     return [geo_region for geo_region in web_client_geo_regions if geo_region.name in providers_client_locations_list]
 
 
-def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, headers, timeout=None):
+def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, slot, timeout=None):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
 
+    headers = get_scm_site_headers(cmd.cli_ctx, name, rg_name, slot)
     total_trials = (int(timeout) // 2) if timeout else 450
     num_trials = 0
     while num_trials < total_trials:
@@ -4986,6 +5005,12 @@ class OneDeployParams:
 
 
 def _build_onedeploy_url(params):
+    if params.src_url:
+        return _build_onedeploy_arm_url(params)
+    return _build_onedeploy_scm_url(params)
+
+
+def _build_onedeploy_scm_url(params):
     scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
     deploy_url = scm_url + '/api/publish?type=' + params.artifact_type
 
@@ -5007,6 +5032,38 @@ def _build_onedeploy_url(params):
     return deploy_url
 
 
+def _build_onedeploy_arm_url(params):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    client = web_client_factory(params.cmd.cli_ctx)
+    sub_id = get_subscription_id(params.cmd.cli_ctx)
+    if not params.slot:
+        base_url = (
+            f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
+            f"{params.webapp_name}/extensions/onedeploy?api-version={client.DEFAULT_API_VERSION}"
+        )
+    else:
+        base_url = (
+            f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
+            f"{params.webapp_name}/slots/{params.slot}/extensions/onedeploy"
+            f"?api-version={client.DEFAULT_API_VERSION}"
+        )
+    return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
+
+
+def _get_ondeploy_headers(params):
+    if params.src_path:
+        content_type = 'application/octet-stream'
+    elif params.src_url:
+        content_type = 'application/json'
+    else:
+        raise RequiredArgumentMissingError('Unable to determine source location of the artifact being deployed')
+
+    additional_headers = {"Content-Type": content_type, "Cache-Control": "no-cache"}
+
+    return get_scm_site_headers(params.cmd.cli_ctx, params.webapp_name, params.resource_group_name, params.slot,
+                                additional_headers=additional_headers)
+
+
 def _get_onedeploy_status_url(params):
     scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
     return scm_url + '/api/deployments/latest'
@@ -5025,9 +5082,18 @@ def _get_onedeploy_request_body(params):
                                         "access it".format(params.src_path)) from e
     elif params.src_url:
         logger.info('Deploying from URL: %s', params.src_url)
-        body = json.dumps({
-            "packageUri": params.src_url
-        })
+        body = {
+            "properties": {
+                "packageUri": params.src_url,
+                "type": params.artifact_type,
+                "path": params.target_path,
+                "ignorestack": params.should_ignore_stack,
+                "clean": params.is_clean_deployment,
+                "restart": params.should_restart,
+            }
+        }
+        body = {"properties": {k: v for k, v in body["properties"].items() if v is not None}}
+        body = json.dumps(body)
     else:
         raise ResourceNotFoundError('Unable to determine source location of the artifact being deployed')
 
@@ -5035,14 +5101,14 @@ def _get_onedeploy_request_body(params):
 
 
 def _update_artifact_type(params):
-    import ntpath
+    import os
 
     if params.artifact_type is not None:
         return
 
     # Interpret deployment type from the file extension if the type parameter is not passed
-    file_name = ntpath.basename(params.src_path)
-    file_extension = file_name.split(".", 1)[1]
+    _, file_extension = os.path.splitext(params.src_path)
+    file_extension = file_extension[1:]
     if file_extension in ('war', 'jar', 'ear', 'zip'):
         params.artifact_type = file_extension
     elif file_extension in ('sh', 'bat'):
@@ -5061,14 +5127,17 @@ def _make_onedeploy_request(params):
     body = _get_onedeploy_request_body(params)
     deploy_url = _build_onedeploy_url(params)
     deployment_status_url = _get_onedeploy_status_url(params)
-    headers = get_scm_site_headers(params.cmd.cli_ctx, params.webapp_name, params.resource_group_name, params.slot)
-
-    logger.info("Deployment API: %s", deploy_url)
-    response = requests.post(deploy_url, data=body, headers=headers, verify=not should_disable_connection_verify())
+    headers = _get_ondeploy_headers(params)
 
     # For debugging purposes only, you can change the async deployment into a sync deployment by polling the API status
     # For that, set poll_async_deployment_for_debugging=True
-    poll_async_deployment_for_debugging = True
+    logger.info("Deployment API: %s", deploy_url)
+    if not params.src_url:  # use SCM endpoint
+        response = requests.post(deploy_url, data=body, headers=headers, verify=not should_disable_connection_verify())
+        poll_async_deployment_for_debugging = True
+    else:
+        response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
+        poll_async_deployment_for_debugging = False
 
     # check the status of async deployment
     if response.status_code == 202 or response.status_code == 200:
@@ -5076,8 +5145,14 @@ def _make_onedeploy_request(params):
         if poll_async_deployment_for_debugging:
             logger.info('Polling the status of async deployment')
             response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
-                                                         deployment_status_url, headers, params.timeout)
+                                                         deployment_status_url, params.slot, params.timeout)
             logger.info('Async deployment complete. Server response: %s', response_body)
+        else:
+            if 'application/json' in response.headers.get('content-type', ""):
+                state = response.json().get("properties", {}).get("provisioningState")
+                if state:
+                    logger.warning("Deployment status is: \"%s\"", state)
+                response_body = response.json().get("properties", {})
         return response_body
 
     # API not available yet!
