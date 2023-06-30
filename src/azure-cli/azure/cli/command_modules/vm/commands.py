@@ -575,7 +575,7 @@ def load_command_table(self, _):
         g.wait_command('wait', getter_name='get_gallery_instance', getter_type=compute_custom)
 
     vm_shared_gallery_image = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations._shared_gallery_images_operations#SharedGalleryImagesOperations.'
+        operations_tmpl='azure.mgmt.compute.operations#SharedGalleryImagesOperations.'
         '{}',
         client_factory=cf_shared_gallery_image,
         operation_group='shared_galleries')
