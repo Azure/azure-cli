@@ -3965,7 +3965,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     elif is_linux:
         functionapp_def.kind = 'functionapp,linux'
         functionapp_def.reserved = True
-        is_consumption = consumption_plan_location is not None
+        is_consumption = consumption_plan_location is not None or flexconsumption_location is not None
         if not is_consumption:
             site_config.app_settings.append(NameValuePair(name='MACHINEKEY_DecryptionKey',
                                                           value=str(hexlify(urandom(32)).decode()).upper()))
