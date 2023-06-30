@@ -4048,7 +4048,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self._get_cluster_autoscaler_profile()
 
-    def _get_k8s_support_plan(self, enable_validation: bool = False) -> KubernetesSupportPlan :
+    def _get_k8s_support_plan(self) -> KubernetesSupportPlan:
         support_plan = self.raw_param.get("k8s_support_plan")
         return support_plan
 
@@ -5837,7 +5837,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 name="Base",
                 tier="Standard"
             )
-        
+
         if self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM:
             mc.sku = self.models.ManagedClusterSKU(
                 name="Base",
@@ -5878,12 +5878,12 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         support_plan = self.context.get_k8s_support_plan()
         if support_plan == KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT:
-            if mc == None or mc.sku == None or mc.sku.tier.lower() != CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM.lower():
+            if mc is None or mc.sku is None or mc.sku.tier.lower() != CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM.lower():
                 raise AzCLIError("Long term support is only available for premium tier clusters.")
 
         mc.support_plan = support_plan
         return mc
-        
+
     def set_up_azure_monitor_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up azure monitor profile for the ManagedCluster object.
         :return: the ManagedCluster object
@@ -6885,7 +6885,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         support_plan = self.context.get_k8s_support_plan()
         if support_plan == KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT:
-            if mc == None or mc.sku == None or mc.sku.tier.lower() != CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM.lower():
+            if mc is None or mc.sku is None or mc.sku.tier.lower() != CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM.lower():
                 raise AzCLIError("Long term support is only available for premium tier clusters.")
 
         mc.support_plan = support_plan
