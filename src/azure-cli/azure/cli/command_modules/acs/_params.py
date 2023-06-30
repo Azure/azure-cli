@@ -19,7 +19,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_LOAD_BALANCER_SKU_STANDARD, CONST_MANAGED_CLUSTER_SKU_TIER_FREE,
     CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD, CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM,
     CONST_NETWORK_DATAPLANE_AZURE, CONST_NETWORK_DATAPLANE_CILIUM,
-    CONST_NETWORK_PLUGIN_AZURE, CONST_NETWORK_PLUGIN_KUBENET, 
+    CONST_NETWORK_PLUGIN_AZURE, CONST_NETWORK_PLUGIN_KUBENET,
     CONST_NETWORK_PLUGIN_MODE_OVERLAY, CONST_NETWORK_PLUGIN_NONE,
     CONST_NODE_IMAGE_UPGRADE_CHANNEL, CONST_NONE_UPGRADE_CHANNEL,
     CONST_NODEPOOL_MODE_SYSTEM, CONST_NODEPOOL_MODE_USER,
@@ -252,7 +252,7 @@ def load_arguments(self, _):
         c.argument('enable_secret_rotation', action='store_true')
         c.argument('rotation_poll_interval')
         c.argument('enable_sgxquotehelper', action='store_true')
-        
+
         # nodepool paramerters
         c.argument('nodepool_name', default='nodepool1',
                    help='Node pool name, up to 12 alphanumeric characters', validator=validate_nodepool_name)
