@@ -204,7 +204,8 @@ def validate_sku_tier(namespace):
         if namespace.tier == '':
             return
         if namespace.tier.lower() not in ( \
-                CONST_MANAGED_CLUSTER_SKU_TIER_FREE, CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD, CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM):
+                CONST_MANAGED_CLUSTER_SKU_TIER_FREE, CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD, \
+                CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM):
             raise InvalidArgumentValueError("--tier can only be free, standard and premium")
 
 
