@@ -41,7 +41,7 @@ class SpringBootCosmosSqlScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn_secret'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.CosmosSql).format(**self.kwargs)
 
@@ -61,7 +61,21 @@ class SpringBootCosmosSqlScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # list configuration
-        self.cmd('spring-cloud connection list-configuration --id {}'.format(connection_id))
+        self.cmd('spring-cloud connection list-configuration --id {}'.format(connection_id), 
+                 checks = [
+                     self.check('configurations[0].name', 'azure.cosmos.uri'),
+                     self.check('configurations[0].note', 'This configuration property is used in Spring Cloud Azure version 3.x and below.'),
+                     self.check('configurations[1].name', 'azure.cosmos.key'),
+                     self.check('configurations[1].note', 'This configuration property is used in Spring Cloud Azure version 3.x and below.'),
+                     self.check('configurations[2].name', 'azure.cosmos.database'),
+                     self.check('configurations[2].note', 'This configuration property is used in Spring Cloud Azure version 3.x and below.'),
+                     self.check('configurations[3].name', 'spring.cloud.azure.cosmos.endpoint'),
+                     self.check('configurations[3].note', 'This configuration property is used in Spring Cloud Azure version 4.0 and above.'),
+                     self.check('configurations[4].name', 'spring.cloud.azure.cosmos.database'),
+                     self.check('configurations[4].note', 'This configuration property is used in Spring Cloud Azure version 4.0 and above.'),
+                     self.check('configurations[5].name', 'spring.cloud.azure.cosmos.key'),
+                     self.check('configurations[5].note', 'This configuration property is used in Spring Cloud Azure version 4.0 and above.'),
+                 ])
 
         # validate connection
         self.cmd('spring-cloud connection validate --id {}'.format(connection_id))
@@ -86,7 +100,7 @@ class SpringBootCosmosSqlScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn_umi'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.CosmosSql).format(**self.kwargs)
 
@@ -110,7 +124,17 @@ class SpringBootCosmosSqlScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # list configuration
-        self.cmd('spring connection list-configuration --id {}'.format(connection_id))
+        self.cmd('spring connection list-configuration --id {}'.format(connection_id), 
+                 checks = [
+                     self.check('configurations[0].name', 'spring.cloud.azure.cosmos.endpoint'),
+                     self.check('configurations[0].note', 'This configuration property is used in Spring Cloud Azure version 4.0 and above.'),
+                     self.check('configurations[1].name', 'spring.cloud.azure.cosmos.database'),
+                     self.check('configurations[1].note', 'This configuration property is used in Spring Cloud Azure version 4.0 and above.'),
+                     self.check('configurations[2].name', 'spring.cloud.azure.cosmos.credential.managed-identity-enabled'),
+                     self.check('configurations[2].note', 'This configuration property is used in Spring Cloud Azure version 4.0 and above.'),
+                     self.check('configurations[3].name', 'spring.cloud.azure.cosmos.credential.client-id'),
+                     self.check('configurations[3].note', 'This configuration property is used in Spring Cloud Azure version 4.0 and above.'),
+                 ])
 
         # validate connection
         self.cmd('spring connection validate --id {}'.format(connection_id))
@@ -135,7 +159,7 @@ class SpringBootCosmosSqlScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn_smi'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.CosmosSql).format(**self.kwargs)
 
@@ -155,7 +179,15 @@ class SpringBootCosmosSqlScenarioTest(ScenarioTest):
         connection_id = connections[0].get('id')
 
         # list configuration
-        self.cmd('spring connection list-configuration --id {}'.format(connection_id))
+        self.cmd('spring connection list-configuration --id {}'.format(connection_id), 
+                 checks = [
+                     self.check('configurations[0].name', 'spring.cloud.azure.cosmos.endpoint'),
+                     self.check('configurations[0].note', 'This configuration property is used in Spring Cloud Azure version 4.0 and above.'),
+                     self.check('configurations[1].name', 'spring.cloud.azure.cosmos.database'),
+                     self.check('configurations[1].note', 'This configuration property is used in Spring Cloud Azure version 4.0 and above.'),
+                     self.check('configurations[2].name', 'spring.cloud.azure.cosmos.credential.managed-identity-enabled'),
+                     self.check('configurations[2].note', 'This configuration property is used in Spring Cloud Azure version 4.0 and above.')
+                 ])
 
         # validate connection
         self.cmd('spring connection validate --id {}'.format(connection_id))
