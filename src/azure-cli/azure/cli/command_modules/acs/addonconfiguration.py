@@ -601,7 +601,7 @@ def validate_data_collection_settings(dataCollectionSettings):
     if 'enableContainerLogV2' in dataCollectionSettings.keys():
         enableContainerLogV2Value = dataCollectionSettings["enableContainerLogV2"]
         if not isinstance(enableContainerLogV2Value, bool):
-            raise InvalidArgumentValueError('enableContainerLogV2Value value MUST be either True or False')
+            raise InvalidArgumentValueError('enableContainerLogV2Value value MUST be either true or false')
     if 'streams' in dataCollectionSettings.keys():
         streams = dataCollectionSettings["streams"]
         if isinstance(streams, list) is False:
