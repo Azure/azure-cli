@@ -19,7 +19,9 @@ from ._resource_config import (
 )
 from ._utils import should_load_source
 
+
 logger = get_logger(__name__)
+
 
 def load_command_table(self, _):  # pylint: disable=too-many-statements
 
@@ -57,7 +59,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
             if RESOURCE.ConfluentKafka in supported_target_resources:
                 supported_target_resources.remove(RESOURCE.ConfluentKafka)
             else:
-                logger.warning("ConfluentKafka is not in supported target resources for {}".format(source.value))
+                logger.warning("ConfluentKafka is not in supported target resources for %s", source.value)
             for target in supported_target_resources:
                 with self.command_group('{} connection create'.format(source.value),
                                         connection_type, client_factory=cf_linker) as ig:
@@ -106,7 +108,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     if RESOURCE.ConfluentKafka in supported_target_resources:
         supported_target_resources.remove(RESOURCE.ConfluentKafka)
     else:
-        logger.warning("ConfluentKafka is not in supported target resources for {}".format(source.value))
+        logger.warning("ConfluentKafka is not in supported target resources for %s", RESOURCE.Local.value)
     for target in supported_target_resources:
         with self.command_group('connection preview-configuration', client_factory=cf_configuration_names) as ig:
             ig.custom_command(target.value, 'connection_preview_configuration')
