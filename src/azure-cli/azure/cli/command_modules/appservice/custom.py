@@ -3078,7 +3078,7 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
                 found_cert = webapp_cert
     # search for a cert that matches in the subscription, filtering on the serverfarm
     if not found_cert:
-        sub_certs = client.certificates.list(filter=f"ServerFarmId eq '{webapp.server_farm_id}'", api_version="2021-03-01")
+        sub_certs = client.certificates.list(filter=f"ServerFarmId eq '{webapp.server_farm_id}'")
         found_cert = next(iter([c for c in sub_certs if c.thumbprint == certificate_thumbprint]), None)
     if found_cert:
         if not hostname:
