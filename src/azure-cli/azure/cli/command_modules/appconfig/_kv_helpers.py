@@ -34,9 +34,9 @@ from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOp
 from ._utils import prep_label_filter_for_url_encoding, validate_feature_flag_name, validate_feature_flag_key
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
-from._featuremodels import (map_keyvalue_to_featureflag,
-                            map_featureflag_to_keyvalue,
-                            FeatureFlagValue)
+from ._featuremodels import (map_keyvalue_to_featureflag,
+                             map_featureflag_to_keyvalue,
+                             FeatureFlagValue)
 
 logger = get_logger(__name__)
 FEATURE_MANAGEMENT_KEYWORDS = ["FeatureManagement", "featureManagement", "feature_management", "feature-management"]

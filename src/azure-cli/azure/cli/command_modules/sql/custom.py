@@ -3481,7 +3481,7 @@ def db_sensitivity_label_update(
         sensitivity_label.information_type_id = current_label.information_type_id
 
     except ResourceNotFoundError as ex:
-        if not(ex and 'SensitivityLabelsLabelNotFound' in str(ex)):
+        if not (ex and 'SensitivityLabelsLabelNotFound' in str(ex)):
             raise ex
 
     # Find the label id and information type id in the policy by the label name provided
