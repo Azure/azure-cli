@@ -862,9 +862,14 @@ def _stream_logs(client, resource_group_name, name, container_name, restart_poli
     """Stream logs for a container. """
     lastOutputLines = 0
     while True:
-        log = client.list_logs(resource_group_name, name, container_name)
-        lines = log.content.split('\n')
-        currentOutputLines = len(lines)
+        # Including a try and except policy in order to deal with the case where the log is not properly received
+        try:
+            log = client.list_logs(resource_group_name, name, container_name)
+            lines = log.content.split('\n')
+            currentOutputLines = len(lines)
+        except:
+            print("Warning: There was a problem with the reived log 'received log type: {}'".format(type(client.list_logs(resource_group_name, name, container_name))))
+            currentOutputLines = 0
 
         # Should only happen when the container restarts.
         if currentOutputLines < lastOutputLines and restart_policy != 'Never':
