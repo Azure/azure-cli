@@ -3787,9 +3787,14 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        flexconsumption_location="northcentralus(stage)"):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
-        logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
-                       "be required. To create a 3.x function you would pass in the flag `--functions-version 3`")
-        functions_version = '3'
+        if flexconsumption_location is not None:
+            logger.warning("No functions version specified so defaulting to 4. In the future, specifying a version will "
+                           "be required. To create a 4.x function you would pass in the flag `--functions-version 4`")
+            functions_version = '4'
+        else:
+            logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
+                        "be required. To create a 3.x function you would pass in the flag `--functions-version 3`")
+            functions_version = '3'
     if deployment_source_url and deployment_local_git:
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if environment is None and not is_exactly_one_true(plan, consumption_plan_location, flexconsumption_location):
@@ -3833,6 +3838,12 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             raise RequiredArgumentMissingError(
                 '--instance-size must be used with parameter --flexconsumption-location. '
                 'Please try again with the --instance-size parameter.'
+            )
+
+        if functions_version != '4':
+            raise ArgumentUsageError(
+                '--functions-version must be set to 4 for Azure Functions on the Flex Consumption plan. '
+                'Please try again with the --functions-version parameter set to 4.'
             )
 
     if ((always_ready_instances is not None or maximum_instances is not None or instance_size is not None) and
