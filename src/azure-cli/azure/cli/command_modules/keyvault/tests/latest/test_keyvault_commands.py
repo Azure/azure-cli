@@ -471,11 +471,17 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault list -g {rg}', checks=self.is_empty())
         self.cmd('keyvault show-deleted -n {kv}', checks=self.check('type', 'Microsoft.KeyVault/deletedVaults'))
         self.cmd('keyvault purge -n {kv}')
-        # ' will be parsed by shlex, so need escaping
-        self.cmd(r"az keyvault list-deleted --resource-type vault --query [?name==\'{kv}\']", checks=self.is_empty())
+        # There're too many deleted keyvaults in test sub, skip this line to avoid long wait and large recording file
+        # self.cmd(r"az keyvault list-deleted --resource-type vault --query [?name==\'{kv}\']", checks=self.is_empty())
 
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_mgmt')
+    def test_keyvault_creation(self, resource_group):
+        self.kwargs.update({
+            'kv': self.create_random_name('cli-test-kv-mgmt-', 24),
+            'loc': 'eastus'
+        })
         # test create keyvault further
-        self.cmd('keyvault create -g {rg} -n {kv2} -l {loc} '  # enableSoftDelete is True if omitted
+        self.cmd('keyvault create -g {rg} -n {kv} -l {loc} '  # enableSoftDelete is True if omitted
                  '--retention-days 7 '
                  '--sku premium '
                  '--enabled-for-deployment true --enabled-for-disk-encryption true --enabled-for-template-deployment true '
@@ -490,12 +496,22 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                      self.check('type(properties.accessPolicies)', 'array'),
                      self.check('length(properties.accessPolicies)', 0),
                  ])
-        self.cmd('keyvault delete -n {kv2}')
-        self.cmd('keyvault purge -n {kv2}')
+        self.cmd('keyvault delete -n {kv}')
+        self.cmd('keyvault purge -n {kv}')
 
+    # this test would create a keyvault with purge protection enabled
+    # which cannot be deleted until 7 days later
+    # so we use record_only to avoid creating such resources through live test pipeline
+    @record_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_mgmt')
+    def test_keyvault_creation_with_purge_protection(self, resource_group):
+        self.kwargs.update({
+            'kv': self.create_random_name('cli-test-kv-mgmt-', 24),
+            'loc': 'eastus'
+        })
         # test explicitly set '--enable-purge-protection true'
         # unfortunately this will leave some waste behind, so make it the last test to lowered the execution count
-        self.cmd('keyvault create -g {rg} -n {kv4} -l {loc} --enable-purge-protection true --retention-days 7',
+        self.cmd('keyvault create -g {rg} -n {kv} -l {loc} --enable-purge-protection true --retention-days 7',
                  checks=[self.check('properties.enableSoftDelete', True),
                          self.check('properties.enablePurgeProtection', True)])
 
