@@ -773,10 +773,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
         "apiVersion": {"value": cmd.get_api_version(resource_type=ResourceType.MGMT_KEYVAULT)}
     }
 
-    import requests
-    import json
-    arm_template = requests.get("https://yssa.blob.core.windows.net/cli/keyvault_creation_arm_template.json")
-    deploy_template = json.loads(arm_template.content)
+    from .util import client_tool_kv_creation_template as deploy_template
     if enabled_for_deployment is None:
         deploy_template["resources"][0]["properties"]["enabledForDeployment"] = None
     if enabled_for_disk_encryption is None:
