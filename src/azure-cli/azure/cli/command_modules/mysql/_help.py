@@ -183,6 +183,52 @@ examples:
         --backup-key $backupKeyIdentifier --backup-identity testBackupIdentity
 """
 
+helps['mysql flexible-server threat-protection update'] = """
+type: command
+short-summary: Update the threat protection settings for a flexible server.
+parameters:
+  - name: --resource-group -g
+    type: string
+    short-summary: Name of the resource group.
+  - name: --server-name -s
+    type: string
+    short-summary: Name of the flexible server.
+  - name: --defender-state
+    type: string
+    short-summary: Determines the state of defender. Valid values are 'Enabled' or 'Disabled'.
+examples:
+  - name: Update the threat protection settings for a flexible server.
+    text: az mysql flexible-server threat-protection update --resource-group myrg --server-name myserver --defender-state Enabled
+"""
+
+helps['mysql flexible-server threat-protection show'] = """
+type: command
+short-summary: Show the threat protection settings for a flexible server.
+parameters:
+  - name: --resource-group -g
+    type: string
+    short-summary: Name of the resource group.
+  - name: --server-name -s
+    type: string
+    short-summary: Name of the flexible server.
+examples:
+  - name: Show the threat protection settings for a flexible server.
+    text: az mysql flexible-server threat-protection show --resource-group myrg --server-name myserver
+"""
+
+helps['mysql flexible-server threat-protection list'] = """
+type: command
+short-summary: List the threat protection settings for all flexible servers in a resource group.
+parameters:
+  - name: --resource-group -g
+    type: string
+    short-summary: Name of the resource group.
+examples:
+  - name: List the threat protection settings for all flexible servers in a resource group.
+    text: az mysql flexible-server threat-protection list --resource-group myrg
+"""
+
+
 helps['mysql flexible-server import'] = """
 type: group
 short-summary: Manage import workflows for MySQL Flexible Servers.
