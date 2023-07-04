@@ -585,7 +585,7 @@ def load_command_table(self, _):
         g.command('show-shared', 'get')
 
     vm_shared_gallery_image_version = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations._shared_gallery_image_versions_operations#SharedGalleryImageVers'
+        operations_tmpl='azure.mgmt.compute.operations#SharedGalleryImageVers'
         'ionsOperations.{}',
         client_factory=cf_shared_gallery_image_version,
         operation_group='shared_galleries')
