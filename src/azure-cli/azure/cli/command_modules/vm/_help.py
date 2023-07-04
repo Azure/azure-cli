@@ -30,7 +30,7 @@ long-summary: >4
     The operating system disk is created from an image, and both the operating system disk and the image are actually virtual hard disks (VHDs)
     stored in an Azure storage account. Virtual machines also can have one or more data disks, that are also stored as VHDs.
 
-    Azure Unmanaged Data Disks have a maximum size of 4095 GB. To use didks larger than 4095 GB use [Azure Managed Disks](https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview)
+    Azure Unmanaged Data Disks have a maximum size of 4095 GB. To use disks larger than 4095 GB use [Azure Managed Disks](https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview)
 
 """
 
@@ -796,11 +796,6 @@ examples:
             --intent-vm-sizes Standard_E64s_v4 Standard_M416ms_v2
 """
 
-helps['sig'] = """
-type: group
-short-summary: manage shared image gallery
-"""
-
 helps['sig create'] = """
 type: command
 short-summary: Create a shared image gallery.
@@ -813,11 +808,6 @@ examples:
 helps['sig show'] = """
 type: command
 short-summary: Retrieve information about a Shared Image Gallery.
-"""
-
-helps['sig image-definition'] = """
-type: group
-short-summary: Manage shared gallery image with VM
 """
 
 helps['sig image-definition create'] = """
@@ -890,6 +880,20 @@ examples:
         --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
         --os-type linux --os-state Specialized \\
         --features SecurityType=ConfidentialVM
+  - name: Create an image definition for images that can be used to create Gen2 or TrustedLaunchSupported VMs.
+    text: |
+        az sig image-definition create --resource-group MyResourceGroup \\
+        --gallery-name MyGallery --gallery-image-definition MyImage \\
+        --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
+        --os-type linux --os-state Specialized \\
+        --features SecurityType=TrustedLaunchSupported
+  - name: Create an image definition for images that can be used to create Gen2, TrustedLaunch, or Confidential VMs.
+    text: |
+        az sig image-definition create --resource-group MyResourceGroup \\
+        --gallery-name MyGallery --gallery-image-definition MyImage \\
+        --publisher GreatPublisher --offer GreatOffer --sku GreatSku \\
+        --os-type linux --os-state Specialized \\
+        --features SecurityType=TrustedLaunchAndConfidentialVmSupported
   - name: Create an image definition and indicate end of life date
     text: |
         az sig image-definition create --resource-group MyResourceGroup \\
@@ -935,17 +939,6 @@ examples:
     text: |
         az sig image-definition list-shared --gallery-unique-name galleryUniqueName \\
         --location myLocation --shared-to tenant
-"""
-
-helps['sig image-definition show-shared'] = """
-type: command
-short-summary: Get a shared gallery image
-long-summary: Get a shared gallery image that has been shared directly to your subscription or tenant
-examples:
-  - name: Get an image definition in a gallery shared directly to your subscription or tenant in the given location.
-    text: |
-        az sig image-definition show-shared --gallery-unique-name galleryUniqueName \\
-        --gallery-image-definition myGalleryImageName --location myLocation
 """
 
 helps['sig image-definition update'] = """
@@ -1962,27 +1955,6 @@ examples:
     text: |
         az vm encryption show --name MyVirtualMachine --resource-group MyResourceGroup
     crafted: true
-"""
-
-helps['vm extension'] = """
-type: group
-short-summary: Manage extensions on VMs.
-long-summary: >
-    Extensions are small applications that provide post-deployment configuration and automation tasks on Azure virtual machines.
-    For example, if a virtual machine requires software installation, anti-virus protection, or Docker configuration, a VM extension
-    can be used to complete these tasks. Extensions can be bundled with a new virtual machine deployment or run against any existing system.
-"""
-
-helps['vm extension delete'] = """
-type: command
-short-summary: Remove an extension attached to a VM.
-examples:
-  - name: Use a VM name and extension to delete an extension from a VM.
-    text: az vm extension delete -g MyResourceGroup --vm-name MyVm -n extension_name
-  - name: Delete extensions with IDs containing the string "MyExtension" from a VM.
-    text: >
-        az vm extension delete --ids \\
-            $(az resource list --query "[?contains(name, 'MyExtension')].id" -o tsv)
 """
 
 helps['vm extension image list'] = """
@@ -3705,11 +3677,6 @@ type: group
 short-summary: Manage capacity.
 """
 
-helps['capacity reservation group'] = """
-type: group
-short-summary: Manage capacity reservation group.
-"""
-
 helps['capacity reservation group create'] = """
 type: command
 short-summary: Create capacity reservation group.
@@ -3748,16 +3715,6 @@ examples:
     text: az capacity reservation group list -g MyResourceGroup
   - name: List the capacity reservation groups containing VM instances and VMSS instance which are associated to capacity reservation group
     text: az capacity reservation group list -g MyResourceGroup --vm-instance --vmss-instance
-"""
-
-helps['capacity'] = """
-type: group
-short-summary: Manage capacity.
-"""
-
-helps['capacity reservation'] = """
-type: group
-short-summary: Manage capacity reservation.
 """
 
 helps['capacity reservation create'] = """

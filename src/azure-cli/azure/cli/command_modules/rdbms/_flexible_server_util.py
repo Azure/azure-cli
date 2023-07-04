@@ -475,6 +475,8 @@ def build_identity_and_data_encryption(db_engine, byok_identity=None, backup_byo
             data_encryption = postgresql_flexibleservers.models.DataEncryption(
                 primary_user_assigned_identity_id=byok_identity,
                 primary_key_uri=byok_key,
+                geo_backup_user_assigned_identity_id=backup_byok_identity,
+                geo_backup_key_uri=backup_byok_key,
                 type="AzureKeyVault")
 
     return identity, data_encryption
@@ -500,3 +502,17 @@ def get_tenant_id():
     profile = Profile()
     sub = profile.get_subscription()
     return sub['tenantId']
+
+
+def get_case_insensitive_key_value(case_insensitive_key, list_of_keys, dictionary):
+    for key in list_of_keys:
+        if key.lower() == case_insensitive_key.lower():
+            return dictionary[key]
+    return None
+
+
+def get_enum_value_true_false(value, key):
+    if value is not None and value.lower() != 'true' and value.lower() != 'false':
+        raise CLIError("Value of Key {} must be either 'True' or 'False'".format(key))
+
+    return "False" if value is None or value.lower() == 'false' else "True"

@@ -86,6 +86,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     def test_mysql_flexible_server_mgmt(self, resource_group):
         self._test_flexible_server_mgmt('mysql', resource_group)
+    
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    def test_mysql_flexible_server_import_create(self, resource_group):
+        self._test_mysql_flexible_server_import_create_mgmt('mysql', resource_group)
 
     # To run this test live, make sure that your role excludes the permission 'Microsoft.DBforMySQL/locations/checkNameAvailability/action'
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
@@ -208,6 +213,92 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, restore_server_name), checks=NoneCheck())
+
+    def _test_mysql_flexible_server_import_create_mgmt(self, database_engine, resource_group):
+        # single server which will be used for import
+        ss_server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        location = 'westus2'
+        ss_storage_size = 51200
+        ss_version = '5.7'
+        self.cmd('{} server create -g {} -n {} -l {} --storage-size {} --version {}'.format(database_engine, resource_group, ss_server_name, location, ss_storage_size, ss_version))
+
+        # flexible server details
+        storage_size = 128
+        version = '5.7'
+        sku_name = 'Standard_B1ms'
+        tier = 'Burstable'
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        data_source_type = 'mysql_single'
+        data_source = ss_server_name
+        mode = 'offline'
+
+        self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
+                  --storage-size {} -u {} --version {} --tags keys=3 \
+                  --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
+                                                                                                              resource_group, server_name, sku_name, tier, storage_size,
+                                                                                                              'dbadmin', version, location, data_source_type, data_source, mode))
+
+        basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
+        self.assertEqual(basic_info['name'], server_name)
+        self.assertEqual(str(basic_info['location']).replace(' ', '').lower(), location)
+        self.assertEqual(basic_info['resourceGroup'], resource_group)
+        self.assertEqual(basic_info['sku']['name'], sku_name)
+        self.assertEqual(basic_info['sku']['tier'], tier)
+        self.assertEqual(basic_info['version'], version)
+        self.assertEqual(basic_info['storage']['storageSizeGb'], storage_size)
+
+        # deletion of flexible server created
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
+
+        # size for flex server is less than single server
+        invalid_storage_szie = 64
+        self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
+                  --storage-size {} -u {} --version {} --tags keys=3 \
+                  --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
+                                                                                                              resource_group, server_name, sku_name, tier, invalid_storage_szie,
+                                                                                                              'dbadmin', version, location, data_source_type, data_source, mode),
+                                                                                                              expect_failure=True)
+
+        # version for flex server given is different from single server version
+        invalid_version = '8.0.21'
+        self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
+            --storage-size {} -u {} --version {} --tags keys=3 \
+            --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
+                                                                                                        resource_group, server_name, sku_name, tier, storage_size,
+                                                                                                        'dbadmin', invalid_version, location, data_source_type, data_source, mode),
+                                                                                                        expect_failure=True)
+
+        # resource group passed does not exist
+        invalid_resource_group = self.create_random_name('rg', 10)
+        self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
+            --storage-size {} -u {} --version {} --tags keys=3 \
+            --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
+                                                                                                        invalid_resource_group, server_name, sku_name, tier, storage_size,
+                                                                                                        'dbadmin', version, location, data_source_type, data_source, mode),
+                                                                                                        expect_failure=True)
+
+        # single server name passed does not exist in the resource group passed
+        invalid_data_source_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
+            --storage-size {} -u {} --version {} --tags keys=3 \
+            --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
+                                                                                                        resource_group, server_name, sku_name, tier, storage_size,
+                                                                                                        'dbadmin', version, location, data_source_type, invalid_data_source_name, mode),
+                                                                                                        expect_failure=True)
+
+        # single server resource id passed is invalid or does not exist
+        invalid_data_source_resource_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.DBforMySQL/servers/{}'.format(
+            self.get_subscription_id(), invalid_resource_group, invalid_data_source_name
+        )
+        self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
+            --storage-size {} -u {} --version {} --tags keys=3 \
+            --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
+                                                                                                        resource_group, server_name, sku_name, tier, storage_size,
+                                                                                                        'dbadmin', version, location, data_source_type, invalid_data_source_resource_id, mode),
+                                                                                                        expect_failure=True)
+
+        # deletion of single server created
+        self.cmd('{} server delete -g {} -n {} --yes'.format(database_engine, resource_group, ss_server_name), checks=NoneCheck())
 
     def _test_flexible_server_check_name_availability_fallback_mgmt(self, database_engine, resource_group):
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -1136,7 +1227,6 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
                  database_engine, resource_group, server_name), checks=NoneCheck())
-
 
 class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
 

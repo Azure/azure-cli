@@ -94,6 +94,11 @@ def load_command_table(self, _):
         g.custom_wait_command('wait', 'flexible_server_mysql_get')
         g.custom_command('restart', 'flexible_server_restart')
 
+    with self.command_group('mysql flexible-server import', mysql_flexible_servers_sdk,
+                            custom_command_type=mysql_custom,
+                            client_factory=cf_mysql_flexible_servers, is_preview=True) as g:
+        g.custom_command('create', 'flexible_server_import_create', table_transformer=table_transform_output)
+
     with self.command_group('mysql flexible-server firewall-rule', mysql_flexible_firewall_rule_sdk,
                             custom_command_type=mysql_custom,
                             client_factory=cf_mysql_flexible_firewall_rules) as g:
