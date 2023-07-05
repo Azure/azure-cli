@@ -21,6 +21,7 @@ class CloudTests(ScenarioTest):
         super().tearDown()
         self.cli_ctx.cloud.name = ''
         self.cmd('az cloud set -n ' + self.cloudname)
+        self.cli_ctx.cloud.name = self.cloudname
 
     @serial_test()
     def test_cloud_set_AzureCloud(self):
