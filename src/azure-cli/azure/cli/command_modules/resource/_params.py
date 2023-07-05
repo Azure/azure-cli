@@ -31,7 +31,8 @@ def load_arguments(self, _):
         validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata, RollbackAction)
     from azure.cli.command_modules.resource.parameters import TagUpdateOperation
 
-    ExemptionCategory = self.get_models('ExemptionCategory', operation_group='policy_exemptions')
+    ExemptionCategory = self.get_models('ExemptionCategory', resource_type=ResourceType.MGMT_RESOURCE_POLICY,
+                                        operation_group='policy_exemptions')
     DeploymentMode, WhatIfResultFormat, ChangeType = self.get_models('DeploymentMode', 'WhatIfResultFormat', 'ChangeType')
 
     # BASIC PARAMETER CONFIGURATION
