@@ -303,7 +303,7 @@ def show_protectable_item(items, name, server_name, protectable_item_type):
     return cust_help.get_none_one_or_many(filtered_items)
 
 
-def show_protectable_instance(items, server_name, protectable_item_type):
+def show_protectable_instance(items, server_name, protectable_item_type, instance_name=None):
     if server_name is None:
         raise RequiredArgumentMissingError("""
         Server name missing. Please provide a valid server name using --target-server-name.
@@ -324,6 +324,9 @@ def show_protectable_instance(items, server_name, protectable_item_type):
     # Server Name filter
     filtered_items = [item for item in filtered_items if hasattr(item.properties, 'server_name') and
                       item.properties.server_name.lower() == server_name.lower()]
+    # Instance Name filter, if it is passed
+    if instance_name:
+        filtered_items = [item for item in items if item.name.lower() == instance_name.lower()]
 
     return cust_help.get_none_one_or_many(filtered_items)
 

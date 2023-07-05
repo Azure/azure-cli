@@ -944,6 +944,7 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
             if account_name == parse_resource_id(or_policy.source_account)['name']:
                 raise CLIError('ValueError: Please specify --policy-id with auto-generated policy id value on '
                                'destination account.')
+        raise ex
 
 
 def update_or_policy(client, parameters, resource_group_name, account_name, object_replication_policy_id=None,

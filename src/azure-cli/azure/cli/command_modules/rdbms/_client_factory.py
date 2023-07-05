@@ -349,12 +349,20 @@ def cf_postgres_flexible_location_capabilities(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).location_based_capabilities
 
 
+def cf_postgres_flexible_server_capabilities(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).server_capabilities
+
+
 def cf_postgres_flexible_backups(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).backups
 
 
 def cf_postgres_flexible_adadmin(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).administrators
+
+
+def cf_postgres_flexible_migrations(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).migrations
 
 
 def cf_postgres_check_resource_availability(cli_ctx, _):
