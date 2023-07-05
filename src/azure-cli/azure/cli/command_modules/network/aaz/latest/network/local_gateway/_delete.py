@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network local-gateway delete"
+    "network local-gateway delete",
 )
 class Delete(AAZCommand):
     """Delete a local VPN gateway.
