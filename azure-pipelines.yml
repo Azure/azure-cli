@@ -45,6 +45,7 @@ jobs:
   - bash: |
       set -ev
       . env/bin/activate
+      azdev test --no-exitfirst --verbose --series botservice cloud --profile latest --xml-path /home/cloudtest/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_3.9_latest_7.serial.xml --pytest-args '-o junit_family=xunit1 --durations=10 --tb=no'
       azdev test --no-exitfirst --verbose resource monitor acr appconfig redis eventhubs relay container azure-cli --profile latest --xml-path /home/cloudtest/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_3.9_latest_7.parallel.xml --pytest-args '-o junit_family=xunit1 --durations=10 --tb=no'
 #- job: CheckPullRequest
 #  displayName: "Check the Format of Pull Request Title and Content"
