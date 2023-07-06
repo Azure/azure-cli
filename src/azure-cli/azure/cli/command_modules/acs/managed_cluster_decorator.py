@@ -4706,7 +4706,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         # default to None
         support_plan = None
         # try to read the property value corresponding to the parameter from the `mc` object
-        if self.mc and self.mc.support_plan is not None:
+        if self.mc and hasattr(self.mc, "support_plan") and self.mc.support_plan is not None:
             support_plan = self.mc.support_plan
 
         # if specified by customer, use the specified value
