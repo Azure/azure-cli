@@ -301,10 +301,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('yes', arg_type=yes_arg_type)
 
     with self.argument_context('mysql flexible-server import create') as c:
-        c.argument('tier', default='Burstable', arg_type=tier_arg_type)
-        c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
-        c.argument('storage_gb', default='32', arg_type=storage_gb_arg_type)
-        c.argument('version', default='5.7', arg_type=version_arg_type)
+        c.argument('tier', arg_type=tier_arg_type)
+        c.argument('sku_name', arg_type=sku_name_arg_type)
+        c.argument('storage_gb', arg_type=storage_gb_arg_type)
+        c.argument('version', arg_type=version_arg_type)
         c.argument('iops', arg_type=iops_arg_type)
         c.argument('auto_grow', default='Enabled', arg_type=auto_grow_arg_type)
         c.argument('auto_scale_iops', default='Disabled', arg_type=auto_scale_iops_arg_type)

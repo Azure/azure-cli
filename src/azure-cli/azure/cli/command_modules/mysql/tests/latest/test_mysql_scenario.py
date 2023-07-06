@@ -251,7 +251,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
 
         # size for flex server is less than single server
-        invalid_storage_szie = 64
+        invalid_storage_szie = 32
         self.cmd('{} flexible-server import create -g {} -n {} --sku-name {} --tier {} \
                   --storage-size {} -u {} --version {} --tags keys=3 \
                   --public-access None --location {} --data-source-type {} --data-source {} --mode {}'.format(database_engine,
