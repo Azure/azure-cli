@@ -3700,19 +3700,6 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location):
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
 
-def create_flex_functionapp(cmd, resource_group_name, name, functionapp_def):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    client = web_client_factory(cmd.cli_ctx)
-    functionapp_json = functionapp_def.serialize()
-    body = json.dumps(functionapp_json)
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    site_url_base = 'subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'
-    site_url = site_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
-    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + site_url
-    response = send_raw_request(cmd.cli_ctx, "PUT", request_url, body=body)
-    return response.json()
-
-
 def update_flex_functionapp_configuration(cmd, resource_group_name, name, configs):
     from azure.cli.core.commands.client_factory import get_subscription_id
     client = web_client_factory(cmd.cli_ctx)
@@ -3988,18 +3975,12 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                   "Supported version for runtime {1} is {2}."
                                   .format(runtime_version, runtime, lang['version']))
 
-        site_config_dict = SiteConfigPropertiesDictionary()
-        for prop, value in lang['site_config'].items():
-            setattr(site_config_dict, prop, value)
-        app_settings_dict = lang['app_settings']
+    runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=(not is_linux))
+    matched_runtime = runtime_helper.resolve("dotnet" if not runtime else runtime,
+                                                runtime_version, functions_version, is_linux)
 
-    else:
-        runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=(not is_linux))
-        matched_runtime = runtime_helper.resolve("dotnet" if not runtime else runtime,
-                                                 runtime_version, functions_version, is_linux)
-
-        site_config_dict = matched_runtime.site_config_dict
-        app_settings_dict = matched_runtime.app_settings_dict
+    site_config_dict = matched_runtime.site_config_dict
+    app_settings_dict = matched_runtime.app_settings_dict
 
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
@@ -4130,22 +4111,18 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     create_app_insights = False
 
-    if flexconsumption_location is None:
-        if app_insights_key is not None:
-            site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
-                                                          value=app_insights_key))
-        elif app_insights is not None:
-            instrumentation_key = get_app_insights_key(cmd.cli_ctx, resource_group_name, app_insights)
-            site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
-                                                          value=instrumentation_key))
-        elif disable_app_insights or not matched_runtime.app_insights:
-            # set up dashboard if no app insights
-            site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
-        elif not disable_app_insights and matched_runtime.app_insights:
-            create_app_insights = True
-
-    if flexconsumption_location:
-        return create_flex_functionapp(cmd, resource_group_name, name, functionapp_def)
+    if app_insights_key is not None:
+        site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
+                                                        value=app_insights_key))
+    elif app_insights is not None:
+        instrumentation_key = get_app_insights_key(cmd.cli_ctx, resource_group_name, app_insights)
+        site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
+                                                        value=instrumentation_key))
+    elif disable_app_insights or not matched_runtime.app_insights:
+        # set up dashboard if no app insights
+        site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
+    elif not disable_app_insights and matched_runtime.app_insights:
+        create_app_insights = True
 
     poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
@@ -4224,7 +4201,8 @@ def try_create_application_insights(cmd, functionapp):
 
     ai_resource_group_name = functionapp.resource_group
     ai_name = functionapp.name
-    ai_location = functionapp.location
+    # Temporary change for testing
+    ai_location =  functionapp.location.replace("(stage)", "").replace("stage", "")
 
     app_insights_client = get_mgmt_service_client(cmd.cli_ctx, ApplicationInsightsManagementClient)
     ai_properties = {
