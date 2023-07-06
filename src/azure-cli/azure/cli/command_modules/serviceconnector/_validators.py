@@ -619,7 +619,7 @@ def validate_default_params(cmd, namespace):
 def validate_connection_name(name):
     if not re.match(r'^[A-Za-z0-9\._]+$', name):
         e = InvalidArgumentValueError("Resource name can only contain letters (A-Z, a-z), "
-                                        "numbers (0-9), periods ('.'), and underscores ('_')")
+                                      "numbers (0-9), periods ('.'), and underscores ('_')")
         telemetry.set_exception('connection-name-invalid')
         raise e
     return True
