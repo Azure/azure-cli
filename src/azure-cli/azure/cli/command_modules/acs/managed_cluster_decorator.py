@@ -4682,7 +4682,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return edge_zone
 
-
     def get_node_resource_group(self) -> Union[str, None]:
         """Obtain the value of node_resource_group.
 
