@@ -568,6 +568,8 @@ class AutomaticScheduling(object):
                 serial_tests.append(k)
             else:
                 parallel_tests.append(k)
+        # Put the cloud module at the end of the serial execution
+        # Since it will cause the test_get_docker_credentials test to fail
         if 'cloud' in serial_tests:
             serial_tests.remove('cloud')
             serial_tests.append('cloud')
