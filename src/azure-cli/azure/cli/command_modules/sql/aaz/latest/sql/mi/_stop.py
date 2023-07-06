@@ -16,6 +16,10 @@ from azure.cli.core.aaz import *
 )
 class Stop(AAZCommand):
     """Stops the managed instance.
+
+    :example: Stop a managed instance.
+        az sql mi stop --ids resourceId
+        az sql mi stop --mi miName -g resourceGroup --subscription subscription
     """
 
     _aaz_info = {

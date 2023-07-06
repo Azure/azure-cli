@@ -16,6 +16,10 @@ from azure.cli.core.aaz import *
 )
 class Start(AAZCommand):
     """Starts the managed instance.
+
+    :example: Start a managed instance.
+        az sql mi start --ids resourceId
+        az sql mi start --mi miName -g resourceGroup --subscription subscription
     """
 
     _aaz_info = {
@@ -49,7 +53,7 @@ class Start(AAZCommand):
             id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="Name of resource group.",
+            help="Name of the resource group.",
             required=True,
         )
         return cls._args_schema
