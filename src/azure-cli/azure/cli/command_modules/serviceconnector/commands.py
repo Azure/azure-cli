@@ -51,7 +51,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
             # use SUPPORTED_AUTH_TYPE to decide target resource, as some
             # target resources are not avialable for certain source resource
-            supported_target_resources = [target for target in SUPPORTED_AUTH_TYPE.get(source) if target!= RESOURCE.ConfluentKafka]
+            supported_target_resources = list(SUPPORTED_AUTH_TYPE.get(source).keys())
+            supported_target_resources.remove(RESOURCE.ConfluentKafka)
             for target in supported_target_resources:
                 with self.command_group('{} connection create'.format(source.value),
                                         connection_type, client_factory=cf_linker) as ig:
