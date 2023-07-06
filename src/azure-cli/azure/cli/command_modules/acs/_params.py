@@ -528,8 +528,8 @@ def load_arguments(self, _):
             c.argument('aks_custom_headers')
 
     with self.argument_context('aks nodepool snapshot update') as c:
-        c.argument('snapshot_name', options_list=['--name', '-n'], required=True, help='The nodepool snapshot name.', validator=validate_snapshot_name)
-        c.argument('tags', tags_type, required=True, help='The tags to set to the snapshot.')
+        c.argument('snapshot_name', options_list=['--name', '-n'], help='The nodepool snapshot name.', validator=validate_snapshot_name)
+        c.argument('tags', tags_type, help='The tags to set to the snapshot.')
 
     for scope in ['aks nodepool snapshot show', 'aks nodepool snapshot delete', 'aks snapshot show', 'aks snapshot delete']:
         with self.argument_context(scope) as c:
