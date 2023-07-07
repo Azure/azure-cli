@@ -1275,7 +1275,7 @@ class NetworkPrivateLinkApiManagementScenarioTest(ScenarioTest):
 
         # Create ApiManagement Service
         service_created = self.cmd(
-            'apim create -g {resource_group} -n {service_name} --l {location} --publisher-email email@mydomain.com --publisher-name Microsoft').get_output_in_json()
+            'apim create -g {resource_group} -n {service_name} --l {location} --publisher-email email@mydomain.com --publisher-name Microsoft --sku-name "Premium"').get_output_in_json()
         self.kwargs['service_id'] = service_created['id']
 
         # check private link resource is available
@@ -1306,8 +1306,10 @@ class NetworkPrivateLinkApiManagementScenarioTest(ScenarioTest):
         self.kwargs['endpoint_request'] = result[0]['name']
 
         result = self.cmd(
-            'network private-endpoint-connection reject -g {resource_group} --resource-name {service_name} -n {endpoint_request} --type Microsoft.ApiManagement/service',
+            'network private-endpoint-connection reject -g {resource_group} --resource-name {service_name} -n {endpoint_request} --type Microsoft.ApiManagement/service ',
             checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])
+        
+        self.cmd("az apim wait --updated --name {service_name} --resource-group {resource_group}")
 
         # Create second endpoint with manual approval
         result = self.cmd(
@@ -1326,6 +1328,8 @@ class NetworkPrivateLinkApiManagementScenarioTest(ScenarioTest):
         self.cmd(
             'network private-endpoint-connection approve -g {resource_group} --resource-name {service_name} -n {endpoint_request2} --type Microsoft.ApiManagement/service',
             checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
+        
+        self.cmd("az apim wait --updated --name {service_name} --resource-group {resource_group}")
 
         self.cmd(
             'network private-endpoint-connection reject -g {resource_group} --resource-name {service_name} -n {endpoint_request2} --type Microsoft.ApiManagement/service',
@@ -1336,6 +1340,9 @@ class NetworkPrivateLinkApiManagementScenarioTest(ScenarioTest):
             self.check('name', '{endpoint_request2}')
         ])
 
+        self.cmd("az apim wait --updated --name {service_name} --resource-group {resource_group}")
+        self.cmd("az apim wait --updated --name {service_name} --resource-group {resource_group}")
+        
         # Remove endpoint
         self.cmd(
             'network private-endpoint-connection delete -g {resource_group} --resource-name {service_name} -n {endpoint_request} --type Microsoft.ApiManagement/service -y')

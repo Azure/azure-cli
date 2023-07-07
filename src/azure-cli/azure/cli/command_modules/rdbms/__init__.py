@@ -13,7 +13,6 @@ from azure.cli.command_modules.rdbms.flexible_server_commands import load_flexib
 from azure.cli.command_modules.rdbms._params import load_arguments
 import azure.cli.command_modules.rdbms._help  # pylint: disable=unused-import
 import azure.cli.command_modules.rdbms._helptext_pg  # pylint: disable=unused-import
-import azure.cli.command_modules.rdbms._helptext_mysql  # pylint: disable=unused-import
 
 
 # pylint: disable=import-outside-toplevel

@@ -311,6 +311,12 @@ def load_command_table(self, _):
         g.custom_command('remove', 'remove_template_validator', supports_local_cache=True)
         g.custom_show_command('show', 'show_template_validator', supports_local_cache=True)
 
+    with self.command_group('image builder optimizer', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
+        g.custom_command('add', 'add_or_update_template_optimizer', supports_local_cache=True)
+        g.custom_command('update', 'add_or_update_template_optimizer', supports_local_cache=True)
+        g.custom_command('remove', 'remove_template_optimizer', supports_local_cache=True)
+        g.custom_show_command('show', 'show_template_optimizer', supports_local_cache=True)
+
     with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots', min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_snapshot', validator=process_snapshot_create_namespace, supports_no_wait=True)
         g.command('delete', 'begin_delete')
@@ -389,7 +395,6 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_vm_encryption_status', table_transformer=transform_vm_encryption_show_table_output)
 
     with self.command_group('vm extension', compute_vm_extension_sdk) as g:
-        g.command('delete', 'begin_delete', supports_no_wait=True)
         g.custom_show_command('show', 'show_extensions', table_transformer=transform_extension_show_table_output)
         g.custom_command('set', 'set_extension', supports_no_wait=True)
         g.custom_command('list', 'list_extensions', table_transformer='[].' + transform_extension_show_table_output)
@@ -535,9 +540,6 @@ def load_command_table(self, _):
 
     with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_gallery_image')
-        g.command('list', 'list_by_gallery')
-        g.show_command('show', 'get')
-        g.command('delete', 'begin_delete')
         g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='gallery_image')
 
     with self.command_group('sig image-version', compute_gallery_image_versions_sdk, operation_group='gallery_image_versions', min_api='2018-06-01') as g:
@@ -582,7 +584,6 @@ def load_command_table(self, _):
     with self.command_group('sig image-definition', vm_shared_gallery_image, min_api='2020-09-30', operation_group='shared_galleries',
                             client_factory=cf_shared_gallery_image) as g:
         g.custom_command('list-shared', 'sig_shared_image_definition_list')
-        g.command('show-shared', 'get')
 
     vm_shared_gallery_image_version = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations._shared_gallery_image_versions_operations#SharedGalleryImageVers'

@@ -15,7 +15,7 @@ def multi_transformers(*transformers):
 
 
 def keep_max_results(output, **command_args):
-    maxresults = command_args.get('maxresults', None)
+    maxresults = command_args.get('maxresults', command_args.get('max_page_size', None))
     if maxresults:
         return list(output)[:maxresults]
     return output
@@ -114,4 +114,335 @@ def transform_key_random_output(result, **command_args):
         import base64
         return {"value": base64.b64encode(result)}
 
+    return result
+
+
+def transform_secret_list(result, **command_args):
+    return [transform_secret_base_properties(secret) for secret in result]
+
+
+def transform_secret_base_properties(result, **command_args):
+    if not isinstance(result, dict):
+        ret = {
+            "attributes": getattr(result, "_attributes", None),
+            "contentType": getattr(result, "content_type", None),
+            "id": getattr(result, "id", None),
+            "managed": getattr(result, "managed", None),
+            "name": getattr(result, "name", None),
+            "tags": getattr(result, "tags", None)
+        }
+        return ret
+    return result
+
+
+def transform_deleted_secret_list(result, **command_args):
+    return [transform_deleted_secret_properties(secret) for secret in result]
+
+
+def transform_deleted_secret_properties(result):
+    if not isinstance(result, dict):
+        ret = transform_secret_base_properties(getattr(result, "properties", None))
+        ret.update({
+            "deletedDate": getattr(result, "deleted_date", None),
+            "recoveryId": getattr(result, "recovery_id", None),
+            "scheduledPurgeDate": getattr(result, "scheduled_purge_date", None)
+        })
+        return ret
+    return result
+
+
+def transform_secret_set(result, **command_args):
+    if not isinstance(result, dict):
+        properties = getattr(result, "properties", None)
+        ret = transform_secret_base_properties(properties)
+        ret.update({
+            "kid": getattr(properties, "key_id", None),
+            "value": getattr(result, "value", None)
+        })
+        return ret
+    return result
+
+
+def transform_secret_set_attributes(result, **command_args):
+    if not isinstance(result, dict):
+        ret = transform_secret_base_properties(result)
+        ret.update({
+            "kid": getattr(result, "key_id", None),
+            "value": None
+        })
+        return ret
+    return result
+
+
+def transform_secret_show_deleted(result, **command_args):
+    if not isinstance(result, dict):
+        properties = getattr(result, "properties", None)
+        ret = transform_secret_base_properties(properties)
+        ret.update({
+            "kid": getattr(properties, "key_id", None),
+            "value": None,
+            "deletedDate": getattr(result, "deleted_date", None),
+            "recoveryId": getattr(result, "recovery_id", None),
+            "scheduledPurgeDate": getattr(result, "scheduled_purge_date", None)
+        })
+        return ret
+    return result
+
+
+def transform_secret_delete(result, **command_args):
+    if not isinstance(result, dict):
+        ret = transform_secret_show_deleted(result.result())
+        return ret
+    return result
+
+
+def transform_secret_recover(result, **command_args):
+    if not isinstance(result, dict):
+        ret = transform_secret_set_attributes(result.result())
+        return ret
+    return result
+
+
+def transform_certificate_create(result, **command_args):
+    if not isinstance(result, dict):
+        import base64
+        csr = getattr(result, "csr", None)
+        ret = {
+            "cancellationRequested": getattr(result, "cancellation_requested", None),
+            "csr": base64.b64encode(csr).decode('utf-8') if csr else None,
+            "error": getattr(result, "error", None),
+            "id": getattr(result, "id", None),
+            "issuerParameters": {
+                "certificateTransparency": getattr(result, "certificate_transparency", None),
+                "certificateType": getattr(result, "certificate_type", None),
+                "name": getattr(result, "issuer_name", None)
+            },
+            "name": getattr(result, "name", None),
+            "requestId": getattr(result, "request_id", None),
+            "status": getattr(result, "status", None),
+            "statusDetails": getattr(result, "status_details", None),
+            "target": getattr(result, "target", None)
+        }
+        return ret
+    return result
+
+
+def transform_certificate_list(result, **command_args):
+    return [transform_certificate_properties(certificate) for certificate in result]
+
+
+def transform_certificate_properties(result):
+    import base64
+    if not isinstance(result, dict):
+        x509_thumbprint = getattr(result, "x509_thumbprint", None)
+        ret = {
+            "attributes": {
+                "created": getattr(result, "created_on", None),
+                "enabled": getattr(result, "enabled", None),
+                "expires": getattr(result, "expires_on", None),
+                "notBefore": getattr(result, "not_before", None),
+                "recoveryLevel": getattr(result, "recovery_level", None),
+                "updated": getattr(result, "updated_on", None)
+            },
+            "id": getattr(result, "id", None),
+            "name": getattr(result, "name", None),
+            "subject": getattr(result, "subject", ""),
+            "tags": getattr(result, "tags", None),
+            "x509Thumbprint": base64.b64encode(x509_thumbprint).decode('utf-8') if x509_thumbprint else None,
+            "x509ThumbprintHex": x509_thumbprint.hex().upper() if x509_thumbprint else None
+        }
+        return ret
+    return result
+
+
+def transform_certificate_list_deleted(result, **command_args):
+    return [transform_deleted_certificate(certificate) for certificate in result]
+
+
+def transform_deleted_certificate(result):
+    if not isinstance(result, dict):
+        ret = transform_certificate_properties(getattr(result, "properties", None))
+        ret.update({
+            "deletedDate": getattr(result, "deleted_on", None),
+            "recoveryId": getattr(result, "recovery_id", None),
+            "scheduledPurgeDate": getattr(result, "scheduled_purge_date", None)
+        })
+        del ret["subject"]
+        return ret
+    return result
+
+
+def transform_certificate_show(result, **command_args):
+    import base64
+    if not isinstance(result, dict):
+        ret = transform_certificate_properties(getattr(result, "properties", None))
+        cert_id = getattr(result, "id", None)
+        cer = getattr(result, "cer", None)
+        ret.update({
+            "cer": base64.b64encode(cer).decode('utf-8') if cer else None,
+            "contentType": getattr(result, "content_type", None),
+            "kid": getattr(result, "key_id", None),
+            "policy": transform_certificate_policy(policy=getattr(result, "policy", None),
+                                                   policy_id='/'.join(cert_id.split('/')[:-1] + ['policy'])),
+            "sid": getattr(result, "secret_id", None)
+        })
+        del ret["subject"]
+        return ret
+    return result
+
+
+# pylint: disable=line-too-long,redefined-builtin
+def transform_certificate_policy(policy, policy_id):
+    if policy is not None and not isinstance(policy, dict):
+        policy = {
+            "attributes": {
+                "created": getattr(policy, "created_on", None),
+                "enabled": getattr(policy, "enabled", None),
+                "expires": getattr(policy, "expires_on", None),
+                "notBefore": getattr(policy, "not_before", None),
+                "recoveryLevel": getattr(policy, "recovery_level", None),
+                "updated": getattr(policy, "updated_on", None)
+            },
+            "id": policy_id,
+            "issuerParameters": {
+                "certificateTransparency": getattr(policy, "certificate_transparency", None),
+                "certificateType": getattr(policy, "certificate_type", None),
+                "name": getattr(policy, "issuer_name", None)
+            },
+            "keyProperties": {
+                "curve": getattr(policy, "curve", None),
+                "exportable": getattr(policy, "exportable", None),
+                "keySize": getattr(policy, "key_size", None),
+                "keyType": getattr(policy, "key_type", None),
+                "reuseKey": getattr(policy, "reuse_key", None)
+            },
+            "lifetimeActions": [{
+                "action": {
+                    "actionType": getattr(action, "action", None)
+                },
+                "trigger": {
+                    "daysBeforeExpiry": getattr(action, "days_before_expiry", None),
+                    "lifetimePercentage": getattr(action, "lifetime_percentage", None)
+                }
+            } for action in (getattr(policy, "lifetime_actions", None) or [])],
+            "secretProperties": {
+                "contentType": getattr(policy, "content_type", None)
+            },
+            "x509CertificateProperties": {
+                "ekus": getattr(policy, "enhanced_key_usage", None),
+                "keyUsage": getattr(policy, "key_usage", None),
+                "subject": getattr(policy, "subject", None),
+                "subjectAlternativeNames": {
+                    "emails": getattr(policy, "san_emails", None),
+                    "upns": getattr(policy, "san_user_principal_names", None),
+                    "dnsNames": getattr(policy, "san_dns_names", None)
+                },
+                "validityInMonths": getattr(policy, "validity_in_months", None)
+            }
+        }
+        return policy
+    return policy
+
+
+def transform_certificate_show_deleted(result, **command_args):
+    if not isinstance(result, dict):
+        ret = transform_certificate_show(result)
+        ret.update({
+            "deletedDate": getattr(result, "deleted_on", None),
+            "recoveryId": getattr(result, "recovery_id", None),
+            "scheduledPurgeDate": getattr(result, "scheduled_purge_date", None)
+        })
+        return ret
+    return result
+
+
+def transform_certificate_delete(result, **command_args):
+    if not isinstance(result, dict):
+        ret = transform_certificate_show_deleted(result.result())
+        return ret
+    return result
+
+
+def transform_certificate_recover(result, **command_args):
+    if not isinstance(result, dict):
+        ret = transform_certificate_show(result.result())
+        return ret
+    return result
+
+
+def transform_certificate_contact_list(result, **command_args):
+    if isinstance(result, list):
+        client = command_args.get('self')
+        return transform_certificate_contact_list_result(result, client)
+    return result
+
+
+def transform_certificate_contact_list_result(result, client):
+    contacts_id = ""
+    if getattr(client, "vault_url") and isinstance(getattr(client, "vault_url"), str):
+        contacts_id = getattr(client, "vault_url") + '/certificates/contacts'
+    ret = {
+        "contactList": [
+            {
+                "emailAddress": getattr(contact, "email"),
+                "name": getattr(contact, "name"),
+                "phone": getattr(contact, "phone")
+            } for contact in result
+        ],
+        "id": contacts_id
+    }
+    return ret
+
+
+def transform_certificate_contact_add(result, **command_args):
+    if isinstance(result, list):
+        client = command_args.get('client')
+        return transform_certificate_contact_list_result(result, client)
+    return result
+
+
+def transform_certificate_issuer_create(result, **command_args):
+    if not isinstance(result, dict):
+        ret = {
+            "attributes": {
+                "created": getattr(result, "created_on"),
+                "enabled": getattr(result, "enabled"),
+                "updated": getattr(result, "updated_on")
+            },
+            "credentials": {
+                "accountId": getattr(result, "account_id"),
+                "password": getattr(result, "password")
+            },
+            "id": getattr(result, "id"),
+            "organizationDetails": {
+                "adminDetails": getattr(result, "admin_contacts"),
+                "id": getattr(result, "organization_id"),
+                "zip": 0
+            },
+            "provider": getattr(result, "provider")
+        }
+        return ret
+    return result
+
+
+def transform_certificate_issuer_list(result, **command_args):
+    if not isinstance(result, dict) and not isinstance(result, list):
+        ret = [{
+            "id": getattr(res, "id"),
+            "provider": getattr(res, "provider")
+        } for res in result]
+        return ret
+    return result
+
+
+def transform_certificate_issuer_admin_list(result, **command_args):
+    if not isinstance(result, dict) and not isinstance(result, list):
+        admin_contacts = getattr(result, 'admin_contacts')
+        ret = [{
+            "emailAddress": getattr(contact, "email"),
+            "firstName": getattr(contact, "first_name"),
+            "lastName": getattr(contact, "last_name"),
+            "phone": getattr(contact, "phone")
+        } for contact in admin_contacts]
+        return ret
     return result

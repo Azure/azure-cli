@@ -399,15 +399,14 @@ def recover_vault_or_hsm(cmd, client, resource_group_name=None, location=None, v
 
 
 def recover_hsm(cmd, client, hsm_name, resource_group_name, location, no_wait=False):
-    from azure.cli.core._profile import Profile
+    from azure.cli.core._profile import Profile, _TENANT_ID
 
     ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT)
     ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_KEYVAULT)
 
     # tenantId and sku shouldn't be required
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    _, _, tenant_id = profile.get_login_credentials(
-        resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+    tenant_id = profile.get_subscription(subscription=cmd.cli_ctx.data.get('subscription_id', None))[_TENANT_ID]
 
     # Use 'Recover' as 'create_mode' temporarily since it's a bug from service side making 'create_mode' case-sensitive
     # Will change it back to CreateMode.recover.value('recover') from SDK definition after service fix
@@ -424,7 +423,7 @@ def recover_hsm(cmd, client, hsm_name, resource_group_name, location, no_wait=Fa
 
 
 def recover_vault(cmd, client, vault_name, resource_group_name, location, no_wait=False):
-    from azure.cli.core._profile import Profile
+    from azure.cli.core._profile import Profile, _TENANT_ID
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
@@ -434,8 +433,7 @@ def recover_vault(cmd, client, vault_name, resource_group_name, location, no_wai
     Sku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_KEYVAULT)
     SkuName = cmd.get_models('SkuName', resource_type=ResourceType.MGMT_KEYVAULT)
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    _, _, tenant_id = profile.get_login_credentials(
-        resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+    tenant_id = profile.get_subscription(subscription=cmd.cli_ctx.data.get('subscription_id', None))[_TENANT_ID]
 
     params = VaultCreateOrUpdateParameters(location=location,
                                            properties={'tenant_id': tenant_id,
@@ -594,7 +592,7 @@ def create_hsm(cmd, client,
 
     administrators = [admin.strip().replace('\r', '').replace('\n', '') for admin in administrators]
 
-    from azure.cli.core._profile import Profile
+    from azure.cli.core._profile import Profile, _TENANT_ID
 
     if not sku:
         sku = 'Standard_B1'
@@ -604,8 +602,7 @@ def create_hsm(cmd, client,
     ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_KEYVAULT)
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    _, _, tenant_id = profile.get_login_credentials(
-        resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
+    tenant_id = profile.get_subscription(subscription=cmd.cli_ctx.data.get('subscription_id', None))[_TENANT_ID]
 
     properties = ManagedHsmProperties(tenant_id=tenant_id,
                                       enable_purge_protection=enable_purge_protection,
@@ -654,7 +651,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
         # if client.get raise exception, we can take it as no existing vault found
         # just continue the normal creation process
         pass
-    from azure.cli.core._profile import Profile
+    from azure.cli.core._profile import Profile, _TENANT_ID
     from azure.cli.command_modules.role import graph_client_factory, GraphError
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
@@ -669,11 +666,9 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
     VaultProperties = cmd.get_models('VaultProperties', resource_type=ResourceType.MGMT_KEYVAULT)
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    _, _, tenant_id = profile.get_login_credentials(
-        resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
-
     graph_client = graph_client_factory(cmd.cli_ctx)
-    subscription = profile.get_subscription()
+    subscription = profile.get_subscription(subscription=cmd.cli_ctx.data.get('subscription_id', None))
+    tenant_id = subscription[_TENANT_ID]
 
     # if bypass or default_action was specified create a NetworkRuleSet
     # if neither were specified we will parse it from parameter `--network-acls`
@@ -698,7 +693,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
                                             KeyPermissions.delete,
                                             KeyPermissions.list,
                                             KeyPermissions.update,
-                                            KeyPermissions.IMPORT,
+                                            KeyPermissions.import_enum,
                                             KeyPermissions.backup,
                                             KeyPermissions.restore,
                                             KeyPermissions.recover],
@@ -715,7 +710,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
                                           CertificatePermissions.list,
                                           CertificatePermissions.delete,
                                           CertificatePermissions.create,
-                                          CertificatePermissions.IMPORT,
+                                          CertificatePermissions.import_enum,
                                           CertificatePermissions.update,
                                           CertificatePermissions.managecontacts,
                                           CertificatePermissions.getissuers,
