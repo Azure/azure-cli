@@ -270,7 +270,7 @@ def load_arguments(self, _):
                    help='space-separated tags: key[=value] [key[=value] ...]. Use "" to clear existing tags.')
         c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels,
                    help='space-separated labels: key[=value] [key[=value] ...]. See https://aka.ms/node-labels for syntax of labels.')
-        c.argument('nodepool_taints', nargs='*', validator=validate_nodepool_taints)
+        c.argument('nodepool_taints', type=str, validator=validate_nodepool_taints)
         c.argument('node_osdisk_type', arg_type=get_enum_type(node_os_disk_types))
         c.argument('node_osdisk_size', type=int)
         c.argument('max_pods', type=int, options_list=['--max-pods', '-m'])
@@ -372,8 +372,8 @@ def load_arguments(self, _):
         c.argument('max_count', type=int, validator=validate_nodes_count)
         c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels,
                    help='space-separated labels: key[=value] [key[=value] ...]. See https://aka.ms/node-labels for syntax of labels.')
-        c.argument('nodepool_taints', nargs='*', validator=validate_nodepool_taints)
-        # azure monitor profile
+        c.argument('nodepool_taints', type=str, validator=validate_nodepool_taints)
+so        # azure monitor profile
         c.argument('enable_azure_monitor_metrics', action='store_true')
         c.argument('azure_monitor_workspace_resource_id', validator=validate_azuremonitorworkspaceresourceid)
         c.argument('ksm_metric_labels_allow_list')
