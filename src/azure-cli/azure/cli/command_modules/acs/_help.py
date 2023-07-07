@@ -1556,6 +1556,16 @@ helps['aks nodepool snapshot list'] = """
     short-summary: List nodepool snapshots.
 """
 
+helps['aks nodepool snapshot update'] = """
+    type: command
+    short-summary: Update tags on a snapshot of a nodepool.
+    examples:
+        - name: Update tags on a nodepool snapshot.
+          text: az aks nodepool snapshot update -g MyResourceGroup -n snapshot1 --tags "foo=bar" "key1=val1"
+        - name: Clear tags on a nodepool snapshot.
+          text: az aks nodepool snapshot update -g MyResourceGroup -n snapshot1 --tags ""
+"""
+
 helps['aks nodepool snapshot create'] = """
     type: command
     short-summary: Create a nodepool snapshot.
