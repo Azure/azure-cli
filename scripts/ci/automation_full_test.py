@@ -570,6 +570,7 @@ class AutomaticScheduling(object):
                 parallel_tests.append(k)
         # Put the cloud module at the end of the serial execution
         # Since it will cause the test_get_docker_credentials test to fail
+        # TODO: Find the root cause of the failure and modify the test code.
         if 'cloud' in serial_tests:
             serial_tests.remove('cloud')
             serial_tests.append('cloud')
