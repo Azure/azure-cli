@@ -2413,6 +2413,7 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
                 "labels": "test_labels",
                 "tags": "test_tags",
                 "node_taints": "",
+                "nodepool_taints": "",
             },
             self.resource_type,
             self.agentpool_decorator_mode,
