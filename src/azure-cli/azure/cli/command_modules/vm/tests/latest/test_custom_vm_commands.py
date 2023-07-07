@@ -27,17 +27,14 @@ from azure.cli.core.profiles import get_sdk, ResourceType
 
 from azure.cli.core.mock import DummyCli
 
-from azure.mgmt.compute.models import NetworkProfile, StorageProfile, DataDisk, OSDisk, OperatingSystemTypes, \
-    InstanceViewStatus, VirtualMachineExtensionInstanceView, VirtualMachineExtension, DiskCreateOptionTypes, \
-    CachingTypes
-#
-# NetworkProfile, StorageProfile, DataDisk, OSDisk, OperatingSystemTypes, InstanceViewStatus, \
-#     VirtualMachineExtensionInstanceView, VirtualMachineExtension, ImageReference, DiskCreateOptionTypes, \
-#     CachingTypes = get_sdk(DummyCli(), ResourceType.MGMT_COMPUTE, 'NetworkProfile', 'StorageProfile', 'DataDisk', 'OSDisk',
-#                            'OperatingSystemTypes', 'InstanceViewStatus', 'VirtualMachineExtensionInstanceView',
-#                            'VirtualMachineExtension', 'ImageReference', 'DiskCreateOptionTypes',
-#                            'CachingTypes',
-#                            mod='models', operation_group='virtual_machines')  # FIXME split into loading by RT
+
+NetworkProfile, StorageProfile, DataDisk, OSDisk, OperatingSystemTypes, InstanceViewStatus, \
+    VirtualMachineExtensionInstanceView, VirtualMachineExtension, ImageReference, DiskCreateOptionTypes, \
+    CachingTypes = get_sdk(DummyCli(), ResourceType.MGMT_COMPUTE, 'NetworkProfile', 'StorageProfile', 'DataDisk', 'OSDisk',
+                           'OperatingSystemTypes', 'InstanceViewStatus', 'VirtualMachineExtensionInstanceView',
+                           'VirtualMachineExtension', 'ImageReference', 'DiskCreateOptionTypes',
+                           'CachingTypes',
+                           mod='models', operation_group='virtual_machines')  # FIXME split into loading by RT
 
 
 def _get_test_cmd():

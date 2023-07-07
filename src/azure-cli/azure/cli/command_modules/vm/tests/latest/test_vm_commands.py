@@ -1673,6 +1673,7 @@ class ComputeListSkusScenarioTest(ScenarioTest):
 
 class VMExtensionScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_extension')
     def test_vm_extension(self, resource_group):
 
@@ -1683,6 +1684,8 @@ class VMExtensionScenarioTest(ScenarioTest):
             'vm': 'myvm',
             'pub': 'Microsoft.OSTCExtensions',
             'ext': 'VMAccessForLinux',
+            'pub2': 'Microsoft.Azure.Security.LinuxAttestation',
+            'ext2': 'GuestAttestation',
             'config': config_file,
             'user': user_name
         })
@@ -1712,6 +1715,15 @@ class VMExtensionScenarioTest(ScenarioTest):
             self.check('instanceView.statuses[0].displayStatus', 'Provisioning succeeded'),
         ])
         self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext}')
+
+        self.cmd('vm extension set -n {ext2} --publisher {pub2} --vm-name {vm} --resource-group {rg} --force-update')
+        self.cmd('vm extension show --resource-group {rg} --vm-name {vm} --name {ext2}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{ext2}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('enableAutomaticUpgrade', True)
+        ])
+        self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext2}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_extension_debian')
     def test_vm_extension_debian(self, resource_group):
