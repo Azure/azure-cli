@@ -131,6 +131,7 @@ def load_command_table(self, _):
                               table_transformer=aks_show_nodepool_snapshot_table_format)
         g.custom_command('create', 'aks_nodepool_snapshot_create', supports_no_wait=True)
         g.custom_command('delete', 'aks_nodepool_snapshot_delete', supports_no_wait=True)
+        g.custom_command('update', 'aks_nodepool_snapshot_update')
         g.wait_command('wait')
 
     with self.command_group('aks oidc-issuer', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
