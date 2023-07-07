@@ -214,7 +214,7 @@ def map_featureflag_to_keyvalue(featureflag):
 
     except Exception as exception:
         error_msg = "Exception while converting feature flag to key value: {0}\n{1}".format(featureflag.key, exception)
-        raise Exception(error_msg)
+        raise Exception(error_msg)  # pylint: disable=broad-exception-raised
 
     return set_kv
 
