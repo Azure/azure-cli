@@ -14,31 +14,31 @@
   </PropertyGroup>
   <!-- Local WiX -->
   <PropertyGroup>
-    <LocalWixRoot>artifacts\$(Platform)\wix</LocalWixRoot>
+    <LocalWixRoot>artifacts\wix</LocalWixRoot>
     <WixToolPath>$(LocalWixRoot)</WixToolPath>
     <WixTargetsPath Condition="Exists('$(WixToolPath)\Wix.targets')">$(WixToolPath)\Wix.targets</WixTargetsPath>
     <WixTasksPath Condition="Exists('$(WixToolPath)\wixtasks.dll')">wixtasks.dll</WixTasksPath>
-    <AzureCliSource>artifacts\$(Platform)\cli</AzureCliSource>
+    <AzureCliSource>artifacts\cli</AzureCliSource>
     <LinkerAdditionalOptions>-fv</LinkerAdditionalOptions>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <OutputPath>out\$(Platform)\$(Configuration)\</OutputPath>
-    <IntermediateOutputPath>out\obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <OutputPath>out\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>out\obj\$(Configuration)\</IntermediateOutputPath>
     <DefineConstants>Debug;AzureCliSource=$(AzureCliSource)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <OutputPath>out\$(Platform)\</OutputPath>
-    <IntermediateOutputPath>out\obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <OutputPath>out\</OutputPath>
+    <IntermediateOutputPath>out\obj\$(Configuration)\</IntermediateOutputPath>
     <DefineConstants>AzureCliSource=$(AzureCliSource)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-    <OutputPath>out\$(Platform)\$(Configuration)\</OutputPath>
-    <IntermediateOutputPath>out\obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <OutputPath>out\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>out\obj\$(Configuration)\</IntermediateOutputPath>
     <DefineConstants>Debug;AzureCliSource=$(AzureCliSource)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-    <OutputPath>out\$(Platform)\</OutputPath>
-    <IntermediateOutputPath>out\obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <OutputPath>out\</OutputPath>
+    <IntermediateOutputPath>out\obj\$(Configuration)\</IntermediateOutputPath>
     <DefineConstants>AzureCliSource=$(AzureCliSource)</DefineConstants>
   </PropertyGroup>
   <ItemGroup>

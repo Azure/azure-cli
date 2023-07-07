@@ -206,8 +206,8 @@ jobs:
 
 
   - script: |
-      set /p ARCH=$(Platform)
-      set /p CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
+      set ARCH=$(Platform)
+      set CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
       set
       
       build_scripts/windows/scripts/build.cmd
@@ -216,16 +216,22 @@ jobs:
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
     inputs:
-      BuildDropPath: 'build_scripts/windows/out/$(Platform)'
+      BuildDropPath: 'build_scripts/windows/out/'
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: MSI'
     inputs:
-      TargetPath: 'build_scripts/windows/out/$(Platform)'
-      ArtifactName: msi
+      TargetPath: 'build_scripts/windows/out/'
+      ArtifactName: msi-$(Platform)
 
 - job: TestWindowsMSI
   displayName: Test Windows MSI
+  strategy:
+    matrix:
+      x86:
+        Platform: x86
+      x64:
+        Platform: x64
 
   dependsOn: BuildWindowsMSI
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
@@ -242,10 +248,10 @@ jobs:
     displayName: 'Download Build Artifacts'
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/msi'
-      artifactName: msi
+      artifactName: msi-$(Platform)
 
   - task: PowerShell@2
-    displayName: Install and Load x86 CLI
+    displayName: Install and Load CLI
     inputs:
       targetType: inline
       script: |
@@ -261,53 +267,7 @@ jobs:
         
         $InstallArgs = @(
           "/i"
-          "`"$env:SYSTEM_ARTIFACTSDIRECTORY\msi\x86\Microsoft Azure CLI.msi`""
-          "/q"
-          "/norestart"
-          "/l*v"
-          ".\install_logs.txt"
-        )
-        $pre_installed_version=az version --query '\"azure-cli\"' -o tsv
-        $to_be_installed_version=Get-Content $(System.ArtifactsDirectory)/metadata/version
-        if ($pre_installed_version -eq $to_be_installed_version){
-          # See https://docs.microsoft.com/windows/win32/msi/reinstallmode about options of REINSTALLMODE
-          $reinstall_option="REINSTALL=ALL REINSTALLMODE=emus"
-          $InstallArgs += $reinstall_option
-        }
-        Start-Process "msiexec.exe" -ArgumentList $InstallArgs -Wait -NoNewWindow
-        $install_time=Measure-Command {Start-Process "msiexec.exe" -ArgumentList $InstallArgs -Wait -NoNewWindow} | select -expand TotalSeconds
-        $installed_version=az version --query '\"azure-cli\"' -o tsv
-        if ($installed_version -ne $to_be_installed_version){
-          echo "The MSI failed to install."
-          Exit 1
-        }
-        echo 'Install time(seconds):' $install_time
-        az --version
-        # Test bundled pip with extension installation
-        az extension add -n rdbms-connect
-        az self-test
-        
-        Get-Content .\install_logs.txt
-
-  - task: PowerShell@2
-    # Test install (upgrade of x86) of x64 MSI as well.
-    displayName: Install and Load x64 CLI
-    inputs:
-      targetType: inline
-      script: |
-        if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-          # Start another Powershell process as Admin and execute this script again
-          $arguments = "& '" +$myinvocation.mycommand.definition + "'"
-          Start-Process powershell -Verb runAs -ArgumentList $arguments
-          # Stop if the PowerShell is not run as Admin
-          Break
-        }
-        # The following are executed by elevated PowerShell
-        az --version
-        
-        $InstallArgs = @(
-          "/i"
-          "`"$env:SYSTEM_ARTIFACTSDIRECTORY\msi\x64\Microsoft Azure CLI.msi`""
+          "`"$env:SYSTEM_ARTIFACTSDIRECTORY\msi\Microsoft Azure CLI.msi`""
           "/q"
           "/norestart"
           "/l*v"

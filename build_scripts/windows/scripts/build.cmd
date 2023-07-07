@@ -39,7 +39,7 @@ set OUTPUT_DIR=%~dp0..\out
 if exist %OUTPUT_DIR% rmdir /s /q %OUTPUT_DIR%
 mkdir %OUTPUT_DIR%
 
-set ARTIFACTS_DIR=%~dp0..\artifacts\%ARCH%
+set ARTIFACTS_DIR=%~dp0..\artifacts
 mkdir %ARTIFACTS_DIR%
 set TEMP_SCRATCH_FOLDER=%ARTIFACTS_DIR%\cli_scratch
 set BUILDING_DIR=%ARTIFACTS_DIR%\cli
@@ -86,9 +86,6 @@ if not exist %WIX_DIR% (
     echo Wix downloaded and extracted successfully.
     popd
 )
-
-REM Use only downloaded python and ignore machine state
-set PYTHONHOME=%PYTHON_DIR%
 
 REM ensure Python is available
 if exist %PYTHON_DIR% (
