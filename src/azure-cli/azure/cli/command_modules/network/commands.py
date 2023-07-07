@@ -85,9 +85,8 @@ def load_command_table(self, _):
         self.command_table["network application-gateway root-cert update"] = RootCertUpdate(loader=self)
 
     with self.command_group("network application-gateway client-cert"):
-        from .custom import ClientCertAdd, ClientCertRemove, ClientCertUpdate
+        from .custom import ClientCertAdd, ClientCertUpdate
         self.command_table["network application-gateway client-cert add"] = ClientCertAdd(loader=self)
-        self.command_table["network application-gateway client-cert remove"] = ClientCertRemove(loader=self)
         self.command_table["network application-gateway client-cert update"] = ClientCertUpdate(loader=self)
 
     with self.command_group("network application-gateway frontend-ip"):
@@ -156,10 +155,9 @@ def load_command_table(self, _):
         self.command_table["network application-gateway ssl-policy set"] = SSLPolicySet(loader=self)
 
     with self.command_group("network application-gateway ssl-profile"):
-        from .custom import SSLProfileAdd, SSLProfileUpdate, SSLProfileRemove
+        from .custom import SSLProfileAdd, SSLProfileUpdate
         self.command_table["network application-gateway ssl-profile add"] = SSLProfileAdd(loader=self)
         self.command_table["network application-gateway ssl-profile update"] = SSLProfileUpdate(loader=self)
-        self.command_table["network application-gateway ssl-profile remove"] = SSLProfileRemove(loader=self)
 
     with self.command_group("network application-gateway url-path-map"):
         from .custom import URLPathMapCreate, URLPathMapUpdate, URLPathMapRuleCreate
@@ -373,23 +371,19 @@ def load_command_table(self, _):
 
     with self.command_group('network private-endpoint dns-zone-group'):
         from azure.cli.command_modules.network.custom import PrivateEndpointPrivateDnsZoneGroupCreate, \
-            PrivateEndpointPrivateDnsZoneAdd, PrivateEndpointPrivateDnsZoneRemove
+            PrivateEndpointPrivateDnsZoneAdd
         self.command_table['network private-endpoint dns-zone-group create'] = \
             PrivateEndpointPrivateDnsZoneGroupCreate(loader=self)
         self.command_table['network private-endpoint dns-zone-group add'] = \
             PrivateEndpointPrivateDnsZoneAdd(loader=self)
-        self.command_table['network private-endpoint dns-zone-group remove'] = \
-            PrivateEndpointPrivateDnsZoneRemove(loader=self)
 
     with self.command_group('network private-endpoint ip-config'):
-        from azure.cli.command_modules.network.custom import PrivateEndpointIpConfigAdd, PrivateEndpointIpConfigRemove
+        from azure.cli.command_modules.network.custom import PrivateEndpointIpConfigAdd
         self.command_table['network private-endpoint ip-config add'] = PrivateEndpointIpConfigAdd(loader=self)
-        self.command_table['network private-endpoint ip-config remove'] = PrivateEndpointIpConfigRemove(loader=self)
 
     with self.command_group('network private-endpoint asg'):
-        from azure.cli.command_modules.network.custom import PrivateEndpointAsgAdd, PrivateEndpointAsgRemove
+        from azure.cli.command_modules.network.custom import PrivateEndpointAsgAdd
         self.command_table['network private-endpoint asg add'] = PrivateEndpointAsgAdd(loader=self)
-        self.command_table['network private-endpoint asg remove'] = PrivateEndpointAsgRemove(loader=self)
     # endregion
 
     # region PrivateLinkServices
@@ -438,14 +432,12 @@ def load_command_table(self, _):
     self.command_table["network lb address-pool delete"] = LBAddressPoolDelete(loader=self)
     self.command_table["network lb address-pool update"] = LBAddressPoolUpdate(loader=self)
 
-    from .operations.load_balancer import LBAddressPoolAddressAdd, LBAddressPoolAddressRemove, LBAddressPoolAddressUpdate
+    from .operations.load_balancer import LBAddressPoolAddressAdd, LBAddressPoolAddressUpdate
     self.command_table["network lb address-pool address add"] = LBAddressPoolAddressAdd(loader=self)
-    self.command_table["network lb address-pool address remove"] = LBAddressPoolAddressRemove(loader=self)
     self.command_table["network lb address-pool address update"] = LBAddressPoolAddressUpdate(loader=self)
 
-    from .operations.load_balancer import LBAddressPoolTunnelInterfaceAdd, LBAddressPoolTunnelInterfaceRemove, LBAddressPoolTunnelInterfaceUpdate
+    from .operations.load_balancer import LBAddressPoolTunnelInterfaceAdd, LBAddressPoolTunnelInterfaceUpdate
     self.command_table["network lb address-pool tunnel-interface add"] = LBAddressPoolTunnelInterfaceAdd(loader=self)
-    self.command_table["network lb address-pool tunnel-interface remove"] = LBAddressPoolTunnelInterfaceRemove(loader=self)
     self.command_table["network lb address-pool tunnel-interface update"] = LBAddressPoolTunnelInterfaceUpdate(loader=self)
 
     from .operations.load_balancer import LBProbeCreate, LBProbeUpdate

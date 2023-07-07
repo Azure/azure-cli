@@ -337,7 +337,7 @@ def load_arguments(self, _):
 
     for item in ['', 'a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'ns', 'ptr', 'srv', 'tlsa', 'txt']:
         with self.argument_context('network dns record-set {} create'.format(item)) as c:
-            c.argument('ttl', help='Record set TTL (time-to-live)')
+            c.argument('ttl', type=int, help='Record set TTL (time-to-live)')
             c.argument('if_none_match', help='Create the record set only if it does not already exist.', action='store_true')
 
     for item in ['a', 'aaaa', 'caa', 'cname', 'ds', 'mx', 'ns', 'ptr', 'srv', 'tlsa', 'txt']:
@@ -356,7 +356,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network dns record-set cname set-record') as c:
         c.argument('record_set_name', options_list=['--record-set-name', '-n'], help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
-        c.argument('ttl', help='Record set TTL (time-to-live)')
+        c.argument('ttl', type=int, help='Record set TTL (time-to-live)')
         c.argument('if_none_match', help='Create the record set only if it does not already exist.',
                    action='store_true')
 

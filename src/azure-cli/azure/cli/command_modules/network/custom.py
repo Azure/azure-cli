@@ -29,8 +29,7 @@ from .aaz.latest.network.application_gateway import Update as _ApplicationGatewa
 from .aaz.latest.network.application_gateway.address_pool import Create as _AddressPoolCreate, \
     Update as _AddressPoolUpdate
 from .aaz.latest.network.application_gateway.auth_cert import Create as _AuthCertCreate, Update as _AuthCertUpdate
-from .aaz.latest.network.application_gateway.client_cert import Add as _ClientCertAdd, Remove as _ClientCertRemove, \
-    Update as _ClientCertUpdate
+from .aaz.latest.network.application_gateway.client_cert import Add as _ClientCertAdd, Update as _ClientCertUpdate
 from .aaz.latest.network.application_gateway.frontend_ip import Create as _FrontendIPCreate, Update as _FrontendIPUpdate
 from .aaz.latest.network.application_gateway.http_listener import Create as _HTTPListenerCreate, \
     Update as _HTTPListenerUpdate
@@ -52,8 +51,7 @@ from .aaz.latest.network.application_gateway.rule import Create as _RuleCreate, 
 from .aaz.latest.network.application_gateway.settings import Create as _SettingsCreate, Update as _SettingsUpdate
 from .aaz.latest.network.application_gateway.ssl_cert import Create as _SSLCertCreate, Update as _SSLCertUpdate
 from .aaz.latest.network.application_gateway.ssl_policy import Set as _SSLPolicySet
-from .aaz.latest.network.application_gateway.ssl_profile import Add as _SSLProfileAdd, Update as _SSLProfileUpdate, \
-    Remove as _SSLProfileRemove
+from .aaz.latest.network.application_gateway.ssl_profile import Add as _SSLProfileAdd, Update as _SSLProfileUpdate
 from .aaz.latest.network.application_gateway.url_path_map import Create as _URLPathMapCreate, \
     Update as _URLPathMapUpdate
 from .aaz.latest.network.application_gateway.url_path_map.rule import Create as _URLPathMapRuleCreate
@@ -83,11 +81,10 @@ from .aaz.latest.network.nsg import Create as _NSGCreate
 from .aaz.latest.network.nsg.rule import Create as _NSGRuleCreate, Update as _NSGRuleUpdate
 from .aaz.latest.network.public_ip import Create as _PublicIPCreate, Update as _PublicIPUpdate
 from .aaz.latest.network.private_endpoint import Create as _PrivateEndpointCreate, Update as _PrivateEndpointUpdate
-from .aaz.latest.network.private_endpoint.asg import Add as _PrivateEndpointAsgAdd, Remove as _PrivateEndpointAsgRemove
+from .aaz.latest.network.private_endpoint.asg import Add as _PrivateEndpointAsgAdd
 from .aaz.latest.network.private_endpoint.dns_zone_group import Create as _PrivateEndpointPrivateDnsZoneGroupCreate, \
-    Add as _PrivateEndpointPrivateDnsZoneAdd, Remove as _PrivateEndpointPrivateDnsZoneRemove
-from .aaz.latest.network.private_endpoint.ip_config import Remove as _PrivateEndpointIpConfigRemove, \
-    Add as _PrivateEndpointIpConfigAdd
+    Add as _PrivateEndpointPrivateDnsZoneAdd
+from .aaz.latest.network.private_endpoint.ip_config import Add as _PrivateEndpointIpConfigAdd
 from .aaz.latest.network.private_link_service import Create as _PrivateLinkServiceCreate, \
     Update as _PrivateLinkServiceUpdate
 from .aaz.latest.network.private_link_service.connection import Update as _PrivateEndpointConnectionUpdate
@@ -876,17 +873,6 @@ class ClientCertAdd(_ClientCertAdd):
         return result
 
 
-class ClientCertRemove(_ClientCertRemove):
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
 class ClientCertUpdate(_ClientCertUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -1043,17 +1029,6 @@ class SSLProfileUpdate(_SSLProfileUpdate):
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
-
-
-class SSLProfileRemove(_SSLProfileRemove):
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
 # endregion
 
 
@@ -1124,20 +1099,12 @@ class HTTPSettingsCreate(_HTTPSettingsCreate):
 class HTTPSettingsUpdate(_HTTPSettingsUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZListArgFormat, AAZIntArg, AAZIntArgFormat, AAZResourceIdArg, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
+        from azure.cli.core.aaz import AAZListArg, AAZIntArg, AAZIntArgFormat, AAZResourceIdArg, AAZResourceIdArgFormat
 
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.auth_certs = AAZListArg(
             options=["--auth-certs"],
             help="Space-separated list of authentication certificates (Names and IDs) to associate with the HTTP settings.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.auth_certs.Element = AAZResourceIdArg(
@@ -1151,7 +1118,6 @@ class HTTPSettingsUpdate(_HTTPSettingsUpdate):
             options=["--root-certs"],
             help="Space-separated list of trusted root certificates (Names and IDs) to associate with the HTTP settings. "
                  "`--host-name` or `--host-name-from-backend-pool` is required when this field is set.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.root_certs.Element = AAZResourceIdArg(
@@ -1243,21 +1209,12 @@ class SettingsCreate(_SettingsCreate):
 class SettingsUpdate(_SettingsUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZListArgFormat, AAZResourceIdArg, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
+        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.root_certs = AAZListArg(
             options=["--root-certs"],
             help="Space-separated list of trusted root certificates (Names and IDs) to associate with the HTTP settings. "
                  "`--host-name` or `--backend-pool-host-name` is required when this field is set.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.root_certs.Element = AAZResourceIdArg(
@@ -1779,29 +1736,21 @@ class URLPathMapUpdate(_URLPathMapUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZResourceIdArgFormat
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         # apply templates for resource id
-        args_schema.default_address_pool._fmt = EmptyResourceIdArgFormat(
+        args_schema.default_address_pool._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/applicationGateways/{gateway_name}/backendAddressPools/{}",
         )
-        args_schema.default_http_settings._fmt = EmptyResourceIdArgFormat(
+        args_schema.default_http_settings._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/applicationGateways/{gateway_name}/backendHttpSettingsCollection/{}",
         )
-        args_schema.default_redirect_config._fmt = EmptyResourceIdArgFormat(
+        args_schema.default_redirect_config._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/applicationGateways/{gateway_name}/redirectConfigurations/{}",
         )
-        args_schema.default_rewrite_rule_set._fmt = EmptyResourceIdArgFormat(
+        args_schema.default_rewrite_rule_set._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/applicationGateways/{gateway_name}/rewriteRuleSets/{}",
         )
@@ -3860,31 +3809,7 @@ class PrivateEndpointPrivateDnsZoneAdd(_PrivateEndpointPrivateDnsZoneAdd):
         return result
 
 
-class PrivateEndpointPrivateDnsZoneRemove(_PrivateEndpointPrivateDnsZoneRemove):
-
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
 class PrivateEndpointIpConfigAdd(_PrivateEndpointIpConfigAdd):
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class PrivateEndpointIpConfigRemove(_PrivateEndpointIpConfigRemove):
-
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -3899,18 +3824,6 @@ class PrivateEndpointAsgAdd(_PrivateEndpointAsgAdd):
         args_schema.asg_id._required = False
 
         return args_schema
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class PrivateEndpointAsgRemove(_PrivateEndpointAsgRemove):
-
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -4376,33 +4289,17 @@ class NICCreate(_NICCreate):
 class NICUpdate(_NICUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
+        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.network_security_group = AAZResourceIdArg(
             options=["--network-security-group"],
             help="Name or ID of an existing network security group",
-            fmt=EmptyResourceIdArgFormat(
+            fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                          "/networkSecurityGroups/{}",
             ),
             nullable=True,
         )
-        args_schema.dns_servers._fmt = EmptyListArgFormat()
         args_schema.nsg._registered = False
         return args_schema
 
@@ -4550,22 +4447,7 @@ class NICIPConfigCreate(_NICIPConfigCreate):
 class NICIPConfigUpdate(_NICIPConfigUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.vnet_name = AAZStrArg(
             options=["--vnet-name"],
@@ -4573,15 +4455,15 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             help="Name of the virtual network.",
             nullable=True,
         )
-        args_schema.subnet._fmt = EmptyResourceIdArgFormat(
+        args_schema.subnet._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/virtualNetworks/{vnet_name}/subnets/{}",
         )
-        args_schema.public_ip_address._fmt = EmptyResourceIdArgFormat(
+        args_schema.public_ip_address._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
                      "publicIPAddresses/{}"
         )
-        args_schema.gateway_lb._fmt = EmptyResourceIdArgFormat(
+        args_schema.gateway_lb._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
                      "loadBalancers/{}/frontendIPConfigurations/{}",
         )
@@ -4589,7 +4471,6 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             options=["--application-security-groups", "--asgs"],
             arg_group="IP Configuration",
             help="Space-separated list of application security groups.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.application_security_groups.Element = AAZResourceIdArg(
@@ -4610,7 +4491,6 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             arg_group="Application Gateway",
             help="Space-separated list of names or IDs of application gateway backend address pools to "
                  "associate with the NIC. If names are used, `--gateway-name` must be specified.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.app_gateway_address_pools.Element = AAZResourceIdArg(
@@ -4631,7 +4511,6 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             arg_group="Load Balancer",
             help="Space-separated list of names or IDs of load balancer address pools to associate with the NIC. "
                  "If names are used, `--lb-name` must be specified.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.lb_address_pools.Element = AAZResourceIdArg(
@@ -4646,7 +4525,6 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             arg_group="Load Balancer",
             help="Space-separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. "
                  "If names are used, `--lb-name` must be specified.",
-            fmt=EmptyListArgFormat(),
             nullable=True,
         )
         args_schema.lb_inbound_nat_rules.Element = AAZResourceIdArg(
@@ -4743,28 +4621,8 @@ def add_nic_ip_config_address_pool(cmd, resource_group_name, network_interface_n
 
 def remove_nic_ip_config_address_pool(cmd, resource_group_name, network_interface_name, ip_config_name,
                                       backend_address_pool, load_balancer_name=None, application_gateway_name=None):
-    from .aaz.latest.network.nic.ip_config.lb_pool import Remove as _LBPoolRemove
-    from .aaz.latest.network.nic.ip_config.ag_pool import Remove as _AGPoolRemove
-
-    class LBPoolRemove(_LBPoolRemove):
-        def _handler(self, command_args):
-            lro_poller = super()._handler(command_args)
-            lro_poller._result_callback = self._output
-            return lro_poller
-
-        def _output(self, *args, **kwargs):
-            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-            return result["ipConfigurations"][0]
-
-    class AGPoolRemove(_AGPoolRemove):
-        def _handler(self, command_args):
-            lro_poller = super()._handler(command_args)
-            lro_poller._result_callback = self._output
-            return lro_poller
-
-        def _output(self, *args, **kwargs):
-            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-            return result["ipConfigurations"][0]
+    from .aaz.latest.network.nic.ip_config.lb_pool import Remove as LBPoolRemove
+    from .aaz.latest.network.nic.ip_config.ag_pool import Remove as AGPoolRemove
 
     arguments = {
         "ip_config_name": ip_config_name,
@@ -4799,10 +4657,6 @@ class NICIPConfigNATAdd(_NICIPConfigNATAdd):
 
 
 class NICIPConfigNATRemove(_NICIPConfigNATRemove):
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -4817,10 +4671,6 @@ class NICIPConfigNATRemove(_NICIPConfigNATRemove):
                      "/loadBalancers/{lb_name}/inboundNatRules/{}",
         )
         return args_schema
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result["ipConfigurations"][0]
 # endregion
 
 
@@ -4899,15 +4749,7 @@ class NSGRuleCreate(_NSGRuleCreate):
 class NSGRuleUpdate(_NSGRuleUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
+        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.destination_asgs = AAZListArg(
             options=["--destination-asgs"],
@@ -4915,7 +4757,6 @@ class NSGRuleUpdate(_NSGRuleUpdate):
             help="Space-separated list of application security group names or IDs. Limited by backend server, "
                  "temporarily this argument only supports one application security group name or ID.",
             nullable=True,
-            fmt=EmptyListArgFormat(),
         )
         args_schema.destination_asgs.Element = AAZResourceIdArg(
             nullable=True,
@@ -4930,7 +4771,6 @@ class NSGRuleUpdate(_NSGRuleUpdate):
             help="Space-separated list of application security group names or IDs. Limited by backend server, "
                  "temporarily this argument only supports one application security group name or ID.",
             nullable=True,
-            fmt=EmptyListArgFormat(),
         )
         args_schema.source_asgs.Element = AAZResourceIdArg(
             nullable=True,
@@ -5636,26 +5476,10 @@ class VNetCreate(_VNetCreate):
 class VNetUpdate(_VNetUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArgFormat, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
+        from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         # handle detach logic
-        args_schema.dns_servers._fmt = EmptyListArgFormat()
-        args_schema.ddos_protection_plan._fmt = EmptyResourceIdArgFormat(
+        args_schema.ddos_protection_plan._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/ddosProtectionPlans/{}",
         )
@@ -5775,22 +5599,7 @@ class VNetSubnetCreate(_VNetSubnetCreate):
 class VNetSubnetUpdate(_VNetSubnetUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZListArgFormat, AAZResourceIdArgFormat
-
-        class EmptyListArgFormat(AAZListArgFormat):
-            def __call__(self, ctx, value):
-                if value.to_serialized_data() == [""]:
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
-        class EmptyResourceIdArgFormat(AAZResourceIdArgFormat):
-            def __call__(self, ctx, value):
-                if value._data == "":
-                    logger.warning("It's recommended to detach it by null, empty string (\"\") will be deprecated.")
-                    value._data = None
-                return super().__call__(ctx, value)
-
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.delegations = AAZListArg(
             options=["--delegations"],
@@ -5806,7 +5615,6 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
             help="Space-separated list of services allowed private access to this subnet. "
                  "Values from: az network vnet list-endpoint-services.",
             nullable=True,
-            fmt=EmptyListArgFormat(),
         )
         args_schema.service_endpoints.Element = AAZStrArg(
             nullable=True,
@@ -5815,7 +5623,6 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
             options=["--service-endpoint-policy"],
             help="Space-separated list of names or IDs of service endpoint policies to apply.",
             nullable=True,
-            fmt=EmptyListArgFormat(),
         )
         args_schema.service_endpoint_policy.Element = AAZResourceIdArg(
             nullable=True,
@@ -5853,15 +5660,15 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         args_schema.private_endpoint_network_policies._registered = False
         args_schema.private_link_service_network_policies._registered = False
         # handle detach logic
-        args_schema.nat_gateway._fmt = EmptyResourceIdArgFormat(
+        args_schema.nat_gateway._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/natGateways/{}",
         )
-        args_schema.network_security_group._fmt = EmptyResourceIdArgFormat(
+        args_schema.network_security_group._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/networkSecurityGroups/{}",
         )
-        args_schema.route_table._fmt = EmptyResourceIdArgFormat(
+        args_schema.route_table._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/routeTables/{}",
         )
@@ -5908,6 +5715,8 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
             instance.properties.network_security_group = None
         if not has_value(instance.properties.route_table.id):
             instance.properties.route_table = None
+        if not has_value(instance.properties.nat_gateway.id):
+            instance.properties.nat_gateway = None
 
 
 class VNetPeeringCreate(_VNetPeeringCreate):
