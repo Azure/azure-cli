@@ -292,10 +292,10 @@ def validate_nodepool_taints(namespace):
         return
 
     for taint in taintsStr.split(','):
-        validate_taints(taint)
+        validate_taint(taint)
 
 
-def validate_taints(taint):
+def validate_taint(taint):
     """Validates that provided taint is a valid format"""
 
     regex = re.compile(r"^[a-zA-Z\d][\w\-\.\/]{0,252}=[a-zA-Z\d][\w\-\.]{0,62}:(NoSchedule|PreferNoSchedule|NoExecute)$")  # pylint: disable=line-too-long

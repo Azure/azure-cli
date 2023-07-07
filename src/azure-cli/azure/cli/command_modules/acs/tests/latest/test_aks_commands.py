@@ -3116,8 +3116,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
                      '--tags {tags} ' \
-                     '--nodepool-labels {nodepool_labels}' \
-                     '--nodepool_taints {nodepool_taints}'
+                     '--nodepool-labels {nodepool_labels} ' \
+                     '--nodepool-taints {nodepool_taints} '
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
