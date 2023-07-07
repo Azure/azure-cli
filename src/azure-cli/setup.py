@@ -52,7 +52,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     "antlr4-python3-runtime~=4.9.3",
     'azure-appconfiguration~=1.1.1',
-    'azure-batch~=13.0.0',
+    'azure-batch~=14.0.0',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-data-tables==12.4.0',
