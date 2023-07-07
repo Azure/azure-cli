@@ -889,9 +889,12 @@ def add_template_validator(cmd, client, resource_group_name, image_template_name
     existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
                                          resource_group_name=resource_group_name,
                                          image_template_name=image_template_name)
-    image_template_properties_validate = ImageTemplatePropertiesValidate(
-        continue_distribute_on_failure=dis_on_failure, source_validation_only=source_validation_only)
-    existing_image_template.validate = image_template_properties_validate
+    if not existing_image_template.validate:
+        existing_image_template.validate = ImageTemplatePropertiesValidate(
+            continue_distribute_on_failure=dis_on_failure, source_validation_only=source_validation_only)
+    else:
+        existing_image_template.validate.continue_distribute_on_failure = dis_on_failure
+        existing_image_template.validate.source_validation_only = source_validation_only
 
     return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update,
                       parameters=existing_image_template, resource_group_name=resource_group_name,
@@ -920,4 +923,48 @@ def show_template_validator(cmd, client, resource_group_name, image_template_nam
                                          resource_group_name=resource_group_name,
                                          image_template_name=image_template_name)
     return existing_image_template.validate
+
+
+def add_or_update_template_optimizer(cmd, client, resource_group_name, image_template_name, enable_vm_boot=None):
+    _require_defer(cmd)
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
+
+    from azure.mgmt.imagebuilder.models import ImageTemplatePropertiesOptimize, ImageTemplatePropertiesOptimizeVmBoot
+    image_template_properties_optimize = existing_image_template.optimize or ImageTemplatePropertiesOptimize()
+
+    if enable_vm_boot is not None:
+        state = "Enabled" if enable_vm_boot else "Disabled"
+        vm_boot = ImageTemplatePropertiesOptimizeVmBoot(state=state)
+        image_template_properties_optimize.vm_boot = vm_boot
+        existing_image_template.optimize = image_template_properties_optimize
+
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update,
+                      parameters=existing_image_template, resource_group_name=resource_group_name,
+                      image_template_name=image_template_name)
+
+
+def remove_template_optimizer(cmd, client, resource_group_name, image_template_name):
+    _require_defer(cmd)
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
+
+    if not existing_image_template.optimize:
+        raise ResourceNotFoundError("No optimize existing in this image template, no need to clear.")
+
+    existing_image_template.optimize = None
+
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
+                      resource_group_name=resource_group_name, image_template_name=image_template_name)
+
+
+def show_template_optimizer(cmd, client, resource_group_name, image_template_name):
+    _require_defer(cmd)
+
+    existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
+                                         resource_group_name=resource_group_name,
+                                         image_template_name=image_template_name)
+    return existing_image_template.optimize
 # endregion

@@ -17,14 +17,14 @@ from azure.cli.command_modules.acs._consts import (
     CONST_GPU_INSTANCE_PROFILE_MIG3_G, CONST_GPU_INSTANCE_PROFILE_MIG4_G,
     CONST_GPU_INSTANCE_PROFILE_MIG7_G, CONST_LOAD_BALANCER_SKU_BASIC,
     CONST_LOAD_BALANCER_SKU_STANDARD, CONST_MANAGED_CLUSTER_SKU_TIER_FREE,
-    CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD, CONST_NETWORK_DATAPLANE_AZURE,
-    CONST_NETWORK_DATAPLANE_CILIUM, CONST_NETWORK_PLUGIN_AZURE,
-    CONST_NETWORK_PLUGIN_KUBENET, CONST_NETWORK_PLUGIN_MODE_OVERLAY,
-    CONST_NETWORK_PLUGIN_NONE, CONST_NODE_IMAGE_UPGRADE_CHANNEL,
+    CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD, CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM,
+    CONST_NETWORK_DATAPLANE_AZURE, CONST_NETWORK_DATAPLANE_CILIUM,
+    CONST_NETWORK_PLUGIN_AZURE, CONST_NETWORK_PLUGIN_KUBENET,
+    CONST_NETWORK_PLUGIN_MODE_OVERLAY, CONST_NETWORK_PLUGIN_NONE,
+    CONST_NODE_IMAGE_UPGRADE_CHANNEL, CONST_NONE_UPGRADE_CHANNEL,
     CONST_NODEPOOL_MODE_SYSTEM, CONST_NODEPOOL_MODE_USER,
-    CONST_NONE_UPGRADE_CHANNEL, CONST_OS_DISK_TYPE_EPHEMERAL,
-    CONST_OS_DISK_TYPE_MANAGED, CONST_OS_SKU_AZURELINUX,
-    CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER, CONST_OS_SKU_UBUNTU,
+    CONST_OS_DISK_TYPE_EPHEMERAL, CONST_OS_DISK_TYPE_MANAGED,
+    CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER, CONST_OS_SKU_UBUNTU,
     CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022,
     CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
@@ -61,7 +61,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_pod_subnet_id, validate_ppg, validate_priority,
     validate_registry_name, validate_sku_tier, validate_snapshot_id,
     validate_snapshot_name, validate_spot_max_price, validate_ssh_key,
-    validate_taints, validate_vm_set_type, validate_vnet_subnet_id,
+    validate_taints, validate_vm_set_type, validate_vnet_subnet_id, validate_k8s_support_plan
     validate_utc_offset, validate_start_date, validate_start_time)
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
@@ -73,7 +73,6 @@ from knack.arguments import CLIArgumentType
 # pylint: disable=line-too-long,too-many-statements
 
 # candidates for enumeration, no longer maintained
-orchestrator_types = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
 regions_in_preview = [
     "canadacentral",
     "canadaeast",
@@ -118,7 +117,7 @@ scale_down_modes = [CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_DOWN_MODE_DEALLOCA
 
 # consts for ManagedCluster
 load_balancer_skus = [CONST_LOAD_BALANCER_SKU_BASIC, CONST_LOAD_BALANCER_SKU_STANDARD]
-sku_tiers = [CONST_MANAGED_CLUSTER_SKU_TIER_FREE, CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD]
+sku_tiers = [CONST_MANAGED_CLUSTER_SKU_TIER_FREE, CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD, CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM]
 network_plugins = [CONST_NETWORK_PLUGIN_KUBENET, CONST_NETWORK_PLUGIN_AZURE, CONST_NETWORK_PLUGIN_NONE]
 network_plugin_modes = [CONST_NETWORK_PLUGIN_MODE_OVERLAY]
 network_dataplanes = [CONST_NETWORK_DATAPLANE_AZURE, CONST_NETWORK_DATAPLANE_CILIUM]
@@ -163,6 +162,7 @@ week_indexes = [
 def load_arguments(self, _):
 
     acr_arg_type = CLIArgumentType(metavar='ACR_NAME_OR_RESOURCE_ID')
+    k8s_support_plans = self.get_models("KubernetesSupportPlan", resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters')
 
     # AKS command argument configuration
     with self.argument_context('aks', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
@@ -243,6 +243,7 @@ def load_arguments(self, _):
         c.argument('attach_acr', acr_arg_type)
         c.argument('skip_subnet_role_assignment', action='store_true')
         c.argument('node_resource_group')
+        c.argument('k8s_support_plan', arg_type=get_enum_type(k8s_support_plans), validator=validate_k8s_support_plan)
         c.argument('enable_defender', action='store_true')
         c.argument('defender_config', validator=validate_defender_config_parameter)
         c.argument('disable_disk_driver', action='store_true')
@@ -273,6 +274,7 @@ def load_arguments(self, _):
         c.argument('enable_secret_rotation', action='store_true')
         c.argument('rotation_poll_interval')
         c.argument('enable_sgxquotehelper', action='store_true')
+
         # nodepool paramerters
         c.argument('nodepool_name', default='nodepool1',
                    help='Node pool name, up to 12 alphanumeric characters', validator=validate_nodepool_name)
@@ -343,6 +345,7 @@ def load_arguments(self, _):
         c.argument('aad_tenant_id')
         c.argument('aad_admin_group_object_ids')
         c.argument('enable_oidc_issuer', action='store_true')
+        c.argument('k8s_support_plan', arg_type=get_enum_type(k8s_support_plans), validator=validate_k8s_support_plan)
         c.argument('windows_admin_password')
         c.argument('enable_ahub', action='store_true')
         c.argument('disable_ahub', action='store_true')
@@ -581,6 +584,10 @@ def load_arguments(self, _):
             c.argument('tags', tags_type)
             c.argument('nodepool_id', required=True, validator=validate_nodepool_id, help='The nodepool id.')
             c.argument('aks_custom_headers')
+
+    with self.argument_context('aks nodepool snapshot update') as c:
+        c.argument('snapshot_name', options_list=['--name', '-n'], help='The nodepool snapshot name.', validator=validate_snapshot_name)
+        c.argument('tags', tags_type, help='The tags to set to the snapshot.')
 
     for scope in ['aks nodepool snapshot show', 'aks nodepool snapshot delete', 'aks snapshot show', 'aks snapshot delete']:
         with self.argument_context(scope) as c:

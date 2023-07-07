@@ -168,7 +168,7 @@ def import_config(cmd,
                 dest_features.append(feature)
 
         need_feature_change = __print_features_preview(
-            old_json=__serialize_features_from_kv_list_to_comparable_json_object(keyvalues=dest_features),
+            old_json=__serialize_features_from_kv_list_to_comparable_json_object(keyvalues=dest_features, is_dest=True),
             new_json=__serialize_features_from_kv_list_to_comparable_json_object(keyvalues=src_features),
             strict=strict,
             yes=yes)
@@ -668,6 +668,7 @@ def list_key(cmd,
              name=None,
              label=None,
              datetime=None,
+             snapshot=None,
              connection_string=None,
              top=None,
              all_=False,
@@ -677,12 +678,16 @@ def list_key(cmd,
     if fields and resolve_keyvault:
         raise CLIErrors.MutuallyExclusiveArgumentError("Please provide only one of these arguments: '--fields' or '--resolve-keyvault'. See 'az appconfig kv list -h' for examples.")
 
+    if snapshot and (key or label or datetime):
+        raise CLIErrors.MutuallyExclusiveArgumentError("'snapshot' cannot be specified with 'key', 'label', or 'datetime' filters.")
+
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     keyvalues = __read_kv_from_config_store(azconfig_client,
                                             key=key if key else SearchFilterOptions.ANY_KEY,
                                             label=label if label else SearchFilterOptions.ANY_LABEL,
                                             datetime=datetime,
+                                            snapshot=snapshot,
                                             fields=fields,
                                             top=top,
                                             all_=all_,

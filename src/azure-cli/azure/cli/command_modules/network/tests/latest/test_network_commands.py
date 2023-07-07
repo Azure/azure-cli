@@ -2200,7 +2200,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             'ip2': 'pip2',
             'ag2': 'ag2',
             'rg': resource_group,
-            'csr_grp1': 'REQUEST-921-PROTOCOL-ATTACK',
+            'csr_grp1': 'REQUEST-931-APPLICATION-ATTACK-RFI',
             'csr_grp2': 'REQUEST-913-SCANNER-DETECTION'
         })
 
@@ -2236,28 +2236,22 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('length(@)', 2)
                  ])
 
+        # add two managed rule set to the managed rules of this waf-policy
+        self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.2 '
+                 '--group-name {csr_grp1} --rule rule-id=931120 --rule rule-id=931130')
+        self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.2 '
+                 '--group-name {csr_grp2} --rule rule-id=913100')
+
         # update some policy settings of this waf-policy
         self.cmd('network application-gateway waf-policy policy-setting update -g {rg} --policy-name {waf} '
                  '--state Enabled --file-upload-limit-in-mb 64 --mode Prevention')
 
         # test waf-policy policy-setting list
         self.cmd('network application-gateway waf-policy policy-setting list -g {rg} --policy-name {waf}', checks=[
-            self.check('length(@)', 5)
+            self.check("type(@)", "object")
         ])
-
-        # add two managed rule set to the managed rules of this waf-policy
-        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
-                 '--type OWASP --version 3.0',
-                 checks=[
-                     self.check('managedRules.managedRuleSets[0].ruleSetType', 'OWASP'),
-                     self.check('managedRules.managedRuleSets[0].ruleSetVersion', '3.0')
-                 ])
-        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
-                 '--type OWASP --version 3.0 '
-                 '--group-name {csr_grp1} --rule rule-id=921100 --rule rule-id=921110')
-        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
-                 '--type OWASP --version 3.0 '
-                 '--group-name {csr_grp2} --rule rule-id=913100')
 
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type Microsoft_BotManagerRuleSet --version 0.1',
@@ -2275,10 +2269,10 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             self.check('customRules[0].priority', 50),
             self.check('customRules[1].priority', 100),
             self.check('managedRules.managedRuleSets[0].ruleSetType', 'OWASP'),
-            self.check('managedRules.managedRuleSets[0].ruleSetVersion', '3.0'),
+            self.check('managedRules.managedRuleSets[0].ruleSetVersion', '3.2'),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules | length(@)', 2),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp1']),
-            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921100'),
+            self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '931120'),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].ruleGroupName', self.kwargs['csr_grp2']),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].rules[0].ruleId', '913100'),
             self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
@@ -2320,7 +2314,6 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  checks=[
                      self.check('length(@)', 1)
                  ])
-
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_custom_rule_')
     def test_network_app_gateway_waf_custom_rule(self, resource_group):
@@ -2422,6 +2415,76 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('matchConditions | length(@)', 1)
                  ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_custom_rule_v2_')
+    def test_network_app_gateway_waf_custom_rule_v2(self, resource_group):
+        self.kwargs.update({
+            'waf': 'agp1',
+            'rule': 'rule1',
+            'rule2': 'rule2',
+            'rule3': 'rule3',
+            'ip': 'pip1',
+            'ag': 'ag1',
+            'custom-rule1': 'custom-rule1'
+        })
+        # create a waf-policy with empty custom rule
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}')
+
+        self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} --type OWASP --version 3.2 --group-name "REQUEST-931-APPLICATION-ATTACK-RFI" --rule rule-id=931120 state=Enabled action=Log --rule rule-id=931130 state=Disabled action=AnomalyScoring')
+        self.cmd('network application-gateway waf-policy managed-rule exclusion rule-set add -g {rg} --policy-name {waf} --match-variable RequestArgNames --selector-match-operator StartsWith --selector hello --type OWASP --version 3.2 --group-name REQUEST-930-APPLICATION-ATTACK-LFI --rule-ids 930120 ')
+        self.cmd('network application-gateway waf-policy managed-rule exclusion rule-set add -g {rg} --policy-name {waf} --match-variable RequestArgNames --selector-match-operator StartsWith --selector hello --type OWASP --version 3.2 --group-name REQUEST-932-APPLICATION-ATTACK-RCE')
+        self.cmd('network application-gateway waf-policy managed-rule exclusion rule-set add -g {rg} --policy-name {waf} --match-variable RequestArgNames --selector-match-operator EndsWith --selector hello --type OWASP --version 3.2')
+        self.cmd('network application-gateway waf-policy managed-rule exclusion add -g {rg} --policy-name {waf} --match-variable RequestArgNames --selector-match-operator StartsWith --selector test')
+        self.cmd('network application-gateway waf-policy managed-rule exclusion add -g {rg} --policy-name {waf} --match-variable RequestArgValues --selector-match-operator StartsWith --selector test')
+        self.cmd('network application-gateway waf-policy policy-setting update -g {rg} --policy-name {waf} '
+                 '--log-scrubbing-state Enabled --scrubbing-rules [{{"state":"Enabled","match-variable":"RequestArgNames","selector-match-operator":"Equals","selector":"test"}},{{"state":"Enabled","match-variable":"RequestIPAddress","selector-match-operator":"EqualsAny","selector":null}}]')
+
+        # create a custom rule
+        self.cmd('network application-gateway waf-policy custom-rule create -g {rg} '
+                 '--policy-name {waf} -n {rule} '
+                 '--priority 1 '
+                 '--action Block '
+                 '--rule-type MatchRule')
+        self.cmd('network application-gateway waf-policy custom-rule create -g {rg} '
+                 '--policy-name {waf} -n {rule2} '
+                 '--priority 2 '
+                 '--action Block '
+                 '--rule-type MatchRule')
+
+        self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
+                 '--policy-name {waf} -n {rule} --match-variables RemoteAddr '
+                 '--operator IPMatch --values "192.168.1.0/24" "10.0.0.0/24" --negate false')
+        self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
+                 '--policy-name {waf} -n {rule2} --negate false '
+                 '--match-variables RemoteAddr --operator IPMatch --values "192.168.1.0/24" ')
+        self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
+                 '--policy-name {waf} -n {rule2} '
+                 '--match-variables RequestHeaders.UserAgent --operator Contains --values "Windows"')
+
+        self.cmd('network application-gateway waf-policy custom-rule create -g {rg} '
+                 '--policy-name {waf} -n {rule3} '
+                 '--priority 3 '
+                 '--action Block '
+                 '--rule-type RateLimitRule '
+                 '--rate-limit-duration FiveMins '
+                 '--rate-limit-threshold 15 '
+                 '--group-by-user-session [{{group-by-variables:[{{variable-name:"GeoLocation"}}]}}]',
+                 checks=[self.check('name', '{rule3}'),
+                         self.check('groupByUserSession[0].groupByVariables[0].variableName', 'GeoLocation'),
+                         self.check('rateLimitDuration', 'FiveMins'),
+                         self.check('rateLimitThreshold', '15')])
+
+        self.cmd('network application-gateway waf-policy custom-rule update -g {rg} '
+                 '--policy-name {waf} -n {rule3} '
+                 '--rate-limit-duration OneMin '
+                 '--rate-limit-threshold 10 '
+                 '--group-by-user-session [{{group-by-variables:[{{variable-name:"ClientAddr"}}]}}]',
+                 checks=[self.check('name', '{rule3}'),
+                         self.check('groupByUserSession[0].groupByVariables[0].variableName', 'ClientAddr'),
+                         self.check('rateLimitDuration', 'OneMin'),
+                         self.check('rateLimitThreshold', '10')])
+        self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
+                 '--policy-name {waf} -n {rule3} --negate true '
+                 '--match-variables RemoteAddr --operator IPMatch --values "192.168.1.0/24" "10.0.0.0/24"')
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_setting_')
     def test_network_app_gateway_waf_policy_setting(self, resource_group):
@@ -2439,6 +2502,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             self.check('policySettings.requestBodyCheck', True),
             self.check('policySettings.state', 'Disabled')
         ])
+        self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} --type OWASP --version 3.2 --group-name "REQUEST-931-APPLICATION-ATTACK-RFI" --rule rule-id=931120 state=Enabled action=Log --rule rule-id=931130 state=Disabled action=AnomalyScoring')
 
         # randomly update some properties
         self.cmd('network application-gateway waf-policy policy-setting update -g {rg} --policy-name {waf} '
@@ -2449,6 +2513,35 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('policySettings.mode', 'Prevention'),
                      self.check('policySettings.requestBodyCheck', False),
                      self.check('policySettings.state', 'Enabled')
+                 ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_setting_v2_')
+    def test_network_app_gateway_waf_policy_setting_v2(self, resource_group):
+        self.kwargs.update({
+            'waf': 'agp1',
+            'ag': 'ag1',
+            'rg': resource_group,
+        })
+
+        # check default policy setting values
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}', checks=[
+            self.check('policySettings.fileUploadLimitInMb', 100),
+            self.check('policySettings.maxRequestBodySizeInKb', 128),
+            self.check('policySettings.mode', 'Detection'),
+            self.check('policySettings.requestBodyCheck', True),
+            self.check('policySettings.state', 'Disabled')
+        ])
+        self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} --policy-name {waf} --type OWASP --version 3.2 --group-name "REQUEST-931-APPLICATION-ATTACK-RFI" --rule rule-id=931120 state=Enabled action=Log --rule rule-id=931130 state=Disabled action=AnomalyScoring')
+        # randomly update some properties
+        self.cmd('network application-gateway waf-policy policy-setting update -g {rg} --policy-name {waf} '
+                 '--request-body-inspect-limit-in-kb 64 --file-upload-enforcement True --request-body-enforcement False '
+                 '--log-scrubbing-state Enabled --scrubbing-rules [{{"state":"Enabled","match-variable":"RequestArgNames","selector-match-operator":"Equals","selector":"test"}},{{"state":"Enabled","match-variable":"RequestIPAddress","selector-match-operator":"EqualsAny","selector":null}}]',
+                 checks=[
+                     self.check('policySettings.requestBodyInspectLimitInKB', 64),
+                     self.check('policySettings.requestBodyEnforcement', False),
+                     self.check('policySettings.fileUploadEnforcement', True),
+                     self.check('policySettings.logScrubbing.scrubbingRules | length(@)', 2),
+                     self.check('policySettings.logScrubbing.state', 'Enabled')
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_managed_rules_')
@@ -6380,7 +6473,7 @@ class NetworkExtendedLocation(ScenarioTest):
         self.kwargs['edge_zone_vnet_id'] = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()['id']
         self.cmd('network vnet-gateway create -g {rg} -n vnet-gateway --vnet {vnet} --gateway-type {gateway_type} --edge-zone {edge_name} '
                  '--edge-zone-vnet-id {edge_zone_vnet_id}',
-                 checks=self.check('vnetGateway.vNetExtendedLocationResourceId', '{edge_zone_vnet_id}'))     
+                 checks=self.check('vnetGateway.vNetExtendedLocationResourceId', '{edge_zone_vnet_id}'))
 
     @ResourceGroupPreparer(name_prefix='test_network_private_endpoint_edge_zone', location='eastus2euap')
     def test_network_private_endpoint_edge_zone(self, resource_group):
