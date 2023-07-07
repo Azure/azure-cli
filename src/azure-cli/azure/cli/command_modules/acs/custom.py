@@ -59,6 +59,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_VIRTUAL_NODE_SUBNET_NAME,
     DecoratorEarlyExitException,
 )
+
 from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
@@ -434,6 +435,7 @@ def aks_create(
     attach_acr=None,
     skip_subnet_role_assignment=False,
     node_resource_group=None,
+    k8s_support_plan=None,
     enable_defender=False,
     defender_config=None,
     disable_disk_driver=False,
@@ -574,6 +576,7 @@ def aks_update(
     aad_tenant_id=None,
     aad_admin_group_object_ids=None,
     enable_oidc_issuer=False,
+    k8s_support_plan=None,
     windows_admin_password=None,
     enable_ahub=False,
     disable_ahub=False,
