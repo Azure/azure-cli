@@ -56,7 +56,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_pod_subnet_id, validate_ppg, validate_priority,
     validate_registry_name, validate_sku_tier, validate_snapshot_id,
     validate_snapshot_name, validate_spot_max_price, validate_ssh_key,
-    validate_taints, validate_vm_set_type, validate_vnet_subnet_id, validate_k8s_support_plan)
+    validate_nodepool_taints, validate_vm_set_type, validate_vnet_subnet_id, validate_k8s_support_plan)
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
     get_resource_name_completion_list, get_three_state_flag, name_type,
@@ -464,7 +464,7 @@ def load_arguments(self, _):
         c.argument('spot_max_price', type=float, validator=validate_spot_max_price)
         c.argument('labels', nargs='*', validator=validate_nodepool_labels)
         c.argument('tags', tags_type)
-        c.argument('node_taints', validator=validate_taints)
+        c.argument('node_taints', validator=validate_nodepool_taints)
         c.argument('node_osdisk_type', arg_type=get_enum_type(node_os_disk_types))
         c.argument('node_osdisk_size', type=int)
         c.argument('max_surge', validator=validate_max_surge)
@@ -492,7 +492,7 @@ def load_arguments(self, _):
         c.argument('max_count', type=int, validator=validate_nodes_count)
         c.argument('labels', nargs='*', validator=validate_nodepool_labels)
         c.argument('tags', tags_type)
-        c.argument('node_taints', validator=validate_taints)
+        c.argument('node_taints', validator=validate_nodepool_taints)
         c.argument('max_surge', validator=validate_max_surge)
         c.argument('mode', get_enum_type(node_mode_types))
         c.argument('scale_down_mode', arg_type=get_enum_type(scale_down_modes))
