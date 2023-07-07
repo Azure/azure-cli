@@ -8,7 +8,7 @@ import unittest
 
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, JMESPathCheck, ResourceGroupPreparer,
                                StorageAccountPreparer, api_version_constraint, live_only, LiveScenarioTest,
-                               record_only, KeyVaultPreparer, JMESPathCheckExists)
+                               record_only, KeyVaultPreparer, JMESPathCheckExists, JMESPathCheckNotExists)
 from azure.cli.testsdk.decorators import serial_test
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
@@ -150,6 +150,66 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage account network-rule list -g {rg} --account-name {sa}', checks=[
             JMESPathCheck('length(resourceAccessRules)', 1)
         ])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2023-01-01')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_ipv6', location='eastus2euap')
+    def test_storage_account_ipv6(self, resource_group):
+        self.kwargs = {
+            'rg': resource_group,
+            'sa': self.create_random_name('sa', 24),
+            'ip1': '25.1.2.3',
+            'ip2': '25.2.0.0/24',
+            'ipv6_1': 'fe00:0:0:1::92',
+            'ipv6_2': 'fe00::1:0:0:1:92',
+            'ipv6_3': 'fe00:0:0:1::/111',
+        }
+        # test storage account create/update with ipv6 settings
+        self.cmd('storage account create -g {rg} -n {sa} --default-dual-stack-endpoint true '
+                 '--publish-ipv4-endpoint true --publish-ipv6-endpoint true',
+                 checks=[
+                     JMESPathCheck('dualStackEndpointPreference.defaultDualStackEndpoints', True),
+                     JMESPathCheck('dualStackEndpointPreference.publishIpv4Endpoint', True),
+                     JMESPathCheck('dualStackEndpointPreference.publishIpv6Endpoint', True),
+                     JMESPathCheckExists('primaryEndpoints.ipv4Endpoints'),
+                     JMESPathCheckExists('primaryEndpoints.ipv6Endpoints')
+                 ])
+
+        self.cmd('storage account update -g {rg} -n {sa} --default-dual-stack-endpoint false '
+                 '--publish-ipv4-endpoint true --publish-ipv6-endpoint false',
+                 checks=[
+                     JMESPathCheck('dualStackEndpointPreference.defaultDualStackEndpoints', False),
+                     JMESPathCheck('dualStackEndpointPreference.publishIpv4Endpoint', True),
+                     JMESPathCheck('dualStackEndpointPreference.publishIpv6Endpoint', False),
+                     JMESPathCheckExists('primaryEndpoints.ipv4Endpoints'),
+                     JMESPathCheckNotExists('primaryEndpoints.ipv6Endpoints')
+        ])
+
+        # test add both ipv4 and ipv6 addresses
+        self.cmd('storage account network-rule add -g {rg} --account-name {sa} --ip-address {ip1} {ip2} '
+                 '--ipv6-address {ipv6_1} {ipv6_2}')
+        self.cmd('storage account network-rule list -g {rg} --account-name {sa}', checks=[
+            JMESPathCheck('length(ipRules)', 2),
+            JMESPathCheck('length(ipv6Rules)', 2)
+        ])
+
+        # test add multiple ip addresses with overlaps between them
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('storage account network-rule add -g {rg} --account-name {sa} --ipv6-address {ipv6_1} {ipv6_3}')
+        # test add multiple ip addresses with some overlaps with the server
+        self.cmd('storage account network-rule add -g {rg} --account-name {sa} --ipv6-address {ipv6_3}')
+        self.cmd('storage account network-rule list -g {rg} --account-name {sa}', checks=[
+            JMESPathCheck('length(ipRules)', 2),
+            JMESPathCheck('length(ipv6Rules)', 2)
+        ])
+
+        # test remove multiple ip addresses
+        self.cmd('storage account network-rule remove -g {rg} --account-name {sa} --ipv6-address {ipv6_1}')
+        self.cmd('storage account network-rule list -g {rg} --account-name {sa}', checks=[
+            JMESPathCheck('length(ipRules)', 2),
+            JMESPathCheck('length(ipv6Rules)', 1)
+        ])
+
 
     @serial_test()
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01')
