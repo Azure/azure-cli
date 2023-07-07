@@ -207,7 +207,7 @@ jobs:
 
   - script: |
       set ARCH=$(Platform)
-      set CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
+      set /p CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
       set
       
       build_scripts/windows/scripts/build.cmd
