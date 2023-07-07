@@ -53,8 +53,8 @@
     <!-- New product architectures should upgrade the original x86 product - even of the same version. -->
     <?if $(var.UpgradeCode) != "dff82af0-3f95-4ac9-8efd-948604fdb028" ?>
     <Upgrade Id="dff82af0-3f95-4ac9-8efd-948604fdb028">
-      <UpgradeVersion Property="WIX_UPGRADE_DETECTED" Maximum="$(var.ProductVersion)" IncludeMinimum="yes" MigrateFeatures="yes" />
-      <UpgradeVersion Property="WIX_DOWNGRADE_DETECTED" Minimum="$(var.ProductVersion)" IncludeMinimum="no" OnlyDetect="yes" />
+      <UpgradeVersion Property="WIX_X86_UPGRADE_DETECTED" Maximum="$(var.ProductVersion)" IncludeMinimum="yes" MigrateFeatures="yes" />
+      <UpgradeVersion Property="WIX_X86_DOWNGRADE_DETECTED" Minimum="$(var.ProductVersion)" IncludeMinimum="no" OnlyDetect="yes" />
     </Upgrade>
     <?endif ?>
 
@@ -91,7 +91,7 @@
     <!-- Show message to restart any terminals only if the PATH is changed -->
     <CustomAction Id="Set_WIXUI_EXITDIALOGOPTIONALTEXT" Property="WIXUI_EXITDIALOGOPTIONALTEXT" Value="Please close and reopen any active terminal window to use Azure CLI." />
     <InstallUISequence>
-      <Custom Action="Set_WIXUI_EXITDIALOGOPTIONALTEXT" After="CostFinalize">NOT Installed AND NOT WIX_UPGRADE_DETECTED</Custom>
+      <Custom Action="Set_WIXUI_EXITDIALOGOPTIONALTEXT" After="CostFinalize">NOT Installed AND NOT WIX_UPGRADE_DETECTED AND NOT WIX_X86_UPGRADE_DETECTED</Custom>
     </InstallUISequence>
 
   </Product>
