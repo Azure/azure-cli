@@ -163,8 +163,7 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
         az_error = azclierror.CLIInternalError(error_msg)
         az_error.set_exception_trace(ex)
         az_error.set_recommendation(
-            "To check existing issues, please visit: https://github.com/Azure/azure-cli/issues\n"
-            "To open a new issue, please run `az feedback`")
+            "To check existing issues, please visit: https://github.com/Azure/azure-cli/issues")
 
     if isinstance(az_error, azclierror.ResourceNotFoundError):
         exit_code = 3

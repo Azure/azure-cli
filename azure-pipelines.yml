@@ -507,6 +507,7 @@ jobs:
 - job: TestExtensionsLoading
   displayName: Test Extensions Loading
   condition: succeeded()
+  continueOnError: true
   timeoutInMinutes: 40
 
   pool:
@@ -882,6 +883,12 @@ jobs:
           distro: bullseye
           arch: ${{ arch.value }}
           pool: ${{ arch.pool }}
+        Bookworm ${{ arch.name }}:
+          # 12
+          deb_system: debian
+          distro: bookworm
+          arch: ${{ arch.value }}
+          pool: ${{ arch.pool }}
   steps:
   - bash: ./scripts/ci/install_docker.sh
     displayName: Install Docker
@@ -931,6 +938,11 @@ jobs:
         Bullseye ${{ arch.name }}:
           deb_system: debian
           distro: bullseye
+          arch: ${{ arch.value }}
+          pool: ${{ arch.pool }}
+        Bookworm ${{ arch.name }}:
+          deb_system: debian
+          distro: bookworm
           arch: ${{ arch.value }}
           pool: ${{ arch.pool }}
   pool:

@@ -147,8 +147,8 @@ short-summary: Pre-load content for a CDN endpoint.
 parameters:
   - name: --content-paths
     type: string
-    short-summary: The path to the content to be loaded. Path should be a relative
-                   file URL of the origin.
+    short-summary: Space-separated values. The path to the content to be loaded.
+                   Path should be a relative file URL of the origin.
 examples:
   - name: Pre-load Javascript and CSS content for an endpoint.
     text: >
@@ -162,8 +162,8 @@ short-summary: Purge pre-loaded content for a CDN endpoint.
 parameters:
   - name: --content-paths
     type: string
-    short-summary: The path to the content to be purged. Can describe a file path or a
-                   wildcard directory.
+    short-summary: Space-separated values. The path to the content to be purged.
+                   Can describe a file path or a wildcard directory.
 examples:
   - name: Purge pre-loaded Javascript and CSS content.
     text: >
