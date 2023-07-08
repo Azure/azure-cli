@@ -29,7 +29,7 @@ from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_
 from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, \
     mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, validate_georestore_location, \
     validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_public_access_server
-from azure.mgmt.rdbms.mysql_flexibleservers.models._my_sql_management_client_enums import AdvancedThreatProtectionName
+# from azure.mgmt.rdbms.mysql_flexibleservers.models._my_sql_management_client_enums import AdvancedThreatProtectionName
 
 logger = get_logger(__name__)
 DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
@@ -82,28 +82,28 @@ def flexible_server_threat_model_update(cmd, client, resource_group_name,
     # }
 
     response = {
-    "id": "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/threatprotection-4799/providers/Microsoft.DBforMySQL/flexibleServers/threatprotection-6440/advancedThreatProtectionSettings/Default",
-    "name": "Default",
-    "type": "Microsoft.DBforMySQL/flexibleServers/advancedThreatProtectionSettings",
-    "systemData": {
-        "createdBy": "string",
-        "createdByType": "User",
-        "createdAt": "2022-04-03T04:41:33.937Z",
-        "lastModifiedBy": "string",
-        "lastModifiedByType": "User",
-        "lastModifiedAt": "2022-04-03T04:41:33.937Z"
-    },
-    "properties": {
-        "state": "{fname}",
-        "creationTime": "2022-04-03T04:41:33.937Z",
-        "provisioningState": "Succeeded"
+        "id": "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/threatprotection-4799/providers/Microsoft.DBforMySQL/flexibleServers/threatprotection-6440/advancedThreatProtectionSettings/Default",
+        "name": "Default",
+        "type": "Microsoft.DBforMySQL/flexibleServers/advancedThreatProtectionSettings",
+        "systemData": {
+            "createdBy": "string",
+            "createdByType": "User",
+            "createdAt": "2022-04-03T04:41:33.937Z",
+            "lastModifiedBy": "string",
+            "lastModifiedByType": "User",
+            "lastModifiedAt": "2022-04-03T04:41:33.937Z"
+        },
+        "properties": {
+            "state": "{fname}",
+            "creationTime": "2022-04-03T04:41:33.937Z",
+            "provisioningState": "Succeeded"
+        }
     }
-}
 
     if defender_state == "Enabled":
-       response["properties"]["state"] = response["properties"]["state"].format(fname="Enabled")
+        response["properties"]["state"] = response["properties"]["state"].format(fname="Enabled")
     else:
-       response["properties"]["state"] = response["properties"]["state"].format(fname="Disabled")
+        response["properties"]["state"] = response["properties"]["state"].format(fname="Disabled")
 
     formatted_response = json.dumps(response, indent=4)
     print(formatted_response)
@@ -154,7 +154,7 @@ def flexible_server_threat_model_show(cmd, client, resource_group_name=None, ser
 
     if server_name is None:
         raise ValueError("Invalid server name provided.")
-    
+
     if advanced_threat_protection_name is None:
         raise ValueError("Invalid defender protection name provided.")
 
