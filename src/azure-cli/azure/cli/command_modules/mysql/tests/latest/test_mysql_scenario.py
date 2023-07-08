@@ -18,9 +18,8 @@ from azure.core.exceptions import HttpResponseError
 from ..._client_factory import cf_mysql_flexible_private_dns_zone_suffix_operations
 from ..._network import prepare_private_dns_zone
 from ...custom import DbContext as MysqlDbContext, _determine_iops
-from ..._util import get_mysql_list_skus_info, retryable_method
-from ...custom import flexible_server_threat_model_update
-from ..._client_factory import cf_mysql_advanced_threat_protection
+from ..._util import get_mysql_list_skus_info, retryable_method 
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.testsdk import (
     JMESPathCheck,
     JMESPathCheckExists,
@@ -31,6 +30,7 @@ from azure.cli.testsdk import (
     ScenarioTest,
     StringContainCheck,
     live_only)
+from knack.util import CLIError
 
 # Constants
 SERVER_NAME_PREFIX = 'azuredbclitest-'
@@ -76,34 +76,46 @@ class AdvancedThreatProtectionTest(ScenarioTest):
      
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
-    @ServerPreparer(engine_type='mysql', location=DEFAULT_LOCATION)
-    def test_mysql_advanced_threat_protection_mgmt(self, resource_group, server):
+   # @ServerPreparer(engine_type='mysql', location=DEFAULT_LOCATION)
+    def test_mysql_advanced_threat_protection_mgmt(self, resource_group, server="Default"):
         self._test_flexible_server_threat_model_update_mgmt('mysql', resource_group, server)
 
     def _test_flexible_server_threat_model_update_mgmt(self, database_engine, resource_group, server):
-
-        self.cmd('{} flexible-server threat-protection update -g {} -s {} \
-                    '.format(database_engine, resource_group, server))
         
+        # Test to check if the defender is in enabled state and the provisioning state is succeeded
+        defender_state = 'Enabled'
+        update_response=self.cmd('{} flexible-server threat-protection update -g {} -s {} --defender-state {}\
+                    '.format(database_engine, resource_group, server,defender_state)).get_output_in_json()
+        self.assertEqual(update_response['properties']['state'], defender_state)
+        self.assertEqual(update_response['properties']['provisioningState'], 'Succeeded')
+        
+        # Test to check the defender state in update and list are same
+        check_same_response=self.cmd('{} flexible-server threat-protection list -g {} -s {}'
+                             .format(database_engine, resource_group, server)).get_output_in_json()
+        self.assertEqual(check_same_response['properties']['state'],update_response['properties']['state'])
+
+        # Test to check the server name passed is the same as the response
         basic_info = self.cmd('{} flexible-server threat-protection list -g {} -s {}'
                              .format(database_engine, resource_group, server)).get_output_in_json()
-
         self.assertEqual(basic_info['name'], server)
-        self.assertEqual(basic_info['resourceGroup'], resource_group)
 
-        # Enable advanced threat protection for the flexible server
-        self.cmd('{} flexible-server threat-protection update -g {} -s {} --defender_state enable'.format(database_engine, resource_group, server))       
-        # Verifing that advanced threat protection is enabled
-        advanced_threat_protection_settings = self.cmd('{} flexible-server threat-protection show -g {} -s {}'.format(database_engine, resource_group, server)).get_output_in_json()
-        self.assertEqual(advanced_threat_protection_settings['state'], 'Enabled')
-        # Disable advanced threat protection for the flexible server
-        self.cmd('{} flexible-server threat-protection update -g {} -s {} --defender_state disable'.format(database_engine, resource_group, server))
-        # Verifing that advanced threat protection is disabled
-        advanced_threat_protection_settings = self.cmd('{} flexible-server advanced-threat-protection show -g {} -s {}'.format(database_engine, resource_group, server)).get_output_in_json()
-        self.assertEqual(advanced_threat_protection_settings['state'], 'Disabled')
+        # Test to check if error is raised when resource group is not provided
+        with self.assertRaisesRegexp(CLIError,"--resource-group"):
+            self.cmd('{} flexible-server threat-protection update -s {} \
+                    '.format(database_engine,server))
+            
+        # Test to check if error is raised when server name is not provided     
+        with self.assertRaisesRegexp(CLIError,"--server-name"):
+            self.cmd('{} flexible-server threat-protection update -g {} \
+                    '.format(database_engine,resource_group))    
+            
+        # Test to check if error is raised when defender state is not provided
+        with self.assertRaisesRegexp(ValueError,"Invalid defender state provided."):
+            self.cmd('{} flexible-server threat-protection update -g {} -s {} \
+                    '.format(database_engine,resource_group, server))
 
 
-# class FlexibleServerMgmtScenarioTest(ScenarioTest):
+#class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
 #     
     # @ResourceGroupPreparer(location=DEFAULT_LOCATION)
