@@ -126,12 +126,13 @@ def sort_by_content(item):
 
 def build_markdown_content(item, content):
     if content == "":
-        content = f'|is_break|cmd_name|rule_message|suggest_message|\n|---|---|---|---|\n'
-    is_break = '❌True' if item['is_break'] else '⚠️False'
+        content = f'|rule|cmd_name|rule_message|suggest_message|\n|---|---|---|---|\n'
+    rule_link = f'[{item["rule_id"]} - {item["rule_name"]}]({item["rule_link_url"]})'
+    rule = f'❌ {rule_link} ' if item['is_break'] else f'⚠️ {rule_link}'
     cmd_name = item['cmd_name'] if 'cmd_name' in item else item['subgroup_name']
     rule_message = item['rule_message']
     suggest_message = item['suggest_message']
-    content += f'|{is_break}|{cmd_name}|{rule_message}|{suggest_message}|\n'
+    content += f'|{rule}|{cmd_name}|{rule_message}|{suggest_message}|\n'
     return content
 
 
