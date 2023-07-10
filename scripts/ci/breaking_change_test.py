@@ -44,6 +44,9 @@ def get_diff_meta_files():
     cmd = ['azdev', 'command-change', 'meta-export', '--src', src_branch, '--tgt', target_branch, '--repo', get_cli_repo_path(), '--meta-output-path', diff_meta_path]
     print(cmd)
     subprocess.run(cmd)
+    cmd = ['ls', '-al', diff_meta_path]
+    print(cmd)
+    subprocess.run(cmd)
 
 
 def get_base_meta_files():
@@ -57,6 +60,9 @@ def get_base_meta_files():
     print(cmd)
     subprocess.run(cmd)
     cmd = ['azdev', 'command-change', 'meta-export', 'CLI', '--meta-output-path', base_meta_path]
+    print(cmd)
+    subprocess.run(cmd)
+    cmd = ['ls', '-al', base_meta_path]
     print(cmd)
     subprocess.run(cmd)
 
