@@ -205,8 +205,10 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if encryption_key_type_for_table is not None or encryption_key_type_for_queue is not None:
         EncryptionServices = cmd.get_models('EncryptionServices')
         EncryptionService = cmd.get_models('EncryptionService')
-        params.encryption = Encryption()
-        params.encryption.services = EncryptionServices()
+        if params.encryption is None:
+            params.encryption = Encryption()
+        if params.encryption.services is None:
+            params.encryption.services = EncryptionServices()
         if encryption_key_type_for_table is not None:
             table_encryption_service = EncryptionService(enabled=True, key_type=encryption_key_type_for_table)
             params.encryption.services.table = table_encryption_service
