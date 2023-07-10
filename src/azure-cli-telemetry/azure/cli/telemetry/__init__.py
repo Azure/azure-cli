@@ -10,7 +10,7 @@ import portalocker
 
 from azure.cli.telemetry.util import save_payload
 
-__version__ = "1.0.8"
+__version__ = "1.1.0"
 
 DEFAULT_INSTRUMENTATION_KEY = 'c4395b75-49cc-422c-bc95-c7d51aef5d46'
 
