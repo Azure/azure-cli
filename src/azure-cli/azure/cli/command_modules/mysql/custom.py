@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-import json
+# import json
 import re
 from datetime import datetime, timedelta
 from dateutil.tz import tzutc
@@ -29,7 +29,6 @@ from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_
 from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, \
     mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, validate_georestore_location, \
     validate_mysql_tier_update, validate_and_format_restore_point_in_time, validate_public_access_server
-# from azure.mgmt.rdbms.mysql_flexibleservers.models._my_sql_management_client_enums import AdvancedThreatProtectionName
 
 logger = get_logger(__name__)
 DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
@@ -61,7 +60,7 @@ def server_list_custom_func(client, resource_group_name=None):
 
 def flexible_server_threat_model_update(cmd, client, resource_group_name,
                                         server_name,
-                                        defender_state=None,
+                                        defender_state,
                                         advanced_threat_protection_name="default",
                                         subscription_id=None
                                         ):
@@ -71,16 +70,15 @@ def flexible_server_threat_model_update(cmd, client, resource_group_name,
     if server_name is None:
         raise ValueError("Invalid server name provided.")
 
-    if advanced_threat_protection_name is None:
+    if advanced_threat_protection_name == mysql_flexibleservers.models.AdvancedThreatProtectionName.DEFAULT.name:
         raise ValueError("Invalid defender protection name provided.")
 
-    if defender_state is None:
+    if not (defender_state.lower() == mysql_flexibleservers.models.AdvancedThreatProtectionState.ENABLED.name.lower() or defender_state.lower() == mysql_flexibleservers.models.AdvancedThreatProtectionState.DISABLED.name.lower()):
         raise ValueError("Invalid defender state provided.")
 
     # parameters = {
     #     'state': defender_state
     # }
-
     response = {
         "id": "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/threatprotection-4799/providers/Microsoft.DBforMySQL/flexibleServers/threatprotection-6440/advancedThreatProtectionSettings/Default",
         "name": "Default",
@@ -99,22 +97,12 @@ def flexible_server_threat_model_update(cmd, client, resource_group_name,
             "provisioningState": "Succeeded"
         }
     }
-
-    if defender_state == "Enabled":
-        response["properties"]["state"] = response["properties"]["state"].format(fname="Enabled")
-    else:
-        response["properties"]["state"] = response["properties"]["state"].format(fname="Disabled")
-
-    formatted_response = json.dumps(response, indent=4)
-    print(formatted_response)
+    response["properties"]["state"] = response["properties"]["state"].format(fname=defender_state)
     return response
-
     # return client.begin_update(resource_group_name, server_name, advanced_threat_protection_name, parameters)
 
 
 def flexible_server_threat_model_list(cmd, client, resource_group_name=None, server_name=None,):
-    if not client:
-        raise ValueError("Invalid client provided.")
 
     if not resource_group_name:
         raise ValueError("Invalid resource group name provided.")
@@ -140,10 +128,7 @@ def flexible_server_threat_model_list(cmd, client, resource_group_name=None, ser
             "provisioningState": "Succeeded"
         }
     }
-    formatted_response = json.dumps(response, indent=4)
-    print(formatted_response)
     return response
-
     # return client.list(resource_group_name,server_name)
 
 
@@ -155,7 +140,7 @@ def flexible_server_threat_model_show(cmd, client, resource_group_name=None, ser
     if server_name is None:
         raise ValueError("Invalid server name provided.")
 
-    if advanced_threat_protection_name is None:
+    if advanced_threat_protection_name == mysql_flexibleservers.models.AdvancedThreatProtectionName.DEFAULT.name:
         raise ValueError("Invalid defender protection name provided.")
 
     response = {
@@ -176,8 +161,7 @@ def flexible_server_threat_model_show(cmd, client, resource_group_name=None, ser
             "provisioningState": "Succeeded"
         }
     }
-    formatted_response = json.dumps(response, indent=4)
-    print(formatted_response)
+    return response
     # return client.get(resource_group_name, server_name, advanced_threat_protection_name)
 
 
