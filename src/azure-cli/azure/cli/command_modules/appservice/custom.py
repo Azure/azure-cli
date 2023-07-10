@@ -3833,6 +3833,12 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 'Please try again with the --functions-version parameter set to 4.'
             )
 
+        if maximum_instances < always_ready_instances:
+            raise ArgumentUsageError(
+                '--maximum-instances is less than --always-ready-instances. '
+                'Please try again with --always-ready-instances being less than or equal to --maximum-instances.'
+            ) 
+
     if ((always_ready_instances is not None or maximum_instances is not None or instance_size is not None) and
             flexconsumption_location is None):
         raise RequiredArgumentMissingError("usage error: parameters --always-ready-instances, --maximum-instances "
