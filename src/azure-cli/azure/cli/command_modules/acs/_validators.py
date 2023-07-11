@@ -304,7 +304,7 @@ def validate_taint(taint):
         return
     found = regex.findall(taint)
     if not found:
-        raise CLIError('Invalid node taint: %s' % taint)
+        raise ArgumentUsageError('Invalid node taint: %s' % taint)
 
 
 def validate_priority(namespace):
