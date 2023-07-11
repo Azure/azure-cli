@@ -55,7 +55,7 @@ def flexible_server_update_set(client, resource_group_name, server_name, paramet
 def server_list_custom_func(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
-    return client.list()               
+    return client.list()
 
 
 def flexible_server_threat_model_update(cmd, client, resource_group_name,
@@ -64,15 +64,14 @@ def flexible_server_threat_model_update(cmd, client, resource_group_name,
                                         advanced_threat_protection_name,
                                         subscription_id=None
                                         ):
-    
+
     allowed_defender_name_values = [mysql_flexibleservers.models.AdvancedThreatProtectionName.DEFAULT.value]
     if advanced_threat_protection_name not in allowed_defender_name_values:
         raise ValueError("Invalid defender protection name provided, Allowed value - {}".format(allowed_defender_name_values))
 
     allowed_defender_state_values = [mysql_flexibleservers.models.AdvancedThreatProtectionState.ENABLED.value, mysql_flexibleservers.models.AdvancedThreatProtectionState.DISABLED.value]
     if defender_state not in allowed_defender_state_values:
-        raise ValueError("Invalid defender state provided , Allowed value - {}".format(allowed_defender_state_values
-        ))
+        raise ValueError("Invalid defender state provided , Allowed value - {}".format(allowed_defender_state_values))
 
     # parameters = {
     #     'state': defender_state
@@ -94,7 +93,7 @@ def flexible_server_threat_model_update(cmd, client, resource_group_name,
             "creationTime": "2022-04-03T04:41:33.937Z",
             "provisioningState": "Succeeded"
         }
-    }       
+    }
     response["properties"]["state"] = response["properties"]["state"].format(fname=defender_state)
     return response
     # return client.begin_update(resource_group_name, server_name, advanced_threat_protection_name, parameters)
