@@ -380,15 +380,11 @@ class _UpdateHelper:
         )
 
         public_ip_addresses = _schema_ddos_protection_plan_read.properties.public_ip_addresses
-        public_ip_addresses.Element = AAZObjectType(
-            flags={"read_only": True},
-        )
+        public_ip_addresses.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(public_ip_addresses.Element)
 
         virtual_networks = _schema_ddos_protection_plan_read.properties.virtual_networks
-        virtual_networks.Element = AAZObjectType(
-            flags={"read_only": True},
-        )
+        virtual_networks.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(virtual_networks.Element)
 
         tags = _schema_ddos_protection_plan_read.tags
@@ -410,14 +406,10 @@ class _UpdateHelper:
             _schema.id = cls._schema_sub_resource_read.id
             return
 
-        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType(
-            flags={"read_only": True}
-        )
+        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
 
         sub_resource_read = _schema_sub_resource_read
-        sub_resource_read.id = AAZStrType(
-            flags={"read_only": True},
-        )
+        sub_resource_read.id = AAZStrType()
 
         _schema.id = cls._schema_sub_resource_read.id
 
