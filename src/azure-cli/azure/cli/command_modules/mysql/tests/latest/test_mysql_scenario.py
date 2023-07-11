@@ -111,6 +111,10 @@ class AdvancedThreatProtectionTest(ScenarioTest):
                     '.format(database_engine,resource_group, server,defender_name,"enabled"))
             self.cmd('{} flexible-server threat-protection update -g {} -s {} -dn {} --defender-state {}\
                     '.format(database_engine,resource_group, server,defender_name,"ENABLED"))
+            self.cmd('{} flexible-server threat-protection update -g {} -s {} -dn {} --defender-state {}\
+                    '.format(database_engine,resource_group, server,defender_name,"disabled"))
+            self.cmd('{} flexible-server threat-protection update -g {} -s {} -dn {} --defender-state {}\
+                    '.format(database_engine,resource_group, server,defender_name,"DISABLED"))
 
 # class FlexibleServerMgmtScenarioTest(ScenarioTest):
     
