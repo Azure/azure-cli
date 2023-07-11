@@ -85,16 +85,13 @@ class AdvancedThreatProtectionTest(ScenarioTest):
     def _test_flexible_server_threat_model_update_mgmt(self, database_engine, resource_group):     
         server="Default"
         #Test to check if the defender is in enabled state and the provisioning state i succeeded
-        defender_state = mysql_flexibleservers.models.AdvancedThreatProtectionState.ENABLED.value or defender_state == mysql_flexibleservers.models.AdvancedThreatProtectionState.DISABLED.value
+        defender_state = mysql_flexibleservers.models.AdvancedThreatProtectionState.ENABLED.value
         defender_name = mysql_flexibleservers.models.AdvancedThreatProtectionName.DEFAULT.value
         update_response=self.cmd('{} flexible-server threat-protection update -g {} -s {} --defender-state {} -dn {}\
                     '.format(database_engine, resource_group, server,defender_state,defender_name)).get_output_in_json()
         self.assertEqual(update_response['properties']['state'], defender_state)
         self.assertEqual(update_response['properties']['provisioningState'], 'Succeeded')
-        self.assertEqual(defender_name,"Default")
-        self.assertEqual(defender_state,"Enabled")
-
-        
+       
         # Test to check if error is raised when defender name is not correct in update
         with self.assertRaisesRegexp(ValueError,"Invalid defender protection name provided."):
             self.cmd('{} flexible-server threat-protection update -g {} -s {} --defender-state {} -dn {} \

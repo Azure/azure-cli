@@ -65,13 +65,14 @@ def flexible_server_threat_model_update(cmd, client, resource_group_name,
                                         subscription_id=None
                                         ):
     
-    allowed_atp_state_values = [mysql_flexibleservers.models.AdvancedThreatProtectionName.DEFAULT.value]
-    if advanced_threat_protection_name not in allowed_atp_state_values:
-        raise ValueError("Invalid defender protection name provided.")
+    allowed_defender_name_values = [mysql_flexibleservers.models.AdvancedThreatProtectionName.DEFAULT.value]
+    if advanced_threat_protection_name not in allowed_defender_name_values:
+        raise ValueError("Invalid defender protection name provided, Allowed value - {}".format(allowed_defender_name_values))
 
     allowed_defender_state_values = [mysql_flexibleservers.models.AdvancedThreatProtectionState.ENABLED.value, mysql_flexibleservers.models.AdvancedThreatProtectionState.DISABLED.value]
     if defender_state not in allowed_defender_state_values:
-        raise ValueError("Invalid defender state provided.")
+        raise ValueError("Invalid defender state provided , Allowed value - {}".format(allowed_defender_state_values
+        ))
 
     # parameters = {
     #     'state': defender_state
@@ -137,8 +138,9 @@ def flexible_server_threat_model_show(cmd, client, resource_group_name, server_n
     if server_name is None:
         raise ValueError("Invalid server name provided.")
 
-    if advanced_threat_protection_name != mysql_flexibleservers.models.AdvancedThreatProtectionName.DEFAULT.value:
-        raise ValueError("Invalid defender protection name provided.")
+    allowed_defender_name_values = [mysql_flexibleservers.models.AdvancedThreatProtectionName.DEFAULT.value]
+    if advanced_threat_protection_name not in allowed_defender_name_values:
+        raise ValueError("Invalid defender protection name provided, Allowed value - {}".format(allowed_defender_name_values))
 
     response = {
         "id": "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/threatprotection-4799/providers/Microsoft.DBforMySQL/flexibleServers/threatprotection-6440/advancedThreatProtectionSettings/Default",
