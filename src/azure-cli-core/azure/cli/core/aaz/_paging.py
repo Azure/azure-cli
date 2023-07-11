@@ -60,8 +60,8 @@ class AAZPageIterator:  # pylint: disable=too-many-instance-attributes
 
 
 class AAZPaged:
-    def __init__(self, executor, extract_result, cli_ctx, next_token=None, page_size=None):
-        if isinstance(page_size, int) and isinstance(next_token, str):
+    def __init__(self, executor, extract_result, cli_ctx, next_token=None, max_items=None):
+        if isinstance(max_items, int) and isinstance(next_token, str):
             next_token = json.loads(next_token)
         else:
             next_token = {"next_link": None, "offset": 0}  # default value
@@ -73,7 +73,7 @@ class AAZPaged:
                 cli_ctx=cli_ctx,
                 next_link=next_token["next_link"],
                 offset=next_token["offset"],
-                page_size=page_size
+                page_size=max_items
             )
         )
 
