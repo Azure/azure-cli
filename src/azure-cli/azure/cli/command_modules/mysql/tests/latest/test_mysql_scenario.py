@@ -31,6 +31,7 @@ from azure.cli.testsdk import (
     StringContainCheck,
     live_only)
 from knack.util import CLIError
+from azure.mgmt.rdbms import mysql_flexibleservers
 
 # Constants
 SERVER_NAME_PREFIX = 'azuredbclitest-'
@@ -72,52 +73,51 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
         return kwargs.get(self.resource_group_parameter_name)
 
 
-class AdvancedThreatProtectionTest(ScenarioTest):
-     
+class AdvancedThreatProtectionTest(ScenarioTest):   
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
    # @ServerPreparer(engine_type='mysql', location=DEFAULT_LOCATION)
-    def test_mysql_advanced_threat_protection_mgmt(self, resource_group):
+
+    def test_mysql_advanced_threat_protection_mgmt(self, resource_group,):
         self._test_flexible_server_threat_model_update_mgmt('mysql', resource_group)
 
-    def _test_flexible_server_threat_model_update_mgmt(self, database_engine, resource_group):
-        
-        # Test to check if the defender is in enabled state and the provisioning state is succeeded
-        server = "Default"
-        defender_state = 'Enabled'
-        print("Hello world")
-        update_response = self.cmd('{} flexible-server threat-protection update -g {} -s {} --defender-state {} \
-                    '.format(database_engine, resource_group, server, defender_state)).get_output_in_json()
+    def _test_flexible_server_threat_model_update_mgmt(self, database_engine, resource_group):     
+        server="Default"
+        #Test to check if the defender is in enabled state and the provisioning state i succeeded
+        defender_state = mysql_flexibleservers.models.AdvancedThreatProtectionState.ENABLED.value or defender_state == mysql_flexibleservers.models.AdvancedThreatProtectionState.DISABLED.value
+        defender_name = mysql_flexibleservers.models.AdvancedThreatProtectionName.DEFAULT.value
+        update_response=self.cmd('{} flexible-server threat-protection update -g {} -s {} --defender-state {} -dn {}\
+                    '.format(database_engine, resource_group, server,defender_state,defender_name)).get_output_in_json()
         self.assertEqual(update_response['properties']['state'], defender_state)
         self.assertEqual(update_response['properties']['provisioningState'], 'Succeeded')
+        self.assertEqual(defender_name,"Default")
+        self.assertEqual(defender_state,"Enabled")
+
         
-        # Test to check the defender state in update and list are same
-        check_same_response=self.cmd('{} flexible-server threat-protection list -g {} -s {}'
-                             .format(database_engine, resource_group, server)).get_output_in_json()
-        self.assertEqual(check_same_response['properties']['state'],update_response['properties']['state'])
+        # Test to check if error is raised when defender name is not correct in update
+        with self.assertRaisesRegexp(ValueError,"Invalid defender protection name provided."):
+            self.cmd('{} flexible-server threat-protection update -g {} -s {} --defender-state {} -dn {} \
+                    '.format(database_engine,resource_group, server,defender_state,"default"))
 
-        # Test to check the server name passed is the same as the response
-        self.assertEqual(check_same_response['name'], server)
+        # Test to check if error is raised when defender name is not correct in show    
+        with self.assertRaisesRegexp(ValueError,"Invalid defender protection name provided."):
+            self.cmd('{} flexible-server threat-protection show -g {} -s {} -dn {} \
+                    '.format(database_engine,resource_group, server,"default"))   
 
-        # # Test to check if error is raised when resource group is not provided
-        # with self.assertRaisesRegexp(CLIError,"--resource-group"):
-        #     self.cmd('{} flexible-server threat-protection update -s {} \
-        #             '.format(database_engine,server))
-            
-        # # Test to check if error is raised when server name is not provided     
-        # with self.assertRaisesRegexp(CLIError,"--server-name"):
-        #     self.cmd('{} flexible-server threat-protection update -g {} \
-        #             '.format(database_engine,resource_group))    
+        # Test to check if error is raised when defender state is not correct 
+        with self.assertRaisesRegexp(ValueError,"Invalid defender state provided."):
+            self.cmd('{} flexible-server threat-protection update -g {} -s {} -dn {} --defender-state {}\
+                    '.format(database_engine,resource_group, server,defender_name,"enabled"))
 
 
-#class FlexibleServerMgmtScenarioTest(ScenarioTest):
+# class FlexibleServerMgmtScenarioTest(ScenarioTest):
+    
+#     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+#     def test_mysql_flexible_server_iops_mgmt(self, resource_group):
+#          self._test_flexible_server_iops_mgmt('mysql', resource_group)
 
-#     
-    # @ResourceGroupPreparer(location=DEFAULT_LOCATION)
-    # def test_mysql_flexible_server_iops_mgmt(self, resource_group):
-    #      self._test_flexible_server_iops_mgmt('mysql', resource_group)
-
-    # def _test_flexible_server_mgmt(self, database_engine, resource_group):
+#     def _test_flexible_server_mgmt(self, database_engine, resource_group):
 
 #         if self.cli_ctx.local_context.is_on:
 #             self.cmd('config param-persist off')
@@ -968,12 +968,12 @@ class AdvancedThreatProtectionTest(ScenarioTest):
 
 #     def _test_firewall_rule_mgmt(self, database_engine, resource_group, server):
 
-        # firewall_rule_name = 'firewall_test_rule'
-        # start_ip_address = '10.10.10.10'
-        # end_ip_address = '12.12.12.12'
-        # firewall_rule_checks = [JMESPathCheck('name', firewall_rule_name),
-        #                         JMESPathCheck('endIpAddress', end_ip_address),
-        #                         JMESPathCheck('startIpAddress', start_ip_address)]
+#         firewall_rule_name = 'firewall_test_rule'
+#         start_ip_address = '10.10.10.10'
+#         end_ip_address = '12.12.12.12'
+#         firewall_rule_checks = [JMESPathCheck('name', firewall_rule_name),
+#                                 JMESPathCheck('endIpAddress', end_ip_address),
+#                                 JMESPathCheck('startIpAddress', start_ip_address)]
 
 #         self.cmd('{} flexible-server firewall-rule create -g {} --name {} --rule-name {} '
 #                  '--start-ip-address {} --end-ip-address {} '

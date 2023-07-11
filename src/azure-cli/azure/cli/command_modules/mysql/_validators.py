@@ -194,7 +194,6 @@ def mysql_sku_name_validator(sku_name, sku_info, tier, instance):
                            'For Business Critical and General Purpose you need to specify --tier value explicitly. '
                            'Allowed values for given tier: {}'.format(skus))
 
-
 def _mysql_version_validator(version, sku_info, tier, instance):
     if instance is not None:
         tier = instance.sku.tier if tier is None else tier

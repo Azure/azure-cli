@@ -207,6 +207,7 @@ examples:
     text: az mysql flexible-server threat-protection update --resource-group myrg --server-name myserver --defender-state Enabled
 """
 
+
 helps['mysql flexible-server threat-protection show'] = """
 type: command
 short-summary: Show the threat protection settings for a flexible server.
