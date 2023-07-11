@@ -109,7 +109,8 @@ class AdvancedThreatProtectionTest(ScenarioTest):
         with self.assertRaisesRegexp(ValueError,"Invalid defender state provided."):
             self.cmd('{} flexible-server threat-protection update -g {} -s {} -dn {} --defender-state {}\
                     '.format(database_engine,resource_group, server,defender_name,"enabled"))
-
+            self.cmd('{} flexible-server threat-protection update -g {} -s {} -dn {} --defender-state {}\
+                    '.format(database_engine,resource_group, server,defender_name,"ENABLED"))
 
 # class FlexibleServerMgmtScenarioTest(ScenarioTest):
     
