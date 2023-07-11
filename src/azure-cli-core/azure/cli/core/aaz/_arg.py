@@ -680,7 +680,7 @@ class AAZPaginationTokenArg(AAZStrArg):
 
 class AAZPaginationLimitArg(AAZIntArg):
     def __init__(
-            self, options=("--page-size",), arg_group="Pagination",
+            self, options=("--max-items",), arg_group="Pagination",
             help="Total number of items to return in the command's output. If the total number of items available is "
                  "more than the value specified, a token is provided in the command's output. To resume pagination, "
                  "provide the token value in `--next-token` argument of a subsequent command.",
