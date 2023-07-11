@@ -234,7 +234,7 @@ parameters:
     type: string
     short-summary: Name of the resource group.
     populator-commands:
-      - az resource list --query "[?type=='Microsoft.DBforMySQL/servers'].[resourceGroup,name]" --output tsv
+      - az resource list --query "[?type=='Microsoft.DBforMySQL/flexibleServers'].[resourceGroup,name]" --output tsv
   - name: --server-name -s
     type: string
     short-summary: Name of the flexible server.
