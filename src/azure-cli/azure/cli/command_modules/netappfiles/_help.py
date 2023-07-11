@@ -1258,7 +1258,7 @@ parameters:
 examples:
   - name: Create an ANF Volume quote rule
     text: >
-        az netappfiles volume quota-rule create -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --quota-rule-name myrulename --quota-type DefaultGroupQuota --quota-size 100006 --quota-target ''
+        az netappfiles volume quota-rule create -g mygroup --account-name myaccname --pool-name mypoolname --volume-name myvolname --quota-rule-name myrulename --quota-type DefaultGroupQuota --quota-size 100006
 """
 
 
