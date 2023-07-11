@@ -255,7 +255,7 @@ class AAZCommand(CLICommand):
 
             return AAZPaged(
                 executor=executor_wrapper, extract_result=extract_result, cli_ctx=self.cli_ctx,
-                next_token=token, max_items=limit
+                token=token, limit=limit
             )
 
         return AAZPaged(executor=executor_wrapper, extract_result=extract_result, cli_ctx=self.cli_ctx)

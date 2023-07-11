@@ -57,7 +57,7 @@ class TestAAZPaging(unittest.TestCase):
 
         paged = AAZPaged(
             executor=executor, extract_result=extract_result, cli_ctx=DummyCli(),
-            next_token=next_token, max_items=4
+            token=next_token, limit=4
         )
         self.assertTrue(list(paged) == ["e", "f", "g", "h"])
 
@@ -85,7 +85,7 @@ class TestAAZPaging(unittest.TestCase):
 
         page_iterator = AAZPageIterator(
             executor=executor, extract_result=extract_result, cli_ctx=DummyCli(),
-            next_link=1, offset=1, page_size=4
+            next_link=1, offset=1, limit=4
         )
 
         # | a b c | d e | f | g h |
