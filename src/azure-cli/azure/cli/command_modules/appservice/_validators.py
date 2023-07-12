@@ -16,8 +16,9 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
-from .utils import (_normalize_sku, get_sku_tier, _normalize_location, get_resource_name_and_group,
-                    get_resource_if_exists, is_functionapp, is_logicapp, is_webapp, is_centauri_functionapp)
+from .utils import (_normalize_sku, get_sku_tier, get_resource_name_and_group,
+                    get_resource_if_exists, is_functionapp, is_logicapp, is_webapp, is_centauri_functionapp,
+                    _normalize_location_for_vnet_integration)
 
 from .aaz.latest.network import ListServiceTags
 from .aaz.latest.network.vnet import List as VNetList, Show as VNetShow
@@ -239,12 +240,13 @@ def validate_add_vnet(cmd, namespace):
 
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
-    webapp_loc = _normalize_location(cmd, webapp.location)
-    vnet_loc = _normalize_location(cmd, vnet_loc)
+    webapp_loc = _normalize_location_for_vnet_integration(cmd, webapp.location)
+    vnet_loc = _normalize_location_for_vnet_integration(cmd, vnet_loc)
 
     if vnet_loc != webapp_loc:
         raise ValidationError("The app and the vnet resources are in different locations. "
-                              "Cannot integrate a regional VNET to an app in a different region")
+                              "Cannot integrate a regional VNET to an app in a different region"
+                              "Web app location: {}. Vnet location: {}".format(webapp_loc, vnet_loc))
 
 
 def validate_front_end_scale_factor(namespace):
@@ -417,6 +419,8 @@ def validate_vnet_integration(cmd, namespace):
         if is_valid_resource_id(namespace.plan):
             parse_result = parse_resource_id(namespace.plan)
             plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
+        elif _get_flexconsumption_location(namespace):
+            return
         else:
             plan_info = client.app_service_plans.get(name=namespace.plan,
                                                      resource_group_name=namespace.resource_group_name)
@@ -489,6 +493,12 @@ def _get_app_name(namespace):
 def _get_environment(namespace):
     if hasattr(namespace, "environment"):
         return namespace.environment
+    return None
+
+
+def _get_flexconsumption_location(namespace):
+    if hasattr(namespace, "flexconsumption_location"):
+        return namespace.flexconsumption_location
     return None
 
 

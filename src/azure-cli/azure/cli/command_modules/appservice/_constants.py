@@ -120,3 +120,5 @@ FLEX_RUNTIMES = [
         'version': '7.2'
     }
 ]
+
+FLEX_SUBNET_DELEGATION = "Microsoft.App/environments"
