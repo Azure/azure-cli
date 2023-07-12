@@ -32,7 +32,7 @@ vmss create:
         prioritize_unhealthy_instances:
             rule_exclusions:
             - option_length_too_long
-        disable_integrity_monitoring:
+        disable_integrity_monitoring_autoupgrade:
             rule_exclusions:
             - option_length_too_long
         os_disk_security_encryption_type:
@@ -48,6 +48,9 @@ vmss create:
             rule_exclusions:
                 - option_length_too_long
         enable_osimage_notification:
+            rule_exclusions:
+                - option_length_too_long
+        disable_extension_autoupgrade:
             rule_exclusions:
                 - option_length_too_long
 vmss update:
@@ -91,13 +94,16 @@ vm create:
         public_ip_address_allocation:
             rule_exclusions:
             - missing_parameter_help
-        disable_integrity_monitoring:
+        disable_integrity_monitoring_autoupgrade:
             rule_exclusions:
                 - option_length_too_long
         os_disk_security_encryption_type:
             rule_exclusions:
                 - option_length_too_long
         os_disk_secure_vm_disk_encryption_set:
+            rule_exclusions:
+                - option_length_too_long
+        disable_extension_autoupgrade:
             rule_exclusions:
                 - option_length_too_long
 vm unmanaged-disk attach:
