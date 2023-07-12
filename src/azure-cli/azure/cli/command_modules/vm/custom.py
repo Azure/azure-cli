@@ -5064,12 +5064,6 @@ def create_disk_encryption_set(
                        disk_encryption_set)
 
 
-def list_disk_encryption_sets(cmd, client, resource_group_name=None):
-    if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list()
-
-
 def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_url=None, source_vault=None,
                                enable_auto_key_rotation=None, federated_client_id=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
