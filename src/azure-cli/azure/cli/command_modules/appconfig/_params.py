@@ -98,6 +98,12 @@ def load_arguments(self, _):
         nargs='+',
         help='Space-separated list of escaped JSON objects that represent the key and label filters used to build an App Configuration snapshot.'
     )
+    snapshot_status_arg_type = CLIArgumentType(
+        options_list=['--status'],
+        arg_type=get_enum_type(['archived', 'failed', 'provisioning', 'ready']),
+        nargs='+',
+        help='Filter snapshots by their status.'
+    )
 
     # Used with data plane commands. These take either a store name or connection string argument.
     # We only read default values when neither connection string nor store name is provided so configured defaults are not supplied.
@@ -376,5 +382,5 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig snapshot list') as c:
         c.argument('snapshot_name', options_list=['--snapshot-name', '-s'], help='If no name specified, return all snapshots by default. Support star sign as filters, for instance abc* means snapshots with abc as prefix to the name.')
-        c.argument('status', help='Value used to filter snapshots by their status.')
+        c.argument('status', arg_type=snapshot_status_arg_type)
         c.argument('fields', arg_type=snapshot_fields_arg_type)
