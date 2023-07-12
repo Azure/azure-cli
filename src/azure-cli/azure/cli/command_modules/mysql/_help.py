@@ -202,6 +202,9 @@ parameters:
   - name: --subscription-id -sid
     type: string
     short-summary: The subscription id of the advanced threat protection resource. The subscription id is required when --defender-state is Enabled.
+  - name: --subscription-id -sid
+    type: string
+    short-summary: The subscription id of the advanced threat protection resource. The subscription id is required when --defender-state is Enabled.
 examples:
   - name: Update the threat protection settings for a flexible server.
     text: az mysql flexible-server threat-protection update --resource-group myrg --server-name myserver --defender-state Enabled
@@ -221,6 +224,9 @@ parameters:
   - name: --dname -dn
     type: string
     short-summary: The name of the advanced threat protection resource. The name is required when --defender-state is Enabled.
+  - name: --subscription-id -sid
+    type: string
+    short-summary: The subscription id of the advanced threat protection resource. The subscription id is required when --defender-state is Enabled.
 examples:
   - name: Show the threat protection settings for a flexible server.
     text: az mysql flexible-server threat-protection show --resource-group myrg --server-name myserver
@@ -240,6 +246,9 @@ parameters:
     short-summary: Name of the flexible server.
     populator-commands:
       - az mysql flexible-server list --resource-group {resource_group_name} --query "[].name" --output tsv
+  - name: --subscription-id -sid
+    type: string
+    short-summary: The subscription id of the advanced threat protection resource. The subscription id is required when --defender-state is Enabled.
 examples:
   - name: List the threat protection settings for all flexible servers in a resource group.
     text: az mysql flexible-server threat-protection list --resource-group myrg

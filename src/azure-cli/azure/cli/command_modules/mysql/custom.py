@@ -73,33 +73,13 @@ def flexible_server_threat_model_update(cmd, client, resource_group_name,
     if defender_state not in allowed_defender_state_values:
         raise ValueError("Invalid defender state provided , Allowed value - {}".format(allowed_defender_state_values))
 
-    # parameters = {
-    #     'state': defender_state
-    # }
-    response = {
-        "id": "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/threatprotection-4799/providers/Microsoft.DBforMySQL/flexibleServers/threatprotection-6440/advancedThreatProtectionSettings/Default",
-        "name": "Default",
-        "type": "Microsoft.DBforMySQL/flexibleServers/advancedThreatProtectionSettings",
-        "systemData": {
-            "createdBy": "string",
-            "createdByType": "User",
-            "createdAt": "2022-04-03T04:41:33.937Z",
-            "lastModifiedBy": "string",
-            "lastModifiedByType": "User",
-            "lastModifiedAt": "2022-04-03T04:41:33.937Z"
-        },
-        "properties": {
-            "state": "{fname}",
-            "creationTime": "2022-04-03T04:41:33.937Z",
-            "provisioningState": "Succeeded"
-        }
+    parameters = {
+        'state': defender_state
     }
-    response["properties"]["state"] = response["properties"]["state"].format(fname=defender_state)
-    return response
-    # return client.begin_update(resource_group_name, server_name, advanced_threat_protection_name, parameters)
+    return client.begin_update(resource_group_name, server_name, advanced_threat_protection_name, parameters)
 
 
-def flexible_server_threat_model_list(cmd, client, resource_group_name, server_name):
+def flexible_server_threat_model_list(cmd, client, resource_group_name, server_name, subscription_id=None):
 
     if not resource_group_name:
         raise ValueError("Invalid resource group name provided.")
@@ -107,29 +87,10 @@ def flexible_server_threat_model_list(cmd, client, resource_group_name, server_n
     if not server_name:
         raise ValueError("Invalid server name provided.")
 
-    response = {
-        "id": "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/threatprotection-4799/providers/Microsoft.DBforMySQL/flexibleServers/threatprotection-6440/advancedThreatProtectionSettings/Default",
-        "name": "Default",
-        "type": "Microsoft.DBforMySQL/flexibleServers/advancedThreatProtectionSettings",
-        "systemData": {
-            "createdBy": "string",
-            "createdByType": "User",
-            "createdAt": "2022-04-03T04:41:33.937Z",
-            "lastModifiedBy": "string",
-            "lastModifiedByType": "User",
-            "lastModifiedAt": "2022-04-03T04:41:33.937Z"
-        },
-        "properties": {
-            "state": "Enabled",
-            "creationTime": "2022-04-03T04:41:33.937Z",
-            "provisioningState": "Succeeded"
-        }
-    }
-    return response
-    # return client.list(resource_group_name,server_name)
+    return client.list(resource_group_name, server_name)
 
 
-def flexible_server_threat_model_show(cmd, client, resource_group_name, server_name, advanced_threat_protection_name):
+def flexible_server_threat_model_show(cmd, client, resource_group_name, server_name, advanced_threat_protection_name, subscription_id=None):
 
     if resource_group_name is None:
         raise ValueError("Invalid resource group name provided.")
@@ -141,26 +102,7 @@ def flexible_server_threat_model_show(cmd, client, resource_group_name, server_n
     if advanced_threat_protection_name not in allowed_defender_name_values:
         raise ValueError("Invalid defender protection name provided, Allowed value - {}".format(allowed_defender_name_values))
 
-    response = {
-        "id": "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/threatprotection-4799/providers/Microsoft.DBforMySQL/flexibleServers/threatprotection-6440/advancedThreatProtectionSettings/Default",
-        "name": "Default",
-        "type": "Microsoft.DBforMySQL/flexibleServers/advancedThreatProtectionSettings",
-        "systemData": {
-                "createdBy": "string",
-                "createdByType": "User",
-                "createdAt": "2022-04-03T04:41:33.937Z",
-                "lastModifiedBy": "string",
-                "lastModifiedByType": "User",
-                "lastModifiedAt": "2022-04-03T04:41:33.937Z"
-        },
-        "properties": {
-            "state": "Enabled",
-            "creationTime": "2022-04-03T04:41:33.937Z",
-            "provisioningState": "Succeeded"
-        }
-    }
-    return response
-    # return client.get(resource_group_name, server_name, advanced_threat_protection_name)
+    return client.get(resource_group_name, server_name, advanced_threat_protection_name)
 
 
 def firewall_rule_delete_func(cmd, client, resource_group_name, server_name, firewall_rule_name, yes=None):

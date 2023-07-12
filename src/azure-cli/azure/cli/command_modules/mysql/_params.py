@@ -310,11 +310,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     with self.argument_context('mysql flexible-server threat-protection list') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
+        c.argument('subscription_id', options_list=['--subscription-id', '-sid'], help='The subscription id of the advanced threat protection resource. The subscription id is required when --defender-state is Enabled.')
 
     with self.argument_context('mysql flexible-server threat-protection show') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
         c.argument('advanced_threat_protection_name', options_list=['--dname', '-dn'], help='The name of the advanced threat protection resource. The name is required when --defender-state is Enabled. ')
+        c.argument('subscription_id', options_list=['--subscription-id', '-sid'], help='The subscription id of the advanced threat protection resource. The subscription id is required when --defender-state is Enabled.')
 
     with self.argument_context('mysql flexible-server import create') as c:
         c.argument('tier', default='Burstable', arg_type=tier_arg_type)
