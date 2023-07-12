@@ -1057,7 +1057,7 @@ def _get_deployment_management_client(cli_ctx, aux_subscriptions=None, aux_tenan
 
 def _prepare_stacks_deny_settings(rcf, deny_settings_mode):
     deny_settings_mode = None if deny_settings_mode.lower() == "none" else deny_settings_mode
-    deny_settings_enum = None
+    deny_settings_enum = "None"
     if deny_settings_mode:
         if deny_settings_mode.lower().replace(' ', '') == "denydelete":
             deny_settings_enum = rcf.deployment_stacks.models.DenySettingsMode.deny_delete
@@ -2541,7 +2541,6 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
 
     excluded_principals_array = _prepare_stacks_excluded_principals(deny_settings_excluded_principals)
     excluded_actions_array = _prepare_stacks_excluded_actions(deny_settings_excluded_actions)
-    excluded_principals_array = []
 
     tags = tags or {}
 
