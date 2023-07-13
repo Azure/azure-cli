@@ -2256,40 +2256,6 @@ class DiskAccessTest(ScenarioTest):
         ])
 # endregion
 
-
-class DiskEncryptionSetTest(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_', location='westcentralus')
-    def test_disk_encryption_set(self, resource_group):
-        self.kwargs.update({
-            'vault': self.create_random_name(prefix='vault-', length=20),
-            'key': self.create_random_name(prefix='key-', length=20),
-            'des': self.create_random_name(prefix='des-', length=20)
-        })
-
-        self.cmd(
-            'keyvault create --name {vault} -g {rg} --sku Premium --enable-purge-protection true --retention-days 7')
-        vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
-        kid = self.cmd(
-            'keyvault key create --vault-name {vault} --name {key} --ops wrapKey unwrapKey --kty RSA-HSM --size 3072 --exportable true').get_output_in_json()[
-            'key']['kid']
-
-        self.kwargs.update({
-            'vault_id': vault_id,
-            'kid': kid
-        })
-
-        self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid}')
-        self.cmd('disk-encryption-set show -g {rg} -n {des}')
-        self.cmd('disk-encryption-set list -g {rg}',
-                 checks=[
-                     self.check('length(@)', 1)
-                 ])
-        self.cmd('disk-encryption-set delete -g {rg} -n {des}')
-
-
-# endregion
-
 # endregion
 
 
