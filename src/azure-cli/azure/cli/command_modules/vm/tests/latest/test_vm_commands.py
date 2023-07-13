@@ -8855,7 +8855,7 @@ class VMInstallPatchesScenarioTest(ScenarioTest):
 class VMTrustedLaunchScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_trusted_launch_', location='southcentralus')
     def test_vm_trusted_launch(self, resource_group):
-        self.cmd('vm create -g {rg} -n vm --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true --admin-username azureuser --admin-password testPassword0 --nsg-rule None --disable-integrity-monitoring-autoupgrade')
+        self.cmd('vm create -g {rg} -n vm --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true --admin-username azureuser --admin-password testPassword0 --nsg-rule None --disable-integrity-monitoring')
         self.cmd('vm show -g {rg} -n vm', checks=[
             self.check('securityProfile.securityType', 'TrustedLaunch'),
             self.check('securityProfile.uefiSettings.secureBootEnabled', True),
@@ -8864,7 +8864,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_trusted_launch_update_', location='southcentralus')
     def test_vm_trusted_launch_update(self, resource_group):
-        self.cmd('vm create -g {rg} -n vm --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser --admin-password testPassword0 --nsg-rule None --disable-integrity-monitoring-autoupgrade')
+        self.cmd('vm create -g {rg} -n vm --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser --admin-password testPassword0 --nsg-rule None --disable-integrity-monitoring')
         self.cmd('vm update -g {rg} -n vm --enable-secure-boot true --enable-vtpm true')
         self.cmd('vm show -g {rg} -n vm', checks=[
             self.check('securityProfile.securityType', 'TrustedLaunch'),
@@ -8975,7 +8975,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_trusted_launch_', location='southcentralus')
     def test_vmss_trusted(self, resource_group):
-        self.cmd('vmss create -g {rg} -n vm --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser --admin-password testPassword0 --disable-integrity-monitoring-autoupgrade')
+        self.cmd('vmss create -g {rg} -n vm --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser --admin-password testPassword0 --disable-integrity-monitoring')
         self.cmd('vmss update -g {rg} -n vm --enable-secure-boot true --enable-vtpm true')
         self.cmd('vmss show -g {rg} -n vm', checks=[
             self.check('virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
@@ -9008,7 +9008,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.uefiSettings.vTpmEnabled', True)
 
         ])
-        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser -g {rg} -n {vm2} --enable-secure-boot --enable-vtpm --disable-integrity-monitoring-autoupgrade')
+        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser -g {rg} -n {vm2} --enable-secure-boot --enable-vtpm --disable-integrity-monitoring')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('resources', None),
             self.check('identity', None),
@@ -9044,7 +9044,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('[0].resources[0].name', 'GuestAttestation'),
             self.check('[0].resources[0].publisher', 'Microsoft.Azure.Security.LinuxAttestation')
         ])
-        self.cmd('vmss create -g {rg} -n {vmss2} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm --disable-integrity-monitoring-autoupgrade')
+        self.cmd('vmss create -g {rg} -n {vmss2} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm --disable-integrity-monitoring')
         self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
             self.check('identity', None),
             self.check('virtualMachineProfile.extensionProfile', 'None'),
@@ -9135,7 +9135,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.uefiSettings.secureBootEnabled', True),
             self.check('securityProfile.uefiSettings.vTpmEnabled', True)
         ])
-        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch -g {rg} -n {vm2} --enable-secure-boot --enable-vtpm --disable-extension-autoupgrade --admin-username azureuser --admin-password testPassword0 --generate-ssh-keys --nsg-rule NONE')
+        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch -g {rg} -n {vm2} --enable-secure-boot --enable-vtpm --disable-integrity-monitoring-autoupgrade --admin-username azureuser --admin-password testPassword0 --generate-ssh-keys --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('resources[0].name', 'GuestAttestation'),
             self.check('resources[0].publisher', 'Microsoft.Azure.Security.LinuxAttestation'),
@@ -9154,7 +9154,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True),
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True)
         ])
-        self.cmd('vmss create -g {rg} -n {vmss2} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm --disable-extension-autoupgrade --generate-ssh-keys')
+        self.cmd('vmss create -g {rg} -n {vmss2} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm --disable-integrity-monitoring-autoupgrade --generate-ssh-keys')
         self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
             self.check('virtualMachineProfile.extensionProfile.extensions[0].name', 'GuestAttestation'),
             self.check('virtualMachineProfile.extensionProfile.extensions[0].publisher',
