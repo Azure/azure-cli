@@ -21,10 +21,9 @@ class SnapshotQueryFields(Enum):
     SIZE = 0x0040
     ITEMS_COUNT = 0x0080
     TAGS = 0x0100
-    STATUS_CODE = 0x0200
+    ETAG = 0x0200
     RETENTION_PERIOD = 0x0400
-    ETAG = 0x0800
-    ALL = NAME | STATUS | FILTERS | COMPOSITION_TYPE | CREATED | EXPIRES | SIZE | ITEMS_COUNT | TAGS | RETENTION_PERIOD | ETAG | STATUS_CODE
+    ALL = NAME | STATUS | FILTERS | COMPOSITION_TYPE | CREATED | EXPIRES | SIZE | ITEMS_COUNT | TAGS | ETAG | RETENTION_PERIOD
 
 
 class Snapshot:
@@ -53,8 +52,6 @@ class Snapshot:
         Dictionary of tags of the snapshot.
     :ivar int retention_period:
         Number of seconds for which an archived snapshot will be kept before being deleted.
-    :ivar int status_code:
-        The status code returned during the snapshot creation process.
     '''
 
     def __init__(self,
@@ -62,7 +59,6 @@ class Snapshot:
                  status,
                  filters,
                  etag=None,
-                 status_code=None,
                  composition_type=None,
                  created=None,
                  expires=None,
@@ -75,7 +71,6 @@ class Snapshot:
         self.name = name
         self.status = status
         self.filters = filters
-        self.status_code = status_code
         self.etag = etag
         self.composition_type = composition_type
         self.created = created.isoformat() if isinstance(created, datetime) else str(created)
@@ -96,8 +91,7 @@ class Snapshot:
             "\nSize: " + str(self.size) + \
             "\nItem count: " + str(self.items_count) + \
             "\nTags: " + (str(self.tags) if self.tags else '{}') + \
-            "\nRetention Period: " + str(self.retention_period) + \
-            "\nStatus Code: " + str(self.status_code)
+            "\nRetention Period: " + str(self.retention_period)
 
     @classmethod
     def from_json(cls, data_dict):
@@ -112,8 +106,7 @@ class Snapshot:
             size=data_dict.get("size", None),
             items_count=data_dict.get("items_count", None),
             tags=data_dict.get("tags", None),
-            retention_period=data_dict.get("retention_period", None),
-            status_code=data_dict.get("status_code", None)
+            retention_period=data_dict.get("retention_period", None)
         )
 
 

@@ -47,7 +47,7 @@ def load_arguments(self, _):
         nargs='+',
         help='Customize output fields for Snapshots',
         validator=validate_snapshot_query_fields,
-        arg_type=get_enum_type(['name', 'etag', 'status_code', 'retention_period', 'filters', 'status', 'created', 'expires', 'size', 'items_count', 'composition_type', 'tags'])
+        arg_type=get_enum_type(['name', 'etag', 'retention_period', 'filters', 'status', 'created', 'expires', 'size', 'items_count', 'composition_type', 'tags'])
     )
     filter_parameters_arg_type = CLIArgumentType(
         validator=validate_filter_parameters,
