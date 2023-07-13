@@ -480,6 +480,7 @@ def aks_create(
     node_count=3,
     nodepool_tags=None,
     nodepool_labels=None,
+    nodepool_taints=None,
     node_osdisk_type=None,
     node_osdisk_size=0,
     vm_set_type=None,
@@ -620,6 +621,7 @@ def aks_update(
     min_count=None,
     max_count=None,
     nodepool_labels=None,
+    nodepool_taints=None,
     # azure monitor profile
     enable_azure_monitor_metrics=False,
     azure_monitor_workspace_resource_id=None,
