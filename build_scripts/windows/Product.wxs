@@ -19,7 +19,12 @@
              Compressed="yes"
              InstallScope="perMachine" />
 
-    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." Schedule="afterInstallExecute" />
+    <!--
+      Because components have been refactored after 2.39.0 we need to remove first or many files will be deleted by a late RemoveExistingProducts (REP).
+      Alternatively, could scheduled REP twice, but would need an immediate CA to run `WcaDoDeferredAction` to schedule REP again,
+      but condition each on whether an older version prior to refactoring was done, or one after the refactoring so that it's more efficient.
+    -->
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." MigrateFeatures="no" Schedule="afterInstallValidate" />
 
     <Media Id="1" Cabinet="WindowsAzureCLI.cab" EmbedCab="yes" CompressionLevel="high" />
 
@@ -29,6 +34,7 @@
     <Property Id="ARPHELPLINK" Value="https://docs.microsoft.com/cli/azure" />
     <Property Id="ARPURLINFOABOUT" Value="https://docs.microsoft.com/cli/azure/overview" />
     <Property Id="ARPURLUPDATEINFO" Value="https://docs.microsoft.com/cli/azure/overview" />
+    <Property Id="DISABLEROLLBACK" Value="1" />
     <Property Id="MSIFASTINSTALL" Value="7" />
     <Property Id="ApplicationFolderName" Value="Microsoft SDKs\Azure" />
     <Property Id="WixAppFolder" Value="WixPerMachineFolder" />

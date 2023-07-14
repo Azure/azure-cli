@@ -8,6 +8,8 @@
     <WixTasksPath>wixtasks.dll</WixTasksPath>
     <AzureCliSource>artifacts\cli</AzureCliSource>
     <LinkerAdditionalOptions>-fv</LinkerAdditionalOptions>
+    <HarvestDirectorySuppressAllWarnings>5150;5151</HarvestDirectorySuppressAllWarnings>
+    <HarvestTransforms>refactor.xslt</HarvestTransforms>
   </PropertyGroup>
   <!-- Project -->
   <PropertyGroup>
@@ -53,6 +55,6 @@
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
   <Target Name="BeforeBuild">
-    <HeatDirectory Directory="$(AzureCliSource)" ToolPath="$(WixToolPath)" AutogenerateGuids="true" ComponentGroupName="AzureCliComponentGroup" SuppressRootDirectory="true" DirectoryRefId="DynamicCliDir" OutputFile="out\azure-cli.wxs" PreprocessorVariable="var.AzureCliSource" />
+    <HeatDirectory Directory="$(AzureCliSource)" ToolPath="$(WixToolPath)" AutogenerateGuids="true" ComponentGroupName="AzureCliComponentGroup" SuppressRootDirectory="true" SuppressCom="true" DirectoryRefId="DynamicCliDir" OutputFile="out\azure-cli.wxs" PreprocessorVariable="var.AzureCliSource" />
   </Target>
 </Project>
