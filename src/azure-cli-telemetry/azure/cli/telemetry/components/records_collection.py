@@ -8,7 +8,6 @@ import os
 import shutil
 import stat
 import tempfile
-from knack.config import CLIConfig
 
 
 class RecordsCollection:
