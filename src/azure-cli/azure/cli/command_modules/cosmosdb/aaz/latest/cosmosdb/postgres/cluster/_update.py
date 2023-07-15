@@ -16,6 +16,21 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update an existing cluster. The request body can contain one or several properties from the cluster definition.
+
+    :example: Scale compute up or down
+        az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --node-v-cores 16
+
+    :example: Scale out: Add new worker nodes
+        az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --node-count 2
+
+    :example: Scale up storage
+        az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --coordinator-storage 2097152
+
+    :example: Update multiple configuration settings of the cluster
+        az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --node-v-cores 16 --node-count 4 coordinator-v-cores 16 --login-password "newPassword"
+
+    :example: Update or define maintenance window
+        az cosmosdb postgres cluster update -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff" --maintenance-window day-of-week=1 start-hour=2 --start-minute=0 custom-window="Enabled"
     """
 
     _aaz_info = {

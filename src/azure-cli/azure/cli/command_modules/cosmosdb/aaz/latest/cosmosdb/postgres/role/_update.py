@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update an existing role.
+
+    :example: Update password of the role
+        az az cosmosdb postgres role update -n "testrole" --password "newPassword" --cluster-name "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff"
     """
 
     _aaz_info = {

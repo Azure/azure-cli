@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List all the configurations of a server in cluster.
+
+    :example: List configurations of the server in the cluster
+        az cosmosdb postgres configuration server list --server-name "test-cluster-c" --cluster-name "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff"
     """
 
     _aaz_info = {

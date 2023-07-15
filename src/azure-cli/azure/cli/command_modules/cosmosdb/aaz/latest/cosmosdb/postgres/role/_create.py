@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a new role or updates an existing role.
+
+    :example: Create a new role for cluster
+        az cosmosdb postgres role create -n "testrole" --password "password" --cluster-name "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff"
     """
 
     _aaz_info = {

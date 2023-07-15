@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete a cluster together with servers in it.
+
+    :example: Delete the cluster
+        az cosmosdb postgres cluster delete -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff"
     """
 
     _aaz_info = {

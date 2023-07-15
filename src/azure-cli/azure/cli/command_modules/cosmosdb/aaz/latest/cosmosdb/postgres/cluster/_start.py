@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Start(AAZCommand):
     """Starts stopped compute on all cluster nodes.
+
+    :example: Start all servers in the cluster
+        az cosmosdb postgres cluster start -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff"
     """
 
     _aaz_info = {

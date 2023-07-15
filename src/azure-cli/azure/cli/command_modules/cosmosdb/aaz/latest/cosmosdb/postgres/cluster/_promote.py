@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Promote(AAZCommand):
     """Promotes read replica cluster to an independent read-write cluster.
+
+    :example: Promote read replica cluster to an independent read-write cluster
+        az cosmosdb postgres cluster promote -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff"
     """
 
     _aaz_info = {

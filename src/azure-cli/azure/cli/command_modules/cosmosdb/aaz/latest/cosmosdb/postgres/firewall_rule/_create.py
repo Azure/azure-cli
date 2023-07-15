@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a new cluster firewall rule or updates an existing cluster firewall rule.
+
+    :example: Create a firewall rule of the cluster
+        az cosmosdb postgres firewall-rule create -n "rule1" --start-ip-address "0.0.0.0" --end-ip-address "255.255.255.255" --cluster-name "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff"
     """
 
     _aaz_info = {

@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete a cluster firewall rule.
+
+    :example: Delete the firewall rule of the cluster
+        az cosmosdb postgres firewall-rule delete -n "rule1" --cluster-name "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff"
     """
 
     _aaz_info = {

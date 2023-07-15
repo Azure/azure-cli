@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get information of a configuration for coordinator and nodes.
+
+    :example: Get configuration details
+        az cosmosdb postgres configuration show -n "array-nulls" --cluster-name "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff"
     """
 
     _aaz_info = {

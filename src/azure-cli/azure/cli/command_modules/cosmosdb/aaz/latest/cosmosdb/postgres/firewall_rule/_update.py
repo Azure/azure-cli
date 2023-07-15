@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update an existing cluster firewall rule.
+
+    :example: Update start ip address of the firewall rule of the cluster
+        az cosmosdb postgres firewall-rule update -n "rule1" --start-ip-address "0.0.0.1" --cluster-name "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff"
     """
 
     _aaz_info = {

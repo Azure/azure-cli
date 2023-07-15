@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Restart(AAZCommand):
     """Restarts all nodes in the cluster.
+
+    :example: Restart all servers in the cluster
+        az cosmosdb postgres cluster restart -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff"
     """
 
     _aaz_info = {

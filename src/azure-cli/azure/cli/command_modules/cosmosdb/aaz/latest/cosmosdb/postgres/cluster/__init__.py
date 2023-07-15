@@ -12,7 +12,6 @@ from .__cmd_group import *
 from ._create import *
 from ._delete import *
 from ._list import *
-from ._list_by_resource_group import *
 from ._promote import *
 from ._restart import *
 from ._show import *

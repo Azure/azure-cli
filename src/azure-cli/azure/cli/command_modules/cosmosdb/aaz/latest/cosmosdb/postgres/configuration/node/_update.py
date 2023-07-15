@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Updates configuration of worker nodes in a cluster
+
+    :example: Update single configuration of nodes
+        az cosmosdb postgres configuration node update -n "array_nulls" --value "off" --cluster-name "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff"
     """
 
     _aaz_info = {

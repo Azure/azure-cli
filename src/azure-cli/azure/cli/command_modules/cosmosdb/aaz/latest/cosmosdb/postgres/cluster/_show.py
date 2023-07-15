@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get information about a cluster such as compute and storage configuration and cluster lifecycle metadata such as cluster creation date and time.
+
+    :example: Show details of cluster
+        az cosmosdb postgres cluster show -n "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff"
     """
 
     _aaz_info = {

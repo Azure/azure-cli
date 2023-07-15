@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get information of a configuration for worker nodes.
+
+    :example: Get configuration details for node
+        az cosmosdb postgres configuration node show -n "array_nulls" --cluster-name "test-cluster" -g "testGroup" --subscription "ffffffff-ffff-ffff-ffff-ffffffffffff"
     """
 
     _aaz_info = {
