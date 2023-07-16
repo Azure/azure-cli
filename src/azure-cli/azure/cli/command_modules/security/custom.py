@@ -1137,7 +1137,7 @@ def get_security_automation_rules_object(rules):
 
 def sanitize_json_as_string(value: string):
     valueLength = len(value)
-    if((value[0] == '\'' and value[valueLength - 1] == '\'') or (value[0] == '\"' and value[valueLength - 1] == '\"')):
+    if ((value[0] == '\'' and value[valueLength - 1] == '\'') or (value[0] == '\"' and value[valueLength - 1] == '\"')):
         value = value[1:]
         value = value[:-1]
     return value
