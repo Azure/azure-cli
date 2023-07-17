@@ -9,6 +9,8 @@ from unittest import mock
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from datetime import datetime, timedelta
+from dateutil import parser
 
 class CosmosDBBackupRestoreScenarioTest(ScenarioTest):
 
