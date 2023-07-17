@@ -654,6 +654,8 @@ def load_arguments(self, _):
     with self.argument_context('keyvault restore start') as c:
         c.argument('folder_to_restore', options_list=['--backup-folder'],
                    help='Name of the blob container which contains the backup')
+        c.argument('key_name', options_list=['--key-name', '--key'],
+                   help='Name of a single key in the backup. When set, only this key will be restored')
 
     with self.argument_context('keyvault restore start', arg_group='Storage Id') as c:
         c.extra('storage_resource_uri', required=False,
