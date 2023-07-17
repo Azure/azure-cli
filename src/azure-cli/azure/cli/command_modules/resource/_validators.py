@@ -98,7 +98,7 @@ def process_deployment_create_namespace(namespace):
         if [bool(namespace.template_uri), bool(namespace.template_file)].count(True) != 1:
             raise CLIError('incorrect usage: Chose only one of'
                            ' --template-file FILE | --template-uri URI')
-    if(bool(namespace.template_uri) or bool(namespace.template_file)):
+    if (bool(namespace.template_uri) or bool(namespace.template_file)):
         _validate_deployment_name(namespace)
     else:
         _validate_deployment_name_with_template_specs(namespace)
