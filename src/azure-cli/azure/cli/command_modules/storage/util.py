@@ -38,7 +38,11 @@ def collect_blob_objects(blob_service, container, pattern=None):
             blobs = blob_service.list_blobs(container)
         else:
             container_client = blob_service.get_container_client(container=container)
-            blobs = container_client.list_blobs()
+            prefix = _get_prefix(pattern)
+            if prefix:
+                blobs = container_client.list_blobs(name_starts_with=prefix)
+            else:
+                blobs = container_client.list_blobs()
         for blob in blobs:
             try:
                 blob_name = blob.name.encode('utf-8') if isinstance(blob.name, unicode) else blob.name
@@ -257,6 +261,19 @@ def mkdir_p(path):
 
 def _pattern_has_wildcards(p):
     return not p or p.find('*') != -1 or p.find('?') != -1 or p.find('[') != -1
+
+
+def _get_prefix(p):
+    if not p:
+        return p
+    pattern_start = len(p)
+    for index, ch in enumerate(p):
+        if ch == '*' or ch == '?' or ch == '[':
+            pattern_start = index
+            break
+    if pattern_start == len(p):
+        return None
+    return p[:pattern_start]
 
 
 def _match_path(path, pattern):

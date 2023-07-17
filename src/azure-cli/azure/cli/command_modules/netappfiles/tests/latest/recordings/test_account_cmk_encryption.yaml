@@ -1,9 +1,10 @@
 interactions:
 - request:
-    body: '{"location": "southcentralusstage", "properties": {"encryption": {"keySource":
-      "Microsoft.KeyVault", "keyVaultProperties": {"keyVaultUri": "myUri", "keyName":
-      "myKeyName", "keyVaultResourceId": "myKeyVaultResourceId"}, "identity": {"userAssignedIdentity":
-      "userAssignedIdentity"}}}}'
+    body: '{"location": "southcentralusstage", "identity": {"type": "UserAssigned",
+      "userAssignedIdentities": {"myIdentity": {}}}, "properties": {"encryption":
+      {"keySource": "Microsoft.KeyVault", "keyVaultProperties": {"keyVaultUri": "myUri",
+      "keyName": "myKeyName", "keyVaultResourceId": "myKeyVaultResourceId"}, "identity":
+      {"userAssignedIdentity": "myIdentity"}}}}'
     headers:
       Accept:
       - application/json
@@ -14,100 +15,43 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '282'
+      - '356'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g -a -l --key-source --key-vault-uri --key-name --keyvault-resource-id --user-assigned-identity
+      - -g -a -l --key-source --identity-type --key-vault-uri --key-name --keyvault-resource-id
+        --user-assigned-identity
       User-Agent:
-      - AZURECLI/2.40.0 (PIP) azsdk-python-mgmt-netapp/9.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002?api-version=2022-09-01
   response:
     body:
-      string: '{"error":{"code":"OperationNotPermitted","message":"Operation: ''Azure
-        key vault encryption'' is not permitted."}}'
+      string: '{"error":{"code":"LinkedInvalidPropertyId","message":"Property id ''myIdentity''
+        at path '''' is invalid. Expect fully qualified resource Id that start with
+        ''/subscriptions/{subscriptionId}'' or ''/providers/{resourceProviderNamespace}/''."}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '112'
+      - '235'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 29 Sep 2022 16:07:16 GMT
+      - Tue, 25 Apr 2023 18:12:13 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 409
-      message: Conflict
-- request:
-    body: '{"location": "southcentralusstage"}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - netappfiles account create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '35'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - -g -a -l
-      User-Agent:
-      - AZURECLI/2.40.0 (PIP) azsdk-python-mgmt-netapp/9.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003?api-version=2022-05-01
-  response:
-    body:
-      string: '{"error":{"code":"OperationFailedUnexpectedly","message":"Operation:
-        ''Create'' failed unexpectedly, please try again."}}'
-    headers:
-      cache-control:
-      - no-cache
-      connection:
-      - close
-      content-length:
-      - '119'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 29 Sep 2022 16:07:20 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-failure-cause:
-      - service
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-      x-powered-by:
-      - ASP.NET
+      - gateway
     status:
-      code: 500
-      message: Internal Server Error
+      code: 400
+      message: Bad Request
 - request:
     body: '{"location": "southcentralusstage"}'
     headers:
@@ -126,25 +70,25 @@ interactions:
       ParameterSetName:
       - -g -a -l
       User-Agent:
-      - AZURECLI/2.40.0 (PIP) azsdk-python-mgmt-netapp/9.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003","name":"cli-acc-000003","type":"Microsoft.NetApp/netAppAccounts","etag":"W/\"datetime''2022-09-29T16%3A07%3A23.4984675Z''\"","location":"southcentralusstage","properties":{"provisioningState":"Creating"},"systemData":{"lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2022-09-29T16:07:22.626737Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003","name":"cli-acc-000003","type":"Microsoft.NetApp/netAppAccounts","etag":"W/\"datetime''2023-04-25T18%3A12%3A17.955021Z''\"","location":"southcentralusstage","tags":{"CreatedOnDate":"2023-04-25T18:12:15.0730650Z"},"properties":{"provisioningState":"Creating"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2023-04-25T18:12:17.0565538Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2023-04-25T18:12:17.0565538Z"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/southcentralusstage/operationResults/bfc5c4ff-e96a-41e3-87bb-37a5392541f6?api-version=2022-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/southcentralusstage/operationResults/ff4e1ee2-d4e9-4d7c-ab7b-1039959dec70?api-version=2022-09-01
       cache-control:
       - no-cache
       content-length:
-      - '523'
+      - '703'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 29 Sep 2022 16:07:24 GMT
+      - Tue, 25 Apr 2023 18:12:19 GMT
       etag:
-      - W/"datetime'2022-09-29T16%3A07%3A23.4984675Z'"
+      - W/"datetime'2023-04-25T18%3A12%3A17.955021Z'"
       expires:
       - '-1'
       pragma:
@@ -156,7 +100,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1194'
       x-powered-by:
       - ASP.NET
     status:
@@ -176,21 +120,21 @@ interactions:
       ParameterSetName:
       - -g -a -l
       User-Agent:
-      - AZURECLI/2.40.0 (PIP) azsdk-python-mgmt-netapp/9.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/southcentralusstage/operationResults/bfc5c4ff-e96a-41e3-87bb-37a5392541f6?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/southcentralusstage/operationResults/ff4e1ee2-d4e9-4d7c-ab7b-1039959dec70?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/southcentralusstage/operationResults/bfc5c4ff-e96a-41e3-87bb-37a5392541f6","name":"bfc5c4ff-e96a-41e3-87bb-37a5392541f6","status":"Succeeded","startTime":"2022-09-29T16:07:23.5111166Z","endTime":"2022-09-29T16:07:23.6361096Z","percentComplete":100.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003","action":"CREATE"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/southcentralusstage/operationResults/ff4e1ee2-d4e9-4d7c-ab7b-1039959dec70","name":"ff4e1ee2-d4e9-4d7c-ab7b-1039959dec70","status":"Succeeded","startTime":"2023-04-25T18:12:17.966924Z","endTime":"2023-04-25T18:12:18.0192647Z","percentComplete":100.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003","action":"CREATE"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '556'
+      - '555'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 29 Sep 2022 16:07:55 GMT
+      - Tue, 25 Apr 2023 18:12:19 GMT
       expires:
       - '-1'
       pragma:
@@ -224,23 +168,23 @@ interactions:
       ParameterSetName:
       - -g -a -l
       User-Agent:
-      - AZURECLI/2.40.0 (PIP) azsdk-python-mgmt-netapp/9.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003","name":"cli-acc-000003","type":"Microsoft.NetApp/netAppAccounts","etag":"W/\"datetime''2022-09-29T16%3A07%3A23.6267901Z''\"","location":"southcentralusstage","properties":{"encryption":{"keySource":"Microsoft.NetApp"},"provisioningState":"Succeeded"},"systemData":{"lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2022-09-29T16:07:22.626737Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003","name":"cli-acc-000003","type":"Microsoft.NetApp/netAppAccounts","etag":"W/\"datetime''2023-04-25T18%3A12%3A18.0136101Z''\"","location":"southcentralusstage","tags":{"CreatedOnDate":"2023-04-25T18:12:15.0730650Z"},"properties":{"encryption":{"keySource":"Microsoft.NetApp"},"provisioningState":"Succeeded"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2023-04-25T18:12:17.0565538Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2023-04-25T18:12:17.0565538Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '570'
+      - '751'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 29 Sep 2022 16:07:56 GMT
+      - Tue, 25 Apr 2023 18:12:20 GMT
       etag:
-      - W/"datetime'2022-09-29T16%3A07%3A23.6267901Z'"
+      - W/"datetime'2023-04-25T18%3A12%3A18.0136101Z'"
       expires:
       - '-1'
       pragma:
@@ -274,23 +218,23 @@ interactions:
       ParameterSetName:
       - -g -a --key-source
       User-Agent:
-      - AZURECLI/2.40.0 (PIP) azsdk-python-mgmt-netapp/9.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003?api-version=2022-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003","name":"cli-acc-000003","type":"Microsoft.NetApp/netAppAccounts","etag":"W/\"datetime''2022-09-29T16%3A07%3A23.6267901Z''\"","location":"southcentralusstage","properties":{"encryption":{"keySource":"Microsoft.NetApp"},"provisioningState":"Succeeded"},"systemData":{"lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2022-09-29T16:07:22.626737Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003","name":"cli-acc-000003","type":"Microsoft.NetApp/netAppAccounts","etag":"W/\"datetime''2023-04-25T18%3A12%3A18.0136101Z''\"","location":"southcentralusstage","tags":{"CreatedOnDate":"2023-04-25T18:12:15.0730650Z"},"properties":{"encryption":{"keySource":"Microsoft.NetApp"},"provisioningState":"Succeeded"},"systemData":{"createdBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","createdByType":"Application","createdAt":"2023-04-25T18:12:17.0565538Z","lastModifiedBy":"c6c4faba-2b22-44d9-80a4-71ff5b71f811","lastModifiedByType":"Application","lastModifiedAt":"2023-04-25T18:12:17.0565538Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '570'
+      - '751'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 29 Sep 2022 16:07:58 GMT
+      - Tue, 25 Apr 2023 18:12:21 GMT
       etag:
-      - W/"datetime'2022-09-29T16%3A07%3A23.6267901Z'"
+      - W/"datetime'2023-04-25T18%3A12%3A18.0136101Z'"
       expires:
       - '-1'
       pragma:
@@ -311,8 +255,9 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"encryption": {"keySource": "Microsoft.KeyVault", "keyVaultProperties":
-      {}, "identity": {}}}}'
+    body: '{"tags": {"CreatedOnDate": "2023-04-25T18:12:15.0730650Z"}, "properties":
+      {"encryption": {"keySource": "Microsoft.KeyVault", "keyVaultProperties": {},
+      "identity": {}}}}'
     headers:
       Accept:
       - application/json
@@ -323,28 +268,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '109'
+      - '168'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -a --key-source
       User-Agent:
-      - AZURECLI/2.40.0 (PIP) azsdk-python-mgmt-netapp/9.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+      - AZURECLI/2.48.0 azsdk-python-mgmt-netapp/10.0.0 Python/3.8.3 (Windows-10-10.0.22000-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003?api-version=2022-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003?api-version=2022-09-01
   response:
     body:
-      string: '{"error":{"code":"OperationNotPermitted","message":"Operation: ''Azure
-        key vault encryption'' is not permitted."}}'
+      string: '{"error":{"code":"InvalidIdentityForAzureKeyVaultConfig","message":"Azure
+        Key Vault Encryption cannot be enabled for NetAppAccount if resource identity
+        type isn''t either ''SystemAssigned'' or ''UserAssigned''"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '112'
+      - '207'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 29 Sep 2022 16:08:01 GMT
+      - Tue, 25 Apr 2023 18:12:23 GMT
       expires:
       - '-1'
       pragma:
@@ -356,10 +302,10 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1195'
       x-powered-by:
       - ASP.NET
     status:
-      code: 409
-      message: Conflict
+      code: 400
+      message: Bad Request
 version: 1
