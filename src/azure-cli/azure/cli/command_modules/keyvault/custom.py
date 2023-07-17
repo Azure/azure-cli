@@ -1416,7 +1416,7 @@ def download_key(client, file_path, hsm_name=None, identifier=None,  # pylint: d
         'PEM': _export_public_key_to_pem
     }
 
-    if encoding not in methods.keys():
+    if encoding not in methods:
         raise CLIError('Unsupported encoding: {}. (Supported encodings: DER, PEM)'.format(encoding))
 
     try:
