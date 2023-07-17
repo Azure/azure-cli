@@ -102,7 +102,7 @@ def load_arguments(self, _):
         options_list=['--status'],
         arg_type=get_enum_type(['archived', 'failed', 'provisioning', 'ready']),
         nargs='+',
-        help='Filter snapshots by their status.'
+        help='Filter snapshots by their status. If no status specified, return all snapshots by default.'
     )
 
     # Used with data plane commands. These take either a store name or connection string argument.
