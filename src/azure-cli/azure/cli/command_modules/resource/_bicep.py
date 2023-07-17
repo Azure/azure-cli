@@ -16,8 +16,7 @@ from contextlib import suppress
 from datetime import datetime, timedelta
 
 import requests
-
-from packaging.version import parse, VERSION_PATTERN
+import semver
 
 from urllib.request import urlopen
 from knack.log import get_logger
@@ -31,7 +30,8 @@ from azure.cli.core.azclierror import (
 )
 from azure.cli.core.util import should_disable_connection_verify
 
-_version_pattern = re.compile(VERSION_PATTERN, re.VERBOSE | re.IGNORECASE)
+# See: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+_semver_pattern = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"  # pylint: disable=line-too-long
 
 # See: https://docs.microsoft.com/azure/azure-resource-manager/templates/template-syntax#template-format
 _template_schema_pattern = r"https?://schema\.management\.azure\.com/schemas/[0-9a-zA-Z-]+/(?P<templateType>[a-zA-Z]+)Template\.json#?"  # pylint: disable=line-too-long
@@ -297,8 +297,8 @@ def _get_bicep_installation_path(system):
 
 
 def _extract_version(text):
-    semver_match = re.search(_version_pattern, text)
-    return parse(semver_match.group(0)) if semver_match else None
+    semver_match = re.search(_semver_pattern, text)
+    return semver.Version.parse(semver_match.group(0)) if semver_match else None
 
 
 def _run_command(bicep_installation_path, args):

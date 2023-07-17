@@ -6,9 +6,9 @@
 import os
 import contextlib
 import unittest
+import semver
 from unittest import mock
 
-from packaging.version import parse
 from knack.util import CLIError
 from azure.cli.command_modules.resource._bicep import (
     ensure_bicep_installation,
@@ -110,7 +110,7 @@ class TestBicep(unittest.TestCase):
         warning_mock,
     ):
         isfile_stub.return_value = True
-        _get_bicep_installed_version_stub.return_value = parse("1.0.0")
+        _get_bicep_installed_version_stub.return_value = semver.Version.parse("1.0.0")
         get_bicep_latest_release_tag_stub.return_value = "v2.0.0"
 
         self.cli_ctx.config.set_value("bicep", "check_version", "True")
@@ -141,7 +141,7 @@ class TestBicep(unittest.TestCase):
             self._remove_bicep_version_check_file()
 
             isfile_stub.return_value = True
-            _get_bicep_installed_version_stub.return_value = parse("1.0.0")
+            _get_bicep_installed_version_stub.return_value = semver.Version.parse("1.0.0")
             get_bicep_latest_release_tag_stub.return_value = "v2.0.0"
 
             run_bicep_command(self.cli_ctx, ["--version"])
@@ -156,7 +156,7 @@ class TestBicep(unittest.TestCase):
     def test_ensure_bicep_installation_skip_download_if_installed_version_matches_release_tag(
         self, dirname_mock, _get_bicep_installed_version_stub, isfile_stub
     ):
-        _get_bicep_installed_version_stub.return_value = parse("0.1.0")
+        _get_bicep_installed_version_stub.return_value = semver.Version.parse("0.1.0")
         isfile_stub.return_value = True
 
         ensure_bicep_installation(self.cli_ctx, release_tag="v0.1.0")
