@@ -7,7 +7,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import time
 import datetime
 
-location = 'WestUS2'
+location = 'WestUS'
 seclocation = 'EastUS'
 premium_sku = 'Premium'
 basic_sku = 'Basic'
