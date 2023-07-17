@@ -22,7 +22,7 @@ import time
 import uuid
 import webbrowser
 import zipfile
-from distutils.version import StrictVersion
+from distutils.version import StrictVersion  # pylint: disable=deprecated-module
 from urllib.error import URLError
 from urllib.request import urlopen
 
