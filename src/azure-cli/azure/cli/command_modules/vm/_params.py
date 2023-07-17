@@ -131,7 +131,7 @@ def load_arguments(self, _):
     enable_secure_boot_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2020-12-01', help='Enable secure boot.')
     # Provide backward compatibility. The defaults will be changed to Trusted Launch VMs in CLI in the future.
     t_security = [x.value for x in self.get_models('SecurityTypes') or []] + ["Standard"]
-    security_type = CLIArgumentType(arg_type=get_enum_type(t_security, default="Standard"), min_api='2020-12-01', help='Specify the security type of the virtual machine.')
+    security_type = CLIArgumentType(arg_type=get_enum_type(t_security), min_api='2020-12-01', help='Specify the security type of the virtual machine.')
     gallery_image_name_type = CLIArgumentType(options_list=['--gallery-image-definition', '-i'], help='The name of the community gallery image definition from which the image versions are to be listed.', id_part='child_name_2')
     gallery_image_name_version_type = CLIArgumentType(options_list=['--gallery-image-version', '-e'], help='The name of the gallery image version to be created. Needs to follow semantic version name pattern: The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. Format: <MajorVersion>.<MinorVersion>.<Patch>', id_part='child_name_3')
     public_gallery_name_type = CLIArgumentType(help='The public name of community gallery.', id_part='child_name_1')
@@ -202,7 +202,7 @@ def load_arguments(self, _):
         c.argument('logical_sector_size', type=int, help='Logical sector size in bytes for Ultra disks. Supported values are 512 ad 4096. 4096 is the default.')
         c.argument('tier', help='Performance tier of the disk (e.g, P4, S10) as described here: https://azure.microsoft.com/pricing/details/managed-disks/. Does not apply to Ultra disks.')
         c.argument('edge_zone', edge_zone_type)
-        c.argument('security_type', arg_type=get_enum_type(t_disk_security, default="Standard"), help='The security type of the VM. Applicable for OS disks only.', min_api='2020-12-01')
+        c.argument('security_type', arg_type=get_enum_type(t_disk_security), help='The security type of the VM. Applicable for OS disks only.', min_api='2020-12-01')
         c.argument('support_hibernation', arg_type=get_three_state_flag(), help='Indicate the OS on a disk supports hibernation.', min_api='2020-12-01')
         c.argument('architecture', arg_type=get_enum_type(self.get_models('Architecture', operation_group='disks')), min_api='2021-12-01', help='CPU architecture.')
         c.argument('data_access_auth_mode', arg_type=get_enum_type(['AzureActiveDirectory', 'None']), min_api='2021-12-01', help='Specify the auth mode when exporting or uploading to a disk or snapshot.')
