@@ -20,7 +20,8 @@ class BaseCommandOperation:
         self.merged_kwargs = merged_kwargs
         self.client_factory = merged_kwargs.get('client_factory')
         self.operation_group = merged_kwargs.get('operation_group')
-        self.ignore_api_version_folder = merged_kwargs.get('ignore_api_version_folder')
+        self.ignore_sdk_api_version_folder = merged_kwargs.get('ignore_sdk_api_version_folder')
+        self.enable_sdk_api_version_validation = merged_kwargs.get('enable_sdk_api_version_validation')
 
     @property
     def cli_ctx(self):
@@ -49,7 +50,7 @@ class BaseCommandOperation:
         from azure.cli.core.profiles import AZURE_API_PROFILES
         from azure.cli.core.profiles._shared import get_versioned_sdk_path
 
-        if not self.ignore_api_version_folder:
+        if not self.ignore_sdk_api_version_folder:
             for rt in AZURE_API_PROFILES[self.cli_ctx.cloud.profile]:
                 if op_path.startswith(rt.import_prefix + '.'):
                     op_path = op_path.replace(rt.import_prefix,
@@ -120,6 +121,11 @@ class CommandOperation(BaseCommandOperation):
             client_arg_name = self.resolve_client_arg_name(self.op_path)
             if client_arg_name in op_args:
                 command_args[client_arg_name] = client
+
+        if self.enable_sdk_api_version_validation is False:
+            # pass
+            command_args['enable_api_version_validation'] = False
+
         return op(**command_args)
 
     def arguments_loader(self):
@@ -359,6 +365,10 @@ class ShowCommandOperation(BaseCommandOperation):
             command_args[client_arg_name] = client
 
         op = self.get_op_handler(self.op_path)  # Fetch op handler again after cmd property is set
+
+        if self.enable_sdk_api_version_validation is False:
+            command_args.update('enable_api_version_validation', self.enable_sdk_api_version_validation)
+
         try:
             return op(**command_args)
         except Exception as ex:  # pylint: disable=broad-except

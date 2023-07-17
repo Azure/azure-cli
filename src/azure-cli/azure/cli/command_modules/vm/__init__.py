@@ -68,7 +68,10 @@ class ComputeCommandsLoader(AzCommandsLoader):
 
 class ComputeCommandGroup(AzCommandGroup):
     def __init__(self, command_loader, group_name, **kwargs):
-        kwargs.update({'ignore_api_version_folder': True})
+        kwargs.update({
+            'ignore_sdk_api_version_folder': True,
+            'enable_sdk_api_version_validation': False
+        })
         super().__init__(command_loader, group_name, **kwargs)
 
 
