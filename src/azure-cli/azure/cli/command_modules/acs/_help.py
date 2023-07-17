@@ -500,6 +500,12 @@ parameters:
   - name: --enable-windows-recording-rules
     type: bool
     short-summary: Enable Windows Recording Rules when enabling the Azure Monitor Metrics addon
+  - name: --nodepool-taints
+    type: string
+    short-summary: The node taints for all node pool.
+  - name: --nodepool-labels
+    type: string
+    short-summary: The node labels for all node pool. See https://aka.ms/node-labels for syntax of labels.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -838,6 +844,12 @@ parameters:
   - name: --disable-azure-monitor-metrics
     type: bool
     short-summary: Disable Azure Monitor Metrics Profile. This will delete all DCRA's associated with the cluster, any linked DCRs with the data stream = prometheus-stream and the recording rule groups created by the addon for this AKS cluster.
+  - name: --nodepool-taints
+    type: string
+    short-summary: The node taints for all node pool.
+  - name: --nodepool-labels
+    type: string
+    short-summary: The node labels for all node pool. See https://aka.ms/node-labels for syntax of labels.
 
 examples:
   - name: Reconcile the cluster back to its current state.

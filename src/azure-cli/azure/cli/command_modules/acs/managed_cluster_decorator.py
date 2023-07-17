@@ -785,6 +785,13 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self.agentpool_context.get_nodepool_labels()
 
+    def get_nodepool_taints(self) -> Union[List[str], None]:
+        """Obtain the value of nodepool_labels.
+
+        :return: dictionary or None
+        """
+        return self.agentpool_context.get_node_taints()
+
     def _get_dns_name_prefix(
         self, enable_validation: bool = False, read_only: bool = False
     ) -> Union[str, None]:
@@ -6251,7 +6258,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         is_default = (
             self.context.get_cluster_autoscaler_profile() is None and
             self.context.get_api_server_authorized_ip_ranges() is None and
-            self.context.get_nodepool_labels() is None
+            self.context.get_nodepool_labels() is None and
+            self.context.get_nodepool_taints() is None
         )
 
         if not is_changed and is_default:
@@ -6320,6 +6328,12 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         if nodepool_labels is not None:
             for agent_profile in mc.agent_pool_profiles:
                 agent_profile.node_labels = nodepool_labels
+
+        # update nodepool taints for all nodepools
+        nodepool_taints = self.context.get_nodepool_taints()
+        if nodepool_taints is not None:
+            for agent_profile in mc.agent_pool_profiles:
+                agent_profile.node_taints = nodepool_taints
         return mc
 
     def update_auto_scaler_profile(self, mc):

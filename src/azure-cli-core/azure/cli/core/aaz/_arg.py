@@ -24,7 +24,7 @@ from ._arg_fmt import AAZObjectArgFormat, AAZListArgFormat, AAZDictArgFormat, AA
 from .exceptions import AAZUnregisteredArg
 from ._prompt import AAZPromptInput
 
-# pylint: disable=redefined-builtin, protected-access, too-few-public-methods
+# pylint: disable=redefined-builtin, protected-access, too-few-public-methods, too-many-instance-attributes
 
 
 class AAZArgumentsSchema(AAZObjectType):
@@ -74,7 +74,7 @@ class AAZArgEnum:
             f"unrecognized value '{data}' from choices '{self.to_choices()}' ")
 
 
-class AAZBaseArg(AAZBaseType):  # pylint: disable=too-many-instance-attributes
+class AAZBaseArg(AAZBaseType):
     """Base argument"""
 
     def __init__(self, options=None, required=False, help=None, arg_group=None, is_preview=False, is_experimental=False,
