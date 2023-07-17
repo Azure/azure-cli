@@ -644,7 +644,7 @@ def request_data_from_registry(http_method,
                 raise RegistryException(
                     parse_error_message('Failed to request data due to a conflict.', response),
                     response.status_code)
-            raise Exception(parse_error_message('Could not {} the requested data.'.format(http_method), response))
+            raise Exception(parse_error_message('Could not {} the requested data.'.format(http_method), response))  # pylint: disable=broad-exception-raised
         except CLIError:
             raise
         except Exception as e:  # pylint: disable=broad-except
