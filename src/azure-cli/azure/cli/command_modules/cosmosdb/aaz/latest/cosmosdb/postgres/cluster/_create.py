@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres cluster create",
+    is_preview=True,
 )
 class Create(AAZCommand):
     """Create a new cluster with servers.

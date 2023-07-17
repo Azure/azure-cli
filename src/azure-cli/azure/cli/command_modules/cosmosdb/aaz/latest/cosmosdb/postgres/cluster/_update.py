@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres cluster update",
+    is_preview=True,
 )
 class Update(AAZCommand):
     """Update an existing cluster. The request body can contain one or several properties from the cluster definition.

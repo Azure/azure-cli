@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres configuration coordinator update",
+    is_preview=True,
 )
 class Update(AAZCommand):
     """Updates configuration of coordinator in a cluster

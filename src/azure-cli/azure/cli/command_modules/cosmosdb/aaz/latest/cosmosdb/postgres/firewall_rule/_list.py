@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres firewall-rule list",
+    is_preview=True,
 )
 class List(AAZCommand):
     """List all the firewall rules on cluster.

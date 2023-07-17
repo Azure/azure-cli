@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres cluster server show",
+    is_preview=True,
 )
 class Show(AAZCommand):
     """Get information about a server in cluster.

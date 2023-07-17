@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "cosmosdb postgres role update",
+    is_preview=True,
 )
 class Update(AAZCommand):
     """Update an existing role.
