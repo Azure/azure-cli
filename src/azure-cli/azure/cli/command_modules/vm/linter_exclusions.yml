@@ -84,6 +84,22 @@ vmss encryption enable:
         key_encryption_algorithm:
             rule_exclusions:
             - missing_parameter_help
+vmss delete:
+    parameters:
+        force_deletion:
+            rule_exclusions:
+            - missing_parameter_help
+vmss list-instances:
+    parameters:
+        expand:
+            rule_exclusions:
+            - missing_parameter_help
+        filter:
+            rule_exclusions:
+            - missing_parameter_help
+        select:
+            rule_exclusions:
+            - missing_parameter_help
 vm application set:
     parameters:
         treat_deployment_as_failure:
@@ -136,9 +152,49 @@ vm install-patches:
         package_name_masks_to_include:
             rule_exclusions:
             - option_length_too_long
+vm deallocate:
+    parameters:
+        hibernate:
+            rule_exclusions:
+            - missing_parameter_help
+vm delete:
+    parameters:
+        force_deletion:
+            rule_exclusions:
+            - missing_parameter_help
 image create:
     parameters:
         os_type:
+            rule_exclusions:
+            - missing_parameter_help
+image show:
+    parameters:
+        expand:
+            rule_exclusions:
+            - missing_parameter_help
+ppg update:
+    parameters:
+        include_colocation_status:
+            rule_exclusions:
+            - missing_parameter_help
+restore-point collection wait:
+    parameters:
+        expand:
+            rule_exclusions:
+            - missing_parameter_help
+restore-point wait:
+    parameters:
+        expand:
+            rule_exclusions:
+            - missing_parameter_help
+sig image-version wait:
+    parameters:
+        expand:
+            rule_exclusions:
+            - missing_parameter_help
+sig update:
+    parameters:
+        select:
             rule_exclusions:
             - missing_parameter_help
 snapshot create:
