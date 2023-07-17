@@ -36,9 +36,9 @@ from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOp
 from ._utils import prep_label_filter_for_url_encoding, validate_feature_flag_name, validate_feature_flag_key
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
-from._featuremodels import (map_keyvalue_to_featureflag,
-                            map_featureflag_to_keyvalue,
-                            FeatureFlagValue)
+from ._featuremodels import (map_keyvalue_to_featureflag,
+                             map_featureflag_to_keyvalue,
+                             FeatureFlagValue)
 
 logger = get_logger(__name__)
 FEATURE_MANAGEMENT_KEYWORDS = ["FeatureManagement", "featureManagement", "feature_management", "feature-management"]
@@ -680,7 +680,7 @@ def __print_features_preview(old_json, new_json, strict=False, yes=False):
 
     diff_output = __find_ff_diff(old_json=old_json, new_json=new_json, strict=strict)
 
-    if diff_output == {}:
+    if not diff_output:
         logger.warning('\nThe target configuration already contains all feature flags in source. No changes will be made.')
         return False
 
@@ -699,7 +699,7 @@ def __print_kv_preview(old_json, new_json, strict=False, yes=False):
 
     diff_output = __find_kv_diff(old_json=old_json, new_json=new_json, strict=strict)
 
-    if diff_output == {}:
+    if not diff_output:
         logger.warning('\nTarget configuration already contains all key-values in source. No changes will be made.')
         return False
 

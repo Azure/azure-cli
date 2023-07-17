@@ -858,7 +858,10 @@ class AKSAgentPoolContext(BaseAKSContext):
         :return: empty list, list of strings or None
         """
         # read the original value passed by the command
-        node_taints = self.raw_param.get("node_taints")
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            node_taints = self.raw_param.get("nodepool_taints")
+        else:
+            node_taints = self.raw_param.get("node_taints")
         # normalize, default is an empty list
         if node_taints is not None:
             node_taints = [x.strip() for x in (node_taints.split(",") if node_taints else [])]
