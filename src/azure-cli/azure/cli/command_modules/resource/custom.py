@@ -2306,7 +2306,7 @@ def create_deployment_stack_at_subscription(cmd, name, location, deny_settings_m
             if get_subscription_response.location != location:
                 raise CLIError("Cannot change location of an already existing stack at subscription scope.")
             # bypass if yes flag is true
-            built_string =_build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
+            built_string = _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
             if not built_string:
                 return
     except:  # pylint: disable=bare-except
@@ -2429,7 +2429,7 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, deny_se
     # build confirmation string
     try:
         if rcf.deployment_stacks.get_at_resource_group(resource_group, name):
-            built_string =_build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
+            built_string = _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
             if not built_string:
                 return
     except:  # pylint: disable=bare-except
@@ -2557,7 +2557,7 @@ def create_deployment_stack_at_management_group(cmd, management_group_id, name, 
     try:
         get_mg_response = rcf.deployment_stacks.get_at_management_group(management_group_id, name)
         if get_mg_response:
-            built_string =_build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
+            built_string = _build_stacks_confirmation_string(rcf, yes, name, delete_resources_enum, delete_resource_groups_enum)
             if not built_string:
                 return
     except:  # pylint: disable=bare-except
