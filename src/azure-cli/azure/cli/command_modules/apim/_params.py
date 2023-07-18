@@ -420,3 +420,60 @@ def load_arguments(self, _):
         c.argument(
             'service_name', options_list=['--service-name', '-n'],
             help="The name of the soft deleted API Management service instance.")
+
+    with self.argument_context('apim graphql resolver create') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('api_id', arg_type=api_id)
+        c.argument('resolver_id',
+                   help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
+        c.argument('display_name',
+                   help='Resolver Name.')
+        c.argument('path', help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.', required=True)
+        c.argument('description',
+                   help='Description of the resolver. May include HTML formatting tags.')
+
+    with self.argument_context('apim graphql resolver delete') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('api_id', arg_type=api_id)
+        c.argument('resolver_id', help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
+        c.argument('if_match', help='ETag of the Entity.')
+
+    with self.argument_context('apim graphql resolver show') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('api_id', arg_type=api_id)
+        c.argument('resolver_id', help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
+
+    with self.argument_context('apim graphql resolver list') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('api_id', arg_type=api_id)
+
+    with self.argument_context('apim graphql resolver policy create') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('api_id', arg_type=api_id)
+        c.argument('resolver_id', help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
+        c.argument('policy_format', help='Format of the policyContent.')
+        c.argument('value_path', help='Contents of the Policy as defined by the format.')
+
+    with self.argument_context('apim graphql resolver policy show') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('api_id', arg_type=api_id)
+        c.argument('resolver_id', help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
+
+    with self.argument_context('apim graphql resolver policy list') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('api_id', arg_type=api_id)
+        c.argument('resolver_id', help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
+
+    with self.argument_context('apim graphql resolver policy delete') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('api_id', arg_type=api_id)
+        c.argument('resolver_id', help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
+        c.argument('if_match', help='ETag of the Entity.')

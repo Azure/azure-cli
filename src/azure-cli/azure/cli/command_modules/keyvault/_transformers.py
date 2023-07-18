@@ -294,16 +294,6 @@ def transform_certificate_show(result, **command_args):
 # pylint: disable=line-too-long,redefined-builtin
 def transform_certificate_policy(policy, policy_id):
     if policy is not None and not isinstance(policy, dict):
-        san_emails = getattr(policy, "san_emails", None)
-        san_dns_names = getattr(policy, "san_dns_names", None)
-        san_upns = getattr(policy, "san_user_principal_names", None)
-        subject_alternative_names = None
-        if san_emails and san_dns_names and san_upns:
-            subject_alternative_names = {
-                "emails": san_emails,
-                "upns": san_upns,
-                "dns_names": san_dns_names
-            }
         policy = {
             "attributes": {
                 "created": getattr(policy, "created_on", None),
@@ -334,7 +324,7 @@ def transform_certificate_policy(policy, policy_id):
                     "daysBeforeExpiry": getattr(action, "days_before_expiry", None),
                     "lifetimePercentage": getattr(action, "lifetime_percentage", None)
                 }
-            } for action in getattr(policy, "lifetime_actions", None)],
+            } for action in (getattr(policy, "lifetime_actions", None) or [])],
             "secretProperties": {
                 "contentType": getattr(policy, "content_type", None)
             },
@@ -342,7 +332,11 @@ def transform_certificate_policy(policy, policy_id):
                 "ekus": getattr(policy, "enhanced_key_usage", None),
                 "keyUsage": getattr(policy, "key_usage", None),
                 "subject": getattr(policy, "subject", None),
-                "subjectAlternativeNames": subject_alternative_names,
+                "subjectAlternativeNames": {
+                    "emails": getattr(policy, "san_emails", None),
+                    "upns": getattr(policy, "san_user_principal_names", None),
+                    "dnsNames": getattr(policy, "san_dns_names", None)
+                },
                 "validityInMonths": getattr(policy, "validity_in_months", None)
             }
         }

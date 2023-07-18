@@ -521,6 +521,14 @@ def get_resource_group_from_id(arm_id):
     return m.group(0)
 
 
+def get_subscription_from_id(arm_id):
+    # Search for the pattern following "/subscriptions/" in the ARM ID
+    # (?<=/subscriptions/)   Positive lookbehind: Match the pattern after "/subscriptions/"
+    # [^/]+                  Match one or more characters that are not a forward slash
+    m = re.search('(?<=/subscriptions/)[^/]+', arm_id)
+    return m.group(0)
+
+
 def get_operation_id_from_header(header):
     parse_object = urlparse(header)
     return parse_object.path.split("/")[-1]

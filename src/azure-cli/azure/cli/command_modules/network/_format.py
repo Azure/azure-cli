@@ -32,9 +32,9 @@ def transform_dns_record_set_table_output(result):
         table_row = OrderedDict()
         table_row['Name'] = item['name']
         table_row['ResourceGroup'] = item['resourceGroup']
-        table_row['Ttl'] = item['ttl']
+        table_row['Ttl'] = item.get('ttl') or item.get('TTL')
         table_row['Type'] = item['type'].rsplit('/', 1)[1]
-        metadata = item['metadata']
+        metadata = item.get('metadata')
         if metadata:
             table_row['Metadata'] = ' '.join(['{}="{}"'.format(x, metadata[x]) for x in sorted(metadata)])
         else:
