@@ -3437,14 +3437,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks show -g {resource_group} -n {name}', checks=[
             self.check('addonProfiles.omsagent.enabled', False),
             self.check('addonProfiles.omsagent.config', None)
-
         ])
 
         # enable monitoring add-on
         self.cmd('aks enable-addons -a monitoring -g {resource_group} -n {name}', checks=[
             self.check('addonProfiles.omsagent.enabled', True),
-            self.exists(
-                'addonProfiles.omsagent.config.logAnalyticsWorkspaceResourceID'),
+            self.exists('addonProfiles.omsagent.config.logAnalyticsWorkspaceResourceID'),
+            self.check('addonProfiles.omsagent.config.useAADAuth', "true"),
             StringContainCheckIgnoreCase('Microsoft.OperationalInsights'),
             StringContainCheckIgnoreCase('DefaultResourceGroup'),
             StringContainCheckIgnoreCase('DefaultWorkspace')
