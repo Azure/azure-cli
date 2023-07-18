@@ -55,7 +55,6 @@ class Create(AAZCommand):
             help="The Namespace name",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -67,6 +66,26 @@ class Create(AAZCommand):
         # define Arg Group "CaptureDescription"
 
         _args_schema = cls._args_schema
+        _args_schema.destination_name = AAZStrArg(
+            options=["--destination-name"],
+            arg_group="CaptureDescription",
+            help="Name for capture destination",
+        )
+        _args_schema.archive_name_format = AAZStrArg(
+            options=["--archive-name-format"],
+            arg_group="CaptureDescription",
+            help="Blob naming convention for archive, e.g. {Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}. Here all the parameters (Namespace,EventHub .. etc) are mandatory irrespective of order",
+        )
+        _args_schema.blob_container = AAZStrArg(
+            options=["--blob-container"],
+            arg_group="CaptureDescription",
+            help="Blob container Name",
+        )
+        _args_schema.storage_account = AAZStrArg(
+            options=["--storage-account"],
+            arg_group="CaptureDescription",
+            help="Resource id of the storage account to be used to create the blobs",
+        )
         _args_schema.enable_capture = AAZBoolArg(
             options=["--enable-capture"],
             arg_group="CaptureDescription",
@@ -101,26 +120,6 @@ class Create(AAZCommand):
             options=["--identity"],
             arg_group="Destination",
             help="A value that indicates whether capture description is enabled.",
-        )
-        _args_schema.destination_name = AAZStrArg(
-            options=["--destination-name"],
-            arg_group="Destination",
-            help="Name for capture destination",
-        )
-        _args_schema.archive_name_format = AAZStrArg(
-            options=["--archive-name-format"],
-            arg_group="Destination",
-            help="Blob naming convention for archive, e.g. {Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}. Here all the parameters (Namespace,EventHub .. etc) are mandatory irrespective of order",
-        )
-        _args_schema.blob_container = AAZStrArg(
-            options=["--blob-container"],
-            arg_group="Destination",
-            help="Blob container Name",
-        )
-        _args_schema.storage_account = AAZStrArg(
-            options=["--storage-account"],
-            arg_group="Destination",
-            help="Resource id of the storage account to be used to create the blobs",
         )
 
         identity = cls._args_schema.identity
@@ -172,12 +171,12 @@ class Create(AAZCommand):
         _args_schema.retention_time_in_hours = AAZIntArg(
             options=["--retention-time", "--retention-time-in-hours"],
             arg_group="RetentionDescription",
-            help="Number of hours to retain the events for this Event Hub. This value is only used when cleanupPolicy is Delete. If cleanupPolicy is Compact the returned value of this property is Long.MaxValue",
+            help="Number of hours to retain the events for this Event Hub. This value is only used when cleanupPolicy is Delete. If cleanupPolicy is Compaction the returned value of this property is Long.MaxValue",
         )
         _args_schema.tombstone_retention_time_in_hours = AAZIntArg(
             options=["-t", "--tombstone-retention-time-in-hours"],
             arg_group="RetentionDescription",
-            help="Number of hours to retain the tombstone markers of a compacted Event Hub. This value is only used when cleanupPolicy is Compact. Consumer must complete reading the tombstone marker within this specified amount of time if consumer begins from starting offset to ensure they get a valid snapshot for the specific key described by the tombstone marker within the compacted Event Hub",
+            help="Number of hours to retain the tombstone markers of a compacted Event Hub. This value is only used when cleanupPolicy is Compaction. Consumer must complete reading the tombstone marker within this specified amount of time if consumer begins from starting offset to ensure they get a valid snapshot for the specific key described by the tombstone marker within the compacted Event Hub",
         )
         return cls._args_schema
 

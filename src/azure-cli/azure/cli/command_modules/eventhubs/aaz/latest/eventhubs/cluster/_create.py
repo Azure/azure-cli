@@ -19,9 +19,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-01-01-preview",
+        "version": "2023-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/clusters/{}", "2022-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/clusters/{}", "2023-01-01-preview"],
         ]
     }
 
@@ -66,6 +66,11 @@ class Create(AAZCommand):
                 resource_group_arg="resource_group",
             ),
         )
+        _args_schema.provisioning_state = AAZStrArg(
+            options=["--provisioning-state"],
+            arg_group="Parameters",
+            help="Provisioning state of the Cluster.",
+        )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
             arg_group="Parameters",
@@ -78,11 +83,6 @@ class Create(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.provisioning_state = AAZStrArg(
-            options=["--provisioning-state"],
-            arg_group="Properties",
-            help="Provisioning state of the Cluster.",
-        )
         _args_schema.supports_scaling = AAZBoolArg(
             options=["--supports-scaling"],
             arg_group="Properties",
@@ -191,7 +191,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01-preview",
+                    "api-version", "2023-01-01-preview",
                     required=True,
                 ),
             }
@@ -218,12 +218,12 @@ class Create(AAZCommand):
             )
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+            _builder.set_prop("provisioningState", AAZStrType, ".provisioning_state")
             _builder.set_prop("sku", AAZObjectType)
             _builder.set_prop("tags", AAZDictType, ".tags")
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("provisioningState", AAZStrType, ".provisioning_state")
                 properties.set_prop("supportsScaling", AAZBoolType, ".supports_scaling")
 
             sku = _builder.get(".sku")
@@ -265,6 +265,9 @@ class Create(AAZCommand):
             _schema_on_200_201.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
+            _schema_on_200_201.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+            )
             _schema_on_200_201.sku = AAZObjectType()
             _schema_on_200_201.system_data = AAZObjectType(
                 serialized_name="systemData",
@@ -283,9 +286,6 @@ class Create(AAZCommand):
             properties.metric_id = AAZStrType(
                 serialized_name="metricId",
                 flags={"read_only": True},
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
             )
             properties.status = AAZStrType(
                 flags={"read_only": True},
