@@ -5618,6 +5618,12 @@ class VMGalleryImage(ScenarioTest):
             self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image2} '
                      '--gallery-image-version {version1} --virtual-machine {image_version_id}')
 
+        # test creating without source should be rejected by backend now
+        from azure.core.exceptions import HttpResponseError
+        with self.assertRaisesRegex(HttpResponseError, r'\(InvalidParameter\) The gallery artifact version source can only be specified either directly under storageProfile or within individual OS or data disks\. .*'):
+            self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image2} '
+                     '--gallery-image-version {version1}')
+
         # test the result of more than one source are provided
         from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
         with self.assertRaises(MutuallyExclusiveArgumentError):
