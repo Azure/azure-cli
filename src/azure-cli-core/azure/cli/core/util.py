@@ -661,7 +661,7 @@ def get_arg_list(op):
         sig = inspect.signature(op)
         return sig.parameters
     except AttributeError:
-        sig = inspect.getargspec(op)  # pylint: disable=deprecated-method
+        sig = inspect.getfullargspec(op)
         return sig.args
 
 
