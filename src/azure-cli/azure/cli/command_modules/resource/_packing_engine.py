@@ -100,7 +100,7 @@ def _pack_artifacts(cmd, template_abs_file_path, context):
             # hierarchy. We won't allow such references for security purposes:
 
             if (not os.path.commonpath([getattr(context, 'RootTemplateDirectory')]) ==
-                    os.path.commonpath([getattr(context, 'RootTemplateDirectory'), abs_local_path])):
+               os.path.commonpath([getattr(context, 'RootTemplateDirectory'), abs_local_path])):
                 raise BadRequestError('Unable to handle the reference to file ' + abs_local_path + 'from ' +
                                       template_abs_file_path +
                                       'because it exists outside of the root template directory of ' +

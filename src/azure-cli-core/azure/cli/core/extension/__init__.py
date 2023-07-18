@@ -8,7 +8,7 @@ import os
 import traceback
 import json
 import re
-from distutils.sysconfig import get_python_lib
+from distutils.sysconfig import get_python_lib  # pylint: disable=deprecated-module
 
 import pkginfo
 from knack.config import CLIConfig
