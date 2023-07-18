@@ -123,7 +123,6 @@ class CommandOperation(BaseCommandOperation):
                 command_args[client_arg_name] = client
 
         if self.enable_sdk_api_version_validation is False:
-            # pass
             command_args['enable_api_version_validation'] = False
 
         return op(**command_args)
