@@ -3838,7 +3838,13 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             raise ArgumentUsageError(
                 '--maximum-instances is less than --always-ready-instances. '
                 'Please try again with --always-ready-instances being less than or equal to --maximum-instances.'
-            ) 
+            )
+
+        if maximum_instances and maximum_instances > 1000:
+            raise ValidationError(
+                '--maximum-instances exceeds the maximum allowed for Azure Functions on the Flex Consumption plan. '
+                'Please try again with a valid --maximum-instances value.'
+            )
 
     if ((always_ready_instances is not None or maximum_instances is not None or instance_size is not None) and
             flexconsumption_location is None):
