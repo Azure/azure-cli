@@ -47,7 +47,7 @@ def load_arguments(self, _):
     JsonWebKeyType = self.get_sdk('KeyType', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_enums')
     KeyCurveName = self.get_sdk('KeyCurveName', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_enums')
     EncryptionAlgorithm = self.get_sdk('EncryptionAlgorithm', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='crypto._enums')
-
+    SignatureAlgorithm = self.get_sdk('SignatureAlgorithm', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='crypto._enums')
     class CLIJsonWebKeyOperation(str, Enum):
         encrypt = "encrypt"
         decrypt = "decrypt"
@@ -359,7 +359,7 @@ def load_arguments(self, _):
                 help='Include managed keys. Default: false')
 
     # keys track2
-    for scope in ['create', 'import', 'set-attributes', 'show', 'encrypt', 'decrypt',
+    for scope in ['create', 'import', 'set-attributes', 'show', 'encrypt', 'decrypt', 'sign', 'verify',
                   'rotate', 'rotation-policy show', 'rotation-policy update']:
         with self.argument_context('keyvault key {}'.format(scope), arg_group='Id') as c:
             c.argument('name', options_list=['--name', '-n'], id_part='child_name_1',
@@ -439,6 +439,13 @@ def load_arguments(self, _):
         c.argument('iv', help='The initialization vector used during encryption. Required for AES decryption.')
         c.argument('aad', help='Optional data that is authenticated but not encrypted. For use with AES-GCM decryption.')
         c.argument('tag', help='The authentication tag generated during encryption. Required for only AES-GCM decryption.')
+
+    for scope in ['sign', 'verify']:
+        with self.argument_context('keyvault key {}'.format(scope)) as c:
+            c.argument('algorithm', options_list=['--algorithm', '-a'], arg_type=get_enum_type(SignatureAlgorithm),
+                       help='Algorithm identifier')
+            c.argument('digest', help='The value to sign')
+            c.argument('signature', help='signature to verify')
 
     with self.argument_context('keyvault key random') as c:
         c.extra('hsm_name', hsm_url_type, arg_group='Id', required=False)
