@@ -238,11 +238,15 @@ def validate_secret_identifier(namespace):
 
 
 def validate_key(namespace):
-    if namespace.key:
-        input_key = str(namespace.key).lower()
-        if input_key == '.' or input_key == '..' or '%' in input_key:
-            raise InvalidArgumentValueError("Key is invalid. Key cannot be a '.' or '..', or contain the '%' character.")
-    else:
+    validate_non_empty_key(namespace)
+
+    input_key = str(namespace.key).lower()
+    if input_key == '.' or input_key == '..' or '%' in input_key:
+        raise InvalidArgumentValueError("Key is invalid. Key cannot be a '.' or '..', or contain the '%' character.")
+
+
+def validate_non_empty_key(namespace):
+    if not namespace.key or str(namespace.key).isspace():
         raise RequiredArgumentMissingError("Key cannot be empty.")
 
 
