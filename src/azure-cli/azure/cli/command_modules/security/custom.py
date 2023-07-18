@@ -17,8 +17,6 @@ from azure.mgmt.security.models import (SecurityContact,
                                         Pricing,
                                         WorkspaceSetting,
                                         AdvancedThreatProtectionSetting,
-                                        RuleResultsInput,
-                                        RulesResultsInput,
                                         AlertSyncSettings,
                                         DataExportSettings,
                                         AlertsSuppressionRule,
@@ -33,6 +31,7 @@ from azure.mgmt.security.models import (SecurityContact,
                                         AutomationRuleSet,
                                         AutomationTriggeringRule,
                                         SettingName)
+from azure.mgmt.security.v2020_07_01_preview.models import (RuleResultsInput, RulesResultsInput)
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError)
 from msrestazure.tools import resource_id
