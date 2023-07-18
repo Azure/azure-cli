@@ -114,7 +114,7 @@ def validate_pull_secret(namespace):
                 namespace.pull_secret = file.read().rstrip('\n')
 
         if not isinstance(json.loads(namespace.pull_secret), dict):
-            raise Exception()
+            raise Exception()  # pylint: disable=broad-exception-raised
     except Exception as e:
         raise InvalidArgumentValueError("Invalid --pull-secret.") from e
 
